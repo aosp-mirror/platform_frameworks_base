@@ -175,8 +175,9 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
 
             // Add current system language into suggestion list
             for(LocaleStore.LocaleInfo localeInfo: LocaleStore.getSystemCurrentLocaleInfo()) {
-                if (appCurrentLocale == null ||
-                        !localeInfo.getLocale().equals(appCurrentLocale.getLocale())) {
+                boolean isNotCurrentLocale = appCurrentLocale == null
+                        || !localeInfo.getLocale().equals(appCurrentLocale.getLocale());
+                if (!isForCountryMode && isNotCurrentLocale) {
                     mLocaleList.add(localeInfo);
                 }
             }
