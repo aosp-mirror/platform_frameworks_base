@@ -61,6 +61,17 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         return;
     }
 
+    // canvas may be an AlphaFilterCanvas, which is intended to draw with a
+    // modified alpha. We do not have a way to do this without drawing into an
+    // extra layer, which would have a performance cost. Draw directly into the
+    // underlying gpu canvas. This matches prior behavior and the behavior in
+    // Vulkan.
+    {
+        auto* gpuCanvas = SkAndroidFrameworkUtils::getBaseWrappedCanvas(canvas);
+        LOG_ALWAYS_FATAL_IF(!gpuCanvas, "GLFunctorDrawable::onDraw is using an invalid canvas!");
+        canvas = gpuCanvas;
+    }
+
     // flush will create a GrRenderTarget if not already present.
     canvas->flush();
 
