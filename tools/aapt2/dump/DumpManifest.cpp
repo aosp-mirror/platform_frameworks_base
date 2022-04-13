@@ -1565,16 +1565,16 @@ class MetaData : public ManifestExtractor::Element {
 
   void Print(text::Printer* printer) override {
     if (extractor()->options_.include_meta_data && !name.empty()) {
-      printer->Print(StringPrintf("meta-data: name='%s' ", name.data()));
+      printer->Print(StringPrintf("meta-data: name='%s'", name.data()));
       if (!value.empty()) {
-        printer->Print(StringPrintf("value='%s' ", value.data()));
+        printer->Print(StringPrintf(" value='%s'", value.data()));
       } else if (value_int) {
-        printer->Print(StringPrintf("value='%d' ", *value_int));
+        printer->Print(StringPrintf(" value='%d'", *value_int));
       } else {
         if (!resource.empty()) {
-          printer->Print(StringPrintf("resource='%s' ", resource.data()));
+          printer->Print(StringPrintf(" resource='%s'", resource.data()));
         } else if (resource_int) {
-          printer->Print(StringPrintf("resource='%d' ", *resource_int));
+          printer->Print(StringPrintf(" resource='%d'", *resource_int));
         }
       }
       printer->Print("\n");

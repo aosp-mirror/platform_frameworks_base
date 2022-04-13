@@ -191,6 +191,7 @@ cc_test_host {
         "integration-tests/CompileTest/**/*",
         "integration-tests/CommandTests/**/*",
         "integration-tests/ConvertTest/**/*",
+        "integration-tests/DumpTest/**/*",
     ],
 }
 
