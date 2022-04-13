@@ -525,6 +525,14 @@ package android.view {
 
 }
 
+package android.view.accessibility {
+
+  public static final class AccessibilityNodeInfo.CollectionItemInfo {
+    method @Deprecated @NonNull public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(@Nullable String, int, int, @Nullable String, int, int, boolean, boolean);
+  }
+
+}
+
 package android.view.translation {
 
   public final class TranslationManager {
