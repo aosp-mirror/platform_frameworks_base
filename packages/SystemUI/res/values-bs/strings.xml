@@ -27,7 +27,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Punjenje putem USB-a nije moguće"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Koristite punjač koji ste dobili uz uređaj"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Uključiti Uštedu baterije?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Informacije o Uštedi baterije"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"O Uštedi baterije"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Uključi"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Uključi"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Ne, hvala"</string>
@@ -453,7 +453,7 @@
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Pozivi i obavještenja će zvoniti jačinom (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Podešavač za korisnički interfejs sistema"</string>
     <string name="status_bar" msgid="4357390266055077437">"Statusna traka"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Način rada za demonstraciju Sistemskog UI-a"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Demo način rada Sistemskog UI-ja"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Omogući način rada za demonstraciju"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Prikaži način rada za demonstraciju"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
@@ -811,8 +811,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pauziranje"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Prethodna numera"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Sljedeća numera"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Povezivanje"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Pokrenite"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Otvorite aplikaciju <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Reproducirajte pjesmu <xliff:g id="SONG_NAME">%1$s</xliff:g> izvođača <xliff:g id="ARTIST_NAME">%2$s</xliff:g> pomoću aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>

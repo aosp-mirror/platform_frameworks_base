@@ -907,7 +907,7 @@
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ตัดการเชื่อมต่ออีเทอร์เน็ตเพื่อสลับเครือข่าย"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"เพื่อปรับปรุงประสบการณ์การใช้อุปกรณ์ แอปและบริการต่างๆ จะยังคงสแกนหาเครือข่าย Wi‑Fi ได้ทุกเมื่อแม้ว่า Wi‑Fi จะปิดอยู่ คุณเปลี่ยนตัวเลือกนี้ได้ในการตั้งค่าการสแกนหา Wi-Fi "<annotation id="link">"เปลี่ยนการตั้งค่า"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ปิดโหมดบนเครื่องบิน"</string>
-    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ต้องการเพิ่มชิ้นส่วนต่อไปนี้ในการตั้งค่าด่วน"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ต้องการเพิ่มองค์ประกอบต่อไปนี้ในการตั้งค่าด่วน"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"เพิ่มชิ้นส่วน"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ไม่ต้องเพิ่มชิ้นส่วน"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"เลือกผู้ใช้"</string>
