@@ -40,6 +40,9 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Rule
@@ -314,7 +317,8 @@ class AuthContainerViewTest : SysuiTestCase() {
             wakefulnessLifecycle,
             userManager,
             lockPatternUtils,
-            Handler(TestableLooper.get(this).looper)
+            Handler(TestableLooper.get(this).looper),
+            FakeExecutor(FakeSystemClock())
         )
 
         if (addToView) {
@@ -331,10 +335,11 @@ class AuthContainerViewTest : SysuiTestCase() {
         wakefulnessLifecycle: WakefulnessLifecycle,
         userManager: UserManager,
         lockPatternUtils: LockPatternUtils,
-        mainHandler: Handler
+        mainHandler: Handler,
+        bgExecutor: DelayableExecutor
     ) : AuthContainerView(
         config, fpProps, faceProps,
-        wakefulnessLifecycle, userManager, lockPatternUtils, mainHandler
+        wakefulnessLifecycle, userManager, lockPatternUtils, mainHandler, bgExecutor
     ) {
         override fun postOnAnimation(runnable: Runnable) {
             runnable.run()
