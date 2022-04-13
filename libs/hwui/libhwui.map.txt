@@ -39,6 +39,7 @@ LIBHWUI { # platform-only /* HWUI isn't current a module, so all of these are st
     ARegionIterator_next;
     ARegionIterator_getRect;
     ARegionIterator_getTotalBounds;
+    hwui_uses_vulkan;
   local:
     *;
 };
