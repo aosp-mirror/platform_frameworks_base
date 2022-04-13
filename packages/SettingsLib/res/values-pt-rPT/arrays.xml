@@ -56,7 +56,7 @@
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"Nunca utilizar a verificação HDCP"</item>
     <item msgid="8254225038262324761">"Utilizar a verificação HDCP para conteúdo DRM apenas"</item>
-    <item msgid="6421717003037072581">"Utilizar sempre a verificação HDCP"</item>
+    <item msgid="6421717003037072581">"Usar sempre a verificação HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"Desativado"</item>
