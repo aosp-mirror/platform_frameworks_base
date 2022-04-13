@@ -2519,7 +2519,7 @@ public class DevicePolicyManager {
      * that has this delegation. If another app already had delegated security logging access, it
      * will lose the delegation when a new app is delegated.
      *
-     * <p> Can only be granted by Device Owner or Profile Owner of an organnization owned and
+     * <p> Can only be granted by Device Owner or Profile Owner of an organization-owned
      * managed profile.
      */
     public static final String DELEGATION_SECURITY_LOGGING = "delegation-security-logging";
