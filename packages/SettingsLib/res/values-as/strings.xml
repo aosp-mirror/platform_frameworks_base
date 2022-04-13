@@ -55,7 +55,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP কনফিগাৰেশ্বন বিফল হৈছে"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"নিম্নমানৰ নেটৱৰ্কৰ বাবে সংযোগ কৰা হোৱা নাই"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"ৱাই-ফাই সংযোগ বিফল হৈছে"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"সত্য়াপন কৰাত সমস্যা হৈছে"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"সত্যাপন কৰাত সমস্যা হৈছে"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"সংযোগ কৰিব নোৱাৰে"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'ৰ সৈতে সংযোগ কৰিব পৰা নাই"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"পাছৱৰ্ড পৰীক্ষা কৰি আকৌ চেষ্টা কৰক"</string>
@@ -146,12 +146,12 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ইনপুটৰ বাবে ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"শ্ৰৱণ যন্ত্ৰৰ বাবে ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIOৰ বাবে ব্যৱহাৰ কৰক"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"যোৰা লগাওক"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"যোৰা লগাওক"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"পেয়াৰ কৰক"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"পেয়াৰ কৰক"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"বাতিল কৰক"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"যোৰা লগালে ইয়ে সংযোজিত কৰাৰ সময়ত আপোনাৰ সম্পৰ্কসমূহ আৰু কলৰ ইতিহাস চাবলৈ অনুমতি দিব।"</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>ৰ সৈতে যোৰা লগাব পৰা নগ\'ল৷"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"এটা ভুল পিন বা পাছকীৰ কাৰণে <xliff:g id="DEVICE_NAME">%1$s</xliff:g>ৰ সৈতে যোৰা লগাব পৰা নাই৷"</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>ৰ সৈতে পেয়াৰ কৰিব পৰা নগ’ল।"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"এটা ভুল পিন বা পাছকীৰ কাৰণে <xliff:g id="DEVICE_NAME">%1$s</xliff:g>ৰ সৈতে পেয়াৰ কৰিব পৰা নাই।"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>ৰ সৈতে যোগাযোগ কৰিব পৰা নগ\'ল"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>এ যোৰা লগাব বিচৰা নাই"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"কম্পিউটাৰ"</string>
@@ -297,8 +297,8 @@
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"ধোঁৱাবৰণীয়া হৈ থকা মানে এয়া ফ’ন অথবা হেডছেটটোৱে সমৰ্থন নকৰে"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"প্ৰতি ছেম্পলত ব্লুটুথ অডিঅ\' বিটসমূহ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ব্লুটুথ অডিঅ\' ক\'ডেকৰ বাছনি\nআৰম্ভ কৰক: প্ৰতি নমুনা ইমান বিট"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"ব্লুটুথ অডিঅ\' চ্চেনেল ম\'ড"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"ব্লুটুথ অডিঅ\' ক\'ডেকৰ বাছনি\nআৰম্ভ কৰক: চ্চেনেল ম\'ড"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"ব্লুটুথ অডিঅ\' চেনেল ম\'ড"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"ব্লুটুথ অডিঅ\' ক\'ডেকৰ বাছনি\nআৰম্ভ কৰক: চেনেল ম\'ড"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ব্লুটুথ অডিঅ’ LDAC ক’ডেক: পৰিৱেশনৰ মান"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ব্লুটুথ অডিঅ\' LDAC\nক\'ডেক বাছনি আৰম্ভ কৰক: প্লেবেকৰ গুণগত মান"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"ষ্ট্ৰীম কৰি থকা হৈছে: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
@@ -401,7 +401,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"নেপথ্য এএনআৰবোৰ দেখুৱাওক"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"নেপথ্য এপসমূহৰ বাবে এপে সঁহাৰি দিয়া নাই ডায়ল\'গ প্ৰদৰ্শন কৰক"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"জাননী চ্চেনেলৰ সকীয়নিসমূহ দেখুৱাওক"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"কোনো এপে বৈধ চ্চেনেল নোহোৱাকৈ কোনো জাননী প\'ষ্ট কৰিলে স্ক্ৰীনত সকীয়নি প্ৰদৰ্শন হয়"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"কোনো এপে বৈধ চেনেল নোহোৱাকৈ কোনো জাননী প\'ষ্ট কৰিলে স্ক্ৰীনত সকীয়নি প্ৰদৰ্শন হয়"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"বাহ্যিক সঞ্চয়াগাৰত এপক বলেৰে অনুমতি দিয়ক"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"মেনিফেষ্টৰ মান যিয়েই নহওক, বাহ্যিক ষ্ট’ৰেজত লিখিবলৈ যিকোনো এপক উপযুক্ত কৰি তোলে"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"বলেৰে কাৰ্যকলাপসমূহৰ আকাৰ সলনি কৰিব পৰা কৰক"</string>
@@ -569,7 +569,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ব্যৱহাৰকাৰী"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"সীমিত প্ৰ\'ফাইল"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"নতুন ব্যৱহাৰকাৰী যোগ কৰিবনে?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"আপুনি অতিৰিক্ত ব্য়ৱহাৰকাৰীক যোগ কৰি এই ডিভাইচটো অন্য় ব্য়ক্তিৰ সৈতে শ্বেয়াৰ কৰিব পাৰে। প্ৰতিজন ব্য়ৱহাৰকাৰীৰ বাবে নিজাকৈ ঠাই আছে যাক তেওঁলোকে এপ্, ৱালপেপাৰ আৰু অন্য়ান্য় বস্তুৰ বাবে নিজৰ উপযোগিতা অনুযায়ী ব্য়ৱহাৰ কৰিব পাৰে। ব্য়ৱহাৰকাৰীসকলে সকলোকে প্ৰভাৱান্বিত কৰা ৱাই-ফাইৰ নিচিনা ডিভাইচৰ ছেটিং সাল-সলনি কৰিবও পাৰে।\n\nআপুনি যেতিয়া কোনো নতুন ব্য়ৱহাৰকাৰীক যোগ কৰে সেই ব্য়ক্তিজনে নিজেই নিজৰ বাবে ঠাই ছেট আপ কৰিব লাগিব।\n\nসকলো ব্য়ৱহাৰকাৰীয়ে অন্য় ব্য়ৱহাৰকাৰীৰ বাবে এপ্‌সমূহ আপডে’ট কৰিব পাৰে। সাধ্য় সুবিধাসমূহৰ ছেটিং আৰু সেৱাসমূহ নতুন ব্য়ৱহাৰকাৰীলৈ স্থানান্তৰ নহ\'বও পাৰে।"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"আপুনি অতিৰিক্ত ব্যৱহাৰকাৰীক যোগ কৰি এই ডিভাইচটো অন্য় ব্য়ক্তিৰ সৈতে শ্বেয়াৰ কৰিব পাৰে। প্ৰতিজন ব্যৱহাৰকাৰীৰ বাবে নিজাকৈ ঠাই আছে যাক তেওঁলোকে এপ্, ৱালপেপাৰ আৰু অন্য়ান্য় বস্তুৰ বাবে নিজৰ উপযোগিতা অনুযায়ী ব্যৱহাৰ কৰিব পাৰে। ব্যৱহাৰকাৰীসকলে সকলোকে প্ৰভাৱান্বিত কৰা ৱাই-ফাইৰ নিচিনা ডিভাইচৰ ছেটিং সাল-সলনি কৰিবও পাৰে।\n\nআপুনি যেতিয়া কোনো নতুন ব্যৱহাৰকাৰীক যোগ কৰে সেই ব্য়ক্তিজনে নিজেই নিজৰ বাবে ঠাই ছেট আপ কৰিব লাগিব।\n\nসকলো ব্যৱহাৰকাৰীয়ে অন্য় ব্যৱহাৰকাৰীৰ বাবে এপ্‌সমূহ আপডে’ট কৰিব পাৰে। সাধ্য় সুবিধাসমূহৰ ছেটিং আৰু সেৱাসমূহ নতুন ব্যৱহাৰকাৰীলৈ স্থানান্তৰ নহ\'বও পাৰে।"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ ঠাই ছেট আপ কৰা প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে সকলো ব্যৱহাৰকাৰীৰ বাবে এপ্ আপডে\'ট কৰিব পাৰে।"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ব্যৱহাৰকাৰী এতিয়া ছেট আপ কৰিবনে?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ডিভাইচটো লৈ নিজৰ ঠাই ছেটআপ কৰিবলৈ নতুন ব্যৱহাৰকাৰী উপলব্ধ থকাটো নিশ্চিত কৰক"</string>
@@ -655,12 +655,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"কিউআৰ ক’ডটো স্কেন কৰক"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"শুনিবলৈ আৰম্ভ কৰিবলৈ, তলৰ মাজৰ অংশত কিউআৰ ক’ডটো ৰাখক"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"কিউআৰ ক’ডটো মান্য ফৰ্মেটৰ নহয়"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰা বন্ধ কৰিবনে?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"যদি আপুনি <xliff:g id="SWITCHAPP">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰে অথবা আউটপুট সলনি কৰে, তেন্তে, আপোনাৰ বৰ্তমানৰ সম্প্ৰচাৰ বন্ধ হৈ যাব"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্ৰচাৰ কৰক"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"আউটপুট সলনি কৰক"</string>
 </resources>

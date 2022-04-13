@@ -357,7 +357,7 @@
     <string name="debug_drawing_category" msgid="5066171112313666619">"रेखाचित्र"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"हार्डवेयरले बढाएको रेन्डरिङ"</string>
     <string name="media_category" msgid="8122076702526144053">"मिडिया"</string>
-    <string name="debug_monitoring_category" msgid="1597387133765424994">"अनुगमन गर्दै"</string>
+    <string name="debug_monitoring_category" msgid="1597387133765424994">"अनुगमन गरिँदै छ"</string>
     <string name="strict_mode" msgid="889864762140862437">"स्ट्रिक्ट मोड अन गरियोस्"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"एपले मुख्य थ्रेडमा लामा गतिविधि गर्दा स्क्रिन फ्ल्यास गरियोस्"</string>
     <string name="pointer_location" msgid="7516929526199520173">"पोइन्टरको स्थान"</string>
@@ -402,7 +402,7 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ब्याकग्राउन्डका एपको हकमा \'नचलिरहेका एप\' सन्देश देखाइयोस्"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना च्यानलसम्बन्धी चेतावनी देखाइयोस्"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"एपले मान्य च्यानलबिना सूचना पोस्ट गर्दा स्क्रिनमा चेतावनी देखाइयोस्"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"एपलाई बहिरी मेमोरीमा पनि चल्ने दिइयोस्"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"एपलाई बहिरी मेमोरीमा पनि चल्न दिइयोस्"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"तोकिएको नियमको ख्याल नगरी एपलाई बाह्य भण्डारणमा चल्ने बनाइयोस्"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"बलपूर्वक एपहरूको आकार मिलाउन मिल्ने बनाइयोस्"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"तोकिएको नियमको ख्याल नगरी एपलाई एकभन्दा बढी विन्डोमा रिसाइज गर्न सकिने बनाइयोस्।"</string>
@@ -442,7 +442,7 @@
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"यो छनोट अब मान्य छैन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"चित्र रङ्ग मोड"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB प्रयोग गर्नुहोस्"</string>
-    <string name="daltonizer_mode_disabled" msgid="403424372812399228">"असक्षम गरिएको छ"</string>
+    <string name="daltonizer_mode_disabled" msgid="403424372812399228">"अफ गरिएको छ"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"मोनोक्रोमेसी"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"ड्युटरएनोमली (रातो-हरियो)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"प्रोटानेमली (रातो, हरियो)"</string>
