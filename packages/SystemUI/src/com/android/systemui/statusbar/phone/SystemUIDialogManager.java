@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import androidx.annotation.NonNull;
 
+import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
@@ -37,7 +38,7 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class SystemUIDialogManager implements Dumpable {
-    private final StatusBarKeyguardViewManager mKeyguardViewManager;
+    private final KeyguardViewController mKeyguardViewController;
 
     private final Set<SystemUIDialog> mDialogsShowing = new HashSet<>();
     private final Set<Listener> mListeners = new HashSet<>();
@@ -45,9 +46,9 @@ public class SystemUIDialogManager implements Dumpable {
     @Inject
     public SystemUIDialogManager(
             DumpManager dumpManager,
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+            KeyguardViewController keyguardViewController) {
         dumpManager.registerDumpable(this);
-        mKeyguardViewManager = statusBarKeyguardViewManager;
+        mKeyguardViewController = keyguardViewController;
     }
 
     /**
@@ -86,7 +87,7 @@ public class SystemUIDialogManager implements Dumpable {
 
     private void updateDialogListeners() {
         if (shouldHideAffordance()) {
-            mKeyguardViewManager.resetAlternateAuth(true);
+            mKeyguardViewController.resetAlternateAuth(true);
         }
 
         for (Listener listener : mListeners) {
