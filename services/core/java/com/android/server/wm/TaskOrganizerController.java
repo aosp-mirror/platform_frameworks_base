@@ -38,6 +38,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
@@ -526,17 +527,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
         final StartingWindowRemovalInfo removalInfo = new StartingWindowRemovalInfo();
         removalInfo.taskId = task.mTaskId;
-        removalInfo.playRevealAnimation = prepareAnimation;
+        removalInfo.playRevealAnimation = prepareAnimation
+                && task.getDisplayInfo().state == Display.STATE_ON;
         final boolean playShiftUpAnimation = !task.inMultiWindowMode();
         final ActivityRecord topActivity = task.topActivityContainsStartingWindow();
         if (topActivity != null) {
             removalInfo.deferRemoveForIme = topActivity.mDisplayContent
                     .mayImeShowOnLaunchingActivity(topActivity);
-            if (prepareAnimation && playShiftUpAnimation) {
+            if (removalInfo.playRevealAnimation && playShiftUpAnimation) {
                 final WindowState mainWindow =
                         topActivity.findMainWindow(false/* includeStartingApp */);
                 if (mainWindow != null) {
-                    final SurfaceControl.Transaction t = mainWindow.getPendingTransaction();
                     removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
                     removalInfo.mainFrame = mainWindow.getRelativeFrame();
                 }
