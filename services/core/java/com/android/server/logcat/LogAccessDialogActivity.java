@@ -116,6 +116,10 @@ public class LogAccessDialogActivity extends Activity implements
         }
 
         mPackageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+        if (mPackageName == null || mPackageName.length() == 0) {
+            throw new NullPointerException("Package Name is null");
+        }
+
         mUid = intent.getIntExtra("com.android.server.logcat.uid", 0);
         mGid = intent.getIntExtra("com.android.server.logcat.gid", 0);
         mPid = intent.getIntExtra("com.android.server.logcat.pid", 0);
@@ -154,12 +158,17 @@ public class LogAccessDialogActivity extends Activity implements
         CharSequence appLabel = pm.getApplicationInfoAsUser(callingPackage,
                 PackageManager.MATCH_DIRECT_BOOT_AUTO,
                 UserHandle.getUserId(uid)).loadLabel(pm);
-        if (appLabel == null) {
+        if (appLabel == null || appLabel.length() == 0) {
             throw new NameNotFoundException("Application Label is null");
         }
 
-        return context.getString(com.android.internal.R.string.log_access_confirmation_title,
-            appLabel);
+        String titleString = context.getString(
+                com.android.internal.R.string.log_access_confirmation_title, appLabel);
+        if (titleString == null || titleString.length() == 0) {
+            throw new NullPointerException("Title is null");
+        }
+
+        return titleString;
     }
 
     /**
