@@ -338,14 +338,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপুনি আপোনাৰ ছেশ্বন অব্যাহত ৰাখিব বিচাৰেনে?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"আকৌ আৰম্ভ কৰক"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"হয়, অব্যাহত ৰাখক"</string>
-    <!-- no translation found for guest_notification_app_name (2110425506754205509) -->
-    <skip />
-    <!-- no translation found for guest_notification_session_active (5567273684713471450) -->
-    <skip />
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"অতিথি ম’ড"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"আপুনি অতিথি ম’ডত আছে"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"নতুন ব্যৱহাৰকাৰী যোগ কৰিবনে?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ স্থান ছেট আপ কৰা প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে নিজৰ লগতে আন ব্যৱহাৰকাৰীৰো এপ্ আপডে’ট কৰিব পাৰে।"</string>
-    <!-- no translation found for user_add_user_message_guest_remove (5589286604543355007) -->
-    <skip />
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"এগৰাকী নতুন ব্যৱহাৰকাৰীক যোগ দিয়াটোৱে অতিথি ম’ডৰ পৰা বাহিৰ কৰিব আৰু বৰ্তমানৰ অতিথিৰ ছেশ্বনটোৰ পৰা আটাইবোৰ এপ্ আৰু ডেটা মচিব।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"অধিকতম ব্যৱহাৰকাৰী সৃষ্টি কৰা হ’ল"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">আপুনি <xliff:g id="COUNT">%d</xliff:g> জনলৈকে ব্যৱহাৰকাৰী যোগ কৰিব পাৰে।</item>
@@ -813,8 +810,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"পজ কৰক"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"পূৰ্বৱৰ্তী ট্ৰেক"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"পৰৱৰ্তী ট্ৰেক"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"সংযোগ কৰি থকা হৈছে"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"প্লে’ কৰক"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> খোলক"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g>ত <xliff:g id="ARTIST_NAME">%2$s</xliff:g>ৰ <xliff:g id="SONG_NAME">%1$s</xliff:g> গীতটো প্লে’ কৰক"</string>

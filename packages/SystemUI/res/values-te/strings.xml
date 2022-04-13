@@ -338,14 +338,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"మొదటి నుండి ప్రారంభించు"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించు"</string>
-    <!-- no translation found for guest_notification_app_name (2110425506754205509) -->
-    <skip />
-    <!-- no translation found for guest_notification_session_active (5567273684713471450) -->
-    <skip />
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"గెస్ట్ మోడ్"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"మీరు గెస్ట్ మోడ్‌లో ఉన్నారు"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"కొత్త యూజర్‌ను జోడించాలా?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"ఒక కొత్త యూజర్‌ను మీరు జోడించినప్పుడు, ఆ వ్యక్తి తన స్పేస్‌ను సెటప్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగతా అందరు యూజర్‌ల కోసం యాప్‌లను అప్‌డేట్ చేయగలరు."</string>
-    <!-- no translation found for user_add_user_message_guest_remove (5589286604543355007) -->
-    <skip />
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"కొత్త యూజర్‌ను జోడించడం వలన గెస్ట్ మోడ్ నుండి నిష్క్రమించబడుతుంది, ప్రస్తుత గెస్ట్ సెషన్ నుండి అన్ని యాప్‌లు, డేటా తొలగించండి."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"వినియోగదారు పరిమితిని చేరుకున్నారు"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">మీరు <xliff:g id="COUNT">%d</xliff:g> వినియోగదారుల వరకు జోడించవచ్చు.</item>
@@ -813,8 +810,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"పాజ్ చేయండి"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"మునుపటి ట్రాక్"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"తర్వాతి ట్రాక్"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"కనెక్ట్ అవుతోంది"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ప్లే చేయండి"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g>ను తెరవండి"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> నుండి <xliff:g id="ARTIST_NAME">%2$s</xliff:g> పాడిన <xliff:g id="SONG_NAME">%1$s</xliff:g>‌ను ప్లే చేయండి"</string>
