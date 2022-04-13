@@ -18,6 +18,9 @@ package com.android.systemui.media;
 
 import static android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorSet;
 import android.app.PendingIntent;
 import android.app.WallpaperColors;
 import android.app.smartspace.SmartspaceAction;
@@ -31,20 +34,22 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
-import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.graphics.drawable.TransitionDrawable;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.animation.Interpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -52,12 +57,14 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -148,6 +155,11 @@ public class MediaControlPanel {
     private MediaCarouselController mMediaCarouselController;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
     private final FalsingManager mFalsingManager;
+    private MetadataAnimationHandler mMetadataAnimationHandler;
+    private ColorSchemeTransition mColorSchemeTransition;
+    private Drawable mPrevArtwork = null;
+    private int mArtworkBoundId = 0;
+    private int mArtworkNextBindRequestId = 0;
 
     // Used for logging.
     protected boolean mIsImpressed = false;
@@ -171,15 +183,20 @@ public class MediaControlPanel {
      * @param activityStarter    activity starter
      */
     @Inject
-    public MediaControlPanel(Context context,
+    public MediaControlPanel(
+            Context context,
             @Background Executor backgroundExecutor,
             @Main Executor mainExecutor,
-            ActivityStarter activityStarter, BroadcastSender broadcastSender,
-            MediaViewController mediaViewController, SeekBarViewModel seekBarViewModel,
+            ActivityStarter activityStarter,
+            BroadcastSender broadcastSender,
+            MediaViewController mediaViewController,
+            SeekBarViewModel seekBarViewModel,
             Lazy<MediaDataManager> lazyMediaDataManager,
             MediaOutputDialogFactory mediaOutputDialogFactory,
             MediaCarouselController mediaCarouselController,
-            FalsingManager falsingManager, SystemClock systemClock, MediaUiEventLogger logger) {
+            FalsingManager falsingManager,
+            SystemClock systemClock,
+            MediaUiEventLogger logger) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mMainExecutor = mainExecutor;
@@ -306,6 +323,33 @@ public class MediaControlPanel {
                 mActivityStarter.startActivity(SETTINGS_INTENT, true /* dismissShade */);
             }
         });
+
+        TextView titleText = mMediaViewHolder.getTitleText();
+        TextView artistText = mMediaViewHolder.getArtistText();
+        AnimatorSet enter = loadAnimator(R.anim.media_metadata_enter,
+                Interpolators.EMPHASIZED_DECELERATE, titleText, artistText);
+        AnimatorSet exit = loadAnimator(R.anim.media_metadata_exit,
+                Interpolators.EMPHASIZED_ACCELERATE, titleText, artistText);
+
+        mColorSchemeTransition = new ColorSchemeTransition(
+            mContext, mBackgroundColor, mMediaViewHolder);
+        mMetadataAnimationHandler = new MetadataAnimationHandler(exit, enter);
+    }
+
+    @VisibleForTesting
+    protected AnimatorSet loadAnimator(int animId, Interpolator motionInterpolator,
+            View... targets) {
+        ArrayList<Animator> animators = new ArrayList<>();
+        for (View target : targets) {
+            AnimatorSet animator = (AnimatorSet) AnimatorInflater.loadAnimator(mContext, animId);
+            animator.getChildAnimations().get(0).setInterpolator(motionInterpolator);
+            animator.setTarget(target);
+            animators.add(animator);
+        }
+
+        AnimatorSet result = new AnimatorSet();
+        result.playTogether(animators);
+        return result;
     }
 
     /** Attaches the recommendations to the recommendation view holder. */
@@ -377,20 +421,6 @@ public class MediaControlPanel {
             });
         }
 
-        // Accessibility label
-        mMediaViewHolder.getPlayer().setContentDescription(
-                mContext.getString(
-                        R.string.controls_media_playing_item_description,
-                        data.getSong(), data.getArtist(), data.getApp()));
-
-        // Song name
-        TextView titleText = mMediaViewHolder.getTitleText();
-        titleText.setText(data.getSong());
-
-        // Artist name
-        TextView artistText = mMediaViewHolder.getArtistText();
-        artistText.setText(data.getArtist());
-
         // Seek Bar
         final MediaController controller = getController();
         mBackgroundExecutor.execute(() -> mSeekBarViewModel.updateController(controller));
@@ -399,11 +429,16 @@ public class MediaControlPanel {
         bindLongPressMenu(data);
         bindActionButtons(data);
         bindScrubbingTime(data);
-        bindArtworkAndColors(data);
+
+        boolean isSongUpdated = bindSongMetadata(data);
+        bindArtworkAndColors(data, isSongUpdated);
 
         // TODO: We don't need to refresh this state constantly, only if the state actually changed
         // to something which might impact the measurement
-        mMediaViewController.refreshState();
+        // State refresh interferes with the translation animation, only run it if it's not running.
+        if (!mMetadataAnimationHandler.isRunning()) {
+            mMediaViewController.refreshState();
+        }
     }
 
     private void bindOutputSwitcherChip(MediaData data) {
@@ -494,120 +529,135 @@ public class MediaControlPanel {
         });
     }
 
-    private void bindArtworkAndColors(MediaData data) {
-        // Default colors
-        int surfaceColor = mBackgroundColor;
-        int accentPrimary = com.android.settingslib.Utils.getColorAttr(mContext,
-                com.android.internal.R.attr.textColorPrimary).getDefaultColor();
-        int textPrimary = com.android.settingslib.Utils.getColorAttr(mContext,
-                com.android.internal.R.attr.textColorPrimary).getDefaultColor();
-        int textPrimaryInverse = com.android.settingslib.Utils.getColorAttr(mContext,
-                com.android.internal.R.attr.textColorPrimaryInverse).getDefaultColor();
-        int textSecondary = com.android.settingslib.Utils.getColorAttr(mContext,
-                com.android.internal.R.attr.textColorSecondary).getDefaultColor();
-        int textTertiary = com.android.settingslib.Utils.getColorAttr(mContext,
-                com.android.internal.R.attr.textColorTertiary).getDefaultColor();
+    private boolean bindSongMetadata(MediaData data) {
+        // Accessibility label
+        mMediaViewHolder.getPlayer().setContentDescription(
+                mContext.getString(
+                        R.string.controls_media_playing_item_description,
+                        data.getSong(), data.getArtist(), data.getApp()));
 
-        // Album art
-        ColorScheme colorScheme = null;
-        ImageView albumView = mMediaViewHolder.getAlbumView();
-        boolean hasArtwork = data.getArtwork() != null;
-        if (hasArtwork) {
-            colorScheme = new ColorScheme(WallpaperColors.fromBitmap(data.getArtwork().getBitmap()),
-                    true);
+        TextView titleText = mMediaViewHolder.getTitleText();
+        TextView artistText = mMediaViewHolder.getArtistText();
+        return mMetadataAnimationHandler.setNext(
+            Pair.create(data.getSong(), data.getArtist()),
+            () -> {
+                titleText.setText(data.getSong());
+                artistText.setText(data.getArtist());
 
-            // Scale artwork to fit background
-            int width = mMediaViewHolder.getPlayer().getWidth();
-            int height = mMediaViewHolder.getPlayer().getHeight();
-            Drawable artwork = getScaledBackground(data.getArtwork(), width, height);
-            albumView.setPadding(0, 0, 0, 0);
-            albumView.setImageDrawable(artwork);
-            albumView.setClipToOutline(true);
-        } else {
-            // If there's no artwork, use colors from the app icon
-            try {
-                Drawable icon = mContext.getPackageManager().getApplicationIcon(
-                        data.getPackageName());
-                colorScheme = new ColorScheme(WallpaperColors.fromDrawable(icon), true);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, "Cannot find icon for package " + data.getPackageName(), e);
+                // refreshState is required here to resize the text views (and prevent ellipsis)
+                mMediaViewController.refreshState();
+
+                // Use OnPreDrawListeners to enforce zero alpha on these views for a frame.
+                // TransitionLayout insists on resetting the alpha of these views to 1 when onLayout
+                // is called which causes the animation to look bad. These suppress that behavior.
+                titleText.getViewTreeObserver().addOnPreDrawListener(
+                        new ViewTreeObserver.OnPreDrawListener() {
+                            @Override
+                            public boolean onPreDraw() {
+                                titleText.setAlpha(0);
+                                titleText.getViewTreeObserver().removeOnPreDrawListener(this);
+                                return true;
+                            }
+                        });
+
+                artistText.getViewTreeObserver().addOnPreDrawListener(
+                        new ViewTreeObserver.OnPreDrawListener() {
+                            @Override
+                            public boolean onPreDraw() {
+                                artistText.setAlpha(0);
+                                artistText.getViewTreeObserver().removeOnPreDrawListener(this);
+                                return true;
+                            }
+                        });
+
+                return Unit.INSTANCE;
+            },
+            () -> {
+                // After finishing the enter animation, we refresh state. This could pop if
+                // something is incorrectly bound, but needs to be run if other elements were
+                // updated while the enter animation was running
+                mMediaViewController.refreshState();
+                return Unit.INSTANCE;
+            });
+    }
+
+    private void bindArtworkAndColors(MediaData data, boolean updateBackground) {
+        final int reqId = mArtworkNextBindRequestId++;
+
+        // Capture width & height from views in foreground for artwork scaling in background
+        int width = mMediaViewHolder.getPlayer().getWidth();
+        int height = mMediaViewHolder.getPlayer().getHeight();
+
+        // WallpaperColors.fromBitmap takes a good amount of time. We do that work
+        // on the background executor to avoid stalling animations on the UI Thread.
+        mBackgroundExecutor.execute(() -> {
+            // Album art
+            ColorScheme mutableColorScheme = null;
+            Drawable artwork;
+            Icon artworkIcon = data.getArtwork();
+            if (artworkIcon != null) {
+                WallpaperColors wallpaperColors = WallpaperColors
+                        .fromBitmap(artworkIcon.getBitmap());
+                mutableColorScheme = new ColorScheme(wallpaperColors, true);
+                artwork = getScaledBackground(artworkIcon, width, height);
+            } else {
+                // If there's no artwork, use colors from the app icon
+                artwork = null;
+                try {
+                    Drawable icon = mContext.getPackageManager()
+                            .getApplicationIcon(data.getPackageName());
+                    mutableColorScheme = new ColorScheme(WallpaperColors.fromDrawable(icon), true);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.w(TAG, "Cannot find icon for package " + data.getPackageName(), e);
+                }
             }
-        }
 
-        // Get colors for player
-        if (colorScheme != null) {
-            surfaceColor = colorScheme.getAccent2().get(9); // A2-800
-            accentPrimary = colorScheme.getAccent1().get(2); // A1-100
-            textPrimary = colorScheme.getNeutral1().get(1); // N1-50
-            textPrimaryInverse = colorScheme.getNeutral1().get(10); // N1-900
-            textSecondary = colorScheme.getNeutral2().get(3); // N2-200
-            textTertiary = colorScheme.getNeutral2().get(5); // N2-400
-        }
+            final ColorScheme colorScheme = mutableColorScheme;
+            mMainExecutor.execute(() -> {
+                // Cancel the request if a later one arrived first
+                if (reqId < mArtworkBoundId) return;
+                mArtworkBoundId = reqId;
 
-        ColorStateList bgColorList = ColorStateList.valueOf(surfaceColor);
-        ColorStateList accentColorList = ColorStateList.valueOf(accentPrimary);
-        ColorStateList textColorList = ColorStateList.valueOf(textPrimary);
+                // Bind the album view to the artwork or a transition drawable
+                ImageView albumView = mMediaViewHolder.getAlbumView();
+                albumView.setPadding(0, 0, 0, 0);
+                albumView.setClipToOutline(true);
+                if (updateBackground) {
+                    if (mPrevArtwork == null || artwork == null) {
+                        albumView.setImageDrawable(artwork);
+                    } else {
+                        TransitionDrawable transitionDrawable = new TransitionDrawable(
+                                new Drawable[] { mPrevArtwork, artwork });
+                        albumView.setImageDrawable(transitionDrawable);
+                        transitionDrawable.startTransition(333);
+                    }
+                    mPrevArtwork = artwork;
+                }
 
-        // Gradient and background (visible when there is no art)
-        albumView.setForegroundTintList(ColorStateList.valueOf(surfaceColor));
-        albumView.setBackgroundTintList(
-                ColorStateList.valueOf(surfaceColor));
-        mMediaViewHolder.getPlayer().setBackgroundTintList(bgColorList);
+                // Transition Colors to current color scheme
+                mColorSchemeTransition.updateColorScheme(colorScheme);
 
-        // App icon - use notification icon
-        ImageView appIconView = mMediaViewHolder.getAppIcon();
-        appIconView.clearColorFilter();
-        if (data.getAppIcon() != null && !data.getResumption()) {
-            appIconView.setImageIcon(data.getAppIcon());
-            appIconView.setColorFilter(accentPrimary);
-        } else {
-            // Resume players use launcher icon
-            appIconView.setColorFilter(getGrayscaleFilter());
-            try {
-                Drawable icon = mContext.getPackageManager().getApplicationIcon(
-                        data.getPackageName());
-                appIconView.setImageDrawable(icon);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, "Cannot find icon for package " + data.getPackageName(), e);
-                appIconView.setImageResource(R.drawable.ic_music_note);
-            }
-        }
-
-        // Metadata text
-        mMediaViewHolder.getTitleText().setTextColor(textPrimary);
-        mMediaViewHolder.getArtistText().setTextColor(textSecondary);
-
-        // Seekbar
-        SeekBar seekbar = mMediaViewHolder.getSeekBar();
-        seekbar.getThumb().setTintList(textColorList);
-        seekbar.setProgressTintList(textColorList);
-        seekbar.setProgressBackgroundTintList(ColorStateList.valueOf(textTertiary));
-        mMediaViewHolder.getScrubbingElapsedTimeView().setTextColor(textColorList);
-        mMediaViewHolder.getScrubbingTotalTimeView().setTextColor(textColorList);
-
-        // Action buttons
-        mMediaViewHolder.getActionPlayPause().setBackgroundTintList(accentColorList);
-        mMediaViewHolder.getActionPlayPause().setImageTintList(
-                ColorStateList.valueOf(textPrimaryInverse));
-        for (ImageButton button : mMediaViewHolder.getTransparentActionButtons()) {
-            button.setImageTintList(textColorList);
-        }
-
-        // Output switcher
-        View seamlessView = mMediaViewHolder.getSeamlessButton();
-        seamlessView.setBackgroundTintList(accentColorList);
-        ImageView seamlessIconView = mMediaViewHolder.getSeamlessIcon();
-        seamlessIconView.setImageTintList(bgColorList);
-        TextView seamlessText = mMediaViewHolder.getSeamlessText();
-        seamlessText.setTextColor(surfaceColor);
-
-        // Long press buttons
-        mMediaViewHolder.getLongPressText().setTextColor(textColorList);
-        mMediaViewHolder.getSettings().setImageTintList(accentColorList);
-        mMediaViewHolder.getCancelText().setTextColor(textColorList);
-        mMediaViewHolder.getCancelText().setBackgroundTintList(accentColorList);
-        mMediaViewHolder.getDismissText().setTextColor(surfaceColor);
-        mMediaViewHolder.getDismissText().setBackgroundTintList(accentColorList);
+                // App icon - use notification icon
+                ImageView appIconView = mMediaViewHolder.getAppIcon();
+                appIconView.clearColorFilter();
+                if (data.getAppIcon() != null && !data.getResumption()) {
+                    appIconView.setImageIcon(data.getAppIcon());
+                    appIconView.setColorFilter(
+                            mColorSchemeTransition.getAccentPrimary().getTargetColor());
+                } else {
+                    // Resume players use launcher icon
+                    appIconView.setColorFilter(getGrayscaleFilter());
+                    try {
+                        Drawable icon = mContext.getPackageManager()
+                                .getApplicationIcon(data.getPackageName());
+                        appIconView.setImageDrawable(icon);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Log.w(TAG, "Cannot find icon for package " + data.getPackageName(), e);
+                        appIconView.setImageResource(R.drawable.ic_music_note);
+                    }
+                }
+            });
+        });
     }
 
     private void bindActionButtons(MediaData data) {
@@ -714,6 +764,7 @@ public class MediaControlPanel {
         animHandler.tryExecute(() -> {
             bindButtonWithAnimations(button, mediaAction, animHandler);
             setSemanticButtonVisibleAndAlpha(button.getId(), mediaAction, semanticActions);
+            return Unit.INSTANCE;
         });
     }
 
@@ -795,11 +846,12 @@ public class MediaControlPanel {
     private void updateDisplayForScrubbingChange(@NonNull MediaButton semanticActions) {
         // Update visibilities of the scrubbing time views and the scrubbing-dependent buttons.
         bindScrubbingTime(mMediaData);
-        SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.forEach((id) ->
-                setSemanticButtonVisibleAndAlpha(
-                        id, semanticActions.getActionById(id), semanticActions));
-        // Trigger a state refresh so that we immediately update visibilities.
-        mMediaViewController.refreshState();
+        SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.forEach((id) -> setSemanticButtonVisibleAndAlpha(
+                id, semanticActions.getActionById(id), semanticActions));
+        if (!mMetadataAnimationHandler.isRunning()) {
+            // Trigger a state refresh so that we immediately update visibilities.
+            mMediaViewController.refreshState();
+        }
     }
 
     private void bindScrubbingTime(MediaData data) {
@@ -822,74 +874,6 @@ public class MediaControlPanel {
         return semanticActions != null && SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.stream().allMatch(
                 id -> semanticActions.getActionById(id) != null
         );
-    }
-
-    // AnimationBindHandler is responsible for tracking the bound animation state and preventing
-    // jank and conflicts due to media notifications arriving at any time during an animation. It
-    // does this in two parts.
-    //  - Exit animations fired as a result of user input are tracked. When these are running, any
-    //      bind actions are delayed until the animation completes (and then fired in sequence).
-    //  - Continuous animations are tracked using their rebind id. Later calls using the same
-    //      rebind id will be totally ignored to prevent the continuous animation from restarting.
-    private static class AnimationBindHandler extends Animatable2.AnimationCallback {
-        private ArrayList<Runnable> mOnAnimationsComplete = new ArrayList<>();
-        private ArrayList<Animatable2> mRegistrations = new ArrayList<>();
-        private Integer mRebindId = null;
-
-        // This check prevents rebinding to the action button if the identifier has not changed. A
-        // null value is always considered to be changed. This is used to prevent the connecting
-        // animation from rebinding (and restarting) if multiple buffer PlaybackStates are pushed by
-        // an application in a row.
-        public boolean updateRebindId(Integer rebindId) {
-            if (mRebindId == null || rebindId == null || !mRebindId.equals(rebindId)) {
-                mRebindId = rebindId;
-                return true;
-            }
-            return false;
-        }
-
-        public void tryRegister(Drawable drawable) {
-            if (drawable instanceof Animatable2) {
-                Animatable2 anim = (Animatable2) drawable;
-                anim.registerAnimationCallback(this);
-                mRegistrations.add(anim);
-            }
-        }
-
-        public void unregisterAll() {
-            for (Animatable2 anim : mRegistrations) {
-                anim.unregisterAnimationCallback(this);
-            }
-            mRegistrations.clear();
-        }
-
-        public boolean isAnimationRunning() {
-            for (Animatable2 anim : mRegistrations) {
-                if (anim.isRunning()) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public void tryExecute(Runnable action) {
-            if (isAnimationRunning()) {
-                mOnAnimationsComplete.add(action);
-            } else {
-                action.run();
-            }
-        }
-
-        @Override
-        public void onAnimationEnd(Drawable drawable) {
-            super.onAnimationEnd(drawable);
-            if (!isAnimationRunning()) {
-                for (Runnable action : mOnAnimationsComplete) {
-                    action.run();
-                }
-                mOnAnimationsComplete.clear();
-            }
-        }
     }
 
     @Nullable
@@ -1097,7 +1081,9 @@ public class MediaControlPanel {
         });
 
         mController = null;
-        mMediaViewController.refreshState();
+        if (mMetadataAnimationHandler == null || !mMetadataAnimationHandler.isRunning()) {
+            mMediaViewController.refreshState();
+        }
     }
 
     /**
