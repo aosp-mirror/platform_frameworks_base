@@ -549,7 +549,7 @@
     <string name="monitoring_title" msgid="4063890083735924568">"नेटवर्क को मॉनीटर करना"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"वीपीएन"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"नेटवर्क लॉगिंग"</string>
-    <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA प्रमाणपत्र"</string>
+    <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA सर्टिफ़िकेट"</string>
     <string name="disable_vpn" msgid="482685974985502922">"VPN अक्षम करें"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN डिस्‍कनेक्‍ट करें"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"नीतियां देखें"</string>

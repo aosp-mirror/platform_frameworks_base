@@ -755,13 +755,13 @@
     <string name="notification_delegate_header" msgid="1264510071031479920">"প্ৰক্সি হিচাপে পঠিওৱা জাননী"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ আটাইবোৰ জাননী"</string>
     <string name="see_more_title" msgid="7409317011708185729">"অধিক চাওক"</string>
-    <string name="appops_camera" msgid="5215967620896725715">"এই এপে কেমেৰা ব্য়ৱহাৰ কৰি আছে।"</string>
-    <string name="appops_microphone" msgid="8805468338613070149">"এই এপে মাইক্ৰ\'ফ\'ন ব্য়ৱহাৰ কৰি আছে।"</string>
+    <string name="appops_camera" msgid="5215967620896725715">"এই এপে কেমেৰা ব্যৱহাৰ কৰি আছে।"</string>
+    <string name="appops_microphone" msgid="8805468338613070149">"এই এপে মাইক্ৰ\'ফ\'ন ব্যৱহাৰ কৰি আছে।"</string>
     <string name="appops_overlay" msgid="4822261562576558490">"এই এপটো আপোনাৰ স্ক্ৰীনত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ আছে।"</string>
-    <string name="appops_camera_mic" msgid="7032239823944420431">"এই এপে মাইক্ৰ\'ন আৰু কেমেৰা ব্য়ৱহাৰ কৰি আছে।"</string>
-    <string name="appops_camera_overlay" msgid="6466845606058816484">"এই এপে আপোনাৰ স্ক্ৰীনত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ কেমেৰা ব্য়ৱহাৰ কৰি আছে।"</string>
-    <string name="appops_mic_overlay" msgid="4609326508944233061">"এই এপে আপোনাৰ স্ক্ৰীনত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ মাইক্ৰ\'ফ\'ন ব্য়ৱহাৰ কৰি আছে।"</string>
-    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"এই এপে আপোনাৰ স্ক্ৰীনত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ মাইক্ৰ\'ফ\'ন আৰু কেমেৰা ব্য়ৱহাৰ কৰি আছে।"</string>
+    <string name="appops_camera_mic" msgid="7032239823944420431">"এই এপে মাইক্ৰ\'ন আৰু কেমেৰা ব্যৱহাৰ কৰি আছে।"</string>
+    <string name="appops_camera_overlay" msgid="6466845606058816484">"এই এপে আপোনাৰ স্ক্ৰীনত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ কেমেৰা ব্যৱহাৰ কৰি আছে।"</string>
+    <string name="appops_mic_overlay" msgid="4609326508944233061">"এই এপে আপোনাৰ স্ক্ৰীনত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ মাইক্ৰ\'ফ\'ন ব্যৱহাৰ কৰি আছে।"</string>
+    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"এই এপে আপোনাৰ স্ক্ৰীনত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ মাইক্ৰ\'ফ\'ন আৰু কেমেৰা ব্যৱহাৰ কৰি আছে।"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"ছেটিং"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ঠিক আছে"</string>
     <string name="feedback_alerted" msgid="5192459808484271208">"ছিষ্টেমটোৱে স্বয়ংক্ৰিয়ভাৱে এই জাননীটোৰ ক্ষেত্ৰত দিয়া &lt;b&gt;গুৰুত্ব ডিফ’ল্ট&lt;/b&gt;লৈ বৃদ্ধি কৰিছে।"</string>
