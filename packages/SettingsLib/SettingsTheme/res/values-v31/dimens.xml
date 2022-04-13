@@ -25,6 +25,4 @@
     <dimen name="settingslib_listPreferredItemPaddingStart">24dp</dimen>
     <!-- Right padding of the preference -->
     <dimen name="settingslib_listPreferredItemPaddingEnd">24dp</dimen>
-
-    <dimen name="settingslib_spinner_height">36dp</dimen>
 </resources>
