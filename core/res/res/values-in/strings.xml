@@ -992,7 +992,7 @@
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nYakin ingin beranjak dari halaman ini?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"Konfirmasi"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Kiat: Ketuk dua kali untuk memperbesar dan memperkecil."</string>
-    <string name="autofill_this_form" msgid="3187132440451621492">"IsiOtomatis"</string>
+    <string name="autofill_this_form" msgid="3187132440451621492">"Isi Otomatis"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"Siapkan Pengisian Otomatis"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"IsiOtomatis dengan <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">"  "</string>
@@ -1167,7 +1167,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"Pilih teks"</string>
     <string name="undo" msgid="3175318090002654673">"Urungkan"</string>
     <string name="redo" msgid="7231448494008532233">"Ulangi"</string>
-    <string name="autofill" msgid="511224882647795296">"IsiOtomatis"</string>
+    <string name="autofill" msgid="511224882647795296">"Isi Otomatis"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Pemilihan teks"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Tambahkan ke kamus"</string>
     <string name="deleteText" msgid="4200807474529938112">"Hapus"</string>
@@ -1708,11 +1708,11 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"NONAKTIF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Izinkan <xliff:g id="SERVICE">%1$s</xliff:g> memiliki kontrol penuh atas perangkat Anda?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jika Anda mengaktifkan <xliff:g id="SERVICE">%1$s</xliff:g>, perangkat tidak akan menggunakan kunci layar untuk meningkatkan enkripsi data."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrol penuh sesuai untuk aplikasi yang membantu Anda terkait kebutuhan aksesibilitas, tetapi tidak untuk sebagian besar aplikasi."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrol penuh sesuai untuk aplikasi yang mendukung kebutuhan aksesibilitas Anda, tetapi tidak untuk sebagian besar aplikasi."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengontrol layar"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Aplikasi dapat membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Voice Access dapat membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Menampilkan dan melakukan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Aplikasi dapat melacak interaksi Anda dengan aplikasi atau sensor hardware, dan melakukan interaksi dengan aplikasi untuk Anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Voice Access dapat melacak interaksi Anda dengan aplikasi atau sensor hardware, dan berinteraksi dengan aplikasi untuk Anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Izinkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketuk fitur untuk mulai menggunakannya:"</string>

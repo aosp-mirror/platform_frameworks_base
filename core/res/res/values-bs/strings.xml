@@ -1730,7 +1730,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ISKLJUČENO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Dozvoliti da usluga <xliff:g id="SERVICE">%1$s</xliff:g> ima punu kontrolu nad vašim uređajem?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ako uključite uslugu <xliff:g id="SERVICE">%1$s</xliff:g>, uređaj neće koristiti zaključavanje ekrana za poboljšanje šifriranja podataka."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Puna kontrola je prikladna za aplikacije koje vam pomažu kod potreba za pristupačnosti, ali nije za većinu aplikacija."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Puna kontrola je prikladna za aplikacije koje vam pomažu kod potreba pristupačnosti, ali nije za većinu aplikacija."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Prikaz i kontrola ekrana"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Može čitati sav sadržaj na ekranu i prikazivati sadržaj u drugim aplikacijama."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Prikaz i izvršavanje radnji"</string>

@@ -1726,7 +1726,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ରଙ୍ଗ ବଦଳାଇବାର ସୁବିଧା"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ରଙ୍ଗ ସଂଶୋଧନ"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ଏକ-ହାତ ମୋଡ୍"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ଅତିରିକ୍ତ ଡିମ୍"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ଅତ୍ୟଧିକ ଡିମ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ଭଲ୍ୟୁମ୍ କୀ\'ଗୁଡ଼ିକୁ ଧରି ରଖାଯାଇଛି। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ଚାଲୁ ହୋଇଛି।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ଭଲ୍ୟୁମ୍ କୀ\'ଗୁଡ଼ିକୁ ଧରି ରଖାଯାଇଛି। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ବନ୍ଦ ହୋଇଛି।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ବ୍ୟବହାର କରିବାକୁ ତିନି ସେକେଣ୍ଡ ପାଇଁ ଉଭୟ ଭଲ୍ୟୁମ୍‍ କୀ ଦବାଇ ଧରି ରଖନ୍ତୁ"</string>
