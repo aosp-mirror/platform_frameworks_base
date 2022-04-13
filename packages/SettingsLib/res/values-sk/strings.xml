@@ -173,9 +173,9 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Odstránené aplikácie"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Odstránené aplikácie a používatelia"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Aktualizácie systému"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Pripojenie cez USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Tethering cez USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Prenosný prístupový bod"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Pripojenie cez Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Tethering cez Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Zdieľané pripojenie"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Zdieľané pripojenie a prenosný hotspot"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Všetky pracovné aplikácie"</string>

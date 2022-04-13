@@ -234,7 +234,7 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ऐक्सेस पॉइंट के नाम की सेटिंग इस उपयोगकर्ता के लिए मौजूद नहीं हैं"</string>
     <string name="enable_adb" msgid="8072776357237289039">"यूएसबी डीबग करना"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"डीबग मोड जब यूएसबी कनेक्‍ट किया गया हो"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"यूएसबी डीबग करने की मंज़ूरी रद्द करें"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"यूएसबी डीबग करने की मंज़ूरी निरस्त करें"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"वॉयरलेस डीबगिंग"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"डिवाइस के वाई-फ़ाई से कनेक्ट हाेने पर, डीबग मोड चालू करें"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"गड़बड़ी"</string>
@@ -267,35 +267,35 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"गड़बड़ी की रिपोर्ट लेने के लिए पावर मेन्यू में कोई बटन दिखाएं"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"स्क्रीन को चालू रखें"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"चार्ज करते समय स्‍क्रीन कभी भी कम बैटरी मोड में नहीं जाएगी"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ब्लूटूथ एचसीआई स्‍नूप लॉग चालू करें"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ब्लूटूथ HCI स्‍नूप लॉग चालू करें"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ब्लूटूथ पैकेट कैप्चर करें. (यह सेटिंग बदलने के बाद ब्लूटूथ टॉगल करें)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM अनलॉक करना"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"बूटलोडर को अनलाॅक किए जाने की अनुमति दें"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM अनलॉक करने की अनुमति दें?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"चेतावनी: इस सेटिंग के चालू रहने पर डिवाइस सुरक्षा सुविधाएं इस डिवाइस पर काम नहीं करेंगी."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"जगह की नकली जानकारी देने के लिए ऐप चुनें"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"जगह की नकली जानकारी देने के लिए ऐप सेट नहीं है"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"जगह की नकली जानकारी देने वाला ऐप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"जगह की दिखावटी जानकारी देने के लिए ऐप्लिकेशन चुनें"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"जगह की दिखावटी जानकारी देने के लिए ऐप सेट नहीं है"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"जगह की दिखावटी जानकारी देने वाला ऐप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"नेटवर्किंग"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"वायरलेस डिसप्ले सर्टिफ़िकेशन"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"वाई-फ़ाई वर्बोस लॉगिंग चालू करें"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"वाई-फ़ाई के लिए स्कैन की संख्या कम करें"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"वाई-फ़ाई के लिए स्कैन थ्रॉटलिंग करें"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"थोड़े समय के लिए वाई-फ़ाई नेटवर्क से जुड़ने पर MAC पता बदलने की सुविधा"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"मोबाइल डेटा हमेशा चालू"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"हार्डवेयर से तेज़ी लाने के लिए टेदर करें"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"बिना नाम वाले ब्लूटूथ डिवाइस दिखाएं"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ब्लूटूथ से आवाज़ के कंट्रोल की सुविधा रोकें"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche चालू करें"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ब्लूटूथ एवीआरसीपी वर्शन"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ब्लूटूथ AVRCP वर्शन"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ब्लूटूथ AVRCP वर्शन चुनें"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"ब्लूटूथ का MAP वर्शन"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"ब्लूटूथ का MAP वर्शन चुनें"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ब्लूटूथ ऑडियो कोडेक"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ब्लूटूथ ऑडियो कोडेक का\nविकल्प चालू करें"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"ब्लूटूथ ऑडियो नमूना दर"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"ब्लूटूथ ऑडियो सैंपल रेट"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"ब्लूटूथ ऑडियो कोडेक का\nयह विकल्प चालू करें: सैंपल की दर"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"धूसर किया गया का मतलब है कि फ़ोन या हेडसेट पर काम नहीं करता"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"ब्लूटूथ ऑडियो बिट प्रति नमूना"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"हर सैंपल के लिए ब्लूटूथ ऑडियो बिट"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ब्लूटूथ ऑडियो कोडेक का\nयह विकल्प चालू करें: हर सैंपल के लिए बिट की संख्या"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"ब्लूटूथ ऑडियो चैनल मोड"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"ब्लूटूथ ऑडियो कोडेक का\nयह विकल्प चालू करें: चैनल मोड"</string>
@@ -310,12 +310,12 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"डीएनएस सेवा देने वाले का होस्टनाम डालें"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"कनेक्‍ट नहीं हो सका"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"वायरलेस डिसप्ले सर्टिफ़िकेशन के विकल्प दिखाएं"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"वाई-फ़ाई लॉगिंग का स्तर बढ़ाएं, वाई-फ़ाई पिकर में प्रति SSID RSSI दिखाएं"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"वाई-फ़ाई लॉगिंग लेवल बढ़ाएं, वाई-फ़ाई पिकर में हर SSID के लिए RSSI दिखाएं"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"बैटरी की खपत कम और नेटवर्क की परफ़ॉर्मेंस बेहतर होती है"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"जब यह मोड चालू होता है, तब नेटवर्क से कनेक्ट होने पर हर बार इस डिवाइस का MAC पता बदल सकता है. ऐसा तब होता है, जब डिवाइस किसी ऐसे नेटवर्क से जुड़ता है जिस पर MAC पता बदलने की सुविधा चालू होती है."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"डेटा इस्तेमाल करने की सीमा तय की गई है"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"डेटा इस्तेमाल करने की सीमा तय नहीं की गई है"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"लॉगर बफ़र आकार"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"लॉगर बफ़र साइज़"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"प्रति लॉग बफ़र लॉगर आकार चुनें"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"लॉगर सतत मेमोरी साफ़ करें?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"जब हम सतत लॉगर के साथ निगरानी करना बंद कर देते हैं, तो हमें आपके डिवाइस पर मौजूद लॉगर डेटा को मिटाने की आवश्यकता होती है."</string>
@@ -336,7 +336,7 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"विकास सेटिंग की अनुमति दें?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ये सेटिंग केवल विकास संबंधी उपयोग के प्रयोजन से हैं. वे आपके डिवाइस और उस पर स्‍थित ऐप्लिकेशन  को खराब कर सकती हैं या उनके दुर्व्यवहार का कारण हो सकती हैं."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"यूएसबी पर ऐप्लिकेशन की पुष्टि करें"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"नुकसानदेह व्यवहार के लिए ADB/ADT से इंस्टॉल किए गए ऐप्लिकेशन जांचें."</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"नुकसान पहुंचाने वाली गतिविधियों के लिए ADB/ADT से इंस्टॉल किए गए ऐप्लिकेशन जांचें."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"बिना नाम वाले ब्लूटूथ डिवाइस (सिर्फ़ MAC पते वाले) दिखाए जाएंगे"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"दूर के डिवाइस पर आवाज़ बहुत बढ़ जाने या उससे कंट्रोल हटने जैसी समस्याएं होने पर, यह ब्लूटूथ के ज़रिए आवाज़ के कंट्रोल की सुविधा रोक देता है."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लूटूथ सेटिंग में Gabeldorsche सुविधा को चालू करता है."</string>
@@ -358,14 +358,14 @@
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"हार्डवेयर ऐक्सेलरेटेड रेंडरिंग"</string>
     <string name="media_category" msgid="8122076702526144053">"मीडिया"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"निगरानी"</string>
-    <string name="strict_mode" msgid="889864762140862437">"सख्‍त मोड चालू किया गया"</string>
+    <string name="strict_mode" msgid="889864762140862437">"स्ट्रिक्ट मोड चालू किया गया"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"थ्रेड पर लंबा प्रोसेस होने पर स्‍क्रीन फ़्लैश करें"</string>
     <string name="pointer_location" msgid="7516929526199520173">"पॉइंटर की जगह"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"मौजूदा टच डेटा दिखाने वाला स्‍क्रीन ओवरले"</string>
     <string name="show_touches" msgid="8437666942161289025">"टैप दिखाएं"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"टैप के लिए विज़ुअल फ़ीडबैक दिखाएं"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"सर्फ़ेस अपडेट दिखाएं"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"अपडेट होने पर पूरे विंडो सर्फ़ेस को फ़्लैश करें"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"अपडेट होने पर पूरे विंडो सर्फ़ेस फ़्लैश करें"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"जीपीयू व्यू के अपडेट दिखाएं"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"GPU से बनाए गए व्यू, विंडो में फ़्लैश करता है"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"हार्डवेयर लेयर अपडेट दिखाएं"</string>
@@ -376,7 +376,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"रंग स्पेस सिम्युलेट करें"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ट्रेस चालू करें"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"यूएसबी ऑडियो रूटिंग बंद करें"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"यूएसबी ऑडियो पेरिफ़ेरल पर अपने-आप रूटिंग बंद करें"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"यूएसबी ऑडियो पेरिफ़ेरल पर अपने-आप रूटिंग होना बंद करें"</string>
     <string name="debug_layout" msgid="1659216803043339741">"लेआउट सीमाएं दिखाएं"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमाएं, मार्जिन वगैरह दिखाएं."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"लेआउट की दिशा दाएं से बाएं करें"</string>
@@ -389,7 +389,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"जीपीयू डीबग लेयर चालू करें"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डीबग ऐप के लिए जीपीयू डीबग लेयर लोड करने दें"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"वर्बोस वेंडर लॉगिंग चालू करें"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"गड़बड़ियों की रिपोर्ट में खास डिवाइस से जुड़े वेंडर लॉग शामिल करें. इन लॉग में निजी जानकारी, बैटरी का ज़्यादा इस्तेमाल, और/या डिवाइस की मेमोरी ज़्यादा इस्तेमाल करने की जानकारी हो सकती है."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"गड़बड़ियों की रिपोर्ट में खास डिवाइस से जुड़े वेंडर लॉग शामिल करें. इन लॉग में निजी जानकारी, बैटरी का ज़्यादा इस्तेमाल, और/या डिवाइस का स्टोरेज ज़्यादा इस्तेमाल करने की जानकारी हो सकती है."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"विंडो एनिमेशन स्‍केल"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ट्रांज़िशन एनिमेशन स्‍केल"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"एनिमेटर अवधि स्केल"</string>
@@ -401,11 +401,11 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"बैकग्राउंड के ANRs दिखाएं"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"बैकग्राउंड में चलने वाले ऐप्लिकेशन के लिए, \'यह ऐप्लिकेशन नहीं चल रहा\' मैसेज दिखाएं"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना चैनल चेतावनी दिखाएं"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ऐप्लिकेशन, मान्य चैनल के बिना सूचना पोस्ट करे तो स्क्रीन पर चेतावनी दिखाएं"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"ऐप्लिकेशन को बाहरी मेमोरी पर ही चलाएं"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"इससे कोई भी ऐप्लिकेशन बाहरी मेमोरी में रखने लायक बन जाता है चाहे उसकी मेनिफ़ेस्ट वैल्यू कुछ भी हो"</string>
-    <string name="force_resizable_activities" msgid="7143612144399959606">"विंडो के हिसाब से गतिविधियों का आकार बदल दें"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"सभी गतिविधियों को मल्टी-विंडो (एक से ज़्यादा ऐप्लिकेशन, एक साथ) के लिए आकार बदलने लायक बनाएं, चाहे उनकी मेनिफ़ेस्ट वैल्यू कुछ भी हो."</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"कोई ऐप, मान्य चैनल के बिना सूचना पोस्ट करे, तो स्क्रीन पर चेतावनी दिखाएं"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"ऐप्लिकेशन को बाहरी स्टोरेज पर ही चलाएं"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"इससे कोई भी ऐप्लिकेशन बाहरी स्टोरेज में रखने लायक बन जाता है, चाहे उसकी मेनिफ़ेस्ट वैल्यू कुछ भी हो"</string>
+    <string name="force_resizable_activities" msgid="7143612144399959606">"विंडो के हिसाब से गतिविधियों का साइज़ बदल दें"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"सभी गतिविधियों को मल्टी-विंडो (एक से ज़्यादा ऐप्लिकेशन, एक साथ) के लिए साइज़ बदलने लायक बनाएं, चाहे उनकी मेनिफ़ेस्ट वैल्यू कुछ भी हो."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"फ़्रीफ़ॉर्म विंडो (एक साथ कई विंडो दिखाना) चालू करें"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"जांच के लिए बनी फ़्रीफ़ॉर्म विंडो के लिए सहायता चालू करें."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"डेस्‍कटॉप बैक अप पासवर्ड"</string>
