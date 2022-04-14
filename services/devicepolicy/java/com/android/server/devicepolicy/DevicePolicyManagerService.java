@@ -1781,7 +1781,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @VisibleForTesting
     DevicePolicyManagerService(Injector injector) {
-        DevicePolicyManager.disableGetKeyguardDisabledFeaturesCache();
+        DevicePolicyManager.disableLocalCaches();
 
         mInjector = injector;
         mContext = Objects.requireNonNull(injector.mContext);

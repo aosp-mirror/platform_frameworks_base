@@ -217,22 +217,18 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 break;
             case TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER:
                 if (!(convertView instanceof ViewGroup)) {
+                    TextView title;
                     if (((LocaleStore.LocaleInfo)getItem(position)).isAppCurrentLocale()) {
                         convertView = mInflater.inflate(
-                                R.layout.app_language_picker_system_current, parent, false);
+                                R.layout.app_language_picker_current_locale_item, parent, false);
+                        title = convertView.findViewById(R.id.language_picker_item);
                     } else {
                         convertView = mInflater.inflate(
-                                R.layout.app_language_picker_system_default, parent, false);
+                                R.layout.language_picker_item, parent, false);
+                        title = convertView.findViewById(R.id.locale);
                     }
+                    title.setText(R.string.system_locale_title);
                 }
-
-                Locale defaultLocale = Locale.getDefault();
-                TextView title = convertView.findViewById(R.id.locale);
-                title.setText(R.string.system_locale_title);
-                title.setTextLocale(defaultLocale);
-                TextView subtitle = convertView.findViewById(R.id.system_locale_subtitle);
-                subtitle.setText(defaultLocale.getDisplayName());
-                subtitle.setTextLocale(defaultLocale);
                 break;
             case TYPE_CURRENT_LOCALE:
                 if (!(convertView instanceof ViewGroup)) {

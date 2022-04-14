@@ -49,6 +49,12 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED;
+import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
+import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_REASON_DOZE;
+import static android.net.ConnectivityManager.BLOCKED_REASON_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
@@ -4815,7 +4821,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
-            bindApplicationTimeMillis = SystemClock.elapsedRealtime();
+            bindApplicationTimeMillis = SystemClock.uptimeMillis();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
             if (mPlatformCompat != null) {
@@ -4963,9 +4969,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pid,
                 app.info.packageName,
                 FrameworkStatsLog.PROCESS_START_TIME__TYPE__COLD,
-                app.getStartTime(),
-                (int) (bindApplicationTimeMillis - app.getStartTime()),
-                (int) (SystemClock.elapsedRealtime() - app.getStartTime()),
+                app.getStartElapsedTime(),
+                (int) (bindApplicationTimeMillis - app.getStartUptime()),
+                (int) (SystemClock.uptimeMillis() - app.getStartUptime()),
                 app.getHostingRecord().getType(),
                 (app.getHostingRecord().getName() != null ? app.getHostingRecord().getName() : ""));
         return true;
@@ -17306,8 +17312,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // TODO: We can reuse this data in
                 // ProcessList#incrementProcStateSeqAndNotifyAppsLOSP instead of calling into
                 // NetworkManagementService.
-                return mUidNetworkBlockedReasons.get(uid, BLOCKED_REASON_NONE)
-                        != BLOCKED_REASON_NONE;
+                final int uidBlockedReasons = mUidNetworkBlockedReasons.get(
+                        uid, BLOCKED_REASON_NONE);
+                if (uidBlockedReasons == BLOCKED_REASON_NONE) {
+                    return false;
+                }
+                final int topExemptedBlockedReasons = BLOCKED_REASON_BATTERY_SAVER
+                        | BLOCKED_REASON_DOZE
+                        | BLOCKED_REASON_APP_STANDBY
+                        | BLOCKED_REASON_LOW_POWER_STANDBY
+                        | BLOCKED_METERED_REASON_DATA_SAVER
+                        | BLOCKED_METERED_REASON_USER_RESTRICTED;
+                final int effectiveBlockedReasons =
+                        uidBlockedReasons & ~topExemptedBlockedReasons;
+                // Only consider it as blocked if it is not blocked by a reason
+                // that is not exempted by app being in the top state.
+                return effectiveBlockedReasons == BLOCKED_REASON_NONE;
             }
         }
 

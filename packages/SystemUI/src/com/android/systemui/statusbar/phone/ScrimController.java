@@ -790,7 +790,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
             if (mBouncerHiddenFraction != KeyguardBouncer.EXPANSION_HIDDEN) {
                 final float interpolatedFraction =
-                        BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(
+                        BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(
                                 mBouncerHiddenFraction);
                 mBehindAlpha = MathUtils.lerp(mDefaultScrimAlpha, mBehindAlpha,
                         interpolatedFraction);
@@ -1076,7 +1076,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private float getInterpolatedFraction() {
         if (mStatusBarKeyguardViewManager.bouncerIsInTransit()) {
             return BouncerPanelExpansionCalculator
-                    .getBackScrimScaledExpansion(mPanelExpansionFraction);
+                    .aboutToShowBouncerProgress(mPanelExpansionFraction);
         }
         return ShadeInterpolation.getNotificationScrimAlpha(mPanelExpansionFraction);
     }

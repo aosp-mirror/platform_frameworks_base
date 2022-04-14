@@ -223,6 +223,11 @@ public final class AppRestrictionController {
     private static final String ATTR_LEVEL_TS = "levelts";
     private static final String ATTR_REASON = "reason";
 
+    private static final String[] ROLES_IN_INTEREST = {
+        RoleManager.ROLE_DIALER,
+        RoleManager.ROLE_EMERGENCY,
+    };
+
     private final Context mContext;
     private final HandlerThread mBgHandlerThread;
     private final BgHandler mBgHandler;
@@ -1386,6 +1391,7 @@ public final class AppRestrictionController {
         initBgRestrictionExemptioFromSysConfig();
         initRestrictionStates();
         initSystemModuleNames();
+        initRolesInInterest();
         registerForUidObservers();
         registerForSystemBroadcasts();
         mNotificationHelper.onSystemReady();
@@ -2663,6 +2669,18 @@ public final class AppRestrictionController {
         synchronized (mLock) {
             final ArrayList<String> roles = mUidRolesMapping.get(uid);
             return roles != null && roles.indexOf(roleName) >= 0;
+        }
+    }
+
+    private void initRolesInInterest() {
+        final int[] allUsers = mInjector.getUserManagerInternal().getUserIds();
+        for (String role : ROLES_IN_INTEREST) {
+            if (mInjector.getRoleManager().isRoleAvailable(role)) {
+                for (int userId : allUsers) {
+                    final UserHandle user = UserHandle.of(userId);
+                    onRoleHoldersChanged(role, user);
+                }
+            }
         }
     }
 

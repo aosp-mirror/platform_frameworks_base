@@ -238,8 +238,6 @@ final class VibrationSettings {
         // Listen to all settings that might affect the result of Vibrator.getVibrationIntensity.
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES));
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_ON));
-        registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_WHEN_RINGING));
-        registerSettingsObserver(Settings.System.getUriFor(Settings.System.APPLY_RAMPING_RINGER));
         registerSettingsObserver(Settings.System.getUriFor(
                 Settings.System.HAPTIC_FEEDBACK_ENABLED));
         registerSettingsObserver(
@@ -449,18 +447,11 @@ final class VibrationSettings {
             mCurrentVibrationIntensities.put(USAGE_NOTIFICATION, notificationIntensity);
             mCurrentVibrationIntensities.put(USAGE_MEDIA, mediaIntensity);
             mCurrentVibrationIntensities.put(USAGE_UNKNOWN, mediaIntensity);
+            mCurrentVibrationIntensities.put(USAGE_RINGTONE, ringIntensity);
 
             // Communication request is not disabled by the notification setting.
             mCurrentVibrationIntensities.put(USAGE_COMMUNICATION_REQUEST,
                     positiveNotificationIntensity);
-
-            if (!loadBooleanSetting(Settings.System.VIBRATE_WHEN_RINGING)
-                    && !loadBooleanSetting(Settings.System.APPLY_RAMPING_RINGER)) {
-                // Make sure deprecated boolean setting still disables ringtone vibrations.
-                mCurrentVibrationIntensities.put(USAGE_RINGTONE, Vibrator.VIBRATION_INTENSITY_OFF);
-            } else {
-                mCurrentVibrationIntensities.put(USAGE_RINGTONE, ringIntensity);
-            }
 
             // This should adapt the behavior preceding the introduction of this new setting
             // key, which is to apply HAPTIC_FEEDBACK_INTENSITY, unless it's disabled.

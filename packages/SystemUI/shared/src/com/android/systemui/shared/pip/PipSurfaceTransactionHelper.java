@@ -80,21 +80,29 @@ public class PipSurfaceTransactionHelper {
 
     public PictureInPictureSurfaceTransaction scaleAndCrop(
             SurfaceControl.Transaction tx, SurfaceControl leash,
-            Rect sourceBounds, Rect destinationBounds, Rect insets) {
+            Rect sourceRectHint, Rect sourceBounds, Rect destinationBounds, Rect insets) {
         mTmpSourceRectF.set(sourceBounds);
         mTmpDestinationRect.set(sourceBounds);
         mTmpDestinationRect.inset(insets);
         // Scale by the shortest edge and offset such that the top/left of the scaled inset
         // source rect aligns with the top/left of the destination bounds
-        final float scale = sourceBounds.width() <= sourceBounds.height()
-                ? (float) destinationBounds.width() / sourceBounds.width()
-                : (float) destinationBounds.height() / sourceBounds.height();
+        final float scale;
+        if (sourceRectHint.isEmpty() || sourceRectHint.width() == sourceBounds.width()) {
+            scale = sourceBounds.width() <= sourceBounds.height()
+                    ? (float) destinationBounds.width() / sourceBounds.width()
+                    : (float) destinationBounds.height() / sourceBounds.height();
+        } else {
+            // scale by sourceRectHint if it's not edge-to-edge
+            scale = sourceRectHint.width() <= sourceRectHint.height()
+                    ? (float) destinationBounds.width() / sourceRectHint.width()
+                    : (float) destinationBounds.height() / sourceRectHint.height();
+        }
         final float left = destinationBounds.left - (insets.left + sourceBounds.left) * scale;
         final float top = destinationBounds.top - (insets.top + sourceBounds.top) * scale;
         mTmpTransform.setScale(scale, scale);
         final float cornerRadius = getScaledCornerRadius(mTmpDestinationRect, destinationBounds);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
-                .setWindowCrop(leash, mTmpDestinationRect)
+                .setCrop(leash, mTmpDestinationRect)
                 .setPosition(leash, left, top)
                 .setCornerRadius(leash, cornerRadius)
                 .setShadowRadius(leash, mShadowRadius);
@@ -127,7 +135,7 @@ public class PipSurfaceTransactionHelper {
             adjustedPositionY = positionY - insets.left * scale;
         }
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
-                .setWindowCrop(leash, mTmpDestinationRect)
+                .setCrop(leash, mTmpDestinationRect)
                 .setPosition(leash, adjustedPositionX, adjustedPositionY)
                 .setCornerRadius(leash, cornerRadius)
                 .setShadowRadius(leash, mShadowRadius);

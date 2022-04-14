@@ -521,6 +521,70 @@ public class NotificationTest {
     }
 
     @Test
+    public void testBuild_ensureMessagingUserIsNotTooBig_resizesIcon() {
+        Icon hugeIcon = Icon.createWithBitmap(
+                Bitmap.createBitmap(3000, 3000, Bitmap.Config.ARGB_8888));
+        Icon hugeMessageAvatar = Icon.createWithBitmap(
+                Bitmap.createBitmap(3000, 3000, Bitmap.Config.ARGB_8888));
+        Icon hugeHistoricMessageAvatar = Icon.createWithBitmap(
+                Bitmap.createBitmap(3000, 3000, Bitmap.Config.ARGB_8888));
+
+        Notification.MessagingStyle style = new Notification.MessagingStyle(
+                new Person.Builder().setIcon(hugeIcon).setName("A User").build());
+        style.addMessage(new Notification.MessagingStyle.Message("A message", 123456,
+                new Person.Builder().setIcon(hugeMessageAvatar).setName("A Sender").build()));
+        style.addHistoricMessage(new Notification.MessagingStyle.Message("A message", 123456,
+                new Person.Builder().setIcon(hugeHistoricMessageAvatar).setName(
+                        "A Historic Sender").build()));
+        Notification notification = new Notification.Builder(mContext, "Channel").setStyle(
+                style).build();
+
+        Bitmap personIcon = style.getUser().getIcon().getBitmap();
+        assertThat(personIcon.getWidth()).isEqualTo(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_person_icon_max_size));
+        assertThat(personIcon.getHeight()).isEqualTo(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_person_icon_max_size));
+
+        Bitmap avatarIcon = style.getMessages().get(0).getSenderPerson().getIcon().getBitmap();
+        assertThat(avatarIcon.getWidth()).isEqualTo(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_person_icon_max_size));
+        assertThat(avatarIcon.getHeight()).isEqualTo(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_person_icon_max_size));
+
+        Bitmap historicAvatarIcon = style.getHistoricMessages().get(
+                0).getSenderPerson().getIcon().getBitmap();
+        assertThat(historicAvatarIcon.getWidth()).isEqualTo(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_person_icon_max_size));
+        assertThat(historicAvatarIcon.getHeight()).isEqualTo(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_person_icon_max_size));
+    }
+
+    @Test
+    public void testBuild_ensureMessagingShortcutIconIsNotTooBig_resizesIcon() {
+        Icon hugeIcon = Icon.createWithBitmap(
+                Bitmap.createBitmap(3000, 3000, Bitmap.Config.ARGB_8888));
+        Notification.MessagingStyle style = new Notification.MessagingStyle(
+                new Person.Builder().setName("A User").build()).setShortcutIcon(hugeIcon);
+
+        Notification notification = new Notification.Builder(mContext, "Channel").setStyle(
+                style).build();
+        Bitmap shortcutIcon = style.getShortcutIcon().getBitmap();
+
+        assertThat(shortcutIcon.getWidth()).isEqualTo(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_small_icon_size));
+        assertThat(shortcutIcon.getHeight()).isEqualTo(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_small_icon_size));
+    }
+
+    @Test
     public void testColors_ensureColors_dayMode_producesValidPalette() {
         Notification.Colors c = new Notification.Colors();
         boolean colorized = false;
