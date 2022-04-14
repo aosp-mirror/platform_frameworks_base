@@ -70,6 +70,8 @@ import com.android.wm.shell.splitscreen.StageTaskUnfoldController;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 import com.android.wm.shell.unfold.UnfoldBackgroundController;
+import com.android.wm.shell.unfold.UnfoldTransitionHandler;
+import com.android.wm.shell.unfold.animation.FullscreenUnfoldTaskAnimator;
 
 import java.util.Optional;
 
@@ -344,15 +346,37 @@ public class WMShellModule {
     @Provides
     @DynamicOverride
     static FullscreenUnfoldController provideFullscreenUnfoldController(
-            Context context,
             Optional<ShellUnfoldProgressProvider> progressProvider,
-            Lazy<UnfoldBackgroundController> unfoldBackgroundController,
-            DisplayInsetsController displayInsetsController,
+            Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
+            FullscreenUnfoldTaskAnimator fullscreenUnfoldTaskAnimator,
+            UnfoldBackgroundController unfoldBackgroundController,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
-        return new FullscreenUnfoldController(context, mainExecutor,
-                unfoldBackgroundController.get(), progressProvider.get(),
-                displayInsetsController);
+        return new FullscreenUnfoldController(mainExecutor,
+                unfoldBackgroundController, progressProvider.get(),
+                unfoldTransitionHandler.get(), fullscreenUnfoldTaskAnimator);
+    }
+
+    @Provides
+    static FullscreenUnfoldTaskAnimator provideFullscreenUnfoldTaskAnimator(
+            Context context,
+            DisplayInsetsController displayInsetsController
+    ) {
+        return new FullscreenUnfoldTaskAnimator(context, displayInsetsController);
+    }
+
+    @WMSingleton
+    @Provides
+    @DynamicOverride
+    static UnfoldTransitionHandler provideUnfoldTransitionHandler(
+            Optional<ShellUnfoldProgressProvider> progressProvider,
+            FullscreenUnfoldTaskAnimator animator,
+            UnfoldBackgroundController backgroundController,
+            TransactionPool transactionPool,
+            Transitions transitions,
+            @ShellMainThread ShellExecutor executor) {
+        return new UnfoldTransitionHandler(progressProvider.get(), animator,
+                transactionPool, backgroundController, executor, transitions);
     }
 
     @Provides
