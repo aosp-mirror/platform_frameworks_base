@@ -87,9 +87,9 @@
     <item msgid="2075645297847971154">"Włączony"</item>
   </string-array>
   <string-array name="tile_states_color_correction">
-    <item msgid="2840507878437297682">"Brak dostępu"</item>
-    <item msgid="1909756493418256167">"Wyłączono"</item>
-    <item msgid="4531508423703413340">"Włączono"</item>
+    <item msgid="2840507878437297682">"Niedostępna"</item>
+    <item msgid="1909756493418256167">"Wyłączona"</item>
+    <item msgid="4531508423703413340">"Włączona"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Niedostępne"</item>
