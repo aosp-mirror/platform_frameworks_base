@@ -373,17 +373,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private fun initRecommendationViewHolderMocks() {
         whenever(recommendationViewHolder.recommendations).thenReturn(view)
         whenever(recommendationViewHolder.cardIcon).thenReturn(appIcon)
-        whenever(recommendationViewHolder.cardText).thenReturn(titleText)
 
         // Add a recommendation item
         coverItem = ImageView(context).also { it.setId(R.id.media_cover1) }
         whenever(coverContainer.id).thenReturn(R.id.media_cover1_container)
         whenever(recommendationViewHolder.mediaCoverItems).thenReturn(listOf(coverItem))
         whenever(recommendationViewHolder.mediaCoverContainers).thenReturn(listOf(coverContainer))
-        whenever(recommendationViewHolder.mediaCoverItemsResIds)
-            .thenReturn(listOf(R.id.media_cover1))
-        whenever(recommendationViewHolder.mediaCoverContainersResIds)
-            .thenReturn(listOf(R.id.media_cover1_container))
 
         // Long press menu
         whenever(recommendationViewHolder.settings).thenReturn(settings)
