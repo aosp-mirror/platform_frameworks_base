@@ -36,7 +36,8 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
-import androidx.core.os.BuildCompat;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -220,7 +221,7 @@ public class DeviceInfoUtils {
     }
 
     private static String getRawPhoneNumber(Context context, int subscriptionId) {
-        if (BuildCompat.isAtLeastT()) {
+        if (SdkLevel.isAtLeastT()) {
             return getRawPhoneNumberFromT(context, subscriptionId);
         } else {
             final TelephonyManager telephonyManager = context.getSystemService(
