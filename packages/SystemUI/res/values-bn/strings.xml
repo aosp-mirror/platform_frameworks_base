@@ -574,7 +574,7 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"বিজ্ঞপ্তি"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"কীবোর্ড শর্টকাট"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"কীবোর্ড লে-আউট পাল্টান"</string>
-    <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"অ্যাপ্লিকেশানগুলি"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"অ্যাপ্লিকেশন"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"সহযোগিতা"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"ব্রাউজার"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"পরিচিতি"</string>

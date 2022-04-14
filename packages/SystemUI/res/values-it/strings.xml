@@ -25,7 +25,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Impossibile ricaricare tramite USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Utilizza il caricabatterie fornito in dotazione con il dispositivo"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Attivare il risparmio energetico?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Informazioni su Risparmio energetico"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Informazioni sul risparmio energetico"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Attiva"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Attiva il risparmio energetico"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotazione automatica schermo"</string>
@@ -880,7 +880,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Connessione automatica rete Wi-Fi non attiva al momento"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Mostra tutte"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Per cambiare rete, scollega il cavo Ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Per migliorare l\'esperienza con il dispositivo, le app e i servizi possono continuare a cercare reti Wi-Fi in qualsiasi momento, anche quando la connessione Wi-Fi non è attiva. Puoi modificare questa preferenza nelle impostazioni relative alla ricerca di reti Wi-Fi. "<annotation id="link">"Cambia"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Per migliorare l\'esperienza con il dispositivo, le app e i servizi possono continuare a cercare reti Wi-Fi in qualsiasi momento, anche quando la connessione Wi-Fi non è attiva. Puoi modificare questa preferenza nelle impostazioni relative alla ricerca di reti Wi-Fi. "<annotation id="link">"Modifica"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Disattiva la modalità aereo"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleziona utente"</string>
 </resources>
