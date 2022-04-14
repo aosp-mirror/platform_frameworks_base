@@ -653,13 +653,29 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="MediaPlayer.AppIcon">
+    <style name="MediaPlayer.Recommendation"/>
+
+    <style name="MediaPlayer.Recommendation.AppIcon">
         <item name="android:background">@drawable/qs_media_icon_background</item>
         <item name="android:backgroundTint">@color/media_player_solid_button_bg</item>
-        <item name="android:padding">4dp</item>
+        <item name="android:layout_width">@dimen/qs_media_rec_icon_size</item>
+        <item name="android:layout_height">@dimen/qs_media_rec_icon_size</item>
+        <item name="layout_constraintTop_toTopOf">parent</item>
+        <item name="layout_constraintStart_toStartOf">parent</item>
+        <item name="android:layout_marginTop">@dimen/qs_media_padding</item>
+        <item name="android:layout_marginStart">@dimen/qs_media_padding</item>
+        <item name="android:src">@drawable/ic_headset</item>
     </style>
 
-    <style name="MediaPlayer.Album">
+    <style name="MediaPlayer.Recommendation.AlbumContainer">
+        <item name="android:layout_width">@dimen/qs_media_rec_album_size</item>
+        <item name="android:layout_height">@dimen/qs_media_rec_album_size</item>
+        <item name="android:background">@drawable/qs_media_light_source</item>
+        <item name="android:layout_marginTop">@dimen/qs_media_padding</item>
+        <item name="android:layout_marginBottom">@dimen/qs_media_padding</item>
+    </style>
+
+    <style name="MediaPlayer.Recommendation.Album">
         <item name="android:backgroundTint">@color/media_player_album_bg</item>
     </style>
 
