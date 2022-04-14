@@ -799,6 +799,11 @@ public class UdfpsController implements DozeReceiver {
             if (!mKeyguardUpdateMonitor.isFaceDetectionRunning()) {
                 mKeyguardUpdateMonitor.requestFaceAuth(/* userInitiatedRequest */ false);
             }
+
+            if (mKeyguardUpdateMonitor.mRequestActiveUnlockOnUnlockIntent) {
+                mKeyguardUpdateMonitor.requestActiveUnlock("unlock-intent extra=udfpsFingerDown",
+                        true);
+            }
         }
         mOnFingerDown = true;
         mFingerprintManager.onPointerDown(requestId, mSensorProps.sensorId, x, y, minor, major);

@@ -71,7 +71,13 @@ class KeyguardLiftController @Inject constructor(
             isListening = false
             updateListeningState()
             keyguardUpdateMonitor.requestFaceAuth(true)
-            keyguardUpdateMonitor.requestActiveUnlock()
+            if (keyguardUpdateMonitor.mRequestActiveUnlockOnWakeup) {
+                keyguardUpdateMonitor.requestActiveUnlock("wake-unlock," +
+                        " extra=KeyguardLiftController")
+            } else if (keyguardUpdateMonitor.mInitiateActiveUnlockOnWakeup) {
+                keyguardUpdateMonitor.initiateActiveUnlock("wake-initiate," +
+                        " extra=KeyguardLiftController")
+            }
         }
     }
 

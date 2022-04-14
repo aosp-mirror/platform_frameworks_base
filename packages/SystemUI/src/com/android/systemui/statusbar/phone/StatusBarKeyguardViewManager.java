@@ -589,10 +589,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void updateAlternateAuthShowing(boolean updateScrim) {
+        final boolean isShowingAltAuth = isShowingAlternateAuth();
         if (mKeyguardMessageAreaController != null) {
-            mKeyguardMessageAreaController.setAltBouncerShowing(isShowingAlternateAuth());
+            mKeyguardMessageAreaController.setAltBouncerShowing(isShowingAltAuth);
         }
-        mBypassController.setAltBouncerShowing(isShowingAlternateAuth());
+        mBypassController.setAltBouncerShowing(isShowingAltAuth);
+        mKeyguardUpdateManager.setUdfpsBouncerShowing(isShowingAltAuth);
 
         if (updateScrim) {
             mCentralSurfaces.updateScrimController();
