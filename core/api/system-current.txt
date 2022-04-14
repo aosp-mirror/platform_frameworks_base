@@ -368,12 +368,12 @@ package android {
 
   public static final class R.array {
     field public static final int config_keySystemUuidMapping = 17235973; // 0x1070005
-    field public static final int config_optionalIpSecAlgorithms;
+    field public static final int config_optionalIpSecAlgorithms = 17235974; // 0x1070006
   }
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
-    field public static final int gameSessionService;
+    field public static final int gameSessionService = 16844373; // 0x1010655
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
@@ -386,7 +386,7 @@ package android {
   }
 
   public static final class R.bool {
-    field public static final int config_enableQrCodeScannerOnLockScreen;
+    field public static final int config_enableQrCodeScannerOnLockScreen = 17891336; // 0x1110008
     field public static final int config_sendPackageName = 17891328; // 0x1110000
     field public static final int config_showDefaultAssistant = 17891329; // 0x1110001
     field public static final int config_showDefaultEmergency = 17891330; // 0x1110002
@@ -403,7 +403,7 @@ package android {
 
   public static final class R.drawable {
     field public static final int ic_info = 17301684; // 0x10800b4
-    field public static final int ic_safety_protection;
+    field public static final int ic_safety_protection = 17301685; // 0x10800b5
   }
 
   public static final class R.raw {
@@ -415,13 +415,13 @@ package android {
     field public static final int config_customMediaKeyDispatcher = 17039404; // 0x104002c
     field public static final int config_customMediaSessionPolicyProvider = 17039405; // 0x104002d
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
-    field public static final int config_defaultAutomotiveNavigation;
+    field public static final int config_defaultAutomotiveNavigation = 17039424; // 0x1040040
     field public static final int config_defaultBrowser = 17039394; // 0x1040022
     field public static final int config_defaultCallRedirection = 17039397; // 0x1040025
     field public static final int config_defaultCallScreening = 17039398; // 0x1040026
     field public static final int config_defaultDialer = 17039395; // 0x1040023
     field public static final int config_defaultSms = 17039396; // 0x1040024
-    field public static final int config_devicePolicyManagement;
+    field public static final int config_devicePolicyManagement = 17039421; // 0x104003d
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
     field public static final int config_feedbackIntentNameKey = 17039392; // 0x1040020
     field public static final int config_helpIntentExtraKey = 17039389; // 0x104001d
@@ -430,19 +430,19 @@ package android {
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
     field public static final int config_systemActivityRecognizer = 17039416; // 0x1040038
     field public static final int config_systemAmbientAudioIntelligence = 17039411; // 0x1040033
-    field public static final int config_systemAppProtectionService;
+    field public static final int config_systemAppProtectionService = 17039422; // 0x104003e
     field public static final int config_systemAudioIntelligence = 17039412; // 0x1040034
-    field public static final int config_systemAutomotiveCalendarSyncManager;
+    field public static final int config_systemAutomotiveCalendarSyncManager = 17039423; // 0x104003f
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
     field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
     field public static final int config_systemCompanionDeviceProvider = 17039417; // 0x1040039
     field public static final int config_systemContacts = 17039403; // 0x104002b
     field public static final int config_systemGallery = 17039399; // 0x1040027
     field public static final int config_systemNotificationIntelligence = 17039413; // 0x1040035
-    field public static final int config_systemSettingsIntelligence;
+    field public static final int config_systemSettingsIntelligence = 17039426; // 0x1040042
     field public static final int config_systemShell = 17039402; // 0x104002a
     field public static final int config_systemSpeechRecognizer = 17039406; // 0x104002e
-    field public static final int config_systemSupervision;
+    field public static final int config_systemSupervision = 17039420; // 0x104003c
     field public static final int config_systemTelevisionNotificationHandler = 17039409; // 0x1040031
     field public static final int config_systemTextIntelligence = 17039414; // 0x1040036
     field public static final int config_systemUi = 17039418; // 0x104003a
@@ -450,7 +450,7 @@ package android {
     field public static final int config_systemVisualIntelligence = 17039415; // 0x1040037
     field public static final int config_systemWellbeing = 17039408; // 0x1040030
     field public static final int config_systemWifiCoexManager = 17039407; // 0x104002f
-    field public static final int safety_protection_display_text;
+    field public static final int safety_protection_display_text = 17039425; // 0x1040041
   }
 
   public static final class R.style {
