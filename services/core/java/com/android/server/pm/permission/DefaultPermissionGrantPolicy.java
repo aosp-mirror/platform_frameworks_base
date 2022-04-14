@@ -896,15 +896,6 @@ final class DefaultPermissionGrantPolicy {
                     COARSE_BACKGROUND_LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
         }
 
-        // Content capture
-        String contentCapturePackageName =
-                mContext.getPackageManager().getContentCaptureServicePackageName();
-        if (!TextUtils.isEmpty(contentCapturePackageName)) {
-            grantPermissionsToSystemPackage(pm, contentCapturePackageName, userId,
-                    PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
-                    CONTACTS_PERMISSIONS, STORAGE_PERMISSIONS);
-        }
-
         // Attention Service
         String attentionServicePackageName =
                 mContext.getPackageManager().getAttentionServicePackageName();
