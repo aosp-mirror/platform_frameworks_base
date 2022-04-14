@@ -441,6 +441,9 @@
          they were added. -->
     <integer name="config_smart_replies_in_notifications_onclick_init_delay">200</integer>
 
+    <!-- Smartspace trampoline activity that is used when the user taps smartspace. -->
+    <string name="config_smartspaceTrampolineActivityComponent" translatable="false">com.google.android.apps.gsa.staticplugins.opa.smartspace.ExportedSmartspaceTrampolineActivity</string>
+
     <!-- Screenshot editing default activity.  Must handle ACTION_EDIT image/png intents.
          Blank sends the user to the Chooser first.
          This name is in the ComponentName flattened format (package/class)  -->
