@@ -4454,8 +4454,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         boolean wallpaperEnabled = mWmService.mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableWallpaperService)
                 && mWmService.mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_checkWallpaperAtBoot)
-                && !mWmService.mOnlyCore;
+                com.android.internal.R.bool.config_checkWallpaperAtBoot);
 
         final boolean haveBootMsg = drawnWindowTypes.get(TYPE_BOOT_PROGRESS);
         final boolean haveApp = drawnWindowTypes.get(TYPE_BASE_APPLICATION);

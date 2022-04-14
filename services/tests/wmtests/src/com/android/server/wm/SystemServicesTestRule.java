@@ -308,7 +308,7 @@ public class SystemServicesTestRule implements TestRule {
         // Suppress StrictMode violation (DisplayWindowSettings) to avoid log flood.
         DisplayThread.getHandler().post(StrictMode::allowThreadDiskWritesMask);
         mWmService = WindowManagerService.main(
-                mContext, mImService, false, false, wmPolicy, mAtmService,
+                mContext, mImService, false, wmPolicy, mAtmService,
                 testDisplayWindowSettingsProvider, StubTransaction::new,
                 (unused) -> new MockSurfaceControlBuilder());
         spyOn(mWmService);
