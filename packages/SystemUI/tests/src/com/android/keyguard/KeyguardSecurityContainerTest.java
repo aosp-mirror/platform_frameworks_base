@@ -291,7 +291,9 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     @Test
     public void testTwoOrMoreUsersDoesAllowDropDown() {
         // GIVEN one user has been setup
-        when(mUserSwitcherController.getUsers()).thenReturn(buildUserRecords(2));
+        ArrayList<UserRecord> records = buildUserRecords(2);
+        when(mUserSwitcherController.getCurrentUserRecord()).thenReturn(records.get(0));
+        when(mUserSwitcherController.getUsers()).thenReturn(records);
 
         // WHEN UserSwitcherViewMode is initialized
         setupUserSwitcher();
