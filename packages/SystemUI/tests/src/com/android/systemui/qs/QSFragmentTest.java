@@ -214,7 +214,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         assertThat(mQsFragmentView.getAlpha())
                 .isEqualTo(
-                        BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(
+                        BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(
                                 transitionProgress));
     }
 

@@ -39,10 +39,13 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENT
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__NORMAL_DETECTOR;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED;
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_EXCEPTION;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_SECURITY_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_TIMEOUT;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_UNEXPECTED_CALLBACK;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED_FROM_RESTART;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECT_UNEXPECTED_CALLBACK;
 import static com.android.server.voiceinteraction.SoundTriggerSessionPermissionsDecorator.enforcePermissionForPreflight;
 
 import android.annotation.NonNull;
@@ -132,6 +135,13 @@ final class HotwordDetectionConnection {
             HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_ERROR;
     private static final int METRICS_INIT_CALLBACK_STATE_SUCCESS =
             HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_SUCCESS;
+
+    private static final int METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION =
+            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_SECURITY_EXCEPTION;
+    private static final int METRICS_KEYPHRASE_TRIGGERED_DETECT_UNEXPECTED_CALLBACK =
+            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_UNEXPECTED_CALLBACK;
+    private static final int METRICS_KEYPHRASE_TRIGGERED_REJECT_UNEXPECTED_CALLBACK =
+            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECT_UNEXPECTED_CALLBACK;
 
     private final Executor mAudioCopyExecutor = Executors.newCachedThreadPool();
     // TODO: This may need to be a Handler(looper)
@@ -575,7 +585,7 @@ final class HotwordDetectionConnection {
                         Slog.i(TAG, "Ignoring #onDetected due to a process restart");
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 mDetectorType,
-                                HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_EXCEPTION);
+                                METRICS_KEYPHRASE_TRIGGERED_DETECT_UNEXPECTED_CALLBACK);
                         return;
                     }
                     mValidatingDspTrigger = false;
@@ -584,7 +594,7 @@ final class HotwordDetectionConnection {
                     } catch (SecurityException e) {
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 mDetectorType,
-                                HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_EXCEPTION);
+                                METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION);
                         throw e;
                     }
                     externalCallback.onKeyphraseDetected(recognitionEvent, result);
@@ -614,7 +624,7 @@ final class HotwordDetectionConnection {
                         Slog.i(TAG, "Ignoring #onRejected due to a process restart");
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 mDetectorType,
-                                HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_EXCEPTION);
+                                METRICS_KEYPHRASE_TRIGGERED_REJECT_UNEXPECTED_CALLBACK);
                         return;
                     }
                     mValidatingDspTrigger = false;
@@ -687,6 +697,9 @@ final class HotwordDetectionConnection {
             // rejection. This also allows the Interactor to startReco again
             try {
                 mCallback.onRejected(new HotwordRejectedResult.Builder().build());
+                HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                        mDetectorType,
+                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED_FROM_RESTART);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to call #rejected");
             }

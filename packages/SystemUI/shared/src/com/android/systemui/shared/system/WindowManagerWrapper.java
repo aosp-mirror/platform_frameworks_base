@@ -86,6 +86,7 @@ public class WindowManagerWrapper {
     public static final int ITYPE_RIGHT_TAPPABLE_ELEMENT = InsetsState.ITYPE_RIGHT_TAPPABLE_ELEMENT;
     public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT =
             InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
+    public static final int ITYPE_SIZE = InsetsState.SIZE;
 
     public static final int ANIMATION_DURATION_RESIZE = InsetsController.ANIMATION_DURATION_RESIZE;
     public static final Interpolator RESIZE_INTERPOLATOR = InsetsController.RESIZE_INTERPOLATOR;

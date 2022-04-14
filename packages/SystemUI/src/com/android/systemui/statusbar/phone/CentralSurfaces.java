@@ -4420,8 +4420,7 @@ public class CentralSurfaces extends CoreStartable implements
                 @Override
                 public void onDozeAmountChanged(float linear, float eased) {
                     if (mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)
-                            && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)
-                            && !mBiometricUnlockController.isWakeAndUnlock()) {
+                            && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
                         mLightRevealScrim.setRevealAmount(1f - linear);
                     }
                 }

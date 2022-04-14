@@ -297,6 +297,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             .OnRuntimePermissionStateChangedListener>
             mRuntimePermissionStateChangedListeners = new ArrayList<>();
 
+    private final boolean mIsLeanback;
+
     @NonNull
     private final OnPermissionChangeListeners mOnPermissionChangeListeners;
 
@@ -380,6 +382,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         mContext = context;
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         mUserManagerInt = LocalServices.getService(UserManagerInternal.class);
+        mIsLeanback = availableFeatures.containsKey(PackageManager.FEATURE_LEANBACK);
 
         mPrivilegedPermissionAllowlistSourcePackageNames.add(PLATFORM_PACKAGE_NAME);
         // PackageManager.hasSystemFeature() is not used here because PackageManagerService
@@ -2818,6 +2821,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                                 if ((origPermState != null && origPermState.isGranted())
                                         || legacyActivityRecognitionPermission != null) {
                                     if (!uidState.grantPermission(bp)) {
+                                        wasChanged = true;
+                                    }
+                                }
+                            }
+                            if (mIsLeanback && NOTIFICATION_PERMISSIONS.contains(permName)) {
+                                uidState.grantPermission(bp);
+                                if (origPermState == null || !origPermState.isGranted()) {
+                                    if (uidState.grantPermission(bp)) {
                                         wasChanged = true;
                                     }
                                 }

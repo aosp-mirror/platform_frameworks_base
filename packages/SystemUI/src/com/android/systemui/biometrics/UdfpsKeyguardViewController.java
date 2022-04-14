@@ -25,6 +25,7 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -71,7 +72,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     private float mTransitionToFullShadeProgress;
     private float mLastDozeAmount;
     private long mLastUdfpsBouncerShowTime = -1;
-    private float mStatusBarExpansion;
+    private float mPanelExpansionFraction;
     private boolean mLaunchTransitionFadingAway;
     private boolean mIsLaunchingActivity;
     private float mActivityLaunchProgress;
@@ -188,7 +189,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         pw.println("mQsExpanded=" + mQsExpanded);
         pw.println("mIsBouncerVisible=" + mIsBouncerVisible);
         pw.println("mInputBouncerHiddenAmount=" + mInputBouncerHiddenAmount);
-        pw.println("mStatusBarExpansion=" + mStatusBarExpansion);
+        pw.println("mPanelExpansionFraction=" + mPanelExpansionFraction);
         pw.println("unpausedAlpha=" + mView.getUnpausedAlpha());
         pw.println("mUdfpsRequested=" + mUdfpsRequested);
         pw.println("mView.mUdfpsRequested=" + mView.mUdfpsRequested);
@@ -324,14 +325,16 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
      */
     @Override
     public void updateAlpha() {
-        // fade icon on transitions to showing the status bar, but if mUdfpsRequested, then
-        // the keyguard is occluded by some application - so instead use the input bouncer
-        // hidden amount to determine the fade
-        float expansion = mUdfpsRequested ? mInputBouncerHiddenAmount : mStatusBarExpansion;
+        // Fade icon on transitions to showing the status bar or bouncer, but if mUdfpsRequested,
+        // then the keyguard is occluded by some application - so instead use the input bouncer
+        // hidden amount to determine the fade.
+        float expansion = mUdfpsRequested ? mInputBouncerHiddenAmount : mPanelExpansionFraction;
+
         int alpha = mShowingUdfpsBouncer ? 255
                 : (int) MathUtils.constrain(
                     MathUtils.map(.5f, .9f, 0f, 255f, expansion),
                     0f, 255f);
+
         if (!mShowingUdfpsBouncer) {
             alpha *= (1.0f - mTransitionToFullShadeProgress);
 
@@ -471,7 +474,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         @Override
         public void onPanelExpansionChanged(
                 float fraction, boolean expanded, boolean tracking) {
-            mStatusBarExpansion = fraction;
+            mPanelExpansionFraction =
+                    mKeyguardViewManager.bouncerIsInTransit() ? BouncerPanelExpansionCalculator
+                            .aboutToShowBouncerProgress(fraction) : fraction;
             updateAlpha();
         }
     };

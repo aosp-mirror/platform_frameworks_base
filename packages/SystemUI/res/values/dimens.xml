@@ -474,6 +474,7 @@
     <dimen name="qs_brightness_margin_top">8dp</dimen>
     <dimen name="qs_brightness_margin_bottom">24dp</dimen>
     <dimen name="qqs_layout_margin_top">16dp</dimen>
+    <dimen name="qqs_layout_padding_bottom">24dp</dimen>
 
     <dimen name="qs_customize_internal_side_paddings">8dp</dimen>
     <dimen name="qs_icon_size">20dp</dimen>

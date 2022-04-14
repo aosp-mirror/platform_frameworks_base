@@ -27,6 +27,7 @@ import (
 const art = "art.module.public.api"
 const conscrypt = "conscrypt.module.public.api"
 const i18n = "i18n.module.public.api"
+
 var core_libraries_modules = []string{art, conscrypt, i18n}
 
 // The intention behind this soong plugin is to generate a number of "merged"
@@ -92,6 +93,8 @@ type fgProps struct {
 type MergedTxtDefinition struct {
 	// "current.txt" or "removed.txt"
 	TxtFilename string
+	// Filename in the new dist dir. "android.txt" or "android-removed.txt"
+	DistFilename string
 	// The module for the non-updatable / non-module part of the api.
 	BaseTxt string
 	// The list of modules that are relevant for this merged txt.
@@ -112,7 +115,6 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	if txt.Scope != "public" {
 		filename = txt.Scope + "-" + filename
 	}
-
 	props := genruleProps{}
 	props.Name = proptools.StringPtr(ctx.ModuleName() + "-" + filename)
 	props.Tools = []string{"metalava"}
@@ -126,9 +128,9 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 			Dest:    proptools.StringPtr(filename),
 		},
 		{
-			Targets: []string{"sdk"},
+			Targets: []string{"api_txt", "sdk"},
 			Dir:     proptools.StringPtr("apistubs/android/" + txt.Scope + "/api"),
-			Dest:    proptools.StringPtr(txt.TxtFilename),
+			Dest:    proptools.StringPtr(txt.DistFilename),
 		},
 	}
 	props.Visibility = []string{"//visibility:public"}
@@ -240,34 +242,39 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 	var textFiles []MergedTxtDefinition
 
 	tagSuffix := []string{".api.txt}", ".removed-api.txt}"}
+	distFilename := []string{"android.txt", "android-removed.txt"}
 	for i, f := range []string{"current.txt", "removed.txt"} {
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename: f,
-			BaseTxt:     ":non-updatable-" + f,
-			Modules:     bootclasspath,
-			ModuleTag:   "{.public" + tagSuffix[i],
-			Scope:       "public",
+			TxtFilename:  f,
+			DistFilename: distFilename[i],
+			BaseTxt:      ":non-updatable-" + f,
+			Modules:      bootclasspath,
+			ModuleTag:    "{.public" + tagSuffix[i],
+			Scope:        "public",
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename: f,
-			BaseTxt:     ":non-updatable-system-" + f,
-			Modules:     bootclasspath,
-			ModuleTag:   "{.system" + tagSuffix[i],
-			Scope:       "system",
+			TxtFilename:  f,
+			DistFilename: distFilename[i],
+			BaseTxt:      ":non-updatable-system-" + f,
+			Modules:      bootclasspath,
+			ModuleTag:    "{.system" + tagSuffix[i],
+			Scope:        "system",
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename: f,
-			BaseTxt:     ":non-updatable-module-lib-" + f,
-			Modules:     bootclasspath,
-			ModuleTag:   "{.module-lib" + tagSuffix[i],
-			Scope:       "module-lib",
+			TxtFilename:  f,
+			DistFilename: distFilename[i],
+			BaseTxt:      ":non-updatable-module-lib-" + f,
+			Modules:      bootclasspath,
+			ModuleTag:    "{.module-lib" + tagSuffix[i],
+			Scope:        "module-lib",
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
-			TxtFilename: f,
-			BaseTxt:     ":non-updatable-system-server-" + f,
-			Modules:     system_server_classpath,
-			ModuleTag:   "{.system-server" + tagSuffix[i],
-			Scope:       "system-server",
+			TxtFilename:  f,
+			DistFilename: distFilename[i],
+			BaseTxt:      ":non-updatable-system-server-" + f,
+			Modules:      system_server_classpath,
+			ModuleTag:    "{.system-server" + tagSuffix[i],
+			Scope:        "system-server",
 		})
 	}
 	for _, txt := range textFiles {

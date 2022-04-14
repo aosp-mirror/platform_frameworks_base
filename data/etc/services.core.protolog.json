@@ -703,12 +703,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "-1427392850": {
-      "message": "WindowState: Setting back callback %s (priority: %d) (Client IWindow: %s). (WindowState: %s)",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/WindowState.java"
-    },
     "-1427184084": {
       "message": "addWindow: New client %s: window=%s Callers=%s",
       "level": "VERBOSE",
@@ -858,6 +852,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "-1277068810": {
+      "message": "startBackNavigation currentTask=%s, topRunningActivity=%s, callbackInfo=%s, currentFocus=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "-1270731689": {
       "message": "Attempted to set replacing window on app token with no content %s",
@@ -1098,12 +1098,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "-1010850753": {
-      "message": "No focused window, defaulting to top task's window",
-      "level": "WARN",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "-1009117329": {
       "message": "isFetchingAppTransitionSpecs=true",
@@ -3043,12 +3037,6 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
-    "878005951": {
-      "message": "startBackNavigation task=%s, topRunningActivity=%s, callbackInfo=%s, currentFocus=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
-    },
     "892244061": {
       "message": "Waiting for drawn %s: removed=%b visible=%b mHasSurface=%b drawState=%d",
       "level": "INFO",
@@ -3331,12 +3319,6 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
-    "1172542963": {
-      "message": "onBackNavigationDone backType=%s, task=%s, prevTaskTopActivity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
-    },
     "1175495463": {
       "message": "ImeContainer just became organized. Reparenting under parent. imeParentSurfaceControl=%s",
       "level": "INFO",
@@ -3409,6 +3391,12 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "1264179654": {
+      "message": "No focused window, defaulting to top current task's window",
+      "level": "WARN",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "1270792394": {
       "message": "Resumed after relaunch %s",
       "level": "DEBUG",
@@ -3426,6 +3414,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "1288920916": {
+      "message": "Error sending initial insets change to WindowContainer overlay",
+      "level": "ERROR",
+      "group": "WM_DEBUG_ANIM",
+      "at": "com\/android\/server\/wm\/WindowContainer.java"
     },
     "1305412562": {
       "message": "Report configuration: %s %s",
@@ -3852,6 +3846,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1778919449": {
+      "message": "onBackNavigationDone backType=%s, task=%s, prevActivity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "1781673113": {
       "message": "onAnimationFinished(): targetRootTask=%s targetActivity=%s mRestoreTargetBehindRootTask=%s",

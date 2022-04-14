@@ -1976,8 +1976,10 @@ public class WindowManagerService extends IWindowManager.Stub
         // We use the visible frame, because we want the animation to morph the window from what
         // was visible to the user to the final destination of the new window.
         final Rect frame = new Rect(replacedWindow.getFrame());
+        final WindowManager.LayoutParams attrs = replacedWindow.mAttrs;
         frame.inset(replacedWindow.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                frame, replacedWindow.mAttrs.softInputMode));
+                frame, attrs.type, replacedWindow.getWindowingMode(), attrs.softInputMode,
+                attrs.flags));
         // We treat this as if this activity was opening, so we can trigger the app transition
         // animation and piggy-back on existing transition animation infrastructure.
         final DisplayContent dc = activity.getDisplayContent();
@@ -8135,7 +8137,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (task == null) {
                     throw new IllegalArgumentException("no task with taskId" + taskId);
                 }
-                task.addTrustedOverlay(overlay);
+                task.addTrustedOverlay(overlay, task.getTopVisibleAppMainWindow());
             }
         }
 

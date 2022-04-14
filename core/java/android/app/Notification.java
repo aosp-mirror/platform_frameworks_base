@@ -628,6 +628,9 @@ public class Notification implements Parcelable
      * Bit to be bitwise-ored into the {@link #flags} field that should be
      * set if you would only like the sound, vibrate and ticker to be played
      * if the notification was not already showing.
+     *
+     * Note that using this flag will stop any ongoing alerting behaviour such
+     * as sound, vibration or blinking notification LED.
      */
     public static final int FLAG_ONLY_ALERT_ONCE    = 0x00000008;
 
@@ -4633,6 +4636,9 @@ public class Notification implements Parcelable
          * Set this flag if you would only like the sound, vibrate
          * and ticker to be played if the notification is not already showing.
          *
+         * Note that using this flag will stop any ongoing alerting behaviour such
+         * as sound, vibration or blinking notification LED.
+         *
          * @see Notification#FLAG_ONLY_ALERT_ONCE
          */
         @NonNull
@@ -7917,6 +7923,8 @@ public class Notification implements Parcelable
          * @hide
          */
         public MessagingStyle setShortcutIcon(@Nullable Icon conversationIcon) {
+            // TODO(b/228941516): This icon should be downscaled to avoid using too much memory,
+            // see reduceImageSizes.
             mShortcutIcon = conversationIcon;
             return this;
         }
@@ -8421,6 +8429,51 @@ public class Notification implements Parcelable
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             return makeMessagingView(StandardTemplateParams.VIEW_TYPE_HEADS_UP);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void reduceImageSizes(Context context) {
+            super.reduceImageSizes(context);
+            Resources resources = context.getResources();
+            boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
+            if (mShortcutIcon != null) {
+                int maxSize = resources.getDimensionPixelSize(
+                        isLowRam ? R.dimen.notification_small_icon_size_low_ram
+                                : R.dimen.notification_small_icon_size);
+                mShortcutIcon.scaleDownIfNecessary(maxSize, maxSize);
+            }
+
+            int maxAvatarSize = resources.getDimensionPixelSize(
+                    isLowRam ? R.dimen.notification_person_icon_max_size
+                            : R.dimen.notification_person_icon_max_size_low_ram);
+            if (mUser != null && mUser.getIcon() != null) {
+                mUser.getIcon().scaleDownIfNecessary(maxAvatarSize, maxAvatarSize);
+            }
+
+            reduceMessagesIconSizes(mMessages, maxAvatarSize);
+            reduceMessagesIconSizes(mHistoricMessages, maxAvatarSize);
+        }
+
+        /**
+         * @hide
+         */
+        private static void reduceMessagesIconSizes(@Nullable List<Message> messages, int maxSize) {
+            if (messages == null) {
+                return;
+            }
+
+            for (Message message : messages) {
+                Person sender = message.mSender;
+                if (sender != null) {
+                    Icon icon = sender.getIcon();
+                    if (icon != null) {
+                        icon.scaleDownIfNecessary(maxSize, maxSize);
+                    }
+                }
+            }
         }
 
         public static final class Message {

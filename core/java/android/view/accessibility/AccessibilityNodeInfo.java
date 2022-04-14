@@ -5682,6 +5682,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param heading Whether the item is a heading. (Prefer
          *                {@link AccessibilityNodeInfo#setHeading(boolean)})
          * @param selected Whether the item is selected.
+         * @removed
          */
         @Deprecated
         @NonNull
