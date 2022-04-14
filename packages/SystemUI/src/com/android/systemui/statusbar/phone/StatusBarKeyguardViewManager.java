@@ -589,9 +589,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
-    /**
-     * Stop showing any alternate auth methods
-     */
+    @Override
     public void resetAlternateAuth(boolean forceUpdateScrim) {
         final boolean updateScrim = (mAlternateAuthInterceptor != null
                 && mAlternateAuthInterceptor.hideAlternateAuthBouncer())
