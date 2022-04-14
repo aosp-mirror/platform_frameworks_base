@@ -1681,9 +1681,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"อนุญาตให้ <xliff:g id="SERVICE">%1$s</xliff:g> ควบคุมอุปกรณ์อย่างเต็มที่ไหม"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"การควบคุมอย่างเต็มที่เหมาะสำหรับแอปที่ช่วยคุณในเรื่องความต้องการความช่วยเหลือพิเศษแต่ไม่เหมาะสำหรับแอปส่วนใหญ่"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ดูและควบคุมหน้าจอ"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"การควบคุมนี้อ่านเนื้อหาทั้งหมดบนหน้าจอและแสดงเนื้อหาทับแอปอื่นๆ"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"การควบคุมนี้สามารถอ่านเนื้อหาทั้งหมดบนหน้าจอและแสดงเนื้อหาทับแอปอื่นๆ"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ดูและดำเนินการ"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"การกระทำนี้ติดตามการโต้ตอบของคุณกับแอปหรือกับเซ็นเซอร์ของฮาร์ดแวร์ และจะโต้ตอบกับแอปต่างๆ แทนคุณ"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"การควบคุมนี้สามารถติดตามการโต้ตอบของคุณกับแอปหรือกับเซ็นเซอร์ของฮาร์ดแวร์ และโต้ตอบกับแอปต่างๆ แทนคุณ"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"อนุญาต"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ปฏิเสธ"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"แตะฟีเจอร์เพื่อเริ่มใช้"</string>
@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่พร้อมใช้งานในขณะนี้"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ไม่พร้อมใช้งาน"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"ต้องการสิทธิ์"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"กล้องไม่พร้อมใช้งาน"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ดำเนินการต่อบนโทรศัพท์"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"ไมโครโฟนไม่พร้อมใช้งาน"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"การตั้งค่า Android TV ไม่พร้อมใช้งาน"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"การตั้งค่าแท็บเล็ตไม่พร้อมใช้งาน"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"การตั้งค่าโทรศัพท์ไม่พร้อมใช้งาน"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ โปรดลองเข้าถึงในอุปกรณ์ Android TV แทน"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ โปรดลองเข้าถึงในแท็บเล็ตแทน"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ โปรดลองเข้าถึงในโทรศัพท์แทน"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ในขณะนี้ โปรดลองเข้าถึงในอุปกรณ์ Android TV แทน"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ในขณะนี้ โปรดลองเข้าถึงในแท็บเล็ตแทน"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ในขณะนี้ โปรดลองเข้าถึงในโทรศัพท์แทน"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"แอปนี้มีการขอการรักษาความปลอดภัยเพิ่มเติม โปรดลองเข้าถึงในอุปกรณ์ Android TV แทน"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"แอปนี้มีการขอการรักษาความปลอดภัยเพิ่มเติม โปรดลองเข้าถึงในแท็บเล็ตแทน"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"แอปนี้มีการขอการรักษาความปลอดภัยเพิ่มเติม โปรดลองเข้าถึงในโทรศัพท์แทน"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"แอปนี้สร้างขึ้นเพื่อ Android เวอร์ชันเก่าและอาจทำงานผิดปกติ โปรดลองตรวจหาการอัปเดตหรือติดต่อนักพัฒนาซอฟต์แวร์"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ตรวจสอบอัปเดต"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"คุณมีข้อความใหม่"</string>
@@ -2293,9 +2278,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> แปลแล้ว"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"แปลข้อความจากภาษา<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>เป็นภาษา<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>แล้ว"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"กิจกรรมในเบื้องหลัง"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"แอปกำลังใช้แบตเตอรี่"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"แอปยังทำงานอยู่"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> กำลังใช้แบตเตอรี่ในเบื้องหลัง แตะเพื่อตรวจสอบ"</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> อาจส่งผลต่ออายุการใช้งานแบตเตอรี่ แตะเพื่อตรวจสอบแอปที่ทำงานอยู่"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ตรวจสอบแอปที่ใช้งานอยู่"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"เข้าถึงกล้องของโทรศัพท์จาก <xliff:g id="DEVICE">%1$s</xliff:g> ไม่ได้"</string>
