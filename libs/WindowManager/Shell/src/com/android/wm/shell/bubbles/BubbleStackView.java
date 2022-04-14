@@ -913,8 +913,10 @@ public class BubbleStackView extends FrameLayout
                             afterExpandedViewAnimation();
                             showManageMenu(mShowingManage);
                         } /* after */);
+                        PointF p = mPositioner.getExpandedBubbleXY(getBubbleIndex(mExpandedBubble),
+                                getState());
                         final float translationY = mPositioner.getExpandedViewY(mExpandedBubble,
-                                getBubbleIndex(mExpandedBubble));
+                                mPositioner.showBubblesVertically() ? p.y : p.x);
                         mExpandedViewContainer.setTranslationX(0f);
                         mExpandedViewContainer.setTranslationY(translationY);
                         mExpandedViewContainer.setAlpha(1f);
