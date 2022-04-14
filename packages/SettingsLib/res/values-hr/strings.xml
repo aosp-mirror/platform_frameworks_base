@@ -361,7 +361,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Omogući slojeve za otklanjanje pogrešaka GPU-a"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Omogućite učitavanje slojeva za otklanjanje pogrešaka GPU-a za aplikacije za otklanjanje pogrešaka"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Omogući opširni zapisnik"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Uključite dodatne zapisnike dobavljača pojedinog uređaja u izvješća o programskoj pogrešci koja mogu sadržavati privatne podatke, trošiti više baterije i/ili zauzeti više prostora za pohranu."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Uključite dodatne zapisnike dobavljača pojedinog uređaja u izvješća o programskim pogreškama koja mogu sadržavati privatne podatke, trošiti više baterije i/ili zauzeti više prostora za pohranu."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Brzina animacije prozora"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Brzina animacije prijelaza"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Razmjer duljine animatora"</string>

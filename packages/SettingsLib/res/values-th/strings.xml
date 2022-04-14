@@ -198,9 +198,9 @@
     <string name="category_personal" msgid="6236798763159385225">"ส่วนตัว"</string>
     <string name="category_work" msgid="4014193632325996115">"ที่ทำงาน"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ตัวเลือกสำหรับนักพัฒนาแอป"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"เปิดใช้ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"เปิดใช้ตัวเลือกสำหรับนักพัฒนาแอป"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ตั้งค่าตัวเลือกสำหรับการพัฒนาแอปพลิเคชัน"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์ไม่สามารถใช้ได้สำหรับผู้ใช้นี้"</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"ตัวเลือกสำหรับนักพัฒนาแอปไม่สามารถใช้ได้สำหรับผู้ใช้นี้"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"การตั้งค่า VPN ไม่สามารถใช้ได้สำหรับผู้ใช้รายนี้"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"การตั้งค่าการปล่อยสัญญาณไม่สามารถใช้ได้สำหรับผู้ใช้รายนี้"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"การตั้งค่าจุดเข้าใช้งานไม่สามารถใช้ได้สำหรับผู้ใช้รายนี้"</string>
@@ -324,7 +324,7 @@
     <string name="select_application" msgid="2543228890535466325">"เลือกแอปพลิเคชัน"</string>
     <string name="no_application" msgid="9038334538870247690">"ไม่มี"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"รอโปรแกรมแก้ไขข้อบกพร่อง"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"แอปพลิเคชันที่มีการแก้ปัญหาจะรอให้โปรแกรมแก้ไขข้อบกพร่องแนบข้อมูลก่อนปฏิบัติการ"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"แอปพลิเคชันที่มีการแก้ไขข้อบกพร่องจะรอให้โปรแกรมแก้ไขข้อบกพร่องแนบข้อมูลก่อนปฏิบัติการ"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"อินพุต"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"การวาดภาพ"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"การแสดงผลที่มีการเร่งด้วยฮาร์ดแวร์"</string>
@@ -351,8 +351,8 @@
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"ปิดการกำหนดเส้นทางโดยอัตโนมัติไปยังอุปกรณ์ต่อพ่วงเสียงทาง USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"แสดงขอบของการจัดวาง"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"แสดงหน้าปกคลิป ขอบ ฯลฯ"</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"บังคับทิศทางการจัดวาง RTL"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"บังคับทิศทางการจัดวางหน้าจอเป็น RTL สำหรับทุกภาษา"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"บังคับทิศทางการจัดวางขวาไปซ้าย"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"บังคับทิศทางการจัดวางหน้าจอเป็นขวาไปซ้ายสำหรับทุกภาษา"</string>
     <string name="window_blurs" msgid="6831008984828425106">"อนุญาตการเบลอระดับหน้าต่าง"</string>
     <string name="force_msaa" msgid="4081288296137775550">"บังคับใช้ 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"เปิดใช้งาน 4x MSAA ในแอปพลิเคชัน OpenGL ES 2.0"</string>
@@ -370,7 +370,7 @@
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ไม่เก็บกิจกรรม"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ล้างทุกกิจกรรมทันทีที่ผู้ใช้ออกไป"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"ขีดจำกัดกระบวนการเบื้องหลัง"</string>
-    <string name="show_all_anrs" msgid="9160563836616468726">"แสดง ANR พื้นหลัง"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"แสดง ANR เบื้องหลัง"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"แสดงกล่องโต้ตอบ \"แอปไม่ตอบสนอง\" สำหรับแอปเบื้องหลัง"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"แสดงคำเตือนจากช่องทางการแจ้งเตือน"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"แสดงคำเตือนบนหน้าจอเมื่อแอปโพสต์การแจ้งเตือนโดยไม่มีช่องทางที่ถูกต้อง"</string>
