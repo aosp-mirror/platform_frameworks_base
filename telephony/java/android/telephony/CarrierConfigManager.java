@@ -832,6 +832,17 @@ public class CarrierConfigManager {
             "dial_string_replace_string_array";
 
     /**
+     * Specifies a map from dialstrings to replacements for international roaming network service
+     * numbers which cannot be replaced on the carrier side.
+     * <p>
+     * Individual entries have the format:
+     * [dialstring to replace]:[replacement]
+     * @hide
+     */
+    public static final String KEY_INTERNATIONAL_ROAMING_DIAL_STRING_REPLACE_STRING_ARRAY =
+            "international_roaming_dial_string_replace_string_array";
+
+    /**
      * Flag specifying whether WFC over IMS supports the "wifi only" option.  If false, the wifi
      * calling settings will not include an option for "wifi only".  If true, the wifi calling
      * settings will include an option for "wifi only"
@@ -8713,6 +8724,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_DIAL_STRING_REPLACE_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_INTERNATIONAL_ROAMING_DIAL_STRING_REPLACE_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_FORCE_HOME_NETWORK_BOOL, false);
         sDefaults.putInt(KEY_GSM_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);

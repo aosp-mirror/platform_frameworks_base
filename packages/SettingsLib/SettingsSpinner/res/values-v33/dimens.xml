@@ -16,5 +16,6 @@
 
 <resources>
     <dimen name="spinner_height">36dp</dimen>
+    <dimen name="spinner_dropdown_height">48dp</dimen>
     <dimen name="spinner_padding_top_or_bottom">8dp</dimen>
 </resources>

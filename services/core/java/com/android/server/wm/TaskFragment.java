@@ -339,7 +339,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
-    private void resetAdjacentTaskFragment() {
+    void resetAdjacentTaskFragment() {
         // Reset the adjacent TaskFragment if its adjacent TaskFragment is also this TaskFragment.
         if (mAdjacentTaskFragment != null && mAdjacentTaskFragment.mAdjacentTaskFragment == this) {
             mAdjacentTaskFragment.mAdjacentTaskFragment = null;
@@ -2315,6 +2315,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
         mMinWidth = minWidth;
         mMinHeight = minHeight;
+    }
+
+    /**
+     * Whether this is an embedded TaskFragment in PIP Task. We don't allow any client config
+     * override for such TaskFragment to prevent flight with PipTaskOrganizer.
+     */
+    boolean isEmbeddedTaskFragmentInPip() {
+        return isOrganizedTaskFragment() && getTask() != null && getTask().inPinnedWindowingMode();
     }
 
     boolean shouldRemoveSelfOnLastChildRemoval() {

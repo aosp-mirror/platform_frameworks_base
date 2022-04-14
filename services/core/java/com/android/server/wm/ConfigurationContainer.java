@@ -190,6 +190,14 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * @see #mFullConfiguration
      */
     public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        updateRequestedOverrideConfiguration(overrideConfiguration);
+        // Update full configuration of this container and all its children.
+        final ConfigurationContainer parent = getParent();
+        onConfigurationChanged(parent != null ? parent.getConfiguration() : Configuration.EMPTY);
+    }
+
+    /** Updates override configuration without recalculate full config. */
+    void updateRequestedOverrideConfiguration(Configuration overrideConfiguration) {
         // Pre-compute this here, so we don't need to go through the entire Configuration when
         // writing to proto (which has significant cost if we write a lot of empty configurations).
         mHasOverrideConfiguration = !Configuration.EMPTY.equals(overrideConfiguration);
@@ -199,9 +207,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
                 && diffRequestedOverrideMaxBounds(newBounds) != BOUNDS_CHANGE_NONE) {
             mRequestedOverrideConfiguration.windowConfiguration.setMaxBounds(newBounds);
         }
-        // Update full configuration of this container and all its children.
-        final ConfigurationContainer parent = getParent();
-        onConfigurationChanged(parent != null ? parent.getConfiguration() : Configuration.EMPTY);
     }
 
     /**

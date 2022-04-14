@@ -2761,7 +2761,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     boolean canStartChangeTransition() {
         return !mWmService.mDisableTransitionAnimation && mDisplayContent != null
                 && getSurfaceControl() != null && !mDisplayContent.inTransition()
-                && isVisible() && isVisibleRequested() && okToAnimate();
+                && isVisible() && isVisibleRequested() && okToAnimate()
+                // Pip animation will be handled by PipTaskOrganizer.
+                && !inPinnedWindowingMode() && getParent() != null
+                && !getParent().inPinnedWindowingMode();
     }
 
     /**

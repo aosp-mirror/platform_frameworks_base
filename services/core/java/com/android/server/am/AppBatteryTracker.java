@@ -654,7 +654,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             final long start = stats.getStatsStartTimestamp();
             final long end = stats.getStatsEndTimestamp();
             final double scale = expectedDuration > 0
-                    ? (expectedDuration * 1.0d) / (end - start) : 1.0d;
+                    ? Math.min((expectedDuration * 1.0d) / (end - start), 1.0d) : 1.0d;
             final AppBatteryPolicy bgPolicy = mInjector.getPolicy();
             for (UidBatteryConsumer uidConsumer : uidConsumers) {
                 // TODO: b/200326767 - as we are not supporting per proc state attribution yet,

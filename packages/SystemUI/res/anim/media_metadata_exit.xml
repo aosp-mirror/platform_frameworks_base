@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2018 The Android Open Source Project
+     Copyright (C) 2022 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,10 +14,19 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<TextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/text1"
-    style="@style/SettingsSpinnerTitleBar"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"/>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+     android:ordering="together">
+    <objectAnimator
+        android:propertyName="translationX"
+        android:valueFrom="0dp"
+        android:valueTo="-32dp"
+        android:duration="167"
+        android:valueType="floatType" />
+    <objectAnimator
+        android:propertyName="transitionAlpha"
+        android:valueFrom="1"
+        android:valueTo="0"
+        android:duration="83"
+        android:startOffset="83"
+        android:valueType="floatType" />
+</set>
