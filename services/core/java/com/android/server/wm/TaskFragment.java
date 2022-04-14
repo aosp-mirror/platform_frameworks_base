@@ -193,6 +193,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     boolean mClearedTaskForReuse;
 
     /**
+     * The last running activity of the TaskFragment was reparented to a different Task because it
+     * is entering PiP.
+     */
+    boolean mClearedTaskFragmentForPip;
+
+    /**
      * When we are in the process of pausing an activity, before starting the
      * next one, this variable holds the activity that is currently being paused.
      *
@@ -845,6 +851,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return getActivity(ActivityRecord::canBeTopRunning);
         }
         return getActivity((r) -> r.canBeTopRunning() && r.getTask() == this.getTask());
+    }
+
+    int getNonFinishingActivityCount() {
+        final int[] runningActivityCount = new int[1];
+        forAllActivities(a -> {
+            if (!a.finishing) {
+                runningActivityCount[0]++;
+            }
+        });
+        return runningActivityCount[0];
     }
 
     boolean isTopActivityFocusable() {
@@ -1709,6 +1725,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void addChild(WindowContainer child, int index) {
         ActivityRecord r = topRunningActivity();
         mClearedTaskForReuse = false;
+        mClearedTaskFragmentForPip = false;
 
         boolean isAddingActivity = child.asActivityRecord() != null;
         final Task task = isAddingActivity ? getTask() : null;
@@ -2253,22 +2270,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
         final Point positionInParent = new Point();
         getRelativePosition(positionInParent);
-        final int[] runningActivityCount = new int[1];
-        forAllActivities(a -> {
-            if (!a.finishing) {
-                runningActivityCount[0]++;
-            }
-        });
         return new TaskFragmentInfo(
                 mFragmentToken,
                 mRemoteToken.toWindowContainerToken(),
                 getConfiguration(),
-                runningActivityCount[0] == 0,
-                runningActivityCount[0],
+                getNonFinishingActivityCount(),
                 isVisible(),
                 childActivities,
                 positionInParent,
-                mClearedTaskForReuse);
+                mClearedTaskForReuse,
+                mClearedTaskFragmentForPip);
     }
 
     @Nullable
