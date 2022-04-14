@@ -388,12 +388,17 @@ public class RemoteTransitionCompat implements Parcelable {
                     wct.restoreTransientOrder(mRecentsTask);
                 }
             } else {
-                if (!sendUserLeaveHint) {
-                    for (int i = 0; i < mPausingTasks.size(); ++i) {
+                for (int i = 0; i < mPausingTasks.size(); ++i) {
+                    if (!sendUserLeaveHint) {
                         // This means recents is not *actually* finishing, so of course we gotta
                         // do special stuff in WMCore to accommodate.
                         wct.setDoNotPip(mPausingTasks.get(i));
                     }
+                    // Since we will reparent out of the leashes, pre-emptively hide the child
+                    // surface to match the leash. Otherwise, there will be a flicker before the
+                    // visibility gets committed in Core when using split-screen (in splitscreen,
+                    // the leaf-tasks are not "independent" so aren't hidden by normal setup).
+                    t.hide(mInfo.getChange(mPausingTasks.get(i)).getLeash());
                 }
                 if (mPipTask != null && mPipTransaction != null && sendUserLeaveHint) {
                     t.show(mInfo.getChange(mPipTask).getLeash());
