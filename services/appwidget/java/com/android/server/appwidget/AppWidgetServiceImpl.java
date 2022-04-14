@@ -154,7 +154,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private static final String TAG = "AppWidgetServiceImpl";
 
     private static final boolean DEBUG = false;
-    private static final boolean DEBUG_PROVIDER_INFO_CACHE = true;
+    static final boolean DEBUG_PROVIDER_INFO_CACHE = true;
 
     private static final String OLD_KEYGUARD_HOST_PACKAGE = "android";
     private static final String NEW_KEYGUARD_HOST_PACKAGE = "com.android.keyguard";
@@ -2001,6 +2001,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    @GuardedBy("mLock")
     private void scheduleNotifyProviderChangedLocked(Widget widget) {
         long requestId = UPDATE_COUNTER.incrementAndGet();
         if (widget != null) {
@@ -2330,6 +2331,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         sendBroadcastAsUser(intent, widget.provider.id.getProfile());
     }
 
+    @GuardedBy("mLock")
     private void registerForBroadcastsLocked(Provider provider, int[] appWidgetIds) {
         AppWidgetProviderInfo info = provider.getInfoLocked(mContext);
         if (info.updatePeriodMillis > 0) {
@@ -3433,6 +3435,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      *
      * @return whether any providers were updated
      */
+    @GuardedBy("mLock")
     private boolean updateProvidersForPackageLocked(String packageName, int userId,
             Set<ProviderId> removedProviders) {
         boolean providersUpdated = false;
@@ -4218,6 +4221,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         /**
          * Adds all pending updates in {@param outUpdates} keys by the update time.
          */
+        @GuardedBy("mLock")
         public void getPendingUpdatesForIdLocked(Context context, int appWidgetId,
                 LongSparseArray<PendingHostUpdate> outUpdates) {
             long updateSequenceNo = lastWidgetUpdateSequenceNo;
