@@ -393,7 +393,7 @@
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ຂະໜາດໜ້າ​ຈໍ​ຂອງອະນິເມຊັນ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ຂະໜາດສະຫຼັບອະນິເມຊັນ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ໄລຍະເວລາອະນິເມຊັນ"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ຈຳລອງຈໍສະແດງຜົນທີ່ສອງ"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ຈຳລອງຈໍສະແດງຜົນທີສອງ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ແອັບ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ບໍ່ຕ້ອງຮັກສາການເຄື່ອນ​ໄຫວ"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ລຶບທຸກການເຄື່ອນໄຫວທັນທີທີ່ຜູ້ໃຊ້ອອກຈາກມັນ"</string>
