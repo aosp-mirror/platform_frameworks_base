@@ -801,7 +801,7 @@
       <item quantity="other">%d menit</item>
       <item quantity="one">%d menit</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"Pemakaian baterai"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"Penggunaan baterai"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Penghemat Baterai tidak tersedia selama pengisian daya"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Penghemat Baterai"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Mengurangi performa dan data latar belakang"</string>
@@ -837,7 +837,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Terbaru"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Kembali"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notifikasi"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Pintasan Keyboard"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Pintasan keyboard"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Ganti tata letak keyboard"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplikasi"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Bantuan"</string>

@@ -350,7 +350,7 @@
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"បាន​ចាក់សោ​ការ​បង្វិល"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"បញ្ឈរ"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"ទេសភាព"</string>
-    <string name="quick_settings_ime_label" msgid="3351174938144332051">"វិធីសាស្ត្រ​បញ្ចូល"</string>
+    <string name="quick_settings_ime_label" msgid="3351174938144332051">"វិធីបញ្ចូល"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ទី​តាំង​"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ទីតាំង​បាន​បិទ"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"ការចូលប្រើ​កាមេរ៉ា"</string>
