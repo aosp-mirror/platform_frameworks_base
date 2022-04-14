@@ -39,10 +39,6 @@ class PrivacyDotDecorProviderFactory @Inject constructor(
     override val hasProviders: Boolean
         get() = isPrivacyDotEnabled
 
-    override fun onDisplayUniqueIdChanged(displayUniqueId: String?) {
-        // Do nothing for privacy dot
-    }
-
     override val providers: List<DecorProvider>
         get() {
             return if (hasProviders) {
