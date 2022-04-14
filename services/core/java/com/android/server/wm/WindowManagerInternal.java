@@ -433,6 +433,14 @@ public abstract class WindowManagerInternal {
     public abstract IBinder getFocusedWindowToken();
 
     /**
+     * Gets the token of the window that has input focus. It is from the focused
+     * {@link WindowState}.
+     *
+     * @return The token.
+     */
+    public abstract IBinder getFocusedWindowTokenFromWindowStates();
+
+    /**
      * @return Whether the keyguard is engaged.
      */
     public abstract boolean isKeyguardLocked();
