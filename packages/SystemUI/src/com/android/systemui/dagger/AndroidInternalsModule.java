@@ -19,8 +19,12 @@ package com.android.systemui.dagger;
 import android.content.Context;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
+
+import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -32,14 +36,14 @@ import dagger.Provides;
 public class AndroidInternalsModule {
     /** */
     @Provides
-    @SysUISingleton
+    @Singleton
     public LockPatternUtils provideLockPatternUtils(Context context) {
         return new LockPatternUtils(context);
     }
 
     /** */
     @Provides
-    @SysUISingleton
+    @Singleton
     public MetricsLogger provideMetricsLogger() {
         return new MetricsLogger();
     }
@@ -50,4 +54,10 @@ public class AndroidInternalsModule {
         return new NotificationMessagingUtil(context);
     }
 
+    /** Provides an instance of {@link com.android.internal.logging.UiEventLogger} */
+    @Provides
+    @Singleton
+    static UiEventLogger provideUiEventLogger() {
+        return new UiEventLoggerImpl();
+    }
 }
