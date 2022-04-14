@@ -17,6 +17,7 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
@@ -85,7 +86,9 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         duration = LIGHT_REVEAL_ANIMATION_DURATION
         interpolator = Interpolators.LINEAR
         addUpdateListener {
-            lightRevealScrim.revealAmount = it.animatedValue as Float
+            if (lightRevealScrim.revealEffect !is CircleReveal) {
+                lightRevealScrim.revealAmount = it.animatedValue as Float
+            }
             if (lightRevealScrim.isScrimAlmostOccludes &&
                     interactionJankMonitor.isInstrumenting(CUJ_SCREEN_OFF)) {
                 // ends the instrument when the scrim almost occludes the screen.
@@ -95,9 +98,9 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         }
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationCancel(animation: Animator?) {
-                lightRevealScrim.revealAmount = 1f
-                lightRevealAnimationPlaying = false
-                interactionJankMonitor.cancel(CUJ_SCREEN_OFF)
+                if (lightRevealScrim.revealEffect !is CircleReveal) {
+                    lightRevealScrim.revealAmount = 1f
+                }
             }
 
             override fun onAnimationEnd(animation: Animator?) {

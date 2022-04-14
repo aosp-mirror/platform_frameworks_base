@@ -610,7 +610,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             view.setVisibility((View.VISIBLE));
         }
         float alpha = mQSPanelController.bouncerInTransit()
-                ? BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(progress)
+                ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(progress)
                 : ShadeInterpolation.getContentAlpha(progress);
         view.setAlpha(alpha);
     }

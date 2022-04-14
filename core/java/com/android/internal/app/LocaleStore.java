@@ -25,9 +25,11 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IllformedLocaleException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -275,6 +277,22 @@ public class LocaleStore {
             Log.d(TAG, "IllegalArgumentException ", e);
         }
         return null;
+    }
+
+    /**
+     * Returns a list of system languages with LocaleInfo
+     */
+    public static List<LocaleInfo> getSystemCurrentLocaleInfo() {
+        List<LocaleInfo> localeList = new ArrayList<>();
+
+        LocaleList systemLangList = LocaleList.getDefault();
+        for(int i = 0; i < systemLangList.size(); i++) {
+            LocaleInfo systemLocaleInfo = new LocaleInfo(systemLangList.get(i));
+            systemLocaleInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SIM;
+            systemLocaleInfo.mIsTranslated = true;
+            localeList.add(systemLocaleInfo);
+        }
+        return localeList;
     }
 
     /**

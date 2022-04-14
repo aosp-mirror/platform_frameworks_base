@@ -29,9 +29,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
@@ -39,6 +42,7 @@ import android.annotation.Nullable;
 import android.hardware.HardwareBuffer;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.BackEvent;
 import android.window.BackNavigationInfo;
@@ -77,15 +81,22 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Test
     public void backNavInfo_HomeWhenBackToLauncher() {
-        IOnBackInvokedCallback callback = withSystemCallback(createTopTaskWithActivity());
+        Task task = createTopTaskWithActivity();
+        IOnBackInvokedCallback callback = withSystemCallback(task);
 
-        BackNavigationInfo backNavigationInfo = startBackNavigation();
+        SurfaceControl.Transaction tx = mock(SurfaceControl.Transaction.class);
+        BackNavigationInfo backNavigationInfo = mBackNavigationController.startBackNavigation(mWm,
+                tx);
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
         assertThat(backNavigationInfo.getDepartingAnimationTarget()).isNotNull();
         assertThat(backNavigationInfo.getTaskWindowConfiguration()).isNotNull();
         assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(callback);
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_RETURN_TO_HOME));
+
+        verify(tx, atLeastOnce()).apply();
+        verify(tx, times(1)).reparent(any(),
+                eq(backNavigationInfo.getDepartingAnimationTarget().leash));
     }
 
     @Test

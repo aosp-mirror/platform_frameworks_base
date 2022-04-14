@@ -732,14 +732,11 @@ public class VcnGatewayConnection extends StateMachine {
         logDbg("Triggering async teardown");
         sendDisconnectRequestedAndAcquireWakelock(
                 DISCONNECT_REASON_TEARDOWN, true /* shouldQuit */);
-
-        // TODO: Notify VcnInstance (via callbacks) of permanent teardown of this tunnel, since this
-        // is also called asynchronously when a NetworkAgent becomes unwanted
     }
 
     @Override
     protected void onQuitting() {
-        logDbg("Quitting VcnGatewayConnection");
+        logInfo("Quitting VcnGatewayConnection");
 
         if (mNetworkAgent != null) {
             logWtf("NetworkAgent was non-null in onQuitting");
@@ -794,7 +791,7 @@ public class VcnGatewayConnection extends StateMachine {
             // TODO(b/180132994): explore safely removing this Thread check
             mVcnContext.ensureRunningOnLooperThread();
 
-            logDbg(
+            logInfo(
                     "Selected underlying network changed: "
                             + (underlying == null ? null : underlying.network));
 
@@ -1335,7 +1332,7 @@ public class VcnGatewayConnection extends StateMachine {
         protected void handleDisconnectRequested(EventDisconnectRequestedInfo info) {
             // TODO(b/180526152): notify VcnStatusCallback for Network loss
 
-            logDbg("Tearing down. Cause: " + info.reason);
+            logInfo("Tearing down. Cause: " + info.reason + "; quitting = " + info.shouldQuit);
             if (info.shouldQuit) {
                 mIsQuitting.setTrue();
             }
@@ -1353,7 +1350,7 @@ public class VcnGatewayConnection extends StateMachine {
 
         protected void handleSafeModeTimeoutExceeded() {
             mSafeModeTimeoutAlarm = null;
-            logDbg("Entering safe mode after timeout exceeded");
+            logInfo("Entering safe mode after timeout exceeded");
 
             // Connectivity for this GatewayConnection is broken; tear down the Network.
             teardownNetwork();
@@ -1362,7 +1359,7 @@ public class VcnGatewayConnection extends StateMachine {
         }
 
         protected void logUnexpectedEvent(int what) {
-            logDbg(
+            logVdbg(
                     "Unexpected event code "
                             + what
                             + " in state "
@@ -1672,7 +1669,7 @@ public class VcnGatewayConnection extends StateMachine {
                                     return;
                                 }
 
-                                logDbg("NetworkAgent was unwanted");
+                                logInfo("NetworkAgent was unwanted");
                                 teardownAsynchronously();
                             } /* networkUnwantedCallback */,
                             (status) -> {
@@ -1748,7 +1745,7 @@ public class VcnGatewayConnection extends StateMachine {
                             tunnelIface, IpSecManager.DIRECTION_FWD, transform);
                 }
             } catch (IOException e) {
-                logDbg("Transform application failed for network " + token, e);
+                logInfo("Transform application failed for network " + token, e);
                 sessionLost(token, e);
             }
         }
@@ -1782,7 +1779,7 @@ public class VcnGatewayConnection extends StateMachine {
                     tunnelIface.removeAddress(address.getAddress(), address.getPrefixLength());
                 }
             } catch (IOException e) {
-                logDbg("Adding address to tunnel failed for token " + token, e);
+                logInfo("Adding address to tunnel failed for token " + token, e);
                 sessionLost(token, e);
             }
         }
@@ -1862,7 +1859,7 @@ public class VcnGatewayConnection extends StateMachine {
         }
 
         private void handleMigrationCompleted(EventMigrationCompletedInfo migrationCompletedInfo) {
-            logDbg("Migration completed: " + mUnderlying.network);
+            logInfo("Migration completed: " + mUnderlying.network);
 
             applyTransform(
                     mCurrentToken,
@@ -1890,7 +1887,7 @@ public class VcnGatewayConnection extends StateMachine {
             mUnderlying = ((EventUnderlyingNetworkChangedInfo) msg.obj).newUnderlying;
 
             if (mUnderlying == null) {
-                logDbg("Underlying network lost");
+                logInfo("Underlying network lost");
 
                 // Ignored for now; a new network may be coming up. If none does, the delayed
                 // NETWORK_LOST disconnect will be fired, and tear down the session + network.
@@ -1900,7 +1897,7 @@ public class VcnGatewayConnection extends StateMachine {
             // mUnderlying assumed non-null, given check above.
             // If network changed, migrate. Otherwise, update any existing networkAgent.
             if (oldUnderlying == null || !oldUnderlying.network.equals(mUnderlying.network)) {
-                logDbg("Migrating to new network: " + mUnderlying.network);
+                logInfo("Migrating to new network: " + mUnderlying.network);
                 mIkeSession.setNetwork(mUnderlying.network);
             } else {
                 // oldUnderlying is non-null & underlying network itself has not changed
@@ -2168,13 +2165,13 @@ public class VcnGatewayConnection extends StateMachine {
 
         @Override
         public void onClosedExceptionally(@NonNull IkeException exception) {
-            logDbg("IkeClosedExceptionally for token " + mToken, exception);
+            logInfo("IkeClosedExceptionally for token " + mToken, exception);
             sessionClosed(mToken, exception);
         }
 
         @Override
         public void onError(@NonNull IkeProtocolException exception) {
-            logDbg("IkeError for token " + mToken, exception);
+            logInfo("IkeError for token " + mToken, exception);
             // Non-fatal, log and continue.
         }
     }
@@ -2208,7 +2205,7 @@ public class VcnGatewayConnection extends StateMachine {
 
         @Override
         public void onClosedExceptionally(@NonNull IkeException exception) {
-            logDbg("ChildClosedExceptionally for token " + mToken, exception);
+            logInfo("ChildClosedExceptionally for token " + mToken, exception);
             sessionLost(mToken, exception);
         }
 
@@ -2234,14 +2231,19 @@ public class VcnGatewayConnection extends StateMachine {
         }
     }
 
-    private String getLogPrefix() {
-        return "["
+    // Used in Vcn.java, but must be public for mockito to mock this.
+    public String getLogPrefix() {
+        return "("
                 + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup)
                 + "-"
                 + mConnectionConfig.getGatewayConnectionName()
                 + "-"
                 + System.identityHashCode(this)
-                + "] ";
+                + ") ";
+    }
+
+    private String getTagLogPrefix() {
+        return "[ " + TAG + " " + getLogPrefix() + "]";
     }
 
     private void logVdbg(String msg) {
@@ -2258,34 +2260,44 @@ public class VcnGatewayConnection extends StateMachine {
         Slog.d(TAG, getLogPrefix() + msg, tr);
     }
 
+    private void logInfo(String msg) {
+        Slog.i(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log("[INFO] " + getTagLogPrefix() + msg);
+    }
+
+    private void logInfo(String msg, Throwable tr) {
+        Slog.i(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log("[INFO] " + getTagLogPrefix() + msg + tr);
+    }
+
     private void logWarn(String msg) {
         Slog.w(TAG, getLogPrefix() + msg);
-        LOCAL_LOG.log(getLogPrefix() + "WARN: " + msg);
+        LOCAL_LOG.log("[WARN] " + getTagLogPrefix() + msg);
     }
 
     private void logWarn(String msg, Throwable tr) {
         Slog.w(TAG, getLogPrefix() + msg, tr);
-        LOCAL_LOG.log(getLogPrefix() + "WARN: " + msg + tr);
+        LOCAL_LOG.log("[WARN] " + getTagLogPrefix() + msg + tr);
     }
 
     private void logErr(String msg) {
         Slog.e(TAG, getLogPrefix() + msg);
-        LOCAL_LOG.log(getLogPrefix() + "ERR: " + msg);
+        LOCAL_LOG.log("[ERR ] " + getTagLogPrefix() + msg);
     }
 
     private void logErr(String msg, Throwable tr) {
         Slog.e(TAG, getLogPrefix() + msg, tr);
-        LOCAL_LOG.log(getLogPrefix() + "ERR: " + msg + tr);
+        LOCAL_LOG.log("[ERR ] " + getTagLogPrefix() + msg + tr);
     }
 
     private void logWtf(String msg) {
         Slog.wtf(TAG, getLogPrefix() + msg);
-        LOCAL_LOG.log(getLogPrefix() + "WTF: " + msg);
+        LOCAL_LOG.log("[WTF ] " + msg);
     }
 
     private void logWtf(String msg, Throwable tr) {
         Slog.wtf(TAG, getLogPrefix() + msg, tr);
-        LOCAL_LOG.log(getLogPrefix() + "WTF: " + msg + tr);
+        LOCAL_LOG.log("[WTF ] " + msg + tr);
     }
 
     /**

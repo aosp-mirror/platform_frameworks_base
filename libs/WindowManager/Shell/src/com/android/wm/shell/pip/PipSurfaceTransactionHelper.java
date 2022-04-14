@@ -103,21 +103,31 @@ public class PipSurfaceTransactionHelper {
      * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
     public PipSurfaceTransactionHelper scaleAndCrop(SurfaceControl.Transaction tx,
-            SurfaceControl leash,
-            Rect sourceBounds, Rect destinationBounds, Rect insets) {
+            SurfaceControl leash, Rect sourceRectHint,
+            Rect sourceBounds, Rect destinationBounds, Rect insets,
+            boolean isInPipDirection) {
         mTmpSourceRectF.set(sourceBounds);
         mTmpDestinationRect.set(sourceBounds);
         mTmpDestinationRect.inset(insets);
         // Scale by the shortest edge and offset such that the top/left of the scaled inset source
         // rect aligns with the top/left of the destination bounds
-        final float scale = sourceBounds.width() <= sourceBounds.height()
-                ? (float) destinationBounds.width() / sourceBounds.width()
-                : (float) destinationBounds.height() / sourceBounds.height();
+        final float scale;
+        if (isInPipDirection
+                && sourceRectHint != null && sourceRectHint.width() < sourceBounds.width()) {
+            // scale by sourceRectHint if it's not edge-to-edge, for entering PiP transition only.
+            scale = sourceBounds.width() <= sourceBounds.height()
+                    ? (float) destinationBounds.width() / sourceRectHint.width()
+                    : (float) destinationBounds.height() / sourceRectHint.height();
+        } else {
+            scale = sourceBounds.width() <= sourceBounds.height()
+                    ? (float) destinationBounds.width() / sourceBounds.width()
+                    : (float) destinationBounds.height() / sourceBounds.height();
+        }
         final float left = destinationBounds.left - insets.left * scale;
         final float top = destinationBounds.top - insets.top * scale;
         mTmpTransform.setScale(scale, scale);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
-                .setWindowCrop(leash, mTmpDestinationRect)
+                .setCrop(leash, mTmpDestinationRect)
                 .setPosition(leash, left, top);
         return this;
     }
@@ -163,7 +173,7 @@ public class PipSurfaceTransactionHelper {
         mTmpTransform.setScale(scale, scale);
         mTmpTransform.postRotate(degrees);
         mTmpTransform.postTranslate(positionX, positionY);
-        tx.setMatrix(leash, mTmpTransform, mTmpFloat9).setWindowCrop(leash, crop);
+        tx.setMatrix(leash, mTmpTransform, mTmpFloat9).setCrop(leash, crop);
         return this;
     }
 

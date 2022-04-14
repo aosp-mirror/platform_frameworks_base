@@ -19,4 +19,5 @@ package com.android.systemui.decor
 abstract class DecorProviderFactory {
     abstract val providers: List<DecorProvider>
     abstract val hasProviders: Boolean
+    abstract fun onDisplayUniqueIdChanged(displayUniqueId: String?)
 }

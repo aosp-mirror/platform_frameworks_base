@@ -93,7 +93,8 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
         mDisplayId = mContext.getDisplayId();
     }
 
-    public void destroy(Context context) {
+    /** Call to cleanup the LightBarTransitionsController when done with it. */
+    public void destroy() {
         mCommandQueue.removeCallback(this);
         mStatusBarStateController.removeCallback(this);
     }

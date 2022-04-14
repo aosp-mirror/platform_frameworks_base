@@ -1480,7 +1480,7 @@ public class ResolverActivity extends Activity implements
             if (intent != null) {
                 prepareIntentForCrossProfileLaunch(intent);
             }
-            safelyStartActivityInternal(otherProfileResolveInfo,
+            safelyStartActivityAsUser(otherProfileResolveInfo,
                     mMultiProfilePagerAdapter.getInactiveListAdapter().mResolverListController
                             .getUserHandle());
         });
