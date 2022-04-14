@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<root>
+    <profile-owner package="com.afwsamples.testdpc" name="com.afwsamples.testdpc" component="com.afwsamples.testdpc/com.afwsamples.testdpc.DeviceAdminReceiver" />
+</root>
