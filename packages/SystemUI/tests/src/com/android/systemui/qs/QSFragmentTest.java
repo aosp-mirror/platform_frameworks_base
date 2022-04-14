@@ -62,7 +62,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -135,7 +135,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                         () -> mock(AutoTileManager.class),
                         mock(DumpManager.class),
                         mock(BroadcastDispatcher.class),
-                        Optional.of(mock(CentralSurfaces.class)),
+                        Optional.of(mock(CentralSurfacesInt.class)),
                         mock(QSLogger.class),
                         mock(UiEventLogger.class),
                         mock(UserTracker.class),

@@ -168,7 +168,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private FlashlightController mFlashlightController;
     private PreviewInflater mPreviewInflater;
     private AccessibilityController mAccessibilityController;
-    private CentralSurfaces mCentralSurfaces;
+    private CentralSurfacesInt mCentralSurfaces;
     private KeyguardAffordanceHelper mAffordanceHelper;
     private FalsingManager mFalsingManager;
     private boolean mUserSetupComplete;
@@ -472,7 +472,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView.setContentDescription(state.contentDescription);
     }
 
-    public void setCentralSurfaces(CentralSurfaces centralSurfaces) {
+    public void setCentralSurfaces(CentralSurfacesInt centralSurfaces) {
         mCentralSurfaces = centralSurfaces;
         updateCameraVisibility(); // in case onFinishInflate() was called too early
     }

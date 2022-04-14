@@ -64,7 +64,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry.
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.util.DumpUtilsKt;
@@ -102,7 +102,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     private final Handler mMainHandler;
     private final ActionClickLogger mLogger;
 
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    private final Lazy<Optional<CentralSurfacesInt>> mCentralSurfacesOptionalLazy;
 
     protected final Context mContext;
     protected final NotifPipelineFlags mNotifPipelineFlags;
@@ -262,7 +262,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager notificationEntryManager,
             RemoteInputNotificationRebuilder rebuilder,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            Lazy<Optional<CentralSurfacesInt>> centralSurfacesOptionalLazy,
             StatusBarStateController statusBarStateController,
             @Main Handler mainHandler,
             RemoteInputUriController remoteInputUriController,

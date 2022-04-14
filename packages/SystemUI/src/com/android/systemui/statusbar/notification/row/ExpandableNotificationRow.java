@@ -112,7 +112,7 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
@@ -398,7 +398,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
             return isSystem;
         } else {
-            PackageManager packageManager = CentralSurfaces.getPackageManagerForUser(
+            PackageManager packageManager = CentralSurfacesInt.getPackageManagerForUser(
                     context, sbn.getUser().getIdentifier());
             Boolean isSystemNotification = null;
 
