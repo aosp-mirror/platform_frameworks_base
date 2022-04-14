@@ -54,6 +54,7 @@ import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
@@ -101,6 +102,8 @@ public class StageCoordinatorTests extends ShellTestCase {
     private TransactionPool mTransactionPool;
     @Mock
     private SplitscreenEventLogger mLogger;
+    @Mock
+    private ShellExecutor mMainExecutor;
 
     private final Rect mBounds1 = new Rect(10, 20, 30, 40);
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
@@ -116,7 +119,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator = spy(new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool, mLogger,
-                Optional.empty(), new UnfoldControllerProvider()));
+                mMainExecutor, Optional.empty(), new UnfoldControllerProvider()));
         doNothing().when(mStageCoordinator).updateActivityOptions(any(), anyInt());
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
