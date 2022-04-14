@@ -2069,14 +2069,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Klepnutím získate ďalšie informácie a budete môcť vykonať zmeny."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režim bez vyrušení sa zmenil"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Klepnutím skontrolujete, čo je blokované."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Kontrola nastavení upozornení"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"V Androide 13 vyžadujú nainštalované aplikácie povolenie, aby mohli odosielať upozornenia. Klepnutím môžete zmeniť toto povolenie pre existujúce aplikácie."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Pripomenúť neskôr"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Zavrieť"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systém"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Nastavenia"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparát"</string>
@@ -2295,9 +2291,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Správa <xliff:g id="MESSAGE">%1$s</xliff:g> bola preložená."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Správa bola preložená z jazyka <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> do jazyka <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktivita na pozadí"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Aplikácia používa batériu"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Aplikácia je stále aktívna"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> používa batériu na pozadí. Skontrolujte to klepnutím."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> môže mať vplyv na výdrž batérie. Klepnutím si zobrazte aktívne aplikácie."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Skontrolovať aktívne aplikácie"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere telefónu"</string>
