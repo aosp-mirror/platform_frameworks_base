@@ -1728,7 +1728,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"За превключване между функциите докоснете и задръжте бутона за достъпност."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"За превключване между функциите прекарайте два пръста нагоре и задръжте."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"За превключване между функциите прекарайте три пръста нагоре и задръжте."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ниво на мащаба"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Увеличение"</string>
     <string name="user_switched" msgid="7249833311585228097">"Текущ потребител <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Превключва се към: <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> излиза…"</string>
