@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetuj"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Ukloni"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Sesija gosta se resetuje…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Želite da resetujete sesiju gosta?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Time ćete pokrenuti novu sesiju gosta i izbrisati sve aplikacije i podatke iz aktuelne sesije"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Izaći ćete iz režima gosta?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Time ćete izbrisati sve aplikacije i podatke iz aktuelne sesije gosta"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Izađi"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Sačuvaćete aktivnosti gosta?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Sačuvajte aktivnosti iz aktuelne sesije ili izbrišite sve aplikacije i podatke"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Izbriši"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Sačuvaj"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Izađi iz režima gosta"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Resetuj sesiju gosta"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Izađi iz režima gosta"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sve aktivnosti će biti izbrisane pri izlazu"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Možete da sačuvate ili izbrišete aktivnosti pri izlazu"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetujete da biste izbrisali aktivnosti sesije odmah ili možete da sačuvate ili izbrišete aktivnosti pri izlazu"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Slikaj"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Odaberi sliku"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Izaberite sliku"</string>

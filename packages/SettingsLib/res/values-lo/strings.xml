@@ -393,7 +393,7 @@
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ຂະໜາດໜ້າ​ຈໍ​ຂອງອະນິເມຊັນ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ຂະໜາດສະຫຼັບອະນິເມຊັນ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ໄລຍະເວລາອະນິເມຊັນ"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ຈຳລອງຈໍສະແດງຜົນທີ່ສອງ"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ຈຳລອງຈໍສະແດງຜົນທີສອງ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ແອັບ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ບໍ່ຕ້ອງຮັກສາການເຄື່ອນ​ໄຫວ"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ລຶບທຸກການເຄື່ອນໄຫວທັນທີທີ່ຜູ້ໃຊ້ອອກຈາກມັນ"</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ຣີເຊັດ"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ລຶບອອກ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ກຳລັງຣີເຊັດແຂກ…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ຣີເຊັດໄລຍະເວລາຂອງແຂກບໍ?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ນີ້ຈະເລີ່ມໄລຍະເວລາຂອງແຂກໃໝ່ ແລະ ລຶບແອັບ ແລະ ຂໍ້ມູນທັງໝົດອອກຈາກເຊດຊັນປັດຈຸບັນ"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ອອກຈາກໂໝດແຂກບໍ?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ນີ້ຈະລຶບແອັບ ແລະ ຂໍ້ມູນອອກຈາກໄລຍະເວລາຂອງແຂກປັດຈຸບັນ"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ອອກ"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ບັນທຶກການເຄື່ອນໄຫວແຂກບໍ?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ທ່ານສາມາດບັນທຶກການເຄື່ອນໄຫວຈາກເຊດຊັນປັດຈຸບັນ ຫຼື ລຶບແອັບ ແລະ ຂໍ້ມູນທັງໝົດໄດ້"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ລຶບ"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ບັນທຶກ"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"ອອກຈາກໂໝດແຂກ"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"ຣີເຊັດໄລຍະເວລາຂອງແຂກ"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ອອກຈາກແຂກ"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ການເຄື່ອນໄຫວທັງໝົດຈະຖືກລຶບໃນຕອນອອກ"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ທ່ານສາມາດບັນທຶກ ຫຼື ລຶບການເຄື່ອນໄຫວຂອງທ່ານໃນຕອນອອກໄດ້"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"ຣີເຊັດເພື່ອລຶບການເຄື່ອນໄຫວເຊດຊັນຕອນນີ້ ຫຼື ທ່ານສາມາດບັນທຶກ ຫຼື ລຶບການເຄື່ອນໄຫວໃນຕອນອອກໄດ້"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ຖ່າຍຮູບ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ເລືອກຮູບ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ເລືອກຮູບ"</string>

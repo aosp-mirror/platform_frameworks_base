@@ -236,7 +236,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB компьютерге сайылганда мүчүлүштүктөрдү оңдоо режими иштейт"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB аркылуу мүчүлүштүктөрдү аныктоо уруксатын артка кайтаруу"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi\'га туташканда, мүчүлүштүктөрдү аныктоо режими иштейт оңдоо режими"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi\'га туташканда, мүчүлүштүктөрдү аныктоо режими иштейт"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Ката"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Жеткиликтүү түзмөктөрдү көрүү үчүн мүчүлүштүктөрдү Wi-Fi аркылуу аныктоону күйгүзүңүз"</string>
@@ -279,8 +279,8 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"Тармактар"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Зымсыз мониторлорду тастыктамалоо"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi таржымалы"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi тармактарын издөөнү жөнгө салуу"</string>
-    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi туташуусу туруксуз MAC даректерин башаламан иретте түзүү"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi тармактарын издөөнү чектөө"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi-Fi тармагындагы башаламан MAC даректери"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобилдик Интернет иштей берет"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Модем режиминде аппараттын иштешин тездетүү"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Аталышсыз Bluetooth түзмөктөрү көрүнсүн"</string>
@@ -312,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Зымсыз мониторлорду тастыктамалоо параметрлери көрүнүп турат"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi тандалганда ар бир SSID үчүн RSSI көрүнүп турат"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батареяны үнөмдөп, тармактын иштешин жакшыртат"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Бул режим өчүрүлгөндөн кийин, түзмөк MAC дарегин башаламан иретте түзүү функциясы иштетилген тармакка туташкан сайын анын MAC дареги өзгөрүшү мүмкүн."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Бул режим иштетилсе, түзмөктүн MAC дареги башаламан MAC даректерди түзгөн тармакка туташкан сайын өзгөрүп турушу мүмкүн."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Трафик ченелет"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Чектелбеген тармак"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Журнал буферинин өлчөмү"</string>
@@ -398,7 +398,7 @@
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Аракеттер сакталбасын"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Колдонуучу чыгып кетери менен бардык аракеттер өчүрүлөт"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Фондогу процесстер чеги"</string>
-    <string name="show_all_anrs" msgid="9160563836616468726">"Фондогу \"Колдонмо жооп бербей жатат\" деп көрсөтүү"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"Фондук режимдеги ANR"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Фондогу колдонмо жооп бербей жатат деп билдирип турат"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Билдирмелер каналынын эскертүүлөрүн көрсөтүү"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Тыюу салынган каналдын колдонмосунун жаңы билдирмелери тууралуу эскертүүлөр көрүнөт"</string>
@@ -552,7 +552,7 @@
     <string name="help_label" msgid="3528360748637781274">"Жардам/Пикир билдирүү"</string>
     <string name="storage_category" msgid="2287342585424631813">"Сактагыч"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Бөлүшүлгөн маалымат"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"Бөлүшүлгөн маалыматты көрүп, өзгөртүү"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Бөлүшүлгөн маалыматты көрүп, өзгөртөсүз"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Бул колдонуучу менен бөлүшүлгөн маалымат жок."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Бөлүшүлгөн маалыматты алууда ката кетти. Кайталоо."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Бөлүшүлгөн маалыматты идентификатору: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
@@ -670,12 +670,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR кодун скандоо"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Угуп баштоо үчүн QR кодун борборго жайгаштырыңыз"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR кодунун форматы жараксыз"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда кабарлоо токтотулсунбу?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Эгер <xliff:g id="SWITCHAPP">%1$s</xliff:g> колдонмосунда кабарласаңыз же аудионун чыгуусун өзгөртсөңүз, учурдагы кабарлоо токтотулат"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> колдонмосунда кабарлоо"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Аудионун чыгуусун өзгөртүү"</string>
 </resources>

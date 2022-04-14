@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ዳግም አስጀምር"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"አስወግድ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"እንግዳን ዳግም በማስጀመር ላይ…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"የእንግዳ ክፍለ-ጊዜ ዳግም ይጀመር?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ይህ አዲስ የእንግዳ ክፍለ-ጊዜ ይጀምራል እና ሁሉንም መተግበሪያዎች እና ውሂብ አሁን ካለው ክፍለ-ጊዜ ይሰርዛል"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ከእንግዳ ሁኔታ ይውጣ?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ይህ አሁን ካለው የእንግዳ ክፍለ-ጊዜ መተግበሪያዎችን እና ውሂብን ይሰርዛል"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ውጣ"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"የእንግዳ እንቅስቃሴ ይቀመጥ?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"እንቅስቃሴን አሁን ካለው ክፍለ-ጊዜ ማስቀመጥ ወይም ሁሉንም መተግበሪያዎች እና ውሂብ መሰረዝ ይችላሉ"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ሰርዝ"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"አስቀምጥ"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"ከእንግዳ ሁኔታ ውጣ"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"የእንግዳ ክፍለ-ጊዜን ዳግም አስጀምር"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"እንግዳ ያስወጡ"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"በሚወጡበት ጊዜ ሁሉም እንቅስቃሴዎች ይሰረዛሉ"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"በሚወጡበት ጊዜ እንቅስቃሴዎን ማስቀመጥ ወይም መሰረዝ ይችላሉ"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"የክፍለ-ጊዜ እንቅስቃሴን አሁን ለመሰረዝ ዳግም ያስጀምሩ፣ ወይም በሚወጡበት ጊዜ እንቅስቃሴን ማስቀመጥ ወይም መሰረዝ ይችላሉ"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ፎቶ አንሳ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ምስል ይምረጡ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ፎቶ ይምረጡ"</string>
