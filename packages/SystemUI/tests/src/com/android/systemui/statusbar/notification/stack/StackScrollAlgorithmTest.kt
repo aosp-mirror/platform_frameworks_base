@@ -8,7 +8,6 @@ import com.android.systemui.statusbar.EmptyShadeView
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -22,14 +21,10 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private val stackScrollAlgorithm = StackScrollAlgorithm(context, hostView)
     private val expandableViewState = ExpandableViewState()
     private val notificationRow = mock(ExpandableNotificationRow::class.java)
-    private val mStatusBarKeyguardViewManager = mock(StatusBarKeyguardViewManager::class.java)
-
     private val ambientState = AmbientState(
-        context,
-        SectionProvider { _, _ -> false },
-        BypassController { false },
-        mStatusBarKeyguardViewManager
-    )
+            context,
+            SectionProvider { _, _ -> false },
+            BypassController { false })
 
     @Before
     fun setUp() {

@@ -27,7 +27,6 @@ import android.view.ViewGroup;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.policy.SystemBarUtils;
-import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -432,9 +431,7 @@ public class StackScrollAlgorithm {
         } else if (ambientState.isExpansionChanging()) {
             // Adjust alpha for shade open & close.
             float expansion = ambientState.getExpansionFraction();
-            viewState.alpha = ambientState.isBouncerInTransit()
-                    ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion)
-                    : ShadeInterpolation.getContentAlpha(expansion);
+            viewState.alpha = ShadeInterpolation.getContentAlpha(expansion);
         }
 
         if (ambientState.isShadeExpanded() && view.mustStayOnScreen()

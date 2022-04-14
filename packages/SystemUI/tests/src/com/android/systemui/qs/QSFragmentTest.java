@@ -190,7 +190,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         QSFragment fragment = resumeAndGetFragment();
         enableSplitShade();
         setStatusBarState(StatusBarState.KEYGUARD);
-        when(mQSPanelController.isBouncerInTransit()).thenReturn(false);
+        when(mQSPanelController.bouncerInTransit()).thenReturn(false);
         int transitionPxAmount = 123;
         float transitionProgress = 0.5f;
 
@@ -206,7 +206,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         QSFragment fragment = resumeAndGetFragment();
         enableSplitShade();
         setStatusBarState(StatusBarState.KEYGUARD);
-        when(mQSPanelController.isBouncerInTransit()).thenReturn(true);
+        when(mQSPanelController.bouncerInTransit()).thenReturn(true);
         int transitionPxAmount = 123;
         float transitionProgress = 0.5f;
 
