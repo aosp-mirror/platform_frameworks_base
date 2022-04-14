@@ -238,7 +238,7 @@ public enum ScrimState {
 
             mAnimationDuration = mKeyguardFadingAway
                     ? mKeyguardFadingAwayDuration
-                    : CentralSurfaces.FADE_KEYGUARD_DURATION;
+                    : CentralSurfacesInt.FADE_KEYGUARD_DURATION;
 
             boolean fromAod = previousState == AOD || previousState == PULSING;
             mAnimateChange = !mLaunchingAffordanceWithPreview && !fromAod;

@@ -34,7 +34,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 import com.android.systemui.util.time.SystemClock;
 
@@ -54,7 +54,7 @@ import javax.inject.Inject;
 @SuppressLint("OverrideAbstract")
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
-    private static final boolean DEBUG = CentralSurfaces.DEBUG;
+    private static final boolean DEBUG = CentralSurfacesInt.DEBUG;
     private static final long MAX_RANKING_DELAY_MILLIS = 500L;
 
     private final Context mContext;

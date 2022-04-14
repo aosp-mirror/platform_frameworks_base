@@ -18,7 +18,7 @@ import com.android.systemui.statusbar.StatusBarState;
 
 /**
  * {@link ShadeController} is an abstraction of the work that used to be hard-coded in
- * {@link CentralSurfaces}. The shade itself represents the concept of the status bar window state,
+ * {@link CentralSurfacesInt}. The shade itself represents the concept of the status bar window state,
  * and can be in multiple states: dozing, locked, showing the bouncer, occluded, etc. All/some of
  * these are coordinated with {@link StatusBarKeyguardViewManager} via
  * {@link com.android.systemui.keyguard.KeyguardViewMediator} and others.
@@ -38,7 +38,7 @@ public interface ShadeController {
 
     /**
      * Collapse the shade animated, showing the bouncer when on {@link StatusBarState#KEYGUARD} or
-     * dismissing {@link CentralSurfaces} when on {@link StatusBarState#SHADE}.
+     * dismissing {@link CentralSurfacesInt} when on {@link StatusBarState#SHADE}.
      */
     void animateCollapsePanels(int flags, boolean force);
 

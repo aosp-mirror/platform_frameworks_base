@@ -79,7 +79,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private LockPatternUtils mLockPatternUtils;
     @Mock private KeyguardStateController mKeyguardStateController;
-    @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private CentralSurfacesInt mCentralSurfaces;
     @Mock private ViewGroup mContainer;
     @Mock private NotificationPanelViewController mNotificationPanelView;
     @Mock private BiometricUnlockController mBiometricUnlockController;

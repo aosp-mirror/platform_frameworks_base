@@ -58,7 +58,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
 
     private boolean mIsStatusBarExpanded = false;
     private boolean mShouldAdjustInsets = false;
-    private CentralSurfaces mCentralSurfaces;
+    private CentralSurfacesInt mCentralSurfaces;
     private View mNotificationShadeWindowView;
     private View mNotificationPanelView;
     private boolean mForceCollapsedUntilLayout = false;
@@ -118,7 +118,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     }
 
     protected void setup(
-            @NonNull CentralSurfaces centralSurfaces,
+            @NonNull CentralSurfacesInt centralSurfaces,
             @NonNull View notificationShadeWindowView) {
         mCentralSurfaces = centralSurfaces;
         mNotificationShadeWindowView = notificationShadeWindowView;

@@ -60,7 +60,7 @@ import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -113,7 +113,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private Handler mHandler;
     @Mock private UserContextProvider mUserContextProvider;
     @Mock private VibratorHelper mVibratorHelper;
-    @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private CentralSurfacesInt mCentralSurfaces;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
 

@@ -25,7 +25,7 @@ import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.CentralSurfacesInt
 import javax.inject.Inject
 
 /**
@@ -80,8 +80,8 @@ class StatusBarWindowStateController @Inject constructor(
         }
 
         windowState = state
-        if (CentralSurfaces.DEBUG_WINDOW_STATE) {
-            Log.d(CentralSurfaces.TAG, "Status bar " + windowStateToString(state))
+        if (CentralSurfacesInt.DEBUG_WINDOW_STATE) {
+            Log.d(CentralSurfacesInt.TAG, "Status bar " + windowStateToString(state))
         }
         listeners.forEach { it.onStatusBarWindowStateChanged(state) }
     }

@@ -20,16 +20,16 @@ import android.view.View;
 
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 
 /**
  * Calculates and moves the QS frame vertically.
  */
 public abstract class QsFrameTranslateController {
 
-    protected CentralSurfaces mCentralSurfaces;
+    protected CentralSurfacesInt mCentralSurfaces;
 
-    public QsFrameTranslateController(CentralSurfaces centralSurfaces) {
+    public QsFrameTranslateController(CentralSurfacesInt centralSurfaces) {
         mCentralSurfaces = centralSurfaces;
     }
 
