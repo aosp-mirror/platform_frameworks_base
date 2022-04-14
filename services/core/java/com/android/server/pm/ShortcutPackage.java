@@ -160,8 +160,6 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String KEY_BITMAPS = "bitmaps";
     private static final String KEY_BITMAP_BYTES = "bitmapBytes";
 
-    private final Object mLock = new Object();
-
     private final Executor mExecutor;
 
     /**
@@ -779,7 +777,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             return false;
         }
         mApiCallCount++;
-        s.scheduleSaveUser(getOwnerUserId());
+        scheduleSave();
         return true;
     }
 
@@ -789,7 +787,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         if (mApiCallCount > 0) {
             mApiCallCount = 0;
-            mShortcutUser.mService.scheduleSaveUser(getOwnerUserId());
+            scheduleSave();
         }
     }
 
@@ -1886,15 +1884,12 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         final ShortcutPackage ret = new ShortcutPackage(shortcutUser,
                 shortcutUser.getUserId(), packageName);
-
         synchronized (ret.mLock) {
             ret.mIsAppSearchSchemaUpToDate = ShortcutService.parseIntAttribute(
                     parser, ATTR_SCHEMA_VERSON, 0) == AppSearchShortcutInfo.SCHEMA_VERSION;
         }
-        ret.mApiCallCount =
-                ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
-        ret.mLastResetTime =
-                ShortcutService.parseLongAttribute(parser, ATTR_LAST_RESET);
+        ret.mApiCallCount = ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
+        ret.mLastResetTime = ShortcutService.parseLongAttribute(parser, ATTR_LAST_RESET);
 
 
         final int outerDepth = parser.getDepth();
@@ -2436,16 +2431,15 @@ class ShortcutPackage extends ShortcutPackageItem {
                         })));
     }
 
-    void persistsAllShortcutsAsync() {
-        synchronized (mLock) {
-            final Map<String, ShortcutInfo> copy = mShortcuts;
-            if (!mTransientShortcuts.isEmpty()) {
-                copy.putAll(mTransientShortcuts);
-                mTransientShortcuts.clear();
-            }
-            saveShortcutsAsync(copy.values().stream().filter(ShortcutInfo::usesQuota).collect(
-                    Collectors.toList()));
+    @Override
+    void scheduleSaveToAppSearchLocked() {
+        final Map<String, ShortcutInfo> copy = new ArrayMap<>(mShortcuts);
+        if (!mTransientShortcuts.isEmpty()) {
+            copy.putAll(mTransientShortcuts);
+            mTransientShortcuts.clear();
         }
+        saveShortcutsAsync(copy.values().stream().filter(ShortcutInfo::usesQuota).collect(
+                Collectors.toList()));
     }
 
     private void saveShortcutsAsync(
@@ -2543,5 +2537,13 @@ class ShortcutPackage extends ShortcutPackageItem {
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
         }
+    }
+
+    @Override
+    protected File getShortcutPackageItemFile() {
+        final File path = new File(mShortcutUser.mService.injectUserDataPath(
+                mShortcutUser.getUserId()), ShortcutUser.DIRECTORY_PACKAGES);
+        final String fileName = getPackageName() + ".xml";
+        return new File(path, fileName);
     }
 }

@@ -1969,7 +1969,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         if (si == null) {
             return null;
         }
-        mService.waitForBitmapSavesForTest();
+        mService.waitForBitmapSaves();
         return new File(si.getBitmapPath()).getName();
     }
 
@@ -1978,7 +1978,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         if (si == null) {
             return null;
         }
-        mService.waitForBitmapSavesForTest();
+        mService.waitForBitmapSaves();
         return new File(si.getBitmapPath()).getAbsolutePath();
     }
 
@@ -2133,7 +2133,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     protected boolean bitmapDirectoryExists(String packageName, int userId) {
-        mService.waitForBitmapSavesForTest();
+        mService.waitForBitmapSaves();
         final File path = new File(mService.getUserBitmapFilePath(userId), packageName);
         return path.isDirectory();
     }
