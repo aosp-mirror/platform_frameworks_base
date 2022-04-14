@@ -28722,7 +28722,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *     {@link InputDevice#SOURCE_MOUSE_RELATIVE}, and relative position changes will be
      *     available through {@link MotionEvent#getX} and {@link MotionEvent#getY}.</li>
      *
-     *     <li>Events from a touchpad will be delivered with the source
+     *     <li>Events from a touchpad or trackpad will be delivered with the source
      *     {@link InputDevice#SOURCE_TOUCHPAD}, where the absolute position of each of the pointers
      *     on the touchpad will be available through {@link MotionEvent#getX(int)} and
      *     {@link MotionEvent#getY(int)}, and their relative movements are stored in
@@ -28730,6 +28730,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      *     <li>Events from other types of devices, such as touchscreens, will not be affected.</li>
      * </ul>
+     * <p>
+     * When pointer capture changes, connected mouse and trackpad devices may be reconfigured,
+     * and their properties (such as their sources or motion ranges) may change. Use an
+     * {@link android.hardware.input.InputManager.InputDeviceListener} to be notified when a device
+     * changes (which may happen after enabling or disabling pointer capture), and use
+     * {@link InputDevice#getDevice(int)} to get the updated {@link InputDevice}.
      * <p>
      * Events captured through pointer capture will be dispatched to
      * {@link OnCapturedPointerListener#onCapturedPointer(View, MotionEvent)} if an
