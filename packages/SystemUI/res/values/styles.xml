@@ -1101,6 +1101,7 @@
 
     <style name="FgsManagerAppLabel" parent="TextAppearance.Dialog.Body">
         <item name="android:textDirection">locale</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="FgsManagerAppDuration">
