@@ -32,6 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.app.Notification;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
@@ -41,6 +42,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
@@ -169,5 +171,17 @@ public class StatusBarIconViewTest extends SysuiTestCase {
                 icon, 0, 0, "");
         mIconView.getIcon(largeIcon);
         // No crash? good
+    }
+
+    @Test
+    public void testContentDescForNotification_invalidAi_noCrash() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(0)
+                .build();
+        // should be ApplicationInfo
+        n.extras.putParcelable(Notification.EXTRA_BUILDER_APPLICATION_INFO, new Bundle());
+        StatusBarIconView.contentDescForNotification(mContext, n);
+
+        // no crash, good
     }
 }
