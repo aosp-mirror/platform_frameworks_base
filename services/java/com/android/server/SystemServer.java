@@ -2694,8 +2694,8 @@ public final class SystemServer implements Dumpable {
 
         t.traceBegin("MakeDisplayManagerServiceReady");
         try {
-            // TODO: use boot phase and communicate these flags some other way
-            mDisplayManagerService.systemReady(safeMode, /* onlyCore= */ false);
+            // TODO: use boot phase and communicate this flag some other way
+            mDisplayManagerService.systemReady(safeMode);
         } catch (Throwable e) {
             reportWtf("making Display Manager Service ready", e);
         }

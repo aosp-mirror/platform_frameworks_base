@@ -206,7 +206,7 @@ public class DisplayManagerServiceTest {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
-        displayManager.systemReady(false /* safeMode */, true /* onlyCore */);
+        displayManager.systemReady(false /* safeMode */);
         displayManager.windowManagerAndInputReady();
 
         // This is effectively the DisplayManager service published to ServiceManager.
@@ -278,7 +278,7 @@ public class DisplayManagerServiceTest {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
-        displayManager.systemReady(false /* safeMode */, true /* onlyCore */);
+        displayManager.systemReady(false /* safeMode */);
         displayManager.windowManagerAndInputReady();
 
         // This is effectively the DisplayManager service published to ServiceManager.
