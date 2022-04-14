@@ -25,6 +25,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardViewController;
+import com.android.keyguard.ViewMediatorCallback;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
@@ -126,5 +127,11 @@ public class KeyguardModule {
                 dreamOverlayStateController,
                 notificationShadeWindowController,
                 activityLaunchAnimator);
+    }
+
+    /** */
+    @Provides
+    public ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
+        return viewMediator.getViewMediatorCallback();
     }
 }
