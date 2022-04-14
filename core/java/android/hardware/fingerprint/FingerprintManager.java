@@ -45,6 +45,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.BiometricTestSession;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.SensorProperties;
@@ -918,13 +919,13 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
 
 
     /**
-     * Forwards FingerprintStateListener to FingerprintService
-     * @param listener new FingerprintStateListener being added
+     * Forwards BiometricStateListener to FingerprintService
+     * @param listener new BiometricStateListener being added
      * @hide
      */
-    public void registerFingerprintStateListener(@NonNull FingerprintStateListener listener) {
+    public void registerBiometricStateListener(@NonNull BiometricStateListener listener) {
         try {
-            mService.registerFingerprintStateListener(listener);
+            mService.registerBiometricStateListener(listener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
