@@ -190,7 +190,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                     mTaskOrganizer, mDisplayController, mDisplayImeController,
                     mDisplayInsetsController, mTransitions, mTransactionPool, mLogger,
-                    mIconProvider, mRecentTasksOptional, mUnfoldControllerProvider);
+                    mIconProvider, mMainExecutor, mRecentTasksOptional, mUnfoldControllerProvider);
         }
     }
 
