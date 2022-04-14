@@ -81,10 +81,12 @@ constructor(
         outputListeners.remove(listener)
     }
 
-    override val isFullyOpened: Boolean
-        get() = !isFolded && lastFoldUpdate == FOLD_UPDATE_FINISH_FULL_OPEN
+    override val isFinishedOpening: Boolean
+        get() = !isFolded &&
+            (lastFoldUpdate == FOLD_UPDATE_FINISH_FULL_OPEN ||
+                lastFoldUpdate == FOLD_UPDATE_FINISH_HALF_OPEN)
 
-    private val isTransitionInProgess: Boolean
+    private val isTransitionInProgress: Boolean
         get() =
             lastFoldUpdate == FOLD_UPDATE_START_OPENING ||
                 lastFoldUpdate == FOLD_UPDATE_START_CLOSING
@@ -104,7 +106,7 @@ constructor(
             notifyFoldUpdate(FOLD_UPDATE_START_CLOSING)
         }
 
-        if (isTransitionInProgess) {
+        if (isTransitionInProgress) {
             if (isFullyOpened) {
                 notifyFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN)
                 cancelTimeout()
@@ -168,7 +170,7 @@ constructor(
     }
 
     private fun rescheduleAbortAnimationTimeout() {
-        if (isTransitionInProgess) {
+        if (isTransitionInProgress) {
             cancelTimeout()
         }
         handler.postDelayed(timeoutRunnable, HALF_OPENED_TIMEOUT_MILLIS)
