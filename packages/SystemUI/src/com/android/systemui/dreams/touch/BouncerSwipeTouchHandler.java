@@ -37,7 +37,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
@@ -79,7 +79,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private float mCurrentExpansion;
-    private final Optional<CentralSurfaces> mCentralSurfaces;
+    private final Optional<CentralSurfacesInt> mCentralSurfaces;
 
     private VelocityTracker mVelocityTracker;
 
@@ -110,7 +110,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                         // scrolls.
                         mCapture = Math.abs(distanceY) > Math.abs(distanceX);
                         mBouncerInitiallyShowing = mCentralSurfaces
-                                .map(CentralSurfaces::isBouncerShowing)
+                                .map(CentralSurfacesInt::isBouncerShowing)
                                 .orElse(false);
 
                         if (mCapture) {
@@ -189,7 +189,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     public BouncerSwipeTouchHandler(
             DisplayMetrics displayMetrics,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            Optional<CentralSurfaces> centralSurfaces,
+            Optional<CentralSurfacesInt> centralSurfaces,
             NotificationShadeWindowController notificationShadeWindowController,
             ValueAnimatorCreator valueAnimatorCreator,
             VelocityTrackerFactory velocityTrackerFactory,
@@ -213,7 +213,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     @Override
     public void getTouchInitiationRegion(Region region) {
-        if (mCentralSurfaces.map(CentralSurfaces::isBouncerShowing).orElse(false)) {
+        if (mCentralSurfaces.map(CentralSurfacesInt::isBouncerShowing).orElse(false)) {
             region.op(new Rect(0, 0, mDisplayMetrics.widthPixels,
                             Math.round(
                                     mDisplayMetrics.heightPixels * mBouncerZoneScreenPercentage)),

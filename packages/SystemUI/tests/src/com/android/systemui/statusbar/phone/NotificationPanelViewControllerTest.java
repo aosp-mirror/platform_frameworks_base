@@ -161,7 +161,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private static final int NOTIFICATION_SCRIM_TOP_PADDING_IN_SPLIT_SHADE = 50;
 
     @Mock
-    private CentralSurfaces mCentralSurfaces;
+    private CentralSurfacesInt mCentralSurfaces;
     @Mock
     private NotificationStackScrollLayout mNotificationStackScrollLayout;
     @Mock

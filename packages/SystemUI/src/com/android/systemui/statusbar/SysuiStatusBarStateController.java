@@ -25,7 +25,7 @@ import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 
 import java.lang.annotation.Retention;
 
@@ -92,7 +92,7 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     int getCurrentOrUpcomingState();
 
     /**
-     * Update the dozing state from {@link CentralSurfaces}'s perspective
+     * Update the dozing state from {@link CentralSurfacesInt}'s perspective
      * @param isDozing well, are we dozing?
      * @return {@code true} if the state changed, else {@code false}
      */
@@ -117,7 +117,7 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     void setAndInstrumentDozeAmount(View view, float dozeAmount, boolean animated);
 
     /**
-     * Update the expanded state from {@link CentralSurfaces}'s perspective
+     * Update the expanded state from {@link CentralSurfacesInt}'s perspective
      * @param expanded are we expanded?
      * @return {@code true} if the state changed, else {@code false}
      */
