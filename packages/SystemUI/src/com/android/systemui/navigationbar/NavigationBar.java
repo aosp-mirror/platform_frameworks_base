@@ -83,6 +83,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.InsetsVisibilities;
 import android.view.KeyEvent;
@@ -196,6 +197,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final Optional<Pip> mPipOptional;
     private final Optional<Recents> mRecentsOptional;
     private final DeviceConfigProxy mDeviceConfigProxy;
+    private final NavigationBarTransitions mNavigationBarTransitions;
     private final Optional<BackAnimation> mBackAnimation;
     private final Handler mHandler;
     private final NavigationBarOverlayController mNavbarOverlayController;
@@ -512,6 +514,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             InputMethodManager inputMethodManager,
             DeadZone deadZone,
             DeviceConfigProxy deviceConfigProxy,
+            NavigationBarTransitions navigationBarTransitions,
             Optional<BackAnimation> backAnimation) {
         super(navigationBarView);
         mFrame = navigationBarFrame;
@@ -536,6 +539,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mRecentsOptional = recentsOptional;
         mDeadZone = deadZone;
         mDeviceConfigProxy = deviceConfigProxy;
+        mNavigationBarTransitions = navigationBarTransitions;
         mBackAnimation = backAnimation;
         mHandler = mainHandler;
         mNavbarOverlayController = navbarOverlayController;
@@ -560,6 +564,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     public void onInit() {
         // TODO: A great deal of this code should probably live in onViewAttached.
         // It should also has corresponding cleanup in onViewDetached.
+        mView.setBarTransitions(mNavigationBarTransitions);
         mView.setTouchHandler(mTouchHandler);
         mView.setNavBarMode(mNavBarMode);
         mView.updateRotationButton();
@@ -631,7 +636,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mView.setOnVerticalChangedListener(this::onVerticalChanged);
         mView.setOnTouchListener(this::onNavigationTouch);
         if (mSavedState != null) {
-            mView.getLightTransitionsController().restoreState(mSavedState);
+            getBarTransitions().getLightTransitionsController().restoreState(mSavedState);
         }
         setNavigationIconHints(mNavigationIconHints);
         mView.setWindowVisible(isNavBarWindowVisible());
@@ -704,8 +709,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 mView.getRotationButtonController();
         rotationButtonController.setRotationCallback(null);
         mView.setUpdateActiveTouchRegionsCallback(null);
-        mView.getBarTransitions().destroy();
-        mView.getLightTransitionsController().destroy(mContext);
+        getBarTransitions().destroy();
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
         if (mOrientationHandle != null) {
@@ -731,7 +735,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         outState.putInt(EXTRA_APPEARANCE, mAppearance);
         outState.putInt(EXTRA_BEHAVIOR, mBehavior);
         outState.putBoolean(EXTRA_TRANSIENT_STATE, mTransientShown);
-        mView.getLightTransitionsController().saveState(outState);
+        getBarTransitions().getLightTransitionsController().saveState(outState);
     }
 
     /**
@@ -892,7 +896,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         pw.println("  mTransientShown=" + mTransientShown);
         pw.println("  mTransientShownFromGestureOnSystemBar="
                 + mTransientShownFromGestureOnSystemBar);
-        dumpBarTransitions(pw, "mNavigationBarView", mView.getBarTransitions());
+        dumpBarTransitions(pw, "mNavigationBarView", getBarTransitions());
         mView.dump(pw);
     }
 
@@ -1429,7 +1433,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mLightBarController = lightBarController;
         if (mLightBarController != null) {
             mLightBarController.setNavigationBar(
-                    mView.getLightTransitionsController());
+                    getBarTransitions().getLightTransitionsController());
         }
     }
 
@@ -1471,7 +1475,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 mCentralSurfacesOptionalLazy.get().map(CentralSurfaces::isDeviceInteractive)
                         .orElse(false)
                 && mNavigationBarWindowState != WINDOW_STATE_HIDDEN;
-        mView.getBarTransitions().transitionTo(mTransitionMode, anim);
+        getBarTransitions().transitionTo(mTransitionMode, anim);
     }
 
     public void disableAnimationsDuringHide(long delay) {
@@ -1491,11 +1495,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     public NavigationBarTransitions getBarTransitions() {
-        return mView.getBarTransitions();
+        return mNavigationBarTransitions;
     }
 
     public void finishBarAnimations() {
-        mView.getBarTransitions().finishAnimations();
+        getBarTransitions().finishAnimations();
     }
 
     private WindowManager.LayoutParams getBarLayoutParams(int rotation) {
@@ -1558,10 +1562,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                         | WindowManager.LayoutParams.FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = gravity;
+        lp.providedInternalInsets = new Insets[InsetsState.SIZE];
         if (insetsHeight != -1) {
-            lp.providedInternalInsets = Insets.of(0, height - insetsHeight, 0, 0);
+            lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] =
+                    Insets.of(0, height - insetsHeight, 0, 0);
         } else {
-            lp.providedInternalInsets = Insets.NONE;
+            lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] = null;
         }
         lp.token = new Binder();
         lp.accessibilityTitle = mContext.getString(R.string.nav_bar);

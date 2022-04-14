@@ -624,7 +624,6 @@ public class InputMethod {
         @Override
         public void invalidateInputInternal(EditorInfo editorInfo, IInputContext inputContext,
                 int sessionId) {
-            // TODO(b/217788708): Add automated test.
             if (mStartedInputConnection instanceof RemoteInputConnection) {
                 final RemoteInputConnection ric =
                         (RemoteInputConnection) mStartedInputConnection;

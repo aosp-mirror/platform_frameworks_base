@@ -153,7 +153,7 @@ import java.util.concurrent.TimeUnit;
 public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private static final String TAG = VcnManagementService.class.getSimpleName();
     private static final long DUMP_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(5);
-    private static final int LOCAL_LOG_LINE_COUNT = 128;
+    private static final int LOCAL_LOG_LINE_COUNT = 512;
 
     // Public for use in all other VCN classes
     @NonNull public static final LocalLog LOCAL_LOG = new LocalLog(LOCAL_LOG_LINE_COUNT);
@@ -456,7 +456,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             synchronized (mLock) {
                 final TelephonySubscriptionSnapshot oldSnapshot = mLastSnapshot;
                 mLastSnapshot = snapshot;
-                logDbg("new snapshot: " + mLastSnapshot);
+                logInfo("new snapshot: " + mLastSnapshot);
 
                 // Start any VCN instances as necessary
                 for (Entry<ParcelUuid, VcnConfig> entry : mConfigs.entrySet()) {
@@ -522,6 +522,8 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     @GuardedBy("mLock")
     private void stopVcnLocked(@NonNull ParcelUuid uuidToTeardown) {
+        logInfo("Stopping VCN config for subGrp: " + uuidToTeardown);
+
         // Remove in 2 steps. Make sure teardownAsync is triggered before removing from the map.
         final Vcn vcnToTeardown = mVcns.get(uuidToTeardown);
         if (vcnToTeardown == null) {
@@ -567,7 +569,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     @GuardedBy("mLock")
     private void startVcnLocked(@NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config) {
-        logDbg("Starting VCN config for subGrp: " + subscriptionGroup);
+        logInfo("Starting VCN config for subGrp: " + subscriptionGroup);
 
         // TODO(b/193687515): Support multiple VCNs active at the same time
         if (!mVcns.isEmpty()) {
@@ -626,7 +628,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         if (!config.getProvisioningPackageName().equals(opPkgName)) {
             throw new IllegalArgumentException("Mismatched caller and VcnConfig creator");
         }
-        logDbg("VCN config updated for subGrp: " + subscriptionGroup);
+        logInfo("VCN config updated for subGrp: " + subscriptionGroup);
 
         mContext.getSystemService(AppOpsManager.class)
                 .checkPackage(mDeps.getBinderCallingUid(), config.getProvisioningPackageName());
@@ -652,7 +654,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     public void clearVcnConfig(@NonNull ParcelUuid subscriptionGroup, @NonNull String opPkgName) {
         requireNonNull(subscriptionGroup, "subscriptionGroup was null");
         requireNonNull(opPkgName, "opPkgName was null");
-        logDbg("VCN config cleared for subGrp: " + subscriptionGroup);
+        logInfo("VCN config cleared for subGrp: " + subscriptionGroup);
 
         mContext.getSystemService(AppOpsManager.class)
                 .checkPackage(mDeps.getBinderCallingUid(), opPkgName);
@@ -1050,24 +1052,34 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         Slog.d(TAG, msg, tr);
     }
 
+    private void logInfo(String msg) {
+        Slog.i(TAG, msg);
+        LOCAL_LOG.log("[INFO] [" + TAG + "] " + msg);
+    }
+
+    private void logInfo(String msg, Throwable tr) {
+        Slog.i(TAG, msg, tr);
+        LOCAL_LOG.log("[INFO] [" + TAG + "] " + msg + tr);
+    }
+
     private void logErr(String msg) {
         Slog.e(TAG, msg);
-        LOCAL_LOG.log(TAG + " ERR: " + msg);
+        LOCAL_LOG.log("[ERR] [" + TAG + "] " + msg);
     }
 
     private void logErr(String msg, Throwable tr) {
         Slog.e(TAG, msg, tr);
-        LOCAL_LOG.log(TAG + " ERR: " + msg + tr);
+        LOCAL_LOG.log("[ERR ] [" + TAG + "] " + msg + tr);
     }
 
     private void logWtf(String msg) {
         Slog.wtf(TAG, msg);
-        LOCAL_LOG.log(TAG + " WTF: " + msg);
+        LOCAL_LOG.log("[WTF] [" + TAG + "] " + msg);
     }
 
     private void logWtf(String msg, Throwable tr) {
         Slog.wtf(TAG, msg, tr);
-        LOCAL_LOG.log(TAG + " WTF: " + msg + tr);
+        LOCAL_LOG.log("[WTF ] [" + TAG + "] " + msg + tr);
     }
 
     /**

@@ -1380,6 +1380,14 @@ class Task extends TaskFragment {
         return getActivity(ActivityRecord::canBeTopRunning);
     }
 
+    int getActivityCount() {
+        final int[] activityCount = new int[1];
+        forAllActivities(ar -> {
+            activityCount[0]++;
+        });
+        return activityCount[0];
+    }
+
     /**
      * Return true if any activities in this task belongs to input uid.
      */
@@ -2780,9 +2788,11 @@ class Task extends TaskFragment {
         }
 
         final Rect visibleFrame = sTmpBounds;
+        final WindowManager.LayoutParams attrs = win.mAttrs;
         visibleFrame.set(win.getFrame());
         visibleFrame.inset(win.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                visibleFrame, win.mAttrs.softInputMode));
+                visibleFrame, attrs.type, win.getWindowingMode(), attrs.softInputMode,
+                attrs.flags));
         out.union(visibleFrame);
     }
 

@@ -24,6 +24,8 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -39,6 +41,7 @@ import org.mockito.MockitoAnnotations;
  * Build/Install/Run:
  *  atest WMJetpackUnitTests:JetpackTaskFragmentOrganizerTest
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class JetpackTaskFragmentOrganizerTest {

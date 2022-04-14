@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -31,6 +32,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.clearInvocations;
 
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
@@ -204,6 +206,39 @@ public class TaskFragmentTest extends WindowTestsBase {
 
         assertTrue(primaryActivity.supportsEnterPipOnTaskSwitch);
         assertFalse(secondaryActivity.supportsEnterPipOnTaskSwitch);
+    }
+
+    @Test
+    public void testEmbeddedTaskFragmentEnterPip_resetOrganizerOverrideConfig() {
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(new Binder())
+                .setCreateParentTask()
+                .createActivityCount(1)
+                .build();
+        final Task task = taskFragment.getTask();
+        final ActivityRecord activity = taskFragment.getTopMostActivity();
+        final Rect taskFragmentBounds = new Rect(0, 0, 300, 1000);
+        task.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        taskFragment.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        taskFragment.setBounds(taskFragmentBounds);
+
+        assertEquals(taskFragmentBounds, activity.getBounds());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, activity.getWindowingMode());
+
+        // Move activity to pinned root task.
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
+                null /* launchIntoPipHostActivity */, "test");
+
+        // Ensure taskFragment requested config is reset.
+        assertEquals(taskFragment, activity.getOrganizedTaskFragment());
+        assertEquals(task, activity.getTask());
+        assertTrue(task.inPinnedWindowingMode());
+        assertTrue(taskFragment.inPinnedWindowingMode());
+        final Rect taskBounds = task.getBounds();
+        assertEquals(taskBounds, taskFragment.getBounds());
+        assertEquals(taskBounds, activity.getBounds());
+        assertEquals(Configuration.EMPTY, taskFragment.getRequestedOverrideConfiguration());
     }
 
     @Test

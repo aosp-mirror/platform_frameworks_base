@@ -48,6 +48,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.VcnContext;
+import com.android.server.vcn.util.LogUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -368,6 +369,18 @@ public class UnderlyingNetworkController {
             return;
         }
 
+        String allNetworkPriorities = "";
+        for (UnderlyingNetworkRecord record : sorted) {
+            if (!allNetworkPriorities.isEmpty()) {
+                allNetworkPriorities += ", ";
+            }
+            allNetworkPriorities += record.network + ": " + record.getPriorityClass();
+        }
+        logInfo(
+                "Selected network changed to "
+                        + (candidate == null ? null : candidate.network)
+                        + ", selected from list: "
+                        + allNetworkPriorities);
         mCurrentRecord = candidate;
         mCb.onSelectedUnderlyingNetworkChanged(mCurrentRecord);
     }
@@ -478,14 +491,38 @@ public class UnderlyingNetworkController {
         }
     }
 
-    private static void logWtf(String msg) {
-        Slog.wtf(TAG, msg);
-        LOCAL_LOG.log(TAG + " WTF: " + msg);
+    private String getLogPrefix() {
+        return "("
+                + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup)
+                + "-"
+                + mConnectionConfig.getGatewayConnectionName()
+                + "-"
+                + System.identityHashCode(this)
+                + ") ";
     }
 
-    private static void logWtf(String msg, Throwable tr) {
+    private String getTagLogPrefix() {
+        return "[ " + TAG + " " + getLogPrefix() + "]";
+    }
+
+    private void logInfo(String msg) {
+        Slog.i(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log("[INFO] " + getTagLogPrefix() + msg);
+    }
+
+    private void logInfo(String msg, Throwable tr) {
+        Slog.i(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log("[INFO] " + getTagLogPrefix() + msg + tr);
+    }
+
+    private void logWtf(String msg) {
+        Slog.wtf(TAG, msg);
+        LOCAL_LOG.log(TAG + "[WTF ] " + getTagLogPrefix() + msg);
+    }
+
+    private void logWtf(String msg, Throwable tr) {
         Slog.wtf(TAG, msg, tr);
-        LOCAL_LOG.log(TAG + " WTF: " + msg + tr);
+        LOCAL_LOG.log(TAG + "[WTF ] " + getTagLogPrefix() + msg + tr);
     }
 
     /** Dumps the state of this record for logging and debugging purposes. */

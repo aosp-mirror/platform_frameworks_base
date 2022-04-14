@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -28,6 +31,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -435,6 +440,107 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testTaskFragmentInPip_startActivityInTaskFragment() {
+        setupTaskFragmentInPip();
+        final ActivityRecord activity = mTaskFragment.getTopMostActivity();
+        final IBinder errorToken = new Binder();
+        spyOn(mAtm.getActivityStartController());
+        spyOn(mAtm.mWindowOrganizerController);
+
+        // Not allow to start activity in a TaskFragment that is in a PIP Task.
+        mTransaction.startActivityInTaskFragment(
+                mFragmentToken, activity.token, new Intent(), null /* activityOptions */)
+                .setErrorCallbackToken(errorToken);
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        verify(mAtm.getActivityStartController(), never()).startActivityInTaskFragment(any(), any(),
+                any(), any(), anyInt(), anyInt());
+        verify(mAtm.mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
+                eq(errorToken), any(IllegalArgumentException.class));
+    }
+
+    @Test
+    public void testTaskFragmentInPip_reparentActivityToTaskFragment() {
+        setupTaskFragmentInPip();
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        final IBinder errorToken = new Binder();
+        spyOn(mAtm.mWindowOrganizerController);
+
+        // Not allow to reparent activity to a TaskFragment that is in a PIP Task.
+        mTransaction.reparentActivityToTaskFragment(mFragmentToken, activity.token)
+                .setErrorCallbackToken(errorToken);
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        verify(mAtm.mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
+                eq(errorToken), any(IllegalArgumentException.class));
+        assertNull(activity.getOrganizedTaskFragment());
+    }
+
+    @Test
+    public void testTaskFragmentInPip_setAdjacentTaskFragment() {
+        setupTaskFragmentInPip();
+        final IBinder errorToken = new Binder();
+        spyOn(mAtm.mWindowOrganizerController);
+
+        // Not allow to set adjacent on a TaskFragment that is in a PIP Task.
+        mTransaction.setAdjacentTaskFragments(mFragmentToken, null /* fragmentToken2 */,
+                null /* options */)
+                .setErrorCallbackToken(errorToken);
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        verify(mAtm.mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
+                eq(errorToken), any(IllegalArgumentException.class));
+        verify(mTaskFragment, never()).setAdjacentTaskFragment(any(), anyBoolean());
+    }
+
+    @Test
+    public void testTaskFragmentInPip_createTaskFragment() {
+        mController.registerOrganizer(mIOrganizer);
+        final Task pipTask = createTask(mDisplayContent, WINDOWING_MODE_PINNED,
+                ACTIVITY_TYPE_STANDARD);
+        final ActivityRecord activity = createActivityRecord(pipTask);
+        final IBinder fragmentToken = new Binder();
+        final IBinder errorToken = new Binder();
+        spyOn(mAtm.mWindowOrganizerController);
+
+        // Not allow to create TaskFragment in a PIP Task.
+        createTaskFragmentFromOrganizer(mTransaction, activity, fragmentToken);
+        mTransaction.setErrorCallbackToken(errorToken);
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        verify(mAtm.mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
+                eq(errorToken), any(IllegalArgumentException.class));
+        assertNull(mAtm.mWindowOrganizerController.getTaskFragment(fragmentToken));
+    }
+
+    @Test
+    public void testTaskFragmentInPip_deleteTaskFragment() {
+        setupTaskFragmentInPip();
+        final IBinder errorToken = new Binder();
+        spyOn(mAtm.mWindowOrganizerController);
+
+        // Not allow to delete a TaskFragment that is in a PIP Task.
+        mTransaction.deleteTaskFragment(mFragmentWindowToken)
+                .setErrorCallbackToken(errorToken);
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        verify(mAtm.mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
+                eq(errorToken), any(IllegalArgumentException.class));
+        assertNotNull(mAtm.mWindowOrganizerController.getTaskFragment(mFragmentToken));
+    }
+
+    @Test
+    public void testTaskFragmentInPip_setConfig() {
+        setupTaskFragmentInPip();
+        spyOn(mAtm.mWindowOrganizerController);
+
+        // Set bounds is ignored on a TaskFragment that is in a PIP Task.
+        mTransaction.setBounds(mFragmentWindowToken, new Rect(0, 0, 100, 100));
+
+        verify(mTaskFragment, never()).setBounds(any());
+    }
+
+    @Test
     public void testDeferPendingTaskFragmentEventsOfInvisibleTask() {
         // Task - TaskFragment - Activity.
         final Task task = createTask(mDisplayContent);
@@ -642,5 +748,21 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         } catch (RemoteException e) {
             fail();
         }
+    }
+
+    /** Setups an embedded TaskFragment in a PIP Task. */
+    private void setupTaskFragmentInPip() {
+        mOrganizer.applyTransaction(mTransaction);
+        mController.registerOrganizer(mIOrganizer);
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setCreateParentTask()
+                .setFragmentToken(mFragmentToken)
+                .setOrganizer(mOrganizer)
+                .createActivityCount(1)
+                .build();
+        mFragmentWindowToken = mTaskFragment.mRemoteToken.toWindowContainerToken();
+        mAtm.mWindowOrganizerController.mLaunchTaskFragments
+                .put(mFragmentToken, mTaskFragment);
+        mTaskFragment.getTask().setWindowingMode(WINDOWING_MODE_PINNED);
     }
 }

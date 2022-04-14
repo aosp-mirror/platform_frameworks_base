@@ -4821,7 +4821,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
-            bindApplicationTimeMillis = SystemClock.elapsedRealtime();
+            bindApplicationTimeMillis = SystemClock.uptimeMillis();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
             if (mPlatformCompat != null) {
@@ -4969,9 +4969,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pid,
                 app.info.packageName,
                 FrameworkStatsLog.PROCESS_START_TIME__TYPE__COLD,
-                app.getStartTime(),
-                (int) (bindApplicationTimeMillis - app.getStartTime()),
-                (int) (SystemClock.elapsedRealtime() - app.getStartTime()),
+                app.getStartElapsedTime(),
+                (int) (bindApplicationTimeMillis - app.getStartUptime()),
+                (int) (SystemClock.uptimeMillis() - app.getStartUptime()),
                 app.getHostingRecord().getType(),
                 (app.getHostingRecord().getName() != null ? app.getHostingRecord().getName() : ""));
         return true;
