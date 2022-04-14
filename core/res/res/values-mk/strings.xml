@@ -1849,8 +1849,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"„Штедачот на батерија“ вклучува „Темна тема“ и ограничува или исклучува активност во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"„Штедачот на батерија“ вклучува „Темна тема“ и ограничува или исклучува активност во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>
@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g>, преведено."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Пораката е преведена од <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> на <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Активност во заднина"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Апликација троши батерија"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Апликација сѐ уште е активна"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> троши батерија во заднина. Допрете за да прегледате."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> може да влијае врз траење на батеријата. Допрете за да ги прегледате активните апликации."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверете ги активните апликации"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не може да се пристапи до камерата на вашиот телефон од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
