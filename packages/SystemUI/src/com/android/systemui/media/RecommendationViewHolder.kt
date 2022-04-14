@@ -31,35 +31,14 @@ class RecommendationViewHolder private constructor(itemView: View) {
 
     // Recommendation screen
     val cardIcon = itemView.requireViewById<ImageView>(R.id.recommendation_card_icon)
-    val cardText = itemView.requireViewById<TextView>(R.id.recommendation_card_text)
     val mediaCoverItems = listOf<ImageView>(
         itemView.requireViewById(R.id.media_cover1),
         itemView.requireViewById(R.id.media_cover2),
-        itemView.requireViewById(R.id.media_cover3),
-        itemView.requireViewById(R.id.media_cover4),
-        itemView.requireViewById(R.id.media_cover5),
-        itemView.requireViewById(R.id.media_cover6))
+        itemView.requireViewById(R.id.media_cover3))
     val mediaCoverContainers = listOf<ViewGroup>(
         itemView.requireViewById(R.id.media_cover1_container),
         itemView.requireViewById(R.id.media_cover2_container),
-        itemView.requireViewById(R.id.media_cover3_container),
-        itemView.requireViewById(R.id.media_cover4_container),
-        itemView.requireViewById(R.id.media_cover5_container),
-        itemView.requireViewById(R.id.media_cover6_container))
-    val mediaCoverItemsResIds = listOf<Int>(
-        R.id.media_cover1,
-        R.id.media_cover2,
-        R.id.media_cover3,
-        R.id.media_cover4,
-        R.id.media_cover5,
-        R.id.media_cover6)
-    val mediaCoverContainersResIds = listOf<Int>(
-        R.id.media_cover1_container,
-        R.id.media_cover2_container,
-        R.id.media_cover3_container,
-        R.id.media_cover4_container,
-        R.id.media_cover5_container,
-        R.id.media_cover6_container)
+        itemView.requireViewById(R.id.media_cover3_container))
 
     // Settings/Guts screen
     val longPressText = itemView.requireViewById<TextView>(R.id.remove_text)
@@ -107,19 +86,12 @@ class RecommendationViewHolder private constructor(itemView: View) {
         // Res Ids for the control components on the recommendation view.
         val controlsIds = setOf(
             R.id.recommendation_card_icon,
-            R.id.recommendation_card_text,
             R.id.media_cover1,
             R.id.media_cover2,
             R.id.media_cover3,
-            R.id.media_cover4,
-            R.id.media_cover5,
-            R.id.media_cover6,
             R.id.media_cover1_container,
             R.id.media_cover2_container,
             R.id.media_cover3_container,
-            R.id.media_cover4_container,
-            R.id.media_cover5_container,
-            R.id.media_cover6_container
         )
 
         // Res Ids for the components on the guts panel.

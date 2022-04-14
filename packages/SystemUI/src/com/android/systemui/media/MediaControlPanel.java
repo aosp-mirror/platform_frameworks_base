@@ -100,8 +100,7 @@ public class MediaControlPanel {
             + ".android.apps.gsa.staticplugins.opa.smartspace.ExportedSmartspaceTrampolineActivity";
     private static final String EXTRAS_SMARTSPACE_INTENT =
             "com.google.android.apps.gsa.smartspace.extra.SMARTSPACE_INTENT";
-    private static final int MEDIA_RECOMMENDATION_ITEMS_PER_ROW = 3;
-    private static final int MEDIA_RECOMMENDATION_MAX_NUM = 6;
+    private static final int MEDIA_RECOMMENDATION_MAX_NUM = 3;
     private static final String KEY_SMARTSPACE_ARTIST_NAME = "artist_name";
     private static final String KEY_SMARTSPACE_OPEN_IN_FOREGROUND = "KEY_OPEN_IN_FOREGROUND";
     private static final String KEY_SMARTSPACE_APP_NAME = "KEY_SMARTSPACE_APP_NAME";
@@ -1001,11 +1000,6 @@ public class MediaControlPanel {
                 appName = packageManager.getApplicationLabel(applicationInfo);
             }
         }
-        // Set the app name as card's title.
-        if (!TextUtils.isEmpty(appName)) {
-            TextView headerTitleText = mRecommendationViewHolder.getCardText();
-            headerTitleText.setText(appName);
-        }
 
         // Set up media rec card's tap action if applicable.
         setSmartspaceRecItemOnClickListener(recommendationCard, data.getCardAction(),
@@ -1016,11 +1010,6 @@ public class MediaControlPanel {
 
         List<ImageView> mediaCoverItems = mRecommendationViewHolder.getMediaCoverItems();
         List<ViewGroup> mediaCoverContainers = mRecommendationViewHolder.getMediaCoverContainers();
-        List<Integer> mediaCoverItemsResIds = mRecommendationViewHolder.getMediaCoverItemsResIds();
-        List<Integer> mediaCoverContainersResIds =
-                mRecommendationViewHolder.getMediaCoverContainersResIds();
-        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
-        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         int mediaRecommendationNum = Math.min(mediaRecommendationList.size(),
                 MEDIA_RECOMMENDATION_MAX_NUM);
         int uiComponentIndex = 0;
@@ -1065,21 +1054,6 @@ public class MediaControlPanel {
                                 recommendation.getTitle(), artistName, appName));
             }
 
-            if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
-                setVisibleAndAlpha(collapsedSet,
-                        mediaCoverItemsResIds.get(uiComponentIndex), true);
-                setVisibleAndAlpha(collapsedSet,
-                        mediaCoverContainersResIds.get(uiComponentIndex), true);
-            } else {
-                setVisibleAndAlpha(collapsedSet,
-                        mediaCoverItemsResIds.get(uiComponentIndex), false);
-                setVisibleAndAlpha(collapsedSet,
-                        mediaCoverContainersResIds.get(uiComponentIndex), false);
-            }
-            setVisibleAndAlpha(expandedSet,
-                    mediaCoverItemsResIds.get(uiComponentIndex), true);
-            setVisibleAndAlpha(expandedSet,
-                    mediaCoverContainersResIds.get(uiComponentIndex), true);
             uiComponentIndex++;
         }
 
