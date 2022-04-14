@@ -5678,8 +5678,8 @@
          restricted level.
     -->
     <array name="config_bg_current_drain_threshold_to_bg_restricted">
-        <item>10.0</item> <!-- regular device -->
-        <item>20.0</item> <!-- low ram device -->
+        <item>4.0</item> <!-- regular device -->
+        <item>8.0</item> <!-- low ram device -->
     </array>
 
     <!-- The background current drain monitoring window size. -->
@@ -5739,6 +5739,12 @@
          show the prompt to user, False - we'll not show it.
     -->
     <bool name="config_bg_prompt_fgs_with_noti_to_bg_restricted">false</bool>
+
+    <!-- The behavior when the system detects it's abusive, should the system prompt the user
+         to put it into the bg restricted level.
+         True - we'll show the prompt to user, False - we'll not show it.
+    -->
+    <bool name="config_bg_prompt_abusive_apps_to_bg_restricted">false</bool>
 
     <!-- The types of state where we'll exempt its battery usage during that state.
          The state here must be one or a combination of STATE_TYPE_* in BaseAppStateTracker.
