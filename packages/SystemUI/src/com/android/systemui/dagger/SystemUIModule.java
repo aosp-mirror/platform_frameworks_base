@@ -67,7 +67,7 @@ import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -178,7 +178,7 @@ public abstract class SystemUIModule {
     abstract Recents optionalRecents();
 
     @BindsOptionalOf
-    abstract CentralSurfaces optionalCentralSurfaces();
+    abstract CentralSurfacesInt optionalCentralSurfaces();
 
     @BindsOptionalOf
     abstract UdfpsHbmProvider optionalUdfpsHbmProvider();
