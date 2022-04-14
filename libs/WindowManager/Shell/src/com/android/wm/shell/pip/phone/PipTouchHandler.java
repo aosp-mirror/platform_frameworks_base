@@ -36,6 +36,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.provider.DeviceConfig;
 import android.util.Size;
+import android.view.DisplayCutout;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -964,21 +965,38 @@ public class PipTouchHandler {
         }
 
         private boolean shouldStash(PointF vel, Rect motionBounds) {
+            final boolean flingToLeft = vel.x < -mStashVelocityThreshold;
+            final boolean flingToRight = vel.x > mStashVelocityThreshold;
+            final int offset = motionBounds.width() / 2;
+            final boolean droppingOnLeft =
+                    motionBounds.left < mPipBoundsState.getDisplayBounds().left - offset;
+            final boolean droppingOnRight =
+                    motionBounds.right > mPipBoundsState.getDisplayBounds().right + offset;
+
+            // Do not allow stash if the destination edge contains display cutout. We only
+            // compare the left and right edges since we do not allow stash on top / bottom.
+            final DisplayCutout displayCutout =
+                    mPipBoundsState.getDisplayLayout().getDisplayCutout();
+            if (displayCutout != null) {
+                if ((flingToLeft || droppingOnLeft)
+                        && !displayCutout.getBoundingRectLeft().isEmpty()) {
+                    return false;
+                } else if ((flingToRight || droppingOnRight)
+                        && !displayCutout.getBoundingRectRight().isEmpty()) {
+                    return false;
+                }
+            }
+
             // If user flings the PIP window above the minimum velocity, stash PIP.
             // Only allow stashing to the edge if PIP wasn't previously stashed on the opposite
             // edge.
-            final boolean stashFromFlingToEdge = ((vel.x < -mStashVelocityThreshold
-                    && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT)
-                    || (vel.x > mStashVelocityThreshold
-                    && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT));
+            final boolean stashFromFlingToEdge =
+                    (flingToLeft && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT)
+                    || (flingToRight && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT);
 
             // If User releases the PIP window while it's out of the display bounds, put
             // PIP into stashed mode.
-            final int offset = motionBounds.width() / 2;
-            final boolean stashFromDroppingOnEdge =
-                    (motionBounds.right > mPipBoundsState.getDisplayBounds().right + offset
-                            || motionBounds.left
-                            < mPipBoundsState.getDisplayBounds().left - offset);
+            final boolean stashFromDroppingOnEdge = droppingOnLeft || droppingOnRight;
 
             return stashFromFlingToEdge || stashFromDroppingOnEdge;
         }
