@@ -104,7 +104,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
@@ -219,7 +218,6 @@ import android.os.SystemProperties;
 import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.WorkSource;
 import android.provider.DeviceConfigInterface;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
@@ -643,10 +641,6 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mBootAnimationStopped = false;
     long mBootWaitForWindowsStartTime = -1;
 
-    // Following variables are for debugging screen wakelock only.
-    WindowState mLastWakeLockHoldingWindow = null;
-    WindowState mLastWakeLockObscuringWindow = null;
-
     /** Dump of the windows and app tokens at the time of the last ANR. Cleared after
      * LAST_ANR_LIFETIME_DURATION_MSECS */
     String mLastANRState;
@@ -1011,10 +1005,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mHasWideColorGamutSupport;
     private boolean mHasHdrSupport;
 
-    /** Who is holding the screen on. */
-    private Session mHoldingScreenOn;
-    private PowerManager.WakeLock mHoldingScreenWakeLock;
-
     /** Whether or not a layout can cause a wake up when theater mode is enabled. */
     boolean mAllowTheaterModeWakeFromLayout;
 
@@ -1348,10 +1338,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mLatencyTracker = LatencyTracker.getInstance(context);
 
         mSettingsObserver = new SettingsObserver();
-
-        mHoldingScreenWakeLock = mPowerManager.newWakeLock(
-                PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG_WM);
-        mHoldingScreenWakeLock.setReferenceCounted(false);
 
         mSurfaceAnimationRunner = new SurfaceAnimationRunner(mTransactionFactory,
                 mPowerManagerInternal);
@@ -6038,34 +6024,6 @@ public class WindowManagerService extends IWindowManager.Stub
         });
     }
 
-    void setHoldScreenLocked(final Session newHoldScreen) {
-        final boolean hold = newHoldScreen != null;
-
-        if (hold && mHoldingScreenOn != newHoldScreen) {
-            mHoldingScreenWakeLock.setWorkSource(new WorkSource(newHoldScreen.mUid));
-        }
-        mHoldingScreenOn = newHoldScreen;
-
-        final boolean state = mHoldingScreenWakeLock.isHeld();
-        if (hold != state) {
-            if (hold) {
-                ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON, "Acquiring screen wakelock due to %s",
-                            mRoot.mHoldScreenWindow);
-                mLastWakeLockHoldingWindow = mRoot.mHoldScreenWindow;
-                mLastWakeLockObscuringWindow = null;
-                mHoldingScreenWakeLock.acquire();
-                mPolicy.keepScreenOnStartedLw();
-            } else {
-                ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON, "Releasing screen wakelock, obscured by %s",
-                            mRoot.mObscuringWindow);
-                mLastWakeLockHoldingWindow = null;
-                mLastWakeLockObscuringWindow = mRoot.mObscuringWindow;
-                mPolicy.keepScreenOnStoppedLw();
-                mHoldingScreenWakeLock.release();
-            }
-        }
-    }
-
     void requestTraversal() {
         mWindowPlacerLocked.requestTraversal();
     }
@@ -6698,9 +6656,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" due to ");
                     pw.print(mLastFinishedFreezeSource);
                 }
-                pw.println();
-        pw.print("  mLastWakeLockHoldingWindow=");pw.print(mLastWakeLockHoldingWindow);
-                pw.print(" mLastWakeLockObscuringWindow="); pw.print(mLastWakeLockObscuringWindow);
                 pw.println();
 
         mInputManagerCallback.dump(pw, "  ");
