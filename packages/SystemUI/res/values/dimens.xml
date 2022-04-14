@@ -959,7 +959,6 @@
     <dimen name="qs_media_album_radius">14dp</dimen>
     <dimen name="qs_media_info_margin">12dp</dimen>
     <dimen name="qs_media_info_spacing">8dp</dimen>
-    <dimen name="qs_media_icon_size">20dp</dimen>
     <dimen name="qs_media_icon_offset">4dp</dimen>
     <dimen name="qs_center_guideline_padding">10dp</dimen>
     <dimen name="qs_media_action_spacing">4dp</dimen>
@@ -980,12 +979,9 @@
     <dimen name="qs_media_session_collapsed_guideline">144dp</dimen>
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
-    <dimen name="qs_aa_media_rec_album_size_collapsed">72dp</dimen>
-    <dimen name="qs_aa_media_rec_album_size_expanded">76dp</dimen>
-    <dimen name="qs_aa_media_gradient_bg_width">32dp</dimen>
-    <dimen name="qs_aa_media_rec_album_margin">8dp</dimen>
-    <dimen name="qs_aa_media_rec_album_margin_vert">4dp</dimen>
-    <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>
+    <dimen name="qs_media_rec_album_size">88dp</dimen>
+    <dimen name="qs_media_rec_album_margin">16dp</dimen>
+    <dimen name="qs_media_rec_icon_size">24dp</dimen>
 
     <!-- Media tap-to-transfer chip for sender device -->
     <dimen name="media_ttt_chip_outer_padding">16dp</dimen>
