@@ -58,6 +58,7 @@ import com.android.internal.logging.InstanceId
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.media.MediaControlPanel.KEY_SMARTSPACE_APP_NAME
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
@@ -104,6 +105,7 @@ private const val SESSION_ARTIST = "SESSION_ARTIST"
 private const val SESSION_TITLE = "SESSION_TITLE"
 private const val DISABLED_DEVICE_NAME = "DISABLED_DEVICE_NAME"
 private const val REC_APP_NAME = "REC APP NAME"
+private const val APP_NAME = "APP_NAME"
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -130,6 +132,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var transitionParent: ViewGroup
+    @Mock private lateinit var broadcastDialogController: BroadcastDialogController
     private lateinit var appIcon: ImageView
     @Mock private lateinit var albumView: ImageView
     private lateinit var titleText: TextView
@@ -160,8 +163,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var dismissText: TextView
 
     private lateinit var session: MediaSession
-    private val device = MediaDeviceData(true, null, DEVICE_NAME)
-    private val disabledDevice = MediaDeviceData(false, null, DISABLED_DEVICE_NAME)
+    private lateinit var device: MediaDeviceData
+    private val disabledDevice = MediaDeviceData(false, null, DISABLED_DEVICE_NAME, null,
+            showBroadcastButton = false)
     private lateinit var mediaData: MediaData
     private val clock = FakeSystemClock()
     @Mock private lateinit var logger: MediaUiEventLogger
@@ -187,6 +191,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var recSubtitle1: TextView
     private lateinit var recSubtitle2: TextView
     private lateinit var recSubtitle3: TextView
+    private var shouldShowBroadcastButton: Boolean = false
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -223,7 +228,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
             logger,
             keyguardStateController,
             activityIntentHelper,
-            lockscreenUserManager) {
+            lockscreenUserManager,
+            broadcastDialogController) {
                 override fun loadAnimator(
                     animId: Int,
                     otionInterpolator: Interpolator,
@@ -236,28 +242,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         initGutsViewHolderMocks()
         initMediaViewHolderMocks()
 
-        // Create media session
-        val metadataBuilder = MediaMetadata.Builder().apply {
-            putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
-            putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
-        }
-        val playbackBuilder = PlaybackState.Builder().apply {
-            setState(PlaybackState.STATE_PAUSED, 6000L, 1f)
-            setActions(PlaybackState.ACTION_PLAY)
-        }
-        session = MediaSession(context, SESSION_KEY).apply {
-            setMetadata(metadataBuilder.build())
-            setPlaybackState(playbackBuilder.build())
-        }
-        session.setActive(true)
-
-        mediaData = MediaTestUtils.emptyMediaData.copy(
-                artist = ARTIST,
-                song = TITLE,
-                packageName = PACKAGE,
-                token = session.sessionToken,
-                device = device,
-                instanceId = instanceId)
+        initDeviceMediaData(false, DEVICE_NAME)
 
         // Set up recommendation view
         initRecommendationViewHolderMocks()
@@ -291,6 +276,34 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(gutsViewHolder.cancelText).thenReturn(cancelText)
         whenever(gutsViewHolder.dismiss).thenReturn(dismiss)
         whenever(gutsViewHolder.dismissText).thenReturn(dismissText)
+    }
+
+    private fun initDeviceMediaData(shouldShowBroadcastButton: Boolean, name: String) {
+        device = MediaDeviceData(true, null, name, null,
+                showBroadcastButton = shouldShowBroadcastButton)
+
+        // Create media session
+        val metadataBuilder = MediaMetadata.Builder().apply {
+            putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
+            putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
+        }
+        val playbackBuilder = PlaybackState.Builder().apply {
+            setState(PlaybackState.STATE_PAUSED, 6000L, 1f)
+            setActions(PlaybackState.ACTION_PLAY)
+        }
+        session = MediaSession(context, SESSION_KEY).apply {
+            setMetadata(metadataBuilder.build())
+            setPlaybackState(playbackBuilder.build())
+        }
+        session.setActive(true)
+
+        mediaData = MediaTestUtils.emptyMediaData.copy(
+                artist = ARTIST,
+                song = TITLE,
+                packageName = PACKAGE,
+                token = session.sessionToken,
+                device = device,
+                instanceId = instanceId)
     }
 
     /**
@@ -1030,6 +1043,28 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state, PACKAGE)
         assertThat(seamlessText.getText()).isEqualTo(DEVICE_NAME)
         assertThat(seamless.isEnabled()).isFalse()
+    }
+
+    @Test
+    fun bindBroadcastButton() {
+        initMediaViewHolderMocks()
+        initDeviceMediaData(true, APP_NAME)
+
+        val mockAvd0 = mock(AnimatedVectorDrawable::class.java)
+        whenever(mockAvd0.mutate()).thenReturn(mockAvd0)
+        val semanticActions0 = MediaButton(
+                playOrPause = MediaAction(mockAvd0, Runnable {}, "play", null)
+        )
+        val state = mediaData.copy(resumption = true, semanticActions = semanticActions0,
+                isPlaying = false)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+        assertThat(seamlessText.getText()).isEqualTo(APP_NAME)
+        assertThat(seamless.isEnabled()).isTrue()
+
+        seamless.callOnClick()
+
+        verify(logger).logOpenBroadcastDialog(anyInt(), eq(PACKAGE), eq(instanceId))
     }
 
     /* ***** Guts tests for the player ***** */

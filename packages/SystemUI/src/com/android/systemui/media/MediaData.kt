@@ -215,5 +215,8 @@ data class MediaDeviceData
     val intent: PendingIntent? = null,
 
     /** Unique id for this device */
-    val id: String? = null
+    val id: String? = null,
+
+    /** Whether or not to show the broadcast button */
+    val showBroadcastButton: Boolean
 )
