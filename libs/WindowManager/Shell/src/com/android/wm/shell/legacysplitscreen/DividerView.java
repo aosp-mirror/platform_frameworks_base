@@ -37,7 +37,6 @@ import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.Choreographer;
@@ -238,22 +237,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         @Override
         public void run() {
             resetBackground();
-        }
-    };
-
-    private Runnable mUpdateEmbeddedMatrix = () -> {
-        if (getViewRootImpl() == null) {
-            return;
-        }
-        if (isHorizontalDivision()) {
-            mTmpMatrix.setTranslate(0, mDividerPositionY - mDividerInsets);
-        } else {
-            mTmpMatrix.setTranslate(mDividerPositionX - mDividerInsets, 0);
-        }
-        mTmpMatrix.getValues(mTmpValues);
-        try {
-            getViewRootImpl().getAccessibilityEmbeddedConnection().setScreenMatrix(mTmpValues);
-        } catch (RemoteException e) {
         }
     };
 
@@ -1044,10 +1027,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             } else {
                 t.setPosition(dividerCtrl, mDividerPositionX - mDividerInsets, 0);
             }
-        }
-        if (getViewRootImpl() != null) {
-            getHandler().removeCallbacks(mUpdateEmbeddedMatrix);
-            getHandler().post(mUpdateEmbeddedMatrix);
         }
     }
 

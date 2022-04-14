@@ -7623,29 +7623,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public MagnificationSpec getCompatibleMagnificationSpecForWindow(IBinder windowToken) {
-            synchronized (mGlobalLock) {
-                WindowState windowState = mWindowMap.get(windowToken);
-                if (windowState == null) {
-                    return null;
-                }
-                MagnificationSpec spec = null;
-                if (mAccessibilityController.hasCallbacks()) {
-                    spec = mAccessibilityController.getMagnificationSpecForWindow(windowState);
-                }
-                if ((spec == null || spec.isNop()) && windowState.mGlobalScale == 1.0f) {
-                    return null;
-                }
-                MagnificationSpec result = new MagnificationSpec();
-                if (spec != null) {
-                    result.setTo(spec);
-                }
-                result.scale *= windowState.mGlobalScale;
-                return result;
-            }
-        }
-
-        @Override
         public boolean setMagnificationCallbacks(int displayId,
                 @Nullable MagnificationCallbacks callbacks) {
             synchronized (mGlobalLock) {
