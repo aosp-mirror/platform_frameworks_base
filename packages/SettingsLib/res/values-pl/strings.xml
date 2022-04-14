@@ -389,7 +389,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Warstwy debugowania GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Zezwalaj na ładowanie warstw debugowania GPU"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Włącz szczegółowe rejestrowanie dostawcy"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Dołączaj do raportów o błędach dodatkowe dane dostawcy dotyczące konkretnego urządzenia, które mogą zawierać dane prywatne oraz wykorzystywać więcej baterii lub pamięci."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Dołączaj do raportów o błędach dodatkowe dane dostawcy dotyczące konkretnego urządzenia, które mogą zawierać dane prywatne oraz wykorzystywać więcej baterii lub pamięci"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala animacji okna"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala animacji przejścia"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Skala długości animacji"</string>
