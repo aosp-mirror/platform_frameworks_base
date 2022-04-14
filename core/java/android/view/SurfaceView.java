@@ -967,7 +967,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 final boolean redrawNeeded = sizeChanged || creating || hintChanged
                         || (mVisible && !mDrawFinished);
                 boolean shouldSyncBuffer =
-                        redrawNeeded && viewRoot.wasRelayoutRequested() && viewRoot.isInSync();
+                        redrawNeeded && viewRoot.wasRelayoutRequested() && viewRoot.isInLocalSync();
                 SyncBufferTransactionCallback syncBufferTransactionCallback = null;
                 if (shouldSyncBuffer) {
                     syncBufferTransactionCallback = new SyncBufferTransactionCallback();
