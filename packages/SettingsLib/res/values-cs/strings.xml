@@ -173,9 +173,9 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Odebrané aplikace"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Odebrané aplikace a odebraní uživatelé"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Aktualizace systému"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Připojení přes USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Tethering přes USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Přenosný hotspot"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Připojení přes Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Tethering přes Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Sdílené připojení"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Sdílené připojení a přenosný hotspot"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Všechny pracovní aplikace"</string>
@@ -310,7 +310,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Zadejte hostitele poskytovatele DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nelze se připojit"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobrazit možnosti certifikace bezdrátového displeje"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšit úroveň protokolování Wi‑Fi zobrazenou v SSID a RSSI při výběru sítě Wi‑Fi"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšit úroveň protokolování Wi‑Fi, při výběru Wi‑Fi zobrazovat RSSI pro každý SSID"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Snižuje vyčerpávání baterie a vylepšuje výkon sítě"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Když je tento režim aktivován, adresa MAC tohoto zařízení se může změnit pokaždé, když se zařízení připojí k síti s aktivovanou randomizací adres MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Měřená"</string>
@@ -336,7 +336,7 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Povolit nastavení pro vývojáře?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Tato nastavení jsou určena pouze pro vývojáře. Mohou způsobit rozbití nebo nesprávné fungování zařízení a nainstalovaných aplikací."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Ověřovat aplikace z USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kontrolovat škodlivost aplikací nainstalovaných pomocí nástroje ADB/ADT"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kontrolovat škodlivost aplikací nainstalovaných pomocí nástroje ADB nebo ADT"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Zařízení Bluetooth se budou zobrazovat bez názvů (pouze adresy MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Zakáže funkci absolutní hlasitosti Bluetooth. Zabrání tak problémům s hlasitostí vzdálených zařízení (jako je příliš vysoká hlasitost nebo nemožnost ovládání)."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Zapne sadu funkcí Bluetooth Gabeldorche."</string>
@@ -351,7 +351,7 @@
     <string name="debug_app_set" msgid="6599535090477753651">"Aplikace pro ladění: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Výběr aplikace"</string>
     <string name="no_application" msgid="9038334538870247690">"Nic"</string>
-    <string name="wait_for_debugger" msgid="7461199843335409809">"Počkat na ladicí program"</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"Čekat na ladicí program"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Aplikace čeká na připojení ladicího programu"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Vstup"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Vykreslování"</string>
