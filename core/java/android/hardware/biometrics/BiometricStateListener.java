@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware.fingerprint;
+package android.hardware.biometrics;
 
 import android.annotation.IntDef;
 
@@ -22,10 +22,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Interface for handling state changes in fingerprint-related events.
+ * Interface for handling state changes in biometric sensors.
  * @hide
  */
-public abstract class FingerprintStateListener extends IFingerprintStateListener.Stub {
+public abstract class BiometricStateListener extends IBiometricStateListener.Stub {
     // Operation has not started yet.
     public static final int STATE_IDLE = 0;
 
@@ -43,16 +43,19 @@ public abstract class FingerprintStateListener extends IFingerprintStateListener
 
     @IntDef({STATE_IDLE, STATE_ENROLLING, STATE_KEYGUARD_AUTH, STATE_BP_AUTH, STATE_AUTH_OTHER})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface State {}
+    public @interface State {
+    }
 
     /**
      * Defines behavior in response to state update
-     * @param newState new state of fingerprint sensor
+     * @param newState new state of the biometric sensor
      */
-    public void onStateChanged(@FingerprintStateListener.State int newState) {}
+    public void onStateChanged(@BiometricStateListener.State int newState) {
+    }
 
     /**
      * Invoked when enrollment state changes for the specified user
      */
-    public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {}
+    public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
+    }
 }

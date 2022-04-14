@@ -43,6 +43,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.IBiometricStateListener;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
@@ -56,7 +57,6 @@ import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
-import android.hardware.fingerprint.IFingerprintStateListener;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
@@ -87,6 +87,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -117,7 +118,7 @@ public class FingerprintService extends SystemService {
     private final LockPatternUtils mLockPatternUtils;
     private final FingerprintServiceWrapper mServiceWrapper;
     @NonNull private final List<ServiceProvider> mServiceProviders;
-    @NonNull private final FingerprintStateCallback mFingerprintStateCallback;
+    @NonNull private final BiometricStateCallback mBiometricStateCallback;
     @NonNull private final Handler mHandler;
 
     @GuardedBy("mLock")
@@ -128,20 +129,20 @@ public class FingerprintService extends SystemService {
     @NonNull private final List<FingerprintSensorPropertiesInternal> mSensorProps;
 
     /**
-     * Registers FingerprintStateListener in list stored by FingerprintService
-     * @param listener new FingerprintStateListener being added
+     * Registers BiometricStateListener in list stored by FingerprintService
+     * @param listener new BiometricStateListener being added
      */
-    public void registerFingerprintStateListener(@NonNull IFingerprintStateListener listener) {
-        mFingerprintStateCallback.registerFingerprintStateListener(listener);
+    public void registerBiometricStateListener(@NonNull IBiometricStateListener listener) {
+        mBiometricStateCallback.registerBiometricStateListener(listener);
         broadcastCurrentEnrollmentState(listener);
     }
 
     /**
      * @param listener if non-null, notifies only this listener. if null, notifies all listeners
-     *                 in {@link FingerprintStateCallback}. This is slightly ugly, but reduces
+     *                 in {@link BiometricStateCallback}. This is slightly ugly, but reduces
      *                 redundant code.
      */
-    private void broadcastCurrentEnrollmentState(@Nullable IFingerprintStateListener listener) {
+    private void broadcastCurrentEnrollmentState(@Nullable IBiometricStateListener listener) {
         final UserManager um = UserManager.get(getContext());
         synchronized (mLock) {
             // Update the new listener with current state of all sensors
@@ -154,10 +155,10 @@ public class FingerprintService extends SystemService {
                     // Defer this work and allow the loop to release the lock sooner
                     mHandler.post(() -> {
                         if (listener != null) {
-                            mFingerprintStateCallback.notifyFingerprintEnrollmentStateChanged(
+                            mBiometricStateCallback.notifyEnrollmentStateChanged(
                                     listener, userInfo.id, prop.sensorId, enrolled);
                         } else {
-                            mFingerprintStateCallback.notifyAllFingerprintEnrollmentStateChanged(
+                            mBiometricStateCallback.notifyAllEnrollmentStateChanged(
                                     userInfo.id, prop.sensorId, enrolled);
                         }
                     });
@@ -663,7 +664,7 @@ public class FingerprintService extends SystemService {
                             pw.println("Dumping for sensorId: " + props.sensorId
                                     + ", provider: " + provider.getClass().getSimpleName());
                             pw.println("Fps state: "
-                                    + mFingerprintStateCallback.getFingerprintState());
+                                    + mBiometricStateCallback.getBiometricState());
                             provider.dumpInternal(props.sensorId, pw);
                             pw.println();
                         }
@@ -859,12 +860,12 @@ public class FingerprintService extends SystemService {
                         Fingerprint21UdfpsMock.CONFIG_ENABLE_TEST_UDFPS, 0 /* default */,
                         UserHandle.USER_CURRENT) != 0) {
                     fingerprint21 = Fingerprint21UdfpsMock.newInstance(getContext(),
-                            mFingerprintStateCallback, hidlSensor,
+                            mBiometricStateCallback, hidlSensor,
                             mLockoutResetDispatcher, mGestureAvailabilityDispatcher,
                             BiometricContext.getInstance(getContext()));
                 } else {
                     fingerprint21 = Fingerprint21.newInstance(getContext(),
-                            mFingerprintStateCallback, hidlSensor, mHandler,
+                            mBiometricStateCallback, hidlSensor, mHandler,
                             mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
                 }
                 mServiceProviders.add(fingerprint21);
@@ -887,7 +888,7 @@ public class FingerprintService extends SystemService {
                 try {
                     final SensorProps[] props = fp.getSensorProps();
                     final FingerprintProvider provider =
-                            new FingerprintProvider(getContext(), mFingerprintStateCallback, props,
+                            new FingerprintProvider(getContext(), mBiometricStateCallback, props,
                                     instance, mLockoutResetDispatcher,
                                     mGestureAvailabilityDispatcher,
                                     BiometricContext.getInstance(getContext()));
@@ -1027,8 +1028,8 @@ public class FingerprintService extends SystemService {
         }
 
         @Override
-        public void registerFingerprintStateListener(@NonNull IFingerprintStateListener listener) {
-            FingerprintService.this.registerFingerprintStateListener(listener);
+        public void registerBiometricStateListener(@NonNull IBiometricStateListener listener) {
+            FingerprintService.this.registerBiometricStateListener(listener);
         }
     }
 
@@ -1040,7 +1041,7 @@ public class FingerprintService extends SystemService {
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mServiceProviders = new ArrayList<>();
-        mFingerprintStateCallback = new FingerprintStateCallback();
+        mBiometricStateCallback = new BiometricStateCallback();
         mAuthenticatorsRegisteredCallbacks = new RemoteCallbackList<>();
         mSensorProps = new ArrayList<>();
         mHandler = new Handler(Looper.getMainLooper());
