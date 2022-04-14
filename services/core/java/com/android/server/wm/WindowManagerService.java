@@ -989,6 +989,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final LetterboxConfiguration mLetterboxConfiguration;
 
+    private boolean mIsIgnoreOrientationRequestDisabled;
+
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
@@ -4086,6 +4088,36 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             return display.getIgnoreOrientationRequest();
         }
+    }
+
+    /**
+     * Controls whether ignore orientation request logic in {@link DisplayArea} is disabled
+     * at runtime.
+     *
+     * <p>Note: this assumes that {@link #mGlobalLock} is held by the caller.
+     *
+     * @param isDisabled when {@code true}, the system always ignores the value of {@link
+     *                   DisplayArea#getIgnoreOrientationRequest} and app requested orientation is
+     *                   respected.
+     */
+    void setIsIgnoreOrientationRequestDisabled(boolean isDisabled) {
+        if (isDisabled == mIsIgnoreOrientationRequestDisabled) {
+            return;
+        }
+        mIsIgnoreOrientationRequestDisabled = isDisabled;
+        for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
+            mRoot.getChildAt(i).onIsIgnoreOrientationRequestDisabledChanged();
+        }
+    }
+
+    /**
+     * Whether the system ignores the value of {@link DisplayArea#getIgnoreOrientationRequest} and
+     * app requested orientation is respected.
+     *
+     * <p>Note: this assumes that {@link #mGlobalLock} is held by the caller.
+     */
+    boolean isIgnoreOrientationRequestDisabled() {
+        return mIsIgnoreOrientationRequestDisabled;
     }
 
     @Override

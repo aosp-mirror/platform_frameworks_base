@@ -1001,6 +1001,19 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
     }
 
+    @Override
+    public void setIsIgnoreOrientationRequestDisabled(boolean isDisabled) {
+        enforceTaskPermission("setIsIgnoreOrientationRequestDisabled()");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mService.mWindowManager.setIsIgnoreOrientationRequestDisabled(isDisabled);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     public boolean handleInterceptBackPressedOnTaskRoot(Task task) {
         if (task == null || !task.isOrganized()
                 || !mInterceptBackPressedOnRootTasks.contains(task.mTaskId)) {
