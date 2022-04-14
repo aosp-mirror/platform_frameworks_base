@@ -172,11 +172,11 @@ public class VcnManager {
      *
      * <p>An app that has carrier privileges for any of the subscriptions in the given group may
      * clear a VCN configuration. This API is ONLY permitted for callers running as the primary
-     * user. Any active VCN will be torn down.
+     * user. Any active VCN associated with this configuration will be torn down.
      *
      * @param subscriptionGroup the subscription group that the configuration should be applied to
-     * @throws SecurityException if the caller does not have carrier privileges, or is not running
-     *     as the primary user
+     * @throws SecurityException if the caller does not have carrier privileges, is not the owner of
+     *     the associated configuration, or is not running as the primary user
      * @throws IOException if the configuration failed to be cleared from disk. This may occur due
      *     to temporary disk errors, or more permanent conditions such as a full disk.
      */
@@ -196,8 +196,13 @@ public class VcnManager {
     /**
      * Retrieves the list of Subscription Groups for which a VCN Configuration has been set.
      *
-     * <p>The returned list will include only subscription groups for which the carrier app is
-     * privileged, and which have an associated {@link VcnConfig}.
+     * <p>The returned list will include only subscription groups for which an associated {@link
+     * VcnConfig} exists, and the app is either:
+     *
+     * <ul>
+     *   <li>Carrier privileged for that subscription group, or
+     *   <li>Is the provisioning package of the config
+     * </ul>
      *
      * @throws SecurityException if the caller is not running as the primary user
      */
