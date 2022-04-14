@@ -238,7 +238,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"Shortcut ng ulat sa bug"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Magpakita ng button sa power menu sa pagkuha ng ulat sa bug"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Manatiling gumagana"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"Hindi kailanman hihinto ang screen kapag kinakargahan"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"Hindi kailanman hihinto ang screen kapag nagcha-charge"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"I-enable ang Bluetooth HCI snoop log"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"I-capture ang mga Bluetooth packet. (I-toggle ang Bluetooth pagkatapos baguhin ang setting na ito)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Pag-a-unlock ng OEM"</string>
@@ -339,7 +339,7 @@
     <string name="show_screen_updates" msgid="2078782895825535494">"Ipakita update sa surface"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"I-flash ang buong window surface kapag nag-update"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Ipakita update ng view"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"I-flash mga view sa loob ng window kapag na-draw"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"I-flash ang views sa loob ng window kapag na-draw"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Ipakita ang mga update ng hardware layers"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"I-flash nang berde ang hardware layer pag nag-update ito"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"I-debug ang GPU overdraw"</string>

@@ -205,7 +205,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"இவரால் இணைப்புமுறை அமைப்புகளை மாற்ற முடியாது"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"இவரால் ஆக்சஸ் பாயிண்ட் நேம் அமைப்புகளை மாற்ற முடியாது"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB பிழைதிருத்தம்"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"USB இணைக்கப்பட்டிருக்கும்போது பிழைத்திருத்தப் பயன்முறையை அமை"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"USB இணைக்கப்பட்டிருக்கும்போது பிழைத்திருத்தப் பயன்முறை இயக்கப்படும்"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB பிழைத்திருத்த அங்கீகரிப்புகளை நிராகரி"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"வைஃபை பிழைதிருத்தம்"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"வைஃபையை இணைக்கும்போது பிழைதிருத்தப் பயன்முறை இயக்கப்படும்"</string>
@@ -281,8 +281,8 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"தனிப்பட்ட DNS வழங்குநரின் ஹோஸ்ட் பெயர்"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS வழங்குநரின் ஹோஸ்ட் பெயரை உள்ளிடவும்"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"இணைக்க முடியவில்லை"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டு"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"வைஃபை நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வுக் கருவியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டும்"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"வைஃபை நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வுக் கருவியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டும்"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"பேட்டரி தீர்ந்துபோவதைக் குறைத்து நெட்வொர்க்கின் செயல்திறனை மேம்படுத்தும்"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"இந்தப் பயன்முறை இயக்கப்படும்போது இந்தச் சாதனத்தின் MAC முகவரியானது ஒவ்வொரு முறை MAC ரேண்டம் ஆக்குதல் இயக்கப்பட்டிருக்கும் நெட்வொர்க்குடன் இணைக்கப்படும்போதும் மாறக்கூடும்."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"கட்டண நெட்வொர்க்"</string>
@@ -319,7 +319,7 @@
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP சரிபார்க்கும் செயல்பாடுகளை அமை"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"பிழைதிருத்தம்"</string>
     <string name="debug_app" msgid="8903350241392391766">"பிழைத்திருத்தப் பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"பிழைத்திருத்தப் ஆப்ஸ் அமைக்கப்படவில்லை"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"பிழைத்திருத்த ஆப்ஸ் அமைக்கப்படவில்லை"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"பிழைதிருத்தும் ஆப்ஸ்: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="no_application" msgid="9038334538870247690">"ஒன்றுமில்லை"</string>
@@ -331,28 +331,28 @@
     <string name="media_category" msgid="8122076702526144053">"மீடியா"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"கண்காணி"</string>
     <string name="strict_mode" msgid="889864762140862437">"நிலையான பயன்முறை இயக்கப்பட்டது"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"முக்கியத் தொடரிழையில் நீண்ட நேரம் செயல்படும்போது திரையைக் காட்சிப்படுத்து"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"முக்கியத் தொடரிழையில் நீண்ட நேரம் செயல்படும்போது திரையைக் காட்சிப்படுத்தும்"</string>
     <string name="pointer_location" msgid="7516929526199520173">"குறிப்பான் இடம்"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"திரையின் மேல் அடுக்கானது தற்போது தொடப்பட்டிருக்கும் தரவைக் காண்பிக்கிறது"</string>
     <string name="show_touches" msgid="8437666942161289025">"தட்டல்களைக் காட்டு"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"தட்டல்களின் போது காட்சி அறிகுறிகளைக் காட்டு"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"தட்டல்களின் போது காட்சி அறிகுறிகளைக் காட்டும்"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"மேலோட்ட புதுப்பிப்புகளைக் காட்டு"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"சாளரத்தின் பரப்புநிலைகள் புதுப்பிக்கப்படும்போது, அவற்றை முழுவதுமாகக் காட்டு"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"சாளரத்தின் பரப்புநிலைகள் புதுப்பிக்கப்படும்போது, அவற்றை முழுவதுமாகக் காட்டும்"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"வியூ அப்டேட்ஸைக் காட்டு"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"வரையும்போது, சாளரங்களில் காட்சிகளைக் காட்டு"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"வரையும்போது, சாளரங்களில் காட்சிகளைக் காட்டும்"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"வன்பொருள் லேயர்களின் புதுப்பிப்புகளைக் காட்டு"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"வன்பொருள் லேயர்களைப் புதுப்பிக்கும்போது, அவற்றைப் பச்சை நிறத்தில் காட்டு"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"வன்பொருள் லேயர்களைப் புதுப்பிக்கும்போது, அவற்றைப் பச்சை நிறத்தில் காட்டும்"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU ஓவர்டிரா பிழைதிருத்து"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW மேலடுக்குகளை முடக்கு"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"திரைத் தொகுத்தலுக்கு எப்போதும் GPU ஐப் பயன்படுத்து"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"வண்ணத்தின் இடைவெளியை உருவகப்படுத்து"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL தடயங்களை இயக்கு"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB ஆடியோ ரூட்டிங்கை முடக்கு"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ஆடியோ உபகரணத்திற்கு தன்னியக்க ரூட்டிங்கை முடக்கு"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ஆடியோ உபகரணத்திற்கு தன்னியக்க ரூட்டிங்கை முடக்கும்"</string>
     <string name="debug_layout" msgid="1659216803043339741">"தளவமைப்பு எல்லைகளைக் காட்டு"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"கிளிப் எல்லைகள், ஓரங்கள், மேலும் பலவற்றைக் காட்டு"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL தளவமைப்பின் திசையை வலியுறுத்து"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"எல்லா மொழிகளுக்கும் திரையின் தளவமைப்பு திசையை RTL க்கு மாற்று"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"எல்லா மொழிகளுக்கும் திரையின் தளவமைப்பு திசையை RTL க்கு மாற்றும்"</string>
     <string name="window_blurs" msgid="6831008984828425106">"திரை-நிலை மங்கலை அனுமதி"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ஐ வலியுறுத்து"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 பயன்பாடுகளில் 4x MSAA ஐ இயக்கு"</string>
@@ -368,7 +368,7 @@
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"இரண்டாம்நிலைக் காட்சிகளை உருவகப்படுத்து"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ஆப்ஸ்"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"செயல்பாடுகளை வைத்திருக்காதே"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"பயனர் வெளியேறியதும் செயல்பாடுகளை நீக்கு"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"பயனர் வெளியேறியதும் செயல்பாடுகளை நீக்கும்"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"பின்புலச் செயல்முறை வரம்பு"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"பின்புல ANRகளைக் காட்டு"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"பின்புல ஆப்ஸுக்கு, ஆப்ஸ் பதிலளிக்கவில்லை என்ற செய்தியைக் காட்டும்"</string>
