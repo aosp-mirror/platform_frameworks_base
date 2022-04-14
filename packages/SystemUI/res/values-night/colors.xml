@@ -59,7 +59,6 @@
     <color name="global_actions_alert_text">@color/GM2_red_300</color>
 
     <!-- Floating overlay actions -->
-    <color name="overlay_button_ripple">#42FFFFFF</color>
     <color name="overlay_background_protection_start">#80000000</color> <!-- 50% black -->
 
     <!-- Media -->

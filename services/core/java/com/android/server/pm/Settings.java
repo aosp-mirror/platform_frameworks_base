@@ -380,8 +380,8 @@ public final class Settings implements Watchable, Snappable {
     private final SnapshotCache<WatchedArrayMap<String, PackageSetting>> mPackagesSnapshot;
 
     /**
-     * List of packages that were involved in installing other packages, i.e. are listed
-     * in at least one app's InstallSource.
+     * List of packages that were involved in installing other packages, i.e. packages that created
+     * new sessions or are listed in at least one app's InstallSource.
      */
     @Watched
     private final WatchedArraySet<String> mInstallerPackages;
@@ -5922,5 +5922,9 @@ public final class Settings implements Watchable, Snappable {
                 dumpState.setTitlePrinted(true);
             }
         }
+    }
+
+    boolean isInstallerPackage(@NonNull String packageName) {
+        return mInstallerPackages.contains(packageName);
     }
 }

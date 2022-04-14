@@ -1244,11 +1244,11 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         float expansion = 0.8f;
         float expectedAlpha =
-                BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(expansion);
+                BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
         assertAlphaAfterExpansion(mNotificationsScrim, expectedAlpha, expansion);
 
         expansion = 0.2f;
-        expectedAlpha = BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(expansion);
+        expectedAlpha = BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
         assertAlphaAfterExpansion(mNotificationsScrim, expectedAlpha, expansion);
     }
 
@@ -1284,7 +1284,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Verify normal behavior after
         mScrimController.setUnocclusionAnimationRunning(false);
         float expansion = 0.4f;
-        float alpha = 1 - BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(expansion);
+        float alpha = 1 - BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
         assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
     }
 
@@ -1316,15 +1316,15 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
 
         float expansion = 0.8f;
-        float alpha = 1 - BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(expansion);
+        float alpha = 1 - BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
         assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
 
         expansion = 0.4f;
-        alpha = 1 - BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(expansion);
+        alpha = 1 - BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
         assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
 
         expansion = 0.2f;
-        alpha = 1 - BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(expansion);
+        alpha = 1 - BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
         assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
     }
 

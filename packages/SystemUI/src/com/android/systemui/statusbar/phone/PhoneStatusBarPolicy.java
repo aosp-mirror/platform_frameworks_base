@@ -292,9 +292,7 @@ public class PhoneStatusBarPolicy
         mIconController.setIconVisibility(mSlotHotspot, mHotspot.isHotspotEnabled());
 
         // managed profile
-        mIconController.setIcon(mSlotManagedProfile, R.drawable.stat_sys_managed_profile_status,
-                getManagedProfileAccessibilityString());
-        mIconController.setIconVisibility(mSlotManagedProfile, mManagedProfileIconVisible);
+        updateManagedProfile();
 
         // data saver
         mIconController.setIcon(mSlotDataSaver, R.drawable.stat_sys_data_saver,
@@ -521,7 +519,7 @@ public class PhoneStatusBarPolicy
     }
 
     private void updateManagedProfile() {
-        // getLastResumedActivityUserId needds to acquire the AM lock, which may be contended in
+        // getLastResumedActivityUserId needs to acquire the AM lock, which may be contended in
         // some cases. Since it doesn't really matter here whether it's updated in this frame
         // or in the next one, we call this method from our UI offload thread.
         mUiBgExecutor.execute(() -> {
@@ -529,6 +527,7 @@ public class PhoneStatusBarPolicy
             try {
                 userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
                 boolean isManagedProfile = mUserManager.isManagedProfile(userId);
+                String accessibilityString = getManagedProfileAccessibilityString();
                 mHandler.post(() -> {
                     final boolean showIcon;
                     if (isManagedProfile && (!mKeyguardStateController.isShowing()
@@ -536,7 +535,7 @@ public class PhoneStatusBarPolicy
                         showIcon = true;
                         mIconController.setIcon(mSlotManagedProfile,
                                 R.drawable.stat_sys_managed_profile_status,
-                                getManagedProfileAccessibilityString());
+                                accessibilityString);
                     } else {
                         showIcon = false;
                     }

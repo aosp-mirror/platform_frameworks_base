@@ -53,6 +53,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -98,6 +100,8 @@ public abstract class AuthCredentialView extends LinearLayout {
     protected long mOperationId;
     protected int mEffectiveUserId;
     protected ErrorTimer mErrorTimer;
+
+    protected @Background DelayableExecutor mBackgroundExecutor;
 
     interface Callback {
         void onCredentialMatched(byte[] attestation);
@@ -215,6 +219,10 @@ public abstract class AuthCredentialView extends LinearLayout {
 
     void setContainerView(AuthContainerView containerView) {
         mContainerView = containerView;
+    }
+
+    void setBackgroundExecutor(@Background DelayableExecutor bgExecutor) {
+        mBackgroundExecutor = bgExecutor;
     }
 
     @Override
@@ -377,27 +385,33 @@ public abstract class AuthCredentialView extends LinearLayout {
     }
 
     private void showLastAttemptBeforeWipeDialog() {
-        final AlertDialog alertDialog = new AlertDialog.Builder(mContext)
-                .setTitle(R.string.biometric_dialog_last_attempt_before_wipe_dialog_title)
-                .setMessage(
-                        getLastAttemptBeforeWipeMessage(getUserTypeForWipe(), mCredentialType))
-                .setPositiveButton(android.R.string.ok, null)
-                .create();
-        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
-        alertDialog.show();
+        mBackgroundExecutor.execute(() -> {
+            final AlertDialog alertDialog = new AlertDialog.Builder(mContext)
+                    .setTitle(R.string.biometric_dialog_last_attempt_before_wipe_dialog_title)
+                    .setMessage(
+                            getLastAttemptBeforeWipeMessage(getUserTypeForWipe(), mCredentialType))
+                    .setPositiveButton(android.R.string.ok, null)
+                    .create();
+            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+            mHandler.post(alertDialog::show);
+        });
     }
 
     private void showNowWipingDialog() {
-        final AlertDialog alertDialog = new AlertDialog.Builder(mContext)
-                .setMessage(getNowWipingMessage(getUserTypeForWipe()))
-                .setPositiveButton(
-                        com.android.settingslib.R.string.failed_attempts_now_wiping_dialog_dismiss,
-                        null /* OnClickListener */)
-                .setOnDismissListener(
-                        dialog -> mContainerView.animateAway(AuthDialogCallback.DISMISSED_ERROR))
-                .create();
-        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
-        alertDialog.show();
+        mBackgroundExecutor.execute(() -> {
+            String nowWipingMessage = getNowWipingMessage(getUserTypeForWipe());
+            final AlertDialog alertDialog = new AlertDialog.Builder(mContext)
+                    .setMessage(nowWipingMessage)
+                    .setPositiveButton(
+                            com.android.settingslib.R.string.failed_attempts_now_wiping_dialog_dismiss,
+                            null /* OnClickListener */)
+                    .setOnDismissListener(
+                            dialog -> mContainerView.animateAway(
+                                    AuthDialogCallback.DISMISSED_ERROR))
+                    .create();
+            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+            mHandler.post(alertDialog::show);
+        });
     }
 
     private @UserType int getUserTypeForWipe() {
@@ -412,6 +426,7 @@ public abstract class AuthCredentialView extends LinearLayout {
         }
     }
 
+    // This should not be called on the main thread to avoid making an IPC.
     private String getLastAttemptBeforeWipeMessage(
             @UserType int userType, @Utils.CredentialType int credentialType) {
         switch (userType) {
@@ -442,6 +457,7 @@ public abstract class AuthCredentialView extends LinearLayout {
         }
     }
 
+    // This should not be called on the main thread to avoid making an IPC.
     private String getLastAttemptBeforeWipeProfileMessage(
             @Utils.CredentialType int credentialType) {
         return mDevicePolicyManager.getResources().getString(

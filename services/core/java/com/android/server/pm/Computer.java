@@ -440,10 +440,6 @@ public interface Computer extends PackageDataSnapshot {
     boolean getBlockUninstallForUser(@NonNull String packageName, @UserIdInt int userId);
 
     @Nullable
-    SparseArray<int[]> getBroadcastAllowList(@NonNull String packageName, @UserIdInt int[] userIds,
-            boolean isInstantApp);
-
-    @Nullable
     String getInstallerPackageName(@NonNull String packageName);
 
     @Nullable
@@ -479,6 +475,16 @@ public interface Computer extends PackageDataSnapshot {
 
     boolean isPackageSignedByKeySetExactly(@NonNull String packageName, @NonNull KeySet ks);
 
+    /**
+     * See {@link AppsFilterSnapshot#getVisibilityAllowList(PackageStateInternal, int[], ArrayMap)}
+     */
+    @Nullable
+    SparseArray<int[]> getVisibilityAllowLists(@NonNull String packageName,
+            @UserIdInt int[] userIds);
+
+    /**
+     * See {@link AppsFilterSnapshot#getVisibilityAllowList(PackageStateInternal, int[], ArrayMap)}
+     */
     @Nullable
     int[] getVisibilityAllowList(@NonNull String packageName, @UserIdInt int userId);
 

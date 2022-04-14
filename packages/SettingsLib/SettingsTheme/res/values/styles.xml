@@ -26,10 +26,4 @@
     <style name="TextAppearance.CategoryTitle.SettingsLib"
            parent="@android:style/TextAppearance.DeviceDefault.Medium">
     </style>
-
-    <style name="Spinner.SettingsLib"
-           parent="android:style/Widget.Material.Spinner">
-        <item name="android:background">@drawable/settingslib_spinner_background</item>
-        <item name="android:dropDownVerticalOffset">48dp</item>
-    </style>
 </resources>

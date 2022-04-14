@@ -71,8 +71,6 @@ static const char PRODUCT_BOOTANIMATION_DARK_FILE[] = "/product/media/bootanimat
 static const char PRODUCT_BOOTANIMATION_FILE[] = "/product/media/bootanimation.zip";
 static const char SYSTEM_BOOTANIMATION_FILE[] = "/system/media/bootanimation.zip";
 static const char APEX_BOOTANIMATION_FILE[] = "/apex/com.android.bootanimation/etc/bootanimation.zip";
-static const char PRODUCT_ENCRYPTED_BOOTANIMATION_FILE[] = "/product/media/bootanimation-encrypted.zip";
-static const char SYSTEM_ENCRYPTED_BOOTANIMATION_FILE[] = "/system/media/bootanimation-encrypted.zip";
 static const char OEM_SHUTDOWNANIMATION_FILE[] = "/oem/media/shutdownanimation.zip";
 static const char PRODUCT_SHUTDOWNANIMATION_FILE[] = "/product/media/shutdownanimation.zip";
 static const char SYSTEM_SHUTDOWNANIMATION_FILE[] = "/system/media/shutdownanimation.zip";
@@ -652,23 +650,6 @@ bool BootAnimation::findBootAnimationFileInternal(const std::vector<std::string>
 }
 
 void BootAnimation::findBootAnimationFile() {
-    // If the device has encryption turned on or is in process
-    // of being encrypted we show the encrypted boot animation.
-    char decrypt[PROPERTY_VALUE_MAX];
-    property_get("vold.decrypt", decrypt, "");
-
-    bool encryptedAnimation = atoi(decrypt) != 0 ||
-        !strcmp("trigger_restart_min_framework", decrypt);
-
-    if (!mShuttingDown && encryptedAnimation) {
-        static const std::vector<std::string> encryptedBootFiles = {
-            PRODUCT_ENCRYPTED_BOOTANIMATION_FILE, SYSTEM_ENCRYPTED_BOOTANIMATION_FILE,
-        };
-        if (findBootAnimationFileInternal(encryptedBootFiles)) {
-            return;
-        }
-    }
-
     const bool playDarkAnim = android::base::GetIntProperty("ro.boot.theme", 0) == 1;
     static const std::vector<std::string> bootFiles = {
         APEX_BOOTANIMATION_FILE, playDarkAnim ? PRODUCT_BOOTANIMATION_DARK_FILE : PRODUCT_BOOTANIMATION_FILE,

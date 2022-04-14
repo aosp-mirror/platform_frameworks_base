@@ -27,6 +27,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionFilter.CONTAINER_ORDER_TOP;
 
 import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.ACTIVITY_TYPE_RECENTS;
+import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.MODE_CLOSING;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -132,16 +133,17 @@ public class RemoteTransitionCompat implements Parcelable {
                 // TODO(b/177438007): Move this set-up logic into launcher's animation impl.
                 mToken = transition;
                 // This transition is for opening recents, so recents is on-top. We want to draw
-                // the current going-away task on top of recents, though, so move it to front
+                // the current going-away tasks on top of recents, though, so move them to front.
+                // Note that we divide up the "layer space" into 3 regions each the size of
+                // the change count. This way we can easily move changes into above/below/between
+                // while maintaining their relative ordering.
                 final ArrayList<WindowContainerToken> pausingTasks = new ArrayList<>();
                 WindowContainerToken pipTask = null;
                 WindowContainerToken recentsTask = null;
-                for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-                    final TransitionInfo.Change change = info.getChanges().get(i);
-                    final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                    if (change.getMode() == TRANSIT_CLOSE || change.getMode() == TRANSIT_TO_BACK) {
-                        t.setLayer(leashMap.get(change.getLeash()),
-                                info.getChanges().size() * 3 - i);
+                for (int i = apps.length - 1; i >= 0; --i) {
+                    final ActivityManager.RunningTaskInfo taskInfo = apps[i].taskInfo;
+                    if (apps[i].mode == MODE_CLOSING) {
+                        t.setLayer(apps[i].leash, info.getChanges().size() * 3 - i);
                         if (taskInfo == null) {
                             continue;
                         }
@@ -154,8 +156,7 @@ public class RemoteTransitionCompat implements Parcelable {
                     } else if (taskInfo != null
                             && taskInfo.topActivityType == ACTIVITY_TYPE_RECENTS) {
                         // This task is for recents, keep it on top.
-                        t.setLayer(leashMap.get(change.getLeash()),
-                                info.getChanges().size() * 3 - i);
+                        t.setLayer(apps[i].leash, info.getChanges().size() * 3 - i);
                         recentsTask = taskInfo.token;
                     } else if (taskInfo != null && taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
                         recentsTask = taskInfo.token;
