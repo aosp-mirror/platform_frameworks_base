@@ -21,7 +21,6 @@ import static android.app.StatusBarManager.SESSION_BIOMETRIC_PROMPT;
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 
 import android.annotation.Nullable;
-import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -48,7 +47,7 @@ import javax.inject.Inject;
  * session. Can be used across processes via StatusBarManagerService#registerSessionListener
  */
 @SysUISingleton
-public class SessionTracker extends CoreStartable {
+public class SessionTracker implements CoreStartable {
     private static final String TAG = "SessionTracker";
     private static final boolean DEBUG = false;
 
@@ -65,13 +64,11 @@ public class SessionTracker extends CoreStartable {
 
     @Inject
     public SessionTracker(
-            Context context,
             IStatusBarService statusBarService,
             AuthController authController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardStateController keyguardStateController
     ) {
-        super(context);
         mStatusBarManagerService = statusBarService;
         mAuthController = authController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
