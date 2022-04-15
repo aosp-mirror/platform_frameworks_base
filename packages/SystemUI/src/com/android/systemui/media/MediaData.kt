@@ -27,7 +27,6 @@ import com.android.systemui.R
 data class MediaData(
     val userId: Int,
     val initialized: Boolean = false,
-    val backgroundColor: Int,
     /**
      * App name that will be displayed on the player.
      */
