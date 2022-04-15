@@ -2298,7 +2298,7 @@ public final class AppRestrictionController {
         void postRequestBgRestrictedIfNecessary(String packageName, int uid) {
             final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
             intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
             final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
                     intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE, null,
@@ -2362,7 +2362,7 @@ public final class AppRestrictionController {
             } else {
                 final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
                 intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 pendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
                         intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
                         null, UserHandle.of(UserHandle.getUserId(uid)));
