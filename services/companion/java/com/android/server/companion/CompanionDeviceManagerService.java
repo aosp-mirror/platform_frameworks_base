@@ -671,6 +671,9 @@ public class CompanionDeviceManagerService extends SystemService {
             association = AssociationInfo.builder(association)
                     .setNotifyOnDeviceNearby(active)
                     .build();
+            // Do not need to call {@link BleCompanionDeviceScanner#restartScan()} since it will
+            // trigger {@link BleCompanionDeviceScanner#restartScan(int, AssociationInfo)} when
+            // an application sets/unsets the mNotifyOnDeviceNearby flag.
             mAssociationStore.updateAssociation(association);
 
             // TODO(b/218615198): correctly handle the case when the device is currently present.

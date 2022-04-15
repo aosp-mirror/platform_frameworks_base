@@ -42,10 +42,14 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.commandline.Command;
+import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -59,6 +63,10 @@ import javax.inject.Named;
  *
  * Flags can be set (or unset) via the following adb command:
  *
+ *   adb shell cmd statusbar flag <id> <on|off|toggle|erase>
+ *
+ *  Alternatively, you can change flags via a broadcast intent:
+ *
  *   adb shell am broadcast -a com.android.systemui.action.SET_FLAG --ei id <id> [--ez value <0|1>]
  *
  * To restore a flag back to its default, leave the `--ez value <0|1>` off of the command.
@@ -67,6 +75,7 @@ import javax.inject.Named;
 public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     private static final String TAG = "SysUIFlags";
     static final String ALL_FLAGS = "all_flags";
+    private static final String FLAG_COMMAND = "flag";
 
     private final FlagManager mFlagManager;
     private final SecureSettings mSecureSettings;
@@ -86,12 +95,15 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             @Main Resources resources,
             DumpManager dumpManager,
             @Named(ALL_FLAGS) Map<Integer, Flag<?>> allFlags,
+            CommandRegistry commandRegistry,
             IStatusBarService barService) {
         mFlagManager = flagManager;
         mSecureSettings = secureSettings;
         mResources = resources;
         mSystemProperties = systemProperties;
         mAllFlags = allFlags;
+        mBarService = barService;
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_SET_FLAG);
         filter.addAction(ACTION_GET_FLAGS);
@@ -100,7 +112,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         context.registerReceiver(mReceiver, filter, null, null,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
         dumpManager.registerDumpable(TAG, this);
-        mBarService = barService;
+        commandRegistry.registerCommand(FLAG_COMMAND, FlagCommand::new);
     }
 
     @Override
@@ -276,6 +288,31 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         }
     }
 
+    private void setBooleanFlagInternal(Flag<?> flag, boolean value) {
+        if (flag instanceof BooleanFlag) {
+            setFlagValue(flag.getId(), value, BooleanFlagSerializer.INSTANCE);
+        } else if (flag instanceof ResourceBooleanFlag) {
+            setFlagValue(flag.getId(), value, BooleanFlagSerializer.INSTANCE);
+        } else if (flag instanceof SysPropBooleanFlag) {
+            // Store SysProp flags in SystemProperties where they can read by outside parties.
+            mSystemProperties.setBoolean(((SysPropBooleanFlag) flag).getName(), value);
+            dispatchListenersAndMaybeRestart(flag.getId(),
+                    FeatureFlagsDebug.this::restartAndroid);
+        } else {
+            throw new IllegalArgumentException("Unknown flag type");
+        }
+    }
+
+    private void setStringFlagInternal(Flag<?> flag, String value) {
+        if (flag instanceof StringFlag) {
+            setFlagValue(flag.getId(), value, StringFlagSerializer.INSTANCE);
+        } else if (flag instanceof ResourceStringFlag) {
+            setFlagValue(flag.getId(), value, StringFlagSerializer.INSTANCE);
+        } else {
+            throw new IllegalArgumentException("Unknown flag type");
+        }
+    }
+
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -327,24 +364,19 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             }
 
             Object value = extras.get(EXTRA_VALUE);
-            if (flag instanceof BooleanFlag && value instanceof Boolean) {
-                setFlagValue(id, (Boolean) value, BooleanFlagSerializer.INSTANCE);
-            } else  if (flag instanceof ResourceBooleanFlag && value instanceof Boolean) {
-                setFlagValue(id, (Boolean) value, BooleanFlagSerializer.INSTANCE);
-            } else  if (flag instanceof SysPropBooleanFlag && value instanceof Boolean) {
-                // Store SysProp flags in SystemProperties where they can read by outside parties.
-                mSystemProperties.setBoolean(
-                        ((SysPropBooleanFlag) flag).getName(), (Boolean) value);
-                dispatchListenersAndMaybeRestart(flag.getId(),
-                        FeatureFlagsDebug.this::restartAndroid);
-            } else if (flag instanceof StringFlag && value instanceof String) {
-                setFlagValue(id, (String) value, StringFlagSerializer.INSTANCE);
-            } else if (flag instanceof ResourceStringFlag && value instanceof String) {
-                setFlagValue(id, (String) value, StringFlagSerializer.INSTANCE);
-            } else {
+
+            try {
+                if (value instanceof Boolean) {
+                    setBooleanFlagInternal(flag, (Boolean) value);
+                } else if (value instanceof String) {
+                    setStringFlagInternal(flag, (String) value);
+                } else {
+                    throw new IllegalArgumentException("Unknown value type");
+                }
+            } catch (IllegalArgumentException e) {
                 Log.w(TAG,
-                        "Unable to set " + id + " of type " + flag.getClass() + " to value of type "
-                                + (value == null ? null : value.getClass()));
+                        "Unable to set " + flag.getId() + " of type " + flag.getClass()
+                                + " to value of type " + (value == null ? null : value.getClass()));
             }
         }
 
@@ -387,5 +419,154 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         pw.println("Strings: " + mStringFlagCache.size());
         mStringFlagCache.forEach((key, value) -> pw.println("  sysui_flag_" + key
                 + ": [length=" + value.length() + "] \"" + value + "\""));
+    }
+
+    class FlagCommand implements Command {
+        private final List<String> mOnCommands = List.of("true", "on", "1", "enabled");
+        private final List<String> mOffCommands = List.of("false", "off", "0", "disable");
+
+        @Override
+        public void execute(@NonNull PrintWriter pw, @NonNull List<String> args) {
+            if (args.size() == 0) {
+                pw.println("Error: no flag id supplied");
+                help(pw);
+                pw.println();
+                printKnownFlags(pw);
+                return;
+            }
+
+            if (args.size() > 2) {
+                pw.println("Invalid number of arguments.");
+                help(pw);
+                return;
+            }
+
+            int id = 0;
+            try {
+                id = Integer.parseInt(args.get(0));
+                if (!mAllFlags.containsKey(id)) {
+                    pw.println("Unknown flag id: " + id);
+                    pw.println();
+                    printKnownFlags(pw);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                id = flagNameToId(args.get(0));
+                if (id == 0) {
+                    pw.println("Invalid flag. Must an integer id or flag name: " + args.get(0));
+                    return;
+                }
+            }
+            Flag<?> flag = mAllFlags.get(id);
+
+            String cmd = "";
+            if (args.size() == 2) {
+                cmd = args.get(1).toLowerCase();
+            }
+
+            if ("erase".equals(cmd) || "reset".equals(cmd)) {
+                eraseFlag(flag);
+                return;
+            }
+
+            boolean newValue = true;
+            if (args.size() == 1 || "toggle".equals(cmd)) {
+                boolean enabled = isBooleanFlagEnabled(flag);
+
+                if (args.size() == 1) {
+                    pw.println("Flag " + id + " is " + enabled);
+                    return;
+                }
+
+                newValue = !enabled;
+            } else {
+                newValue = mOnCommands.contains(cmd);
+                if (!newValue && !mOffCommands.contains(cmd)) {
+                    pw.println("Invalid on/off argument supplied");
+                    help(pw);
+                    return;
+                }
+            }
+
+            pw.flush();  // Next command will restart sysui, so flush before we do so.
+            setBooleanFlagInternal(flag, newValue);
+        }
+
+        @Override
+        public void help(PrintWriter pw) {
+            pw.println(
+                    "Usage: adb shell cmd statusbar flag <id> "
+                            + "[true|false|1|0|on|off|enable|disable|toggle|erase|reset]");
+            pw.println("The id can either be a numeric integer or the corresponding field name");
+            pw.println(
+                    "If no argument is supplied after the id, the flags runtime value is output");
+        }
+
+        private boolean isBooleanFlagEnabled(Flag<?> flag) {
+            if (flag instanceof BooleanFlag) {
+                return isEnabled((BooleanFlag) flag);
+            } else if (flag instanceof ResourceBooleanFlag) {
+                return isEnabled((ResourceBooleanFlag) flag);
+            } else if (flag instanceof SysPropFlag) {
+                return isEnabled((SysPropBooleanFlag) flag);
+            }
+
+            return false;
+        }
+
+        private int flagNameToId(String flagName) {
+            List<Field> fields = Flags.getFlagFields();
+            for (Field field : fields) {
+                if (flagName.equals(field.getName())) {
+                    return fieldToId(field);
+                }
+            }
+
+            return 0;
+        }
+
+        private int fieldToId(Field field) {
+            try {
+                Flag<?> flag = (Flag<?>) field.get(null);
+                return flag.getId();
+            } catch (IllegalAccessException e) {
+                // no-op
+            }
+
+            return 0;
+        }
+
+        private void printKnownFlags(PrintWriter pw) {
+            List<Field> fields = Flags.getFlagFields();
+
+            int longestFieldName = 0;
+            for (Field field : fields) {
+                longestFieldName = Math.max(longestFieldName, field.getName().length());
+            }
+
+            pw.println("Known Flags:");
+            pw.print("Flag Name");
+            for (int i = 0; i < longestFieldName - "Flag Name".length() + 1; i++) {
+                pw.print(" ");
+            }
+            pw.println("ID   Enabled?");
+            for (int i = 0; i < longestFieldName; i++) {
+                pw.print("=");
+            }
+            pw.println(" ==== ========");
+            for (Field field : fields) {
+                int id = fieldToId(field);
+                if (id == 0 || !mAllFlags.containsKey(id)) {
+                    continue;
+                }
+                pw.print(field.getName());
+                int fieldWidth = field.getName().length();
+                for (int i = 0; i < longestFieldName - fieldWidth + 1; i++) {
+                    pw.print(" ");
+                }
+                pw.printf("%-4d ", id);
+                pw.println(isBooleanFlagEnabled(mAllFlags.get(id)));
+            }
+        }
     }
 }

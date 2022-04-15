@@ -805,8 +805,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pausar"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Pista anterior"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Siguiente pista"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Conectando"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Reproducir"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Abrir <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Poner <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> en <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -905,7 +904,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Por ahora no se conectará automáticamente a redes Wi-Fi"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Ver todo"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para cambiar de red, desconecta el cable Ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Para mejorar la experiencia con el dispositivo, las aplicaciones y los servicios podrán buscar redes Wi-Fi en cualquier momento, aunque la conexión Wi-Fi esté desactivada. Puedes cambiarlo en los ajustes de búsqueda de redes Wi-Fi. "<annotation id="link">"Cambiar"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Para mejorar la experiencia con el dispositivo, las aplicaciones y los servicios podrán buscar redes Wi-Fi en cualquier momento, aunque la conexión Wi-Fi esté desactivada. Puedes cambiar esto en los ajustes de búsqueda de redes Wi-Fi. "<annotation id="link">"Cambiar"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Desactivar modo avión"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> quiere añadir el siguiente recuadro a ajustes rápidos"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Añadir recuadro"</string>

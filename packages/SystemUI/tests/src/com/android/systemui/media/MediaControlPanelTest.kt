@@ -16,6 +16,8 @@
 
 package com.android.systemui.media
 
+import android.animation.Animator
+import android.animation.AnimatorSet
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceAction
 import android.content.Context
@@ -39,6 +41,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Interpolator
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -49,16 +52,22 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
+import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -72,7 +81,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
-import org.mockito.Mockito.any
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -140,6 +148,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var actionsTopBarrier: Barrier
     @Mock private lateinit var longPressText: TextView
     @Mock private lateinit var handler: Handler
+    @Mock private lateinit var mockAnimator: AnimatorSet
     private lateinit var settings: ImageButton
     private lateinit var cancel: View
     private lateinit var cancelText: TextView
@@ -155,6 +164,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var instanceId: InstanceId
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var applicationInfo: ApplicationInfo
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var activityIntentHelper: ActivityIntentHelper
+    @Mock private lateinit var lockscreenUserManager: NotificationLockscreenUserManager
 
     @Mock private lateinit var recommendationViewHolder: RecommendationViewHolder
     @Mock private lateinit var smartspaceAction: SmartspaceAction
@@ -181,7 +193,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(packageManager.getApplicationLabel(any())).thenReturn(PACKAGE)
         context.setMockPackageManager(packageManager)
 
-        player = MediaControlPanel(
+        player = object : MediaControlPanel(
             context,
             bgExecutor,
             mainExecutor,
@@ -194,8 +206,18 @@ public class MediaControlPanelTest : SysuiTestCase() {
             mediaCarouselController,
             falsingManager,
             clock,
-            logger
-        )
+            logger,
+            keyguardStateController,
+            activityIntentHelper,
+            lockscreenUserManager) {
+                override fun loadAnimator(
+                    animId: Int,
+                    otionInterpolator: Interpolator,
+                    vararg targets: View
+                ): AnimatorSet {
+                    return mockAnimator
+                }
+            }
 
         initMediaViewHolderMocks()
 
@@ -351,17 +373,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private fun initRecommendationViewHolderMocks() {
         whenever(recommendationViewHolder.recommendations).thenReturn(view)
         whenever(recommendationViewHolder.cardIcon).thenReturn(appIcon)
-        whenever(recommendationViewHolder.cardText).thenReturn(titleText)
 
         // Add a recommendation item
         coverItem = ImageView(context).also { it.setId(R.id.media_cover1) }
         whenever(coverContainer.id).thenReturn(R.id.media_cover1_container)
         whenever(recommendationViewHolder.mediaCoverItems).thenReturn(listOf(coverItem))
         whenever(recommendationViewHolder.mediaCoverContainers).thenReturn(listOf(coverContainer))
-        whenever(recommendationViewHolder.mediaCoverItemsResIds)
-            .thenReturn(listOf(R.id.media_cover1))
-        whenever(recommendationViewHolder.mediaCoverContainersResIds)
-            .thenReturn(listOf(R.id.media_cover1_container))
 
         // Long press menu
         whenever(recommendationViewHolder.settings).thenReturn(settings)
@@ -437,6 +454,64 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
+    fun bindSemanticActions_reservedPrev() {
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
+
+        // Setup button state: no prev or next button and their slots reserved
+        val semanticActions = MediaButton(
+            playOrPause = MediaAction(icon, Runnable {}, "play", bg),
+            nextOrCustom = null,
+            prevOrCustom = null,
+            custom0 = MediaAction(icon, null, "custom 0", bg),
+            custom1 = MediaAction(icon, null, "custom 1", bg),
+            false,
+            true
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        assertThat(actionPrev.isEnabled()).isFalse()
+        assertThat(actionPrev.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.INVISIBLE)
+
+        assertThat(actionNext.isEnabled()).isFalse()
+        assertThat(actionNext.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.GONE)
+    }
+
+    @Test
+    fun bindSemanticActions_reservedNext() {
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
+
+        // Setup button state: no prev or next button and their slots reserved
+        val semanticActions = MediaButton(
+            playOrPause = MediaAction(icon, Runnable {}, "play", bg),
+            nextOrCustom = null,
+            prevOrCustom = null,
+            custom0 = MediaAction(icon, null, "custom 0", bg),
+            custom1 = MediaAction(icon, null, "custom 1", bg),
+            true,
+            false
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        assertThat(actionPrev.isEnabled()).isFalse()
+        assertThat(actionPrev.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.GONE)
+
+        assertThat(actionNext.isEnabled()).isFalse()
+        assertThat(actionNext.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.INVISIBLE)
+    }
+
+    @Test
     fun bind_seekBarDisabled_seekBarVisibilityIsSetToInvisible() {
         whenever(seekBarViewModel.getEnabled()).thenReturn(false)
 
@@ -470,7 +545,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
             prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = MediaAction(icon, {}, "next", null),
+            nextOrCustom = MediaAction(icon, {}, "next", null)
         )
         val state = mediaData.copy(semanticActions = semanticActions)
 
@@ -504,7 +579,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
             prevOrCustom = null,
-            nextOrCustom = MediaAction(icon, {}, "next", null),
+            nextOrCustom = MediaAction(icon, {}, "next", null)
         )
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
@@ -524,7 +599,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
             prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = null,
+            nextOrCustom = null
         )
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
@@ -544,7 +619,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
             prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = MediaAction(icon, {}, "next", null),
+            nextOrCustom = MediaAction(icon, {}, "next", null)
         )
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
@@ -566,7 +641,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
             prevOrCustom = MediaAction(icon, {}, "prev", null),
-            nextOrCustom = MediaAction(icon, {}, "next", null),
+            nextOrCustom = MediaAction(icon, {}, "next", null)
         )
         val state = mediaData.copy(semanticActions = semanticActions)
 
@@ -709,8 +784,53 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindText() {
         player.attachPlayer(viewHolder)
         player.bindPlayer(mediaData, PACKAGE)
+
+        // Capture animation handler
+        val captor = argumentCaptor<Animator.AnimatorListener>()
+        verify(mockAnimator, times(2)).addListener(captor.capture())
+        val handler = captor.value
+
+        // Validate text views unchanged but animation started
+        assertThat(titleText.getText()).isEqualTo("")
+        assertThat(artistText.getText()).isEqualTo("")
+        verify(mockAnimator, times(1)).start()
+
+        // Binding only after animator runs
+        handler.onAnimationEnd(mockAnimator)
         assertThat(titleText.getText()).isEqualTo(TITLE)
         assertThat(artistText.getText()).isEqualTo(ARTIST)
+
+        // Rebinding should not trigger animation
+        player.bindPlayer(mediaData, PACKAGE)
+        verify(mockAnimator, times(1)).start()
+    }
+
+    @Test
+    fun bindTextInterrupted() {
+        val data0 = mediaData.copy(artist = "ARTIST_0")
+        val data1 = mediaData.copy(artist = "ARTIST_1")
+        val data2 = mediaData.copy(artist = "ARTIST_2")
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data0, PACKAGE)
+
+        // Capture animation handler
+        val captor = argumentCaptor<Animator.AnimatorListener>()
+        verify(mockAnimator, times(2)).addListener(captor.capture())
+        val handler = captor.value
+
+        handler.onAnimationEnd(mockAnimator)
+        assertThat(artistText.getText()).isEqualTo("ARTIST_0")
+
+        // Bind trigges new animation
+        player.bindPlayer(data1, PACKAGE)
+        verify(mockAnimator, times(2)).start()
+        whenever(mockAnimator.isRunning()).thenReturn(true)
+
+        // Rebind before animation end binds corrct data
+        player.bindPlayer(data2, PACKAGE)
+        handler.onAnimationEnd(mockAnimator)
+        assertThat(artistText.getText()).isEqualTo("ARTIST_2")
     }
 
     @Test
@@ -1001,6 +1121,47 @@ public class MediaControlPanelTest : SysuiTestCase() {
         captor.value.invoke()
 
         verify(logger).logSeek(anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun tapContentView_showOverLockscreen_openActivity() {
+        // WHEN we are on lockscreen and this activity can show over lockscreen
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldShowOverLockscreen(any(), any())).thenReturn(true)
+
+        val clickIntent = mock(Intent::class.java)
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.intent).thenReturn(clickIntent)
+        val captor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
+        val data = mediaData.copy(clickIntent = pendingIntent)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+        verify(viewHolder.player).setOnClickListener(captor.capture())
+
+        // THEN it shows without dismissing keyguard first
+        captor.value.onClick(viewHolder.player)
+        verify(activityStarter).startActivity(eq(clickIntent), eq(true),
+                nullable(), eq(true))
+    }
+
+    @Test
+    fun tapContentView_noShowOverLockscreen_dismissKeyguard() {
+        // WHEN we are on lockscreen and the activity cannot show over lockscreen
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldShowOverLockscreen(any(), any())).thenReturn(false)
+
+        val clickIntent = mock(Intent::class.java)
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.intent).thenReturn(clickIntent)
+        val captor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
+        val data = mediaData.copy(clickIntent = pendingIntent)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+        verify(viewHolder.player).setOnClickListener(captor.capture())
+
+        // THEN keyguard has to be dismissed
+        captor.value.onClick(viewHolder.player)
+        verify(activityStarter).postStartActivityDismissingKeyguard(eq(pendingIntent), any())
     }
 
     @Test

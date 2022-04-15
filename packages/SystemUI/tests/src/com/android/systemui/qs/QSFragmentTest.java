@@ -190,7 +190,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         QSFragment fragment = resumeAndGetFragment();
         enableSplitShade();
         setStatusBarState(StatusBarState.KEYGUARD);
-        when(mQSPanelController.bouncerInTransit()).thenReturn(false);
+        when(mQSPanelController.isBouncerInTransit()).thenReturn(false);
         int transitionPxAmount = 123;
         float transitionProgress = 0.5f;
 
@@ -206,7 +206,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         QSFragment fragment = resumeAndGetFragment();
         enableSplitShade();
         setStatusBarState(StatusBarState.KEYGUARD);
-        when(mQSPanelController.bouncerInTransit()).thenReturn(true);
+        when(mQSPanelController.isBouncerInTransit()).thenReturn(true);
         int transitionPxAmount = 123;
         float transitionProgress = 0.5f;
 
@@ -313,6 +313,24 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         verify(mQSPanelController).setCollapseExpandAction(action);
         verify(mQuickQSPanelController).setCollapseExpandAction(action);
+    }
+
+    @Test
+    public void setOverScrollAmount_setsTranslationOnView() {
+        QSFragment fragment = resumeAndGetFragment();
+
+        fragment.setOverScrollAmount(123);
+
+        assertThat(mQsFragmentView.getTranslationY()).isEqualTo(123);
+    }
+
+    @Test
+    public void setOverScrollAmount_beforeViewCreated_translationIsNotSet() {
+        QSFragment fragment = getFragment();
+
+        fragment.setOverScrollAmount(123);
+
+        assertThat(mQsFragmentView.getTranslationY()).isEqualTo(0);
     }
 
     @Override

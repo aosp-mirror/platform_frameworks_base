@@ -2006,6 +2006,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // of the activity entering PIP
             r.getDisplayContent().prepareAppTransition(TRANSIT_NONE);
 
+            final TaskFragment organizedTf = r.getOrganizedTaskFragment();
             // TODO: Does it make sense to only count non-finishing activities?
             final boolean singleActivity = task.getActivityCount() == 1;
             if (singleActivity) {
@@ -2040,6 +2041,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                             task.mLastRecentsAnimationTransaction,
                             task.mLastRecentsAnimationOverlay);
                     task.clearLastRecentsAnimationTransaction(false /* forceRemoveOverlay */);
+                }
+
+                // The organized TaskFragment is becoming empty because this activity is reparented
+                // to a new PIP Task. In this case, we should notify the organizer about why the
+                // TaskFragment becomes empty.
+                if (organizedTf != null && organizedTf.getNonFinishingActivityCount() == 1
+                        && organizedTf.getTopNonFinishingActivity() == r) {
+                    organizedTf.mClearedTaskFragmentForPip = true;
                 }
 
                 // There are multiple activities in the task and moving the top activity should
@@ -2102,6 +2111,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the root pinned task
             r.supportsEnterPipOnTaskSwitch = false;
+
+            if (organizedTf != null && organizedTf.mClearedTaskFragmentForPip) {
+                // Dispatch the pending info to TaskFragmentOrganizer before PIP animation.
+                // Otherwise, it will keep waiting for the empty TaskFragment to be non-empty.
+                mService.mTaskFragmentOrganizerController.dispatchPendingInfoChangedEvent(
+                        organizedTf);
+            }
         } finally {
             mService.continueWindowLayout();
             try {

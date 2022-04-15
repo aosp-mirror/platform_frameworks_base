@@ -101,6 +101,7 @@ import android.view.BatchedInputEventReceiver.SimpleBatchedInputEventReceiver;
 import android.view.Choreographer;
 import android.view.Gravity;
 import android.view.InputChannel;
+import android.view.InputDevice;
 import android.view.InputEventReceiver;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -134,7 +135,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 import android.window.WindowMetricsHelper;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInputContentUriToken;
@@ -344,6 +348,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * A circular buffer of size MAX_EVENTS_BUFFER in case IME is taking too long to add ink view.
      **/
     private RingBuffer<MotionEvent> mPendingEvents;
+
+    /** Callback to handle back invocation when IME window is shown. */
+    private OnBackInvokedCallback mBackCallback;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and
@@ -1605,6 +1612,7 @@ public class InputMethodService extends AbstractInputMethodService {
     @Override public void onDestroy() {
         mDestroyed = true;
         super.onDestroy();
+        unregisterOnBackInvokedCallback();
         mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mInsetsComputer);
         doFinishInput();
@@ -2579,6 +2587,7 @@ public class InputMethodService extends AbstractInputMethodService {
         cancelImeSurfaceRemoval();
         mInShowWindow = false;
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        registerOnBackInvokedCallback();
     }
 
 
@@ -2622,6 +2631,56 @@ public class InputMethodService extends AbstractInputMethodService {
             onStartCandidatesView(mInputEditorInfo, false);
         }
         if (doShowInput) startExtractingText(false);
+    }
+
+    /**
+     * Registers an {@link OnBackInvokedCallback} to handle back invocation when ahead-of-time
+     *  back dispatching is enabled. We keep the KEYCODE_BACK based legacy code around to handle
+     *  back on older devices.
+     */
+    private void registerOnBackInvokedCallback() {
+        if (mBackCallback != null) {
+            // A back callback has already been registered.
+            return;
+        }
+        final ViewRootImpl viewRootImpl = mRootView == null ? null : mRootView.getViewRootImpl();
+        if (viewRootImpl != null && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(
+                viewRootImpl.mContext)) {
+            final OnBackInvokedCallback callback = () -> {
+                KeyEvent downEvent = createKeyEvent(
+                        KeyEvent.ACTION_DOWN, false /* isTracking */);
+                onKeyDown(KeyEvent.KEYCODE_BACK, downEvent);
+                boolean hasStartedTracking =
+                        (downEvent.getFlags() & KeyEvent.FLAG_START_TRACKING) != 0;
+                KeyEvent upEvent = createKeyEvent(KeyEvent.ACTION_UP, hasStartedTracking);
+                onKeyUp(KeyEvent.KEYCODE_BACK, upEvent);
+            };
+            viewRootImpl.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, callback);
+            mBackCallback = callback;
+        }
+    }
+
+    private KeyEvent createKeyEvent(int action, boolean isTracking) {
+        final long when = SystemClock.uptimeMillis();
+        return new KeyEvent(when, when, action,
+                KeyEvent.KEYCODE_BACK, 0 /* repeat */, 0 /* metaState */,
+                KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
+                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY
+                        | (isTracking ? KeyEvent.FLAG_TRACKING : 0),
+                InputDevice.SOURCE_KEYBOARD);
+    }
+
+    private void unregisterOnBackInvokedCallback() {
+        final ViewRootImpl viewRootImpl = mRootView == null ? null : mRootView.getViewRootImpl();
+        if (viewRootImpl != null
+                && mBackCallback != null
+                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(
+                viewRootImpl.mContext)) {
+            viewRootImpl.getOnBackInvokedDispatcher()
+                    .unregisterOnBackInvokedCallback(mBackCallback);
+        }
+        mBackCallback = null;
     }
 
     /**
@@ -2669,6 +2728,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         mLastWasInFullscreenMode = mIsFullscreen;
         updateFullscreenMode();
+        unregisterOnBackInvokedCallback();
     }
 
     /**

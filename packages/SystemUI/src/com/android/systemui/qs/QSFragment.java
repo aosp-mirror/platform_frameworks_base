@@ -519,7 +519,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Override
     public void setOverScrollAmount(int overScrollAmount) {
         mOverScrolling = overScrollAmount != 0;
-        getView().setTranslationY(overScrollAmount);
+        View view = getView();
+        if (view != null) {
+            view.setTranslationY(overScrollAmount);
+        }
     }
 
     @Override
@@ -609,7 +612,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         } else if (progress > 0 && view.getVisibility() != View.VISIBLE) {
             view.setVisibility((View.VISIBLE));
         }
-        float alpha = mQSPanelController.bouncerInTransit()
+        float alpha = mQSPanelController.isBouncerInTransit()
                 ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(progress)
                 : ShadeInterpolation.getContentAlpha(progress);
         view.setAlpha(alpha);

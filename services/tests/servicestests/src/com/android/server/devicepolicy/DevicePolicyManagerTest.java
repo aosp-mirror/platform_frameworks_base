@@ -1665,39 +1665,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(deviceOwner.getUid()).isEqualTo(DpmMockContext.CALLER_SYSTEM_USER_UID);
     }
 
-    /**
-     * This essentially tests
-     * {@code DevicePolicyManagerService.findOwnerComponentIfNecessaryLocked()}. (which is
-     * private.)
-     *
-     * We didn't use to persist the DO component class name, but now we do, and the above method
-     * finds the right component from a package name upon migration.
-     */
-    @Test
-    public void testDeviceOwnerMigration() throws Exception {
-        checkDeviceOwnerWithMultipleDeviceAdmins();
-
-        // Overwrite the device owner setting and clears the class name.
-        dpms.mOwners.setDeviceOwner(
-                new ComponentName(admin2.getPackageName(), ""),
-                "owner-name", CALLER_USER_HANDLE);
-        dpms.mOwners.writeDeviceOwner();
-
-        // Make sure the DO component name doesn't have a class name.
-        assertThat(dpms.getDeviceOwnerComponent(/* callingUserOnly= */ false).getClassName())
-                .isEmpty();
-
-        // Then create a new DPMS to have it load the settings from files.
-        when(getServices().userManager.getUserRestrictions(any(UserHandle.class)))
-                .thenReturn(new Bundle());
-        initializeDpms();
-
-        // Now the DO component name is a full name.
-        // *BUT* because both admin1 and admin2 belong to the same package, we think admin1 is the
-        // DO.
-        assertThat(dpms.getDeviceOwnerComponent(/* callingUserOnly =*/ false)).isEqualTo(admin1);
-    }
-
     @Test
     public void testSetGetApplicationRestriction() {
         setAsProfileOwner(admin1);

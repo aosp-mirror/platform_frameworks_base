@@ -1707,7 +1707,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"За превключване между функциите докоснете и задръжте бутона за достъпност."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"За превключване между функциите прекарайте два пръста нагоре и задръжте."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"За превключване между функциите прекарайте три пръста нагоре и задръжте."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ниво на мащаба"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Увеличение"</string>
     <string name="user_switched" msgid="7249833311585228097">"Текущ потребител <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Превключва се към: <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> излиза…"</string>
@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Съобщението <xliff:g id="MESSAGE">%1$s</xliff:g> бе преведено."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Съобщението бе преведено от <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> на <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Активност на заден план"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Приложение използва батерията"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Приложение е все още активно"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> използва батерията на заден план. Докоснете за преглед."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> може да засегне живота на батерията. Докоснете за преглед на активните приложения."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверете активните приложения"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Няма достъп до камерата на телефона от вашия <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

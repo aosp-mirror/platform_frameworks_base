@@ -94,6 +94,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
@@ -160,6 +161,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final TransactionPool mTransactionPool;
     private final SplitScreenTransitions mSplitTransitions;
     private final SplitscreenEventLogger mLogger;
+    private final ShellExecutor mMainExecutor;
     private final Optional<RecentTasksController> mRecentTasks;
 
     /**
@@ -199,13 +201,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool, SplitscreenEventLogger logger,
-            IconProvider iconProvider, Optional<RecentTasksController> recentTasks,
+            IconProvider iconProvider, ShellExecutor mainExecutor,
+            Optional<RecentTasksController> recentTasks,
             Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
         mContext = context;
         mDisplayId = displayId;
         mSyncQueue = syncQueue;
         mTaskOrganizer = taskOrganizer;
         mLogger = logger;
+        mMainExecutor = mainExecutor;
         mRecentTasks = recentTasks;
         mMainUnfoldController = unfoldControllerProvider.get().orElse(null);
         mSideUnfoldController = unfoldControllerProvider.get().orElse(null);
@@ -250,7 +254,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             DisplayController displayController, DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, SplitLayout splitLayout,
             Transitions transitions, TransactionPool transactionPool,
-            SplitscreenEventLogger logger,
+            SplitscreenEventLogger logger, ShellExecutor mainExecutor,
             Optional<RecentTasksController> recentTasks,
             Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
         mContext = context;
@@ -269,6 +273,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mMainUnfoldController = unfoldControllerProvider.get().orElse(null);
         mSideUnfoldController = unfoldControllerProvider.get().orElse(null);
         mLogger = logger;
+        mMainExecutor = mainExecutor;
         mRecentTasks = recentTasks;
         mDisplayController.addDisplayWindowListener(this);
         mDisplayLayout = new DisplayLayout();
@@ -397,6 +402,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Nullable PendingIntent pendingIntent, @Nullable Intent fillInIntent,
             @Nullable Bundle mainOptions, @Nullable Bundle sideOptions,
             @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter) {
+        final boolean withIntent = pendingIntent != null && fillInIntent != null;
         // Init divider first to make divider leash for remote animation target.
         mSplitLayout.init();
         // Set false to avoid record new bounds with old task still on top;
@@ -426,10 +432,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         new IRemoteAnimationFinishedCallback.Stub() {
                             @Override
                             public void onAnimationFinished() throws RemoteException {
-                                mIsDividerRemoteAnimating = false;
-                                mShouldUpdateRecents = true;
-                                mSyncQueue.queue(evictWct);
-                                mSyncQueue.runInSync(t -> setDividerVisibility(true, t));
+                                onRemoteAnimationFinishedOrCancelled(evictWct);
                                 finishedCallback.onAnimationFinished();
                             }
                         };
@@ -450,10 +453,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             @Override
             public void onAnimationCancelled() {
-                mIsDividerRemoteAnimating = false;
-                mShouldUpdateRecents = true;
-                mSyncQueue.queue(evictWct);
-                mSyncQueue.runInSync(t -> setDividerVisibility(true, t));
+                onRemoteAnimationFinishedOrCancelled(evictWct);
                 try {
                     adapter.getRunner().onAnimationCancelled();
                 } catch (RemoteException e) {
@@ -489,18 +489,35 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         addActivityOptions(sideOptions, mSideStage);
 
         // Add task launch requests
-        if (pendingIntent != null && fillInIntent != null) {
-            wct.startTask(mainTaskId, mainOptions);
+        wct.startTask(mainTaskId, mainOptions);
+        if (withIntent) {
             wct.sendPendingIntent(pendingIntent, fillInIntent, sideOptions);
         } else {
-            wct.startTask(mainTaskId, mainOptions);
             wct.startTask(sideTaskId, sideOptions);
         }
-
         // Using legacy transitions, so we can't use blast sync since it conflicts.
         mTaskOrganizer.applyTransaction(wct);
         mSyncQueue.runInSync(t ->
                 updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */));
+    }
+
+    private void onRemoteAnimationFinishedOrCancelled(WindowContainerTransaction evictWct) {
+        mIsDividerRemoteAnimating = false;
+        mShouldUpdateRecents = true;
+        // If any stage has no child after animation finished, it means that split will display
+        // nothing, such status will happen if task and intent is same app but not support
+        // multi-instagce, we should exit split and expand that app as full screen.
+        if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
+            mMainExecutor.execute(() ->
+                    exitSplitScreen(mMainStage.getChildCount() == 0
+                        ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
+        } else {
+            mSyncQueue.queue(evictWct);
+            mSyncQueue.runInSync(t -> {
+                setDividerVisibility(true, t);
+                updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
+            });
+        }
     }
 
     /**

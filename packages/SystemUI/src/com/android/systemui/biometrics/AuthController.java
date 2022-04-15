@@ -37,6 +37,7 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
@@ -45,7 +46,6 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.hardware.fingerprint.FingerprintStateListener;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
@@ -138,7 +138,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
     @NonNull private final SensorPrivacyManager mSensorPrivacyManager;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
-    private boolean mAllAuthenticatorsRegistered;
+    private boolean mAllFingerprintAuthenticatorsRegistered;
     @NonNull private final UserManager mUserManager;
     @NonNull private final LockPatternUtils mLockPatternUtils;
     private final @Background DelayableExecutor mBackgroundExecutor;
@@ -157,12 +157,12 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 @Override
                 public void onAllAuthenticatorsRegistered(
                         List<FingerprintSensorPropertiesInternal> sensors) {
-                    mHandler.post(() -> handleAllAuthenticatorsRegistered(sensors));
+                    mHandler.post(() -> handleAllFingerprintAuthenticatorsRegistered(sensors));
                 }
             };
 
-    private final FingerprintStateListener mFingerprintStateListener =
-            new FingerprintStateListener() {
+    private final BiometricStateListener mBiometricStateListener =
+            new BiometricStateListener() {
                 @Override
                 public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
                     mHandler.post(
@@ -234,20 +234,20 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     /**
-     * Whether all authentictors have been registered.
+     * Whether all fingerprint authentictors have been registered.
      */
-    public boolean areAllAuthenticatorsRegistered() {
-        return mAllAuthenticatorsRegistered;
+    public boolean areAllFingerprintAuthenticatorsRegistered() {
+        return mAllFingerprintAuthenticatorsRegistered;
     }
 
-    private void handleAllAuthenticatorsRegistered(
+    private void handleAllFingerprintAuthenticatorsRegistered(
             List<FingerprintSensorPropertiesInternal> sensors) {
         mExecution.assertIsMainThread();
         if (DEBUG) {
             Log.d(TAG, "handleAllAuthenticatorsRegistered | sensors: " + Arrays.toString(
                     sensors.toArray()));
         }
-        mAllAuthenticatorsRegistered = true;
+        mAllFingerprintAuthenticatorsRegistered = true;
         mFpProps = sensors;
         List<FingerprintSensorPropertiesInternal> udfpsProps = new ArrayList<>();
         List<FingerprintSensorPropertiesInternal> sidefpsProps = new ArrayList<>();
@@ -281,7 +281,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         for (Callback cb : mCallbacks) {
             cb.onAllAuthenticatorsRegistered();
         }
-        mFingerprintManager.registerFingerprintStateListener(mFingerprintStateListener);
+        mFingerprintManager.registerBiometricStateListener(mBiometricStateListener);
     }
 
     private void handleEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {

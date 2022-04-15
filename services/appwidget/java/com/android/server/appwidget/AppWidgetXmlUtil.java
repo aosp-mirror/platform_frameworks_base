@@ -22,6 +22,7 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.os.Build;
 import android.text.TextUtils;
+import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
@@ -32,6 +33,8 @@ import java.util.Objects;
  * @hide
  */
 public class AppWidgetXmlUtil {
+
+    private static final String TAG = "AppWidgetXmlUtil";
 
     private static final String ATTR_MIN_WIDTH = "min_width";
     private static final String ATTR_MIN_HEIGHT = "min_height";
@@ -77,7 +80,11 @@ public class AppWidgetXmlUtil {
         if (info.configure != null) {
             out.attribute(null, ATTR_CONFIGURE, info.configure.flattenToShortString());
         }
-        out.attribute(null, ATTR_LABEL, info.label);
+        if (info.label != null) {
+            out.attribute(null, ATTR_LABEL, info.label);
+        } else if (AppWidgetServiceImpl.DEBUG_PROVIDER_INFO_CACHE) {
+            Slog.e(TAG, "Label is empty in " + info.provider);
+        }
         out.attributeInt(null, ATTR_ICON, info.icon);
         out.attributeInt(null, ATTR_PREVIEW_IMAGE, info.previewImage);
         out.attributeInt(null, ATTR_PREVIEW_LAYOUT, info.previewLayout);

@@ -706,7 +706,7 @@ public class PeopleTileViewHelper {
                 Drawable drawable = resolveImage(imageUri, mContext);
                 Bitmap bitmap = convertDrawableToBitmap(drawable);
                 views.setImageViewBitmap(R.id.image, bitmap);
-            } catch (IOException e) {
+            } catch (IOException | SecurityException e) {
                 Log.e(TAG, "Could not decode image: " + e);
                 // If we couldn't load the image, show text that we have a new image.
                 views.setTextViewText(R.id.text_content, newImageDescription);
@@ -754,7 +754,7 @@ public class PeopleTileViewHelper {
         return views;
     }
 
-    private Drawable resolveImage(Uri uri, Context context) throws IOException {
+     Drawable resolveImage(Uri uri, Context context) throws IOException {
         final ImageDecoder.Source source =
                 ImageDecoder.createSource(context.getContentResolver(), uri);
         final Drawable drawable =
