@@ -441,14 +441,14 @@ public class NetworkPolicyManagerServiceTest {
         setNetpolicyXml(context);
 
         doAnswer(new Answer<Void>() {
-
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
                 mUidObserver = (IUidObserver) invocation.getArguments()[0];
                 Log.d(TAG, "set mUidObserver to " + mUidObserver);
                 return null;
             }
-        }).when(mActivityManager).registerUidObserver(any(), anyInt(), anyInt(), any(String.class));
+        }).when(mActivityManagerInternal).registerNetworkPolicyUidObserver(any(),
+                anyInt(), anyInt(), any(String.class));
 
         mFutureIntent = newRestrictBackgroundChangedFuture();
         mDeps = new TestDependencies(mServiceContext);
