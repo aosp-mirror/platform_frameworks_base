@@ -64,7 +64,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -329,28 +328,10 @@ public class CentralSurfaces extends CoreStartable implements
     public static final int[] CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES =
             new int[]{39, 82, 139, 213, 0, 127};
 
-    /**
-     * If true, the system is in the half-boot-to-decryption-screen state.
-     * Prudently disable QS and notifications.
-     */
-    public static final boolean ONLY_CORE_APPS;
-
     /** If true, the lockscreen will show a distinct wallpaper */
     public static final boolean ENABLE_LOCKSCREEN_WALLPAPER = true;
 
     private static final UiEventLogger sUiEventLogger = new UiEventLoggerImpl();
-
-    static {
-        boolean onlyCoreApps;
-        try {
-            IPackageManager packageManager =
-                    IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
-            onlyCoreApps = packageManager != null && packageManager.isOnlyCoreApps();
-        } catch (RemoteException e) {
-            onlyCoreApps = false;
-        }
-        ONLY_CORE_APPS = onlyCoreApps;
-    }
 
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final DreamOverlayStateController mDreamOverlayStateController;
@@ -1653,8 +1634,7 @@ public class CentralSurfaces extends CoreStartable implements
                         || !mUserSwitcherController.isSimpleUserSwitcher())
                 && !isShadeDisabled()
                 && ((mDisabled2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) == 0)
-                && !mDozing
-                && !ONLY_CORE_APPS;
+                && !mDozing;
         mNotificationPanelViewController.setQsExpansionEnabledPolicy(expandEnabled);
         Log.d(TAG, "updateQsExpansionEnabled - QS Expand enabled: " + expandEnabled);
     }
