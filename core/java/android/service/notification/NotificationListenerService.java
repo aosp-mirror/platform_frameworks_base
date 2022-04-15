@@ -259,7 +259,7 @@ public abstract class NotificationListenerService extends Service {
     /** Notification was canceled due to an assistant adjustment update. */
     public static final int REASON_ASSISTANT_CANCEL = 22;
     /** Notification was canceled when lockdown mode is enabled. */
-    public static final int REASON_LOCKDOWN = 22;
+    public static final int REASON_LOCKDOWN = 23;
 
     /**
      * @hide

@@ -39069,7 +39069,7 @@ package android.service.notification {
     field public static final int REASON_GROUP_SUMMARY_CANCELED = 12; // 0xc
     field public static final int REASON_LISTENER_CANCEL = 10; // 0xa
     field public static final int REASON_LISTENER_CANCEL_ALL = 11; // 0xb
-    field public static final int REASON_LOCKDOWN = 22; // 0x16
+    field public static final int REASON_LOCKDOWN = 23; // 0x17
     field public static final int REASON_PACKAGE_BANNED = 7; // 0x7
     field public static final int REASON_PACKAGE_CHANGED = 5; // 0x5
     field public static final int REASON_PACKAGE_SUSPENDED = 14; // 0xe
