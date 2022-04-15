@@ -700,6 +700,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     public void reset() {
+        mViewMode.reset();
         mDisappearAnimRunning = false;
     }
 
@@ -798,9 +799,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mUserSwitcherViewGroup =  mView.findViewById(R.id.keyguard_bouncer_user_switcher);
             }
 
-            Drawable userIcon = findUserIcon(KeyguardUpdateMonitor.getCurrentUser());
-            ((ImageView) mView.findViewById(R.id.user_icon)).setImageDrawable(userIcon);
-
             updateSecurityViewLocation();
 
             mUserSwitcher = mView.findViewById(R.id.user_switcher_header);
@@ -813,6 +811,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mPopup.dismiss();
                 mPopup = null;
             }
+            setupUserSwitcher();
         }
 
         private Drawable findUserIcon(int userId) {
@@ -858,6 +857,12 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
         private void setupUserSwitcher() {
             final UserRecord currentUser = mUserSwitcherController.getCurrentUserRecord();
+            if (currentUser == null) {
+                Log.wtf(TAG, "Current user in user switcher is null.");
+                return;
+            }
+            Drawable userIcon = findUserIcon(currentUser.info.id);
+            ((ImageView) mView.findViewById(R.id.user_icon)).setImageDrawable(userIcon);
             mUserSwitcher.setText(mUserSwitcherController.getCurrentUserName());
 
             ViewGroup anchor = mView.findViewById(R.id.user_switcher_anchor);

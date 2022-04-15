@@ -24,12 +24,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.hardware.fingerprint.FingerprintStateListener;
+import android.hardware.biometrics.BiometricStateListener;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.EnrollClient;
 
 import org.junit.Before;
@@ -39,19 +40,19 @@ import org.mockito.MockitoAnnotations;
 
 @Presubmit
 @SmallTest
-public class FingerprintStateCallbackTest {
+public class BiometricStateCallbackTest {
 
-    private FingerprintStateCallback mCallback;
+    private BiometricStateCallback mCallback;
 
     @Mock
-    FingerprintStateListener mFingerprintStateListener;
+    BiometricStateListener mBiometricStateListener;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mCallback = new FingerprintStateCallback();
-        mCallback.registerFingerprintStateListener(mFingerprintStateListener);
+        mCallback = new BiometricStateCallback();
+        mCallback.registerBiometricStateListener(mBiometricStateListener);
     }
 
     @Test
@@ -86,10 +87,10 @@ public class FingerprintStateCallbackTest {
 
         mCallback.onClientFinished(client, true /* success */);
         if (expectCallback) {
-            verify(mFingerprintStateListener).onEnrollmentsChanged(eq(userId), eq(sensorId),
+            verify(mBiometricStateListener).onEnrollmentsChanged(eq(userId), eq(sensorId),
                     eq(expectedCallbackValue));
         } else {
-            verify(mFingerprintStateListener, never()).onEnrollmentsChanged(anyInt(), anyInt(),
+            verify(mBiometricStateListener, never()).onEnrollmentsChanged(anyInt(), anyInt(),
                     anyBoolean());
         }
     }
@@ -98,7 +99,7 @@ public class FingerprintStateCallbackTest {
     public void testAuthentication_enrollmentCallbackNeverNotified() {
         AuthenticationClient<?> client = mock(AuthenticationClient.class);
         mCallback.onClientFinished(client, true /* success */);
-        verify(mFingerprintStateListener, never()).onEnrollmentsChanged(anyInt(), anyInt(),
+        verify(mBiometricStateListener, never()).onEnrollmentsChanged(anyInt(), anyInt(),
                 anyBoolean());
     }
 }

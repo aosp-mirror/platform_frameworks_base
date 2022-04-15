@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"다음 메시지가 번역되었습니다. <xliff:g id="MESSAGE">%1$s</xliff:g>"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"메시지가 <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>에서 <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>로 번역되었습니다."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"백그라운드 활동"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"앱이 배터리를 사용 중임"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"앱이 여전히 활성 상태임"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 배터리를 사용하고 있습니다. 확인하려면 탭하세요."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> 앱은 배터리 수명에 영향을 미칠 수 있습니다. 활성 상태인 앱을 확인하려면 탭하세요."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"활성 상태의 앱 확인"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 휴대전화 카메라에 액세스할 수 없습니다."</string>

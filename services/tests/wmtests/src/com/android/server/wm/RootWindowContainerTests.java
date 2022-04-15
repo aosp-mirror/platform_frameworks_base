@@ -657,7 +657,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         doReturn(true).when(mRootWindowContainer).resumeHomeActivity(any(), any(), any());
 
-        mAtm.setBooted(true);
+        setBooted(mAtm);
 
         // Trigger resume on all displays
         mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -685,7 +685,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         doReturn(true).when(mRootWindowContainer).resumeHomeActivity(any(), any(), any());
 
-        mAtm.setBooted(true);
+        setBooted(mAtm);
 
         // Trigger resume on all displays
         mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -771,17 +771,10 @@ public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testNotStartHomeBeforeBoot() {
         final int displayId = 1;
-        final boolean isBooting = mAtm.mAmInternal.isBooting();
-        final boolean isBooted = mAtm.mAmInternal.isBooted();
-        try {
-            mAtm.mAmInternal.setBooting(false);
-            mAtm.mAmInternal.setBooted(false);
-            mRootWindowContainer.onDisplayAdded(displayId);
-            verify(mRootWindowContainer, never()).startHomeOnDisplay(anyInt(), any(), anyInt());
-        } finally {
-            mAtm.mAmInternal.setBooting(isBooting);
-            mAtm.mAmInternal.setBooted(isBooted);
-        }
+        doReturn(false).when(mAtm).isBooting();
+        doReturn(false).when(mAtm).isBooted();
+        mRootWindowContainer.onDisplayAdded(displayId);
+        verify(mRootWindowContainer, never()).startHomeOnDisplay(anyInt(), any(), anyInt());
     }
 
     /**

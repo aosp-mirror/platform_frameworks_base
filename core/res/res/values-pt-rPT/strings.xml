@@ -422,9 +422,9 @@
     <string name="permlab_readCallLog" msgid="1739990210293505948">"ler registo de chamadas"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Esta app pode ler o seu histórico de chamadas."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"escrever registo de chamadas"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Permite à app modificar o registo de chamadas do tablet, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem utilizar esta funcionalidade para apagar ou modificar o registo de chamadas."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite à app modificar o registo de chamadas do seu dispositivo Android TV, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem utilizar esta funcionalidade para apagar ou modificar o seu registo de chamadas."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permite à app modificar o registo de chamadas do telemóvel, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem utilizar esta funcionalidade para apagar ou modificar o seu registo de chamadas."</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Permite à app modificar o registo de chamadas do tablet, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem usar esta funcionalidade para apagar ou modificar o registo de chamadas."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite à app modificar o registo de chamadas do seu dispositivo Android TV, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem usar esta funcionalidade para apagar ou modificar o seu registo de chamadas."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permite à app modificar o registo de chamadas do telemóvel, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem usar esta funcionalidade para apagar ou modificar o seu registo de chamadas."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"Aceder a dados de sensores de corpo, como ritmo cardíaco, durante a utilização"</string>
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite à app aceder a dados de sensores de corpo, como ritmo cardíaco, temperatura e percentagem de oxigénio no sangue, enquanto está a ser usada."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Aceder a dados de sensores de corpo, como ritmo cardíaco, quando em seg. plano"</string>
@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Mensagem <xliff:g id="MESSAGE">%1$s</xliff:g> traduzida."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mensagem traduzida de <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> para <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Atividade em segundo plano"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Uma app está a consumir bateria"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Uma app ainda está ativa"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"A app <xliff:g id="APP">%1$s</xliff:g> está a consumir bateria em segundo plano. Toque para rever."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"A app <xliff:g id="APP">%1$s</xliff:g> pode afetar a autonomia da bateria. Toque para rever as apps ativas."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificar apps ativas"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Não é possível aceder à câmara do telemóvel a partir do dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

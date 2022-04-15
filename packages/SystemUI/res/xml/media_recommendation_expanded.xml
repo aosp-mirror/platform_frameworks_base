@@ -15,113 +15,12 @@
   ~ limitations under the License
   -->
 <ConstraintSet
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <Constraint
-        android:id="@+id/media_cover1_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_expanded"
-        app:layout_constraintWidth_max="@dimen/qs_aa_media_rec_album_size_expanded"
-        android:layout_marginTop="@dimen/qs_media_padding"
-        android:layout_marginBottom="@dimen/qs_aa_media_rec_album_margin_vert"
-        android:layout_marginEnd="@dimen/qs_aa_media_rec_album_margin"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/media_horizontal_center_guideline"
-        app:layout_constraintStart_toEndOf="@id/media_vertical_start_guideline"
-        app:layout_constraintEnd_toStartOf="@id/media_cover2_container"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_bias="0"
-        android:visibility="gone" />
-
-    <Constraint
-        android:id="@+id/media_cover2_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_expanded"
-        app:layout_constraintWidth_max="@dimen/qs_aa_media_rec_album_size_expanded"
-        android:layout_marginTop="@dimen/qs_media_padding"
-        android:layout_marginBottom="@dimen/qs_aa_media_rec_album_margin_vert"
-        android:layout_marginEnd="@dimen/qs_aa_media_rec_album_margin"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/media_horizontal_center_guideline"
-        app:layout_constraintStart_toEndOf="@id/media_cover1_container"
-        app:layout_constraintEnd_toStartOf="@id/media_cover3_container"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_bias="0"
-        android:visibility="gone" />
-
-    <Constraint
-        android:id="@+id/media_cover3_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_expanded"
-        app:layout_constraintWidth_max="@dimen/qs_aa_media_rec_album_size_expanded"
-        android:layout_marginTop="@dimen/qs_media_padding"
-        android:layout_marginBottom="@dimen/qs_aa_media_rec_album_margin_vert"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/media_horizontal_center_guideline"
-        app:layout_constraintStart_toEndOf="@id/media_cover2_container"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_bias="0"
-        android:visibility="gone" />
-
-    <Constraint
-        android:id="@+id/media_cover4_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_expanded"
-        app:layout_constraintWidth_max="@dimen/qs_aa_media_rec_album_size_expanded"
-        android:layout_marginTop="@dimen/qs_aa_media_rec_album_margin_vert"
-        android:layout_marginBottom="@dimen/qs_media_padding"
-        android:layout_marginEnd="@dimen/qs_aa_media_rec_album_margin"
-        app:layout_constraintTop_toBottomOf="@+id/media_horizontal_center_guideline"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/media_vertical_start_guideline"
-        app:layout_constraintEnd_toStartOf="@id/media_cover5_container"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_bias="1"
-        android:visibility="gone" />
-
-    <Constraint
-        android:id="@+id/media_cover5_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_expanded"
-        app:layout_constraintWidth_max="@dimen/qs_aa_media_rec_album_size_expanded"
-        android:layout_marginTop="@dimen/qs_aa_media_rec_album_margin_vert"
-        android:layout_marginBottom="@dimen/qs_media_padding"
-        android:layout_marginEnd="@dimen/qs_aa_media_rec_album_margin"
-        app:layout_constraintTop_toBottomOf="@+id/media_horizontal_center_guideline"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/media_cover4_container"
-        app:layout_constraintEnd_toStartOf="@+id/media_cover6_container"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_bias="1"
-        android:visibility="gone" />
-
-    <Constraint
-        android:id="@+id/media_cover6_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_expanded"
-        app:layout_constraintWidth_max="@dimen/qs_aa_media_rec_album_size_expanded"
-        android:layout_marginTop="@dimen/qs_aa_media_rec_album_margin_vert"
-        android:layout_marginBottom="@dimen/qs_media_padding"
-        app:layout_constraintTop_toBottomOf="@id/media_horizontal_center_guideline"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/media_cover5_container"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_bias="1"
-        android:visibility="gone" />
+        android:id="@+id/sizing_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qs_media_session_height_expanded"
+        />
 
 </ConstraintSet>

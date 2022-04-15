@@ -54,7 +54,7 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu SIM txartela blokeatu aurretik.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> saiakera geratzen zaizu SIM txartela blokeatu aurretik.</item>
     </plurals>
-    <string name="imei" msgid="2157082351232630390">"IMEI zk."</string>
+    <string name="imei" msgid="2157082351232630390">"IMEIa"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Sarrerako deien identifikazio-zerbitzua"</string>
     <string name="ClirMmi" msgid="6752346475055446417">"Ezkutatu irteerako deitzailearen IDa"</string>
@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Itzuli da <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> hizkuntzatik <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> hizkuntzara itzuli da mezua."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Atzeko planoko jarduerak"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Aplikazio bat bateria erabiltzen ari da"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Aplikazio bat aktibo dago oraindik"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> atzeko planoan bateria erabiltzen ari da. Sakatu berrikusteko."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Baliteke <xliff:g id="APP">%1$s</xliff:g> aplikazioak bateriaren iraupenean eragina izatea. Sakatu hau aplikazio aktiboak ikusteko."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Ikusi zer aplikazio dauden aktibo"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ezin da atzitu telefonoaren kamera <xliff:g id="DEVICE">%1$s</xliff:g> gailutik"</string>

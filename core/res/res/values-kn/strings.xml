@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ಅನ್ನು ಅನುವಾದಿಸಲಾಗಿದೆ."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> ಭಾಷೆಯಿಂದ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ಭಾಷೆಗೆ ಸಂದೇಶವನ್ನು ಅನುವಾದಿಸಲಾಗಿದೆ."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ಹಿನ್ನೆಲೆ ಚಟುವಟಿಕೆ"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"ಒಂದು ಆ್ಯಪ್ ಬ್ಯಾಟರಿಯನ್ನು ಬಳಸುತ್ತಿದೆ"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ಒಂದು ಆ್ಯಪ್ ಈಗಲೂ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಬ್ಯಾಟರಿಯನ್ನು ಬಳಸುತ್ತಿದೆ. ಪರಿಶೀಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯ ಮೇಲೆ ಪ್ರಭಾವ ಬೀರಬಹುದು. ಸಕ್ರಿಯ ಆ್ಯಪ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ಸಕ್ರಿಯ ಆ್ಯಪ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ಮೂಲಕ ಫೋನ್‌ನ ಕ್ಯಾಮರಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
