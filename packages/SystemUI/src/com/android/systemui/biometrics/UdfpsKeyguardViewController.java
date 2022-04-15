@@ -21,7 +21,6 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.res.Configuration;
-import android.util.Log;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 
@@ -83,7 +82,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
      * {@link KeyguardBouncer#EXPANSION_HIDDEN} (1f)
      */
     private float mInputBouncerHiddenAmount;
-    private boolean mIsBouncerVisible;
+    private boolean mIsGenericBouncerShowing; // whether UDFPS bouncer or input bouncer is visible
 
     protected UdfpsKeyguardViewController(
             @NonNull UdfpsKeyguardView view,
@@ -151,8 +150,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
         mStatusBarState = getStatusBarStateController().getState();
         mQsExpanded = mKeyguardViewManager.isQsExpanded();
-        mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
-        mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
+        updateGenericBouncerVisibility();
         mConfigurationController.addCallback(mConfigurationListener);
         getPanelExpansionStateManager().addExpansionListener(mPanelExpansionListener);
         updateAlpha();
@@ -187,7 +185,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         pw.println("mFaceDetectRunning=" + mFaceDetectRunning);
         pw.println("mStatusBarState=" + StatusBarState.toString(mStatusBarState));
         pw.println("mQsExpanded=" + mQsExpanded);
-        pw.println("mIsBouncerVisible=" + mIsBouncerVisible);
+        pw.println("mIsGenericBouncerShowing=" + mIsGenericBouncerShowing);
         pw.println("mInputBouncerHiddenAmount=" + mInputBouncerHiddenAmount);
         pw.println("mPanelExpansionFraction=" + mPanelExpansionFraction);
         pw.println("unpausedAlpha=" + mView.getUnpausedAlpha());
@@ -225,6 +223,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         } else {
             mKeyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false);
         }
+
+        updateGenericBouncerVisibility();
         updateAlpha();
         updatePauseAuth();
         return true;
@@ -241,7 +241,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         }
 
         if (mUdfpsRequested && !getNotificationShadeVisible()
-                && (!mIsBouncerVisible
+                && (!mIsGenericBouncerShowing
                 || mInputBouncerHiddenAmount != KeyguardBouncer.EXPANSION_VISIBLE)
                 && mKeyguardStateController.isShowing()) {
             return false;
@@ -267,13 +267,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             return true;
         }
 
-        if (mInputBouncerHiddenAmount < .5f || mIsBouncerVisible) {
-            if (!getStatusBarStateController().isDozing()) {
-                return true;
-            } else {
-                Log.e(TAG, "Bouncer state claims visible on doze hiddenAmount="
-                        + mInputBouncerHiddenAmount + " bouncerVisible=" + mIsBouncerVisible);
-            }
+        if (mInputBouncerHiddenAmount < .5f) {
+            return true;
         }
 
         return false;
@@ -349,6 +344,21 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             alpha *= mView.getDialogSuggestedAlpha();
         }
         mView.setUnpausedAlpha(alpha);
+    }
+
+    /**
+     * Updates mIsGenericBouncerShowing (whether any bouncer is showing) and updates the
+     * mInputBouncerHiddenAmount to reflect whether the input bouncer is fully showing or not.
+     */
+    private void updateGenericBouncerVisibility() {
+        mIsGenericBouncerShowing = mKeyguardViewManager.isBouncerShowing(); // includes altBouncer
+        final boolean altBouncerShowing = mKeyguardViewManager.isShowingAlternateAuth();
+        if (altBouncerShowing || !mKeyguardViewManager.bouncerIsOrWillBeShowing()) {
+            mInputBouncerHiddenAmount = 1f;
+        } else if (mIsGenericBouncerShowing) {
+            // input bouncer is fully showing
+            mInputBouncerHiddenAmount = 0f;
+        }
     }
 
     private final StatusBarStateController.StateListener mStateListener =
@@ -434,14 +444,13 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                     updatePauseAuth();
                 }
 
+                /**
+                 * Only called on primary auth bouncer changes, not on whether the UDFPS bouncer
+                 * visibility changes.
+                 */
                 @Override
                 public void onBouncerVisibilityChanged() {
-                    mIsBouncerVisible = mKeyguardViewManager.isBouncerShowing();
-                    if (!mIsBouncerVisible) {
-                        mInputBouncerHiddenAmount = 1f;
-                    } else if (mKeyguardViewManager.isBouncerShowing()) {
-                        mInputBouncerHiddenAmount = 0f;
-                    }
+                    updateGenericBouncerVisibility();
                     updateAlpha();
                     updatePauseAuth();
                 }
