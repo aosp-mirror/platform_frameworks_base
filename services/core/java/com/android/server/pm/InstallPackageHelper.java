@@ -870,7 +870,7 @@ final class InstallPackageHelper {
                                 + " got: " + apexes.length);
             }
             try (PackageParser2 packageParser = mPm.mInjector.getScanningPackageParser()) {
-                mApexManager.installPackage(apexes[0], packageParser);
+                mApexManager.installPackage(apexes[0], packageParser, mPm.mApexPackageInfo);
             }
         } catch (PackageManagerException e) {
             request.mInstallResult.setError("APEX installation failed", e);
@@ -2457,7 +2457,7 @@ final class InstallPackageHelper {
             long requiredInstalledVersionCode, int installFlags) {
         String packageName = pkgLite.packageName;
 
-        final PackageInfo activePackage = mApexManager.getPackageInfo(packageName,
+        final PackageInfo activePackage = mPm.mApexPackageInfo.getPackageInfo(packageName,
                 ApexManager.MATCH_ACTIVE_PACKAGE);
         if (activePackage == null) {
             String errorMsg = "Attempting to install new APEX package " + packageName;
@@ -4080,7 +4080,7 @@ final class InstallPackageHelper {
         final boolean isUserInstall = (scanFlags & SCAN_BOOTING) == 0;
         final boolean isFirstBootOrUpgrade = (scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0;
         if ((isUserInstall || isFirstBootOrUpgrade)
-                && mApexManager.isApexPackage(pkg.getPackageName())) {
+                && mPm.mApexPackageInfo.isApexPackage(pkg.getPackageName())) {
             throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
                     pkg.getPackageName()
                             + " is an APEX package and can't be installed as an APK.");

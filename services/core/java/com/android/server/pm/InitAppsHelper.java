@@ -72,6 +72,7 @@ final class InitAppsHelper {
     private final int mSystemScanFlags;
     private final InstallPackageHelper mInstallPackageHelper;
     private final ApexManager mApexManager;
+    private final ApexPackageInfo mApexPackageInfo;
     private final ExecutorService mExecutorService;
     /* Tracks how long system scan took */
     private long mSystemScanTime;
@@ -96,11 +97,13 @@ final class InitAppsHelper {
     private final List<String> mStubSystemApps = new ArrayList<>();
 
     // TODO(b/198166813): remove PMS dependency
-    InitAppsHelper(PackageManagerService pm, ApexManager apexManager,
+    InitAppsHelper(PackageManagerService pm,
+            ApexManager apexManager, ApexPackageInfo apexPackageInfo,
             InstallPackageHelper installPackageHelper,
             List<ScanPartition> systemPartitions) {
         mPm = pm;
         mApexManager = apexManager;
+        mApexPackageInfo = apexPackageInfo;
         mInstallPackageHelper = installPackageHelper;
         mSystemPartitions = systemPartitions;
         mDirsToScanAsSystem = getSystemScanPartitions();
@@ -179,6 +182,17 @@ final class InitAppsHelper {
         return null;
     }
 
+    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
+    private List<ApexManager.ScanResult> scanApexPackagesTraced(PackageParser2 packageParser) {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanApexPackages");
+        try {
+            return mApexPackageInfo.scanApexPackages(
+                    mApexManager.getAllApexInfos(), packageParser, mExecutorService);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
+
     /**
      * Install apps from system dirs.
      */
@@ -188,7 +202,8 @@ final class InitAppsHelper {
             int[] userIds, long startTime) {
         // Prepare apex package info before scanning APKs, this information is needed when
         // scanning apk in apex.
-        mApexManager.scanApexPackagesTraced(packageParser, mExecutorService);
+        final List<ApexManager.ScanResult> apexScanResults = scanApexPackagesTraced(packageParser);
+        mApexManager.notifyScanResult(apexScanResults);
 
         scanSystemDirs(packageParser, mExecutorService);
         // Parse overlay configuration files to set default enable state, mutability, and
