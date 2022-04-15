@@ -56,7 +56,6 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
 import android.view.SurfaceControl;
-import android.view.View;
 import android.window.SplashScreenView;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowInfo.StartingWindowType;
@@ -543,22 +542,6 @@ public class SplashscreenContentDrawer {
                         mBrandingImageHeight);
             }
             final SplashScreenView splashScreenView = builder.build();
-            if (mSuggestType != STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
-                splashScreenView.addOnAttachStateChangeListener(
-                        new View.OnAttachStateChangeListener() {
-                            @Override
-                            public void onViewAttachedToWindow(View v) {
-                                SplashScreenView.applySystemBarsContrastColor(
-                                        v.getWindowInsetsController(),
-                                        splashScreenView.getInitBackgroundColor());
-                            }
-
-                            @Override
-                            public void onViewDetachedFromWindow(View v) {
-                            }
-                        });
-            }
-
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return splashScreenView;
         }
