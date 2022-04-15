@@ -21,7 +21,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -35,7 +34,6 @@ import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -227,15 +225,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX bookmarksIndex2 ON bookmarks (shortcut);");
 
         // Populate bookmarks table with initial bookmarks
-        boolean onlyCore = false;
-        try {
-            onlyCore = IPackageManager.Stub.asInterface(ServiceManager.getService(
-                    "package")).isOnlyCoreApps();
-        } catch (RemoteException e) {
-        }
-        if (!onlyCore) {
-            loadBookmarks(db);
-        }
+        loadBookmarks(db);
 
         // Load initial volume levels into DB
         loadVolumeLevels(db);
