@@ -116,6 +116,7 @@ import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.AppBackgroundRestrictionsInfo;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -123,7 +124,6 @@ import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerExemptionManager.ExemptionReason;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -1916,76 +1916,59 @@ public final class AppRestrictionController {
     private int getRestrictionLevelStatsd(@RestrictionLevel int level) {
         switch (level) {
             case RESTRICTION_LEVEL_UNKNOWN:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_UNKNOWN;
+                return AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN;
             case RESTRICTION_LEVEL_UNRESTRICTED:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_UNRESTRICTED;
+                return AppBackgroundRestrictionsInfo.LEVEL_UNRESTRICTED;
             case RESTRICTION_LEVEL_EXEMPTED:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_EXEMPTED;
+                return AppBackgroundRestrictionsInfo.LEVEL_EXEMPTED;
             case RESTRICTION_LEVEL_ADAPTIVE_BUCKET:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_ADAPTIVE_BUCKET;
+                return AppBackgroundRestrictionsInfo.LEVEL_ADAPTIVE_BUCKET;
             case RESTRICTION_LEVEL_RESTRICTED_BUCKET:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_RESTRICTED_BUCKET;
+                return AppBackgroundRestrictionsInfo.LEVEL_RESTRICTED_BUCKET;
             case RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_BACKGROUND_RESTRICTED;
+                return AppBackgroundRestrictionsInfo.LEVEL_BACKGROUND_RESTRICTED;
             case RESTRICTION_LEVEL_HIBERNATION:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_HIBERNATION;
+                return AppBackgroundRestrictionsInfo.LEVEL_HIBERNATION;
             default:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_UNKNOWN;
+                return AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN;
         }
     }
 
     private int getThresholdStatsd(int reason) {
         switch (reason) {
             case REASON_MAIN_FORCED_BY_SYSTEM:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__THRESHOLD__THRESHOLD_RESTRICTED;
+                return AppBackgroundRestrictionsInfo.THRESHOLD_RESTRICTED;
             case REASON_MAIN_FORCED_BY_USER:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__THRESHOLD__THRESHOLD_USER;
+                return AppBackgroundRestrictionsInfo.THRESHOLD_USER;
             default:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__THRESHOLD__THRESHOLD_UNKNOWN;
+                return AppBackgroundRestrictionsInfo.THRESHOLD_UNKNOWN;
         }
     }
 
     private int getTrackerTypeStatsd(@TrackerType int type) {
         switch (type) {
             case TRACKER_TYPE_BATTERY:
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__BATTERY_TRACKER;
+                return AppBackgroundRestrictionsInfo.BATTERY_TRACKER;
             case TRACKER_TYPE_BATTERY_EXEMPTION:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__BATTERY_EXEMPTION_TRACKER;
+                return AppBackgroundRestrictionsInfo.BATTERY_EXEMPTION_TRACKER;
             case TRACKER_TYPE_FGS:
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__FGS_TRACKER;
+                return AppBackgroundRestrictionsInfo.FGS_TRACKER;
             case TRACKER_TYPE_MEDIA_SESSION:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__MEDIA_SESSION_TRACKER;
+                return AppBackgroundRestrictionsInfo.MEDIA_SESSION_TRACKER;
             case TRACKER_TYPE_PERMISSION:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__PERMISSION_TRACKER;
+                return AppBackgroundRestrictionsInfo.PERMISSION_TRACKER;
             case TRACKER_TYPE_BROADCAST_EVENTS:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__BROADCAST_EVENTS_TRACKER;
+                return AppBackgroundRestrictionsInfo.BROADCAST_EVENTS_TRACKER;
             case TRACKER_TYPE_BIND_SERVICE_EVENTS:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__BIND_SERVICE_EVENTS_TRACKER;
+                return AppBackgroundRestrictionsInfo.BIND_SERVICE_EVENTS_TRACKER;
             default:
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__UNKNOWN_TRACKER;
+                return AppBackgroundRestrictionsInfo.UNKNOWN_TRACKER;
         }
     }
 
-    private @ExemptionReason int getExemptionReasonStatsd(int uid, @RestrictionLevel int level) {
+    private int getExemptionReasonStatsd(int uid, @RestrictionLevel int level) {
         if (level != RESTRICTION_LEVEL_EXEMPTED) {
-            return FrameworkStatsLog
-                    .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_DENIED;
+            return AppBackgroundRestrictionsInfo.REASON_DENIED;
         }
 
         @ReasonCode final int reasonCode = getBackgroundRestrictionExemptionReason(uid);
@@ -1995,16 +1978,15 @@ public final class AppRestrictionController {
     private int getOptimizationLevelStatsd(@RestrictionLevel int level) {
         switch (level) {
             case RESTRICTION_LEVEL_UNKNOWN:
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__UNKNOWN;
+                return AppBackgroundRestrictionsInfo.UNKNOWN;
             case RESTRICTION_LEVEL_UNRESTRICTED:
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__NOT_OPTIMIZED;
+                return AppBackgroundRestrictionsInfo.NOT_OPTIMIZED;
             case RESTRICTION_LEVEL_ADAPTIVE_BUCKET:
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__OPTIMIZED;
+                return AppBackgroundRestrictionsInfo.OPTIMIZED;
             case RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
-                return FrameworkStatsLog
-                        .APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__BACKGROUND_RESTRICTED;
+                return AppBackgroundRestrictionsInfo.BACKGROUND_RESTRICTED;
             default:
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__UNKNOWN;
+                return AppBackgroundRestrictionsInfo.UNKNOWN;
         }
     }
 
@@ -2012,26 +1994,26 @@ public final class AppRestrictionController {
     private int getTargetSdkStatsd(String packageName) {
         final PackageManager pm = mInjector.getPackageManager();
         if (pm == null) {
-            return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_UNKNOWN;
+            return AppBackgroundRestrictionsInfo.SDK_UNKNOWN;
         }
         try {
             final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
             if (pkg == null || pkg.applicationInfo == null) {
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_UNKNOWN;
+                return AppBackgroundRestrictionsInfo.SDK_UNKNOWN;
             }
             final int targetSdk = pkg.applicationInfo.targetSdkVersion;
             if (targetSdk < Build.VERSION_CODES.S) {
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_PRE_S;
+                return AppBackgroundRestrictionsInfo.SDK_PRE_S;
             } else if (targetSdk < Build.VERSION_CODES.TIRAMISU) {
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_S;
+                return AppBackgroundRestrictionsInfo.SDK_S;
             } else if (targetSdk == Build.VERSION_CODES.TIRAMISU) {
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_T;
+                return AppBackgroundRestrictionsInfo.SDK_T;
             } else {
-                return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_UNKNOWN;
+                return AppBackgroundRestrictionsInfo.SDK_UNKNOWN;
             }
         } catch (PackageManager.NameNotFoundException ignored) {
         }
-        return FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_UNKNOWN;
+        return AppBackgroundRestrictionsInfo.SDK_UNKNOWN;
     }
 
     private void applyRestrictionLevel(String pkgName, int uid,
