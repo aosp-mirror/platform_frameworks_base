@@ -117,6 +117,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
             mCheckBox.setVisibility(View.GONE);
             mStatusIcon.setVisibility(View.GONE);
+            mEndTouchArea.setVisibility(View.GONE);
             mContainerLayout.setOnClickListener(null);
             mTitleText.setTextColor(mController.getColorItemContent());
             mSubTitleText.setTextColor(mController.getColorItemContent());
@@ -168,12 +169,16 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, false /* showStatus */);
+                    mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setVisibility(View.VISIBLE);
                     mCheckBox.setChecked(true);
-                    mSeekBar.setOnClickListener(null);
-                    mSeekBar.setOnClickListener(v -> onGroupActionTriggered(false, device));
+                    mCheckBox.setOnCheckedChangeListener(
+                            (buttonView, isChecked) -> onGroupActionTriggered(false, device));
                     setCheckBoxColor(mCheckBox, mController.getColorItemContent());
                     initSeekbar(device);
+                    mEndTouchArea.setVisibility(View.VISIBLE);
+                    mEndTouchArea.setOnClickListener(null);
+                    mEndTouchArea.setOnClickListener((v) -> mCheckBox.performClick());
                 } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_check));
@@ -185,8 +190,11 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     initSeekbar(device);
                     mCurrentActivePosition = position;
                 } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
+                    mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setVisibility(View.VISIBLE);
                     mCheckBox.setChecked(false);
+                    mCheckBox.setOnCheckedChangeListener(
+                            (buttonView, isChecked) -> onGroupActionTriggered(true, device));
                     mContainerLayout.setOnClickListener(v -> onGroupActionTriggered(true, device));
                     setCheckBoxColor(mCheckBox, mController.getColorItemContent());
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */,
