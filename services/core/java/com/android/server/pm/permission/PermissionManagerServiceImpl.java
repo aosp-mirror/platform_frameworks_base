@@ -570,9 +570,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             return null;
         }
 
+        final ParsedPermissionGroup permissionGroup;
         final List<PermissionInfo> out = new ArrayList<>(10);
         synchronized (mLock) {
-            if (groupName != null && mRegistry.getPermissionGroup(groupName) == null) {
+            permissionGroup = mRegistry.getPermissionGroup(groupName);
+            if (groupName != null && permissionGroup == null) {
                 return null;
             }
             for (Permission bp : mRegistry.getPermissions()) {
@@ -583,6 +585,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
 
         final int callingUserId = UserHandle.getUserId(callingUid);
+        if (mPackageManagerInt.filterAppAccess(permissionGroup.getPackageName(), callingUid,
+                callingUserId)) {
+            return null;
+        }
         out.removeIf(it -> mPackageManagerInt.filterAppAccess(it.packageName, callingUid,
                 callingUserId));
         return out;
