@@ -2675,7 +2675,7 @@ public class ComputerEngine implements Computer {
      */
     public final boolean shouldFilterApplication(@Nullable PackageStateInternal ps,
             int callingUid, @Nullable ComponentName component,
-            @PackageManager.ComponentType int componentType, int userId) {
+            @PackageManager.ComponentType int componentType, int userId, boolean filterUninstall) {
         if (Process.isSdkSandboxUid(callingUid)) {
             int clientAppUid = Process.getAppUidForSdkSandboxUid(callingUid);
             // SDK sandbox should be able to see it's client app
@@ -2689,9 +2689,11 @@ public class ComputerEngine implements Computer {
         }
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         final boolean callerIsInstantApp = instantAppPkgName != null;
-        if (ps == null) {
-            // pretend the application exists, but, needs to be filtered
-            return callerIsInstantApp;
+        if (ps == null
+                || (filterUninstall && !ps.getUserStateOrDefault(userId).isInstalled())) {
+            // If caller is instant app and ps is null, pretend the application exists,
+            // but, needs to be filtered
+            return (callerIsInstantApp || filterUninstall);
         }
         // if the target and caller are the same application, don't filter
         if (isCallerSameApp(ps.getPackageName(), callingUid)) {
@@ -2736,15 +2738,26 @@ public class ComputerEngine implements Computer {
     }
 
     /**
-     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int)
+     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean)
      */
-    public final boolean shouldFilterApplication(
-            @Nullable PackageStateInternal ps, int callingUid, int userId) {
-        return shouldFilterApplication(ps, callingUid, null, TYPE_UNKNOWN, userId);
+    public final boolean shouldFilterApplication(@Nullable PackageStateInternal ps,
+            int callingUid, @Nullable ComponentName component,
+            @PackageManager.ComponentType int componentType, int userId) {
+        return shouldFilterApplication(
+                ps, callingUid, component, componentType, userId, false /* filterUninstall */);
     }
 
     /**
-     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int)
+     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean)
+     */
+    public final boolean shouldFilterApplication(
+            @Nullable PackageStateInternal ps, int callingUid, int userId) {
+        return shouldFilterApplication(
+                ps, callingUid, null, TYPE_UNKNOWN, userId, false /* filterUninstall */);
+    }
+
+    /**
+     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean)
      */
     public final boolean shouldFilterApplication(@NonNull SharedUserSetting sus,
             int callingUid, int userId) {
@@ -2752,10 +2765,19 @@ public class ComputerEngine implements Computer {
         final ArraySet<PackageStateInternal> packageStates =
                 (ArraySet<PackageStateInternal>) sus.getPackageStates();
         for (int index = packageStates.size() - 1; index >= 0 && filterApp; index--) {
-            filterApp &= shouldFilterApplication(packageStates.valueAt(index),
-                    callingUid, /* component */ null, TYPE_UNKNOWN, userId);
+            filterApp &= shouldFilterApplication(packageStates.valueAt(index), callingUid,
+                    null /* component */, TYPE_UNKNOWN, userId, false /* filterUninstall */);
         }
         return filterApp;
+    }
+
+    /**
+     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean)
+     */
+    public final boolean shouldFilterApplicationIncludingUninstalled(
+            @Nullable PackageStateInternal ps, int callingUid, int userId) {
+        return shouldFilterApplication(
+                ps, callingUid, null, TYPE_UNKNOWN, userId, true /* filterUninstall */);
     }
 
     /**

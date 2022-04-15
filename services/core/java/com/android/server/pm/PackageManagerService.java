@@ -6617,9 +6617,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             @UserIdInt int userId) {
         PackageStateInternal packageState =
                 computer.getPackageStateInternal(packageName, callingUid);
-        if (packageState == null
-                || computer.shouldFilterApplication(packageState, callingUid, userId)
-                || !packageState.getUserStateOrDefault(userId).isInstalled()) {
+        if (computer.shouldFilterApplicationIncludingUninstalled(
+                packageState, callingUid, userId)) {
             return null;
         } else {
             return packageState;
