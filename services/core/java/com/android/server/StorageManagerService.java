@@ -1557,10 +1557,6 @@ class StorageManagerService extends IStorageManager.Stub
 
     @GuardedBy("mLock")
     private void onVolumeCreatedLocked(VolumeInfo vol) {
-        if (mPmInternal.isOnlyCoreApps()) {
-            Slog.d(TAG, "System booted in core-only mode; ignoring volume " + vol.getId());
-            return;
-        }
         final ActivityManagerInternal amInternal =
                 LocalServices.getService(ActivityManagerInternal.class);
 
