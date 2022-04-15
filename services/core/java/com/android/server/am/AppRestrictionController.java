@@ -1095,6 +1095,14 @@ public final class AppRestrictionController {
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "restriction_exempted_packages";
 
         /**
+         * Whether or not to show the notification for abusive apps, i.e. when the system
+         * detects it's draining significant amount of battery in the background.
+         * {@code true} - we'll show the prompt to user, {@code false} - we'll not show it.
+         */
+        static final String KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "prompt_abusive_apps_to_bg_restricted";
+
+        /**
          * Default value to {@link #mBgAutoRestrictedBucket}.
          */
         static final boolean DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION = false;
@@ -1118,6 +1126,11 @@ public final class AppRestrictionController {
          * Default value to {@link #mBgPromptFgsWithNotiToBgRestricted}.
          */
         final boolean mDefaultBgPromptFgsWithNotiToBgRestricted;
+
+        /**
+         * Default value to {@link #mBgPromptAbusiveAppsToBgRestricted}.
+         */
+        final boolean mDefaultBgPromptAbusiveAppToBgRestricted;
 
         volatile boolean mBgAutoRestrictedBucket;
 
@@ -1144,10 +1157,17 @@ public final class AppRestrictionController {
          */
         volatile boolean mBgPromptFgsWithNotiOnLongRunning;
 
+        /**
+         * @see #KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED.
+         */
+        volatile boolean mBgPromptAbusiveAppsToBgRestricted;
+
         ConstantsObserver(Handler handler, Context context) {
             super(handler);
             mDefaultBgPromptFgsWithNotiToBgRestricted = context.getResources().getBoolean(
                     com.android.internal.R.bool.config_bg_prompt_fgs_with_noti_to_bg_restricted);
+            mDefaultBgPromptAbusiveAppToBgRestricted = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_bg_prompt_abusive_apps_to_bg_restricted);
         }
 
         @Override
@@ -1171,6 +1191,9 @@ public final class AppRestrictionController {
                         break;
                     case KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING:
                         updateBgPromptFgsWithNotiOnLongRunning();
+                        break;
+                    case KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED:
+                        updateBgPromptAbusiveAppToBgRestricted();
                         break;
                     case KEY_BG_RESTRICTION_EXEMPTED_PACKAGES:
                         updateBgRestrictionExemptedPackages();
@@ -1209,6 +1232,7 @@ public final class AppRestrictionController {
             updateBgLongFgsNotificationMinimalInterval();
             updateBgPromptFgsWithNotiToBgRestricted();
             updateBgPromptFgsWithNotiOnLongRunning();
+            updateBgPromptAbusiveAppToBgRestricted();
             updateBgRestrictionExemptedPackages();
         }
 
@@ -1251,6 +1275,13 @@ public final class AppRestrictionController {
                     DEFAULT_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING);
         }
 
+        private void updateBgPromptAbusiveAppToBgRestricted() {
+            mBgPromptAbusiveAppsToBgRestricted = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED,
+                    mDefaultBgPromptAbusiveAppToBgRestricted);
+        }
+
         private void updateBgRestrictionExemptedPackages() {
             final String settings = DeviceConfig.getString(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1289,6 +1320,10 @@ public final class AppRestrictionController {
             pw.print(KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED);
             pw.print('=');
             pw.println(mBgPromptFgsWithNotiToBgRestricted);
+            pw.print(prefix);
+            pw.print(KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED);
+            pw.print('=');
+            pw.println(mBgPromptAbusiveAppsToBgRestricted);
             pw.print(prefix);
             pw.print(KEY_BG_RESTRICTION_EXEMPTED_PACKAGES);
             pw.print('=');
@@ -2296,6 +2331,13 @@ public final class AppRestrictionController {
         }
 
         void postRequestBgRestrictedIfNecessary(String packageName, int uid) {
+            if (!mBgController.mConstantsObserver.mBgPromptAbusiveAppsToBgRestricted) {
+                if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+                    Slog.i(TAG, "Not requesting bg-restriction due to config");
+                }
+                return;
+            }
+
             final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
             intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
