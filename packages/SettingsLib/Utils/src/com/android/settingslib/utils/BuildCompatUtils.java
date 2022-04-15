@@ -17,10 +17,9 @@
 package com.android.settingslib.utils;
 
 import android.os.Build;
+import android.os.Build.VERSION;
 
 import androidx.annotation.ChecksSdkIntAtLeast;
-
-import com.android.modules.utils.build.SdkLevel;
 
 /**
  * An util class to check whether the current OS version is higher or equal to sdk version of
@@ -35,7 +34,7 @@ public final class BuildCompatUtils {
      */
     @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)
     public static boolean isAtLeastS() {
-        return SdkLevel.isAtLeastS();
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
     }
 
     /**
@@ -45,7 +44,7 @@ public final class BuildCompatUtils {
      */
     @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S_V2)
     public static boolean isAtLeastSV2() {
-        return SdkLevel.isAtLeastSv2();
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S_V2;
     }
 
     /**
@@ -55,7 +54,7 @@ public final class BuildCompatUtils {
      */
     @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.TIRAMISU)
     public static boolean isAtLeastT() {
-        return SdkLevel.isAtLeastT();
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;
     }
 
     private BuildCompatUtils() {}
