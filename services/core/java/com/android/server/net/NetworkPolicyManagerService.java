@@ -162,6 +162,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -4556,9 +4557,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
         try {
             // update rules for all installed applications
-            final PackageManager pm = mContext.getPackageManager();
             final List<UserInfo> users;
-            final List<ApplicationInfo> apps;
 
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "list-users");
             try {
@@ -4566,25 +4565,29 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
             }
-            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "list-uids");
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "iterate-uids");
             try {
-                apps = pm.getInstalledApplications(
-                        PackageManager.MATCH_ANY_USER | PackageManager.MATCH_DISABLED_COMPONENTS
-                                | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+                final PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                        PackageManagerInternal.class);
+                final int usersSize = users.size();
+                for (int i = 0; i < usersSize; ++i) {
+                    final int userId = users.get(i).id;
+                    final SparseBooleanArray sharedAppIdsHandled = new SparseBooleanArray();
+                    packageManagerInternal.forEachInstalledPackage(androidPackage -> {
+                        final int appId = androidPackage.getUid();
+                        if (androidPackage.getSharedUserId() != null) {
+                            if (sharedAppIdsHandled.indexOfKey(appId) < 0) {
+                                sharedAppIdsHandled.put(appId, true);
+                            } else {
+                                return;
+                            }
+                        }
+                        final int uid = UserHandle.getUid(userId, appId);
+                        consumer.accept(uid);
+                    }, userId);
+                }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
-            }
-
-            final int usersSize = users.size();
-            final int appsSize = apps.size();
-            for (int i = 0; i < usersSize; i++) {
-                final UserInfo user = users.get(i);
-                for (int j = 0; j < appsSize; j++) {
-                    final ApplicationInfo app = apps.get(j);
-                    final int uid = UserHandle.getUid(user.id, app.uid);
-                    consumer.accept(uid);
-                }
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
