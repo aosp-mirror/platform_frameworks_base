@@ -672,12 +672,30 @@
         <item name="android:layout_height">@dimen/qs_media_rec_album_size</item>
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:layout_marginTop">@dimen/qs_media_padding</item>
-        <item name="android:layout_marginBottom">@dimen/qs_media_padding</item>
+        <item name="android:layout_marginBottom">@dimen/qs_media_rec_album_bottom_margin</item>
     </style>
 
     <style name="MediaPlayer.Recommendation.Album">
         <item name="android:backgroundTint">@color/media_player_album_bg</item>
     </style>
+
+    <style name="MediaPlayer.Recommendation.Text">
+        <item name="android:layout_width">@dimen/qs_media_rec_album_size</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:gravity">start</item>
+    </style>
+
+    <style name="MediaPlayer.Recommendation.Text.Title">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="MediaPlayer.Recommendation.Text.Subtitle">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
 
     <!-- Used to style charging animation AVD animation -->
     <style name="ChargingAnim" />

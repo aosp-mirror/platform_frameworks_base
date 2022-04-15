@@ -980,7 +980,8 @@
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
     <dimen name="qs_media_rec_album_size">88dp</dimen>
-    <dimen name="qs_media_rec_album_margin">16dp</dimen>
+    <dimen name="qs_media_rec_album_side_margin">16dp</dimen>
+    <dimen name="qs_media_rec_album_bottom_margin">8dp</dimen>
     <dimen name="qs_media_rec_icon_size">24dp</dimen>
 
     <!-- Media tap-to-transfer chip for sender device -->
