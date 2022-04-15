@@ -150,7 +150,6 @@ public class MediaControlPanel {
     private MediaSession.Token mToken;
     private MediaController mController;
     private Lazy<MediaDataManager> mMediaDataManagerLazy;
-    private int mBackgroundColor;
     // Uid for the media app.
     protected int mUid = Process.INVALID_UID;
     private int mSmartspaceMediaItemsCount;
@@ -343,8 +342,7 @@ public class MediaControlPanel {
         AnimatorSet exit = loadAnimator(R.anim.media_metadata_exit,
                 Interpolators.EMPHASIZED_ACCELERATE, titleText, artistText);
 
-        mColorSchemeTransition = new ColorSchemeTransition(
-            mContext, mBackgroundColor, mMediaViewHolder);
+        mColorSchemeTransition = new ColorSchemeTransition(mContext, mMediaViewHolder);
         mMetadataAnimationHandler = new MetadataAnimationHandler(exit, enter);
     }
 
@@ -409,7 +407,6 @@ public class MediaControlPanel {
         }
         mInstanceId = data.getInstanceId();
 
-        mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
             mToken = token;
         }
@@ -485,7 +482,7 @@ public class MediaControlPanel {
             Drawable icon = device.getIcon();
             if (icon instanceof AdaptiveIcon) {
                 AdaptiveIcon aIcon = (AdaptiveIcon) icon;
-                aIcon.setBackgroundColor(mBackgroundColor);
+                aIcon.setBackgroundColor(mColorSchemeTransition.getBgColor());
                 iconView.setImageDrawable(aIcon);
             } else {
                 iconView.setImageDrawable(icon);
@@ -956,11 +953,11 @@ public class MediaControlPanel {
         }
 
         mSmartspaceId = SmallHash.hash(data.getTargetId());
-        mBackgroundColor = data.getBackgroundColor();
+        int backgroundColor = data.getBackgroundColor();
         mPackageName = data.getPackageName();
         mInstanceId = data.getInstanceId();
         TransitionLayout recommendationCard = mRecommendationViewHolder.getRecommendations();
-        recommendationCard.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
+        recommendationCard.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
 
         List<SmartspaceAction> mediaRecommendationList = data.getRecommendations();
         if (mediaRecommendationList == null || mediaRecommendationList.isEmpty()) {
