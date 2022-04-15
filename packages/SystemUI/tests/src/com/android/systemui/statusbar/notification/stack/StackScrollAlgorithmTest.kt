@@ -1,5 +1,6 @@
 package com.android.systemui.statusbar.notification.stack
 
+import android.annotation.DimenRes
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -25,6 +26,14 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             context,
             SectionProvider { _, _ -> false },
             BypassController { false })
+
+    private val testableResources = mContext.orCreateTestableResources
+
+    private fun px(@DimenRes id: Int): Float =
+            testableResources.resources.getDimensionPixelSize(id).toFloat()
+
+    private val bigGap = px(R.dimen.notification_section_divider_height)
+    private val smallGap = px(R.dimen.notification_section_divider_height_lockscreen)
 
     @Before
     fun setUp() {
@@ -74,5 +83,26 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val fullHeight = ambientState.layoutMaxHeight + marginBottom - ambientState.stackY
         val centeredY = ambientState.stackY + fullHeight / 2f - emptyShadeView.height / 2f
         assertThat(emptyShadeView.viewState?.yTranslation).isEqualTo(centeredY)
+    }
+
+    @Test
+    fun getGapForLocation_onLockscreen_returnsSmallGap() {
+        val gap = stackScrollAlgorithm.getGapForLocation(
+                /* fractionToShade= */ 0f, /* onKeyguard= */ true)
+        assertThat(gap).isEqualTo(smallGap)
+    }
+
+    @Test
+    fun getGapForLocation_goingToShade_interpolatesGap() {
+        val gap = stackScrollAlgorithm.getGapForLocation(
+                /* fractionToShade= */ 0.5f, /* onKeyguard= */ true)
+        assertThat(gap).isEqualTo(smallGap * 0.5f + bigGap * 0.5f)
+    }
+
+    @Test
+    fun getGapForLocation_notOnLockscreen_returnsBigGap() {
+        val gap = stackScrollAlgorithm.getGapForLocation(
+                /* fractionToShade= */ 0f, /* onKeyguard= */ false)
+        assertThat(gap).isEqualTo(bigGap)
     }
 }
