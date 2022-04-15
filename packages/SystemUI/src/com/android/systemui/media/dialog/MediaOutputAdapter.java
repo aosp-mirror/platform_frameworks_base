@@ -195,6 +195,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mCheckBox.setChecked(false);
                     mCheckBox.setOnCheckedChangeListener(
                             (buttonView, isChecked) -> onGroupActionTriggered(true, device));
+                    mEndTouchArea.setVisibility(View.VISIBLE);
                     mContainerLayout.setOnClickListener(v -> onGroupActionTriggered(true, device));
                     setCheckBoxColor(mCheckBox, mController.getColorItemContent());
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */,
