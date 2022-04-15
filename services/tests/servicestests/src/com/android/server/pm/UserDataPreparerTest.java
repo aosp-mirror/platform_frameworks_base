@@ -82,7 +82,7 @@ public class UserDataPreparerTest {
         FileUtils.deleteContents(ctx.getCacheDir());
         mInstallLock = new Object();
         MockitoAnnotations.initMocks(this);
-        mUserDataPreparer = new TestUserDataPreparer(mInstaller, mInstallLock, mContextMock, false,
+        mUserDataPreparer = new TestUserDataPreparer(mInstaller, mInstallLock, mContextMock,
                 ctx.getCacheDir());
         when(mContextMock.getSystemServiceName(StorageManager.class))
                 .thenReturn(Context.STORAGE_SERVICE);
@@ -215,8 +215,8 @@ public class UserDataPreparerTest {
         File testDir;
 
         TestUserDataPreparer(Installer installer, Object installLock, Context context,
-                boolean onlyCore, File testDir) {
-            super(installer, installLock, context, onlyCore);
+                File testDir) {
+            super(installer, installLock, context);
             this.testDir = testDir;
         }
 

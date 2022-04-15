@@ -543,12 +543,6 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
 
     @Override
     @Deprecated
-    public final boolean isOnlyCoreApps() {
-        return mService.isOnlyCoreApps();
-    }
-
-    @Override
-    @Deprecated
     public final void freeStorage(String volumeUuid, long bytes,
             @StorageManager.AllocateFlags int flags) throws IOException {
         mService.freeStorage(volumeUuid, bytes, flags);
