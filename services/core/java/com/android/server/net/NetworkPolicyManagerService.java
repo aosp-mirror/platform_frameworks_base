@@ -5468,11 +5468,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) Slog.v(TAG, "setMeteredNetworkDenylist " + uid + ": " + enable);
         try {
             mNetworkManager.setUidOnMeteredNetworkDenylist(uid, enable);
-            mLogger.meteredAllowlistChanged(uid, enable);
+            mLogger.meteredDenylistChanged(uid, enable);
             if (Process.isApplicationUid(uid)) {
                 final int sdkSandboxUid = Process.toSdkSandboxUid(uid);
                 mNetworkManager.setUidOnMeteredNetworkDenylist(sdkSandboxUid, enable);
-                mLogger.meteredAllowlistChanged(sdkSandboxUid, enable);
+                mLogger.meteredDenylistChanged(sdkSandboxUid, enable);
             }
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting denylist (" + enable + ") rules for " + uid, e);
@@ -5485,11 +5485,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) Slog.v(TAG, "setMeteredNetworkAllowlist " + uid + ": " + enable);
         try {
             mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, enable);
-            mLogger.meteredDenylistChanged(uid, enable);
+            mLogger.meteredAllowlistChanged(uid, enable);
             if (Process.isApplicationUid(uid)) {
                 final int sdkSandboxUid = Process.toSdkSandboxUid(uid);
                 mNetworkManager.setUidOnMeteredNetworkAllowlist(sdkSandboxUid, enable);
-                mLogger.meteredDenylistChanged(sdkSandboxUid, enable);
+                mLogger.meteredAllowlistChanged(sdkSandboxUid, enable);
             }
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting allowlist (" + enable + ") rules for " + uid, e);
