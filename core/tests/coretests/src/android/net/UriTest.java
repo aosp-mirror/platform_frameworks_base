@@ -989,10 +989,14 @@ public class UriTest extends TestCase {
         checkToSafeString("ftp://ftp.android.com:2121/...",
                 "ftp://root:love@ftp.android.com:2121/");
 
-        checkToSafeString("unsupported://ajkakjah/askdha/secret?secret",
+        checkToSafeString("unsupported://ajkakjah/...",
                 "unsupported://ajkakjah/askdha/secret?secret");
-        checkToSafeString("unsupported:ajkakjah/askdha/secret?secret",
+        checkToSafeString("unsupported:",
                 "unsupported:ajkakjah/askdha/secret?secret");
+        checkToSafeString("unsupported:/...",
+                "unsupported:/ajkakjah/askdha/secret?secret");
+        checkToSafeString("file:///...",
+                "file:///path/to/secret.doc");
     }
 
     private void checkToSafeString(String expectedSafeString, String original) {

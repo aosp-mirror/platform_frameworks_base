@@ -390,7 +390,8 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * Return a string representation of this URI that has common forms of PII redacted,
      * making it safer to use for logging purposes.  For example, {@code tel:800-466-4411} is
      * returned as {@code tel:xxx-xxx-xxxx} and {@code http://example.com/path/to/item/} is
-     * returned as {@code http://example.com/...}.
+     * returned as {@code http://example.com/...}. For all other uri schemes, only the scheme,
+     * host and port are returned.
      * @return the common forms PII redacted string of this URI
      * @hide
      */
@@ -398,13 +399,14 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     public @NonNull String toSafeString() {
         String scheme = getScheme();
         String ssp = getSchemeSpecificPart();
+        StringBuilder builder = new StringBuilder(64);
+
         if (scheme != null) {
+            builder.append(scheme);
+            builder.append(":");
             if (scheme.equalsIgnoreCase("tel") || scheme.equalsIgnoreCase("sip")
                     || scheme.equalsIgnoreCase("sms") || scheme.equalsIgnoreCase("smsto")
                     || scheme.equalsIgnoreCase("mailto") || scheme.equalsIgnoreCase("nfc")) {
-                StringBuilder builder = new StringBuilder(64);
-                builder.append(scheme);
-                builder.append(':');
                 if (ssp != null) {
                     for (int i=0; i<ssp.length(); i++) {
                         char c = ssp.charAt(i);
@@ -415,24 +417,19 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                         }
                     }
                 }
-                return builder.toString();
-            } else if (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https")
-                    || scheme.equalsIgnoreCase("ftp") || scheme.equalsIgnoreCase("rtsp")) {
-                ssp = "//" + ((getHost() != null) ? getHost() : "")
-                        + ((getPort() != -1) ? (":" + getPort()) : "")
-                        + "/...";
+            } else {
+                // For other schemes, let's be conservative about
+                // the data we include -- only the host and port, not the query params, path or
+                // fragment, because those can often have sensitive info.
+                final String host = getHost();
+                final int port = getPort();
+                final String path = getPath();
+                final String authority = getAuthority();
+                if (authority != null) builder.append("//");
+                if (host != null) builder.append(host);
+                if (port != -1) builder.append(":").append(port);
+                if (authority != null || path != null) builder.append("/...");
             }
-        }
-        // Not a sensitive scheme, but let's still be conservative about
-        // the data we include -- only the ssp, not the query params or
-        // fragment, because those can often have sensitive info.
-        StringBuilder builder = new StringBuilder(64);
-        if (scheme != null) {
-            builder.append(scheme);
-            builder.append(':');
-        }
-        if (ssp != null) {
-            builder.append(ssp);
         }
         return builder.toString();
     }
