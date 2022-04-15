@@ -90,7 +90,8 @@ class SplitScreenTransitions {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
-            @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot) {
+            @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot,
+            @NonNull WindowContainerToken topRoot) {
         mFinishCallback = finishCallback;
         mAnimatingTransition = transition;
         if (mPendingRemoteHandler != null) {
@@ -100,12 +101,12 @@ class SplitScreenTransitions {
             mPendingRemoteHandler = null;
             return;
         }
-        playInternalAnimation(transition, info, startTransaction, mainRoot, sideRoot);
+        playInternalAnimation(transition, info, startTransaction, mainRoot, sideRoot, topRoot);
     }
 
     private void playInternalAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull WindowContainerToken mainRoot,
-            @NonNull WindowContainerToken sideRoot) {
+            @NonNull WindowContainerToken sideRoot, @NonNull WindowContainerToken topRoot) {
         mFinishTransaction = mTransactionPool.acquire();
 
         // Play some place-holder fade animations
@@ -136,7 +137,10 @@ class SplitScreenTransitions {
                 endBounds.offset(-info.getRootOffset().x, -info.getRootOffset().y);
                 startExampleResizeAnimation(leash, startBounds, endBounds);
             }
-            if (change.getParent() != null) {
+            boolean isRootOrSplitSideRoot = change.getParent() == null
+                    || topRoot.equals(change.getParent());
+            // For enter or exit, we only want to animate the side roots but not the top-root.
+            if (!isRootOrSplitSideRoot || topRoot.equals(change.getContainer())) {
                 continue;
             }
 
