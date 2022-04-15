@@ -490,5 +490,4 @@ public class FrameworkServicesModule {
     static SafetyCenterManager provideSafetyCenterManager(Context context) {
         return context.getSystemService(SafetyCenterManager.class);
     }
-
 }

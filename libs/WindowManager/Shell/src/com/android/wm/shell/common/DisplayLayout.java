@@ -32,6 +32,7 @@ import static android.view.Surface.ROTATION_90;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
@@ -334,6 +335,12 @@ public class DisplayLayout {
      */
     public @NavBarPosition int getNavigationBarPosition(Resources res) {
         return navigationBarPosition(res, mWidth, mHeight, mRotation);
+    }
+
+    /** @return {@link DisplayCutout} instance. */
+    @Nullable
+    public DisplayCutout getDisplayCutout() {
+        return mCutout;
     }
 
     /**

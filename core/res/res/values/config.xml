@@ -5678,8 +5678,8 @@
          restricted level.
     -->
     <array name="config_bg_current_drain_threshold_to_bg_restricted">
-        <item>4.0</item> <!-- regular device -->
-        <item>8.0</item> <!-- low ram device -->
+        <item>10.0</item> <!-- regular device -->
+        <item>20.0</item> <!-- low ram device -->
     </array>
 
     <!-- The background current drain monitoring window size. -->

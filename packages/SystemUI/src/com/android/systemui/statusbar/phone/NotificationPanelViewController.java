@@ -3165,7 +3165,10 @@ public class NotificationPanelViewController extends PanelViewController {
         mFalsingCollector.onTrackingStarted(!mKeyguardStateController.canDismissLockScreen());
         super.onTrackingStarted();
         mScrimController.onTrackingStarted();
-        if (mShouldUseSplitNotificationShade) {
+        // normally we want to set mQsExpandImmediate for every split shade case (at least when
+        // expanding), but keyguard tracking logic is different - this callback is called when
+        // unlocking with swipe up but not when swiping down to reveal shade
+        if (mShouldUseSplitNotificationShade && !mKeyguardShowing) {
             mQsExpandImmediate = true;
         }
         if (mQsFullyExpanded) {
@@ -3332,6 +3335,12 @@ public class NotificationPanelViewController extends PanelViewController {
                         mLockscreenGestureLogger
                             .log(LockscreenUiEvent.LOCKSCREEN_LOCK_SHOW_HINT);
                         startUnlockHintAnimation();
+                    }
+                    if (mUpdateMonitor.isFaceEnrolled()
+                            && mUpdateMonitor.mRequestActiveUnlockOnUnlockIntent
+                            && mKeyguardBypassController.canBypass()) {
+                        mUpdateMonitor.requestActiveUnlock("unlock-intent,"
+                                + " extra=lockScreenEmptySpaceTap", true);
                     }
                 }
                 return true;

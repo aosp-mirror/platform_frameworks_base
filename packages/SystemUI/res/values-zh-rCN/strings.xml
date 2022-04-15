@@ -21,8 +21,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"系统界面"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"要开启省电模式吗？"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"您的电池还剩 <xliff:g id="PERCENTAGE">%s</xliff:g> 的电量。省电模式会开启深色主题，限制后台活动并将通知延迟。"</string>
-    <string name="battery_low_intro" msgid="5148725009653088790">"省电模式会开启深色主题，限制后台活动并将通知延迟。"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"您的电池还剩 <xliff:g id="PERCENTAGE">%s</xliff:g> 的电量。省电模式会开启深色主题、限制后台活动，并将通知延迟。"</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"省电模式会开启深色主题、限制后台活动，并将通知延迟。"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"剩余<xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"无法通过 USB 充电"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"使用设备随附的充电器"</string>

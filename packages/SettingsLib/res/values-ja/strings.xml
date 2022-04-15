@@ -236,7 +236,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB 接続時はデバッグモードにする"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB デバッグの許可の取り消し"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ワイヤレス デバッグ"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi 接続時にデバッグモード"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi 接続時はデバッグモードにする"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"エラー"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ワイヤレス デバッグ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"利用可能なデバイスを確認して使用するには、ワイヤレス デバッグを ON にしてください"</string>
@@ -264,7 +264,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi ネットワークに接続してください"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, デバッグ, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"バグレポートのショートカット"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"電源ボタン メニューにバグレポートを取得するボタンを表示する"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"電源ボタンメニューにバグレポートを取得するボタンを表示する"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"スリープモードにしない"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"充電中に画面をスリープにしない"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI スヌープログ"</string>
@@ -336,7 +336,7 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"開発用の設定を許可しますか？"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"これらの設定は開発専用に設計されています。そのためデバイスやデバイス上のアプリが故障したり正常に動作しなくなったりするおそれがあります。"</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB 経由のアプリも検証"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT経由でインストールされたアプリに不正な動作がないかを確認する"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT 経由でインストールされたアプリに不正な動作がないかを確認する"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth デバイスを名前なしで（MAC アドレスのみで）表示します"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"リモートデバイスで音量に関する問題（音量が大きすぎる、制御できないなど）が発生した場合に、Bluetooth の絶対音量の機能を無効にする"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche 機能スタックを有効にします。"</string>
@@ -364,23 +364,23 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"現在のタップデータをオーバーレイ表示する"</string>
     <string name="show_touches" msgid="8437666942161289025">"タップを表示"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"タップを視覚表示する"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"表示面の更新を表示"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"表示面の更新を通知"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"更新時にウィンドウの表示面全体を点滅させる"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"画面の更新を表示"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"描画時にウィンドウ内の表示を点滅させる"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"ハードウェア層の更新を表示"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"更新されたハードウェア層を緑で点滅させる"</string>
-    <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPUオーバードローをデバッグ"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU オーバードローをデバッグ"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW オーバーレイを無効化"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"画面合成に常に GPU を使用する"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"色空間シミュレート"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGLトレースを有効化"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USBオーディオルーティングを無効化"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USBオーディオ周辺機器への自動ルーティングを無効化"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB オーディオ ルーティングを無効化"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB オーディオ周辺機器への自動ルーティングを無効にする"</string>
     <string name="debug_layout" msgid="1659216803043339741">"レイアウト境界を表示"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"クリップの境界線、マージンなどを表示"</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTLレイアウト方向を使用"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"すべての言語/地域で画面レイアウト方向をRTLに設定"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL レイアウト方向を使用"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"すべての言語/地域で画面レイアウト方向を RTL に設定"</string>
     <string name="window_blurs" msgid="6831008984828425106">"ウィンドウ レベルでのぼかしを許可"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA を適用"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 アプリで 4x MSAA を有効にする"</string>
@@ -390,18 +390,18 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"デバッグアプリに GPU デバッグレイヤの読み込みを許可"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ベンダーの詳細なロギングを有効にする"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"バグレポートには、その他のデバイス固有のベンダーログが含まれます。これには、非公開の情報が含まれることがあります。また、バッテリーやストレージの使用量が増えることもあります。"</string>
-    <string name="window_animation_scale_title" msgid="5236381298376812508">"ウィンドウアニメスケール"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"トランジションアニメスケール"</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator再生時間スケール"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"2次画面シミュレート"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"ウィンドウ アニメ スケール"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"トランジション アニメ スケール"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator 再生時間スケール"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"2 次画面シミュレート"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"アプリ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"アクティビティを保持しない"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ユーザーが離れたアクティビティをただちに破棄します"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ユーザーが離れたアクティビティを直ちに破棄する"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"バックグラウンドプロセスの上限"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"バックグラウンド ANR の表示"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"バックグラウンド アプリが応答しない場合にダイアログを表示"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"バックグラウンド アプリが応答しない場合にダイアログを表示する"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"通知チャネルの警告を表示"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"アプリから有効なチャネルのない通知が投稿されたときに画面上に警告を表示します"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"アプリから有効なチャネルのない通知が投稿されたときに、画面上に警告を表示する"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"外部ストレージへのアプリの書き込みを許可"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"マニフェストの値に関係なく、すべてのアプリを外部ストレージに書き込めるようになります"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"アクティビティをサイズ変更可能にする"</string>

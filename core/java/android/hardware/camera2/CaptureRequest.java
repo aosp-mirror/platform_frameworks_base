@@ -266,6 +266,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     private int mRequestType = -1;
 
+    private static final String SET_TAG_STRING_PREFIX =
+            "android.hardware.camera2.CaptureRequest.setTag.";
     /**
      * Get the type of the capture request
      *
@@ -614,6 +616,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
                 throw new RuntimeException("Reading cached CaptureRequest is not supported");
             }
         }
+
+        boolean hasUserTagStr = (in.readInt() == 1) ? true : false;
+        if (hasUserTagStr) {
+            mUserTag = in.readString();
+        }
     }
 
     @Override
@@ -655,6 +662,19 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             } else {
                 dest.writeInt(0);
             }
+        }
+
+        // Write string for user tag if set to something in the same namespace
+        if (mUserTag != null) {
+            String userTagStr = mUserTag.toString();
+            if (userTagStr != null && userTagStr.startsWith(SET_TAG_STRING_PREFIX)) {
+                dest.writeInt(1);
+                dest.writeString(userTagStr.substring(SET_TAG_STRING_PREFIX.length()));
+            } else {
+                dest.writeInt(0);
+            }
+        } else {
+            dest.writeInt(0);
         }
     }
 
@@ -938,7 +958,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * <p>This tag is not used for anything by the camera device, but can be
          * used by an application to easily identify a CaptureRequest when it is
          * returned by
-         * {@link CameraCaptureSession.CaptureCallback#onCaptureCompleted CaptureCallback.onCaptureCompleted}
+         * {@link CameraCaptureSession.CaptureCallback#onCaptureCompleted CaptureCallback.onCaptureCompleted}.</p>
+         *
+         * <p>If the application overrides the tag object's {@link Object#toString} function, the
+         * returned string must not contain personal identifiable information.</p>
          *
          * @param tag an arbitrary Object to store with this request
          * @see CaptureRequest#getTag

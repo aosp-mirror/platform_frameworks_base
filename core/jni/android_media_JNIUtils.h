@@ -64,5 +64,39 @@ inline JNIEnv* getJNIEnvOrDie() {
     return env;
 }
 
+class GlobalRef {
+  public:
+    GlobalRef(jobject object) : GlobalRef(object, AndroidRuntime::getJNIEnv()) {}
+
+    GlobalRef(jobject object, JNIEnv* env) {
+        LOG_ALWAYS_FATAL_IF(env == nullptr, "Invalid JNIEnv when attempting to create a GlobalRef");
+        mGlobalRef = env->NewGlobalRef(object);
+        LOG_ALWAYS_FATAL_IF(env->IsSameObject(object, nullptr) == JNI_TRUE,
+                            "Creating GlobalRef from null object");
+    }
+
+    GlobalRef(const GlobalRef& other) : GlobalRef(other.mGlobalRef) {}
+
+    GlobalRef(GlobalRef&& other) : mGlobalRef(other.mGlobalRef) { other.mGlobalRef = nullptr; }
+
+    // Logically const
+    GlobalRef& operator=(const GlobalRef& other) = delete;
+
+    GlobalRef& operator=(GlobalRef&& other) = delete;
+
+    ~GlobalRef() {
+        if (mGlobalRef == nullptr) return; // No reference to decrement
+        getJNIEnvOrDie()->DeleteGlobalRef(mGlobalRef);
+    }
+
+    // Valid as long as this wrapper is in scope.
+    jobject get() const {
+      return mGlobalRef;
+    }
+
+  private:
+    // Logically const. Not actually const so we can move from GlobalRef
+    jobject mGlobalRef;
+};
 
 } // namespace android
