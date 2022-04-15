@@ -47,7 +47,7 @@
     <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
     <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"Puudub / Täiustatud avamine"</string>
-    <string name="wifi_security_owe" msgid="3343421403561657809">"Täiustatud avamine"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise (192-bitine)"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Salvestatud"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Pole ühendatud"</string>

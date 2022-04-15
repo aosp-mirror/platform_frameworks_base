@@ -76,6 +76,8 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
                 taskInfo.taskId);
         final Point positionInParent = taskInfo.positionInParent;
         mDataByTaskId.put(taskInfo.taskId, new TaskData(leash, positionInParent));
+        mAnimatableTasksListener.onTaskAppeared(taskInfo);
+
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         mSyncQueue.runInSync(t -> {
             // Reset several properties back to fullscreen (PiP, for example, leaves all these
@@ -87,15 +89,15 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
             t.show(leash);
         });
 
-        mAnimatableTasksListener.onTaskAppeared(taskInfo);
         updateRecentsForVisibleFullscreenTask(taskInfo);
     }
 
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
+        mAnimatableTasksListener.onTaskInfoChanged(taskInfo);
+
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
 
-        mAnimatableTasksListener.onTaskInfoChanged(taskInfo);
         updateRecentsForVisibleFullscreenTask(taskInfo);
 
         final TaskData data = mDataByTaskId.get(taskInfo.taskId);

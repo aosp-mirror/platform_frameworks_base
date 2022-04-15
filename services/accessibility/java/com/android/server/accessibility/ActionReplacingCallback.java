@@ -83,7 +83,7 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
             mConnectionWithReplacementActions.findAccessibilityNodeInfoByAccessibilityId(
                     AccessibilityNodeInfo.ROOT_NODE_ID, null,
                     mNodeWithReplacementActionsInteractionId, this, 0,
-                    interrogatingPid, interrogatingTid, null, null);
+                    interrogatingPid, interrogatingTid, null, null, null);
         } catch (RemoteException re) {
             if (DEBUG) {
                 Slog.e(LOG_TAG, "Error calling findAccessibilityNodeInfoByAccessibilityId()");

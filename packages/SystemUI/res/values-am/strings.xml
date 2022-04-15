@@ -805,8 +805,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"ላፍታ አቁም"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"ቀዳሚ ትራክ"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"ቀጣይ ትራክ"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"በመገናኘት ላይ"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"አጫውት"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ክፈት"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g> በ<xliff:g id="ARTIST_NAME">%2$s</xliff:g> ከ<xliff:g id="APP_LABEL">%3$s</xliff:g> ያጫውቱ"</string>

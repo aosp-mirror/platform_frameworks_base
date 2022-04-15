@@ -31,9 +31,10 @@ import android.util.TypedValue;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
-import androidx.core.os.BuildCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
+
+import com.android.modules.utils.build.SdkLevel;
 
 /**
  * Helper class for managing settings preferences that can be disabled
@@ -105,7 +106,7 @@ public class RestrictedPreferenceHelper {
         if (mDisabledSummary) {
             final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
             if (summaryView != null) {
-                final CharSequence disabledText = BuildCompat.isAtLeastT()
+                final CharSequence disabledText = SdkLevel.isAtLeastT()
                         ? getDisabledByAdminUpdatableString()
                         : mContext.getString(R.string.disabled_by_admin_summary_text);
                 if (mDisabledByAdmin) {

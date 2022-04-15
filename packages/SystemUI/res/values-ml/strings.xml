@@ -564,7 +564,7 @@
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"നംപാഡ് <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"അറ്റാച്ച്മെന്റ് നീക്കം ചെയ്യുക"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"സിസ്‌റ്റം"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"വീട്"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ഹോം"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"പുതിയവ"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"മടങ്ങുക"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"അറിയിപ്പുകൾ"</string>
@@ -805,8 +805,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"താൽക്കാലികമായി നിർത്തുക"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"മുമ്പത്തെ ട്രാക്ക്"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"അടുത്ത ട്രാക്ക്"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"കണക്റ്റ് ചെയ്യുന്നു"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"പ്ലേ ചെയ്യുക"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> തുറക്കുക"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> എന്ന ആർട്ടിസ്റ്റിന്റെ <xliff:g id="SONG_NAME">%1$s</xliff:g> എന്ന ഗാനം <xliff:g id="APP_LABEL">%3$s</xliff:g> ആപ്പിൽ പ്ലേ ചെയ്യുക"</string>

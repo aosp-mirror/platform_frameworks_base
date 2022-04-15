@@ -61,7 +61,7 @@ class QSPanelControllerTest : SysuiTestCase() {
         whenever(brightnessSliderFactory.create(any(), any())).thenReturn(brightnessSlider)
         whenever(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
         whenever(qsPanel.resources).thenReturn(mContext.orCreateTestableResources.resources)
-        whenever(statusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(false)
+        whenever(statusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false)
 
         controller = QSPanelController(
             qsPanel,
@@ -109,10 +109,10 @@ class QSPanelControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testBouncerIsInTransit() {
-        whenever(statusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true)
-        assertThat(controller.bouncerInTransit()).isEqualTo(true)
-        whenever(statusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(false)
-        assertThat(controller.bouncerInTransit()).isEqualTo(false)
+    fun testIsBouncerInTransit() {
+        whenever(statusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true)
+        assertThat(controller.isBouncerInTransit()).isEqualTo(true)
+        whenever(statusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false)
+        assertThat(controller.isBouncerInTransit()).isEqualTo(false)
     }
 }
