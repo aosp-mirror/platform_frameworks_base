@@ -4765,6 +4765,7 @@
   <java-symbol type="integer" name="config_bg_current_drain_media_playback_min_duration" />
   <java-symbol type="integer" name="config_bg_current_drain_location_min_duration" />
   <java-symbol type="bool" name="config_bg_prompt_fgs_with_noti_to_bg_restricted" />
+  <java-symbol type="bool" name="config_bg_prompt_abusive_apps_to_bg_restricted" />
   <java-symbol type="integer" name="config_bg_current_drain_exempted_types" />
   <java-symbol type="bool" name="config_bg_current_drain_high_threshold_by_bg_location" />
   <java-symbol type="drawable" name="ic_swap_horiz" />
