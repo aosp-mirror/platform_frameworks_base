@@ -4297,9 +4297,6 @@
   <java-symbol type="string" name="resolver_no_work_apps_available" />
   <java-symbol type="string" name="resolver_no_personal_apps_available" />
   <java-symbol type="string" name="resolver_switch_on_work" />
-  <java-symbol type="drawable" name="ic_work_apps_off" />
-  <java-symbol type="drawable" name="ic_sharing_disabled" />
-  <java-symbol type="drawable" name="ic_no_apps" />
   <java-symbol type="drawable" name="ic_screenshot_edit" />
   <java-symbol type="dimen" name="resolver_empty_state_height" />
   <java-symbol type="dimen" name="resolver_empty_state_height_with_tabs" />

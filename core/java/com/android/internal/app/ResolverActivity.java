@@ -673,7 +673,6 @@ public class ResolverActivity extends Activity implements
                 getResources().getDimensionPixelSize(R.dimen.resolver_button_bar_spacing),
                 buttonBar.getPaddingRight(),
                 getResources().getDimensionPixelSize(R.dimen.resolver_button_bar_spacing));
-        mMultiProfilePagerAdapter.updateAfterConfigChange();
     }
 
     @Override // ResolverListCommunicator
