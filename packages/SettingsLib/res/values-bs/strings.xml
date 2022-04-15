@@ -264,7 +264,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Povežite se na WiFi mrežu"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, otklanjanje grešaka, programer"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Prečica za izvještaj o greškama"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Prikaz dugmeta za prijavu grešaka u meniju napajanja"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vidite dugme za prijavu grešaka u meniju napajanja"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Ne zaključavaj ekran"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Ekran neće prelaziti u stanje mirovanja tokom punjenja"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Omogući Bluetooth HCI snoop zapis"</string>
@@ -299,8 +299,8 @@
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Aktivirajte Bluetooth Audio Codec\nOdabir: Bitovi po uzorku"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Način Bluetooth audio kanala"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Aktivirajte Bluetooth Audio Codec\nOdabir: Način rada po kanalima"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Bluetooth Audio LDAC kodek: Kvalitet reprodukcije"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Aktivirajte Bluetooth Audio \nOdabir kodeka: Kvalitet reprodukcije"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Bluetooth Audio LDAC kodek: kvalitet reprodukcije"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Aktivirajte Bluetooth Audio \nOdabir kodeka: kvalitet reprodukcije"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Prijenos: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Privatni DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Odaberite način rada privatnog DNS-a"</string>
@@ -336,7 +336,7 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Dopustiti postavke za razvoj?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Ove postavke su namijenjene samo za svrhe razvoja. Mogu izazvati pogrešno ponašanje uređaja i aplikacija na njemu."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Potvrdi aplikacije putem USB-a"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Provjerite da li se u aplikacijama instaliranim putem ADB-a/ADT-a javlja zlonamjerno ponašanje"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Provjerite javlja li se zlonamjerno ponašanje u aplikacijama instaliranim putem ADB-a/ADT-a"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Prikazat će se Bluetooth uređaji bez naziva (samo MAC adrese)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Onemogućava funkciju apsolutne jačine zvuka za Bluetooth u slučaju problema s jačinom zvuka na udaljenim uređajima, kao što je neprihvatljivo glasan zvuk ili nedostatak kontrole."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Omogućava grupisanje funkcije Bluetooth Gabeldorsche."</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Poništi"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Ukloni"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Poništavanje sesije gosta…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Želite li poništiti gostujuću sesiju?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Time će se pokrenuti nova gostujuća sesija i izbrisati sve aplikacije i podaci iz trenutačne sesije."</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Napustiti način rada za goste?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Time će se izbrisati aplikacije i podaci iz trenutačne gostujuće sesije."</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Izlaz"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Spremiti aktivnosti gosta?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Možete spremiti aktivnosti iz ove sesije ili izbrisati sve aplikacije i podatke"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Izbriši"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Spremi"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Izlaz iz načina rada za goste"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Poništi gostujuću sesiju"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Izlaz iz gostujuće sesije"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sve će se aktivnosti izbrisati na izlasku"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Možete spremiti ili izbrisati svoje aktivnosti na izlasku"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Poništite da biste odmah izbrisali aktivnost sesije, a možete i spremiti ili izbrisati aktivnost na izlasku."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Snimite fotografiju"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Odaberite sliku"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Odabir fotografije"</string>
@@ -685,12 +670,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skenirajte QR kôd"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Da pokrenete slušanje, centrirajte QR kôd ispod"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Format QR koda nije važeći"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zaustaviti emitiranje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ako emitirate aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promijenite izlaz, vaše će se trenutačno emitiranje zaustaviti"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitiranje aplikacije <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Promjena izlaza"</string>
 </resources>

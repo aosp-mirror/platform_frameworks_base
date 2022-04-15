@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Колдонмого планшетиңиздин чалуулар тизмегин, анын ичинде, чыгыш жана кириш чалууларына тиешелүү берилиштерди өзгөртүү уруксатын берет. Зыяндуу колдонмолор муну колдонуп чалуулар тизмегин өзгөртө же жок кыла алышат."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Колдонмого Android TV түзмөгүңүздүн чалуулар тизмесин, анын ичинде кирүүчү жана чыгуучу чалуулар тууралуу маалыматтарды өзгөртүүгө уруксат берет. Зыянкеч колдонмолор ал уруксатты колдонуп чалуулар тизмеңизди тазалап же өзгөртүп коюшу мүмкүн."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Колдонмого телефонуңуздун чалуулар тизмегин, анын ичинде, чыгыш жана кириш чалууларына тиешелүү берилиштерди өзгөртүү уруксатын берет. Зыяндуу колдонмолор муну колдонуп чалуулар тизмегин өзгөртө же жок кыла алышат."</string>
-    <string name="permlab_bodySensors" msgid="662918578601619569">"Иштеп жатканда дене сенсорлорунун дайындарын, мисалы, жүрөктүн согушун көрүү"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Иштеп жатканда колдонмо дене сенсорлорунун дайындарын, мисалы, жүрөктүн согушу, температура жана кандагы кычкылтектин пайызын көрө алат."</string>
-    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Фондо дене сенсорлорунун дайындарын, мисалы, жүрөктүн согушун көрүү"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Колдонмо фондо дене сенсорлорунун дайындарын, мисалы, жүрөктүн согушу, температура жана кандагы кычкылтектин пайызын көрө алат."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Иштеп жатканда дене сенсорлорунун көрсөткүчтөрүн, мисалы, жүрөктүн согушун көрүү"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Иштеп жатканда колдонмо дене сенсорлорунун көрсөткүчтөрүн, мисалы, жүрөктүн согушу, температура жана кандагы кычкылтектин пайызын көрө алат."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Фондо дене сенсорлорунун көрсөткүчтөрүн, мисалы, жүрөктүн согушун көрүү"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Колдонмо фондо дене сенсорлорунун көрсөткүчтөрүн, мисалы, жүрөктүн согушу, температура жана кандагы кычкылтектин пайызын көрө алат."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Жылнаамадагы иш-чараларды жана алардын чоо-жайын окуу"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Бул колдонмо планшетиңизде сакталган жылнаамадагы иш-чаралардын баарын окуп жана андагы маалыматтарды бөлүшүп же сактай алат."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Бул колдонмо Android TV түзмөгүңүздө сакталган жылнаама иш-чараларынын баарын окуп, ошондой эле жылнаама дайындарын бөлүшүп же сактай алат."</string>
@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> учурда жеткиликсиз"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> жеткиликсиз"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Уруксат керек"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Камера жеткиликсиз"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Телефондон улантуу"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Микрофон жеткиликсиз"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV параметрлери жеткиликсиз"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Планшеттин параметрлери жеткиликсиз"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Телефондун параметрлери жеткиликсиз"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Android TV түзмөгүңүздөн аракет кылып көрүңүз."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Планшетиңизден кирип көрүңүз."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Анын ордуна телефондон кирип көрүңүз."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Учурда буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Android TV түзмөгүңүздөн аракет кылып көрүңүз."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Учурда буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Планшетиңизден кирип көрүңүз."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Учурда буга <xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн кире албайсыз. Анын ордуна телефондон кирип көрүңүз."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Бул колдонмо кошумча коопсуздукту иштетүүнү суранып жатат. Android TV түзмөгүңүздөн аракет кылып көрүңүз."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Бул колдонмо кошумча коопсуздукту иштетүүнү суранып жатат. Планшетиңизден кирип көрүңүз."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Бул колдонмо кошумча коопсуздукту иштетүүнү суранып жатат. Анын ордуна телефондон кирип көрүңүз."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Бул колдонмо Android\'дин эски версиясы үчүн иштеп чыгарылган, андыктан туура эмес иштеши мүмкүн. Жаңыртууларды издеп көрүңүз же иштеп чыгуучуга кайрылыңыз."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Жаңыртууларды текшерүү"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Сизге жаңы билдирүүлөр келди"</string>
@@ -2289,9 +2274,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Билдирүү (<xliff:g id="MESSAGE">%1$s</xliff:g>) которулду."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Билдирүү <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> тилинен <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> тилине которулду."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Фондогу активдүүлүк"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"Колдонмо батареяны сарптоодо"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Колдонмо дагы эле иштеп жатат"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> батареяны фондо колдонуп жатат. Көрүү үчүн таптап коюңуз."</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> батареянын кубатынын мөөнөтүн азайтышы мүмкүн. Жигердүү колдонмолорду көрүү үчүн таптап коюңуз."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Жигердүү колдонмолорду карап чыгуу"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн телефондун камерасына мүмкүнчүлүк жок"</string>

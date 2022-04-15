@@ -686,6 +686,9 @@
     <!-- Permission required for CTS test - CtsInputTestCases -->
     <uses-permission android:name="android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY" />
 
+    <!-- Permission required for CTS test - CtsDevicePolicyManagerTestCases -->
+    <uses-permission android:name="android.permission.READ_NEARBY_STREAMING_POLICY" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

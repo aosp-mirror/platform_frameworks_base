@@ -228,15 +228,6 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
      * Watchable machinery
      */
     private final WatchableImpl mWatchable = new WatchableImpl();
-    /**
-     * The observer that watches for changes from array members
-     */
-    private final Watcher mObserver = new Watcher() {
-        @Override
-        public void onChange(@Nullable Watchable what) {
-            AppsFilterImpl.this.dispatchChange(what);
-        }
-    };
 
     /**
      * Ensures an observer is in the list, exactly once. The observer cannot be null.  The
@@ -331,8 +322,6 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
         mProtectedBroadcastsSnapshot = new SnapshotCache.Auto<>(
                 mProtectedBroadcasts, mProtectedBroadcasts, "AppsFilter.mProtectedBroadcasts");
 
-        registerObservers();
-        Watchable.verifyWatchedAttributes(this, mObserver);
         mSnapshot = makeCache();
     }
 
@@ -373,18 +362,6 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
         mBackgroundExecutor = null;
         mSnapshot = new SnapshotCache.Sealed<>();
         mSystemReady = true;
-    }
-
-    @SuppressWarnings("GuardedBy")
-    private void registerObservers() {
-        mImplicitlyQueryable.registerObserver(mObserver);
-        mRetainedImplicitlyQueryable.registerObserver(mObserver);
-        mQueriesViaPackage.registerObserver(mObserver);
-        mQueriesViaComponent.registerObserver(mObserver);
-        mQueryableViaUsesLibrary.registerObserver(mObserver);
-        mForceQueryable.registerObserver(mObserver);
-        mProtectedBroadcasts.registerObserver(mObserver);
-        mShouldFilterCache.registerObserver(mObserver);
     }
 
     /**
@@ -773,9 +750,7 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
                 mShouldFilterCache.put(recipientUid, visibleUid, false);
             }
         }
-        if (changed) {
-            onChanged();
-        }
+        onChanged();
         return changed;
     }
 
@@ -986,6 +961,7 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
             }
             updateEntireShouldFilterCacheInner(settings, users, userId);
         });
+        onChanged();
     }
 
     private void updateEntireShouldFilterCacheInner(
@@ -1008,8 +984,7 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
     private void updateEntireShouldFilterCacheAsync() {
         mBackgroundExecutor.execute(() -> {
             final ArrayMap<String, PackageStateInternal> settingsCopy = new ArrayMap<>();
-            final Collection<SharedUserSetting> sharedUserSettingsCopy =
-                    new ArraySet<SharedUserSetting>();
+            final Collection<SharedUserSetting> sharedUserSettingsCopy = new ArraySet<>();
             final ArrayMap<String, AndroidPackage> packagesCache = new ArrayMap<>();
             final UserInfo[][] usersRef = new UserInfo[1][];
             mStateProvider.runWithState((settings, sharedUserSettings, users) -> {
@@ -1049,6 +1024,7 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
             } else {
                 updateEntireShouldFilterCacheInner(settingsCopy,
                         usersRef[0], USER_ALL);
+                onChanged();
             }
         });
     }
@@ -1058,7 +1034,6 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
             return;
         }
         updateEntireShouldFilterCache(newUserId);
-        onChanged();
     }
 
     public void onUserDeleted(@UserIdInt int userId) {
@@ -1078,6 +1053,7 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
                     settings.get(packageName), settings, users, USER_ALL,
                     settings.size() /*maxIndex*/);
         });
+        onChanged();
     }
 
     private void updateShouldFilterCacheForPackage(
@@ -1389,9 +1365,8 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
                     }
                 }
             }
-
-            onChanged();
         });
+        onChanged();
     }
 
     private ArraySet<? extends PackageStateInternal> getSharedUserPackages(int sharedUserAppId,
@@ -1495,6 +1470,7 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
                     mStateProvider.runWithState((settings, sharedUserSettings, users) ->
                             callingSharedPkgSettings.addAll(getSharedUserPackages(
                                     packageState.getSharedUserAppId(), sharedUserSettings)));
+
                 } else {
                     callingPkgSetting = packageState;
                 }
@@ -1624,9 +1600,12 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mQueriesViaComponent");
                 }
                 if (mQueriesViaComponentRequireRecompute) {
+                    final ArrayMap<String, PackageStateInternal> settingsCopy = new ArrayMap<>();
                     mStateProvider.runWithState((settings, sharedUserSettings, users) -> {
-                        recomputeComponentVisibility(settings);
+                        settingsCopy.putAll(settings);
                     });
+                    recomputeComponentVisibility(settingsCopy);
+                    onChanged();
                 }
                 synchronized (mLock) {
                     if (mQueriesViaComponent.contains(callingAppId, targetAppId)) {

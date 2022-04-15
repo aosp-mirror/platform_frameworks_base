@@ -29938,10 +29938,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean mHandlingPointerEvent;
 
         /**
-         * The screen matrix of this view when it's on a {@link SurfaceControlViewHost} that is
+         * The window matrix of this view when it's on a {@link SurfaceControlViewHost} that is
          * embedded within a SurfaceView.
          */
-        Matrix mScreenMatrixInEmbeddedHierarchy;
+        Matrix mWindowMatrixInEmbeddedHierarchy;
 
         /**
          * Global to the view hierarchy used as a temporary for dealing with

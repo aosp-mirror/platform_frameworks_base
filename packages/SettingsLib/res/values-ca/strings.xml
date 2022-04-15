@@ -312,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra les opcions per a la certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Augmenta el nivell de registre de la connexió Wi‑Fi i es mostra per SSID RSSI al selector de Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Exhaureix menys la bateria i millora el rendiment de la xarxa"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quan aquest mode està activat, és possible que l’adreça MAC d\'aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quan aquest mode està activat, és possible que l’adreça MAC d\'aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"D\'ús no mesurat"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Mides de la mem. intermèdia del registrador"</string>

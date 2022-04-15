@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"റീസെറ്റ് ചെയ്യുക"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"നീക്കം ചെയ്യുക"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"അതിഥിയെ റീസെറ്റ് ചെയ്യുന്നു…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"അതിഥി സെഷൻ റീസെറ്റ് ചെയ്യണോ?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ഇത് പുതിയൊരു അതിഥി സെഷൻ ആരംഭിക്കുകയും നിലവിലെ സെഷനിൽ നിന്ന് എല്ലാ ആപ്പുകളും ഡാറ്റയും ഇല്ലാതാക്കുകയും ചെയ്യും"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"അതിഥി മോഡിൽ നിന്ന് പുറത്തുകടക്കണോ?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"നിലവിലെ അതിഥി സെഷനിൽ നിന്ന് ആപ്പുകളും ഡാറ്റയും ഇത് ഇല്ലാതാക്കും"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"പുറത്തുകടക്കുക"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"അതിഥി ആക്‌റ്റിവിറ്റി സംരക്ഷിക്കണോ?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"നിലവിലെ സെഷനിൽ നിന്നുള്ള ആക്‌റ്റിവിറ്റി സംരക്ഷിക്കാം അല്ലെങ്കിൽ എല്ലാ ആപ്പുകളും ഡാറ്റയും ഇല്ലാതാക്കാം"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ഇല്ലാതാക്കുക"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"സംരക്ഷിക്കുക"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"അതിഥി മോഡിൽ നിന്ന് പുറത്തുകടക്കുക"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"അതിഥി സെഷൻ റീസെറ്റ് ചെയ്യുക"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"അതിഥി മോഡിൽ നിന്ന് പുറത്തുകടക്കുക"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"പുറത്തുകടക്കുമ്പോൾ എല്ലാ ആക്‌റ്റിവിറ്റിയും ഇല്ലാതാക്കും"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"പുറത്തുകടക്കുമ്പോൾ ആക്‌റ്റിവിറ്റി സംരക്ഷിക്കുകയോ ഇല്ലാതാക്കുകയോ ചെയ്യാം"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"സെഷൻ ആക്‌റ്റിവിറ്റി ഇപ്പോൾ ഇല്ലാതാക്കാൻ റീസെറ്റ് ചെയ്യുക അല്ലെങ്കിൽ പുറത്തുകടക്കുമ്പോൾ ആക്‌റ്റിവിറ്റി സംരക്ഷിക്കുകയോ ഇല്ലാതാക്കുകയോ ചെയ്യാം"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ഒരു ഫോട്ടോ എടുക്കുക"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ഒരു ചിത്രം തിരഞ്ഞെടുക്കുക"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ഫോട്ടോ തിരഞ്ഞെടുക്കുക"</string>

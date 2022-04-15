@@ -101,8 +101,12 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
 
     void dumpLocal(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("app="); pw.print(app != null ? app.toShortString() : null);
-            pw.print(" pid="); pw.print(pid); pw.print(" uid="); pw.print(uid);
-            pw.print(" user="); pw.println(userId);
+        pw.print(" pid="); pw.print(pid); pw.print(" uid="); pw.print(uid);
+        pw.print(" user="); pw.print(userId);
+        if (app != null) {
+            pw.print(" #receivers="); pw.print(app.mReceivers.numberOfReceivers());
+        }
+        pw.println();
         if (curBroadcast != null || linkedToDeath) {
             pw.print(prefix); pw.print("curBroadcast="); pw.print(curBroadcast);
                 pw.print(" linkedToDeath="); pw.println(linkedToDeath);
