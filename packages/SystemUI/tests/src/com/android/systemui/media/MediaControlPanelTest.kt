@@ -90,7 +90,6 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "TEST_KEY"
-private const val BG_COLOR = Color.RED
 private const val PACKAGE = "PKG"
 private const val ARTIST = "ARTIST"
 private const val TITLE = "TITLE"
@@ -247,7 +246,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         session.setActive(true)
 
         mediaData = MediaTestUtils.emptyMediaData.copy(
-                backgroundColor = BG_COLOR,
                 artist = ARTIST,
                 song = TITLE,
                 packageName = PACKAGE,

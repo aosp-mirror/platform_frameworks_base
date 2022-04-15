@@ -38,7 +38,6 @@ import org.mockito.junit.MockitoJUnit
 
 private const val DEFAULT_COLOR = Color.RED
 private const val TARGET_COLOR = Color.BLUE
-private const val BG_COLOR = Color.GREEN
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -66,8 +65,7 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
         transitionFactory = { default, extractColor, applyColor -> mockTransition }
         whenever(extractColor.invoke(colorScheme)).thenReturn(TARGET_COLOR)
 
-        colorSchemeTransition = ColorSchemeTransition(context,
-                BG_COLOR, mediaViewHolder, transitionFactory)
+        colorSchemeTransition = ColorSchemeTransition(context, mediaViewHolder, transitionFactory)
 
         colorTransition = object : ColorTransition(DEFAULT_COLOR, extractColor, applyColor) {
             override fun buildAnimator(): ValueAnimator {

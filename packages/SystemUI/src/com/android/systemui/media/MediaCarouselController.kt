@@ -904,7 +904,6 @@ internal object MediaPlayerData {
     private val EMPTY = MediaData(
             userId = -1,
             initialized = false,
-            backgroundColor = 0,
             app = null,
             appIcon = null,
             artist = null,
