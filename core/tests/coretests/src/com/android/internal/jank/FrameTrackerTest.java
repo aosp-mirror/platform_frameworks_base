@@ -36,6 +36,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -83,6 +84,7 @@ public class FrameTrackerTest {
     private StatsLogWrapper mStatsLog;
     private ArgumentCaptor<OnJankDataListener> mListenerCapture;
     private SurfaceControl mSurfaceControl;
+    private ArgumentCaptor<Runnable> mRunnableArgumentCaptor;
 
     @Before
     public void setup() {
@@ -99,6 +101,8 @@ public class FrameTrackerTest {
         mSurfaceControl = new SurfaceControl.Builder().setName("Surface").build();
         mViewRootWrapper = mock(ViewRootWrapper.class);
         when(mViewRootWrapper.getSurfaceControl()).thenReturn(mSurfaceControl);
+        doNothing().when(mViewRootWrapper).addSurfaceChangedCallback(any());
+        doNothing().when(mViewRootWrapper).removeSurfaceChangedCallback(any());
         mSurfaceControlWrapper = mock(SurfaceControlWrapper.class);
 
         mListenerCapture = ArgumentCaptor.forClass(OnJankDataListener.class);
@@ -109,23 +113,29 @@ public class FrameTrackerTest {
 
         mChoreographer = mock(ChoreographerWrapper.class);
         mStatsLog = mock(StatsLogWrapper.class);
+        mRunnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
     }
 
     private FrameTracker spyFrameTracker(int cuj, String postfix, boolean surfaceOnly) {
+        InteractionJankMonitor monitor = mock(InteractionJankMonitor.class);
         Handler handler = mRule.getActivity().getMainThreadHandler();
         Session session = new Session(cuj, postfix);
         Configuration config = mock(Configuration.class);
         when(config.isSurfaceOnly()).thenReturn(surfaceOnly);
         when(config.getSurfaceControl()).thenReturn(mSurfaceControl);
         when(config.shouldDeferMonitor()).thenReturn(true);
+        View view = mRule.getActivity().getWindow().getDecorView();
+        Handler spyHandler = spy(new Handler(handler.getLooper()));
+        when(config.getView()).thenReturn(surfaceOnly ? null : view);
+        when(config.getHandler()).thenReturn(spyHandler);
         FrameTracker frameTracker = Mockito.spy(
-                new FrameTracker(session, handler, mRenderer, mViewRootWrapper,
+                new FrameTracker(monitor, session, spyHandler, mRenderer, mViewRootWrapper,
                         mSurfaceControlWrapper, mChoreographer, mWrapper, mStatsLog,
                         /* traceThresholdMissedFrames= */ 1,
                         /* traceThresholdFrameTimeMillis= */ -1,
                         /* FrameTrackerListener= */ null, config));
         doNothing().when(frameTracker).triggerPerfetto();
-        doNothing().when(frameTracker).postTraceStartMarker();
+        doNothing().when(frameTracker).postTraceStartMarker(mRunnableArgumentCaptor.capture());
         return frameTracker;
     }
 
@@ -140,6 +150,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mRenderer, only()).addObserver(any());
 
         // send first frame with a long duration - should not be taken into account
@@ -173,6 +184,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mRenderer, only()).addObserver(any());
 
         // send first frame - not janky
@@ -208,6 +220,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mRenderer, only()).addObserver(any());
 
         // send first frame - janky
@@ -243,6 +256,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mRenderer, only()).addObserver(any());
 
         // send first frame - not janky
@@ -278,6 +292,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mRenderer, only()).addObserver(any());
 
         // send first frame - not janky
@@ -319,6 +334,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mRenderer, only()).addObserver(any());
 
         // send first frame - not janky
@@ -332,7 +348,7 @@ public class FrameTrackerTest {
         tracker.end(FrameTracker.REASON_END_NORMAL);
 
         // Send incomplete callback for 102L
-        sendSfFrame(102L, JANK_NONE);
+        sendSfFrame(tracker, 102L, JANK_NONE);
 
         // Send janky but complete callbck fo 103L
         sendFrame(tracker, 50, JANK_APP_DEADLINE_MISSED, 103L);
@@ -356,6 +372,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mRenderer).addObserver(any());
 
         // First frame - not janky
@@ -380,6 +397,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mRenderer, only()).addObserver(any());
 
         // end the trace session
@@ -403,6 +421,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mRenderer, only()).addObserver(any());
 
         // end the trace session at the same vsync id, end vsync id will less than the begin one.
@@ -444,6 +463,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mSurfaceControlWrapper).addJankStatsListener(any(), any());
 
         // First frame - not janky
@@ -479,6 +499,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mSurfaceControlWrapper).addJankStatsListener(any(), any());
 
         // First frame - janky
@@ -514,6 +535,7 @@ public class FrameTrackerTest {
 
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mSurfaceControlWrapper).addJankStatsListener(any(), any());
 
         // First frame - not janky
@@ -548,6 +570,7 @@ public class FrameTrackerTest {
                 CUJ_WALLPAPER_TRANSITION, CUJ_POSTFIX, /* surfaceOnly= */ true);
         when(mChoreographer.getVsyncId()).thenReturn(100L);
         tracker.begin();
+        mRunnableArgumentCaptor.getValue().run();
         verify(mSurfaceControlWrapper).addJankStatsListener(any(), any());
         sendFrame(tracker, JANK_SURFACEFLINGER_DEADLINE_MISSED, 100L);
         sendFrame(tracker, JANK_SURFACEFLINGER_DEADLINE_MISSED, 101L);
@@ -594,7 +617,7 @@ public class FrameTrackerTest {
         if (!tracker.mSurfaceOnly) {
             sendHwuiFrame(tracker, durationMillis, vsyncId, firstWindowFrame);
         }
-        sendSfFrame(vsyncId, jankType);
+        sendSfFrame(tracker, vsyncId, jankType);
     }
 
     private void sendHwuiFrame(FrameTracker tracker, long durationMillis, long vsyncId,
@@ -604,12 +627,18 @@ public class FrameTrackerTest {
                 .getMetric(FrameMetrics.FIRST_DRAW_FRAME);
         doReturn(TimeUnit.MILLISECONDS.toNanos(durationMillis))
                 .when(mWrapper).getMetric(FrameMetrics.TOTAL_DURATION);
+        final ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+        doNothing().when(tracker).postCallback(captor.capture());
         tracker.onFrameMetricsAvailable(0);
+        captor.getValue().run();
     }
 
-    private void sendSfFrame(long vsyncId, @JankType int jankType) {
+    private void sendSfFrame(FrameTracker tracker, long vsyncId, @JankType int jankType) {
+        final ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+        doNothing().when(tracker).postCallback(captor.capture());
         mListenerCapture.getValue().onJankDataAvailable(new JankData[] {
                 new JankData(vsyncId, jankType)
         });
+        captor.getValue().run();
     }
 }
