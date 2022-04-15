@@ -80,6 +80,7 @@ import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
@@ -352,6 +353,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         mKeyguardStatusView = new KeyguardStatusView(mContext);
         mKeyguardStatusView.setId(R.id.keyguard_status_view);
+        DejankUtils.setImmediate(true);
 
         when(mAuthController.isUdfpsEnrolled(anyInt())).thenReturn(false);
         when(mHeadsUpCallback.getContext()).thenReturn(mContext);
@@ -939,6 +941,29 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         verify(mScrimController).setExpansionAffectsAlpha(false);
         mNotificationPanelViewController.onUnlockHintFinished();
         verify(mScrimController).setExpansionAffectsAlpha(true);
+    }
+
+    @Test
+    public void testUnlockHintAnimation_runs_whenNotInPowerSaveMode_andDozeAmountIsZero() {
+        when(mPowerManager.isPowerSaveMode()).thenReturn(false);
+        when(mAmbientState.getDozeAmount()).thenReturn(0f);
+        mNotificationPanelViewController.startUnlockHintAnimation();
+        assertThat(mNotificationPanelViewController.mHintAnimationRunning).isTrue();
+    }
+
+    @Test
+    public void testUnlockHintAnimation_doesNotRun_inPowerSaveMode() {
+        when(mPowerManager.isPowerSaveMode()).thenReturn(true);
+        mNotificationPanelViewController.startUnlockHintAnimation();
+        assertThat(mNotificationPanelViewController.mHintAnimationRunning).isFalse();
+    }
+
+    @Test
+    public void testUnlockHintAnimation_doesNotRun_whenDozeAmountNotZero() {
+        when(mPowerManager.isPowerSaveMode()).thenReturn(false);
+        when(mAmbientState.getDozeAmount()).thenReturn(0.5f);
+        mNotificationPanelViewController.startUnlockHintAnimation();
+        assertThat(mNotificationPanelViewController.mHintAnimationRunning).isFalse();
     }
 
     @Test
