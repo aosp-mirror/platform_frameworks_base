@@ -209,6 +209,12 @@ public abstract class ActivityManagerInternal {
     public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
 
     /**
+     * Inform ActivityManagerService about the latest {@code blockedReasons} for an uid, which
+     * can be used to understand whether the {@code uid} is allowed to access network or not.
+     */
+    public abstract void onUidBlockedReasonsChanged(int uid, int blockedReasons);
+
+    /**
      * @return true if runtime was restarted, false if it's normal boot
      */
     public abstract boolean isRuntimeRestarted();
