@@ -85,7 +85,6 @@ private const val EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY = "dismiss_intent"
 private val LOADING = MediaData(
         userId = -1,
         initialized = false,
-        backgroundColor = 0,
         app = null,
         appIcon = null,
         artist = null,
@@ -177,7 +176,6 @@ class MediaDataManager(
 
     private val themeText = com.android.settingslib.Utils.getColorAttr(context,
             com.android.internal.R.attr.textColorPrimary).defaultColor
-    private val bgColor = context.getColor(R.color.material_dynamic_secondary95)
 
     // Internal listeners are part of the internal pipeline. External listeners (those registered
     // with [MediaDeviceManager.addListener]) receive events after they have propagated through
@@ -591,7 +589,7 @@ class MediaDataManager(
         val mediaAction = getResumeMediaAction(resumeAction)
         val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
-            onMediaDataLoaded(packageName, null, MediaData(userId, true, bgColor, appName,
+            onMediaDataLoaded(packageName, null, MediaData(userId, true, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
                     MediaButton(playOrPause = mediaAction), packageName, token, appIntent,
                     device = null, active = false,
@@ -713,7 +711,7 @@ class MediaDataManager(
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
             val active = mediaEntries[key]?.active ?: true
-            onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
+            onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, app,
                     smallIcon, artist, song, artWorkIcon, actionIcons, actionsToShowCollapsed,
                     semanticActions, sbn.packageName, token, notif.contentIntent, device,
                     active, resumeAction = resumeAction, playbackLocation = playbackLocation,
