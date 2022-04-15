@@ -81,7 +81,6 @@ import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DataSaverControllerImpl;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
-import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.CarrierConfigTracker;
 
@@ -1443,11 +1442,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mMobileSignalControllers.put(id, controller);
         controller.getState().userSetup = true;
         return info;
-    }
-
-    /** */
-    public boolean hasEmergencyCryptKeeperText() {
-        return EncryptionHelper.IS_DATA_ENCRYPTED;
     }
 
     /** */
