@@ -601,14 +601,17 @@ class MediaDataManager(
         }
     }
 
-    private fun loadMediaDataInBg(
+    fun loadMediaDataInBg(
         key: String,
         sbn: StatusBarNotification,
         oldKey: String?,
         logEvent: Boolean = false
     ) {
-        val token = sbn.notification.extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
-                as MediaSession.Token?
+        val token = sbn.notification.extras.getParcelable(
+                Notification.EXTRA_MEDIA_SESSION, MediaSession.Token::class.java)
+        if (token == null) {
+            return
+        }
         val mediaController = mediaControllerFactory.create(token)
         val metadata = mediaController.metadata
 
@@ -655,8 +658,8 @@ class MediaDataManager(
             val extras = sbn.notification.extras
             val deviceName = extras.getCharSequence(Notification.EXTRA_MEDIA_REMOTE_DEVICE, null)
             val deviceIcon = extras.getInt(Notification.EXTRA_MEDIA_REMOTE_ICON, -1)
-            val deviceIntent = extras.getParcelable(Notification.EXTRA_MEDIA_REMOTE_INTENT)
-                    as PendingIntent?
+            val deviceIntent = extras.getParcelable(
+                    Notification.EXTRA_MEDIA_REMOTE_INTENT, PendingIntent::class.java)
             Log.d(TAG, "$key is RCN for $deviceName")
 
             if (deviceName != null && deviceIcon > -1) {
