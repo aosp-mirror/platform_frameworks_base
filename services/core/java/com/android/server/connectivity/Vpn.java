@@ -85,6 +85,7 @@ import android.net.ipsec.ike.ChildSessionParams;
 import android.net.ipsec.ike.IkeSession;
 import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.ipsec.ike.IkeSessionParams;
+import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
@@ -2267,6 +2268,11 @@ public class Vpn {
                 profile.setAllowedAlgorithms(Ikev2VpnProfile.DEFAULT_ALGORITHMS);
                 startVpnProfilePrivileged(profile, VpnConfig.LEGACY_VPN);
                 return;
+            case VpnProfile.TYPE_IKEV2_FROM_IKE_TUN_CONN_PARAMS:
+                // All the necessary IKE options should come from IkeTunnelConnectionParams in the
+                // profile.
+                startVpnProfilePrivileged(profile, VpnConfig.LEGACY_VPN);
+                return;
             case VpnProfile.TYPE_L2TP_IPSEC_PSK:
                 racoon = new String[] {
                     iface, profile.server, "udppsk", profile.ipsecIdentifier,
@@ -2702,10 +2708,23 @@ public class Vpn {
                     resetIkeState();
                     mActiveNetwork = network;
 
-                    final IkeSessionParams ikeSessionParams =
-                            VpnIkev2Utils.buildIkeSessionParams(mContext, mProfile, network);
-                    final ChildSessionParams childSessionParams =
-                            VpnIkev2Utils.buildChildSessionParams(mProfile.getAllowedAlgorithms());
+                    // Get Ike options from IkeTunnelConnectionParams if it's available in the
+                    // profile.
+                    final IkeTunnelConnectionParams ikeTunConnParams =
+                            mProfile.getIkeTunnelConnectionParams();
+                    final IkeSessionParams ikeSessionParams;
+                    final ChildSessionParams childSessionParams;
+                    if (ikeTunConnParams != null) {
+                        final IkeSessionParams.Builder builder = new IkeSessionParams.Builder(
+                                ikeTunConnParams.getIkeSessionParams()).setNetwork(network);
+                        ikeSessionParams = builder.build();
+                        childSessionParams = ikeTunConnParams.getTunnelModeChildSessionParams();
+                    } else {
+                        ikeSessionParams = VpnIkev2Utils.buildIkeSessionParams(
+                                mContext, mProfile, network);
+                        childSessionParams = VpnIkev2Utils.buildChildSessionParams(
+                                mProfile.getAllowedAlgorithms());
+                    }
 
                     // TODO: Remove the need for adding two unused addresses with
                     // IPsec tunnels.
@@ -3226,6 +3245,7 @@ public class Vpn {
             case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS:
             case VpnProfile.TYPE_IKEV2_IPSEC_PSK:
             case VpnProfile.TYPE_IKEV2_IPSEC_RSA:
+            case VpnProfile.TYPE_IKEV2_FROM_IKE_TUN_CONN_PARAMS:
                 if (!mContext.getPackageManager().hasSystemFeature(
                         PackageManager.FEATURE_IPSEC_TUNNELS)) {
                     throw new UnsupportedOperationException(
@@ -3399,6 +3419,7 @@ public class Vpn {
                 case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS:
                 case VpnProfile.TYPE_IKEV2_IPSEC_PSK:
                 case VpnProfile.TYPE_IKEV2_IPSEC_RSA:
+                case VpnProfile.TYPE_IKEV2_FROM_IKE_TUN_CONN_PARAMS:
                     mVpnRunner =
                             new IkeV2VpnRunner(Ikev2VpnProfile.fromVpnProfile(profile));
                     mVpnRunner.start();
