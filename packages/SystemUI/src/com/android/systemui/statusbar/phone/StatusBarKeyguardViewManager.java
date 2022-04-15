@@ -580,9 +580,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
-    /**
-     * Stop showing any alternate auth methods
-     */
+    @Override
     public void resetAlternateAuth(boolean forceUpdateScrim) {
         final boolean updateScrim = (mAlternateAuthInterceptor != null
                 && mAlternateAuthInterceptor.hideAlternateAuthBouncer())
@@ -1378,7 +1376,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     /**
      * Returns if bouncer expansion is between 0 and 1 non-inclusive.
      */
-    public boolean bouncerIsInTransit() {
+    public boolean isBouncerInTransit() {
         if (mBouncer == null) return false;
 
         return mBouncer.inTransit();

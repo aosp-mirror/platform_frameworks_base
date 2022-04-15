@@ -209,7 +209,7 @@ public class TaskFragmentTest extends WindowTestsBase {
     }
 
     @Test
-    public void testEmbeddedTaskFragmentEnterPip_resetOrganizerOverrideConfig() {
+    public void testEmbeddedTaskFragmentEnterPip_singleActivity_resetOrganizerOverrideConfig() {
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
                 .setOrganizer(mOrganizer)
                 .setFragmentToken(new Binder())
@@ -239,6 +239,38 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertEquals(taskBounds, taskFragment.getBounds());
         assertEquals(taskBounds, activity.getBounds());
         assertEquals(Configuration.EMPTY, taskFragment.getRequestedOverrideConfiguration());
+    }
+
+    @Test
+    public void testEmbeddedTaskFragmentEnterPip_multiActivities_notifyOrganizer() {
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment taskFragment0 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(new Binder())
+                .createActivityCount(1)
+                .build();
+        final TaskFragment taskFragment1 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(new Binder())
+                .createActivityCount(1)
+                .build();
+        final ActivityRecord activity0 = taskFragment0.getTopMostActivity();
+        spyOn(mAtm.mTaskFragmentOrganizerController);
+
+        // Move activity to pinned.
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity0,
+                null /* launchIntoPipHostActivity */, "test");
+
+        // Ensure taskFragment requested config is reset.
+        assertTrue(taskFragment0.mClearedTaskFragmentForPip);
+        assertFalse(taskFragment1.mClearedTaskFragmentForPip);
+        final TaskFragmentInfo info = taskFragment0.getTaskFragmentInfo();
+        assertTrue(info.isTaskFragmentClearedForPip());
+        assertTrue(info.isEmpty());
+        verify(mAtm.mTaskFragmentOrganizerController)
+                .dispatchPendingInfoChangedEvent(taskFragment0);
     }
 
     @Test

@@ -173,10 +173,6 @@ class MediaDataManager(
         // Maximum number of actions allowed in expanded view
         @JvmField
         val MAX_NOTIFICATION_ACTIONS = MediaViewHolder.genericButtonIds.size
-
-        /** Maximum number of [PlaybackState.CustomAction] buttons supported */
-        @JvmField
-        val MAX_CUSTOM_ACTIONS = 4
     }
 
     private val themeText = com.android.settingslib.Utils.getColorAttr(context,
@@ -795,71 +791,74 @@ class MediaDataManager(
      */
     private fun createActionsFromState(packageName: String, controller: MediaController):
             MediaButton? {
-        val actions = MediaButton()
-        controller.playbackState?.let { state ->
-            // First, check for standard actions
-            actions.playOrPause = if (isConnectingState(state.state)) {
-                // Spinner needs to be animating to render anything. Start it here.
-                val drawable = context.getDrawable(
-                        com.android.internal.R.drawable.progress_small_material)
-                (drawable as Animatable).start()
-                MediaAction(
-                    drawable,
-                    null, // no action to perform when clicked
-                    context.getString(R.string.controls_media_button_connecting),
-                    context.getDrawable(R.drawable.ic_media_connecting_container),
-                    // Specify a rebind id to prevent the spinner from restarting on later binds.
-                    com.android.internal.R.drawable.progress_small_material
-                )
-            } else if (isPlayingState(state.state)) {
-                getStandardAction(controller, state.actions, PlaybackState.ACTION_PAUSE)
-            } else {
-                getStandardAction(controller, state.actions, PlaybackState.ACTION_PLAY)
-            }
-            val prevButton = getStandardAction(controller, state.actions,
-                    PlaybackState.ACTION_SKIP_TO_PREVIOUS)
-            val nextButton = getStandardAction(controller, state.actions,
-                    PlaybackState.ACTION_SKIP_TO_NEXT)
-
-            // Then, check for custom actions
-            val customActions = MutableList<MediaAction?>(MAX_CUSTOM_ACTIONS) { null }
-            var customCount = 0
-            for (i in 0..(MAX_CUSTOM_ACTIONS - 1)) {
-                getCustomAction(state, packageName, controller, customCount)?.let {
-                    customActions[customCount++] = it
-                }
-            }
-
-            // Finally, assign the remaining button slots: play/pause A B C D
-            // A = previous, else custom action (if not reserved)
-            // B = next, else custom action (if not reserved)
-            // C and D are always custom actions
-            val reservePrev = controller.extras?.getBoolean(
-                    MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_PREV) == true
-            val reserveNext = controller.extras?.getBoolean(
-                    MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_NEXT) == true
-            var customIdx = 0
-
-            actions.prevOrCustom = if (prevButton != null) {
-                prevButton
-            } else if (!reservePrev) {
-                customActions[customIdx++]
-            } else {
-                null
-            }
-
-            actions.nextOrCustom = if (nextButton != null) {
-                nextButton
-            } else if (!reserveNext) {
-                customActions[customIdx++]
-            } else {
-                null
-            }
-
-            actions.custom0 = customActions[customIdx++]
-            actions.custom1 = customActions[customIdx++]
+        val state = controller.playbackState
+        if (state == null) {
+            return MediaButton()
         }
-        return actions
+        // First, check for} standard actions
+        val playOrPause = if (isConnectingState(state.state)) {
+            // Spinner needs to be animating to render anything. Start it here.
+            val drawable = context.getDrawable(
+                com.android.internal.R.drawable.progress_small_material)
+            (drawable as Animatable).start()
+            MediaAction(
+                drawable,
+                null, // no action to perform when clicked
+                context.getString(R.string.controls_media_button_connecting),
+                context.getDrawable(R.drawable.ic_media_connecting_container),
+                // Specify a rebind id to prevent the spinner from restarting on later binds.
+                com.android.internal.R.drawable.progress_small_material
+            )
+        } else if (isPlayingState(state.state)) {
+            getStandardAction(controller, state.actions, PlaybackState.ACTION_PAUSE)
+        } else {
+            getStandardAction(controller, state.actions, PlaybackState.ACTION_PLAY)
+        }
+        val prevButton = getStandardAction(controller, state.actions,
+            PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+        val nextButton = getStandardAction(controller, state.actions,
+            PlaybackState.ACTION_SKIP_TO_NEXT)
+
+        // Then, create a way to build any custom actions that will be needed
+        val customActions = state.customActions.asSequence().filterNotNull().map {
+            getCustomAction(state, packageName, controller, it)
+        }.iterator()
+        fun nextCustomAction() = if (customActions.hasNext()) customActions.next() else null
+
+        // Finally, assign the remaining button slots: play/pause A B C D
+        // A = previous, else custom action (if not reserved)
+        // B = next, else custom action (if not reserved)
+        // C and D are always custom actions
+        val reservePrev = controller.extras?.getBoolean(
+            MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_PREV) == true
+        val reserveNext = controller.extras?.getBoolean(
+            MediaConstants.SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_NEXT) == true
+
+        val prevOrCustom = if (prevButton != null) {
+            prevButton
+        } else if (!reservePrev) {
+            nextCustomAction()
+        } else {
+            null
+        }
+
+        val nextOrCustom = if (nextButton != null) {
+            nextButton
+        } else if (!reserveNext) {
+            nextCustomAction()
+        } else {
+            null
+        }
+
+        return MediaButton(
+            playOrPause,
+            nextOrCustom,
+            prevOrCustom,
+            nextCustomAction(),
+            nextCustomAction(),
+            reserveNext,
+            reservePrev
+        )
     }
 
     /**
@@ -938,18 +937,12 @@ class MediaDataManager(
         state: PlaybackState,
         packageName: String,
         controller: MediaController,
-        index: Int
-    ): MediaAction? {
-        if (state.customActions.size <= index || state.customActions[index] == null) {
-            if (DEBUG) { Log.d(TAG, "not enough actions or action was null at $index") }
-            return null
-        }
-
-        val it = state.customActions[index]
+        customAction: PlaybackState.CustomAction
+    ): MediaAction {
         return MediaAction(
-            Icon.createWithResource(packageName, it.icon).loadDrawable(context),
-            { controller.transportControls.sendCustomAction(it, it.extras) },
-            it.name,
+            Icon.createWithResource(packageName, customAction.icon).loadDrawable(context),
+            { controller.transportControls.sendCustomAction(customAction, customAction.extras) },
+            customAction.name,
             null
         )
     }

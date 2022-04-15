@@ -79,8 +79,6 @@ class Owners {
 
     private static final boolean DEBUG = false; // DO NOT SUBMIT WITH TRUE
 
-    private static final String DEVICE_OWNER_XML_LEGACY = "device_owner.xml";
-
     // XML storing device owner info, system update policy and pending OTA update information.
     private static final String DEVICE_OWNER_XML = "device_owner_2.xml";
 
@@ -89,7 +87,6 @@ class Owners {
     private static final String TAG_ROOT = "root";
 
     private static final String TAG_DEVICE_OWNER = "device-owner";
-    private static final String TAG_DEVICE_INITIALIZER = "device-initializer";
     private static final String TAG_SYSTEM_UPDATE_POLICY = "system-update-policy";
     private static final String TAG_FREEZE_PERIOD_RECORD = "freeze-record";
     private static final String TAG_PENDING_OTA_INFO = "pending-ota-info";
@@ -107,7 +104,6 @@ class Owners {
     private static final String ATTR_REMOTE_BUGREPORT_URI = "remoteBugreportUri";
     private static final String ATTR_REMOTE_BUGREPORT_HASH = "remoteBugreportHash";
     private static final String ATTR_USERID = "userId";
-    private static final String ATTR_USER_RESTRICTIONS_MIGRATED = "userRestrictionsMigrated";
     private static final String ATTR_FREEZE_RECORD_START = "start";
     private static final String ATTR_FREEZE_RECORD_END = "end";
     // Legacy attribute, its presence would mean the profile owner associated with it is
@@ -180,35 +176,14 @@ class Owners {
      */
     void load() {
         synchronized (mLock) {
-            // First, try to read from the legacy file.
-            final File legacy = getLegacyConfigFile();
-
             final List<UserInfo> users = mUserManager.getAliveUsers();
 
-            if (readLegacyOwnerFileLocked(legacy)) {
-                if (DEBUG) {
-                    Log.d(TAG, "Legacy config file found.");
-                }
+            new DeviceOwnerReadWriter().readFromFileLocked();
 
-                // Legacy file exists, write to new files and remove the legacy one.
-                writeDeviceOwner();
-                for (int userId : getProfileOwnerKeys()) {
-                    writeProfileOwner(userId);
-                }
-                if (DEBUG) {
-                    Log.d(TAG, "Deleting legacy config file");
-                }
-                if (!legacy.delete()) {
-                    Slog.e(TAG, "Failed to remove the legacy setting file");
-                }
-            } else {
-                // No legacy file, read from the new format files.
-                new DeviceOwnerReadWriter().readFromFileLocked();
-
-                for (UserInfo ui : users) {
-                    new ProfileOwnerReadWriter(ui.id).readFromFileLocked();
-                }
+            for (UserInfo ui : users) {
+                new ProfileOwnerReadWriter(ui.id).readFromFileLocked();
             }
+
             mUserManagerInternal.setDeviceManaged(hasDeviceOwner());
             for (UserInfo ui : users) {
                 mUserManagerInternal.setUserManaged(ui.id, hasProfileOwner(ui.id));
@@ -338,23 +313,11 @@ class Owners {
             return;
         }
         synchronized (mLock) {
-            // For a newly set DO, there's no need for migration.
-            setDeviceOwnerWithRestrictionsMigrated(admin, ownerName, userId,
-                    /* userRestrictionsMigrated =*/ true);
-        }
-    }
-
-    // Note this should be only called during migration.  Normally when DO is set,
-    // userRestrictionsMigrated should always be true.
-    void setDeviceOwnerWithRestrictionsMigrated(ComponentName admin, String ownerName, int userId,
-            boolean userRestrictionsMigrated) {
-        synchronized (mLock) {
             // A device owner is allowed to access device identifiers. Even though this flag
             // is not currently checked for device owner, it is set to true here so that it is
             // semantically compatible with the meaning of this flag.
-            mDeviceOwner = new OwnerInfo(ownerName, admin, userRestrictionsMigrated,
-                    /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/
-                    null, /* isOrganizationOwnedDevice =*/true);
+            mDeviceOwner = new OwnerInfo(ownerName, admin, /* remoteBugreportUri =*/ null,
+                    /* remoteBugreportHash =*/ null, /* isOrganizationOwnedDevice =*/ true);
             mDeviceOwnerUserId = userId;
 
             mUserManagerInternal.setDeviceManaged(true);
@@ -385,8 +348,8 @@ class Owners {
         synchronized (mLock) {
             // For a newly set PO, there's no need for migration.
             mProfileOwners.put(userId, new OwnerInfo(ownerName, admin,
-                    /* userRestrictionsMigrated =*/ true, /* remoteBugreportUri =*/ null,
-                    /* remoteBugreportHash =*/ null, /* isOrganizationOwnedDevice =*/ false));
+                    /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/ null,
+                    /* isOrganizationOwnedDevice =*/ false));
             mUserManagerInternal.setUserManaged(userId, true);
             notifyChangeLocked();
         }
@@ -404,8 +367,7 @@ class Owners {
         synchronized (mLock) {
             final OwnerInfo ownerInfo = mProfileOwners.get(userId);
             final OwnerInfo newOwnerInfo = new OwnerInfo(target.getPackageName(), target,
-                    ownerInfo.userRestrictionsMigrated, ownerInfo.remoteBugreportUri,
-                    ownerInfo.remoteBugreportHash, /* isOrganizationOwnedDevice =*/
+                    ownerInfo.remoteBugreportUri, ownerInfo.remoteBugreportHash,
                     ownerInfo.isOrganizationOwnedDevice);
             mProfileOwners.put(userId, newOwnerInfo);
             notifyChangeLocked();
@@ -423,10 +385,8 @@ class Owners {
             }
             // We don't set a name because it's not used anyway.
             // See DevicePolicyManagerService#getDeviceOwnerName
-            mDeviceOwner = new OwnerInfo(null, target,
-                    mDeviceOwner.userRestrictionsMigrated, mDeviceOwner.remoteBugreportUri,
-                    mDeviceOwner.remoteBugreportHash, /* isOrganizationOwnedDevice =*/
-                    mDeviceOwner.isOrganizationOwnedDevice);
+            mDeviceOwner = new OwnerInfo(null, target, mDeviceOwner.remoteBugreportUri,
+                    mDeviceOwner.remoteBugreportHash, mDeviceOwner.isOrganizationOwnedDevice);
             if (previousDeviceOwnerType != null) {
                 mDeviceOwnerTypes.put(mDeviceOwner.packageName, previousDeviceOwnerType);
             }
@@ -570,35 +530,6 @@ class Owners {
         }
     }
 
-    /**
-     * @return true if user restrictions need to be migrated for DO.
-     */
-    boolean getDeviceOwnerUserRestrictionsNeedsMigration() {
-        synchronized (mLock) {
-            return mDeviceOwner != null && !mDeviceOwner.userRestrictionsMigrated;
-        }
-    }
-
-    /**
-     * @return true if user restrictions need to be migrated for PO.
-     */
-    boolean getProfileOwnerUserRestrictionsNeedsMigration(int userId) {
-        synchronized (mLock) {
-            OwnerInfo profileOwner = mProfileOwners.get(userId);
-            return profileOwner != null && !profileOwner.userRestrictionsMigrated;
-        }
-    }
-
-    /** Sets the user restrictions migrated flag, and also writes to the file. */
-    void setDeviceOwnerUserRestrictionsMigrated() {
-        synchronized (mLock) {
-            if (mDeviceOwner != null) {
-                mDeviceOwner.userRestrictionsMigrated = true;
-            }
-            writeDeviceOwner();
-        }
-    }
-
     /** Sets the remote bugreport uri and hash, and also writes to the file. */
     void setDeviceOwnerRemoteBugreportUriAndHash(String remoteBugreportUri,
             String remoteBugreportHash) {
@@ -608,17 +539,6 @@ class Owners {
                 mDeviceOwner.remoteBugreportHash = remoteBugreportHash;
             }
             writeDeviceOwner();
-        }
-    }
-
-    /** Sets the user restrictions migrated flag, and also writes to the file. */
-    void setProfileOwnerUserRestrictionsMigrated(int userId) {
-        synchronized (mLock) {
-            OwnerInfo profileOwner = mProfileOwners.get(userId);
-            if (profileOwner != null) {
-                profileOwner.userRestrictionsMigrated = true;
-            }
-            writeProfileOwner(userId);
         }
     }
 
@@ -694,72 +614,6 @@ class Owners {
             return mDeviceOwnerProtectedPackages.containsKey(packageName)
                     ? mDeviceOwnerProtectedPackages.get(packageName) : Collections.emptyList();
         }
-    }
-
-    private boolean readLegacyOwnerFileLocked(File file) {
-        if (!file.exists()) {
-            // Already migrated or the device has no owners.
-            return false;
-        }
-        try {
-            InputStream input = new AtomicFile(file).openRead();
-            TypedXmlPullParser parser = Xml.resolvePullParser(input);
-            int type;
-            while ((type = parser.next()) != TypedXmlPullParser.END_DOCUMENT) {
-                if (type != TypedXmlPullParser.START_TAG) {
-                    continue;
-                }
-
-                String tag = parser.getName();
-                if (tag.equals(TAG_DEVICE_OWNER)) {
-                    String name = parser.getAttributeValue(null, ATTR_NAME);
-                    String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
-                    mDeviceOwner = new OwnerInfo(name, packageName,
-                            /* userRestrictionsMigrated =*/ false, /* remoteBugreportUri =*/ null,
-                            /* remoteBugreportHash =*/ null, /* isOrganizationOwnedDevice =*/ true);
-                    mDeviceOwnerUserId = UserHandle.USER_SYSTEM;
-                } else if (tag.equals(TAG_DEVICE_INITIALIZER)) {
-                    // Deprecated tag
-                } else if (tag.equals(TAG_PROFILE_OWNER)) {
-                    String profileOwnerPackageName = parser.getAttributeValue(null, ATTR_PACKAGE);
-                    String profileOwnerName = parser.getAttributeValue(null, ATTR_NAME);
-                    String profileOwnerComponentStr =
-                            parser.getAttributeValue(null, ATTR_COMPONENT_NAME);
-                    int userId = parser.getAttributeInt(null, ATTR_USERID);
-                    OwnerInfo profileOwnerInfo = null;
-                    if (profileOwnerComponentStr != null) {
-                        ComponentName admin = ComponentName.unflattenFromString(
-                                profileOwnerComponentStr);
-                        if (admin != null) {
-                            profileOwnerInfo = new OwnerInfo(profileOwnerName, admin,
-                                    /* userRestrictionsMigrated =*/ false, null,
-                                    null, /* isOrganizationOwnedDevice =*/ false);
-                        } else {
-                            // This shouldn't happen but switch from package name -> component name
-                            // might have written bad device owner files. b/17652534
-                            Slog.e(TAG, "Error parsing device-owner file. Bad component name " +
-                                    profileOwnerComponentStr);
-                        }
-                    }
-                    if (profileOwnerInfo == null) {
-                        profileOwnerInfo = new OwnerInfo(profileOwnerName, profileOwnerPackageName,
-                                /* userRestrictionsMigrated =*/ false,
-                                /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/
-                                null, /* isOrganizationOwnedDevice =*/ false);
-                    }
-                    mProfileOwners.put(userId, profileOwnerInfo);
-                } else if (TAG_SYSTEM_UPDATE_POLICY.equals(tag)) {
-                    mSystemUpdatePolicy = SystemUpdatePolicy.restoreFromXml(parser);
-                } else {
-                    throw new XmlPullParserException(
-                            "Unexpected tag in device owner file: " + tag);
-                }
-            }
-            input.close();
-        } catch (XmlPullParserException | IOException e) {
-            Slog.e(TAG, "Error parsing device-owner file", e);
-        }
-        return true;
     }
 
     void writeDeviceOwner() {
@@ -1047,9 +901,6 @@ class Owners {
                             mDeviceOwnerUserId);
                     break;
                 }
-                case TAG_DEVICE_INITIALIZER:
-                    // Deprecated tag
-                    break;
                 case TAG_SYSTEM_UPDATE_POLICY:
                     mSystemUpdatePolicy = SystemUpdatePolicy.restoreFromXml(parser);
                     break;
@@ -1087,7 +938,6 @@ class Owners {
                 default:
                     Slog.e(TAG, "Unexpected tag: " + tag);
                     return false;
-
             }
             return true;
         }
@@ -1136,30 +986,16 @@ class Owners {
         public final String name;
         public final String packageName;
         public final ComponentName admin;
-        public boolean userRestrictionsMigrated;
         public String remoteBugreportUri;
         public String remoteBugreportHash;
         public boolean isOrganizationOwnedDevice;
 
-        public OwnerInfo(String name, String packageName, boolean userRestrictionsMigrated,
-                String remoteBugreportUri, String remoteBugreportHash,
-                boolean isOrganizationOwnedDevice) {
-            this.name = name;
-            this.packageName = packageName;
-            this.admin = new ComponentName(packageName, "");
-            this.userRestrictionsMigrated = userRestrictionsMigrated;
-            this.remoteBugreportUri = remoteBugreportUri;
-            this.remoteBugreportHash = remoteBugreportHash;
-            this.isOrganizationOwnedDevice = isOrganizationOwnedDevice;
-        }
-
-        public OwnerInfo(String name, ComponentName admin, boolean userRestrictionsMigrated,
+        OwnerInfo(String name, ComponentName admin,
                 String remoteBugreportUri, String remoteBugreportHash,
                 boolean isOrganizationOwnedDevice) {
             this.name = name;
             this.admin = admin;
             this.packageName = admin.getPackageName();
-            this.userRestrictionsMigrated = userRestrictionsMigrated;
             this.remoteBugreportUri = remoteBugreportUri;
             this.remoteBugreportHash = remoteBugreportHash;
             this.isOrganizationOwnedDevice = isOrganizationOwnedDevice;
@@ -1167,14 +1003,12 @@ class Owners {
 
         public void writeToXml(TypedXmlSerializer out, String tag) throws IOException {
             out.startTag(null, tag);
-            out.attribute(null, ATTR_PACKAGE, packageName);
             if (name != null) {
                 out.attribute(null, ATTR_NAME, name);
             }
             if (admin != null) {
                 out.attribute(null, ATTR_COMPONENT_NAME, admin.flattenToString());
             }
-            out.attributeBoolean(null, ATTR_USER_RESTRICTIONS_MIGRATED, userRestrictionsMigrated);
             if (remoteBugreportUri != null) {
                 out.attribute(null, ATTR_REMOTE_BUGREPORT_URI, remoteBugreportUri);
             }
@@ -1189,14 +1023,9 @@ class Owners {
         }
 
         public static OwnerInfo readFromXml(TypedXmlPullParser parser) {
-            final String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
             final String name = parser.getAttributeValue(null, ATTR_NAME);
             final String componentName =
                     parser.getAttributeValue(null, ATTR_COMPONENT_NAME);
-            final String userRestrictionsMigratedStr =
-                    parser.getAttributeValue(null, ATTR_USER_RESTRICTIONS_MIGRATED);
-            final boolean userRestrictionsMigrated =
-                    ("true".equals(userRestrictionsMigratedStr));
             final String remoteBugreportUri = parser.getAttributeValue(null,
                     ATTR_REMOTE_BUGREPORT_URI);
             final String remoteBugreportHash = parser.getAttributeValue(null,
@@ -1210,23 +1039,18 @@ class Owners {
             final boolean isOrgOwnedDevice =
                     ("true".equals(isOrgOwnedDeviceStr)) | canAccessDeviceIds;
 
-            // Has component name?  If so, return [name, component]
-            if (componentName != null) {
-                final ComponentName admin = ComponentName.unflattenFromString(componentName);
-                if (admin != null) {
-                    return new OwnerInfo(name, admin, userRestrictionsMigrated,
-                            remoteBugreportUri, remoteBugreportHash, isOrgOwnedDevice);
-                } else {
-                    // This shouldn't happen but switch from package name -> component name
-                    // might have written bad device owner files. b/17652534
-                    Slog.e(TAG, "Error parsing owner file. Bad component name " +
-                            componentName);
-                }
+            if (componentName == null) {
+                Slog.e(TAG, "Owner component not found");
+                return null;
+            }
+            final ComponentName admin = ComponentName.unflattenFromString(componentName);
+            if (admin == null) {
+                Slog.e(TAG, "Owner component not parsable: " + componentName);
+                return null;
             }
 
-            // Else, build with [name, package]
-            return new OwnerInfo(name, packageName, userRestrictionsMigrated, remoteBugreportUri,
-                    remoteBugreportHash, isOrgOwnedDevice);
+            return new OwnerInfo(
+                        name, admin, remoteBugreportUri, remoteBugreportHash, isOrgOwnedDevice);
         }
 
         public void dump(IndentingPrintWriter pw) {
@@ -1281,11 +1105,6 @@ class Owners {
                     + getSystemUpdateFreezePeriodRecordAsString());
             needBlank = true;
         }
-    }
-
-    @VisibleForTesting
-    File getLegacyConfigFile() {
-        return new File(mInjector.environmentGetDataSystemDirectory(), DEVICE_OWNER_XML_LEGACY);
     }
 
     @VisibleForTesting

@@ -26,6 +26,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import android.app.ActivityTaskManager;
+import android.graphics.Matrix;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
@@ -38,6 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Class for testing {@link WindowInfo}.
@@ -94,6 +96,8 @@ public class WindowInfoTest {
         assertFalse(w.inPictureInPicture);
         assertFalse(w.hasFlagWatchOutsideTouch);
         assertTrue(w.regionInScreen.isEmpty());
+        assertEquals(w.mTransformMatrix.length, 9);
+        assertTrue(w.mMagnificationSpec.isNop());
     }
 
     @SmallTest
@@ -117,6 +121,8 @@ public class WindowInfoTest {
         equality &= w1.parentToken == w2.parentToken;
         equality &= w1.activityToken == w2.activityToken;
         equality &= w1.regionInScreen.equals(w2.regionInScreen);
+        equality &= w1.mMagnificationSpec.equals(w2.mMagnificationSpec);
+        equality &= Arrays.equals(w1.mTransformMatrix, w2.mTransformMatrix);
         return equality;
     }
 
@@ -136,5 +142,9 @@ public class WindowInfoTest {
         windowInfo.inPictureInPicture = true;
         windowInfo.hasFlagWatchOutsideTouch = true;
         windowInfo.regionInScreen.set(0, 0, 1080, 1080);
+        windowInfo.mMagnificationSpec.scale = 2.0f;
+        windowInfo.mMagnificationSpec.offsetX = 100f;
+        windowInfo.mMagnificationSpec.offsetY = 200f;
+        Matrix.IDENTITY_MATRIX.getValues(windowInfo.mTransformMatrix);
     }
 }

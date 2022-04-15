@@ -967,7 +967,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 final boolean redrawNeeded = sizeChanged || creating || hintChanged
                         || (mVisible && !mDrawFinished);
                 boolean shouldSyncBuffer =
-                        redrawNeeded && viewRoot.wasRelayoutRequested() && viewRoot.isInSync();
+                        redrawNeeded && viewRoot.wasRelayoutRequested() && viewRoot.isInLocalSync();
                 SyncBufferTransactionCallback syncBufferTransactionCallback = null;
                 if (shouldSyncBuffer) {
                     syncBufferTransactionCallback = new SyncBufferTransactionCallback();
@@ -1781,11 +1781,16 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             return;
         }
         getBoundsOnScreen(mTmpRect);
+
+        // To compute the node bounds of the node on the embedded window,
+        // apply this matrix to get the bounds in host window-relative coordinates,
+        // then using the global transform to get the actual bounds on screen.
+        mTmpRect.offset(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
         mTmpMatrix.reset();
         mTmpMatrix.setTranslate(mTmpRect.left, mTmpRect.top);
         mTmpMatrix.postScale(mScreenRect.width() / (float) mSurfaceWidth,
                 mScreenRect.height() / (float) mSurfaceHeight);
-        mRemoteAccessibilityController.setScreenMatrix(mTmpMatrix);
+        mRemoteAccessibilityController.setWindowMatrix(mTmpMatrix);
     }
 
     @Override

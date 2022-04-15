@@ -1695,7 +1695,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"सर्टकटलाई निष्क्रिय पार्नुहोस्"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"सर्टकट प्रयोग गर्नुहोस्"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"कलर इन्भर्सन"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"रङ्ग सच्याउने सुविधा"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"कलर करेक्सन"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"एक हाते मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"अझै मधुरो"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> अन भयो।"</string>
@@ -2293,9 +2293,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> अनुवाद गरिएको छ।"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"म्यासेज <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> भाषाबाट <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> भाषामा अनुवाद गरिएको छ।"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ब्याकग्राउन्डमा गरिएको क्रियाकलाप"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"कुनै एपले ब्याट्री खपत गरिरहेको छ"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"कुनै एप अझै पनि चलिरहेको छ"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> ले ब्याकग्राउन्डमा ब्याट्री खपत गरिरहेको छ। समीक्षा गर्न ट्याप गर्नुहोस्।"</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ले ब्याट्रीको आयु घटाउन सक्छ। सक्रिय एपहरू हेर्न ट्याप गर्नुहोस्।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"कुन कुन एप सक्रिय छ भन्ने कुरा जाँच्नुहोस्"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मार्फत फोनको क्यामेरा प्रयोग गर्न मिल्दैन"</string>

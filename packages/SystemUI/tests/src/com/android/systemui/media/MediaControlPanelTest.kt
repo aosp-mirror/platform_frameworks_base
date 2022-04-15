@@ -52,17 +52,22 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
+import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -76,7 +81,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
-import org.mockito.Mockito.any
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -160,6 +164,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var instanceId: InstanceId
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var applicationInfo: ApplicationInfo
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var activityIntentHelper: ActivityIntentHelper
+    @Mock private lateinit var lockscreenUserManager: NotificationLockscreenUserManager
 
     @Mock private lateinit var recommendationViewHolder: RecommendationViewHolder
     @Mock private lateinit var smartspaceAction: SmartspaceAction
@@ -199,7 +206,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
             mediaCarouselController,
             falsingManager,
             clock,
-            logger) {
+            logger,
+            keyguardStateController,
+            activityIntentHelper,
+            lockscreenUserManager) {
                 override fun loadAnimator(
                     animId: Int,
                     otionInterpolator: Interpolator,
@@ -363,17 +373,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private fun initRecommendationViewHolderMocks() {
         whenever(recommendationViewHolder.recommendations).thenReturn(view)
         whenever(recommendationViewHolder.cardIcon).thenReturn(appIcon)
-        whenever(recommendationViewHolder.cardText).thenReturn(titleText)
 
         // Add a recommendation item
         coverItem = ImageView(context).also { it.setId(R.id.media_cover1) }
         whenever(coverContainer.id).thenReturn(R.id.media_cover1_container)
         whenever(recommendationViewHolder.mediaCoverItems).thenReturn(listOf(coverItem))
         whenever(recommendationViewHolder.mediaCoverContainers).thenReturn(listOf(coverContainer))
-        whenever(recommendationViewHolder.mediaCoverItemsResIds)
-            .thenReturn(listOf(R.id.media_cover1))
-        whenever(recommendationViewHolder.mediaCoverContainersResIds)
-            .thenReturn(listOf(R.id.media_cover1_container))
 
         // Long press menu
         whenever(recommendationViewHolder.settings).thenReturn(settings)
@@ -446,6 +451,64 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         verify(collapsedSet).setVisibility(R.id.action4, ConstraintSet.GONE)
         verify(expandedSet).setVisibility(R.id.action4, ConstraintSet.GONE)
+    }
+
+    @Test
+    fun bindSemanticActions_reservedPrev() {
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
+
+        // Setup button state: no prev or next button and their slots reserved
+        val semanticActions = MediaButton(
+            playOrPause = MediaAction(icon, Runnable {}, "play", bg),
+            nextOrCustom = null,
+            prevOrCustom = null,
+            custom0 = MediaAction(icon, null, "custom 0", bg),
+            custom1 = MediaAction(icon, null, "custom 1", bg),
+            false,
+            true
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        assertThat(actionPrev.isEnabled()).isFalse()
+        assertThat(actionPrev.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.INVISIBLE)
+
+        assertThat(actionNext.isEnabled()).isFalse()
+        assertThat(actionNext.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.GONE)
+    }
+
+    @Test
+    fun bindSemanticActions_reservedNext() {
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
+
+        // Setup button state: no prev or next button and their slots reserved
+        val semanticActions = MediaButton(
+            playOrPause = MediaAction(icon, Runnable {}, "play", bg),
+            nextOrCustom = null,
+            prevOrCustom = null,
+            custom0 = MediaAction(icon, null, "custom 0", bg),
+            custom1 = MediaAction(icon, null, "custom 1", bg),
+            true,
+            false
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        assertThat(actionPrev.isEnabled()).isFalse()
+        assertThat(actionPrev.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.GONE)
+
+        assertThat(actionNext.isEnabled()).isFalse()
+        assertThat(actionNext.drawable).isNull()
+        verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.INVISIBLE)
     }
 
     @Test
@@ -1058,6 +1121,47 @@ public class MediaControlPanelTest : SysuiTestCase() {
         captor.value.invoke()
 
         verify(logger).logSeek(anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun tapContentView_showOverLockscreen_openActivity() {
+        // WHEN we are on lockscreen and this activity can show over lockscreen
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldShowOverLockscreen(any(), any())).thenReturn(true)
+
+        val clickIntent = mock(Intent::class.java)
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.intent).thenReturn(clickIntent)
+        val captor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
+        val data = mediaData.copy(clickIntent = pendingIntent)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+        verify(viewHolder.player).setOnClickListener(captor.capture())
+
+        // THEN it shows without dismissing keyguard first
+        captor.value.onClick(viewHolder.player)
+        verify(activityStarter).startActivity(eq(clickIntent), eq(true),
+                nullable(), eq(true))
+    }
+
+    @Test
+    fun tapContentView_noShowOverLockscreen_dismissKeyguard() {
+        // WHEN we are on lockscreen and the activity cannot show over lockscreen
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldShowOverLockscreen(any(), any())).thenReturn(false)
+
+        val clickIntent = mock(Intent::class.java)
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.intent).thenReturn(clickIntent)
+        val captor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
+        val data = mediaData.copy(clickIntent = pendingIntent)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+        verify(viewHolder.player).setOnClickListener(captor.capture())
+
+        // THEN keyguard has to be dismissed
+        captor.value.onClick(viewHolder.player)
+        verify(activityStarter).postStartActivityDismissingKeyguard(eq(pendingIntent), any())
     }
 
     @Test

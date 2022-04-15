@@ -425,9 +425,9 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ ਦਾ ਕਾਲ ਲੌਗ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡਾਟਾ ਸਮੇਤ। ਖਰਾਬ ਐਪਾਂ ਇਸਦੀ ਵਰਤੋਂ ਤੁਹਾਡੇ ਕਾਲ ਲੌਗ ਨੂੰ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਲਈ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਦਾ ਕਾਲ ਲੌਗ ਸੋਧਣ ਦਿੰਦੀ ਹੈ, ਇਸ ਵਿੱਚ ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡਾਟਾ ਵੀ ਸ਼ਾਮਲ ਹੈ। ਭੈੜੀਆਂ ਐਪਾਂ ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਕਾਲ ਲੌਗ ਡਾਟਾ ਮਿਟਾ ਜਾਂ ਸੋਧ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਦਾ ਕਾਲ ਲੌਗ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡਾਟਾ ਸਮੇਤ। ਖਰਾਬ ਐਪਾਂ ਇਸਦੀ ਵਰਤੋਂ ਤੁਹਾਡੇ ਕਾਲ ਲੌਗ ਨੂੰ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਲਈ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
-    <string name="permlab_bodySensors" msgid="662918578601619569">"ਵਰਤੋਂ ਵਿੱਚ ਹੋਣ \'ਤੇ ਦਿਲ ਦੀ ਧੜਕਣ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"ਵਰਤੋਂ ਵਿੱਚ ਹੋਣ \'ਤੇ ਦਿਲ ਦੀ ਧੜਕਣ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਦੇ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ਜਦੋਂ ਐਪ ਵਰਤੋਂ ਵਿੱਚ ਹੋਵੇ, ਤਾਂ ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਦਿਲ ਦੀ ਧੜਕਣ, ਤਾਪਮਾਨ, ਖੂਨ ਵਿੱਚ ਮੌਜੂਦ ਆਕਸੀਜਨ ਦੀ ਫ਼ੀਸਦ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਦੇ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
-    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਣ \'ਤੇ ਦਿਲ ਦੀ ਧੜਕਣ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਣ \'ਤੇ ਦਿਲ ਦੀ ਧੜਕਣ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਦੇ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ਜਦੋਂ ਐਪ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲ ਰਹੀ ਹੋਵੇ, ਤਾਂ ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਦਿਲ ਦੀ ਧੜਕਣ, ਤਾਪਮਾਨ, ਖੂਨ ਵਿੱਚ ਮੌਜੂਦ ਆਕਸੀਜਨ ਦੀ ਫ਼ੀਸਦ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਦੇ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਅਤੇ ਵੇਰਵਿਆਂ ਨੂੰ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡਾਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
@@ -1679,7 +1679,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ਚਾਲੂ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ਬੰਦ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ਕੀ <xliff:g id="SERVICE">%1$s</xliff:g> ਨੂੰ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦਾ ਪੂਰਾ ਕੰਟਰੋਲ ਦੇਣਾ ਹੈ?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"ਪੂਰਾ ਕੰਟਰੋਲ ਉਹਨਾਂ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਹੈ ਜੋ ਪਹੁੰਚਯੋਗਤਾ ਸੰਬੰਧੀ ਲੋੜਾਂ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕਰਦੀਆਂ ਹਨ, ਪਰ ਜ਼ਿਆਦਾਤਰ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਨਹੀਂ ਹੁੰਦਾ।"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"ਪੂਰਾ ਕੰਟਰੋਲ ਉਨ੍ਹਾਂ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਹੈ ਜੋ ਪਹੁੰਚਯੋਗਤਾ ਸੰਬੰਧੀ ਲੋੜਾਂ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕਰਦੀਆਂ ਹਨ, ਪਰ ਜ਼ਿਆਦਾਤਰ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਨਹੀਂ ਹੁੰਦਾ।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ਸਕ੍ਰੀਨ ਨੂੰ ਦੇਖੋ ਅਤੇ ਕੰਟਰੋਲ ਕਰੋ"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ਇਹ ਸਕ੍ਰੀਨ \'ਤੇ ਸਾਰੀ ਸਮੱਗਰੀ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ ਦੂਜੀਆਂ ਐਪਾਂ ਦੇ ਉੱਪਰ ਦਿਖਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ਕਾਰਵਾਈਆਂ ਦੇਖੋ ਅਤੇ ਕਰੋ"</string>
@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਇਸ ਵੇਲੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"ਇਜਾਜ਼ਤ ਦੀ ਲੋੜ ਹੈ"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"ਕੈਮਰਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ਫ਼ੋਨ \'ਤੇ ਜਾਰੀ ਰੱਖੋ"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਅਣਉਪਲਬਧ ਹੈ"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV ਸੈਟਿੰਗਾਂ ਅਣਉਪਲਬਧ ਹਨ"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"ਟੈਬਲੈੱਟ ਸੈਟਿੰਗਾਂ ਅਣਉਪਲਬਧ ਹਨ"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"ਫ਼ੋਨ ਸੈਟਿੰਗਾਂ ਅਣਉਪਲਬਧ ਹਨ"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> \'ਤੇ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> \'ਤੇ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਟੈਬਲੈੱਟ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> \'ਤੇ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"ਇਸ ਸਮੇਂ ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> \'ਤੇ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"ਇਸ ਸਮੇਂ ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> \'ਤੇ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਟੈਬਲੈੱਟ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"ਇਸ ਸਮੇਂ ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> \'ਤੇ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ਇਹ ਐਪ ਵਧੀਕ ਸੁਰੱਖਿਆ ਦੀ ਬੇਨਤੀ ਕਰ ਰਹੀ ਹੈ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ਇਹ ਐਪ ਵਧੀਕ ਸੁਰੱਖਿਆ ਦੀ ਬੇਨਤੀ ਕਰ ਰਹੀ ਹੈ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਟੈਬਲੈੱਟ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ਇਹ ਐਪ ਵਧੀਕ ਸੁਰੱਖਿਆ ਦੀ ਬੇਨਤੀ ਕਰ ਰਹੀ ਹੈ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ਇਹ ਐਪ Android ਦੇ ਕਿਸੇ ਵਧੇਰੇ ਪੁਰਾਣੇ ਵਰਜਨ ਲਈ ਬਣਾਈ ਗਈ ਸੀ ਅਤੇ ਸ਼ਾਇਦ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ। ਅੱਪਡੇਟਾਂ ਲਈ ਜਾਂਚ ਕਰੋ ਜਾਂ ਵਿਕਾਸਕਾਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ਅੱਪਡੇਟ ਲਈ ਜਾਂਚ ਕਰੋ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ਤੁਹਾਨੂੰ ਨਵੇਂ ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਹੋਏ ਹਨ"</string>
@@ -2067,14 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ਹੋਰ ਜਾਣਨ ਲਈ ਅਤੇ ਬਦਲਾਅ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵਿਕਲਪ ਬਦਲ ਗਿਆ ਹੈ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ਟੈਪ ਕਰਕੇ ਦੋਖੋ ਕਿ ਕਿਹੜੀਆਂ ਚੀਜ਼ਾਂ ਬਲਾਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"ਸੂਚਨਾ ਸੈਟਿੰਗਾਂ ਦੀ ਸਮੀਖਿਆ ਕਰੋ"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 ਵਿੱਚ, ਤੁਹਾਡੇ ਵੱਲੋਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਜਾਣ ਵਾਲੀਆਂ ਐਪਾਂ ਨੂੰ ਸੂਚਨਾਵਾਂ ਭੇਜਣ ਲਈ ਤੁਹਾਡੀ ਇਜਾਜ਼ਤ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। ਮੌਜੂਦਾ ਐਪਾਂ ਲਈ ਇਸ ਇਜਾਜ਼ਤ ਨੂੰ ਬਦਲਣ ਵਾਸਤੇ ਟੈਪ ਕਰੋ।"</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ਬਾਅਦ ਵਿੱਚ ਯਾਦ ਕਰਵਾਓ"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ਖਾਰਜ ਕਰੋ"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ਸਿਸਟਮ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"ਕੈਮਰਾ"</string>
@@ -2293,9 +2274,11 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ਦਾ ਅਨੁਵਾਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"ਸੁਨੇਹੇ ਦਾ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> ਤੋਂ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ਵਿੱਚ ਅਨੁਵਾਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="3258460527676573815">"ਇੱਕ ਐਪ ਬੈਟਰੀ ਵਰਤ ਰਹੀ ਹੈ"</string>
+    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
+    <skip />
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ਇੱਕ ਐਪ ਹਾਲੇ ਵੀ ਕਿਰਿਆਸ਼ੀਲ ਹੈ"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="9180610713603474720">"<xliff:g id="APP">%1$s</xliff:g> ਵੱਲੋਂ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਬੈਟਰੀ ਵਰਤੀ ਜਾ ਰਹੀ ਹੈ। ਸਮੀਖਿਆ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
+    <skip />
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ਵੱਲੋਂ ਬੈਟਰੀ ਲਾਈਫ਼ ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ। ਕਿਰਿਆਸ਼ੀਲ ਐਪਾਂ ਦੀ ਸਮੀਖਿਆ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ਕਿਰਿਆਸ਼ੀਲ ਐਪਾਂ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> ਤੋਂ ਫ਼ੋਨ ਦੇ ਕੈਮਰੇ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>

@@ -61,6 +61,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.settingslib.widget.AdaptiveIcon;
+import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
@@ -73,6 +74,8 @@ import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.time.SystemClock;
 
@@ -97,8 +100,7 @@ public class MediaControlPanel {
             + ".android.apps.gsa.staticplugins.opa.smartspace.ExportedSmartspaceTrampolineActivity";
     private static final String EXTRAS_SMARTSPACE_INTENT =
             "com.google.android.apps.gsa.smartspace.extra.SMARTSPACE_INTENT";
-    private static final int MEDIA_RECOMMENDATION_ITEMS_PER_ROW = 3;
-    private static final int MEDIA_RECOMMENDATION_MAX_NUM = 6;
+    private static final int MEDIA_RECOMMENDATION_MAX_NUM = 3;
     private static final String KEY_SMARTSPACE_ARTIST_NAME = "artist_name";
     private static final String KEY_SMARTSPACE_OPEN_IN_FOREGROUND = "KEY_OPEN_IN_FOREGROUND";
     private static final String KEY_SMARTSPACE_APP_NAME = "KEY_SMARTSPACE_APP_NAME";
@@ -161,6 +163,10 @@ public class MediaControlPanel {
     private int mArtworkBoundId = 0;
     private int mArtworkNextBindRequestId = 0;
 
+    private final KeyguardStateController mKeyguardStateController;
+    private final ActivityIntentHelper mActivityIntentHelper;
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
+
     // Used for logging.
     protected boolean mIsImpressed = false;
     private SystemClock mSystemClock;
@@ -196,7 +202,10 @@ public class MediaControlPanel {
             MediaCarouselController mediaCarouselController,
             FalsingManager falsingManager,
             SystemClock systemClock,
-            MediaUiEventLogger logger) {
+            MediaUiEventLogger logger,
+            KeyguardStateController keyguardStateController,
+            ActivityIntentHelper activityIntentHelper,
+            NotificationLockscreenUserManager lockscreenUserManager) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mMainExecutor = mainExecutor;
@@ -210,6 +219,9 @@ public class MediaControlPanel {
         mFalsingManager = falsingManager;
         mSystemClock = systemClock;
         mLogger = logger;
+        mKeyguardStateController = keyguardStateController;
+        mActivityIntentHelper = activityIntentHelper;
+        mLockscreenUserManager = lockscreenUserManager;
 
         mSeekBarViewModel.setLogSeek(() -> {
             if (mPackageName != null && mInstanceId != null) {
@@ -416,8 +428,21 @@ public class MediaControlPanel {
                 if (mMediaViewController.isGutsVisible()) return;
                 mLogger.logTapContentView(mUid, mPackageName, mInstanceId);
                 logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
-                mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
-                        buildLaunchAnimatorController(mMediaViewHolder.getPlayer()));
+
+                // See StatusBarNotificationActivityStarter#onNotificationClicked
+                boolean showOverLockscreen = mKeyguardStateController.isShowing()
+                        && mActivityIntentHelper.wouldShowOverLockscreen(clickIntent.getIntent(),
+                        mLockscreenUserManager.getCurrentUserId());
+
+                if (showOverLockscreen) {
+                    mActivityStarter.startActivity(clickIntent.getIntent(),
+                            /* dismissShade */ true,
+                            /* animationController */ null,
+                            /* showOverLockscreenWhenLocked */ true);
+                } else {
+                    mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
+                            buildLaunchAnimatorController(mMediaViewHolder.getPlayer()));
+                }
             });
         }
 
@@ -837,7 +862,14 @@ public class MediaControlPanel {
                 scrubbingTimeViewsEnabled(semanticActions) && hideWhenScrubbing && mIsScrubbing;
         boolean visible = mediaAction != null && !shouldBeHiddenDueToScrubbing;
 
-        setVisibleAndAlpha(expandedSet, buttonId, visible);
+        int notVisibleValue;
+        if ((buttonId == R.id.actionPrev && semanticActions.getReservePrev())
+                || (buttonId == R.id.actionNext && semanticActions.getReserveNext())) {
+            notVisibleValue = ConstraintSet.INVISIBLE;
+        } else {
+            notVisibleValue = ConstraintSet.GONE;
+        }
+        setVisibleAndAlpha(expandedSet, buttonId, visible, notVisibleValue);
         setVisibleAndAlpha(collapsedSet, buttonId, visible && showInCompact);
     }
 
@@ -968,11 +1000,6 @@ public class MediaControlPanel {
                 appName = packageManager.getApplicationLabel(applicationInfo);
             }
         }
-        // Set the app name as card's title.
-        if (!TextUtils.isEmpty(appName)) {
-            TextView headerTitleText = mRecommendationViewHolder.getCardText();
-            headerTitleText.setText(appName);
-        }
 
         // Set up media rec card's tap action if applicable.
         setSmartspaceRecItemOnClickListener(recommendationCard, data.getCardAction(),
@@ -983,11 +1010,6 @@ public class MediaControlPanel {
 
         List<ImageView> mediaCoverItems = mRecommendationViewHolder.getMediaCoverItems();
         List<ViewGroup> mediaCoverContainers = mRecommendationViewHolder.getMediaCoverContainers();
-        List<Integer> mediaCoverItemsResIds = mRecommendationViewHolder.getMediaCoverItemsResIds();
-        List<Integer> mediaCoverContainersResIds =
-                mRecommendationViewHolder.getMediaCoverContainersResIds();
-        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
-        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         int mediaRecommendationNum = Math.min(mediaRecommendationList.size(),
                 MEDIA_RECOMMENDATION_MAX_NUM);
         int uiComponentIndex = 0;
@@ -1032,21 +1054,6 @@ public class MediaControlPanel {
                                 recommendation.getTitle(), artistName, appName));
             }
 
-            if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
-                setVisibleAndAlpha(collapsedSet,
-                        mediaCoverItemsResIds.get(uiComponentIndex), true);
-                setVisibleAndAlpha(collapsedSet,
-                        mediaCoverContainersResIds.get(uiComponentIndex), true);
-            } else {
-                setVisibleAndAlpha(collapsedSet,
-                        mediaCoverItemsResIds.get(uiComponentIndex), false);
-                setVisibleAndAlpha(collapsedSet,
-                        mediaCoverContainersResIds.get(uiComponentIndex), false);
-            }
-            setVisibleAndAlpha(expandedSet,
-                    mediaCoverItemsResIds.get(uiComponentIndex), true);
-            setVisibleAndAlpha(expandedSet,
-                    mediaCoverContainersResIds.get(uiComponentIndex), true);
             uiComponentIndex++;
         }
 
@@ -1177,7 +1184,12 @@ public class MediaControlPanel {
     }
 
     private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible) {
-        set.setVisibility(actionId, visible ? ConstraintSet.VISIBLE : ConstraintSet.GONE);
+        setVisibleAndAlpha(set, actionId, visible, ConstraintSet.GONE);
+    }
+
+    private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible,
+            int notVisibleValue) {
+        set.setVisibility(actionId, visible ? ConstraintSet.VISIBLE : notVisibleValue);
         set.setAlpha(actionId, visible ? 1.0f : 0.0f);
     }
 
