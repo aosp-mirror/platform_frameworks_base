@@ -16338,20 +16338,36 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void addPendingTopUid(int uid, int pid) {
-            mPendingStartActivityUids.add(uid, pid);
+        public void addPendingTopUid(int uid, int pid, @Nullable IApplicationThread thread) {
+            final boolean isNewPending = mPendingStartActivityUids.add(uid, pid);
             // We need to update the network rules for the app coming to the top state so that
             // it can access network when the device or the app is in a restricted state
             // (e.g. battery/data saver) but since waiting for updateOomAdj to complete and then
             // informing NetworkPolicyManager might get delayed, informing the state change as soon
             // as we know app is going to come to the top state.
-            if (mNetworkPolicyUidObserver != null) {
+            if (isNewPending && mNetworkPolicyUidObserver != null) {
                 try {
+                    final long procStateSeq = mProcessList.getNextProcStateSeq();
                     mNetworkPolicyUidObserver.onUidStateChanged(uid, PROCESS_STATE_TOP,
-                            mProcessList.getNextProcStateSeq(), PROCESS_CAPABILITY_ALL);
+                            procStateSeq, PROCESS_CAPABILITY_ALL);
+                    if (thread != null && isNetworkingBlockedForUid(uid)) {
+                        thread.setNetworkBlockSeq(procStateSeq);
+                    }
                 } catch (RemoteException e) {
-                    // Should not happen; call is within the same process
+                    Slog.d(TAG, "Error calling setNetworkBlockSeq", e);
                 }
+            }
+        }
+
+        private boolean isNetworkingBlockedForUid(int uid) {
+            synchronized (mUidNetworkBlockedReasons) {
+                // TODO: We can consider only those blocked reasons that will be overridden
+                // by the TOP state. For other ones, there is no point in waiting.
+                // TODO: We can reuse this data in
+                // ProcessList#incrementProcStateSeqAndNotifyAppsLOSP instead of calling into
+                // NetworkManagementService.
+                return mUidNetworkBlockedReasons.get(uid, BLOCKED_REASON_NONE)
+                        != BLOCKED_REASON_NONE;
             }
         }
 

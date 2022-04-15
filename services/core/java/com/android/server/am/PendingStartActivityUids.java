@@ -44,10 +44,12 @@ final class PendingStartActivityUids {
         mContext = context;
     }
 
-    synchronized void add(int uid, int pid) {
+    synchronized boolean add(int uid, int pid) {
         if (mPendingUids.get(uid) == null) {
             mPendingUids.put(uid, new Pair<>(pid, SystemClock.elapsedRealtime()));
+            return true;
         }
+        return false;
     }
 
     synchronized void delete(int uid, long nowElapsed) {
