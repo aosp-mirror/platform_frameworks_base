@@ -542,7 +542,8 @@ public final class NotificationEntry extends ListEntry {
                 if (senderPerson == null) {
                     return true;
                 }
-                Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
+                Person user = extras.getParcelable(
+                        Notification.EXTRA_MESSAGING_PERSON, Person.class);
                 return Objects.equals(user, senderPerson);
             }
         }
