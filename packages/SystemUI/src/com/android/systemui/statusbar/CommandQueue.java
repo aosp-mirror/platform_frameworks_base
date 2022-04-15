@@ -23,8 +23,6 @@ import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.systemui.statusbar.phone.CentralSurfacesImpl.ONLY_CORE_APPS;
-
 import android.annotation.Nullable;
 import android.app.ITransientNotificationCallback;
 import android.app.StatusBarManager;
@@ -535,8 +533,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         final int disabled1 = getDisabled1(DEFAULT_DISPLAY);
         final int disabled2 = getDisabled2(DEFAULT_DISPLAY);
         return (disabled1 & StatusBarManager.DISABLE_EXPAND) == 0
-                && (disabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) == 0
-                && !ONLY_CORE_APPS;
+                && (disabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) == 0;
     }
 
     @Override

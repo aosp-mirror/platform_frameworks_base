@@ -64,7 +64,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
@@ -291,24 +290,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private static final int HINT_RESET_DELAY_MS = 1200;
 
     private static final UiEventLogger sUiEventLogger = new UiEventLoggerImpl();
-
-    /**
-     * If true, the system is in the half-boot-to-decryption-screen state.
-     * Prudently disable QS and notifications.
-     */
-    public static final boolean ONLY_CORE_APPS;
-
-    static {
-        boolean onlyCoreApps;
-        try {
-            IPackageManager packageManager =
-                    IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
-            onlyCoreApps = packageManager != null && packageManager.isOnlyCoreApps();
-        } catch (RemoteException e) {
-            onlyCoreApps = false;
-        }
-        ONLY_CORE_APPS = onlyCoreApps;
-    }
 
     private final Context mContext;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
@@ -1692,8 +1673,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         || !mUserSwitcherController.isSimpleUserSwitcher())
                 && !isShadeDisabled()
                 && ((mDisabled2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) == 0)
-                && !mDozing
-                && !ONLY_CORE_APPS;
+                && !mDozing;
         mNotificationPanelViewController.setQsExpansionEnabledPolicy(expandEnabled);
         Log.d(TAG, "updateQsExpansionEnabled - QS Expand enabled: " + expandEnabled);
     }
