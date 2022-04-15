@@ -133,6 +133,7 @@ public class UdfpsController implements DozeReceiver {
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
     @NonNull private final ActivityLaunchAnimator mActivityLaunchAnimator;
+    @Nullable private final AlternateUdfpsTouchProvider mAlternateTouchProvider;
 
     // Tracks the velocity of a touch to help filter out the touches that move too fast.
     @Nullable private VelocityTracker mVelocityTracker;
@@ -537,7 +538,8 @@ public class UdfpsController implements DozeReceiver {
             @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             @NonNull SystemUIDialogManager dialogManager,
             @NonNull LatencyTracker latencyTracker,
-            @NonNull ActivityLaunchAnimator activityLaunchAnimator) {
+            @NonNull ActivityLaunchAnimator activityLaunchAnimator,
+            @NonNull Optional<AlternateUdfpsTouchProvider> aternateTouchProvider) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -566,6 +568,7 @@ public class UdfpsController implements DozeReceiver {
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mLatencyTracker = latencyTracker;
         mActivityLaunchAnimator = activityLaunchAnimator;
+        mAlternateTouchProvider = aternateTouchProvider.orElse(null);
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -782,6 +785,7 @@ public class UdfpsController implements DozeReceiver {
 
     private void onFingerDown(long requestId, int x, int y, float minor, float major) {
         mExecution.assertIsMainThread();
+
         if (mOverlay == null) {
             Log.w(TAG, "Null request in onFingerDown");
             return;
@@ -806,7 +810,11 @@ public class UdfpsController implements DozeReceiver {
             }
         }
         mOnFingerDown = true;
-        mFingerprintManager.onPointerDown(requestId, mSensorProps.sensorId, x, y, minor, major);
+        if (mAlternateTouchProvider != null) {
+            mAlternateTouchProvider.onPointerDown(requestId, x, y, minor, major);
+        } else {
+            mFingerprintManager.onPointerDown(requestId, mSensorProps.sensorId, x, y, minor, major);
+        }
         Trace.endAsyncSection("UdfpsController.e2e.onPointerDown", 0);
 
         final UdfpsView view = mOverlay.getOverlayView();
@@ -827,7 +835,11 @@ public class UdfpsController implements DozeReceiver {
         mActivePointerId = -1;
         mAcquiredReceived = false;
         if (mOnFingerDown) {
-            mFingerprintManager.onPointerUp(requestId, mSensorProps.sensorId);
+            if (mAlternateTouchProvider != null) {
+                mAlternateTouchProvider.onPointerUp(requestId);
+            } else {
+                mFingerprintManager.onPointerUp(requestId, mSensorProps.sensorId);
+            }
             for (Callback cb : mCallbacks) {
                 cb.onFingerUp();
             }
