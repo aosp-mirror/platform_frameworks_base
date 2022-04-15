@@ -612,8 +612,7 @@ public class AlarmManagerService extends SystemService {
 
         private static final boolean DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED = true;
 
-        // TODO(b/226439802): Flip to true.
-        private static final boolean DEFAULT_SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = false;
+        private static final boolean DEFAULT_SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = true;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
