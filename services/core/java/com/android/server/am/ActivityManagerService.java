@@ -28,6 +28,7 @@ import static android.app.ActivityManager.INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
@@ -45,6 +46,13 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED;
+import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
+import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_REASON_DOZE;
+import static android.net.ConnectivityManager.BLOCKED_REASON_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
@@ -1415,6 +1423,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ActivityThread mSystemThread;
 
     final UidObserverController mUidObserverController;
+    private volatile IUidObserver mNetworkPolicyUidObserver;
+
+    @GuardedBy("mUidNetworkBlockedReasons")
+    private final SparseIntArray mUidNetworkBlockedReasons = new SparseIntArray();
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
         final ProcessRecord mApp;
@@ -6784,6 +6796,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         synchronized (mProcLock) {
+            if (mPendingStartActivityUids.isPendingTopUid(uid)) {
+                return PROCESS_STATE_TOP;
+            }
             return mProcessList.getUidProcStateLOSP(uid);
         }
     }
@@ -14447,7 +14462,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 uid, change, procState, procStateSeq, capability, ephemeral);
         if (uidRec != null) {
             uidRec.setLastReportedChange(enqueuedChange);
-            uidRec.updateLastDispatchedProcStateSeq(enqueuedChange);
         }
 
         // Directly update the power manager, since we sit on top of it and it is critical
@@ -15585,20 +15599,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return;
                 }
                 record.lastNetworkUpdatedProcStateSeq = procStateSeq;
-                if (record.curProcStateSeq > procStateSeq) {
-                    if (DEBUG_NETWORK) {
-                        Slog.d(TAG_NETWORK, "No need to handle older seq no., Uid: " + uid
-                                + ", curProcstateSeq: " + record.curProcStateSeq
-                                + ", procStateSeq: " + procStateSeq);
-                    }
-                    return;
-                }
-                if (record.waitingForNetwork) {
+                if (record.procStateSeqWaitingForNetwork != 0
+                        && procStateSeq >= record.procStateSeqWaitingForNetwork) {
                     if (DEBUG_NETWORK) {
                         Slog.d(TAG_NETWORK, "Notifying all blocking threads for uid: " + uid
-                                + ", procStateSeq: " + procStateSeq);
+                                + ", procStateSeq: " + procStateSeq
+                                + ", procStateSeqWaitingForNetwork: "
+                                + record.procStateSeqWaitingForNetwork);
                     }
                     record.networkStateLock.notifyAll();
+                }
+            }
+        }
+
+        @Override
+        public void onUidBlockedReasonsChanged(int uid, int blockedReasons) {
+            synchronized (mUidNetworkBlockedReasons) {
+                if (blockedReasons == BLOCKED_REASON_NONE) {
+                    mUidNetworkBlockedReasons.delete(uid);
+                } else {
+                    mUidNetworkBlockedReasons.put(uid, blockedReasons);
                 }
             }
         }
@@ -16301,8 +16321,51 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void addPendingTopUid(int uid, int pid) {
-            mPendingStartActivityUids.add(uid, pid);
+        public void addPendingTopUid(int uid, int pid, @Nullable IApplicationThread thread) {
+            final boolean isNewPending = mPendingStartActivityUids.add(uid, pid);
+            // We need to update the network rules for the app coming to the top state so that
+            // it can access network when the device or the app is in a restricted state
+            // (e.g. battery/data saver) but since waiting for updateOomAdj to complete and then
+            // informing NetworkPolicyManager might get delayed, informing the state change as soon
+            // as we know app is going to come to the top state.
+            if (isNewPending && mNetworkPolicyUidObserver != null) {
+                try {
+                    final long procStateSeq = mProcessList.getNextProcStateSeq();
+                    mNetworkPolicyUidObserver.onUidStateChanged(uid, PROCESS_STATE_TOP,
+                            procStateSeq, PROCESS_CAPABILITY_ALL);
+                    if (thread != null && isNetworkingBlockedForUid(uid)) {
+                        thread.setNetworkBlockSeq(procStateSeq);
+                    }
+                } catch (RemoteException e) {
+                    Slog.d(TAG, "Error calling setNetworkBlockSeq", e);
+                }
+            }
+        }
+
+        private boolean isNetworkingBlockedForUid(int uid) {
+            synchronized (mUidNetworkBlockedReasons) {
+                // TODO: We can consider only those blocked reasons that will be overridden
+                // by the TOP state. For other ones, there is no point in waiting.
+                // TODO: We can reuse this data in
+                // ProcessList#incrementProcStateSeqAndNotifyAppsLOSP instead of calling into
+                // NetworkManagementService.
+                final int uidBlockedReasons = mUidNetworkBlockedReasons.get(
+                        uid, BLOCKED_REASON_NONE);
+                if (uidBlockedReasons == BLOCKED_REASON_NONE) {
+                    return false;
+                }
+                final int topExemptedBlockedReasons = BLOCKED_REASON_BATTERY_SAVER
+                        | BLOCKED_REASON_DOZE
+                        | BLOCKED_REASON_APP_STANDBY
+                        | BLOCKED_REASON_LOW_POWER_STANDBY
+                        | BLOCKED_METERED_REASON_DATA_SAVER
+                        | BLOCKED_METERED_REASON_USER_RESTRICTED;
+                final int effectiveBlockedReasons =
+                        uidBlockedReasons & ~topExemptedBlockedReasons;
+                // Only consider it as blocked if it is not blocked by a reason
+                // that is not exempted by app being in the top state.
+                return effectiveBlockedReasons == BLOCKED_REASON_NONE;
+            }
         }
 
         @Override
@@ -16449,6 +16512,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void setStopUserOnSwitch(int value) {
             ActivityManagerService.this.setStopUserOnSwitch(value);
         }
+
+        @Override
+        public void registerNetworkPolicyUidObserver(@NonNull IUidObserver observer,
+                int which, int cutpoint, @NonNull String callingPackage) {
+            mNetworkPolicyUidObserver = observer;
+            mUidObserverController.register(observer, which, cutpoint, callingPackage,
+                    Binder.getCallingUid());
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
@@ -16528,23 +16599,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         synchronized (record.networkStateLock) {
-            if (record.lastDispatchedProcStateSeq < procStateSeq) {
-                if (DEBUG_NETWORK) {
-                    Slog.d(TAG_NETWORK, "Uid state change for seq no. " + procStateSeq + " is not "
-                            + "dispatched to NPMS yet, so don't wait. Uid: " + callingUid
-                            + " lastProcStateSeqDispatchedToObservers: "
-                            + record.lastDispatchedProcStateSeq);
-                }
-                return;
-            }
-            if (record.curProcStateSeq > procStateSeq) {
-                if (DEBUG_NETWORK) {
-                    Slog.d(TAG_NETWORK, "Ignore the wait requests for older seq numbers. Uid: "
-                            + callingUid + ", curProcStateSeq: " + record.curProcStateSeq
-                            + ", procStateSeq: " + procStateSeq);
-                }
-                return;
-            }
             if (record.lastNetworkUpdatedProcStateSeq >= procStateSeq) {
                 if (DEBUG_NETWORK) {
                     Slog.d(TAG_NETWORK, "Network rules have been already updated for seq no. "
@@ -16560,9 +16614,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " Uid: " + callingUid + " procStateSeq: " + procStateSeq);
                 }
                 final long startTime = SystemClock.uptimeMillis();
-                record.waitingForNetwork = true;
+                record.procStateSeqWaitingForNetwork = procStateSeq;
                 record.networkStateLock.wait(mWaitForNetworkTimeoutMs);
-                record.waitingForNetwork = false;
+                record.procStateSeqWaitingForNetwork = 0;
                 final long totalTime = SystemClock.uptimeMillis() - startTime;
                 if (totalTime >= mWaitForNetworkTimeoutMs || DEBUG_NETWORK) {
                     Slog.w(TAG_NETWORK, "Total time waited for network rules to get updated: "

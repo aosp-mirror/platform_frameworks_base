@@ -482,9 +482,8 @@ public final class ProcessList {
      * Having a global counter ensures that seq numbers are monotonically increasing for a
      * particular uid even when the uidRecord is re-created.
      */
-    @GuardedBy("mService")
     @VisibleForTesting
-    long mProcStateSeqCounter = 0;
+    volatile long mProcStateSeqCounter = 0;
 
     /**
      * A global counter for generating sequence numbers to uniquely identify pending process starts.
@@ -4878,13 +4877,17 @@ public final class ProcessList {
     }
 
     /**
-     * Checks if any uid is coming from background to foreground or vice versa and if so, increments
-     * the {@link UidRecord#curProcStateSeq} corresponding to that uid using global seq counter
-     * {@link ProcessList#mProcStateSeqCounter} and notifies the app if it needs to block.
+     * Increments the {@link UidRecord#curProcStateSeq} for all uids using global seq counter
+     * {@link ProcessList#mProcStateSeqCounter} and checks if any uid is coming
+     * from background to foreground or vice versa and if so, notifies the app if it needs to block.
      */
     @VisibleForTesting
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     void incrementProcStateSeqAndNotifyAppsLOSP(ActiveUids activeUids) {
+        for (int i = activeUids.size() - 1; i >= 0; --i) {
+            final UidRecord uidRec = activeUids.valueAt(i);
+            uidRec.curProcStateSeq = getNextProcStateSeq();
+        }
         if (mService.mWaitForNetworkTimeoutMs <= 0) {
             return;
         }
@@ -4911,7 +4914,6 @@ public final class ProcessList {
                 continue;
             }
             synchronized (uidRec.networkStateLock) {
-                uidRec.curProcStateSeq = ++mProcStateSeqCounter; // TODO: use method
                 if (blockState == NETWORK_STATE_BLOCK) {
                     if (blockingUids == null) {
                         blockingUids = new ArrayList<>();
@@ -4922,7 +4924,7 @@ public final class ProcessList {
                         Slog.d(TAG_NETWORK, "uid going to background, notifying all blocking"
                                 + " threads for uid: " + uidRec);
                     }
-                    if (uidRec.waitingForNetwork) {
+                    if (uidRec.procStateSeqWaitingForNetwork != 0) {
                         uidRec.networkStateLock.notifyAll();
                     }
                 }
@@ -4954,6 +4956,10 @@ public final class ProcessList {
                 }
             }
         }
+    }
+
+    long getNextProcStateSeq() {
+        return ++mProcStateSeqCounter;
     }
 
     /**
