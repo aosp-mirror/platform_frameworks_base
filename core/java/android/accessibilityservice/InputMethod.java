@@ -181,14 +181,14 @@ public class InputMethod {
 
     final void startInput(@Nullable InputConnection ic, @NonNull EditorInfo attribute) {
         Log.v(LOG_TAG, "startInput(): editor=" + attribute);
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.startInput");
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AccessibilityService.startInput");
         doStartInput(ic, attribute, false /* restarting */);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void restartInput(@Nullable InputConnection ic, @NonNull EditorInfo attribute) {
         Log.v(LOG_TAG, "restartInput(): editor=" + attribute);
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.restartInput");
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AccessibilityService.restartInput");
         doStartInput(ic, attribute, true /* restarting */);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
