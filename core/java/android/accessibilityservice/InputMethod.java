@@ -62,7 +62,6 @@ public class InputMethod {
 
     private final AccessibilityService mService;
     private InputBinding mInputBinding;
-    private InputConnection mInputConnection;
     private boolean mInputStarted;
     private InputConnection mStartedInputConnection;
     private EditorInfo mInputEditorInfo;
@@ -81,12 +80,8 @@ public class InputMethod {
      */
     @Nullable
     public final AccessibilityInputConnection getCurrentInputConnection() {
-        InputConnection ic = mStartedInputConnection;
-        if (ic != null) {
-            return new AccessibilityInputConnection(ic);
-        }
-        if (mInputConnection != null) {
-            return new AccessibilityInputConnection(mInputConnection);
+        if (mStartedInputConnection != null) {
+            return new AccessibilityInputConnection(mStartedInputConnection);
         }
         return null;
     }
@@ -136,10 +131,8 @@ public class InputMethod {
      * to perform whatever behavior you would like.
      */
     public void onFinishInput() {
-        InputConnection ic = mStartedInputConnection != null ? mStartedInputConnection
-                : mInputConnection;
-        if (ic != null) {
-            ic.finishComposingText();
+        if (mStartedInputConnection != null) {
+            mStartedInputConnection.finishComposingText();
         }
     }
 
@@ -176,18 +169,14 @@ public class InputMethod {
     final void bindInput(@NonNull InputBinding binding) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AccessibilityService.bindInput");
         mInputBinding = binding;
-        mInputConnection = binding.getConnection();
-        Log.v(LOG_TAG, "bindInput(): binding=" + binding
-                + " ic=" + mInputConnection);
+        Log.v(LOG_TAG, "bindInput(): binding=" + binding);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void unbindInput() {
-        Log.v(LOG_TAG, "unbindInput(): binding=" + mInputBinding
-                + " ic=" + mInputConnection);
+        Log.v(LOG_TAG, "unbindInput(): binding=" + mInputBinding);
         // Unbind input is per process per display.
         mInputBinding = null;
-        mInputConnection = null;
     }
 
     final void startInput(@Nullable InputConnection ic, @NonNull EditorInfo attribute) {
@@ -206,8 +195,12 @@ public class InputMethod {
 
 
     final void doStartInput(InputConnection ic, EditorInfo attribute, boolean restarting) {
-        if (!restarting && mInputStarted) {
+        if ((ic == null || !restarting) && mInputStarted) {
             doFinishInput();
+            if (ic == null) {
+                // Unlike InputMethodService, A11y IME should not observe fallback InputConnection.
+                return;
+            }
         }
         mInputStarted = true;
         mStartedInputConnection = ic;
@@ -224,6 +217,7 @@ public class InputMethod {
         }
         mInputStarted = false;
         mStartedInputConnection = null;
+        mInputEditorInfo = null;
     }
 
     private InputMethodSession onCreateInputMethodSessionInterface() {
