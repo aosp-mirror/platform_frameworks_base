@@ -207,6 +207,9 @@ final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
     }
 
     private static final Set<String> NEARBY_DEVICES_PERMISSIONS = new ArraySet<>();
