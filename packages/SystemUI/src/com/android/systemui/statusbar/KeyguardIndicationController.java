@@ -502,8 +502,8 @@ public class KeyguardIndicationController {
 
     private void updateLockScreenTrustMsg(int userId, CharSequence trustGrantedIndication,
             CharSequence trustManagedIndication) {
-        if (!TextUtils.isEmpty(trustGrantedIndication)
-                && mKeyguardUpdateMonitor.getUserHasTrust(userId)) {
+        final boolean userHasTrust = mKeyguardUpdateMonitor.getUserHasTrust(userId);
+        if (!TextUtils.isEmpty(trustGrantedIndication) && userHasTrust) {
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_TRUST,
                     new KeyguardIndication.Builder()
@@ -513,7 +513,7 @@ public class KeyguardIndicationController {
                     false);
         } else if (!TextUtils.isEmpty(trustManagedIndication)
                 && mKeyguardUpdateMonitor.getUserTrustIsManaged(userId)
-                && !mKeyguardUpdateMonitor.getUserHasTrust(userId)) {
+                && !userHasTrust) {
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_TRUST,
                     new KeyguardIndication.Builder()

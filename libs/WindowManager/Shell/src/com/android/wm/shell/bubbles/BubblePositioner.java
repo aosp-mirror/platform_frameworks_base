@@ -329,6 +329,11 @@ public class BubblePositioner {
                 : mBubbleSize;
     }
 
+    /** Size of the visible (non-overlapping) part of the pointer. */
+    public int getPointerSize() {
+        return mPointerHeight - mPointerOverlap;
+    }
+
     /** The maximum number of bubbles that can be displayed comfortably on screen. */
     public int getMaxBubbles() {
         return mMaxBubbles;
@@ -367,7 +372,7 @@ public class BubblePositioner {
      * padding is added.
      */
     public int[] getExpandedViewContainerPadding(boolean onLeft, boolean isOverflow) {
-        final int pointerTotalHeight = mPointerHeight - mPointerOverlap;
+        final int pointerTotalHeight = getPointerSize();
         final int expandedViewLargeScreenInsetFurthestEdge =
                 getExpandedViewLargeScreenInsetFurthestEdge(isOverflow);
         if (mIsLargeScreen) {

@@ -2813,8 +2813,8 @@ public class Notification implements Parcelable
         }
 
         if (extras != null) {
-            visitIconUri(visitor, extras.getParcelable(EXTRA_LARGE_ICON_BIG));
-            visitIconUri(visitor, extras.getParcelable(EXTRA_PICTURE_ICON));
+            visitIconUri(visitor, extras.getParcelable(EXTRA_LARGE_ICON_BIG, Icon.class));
+            visitIconUri(visitor, extras.getParcelable(EXTRA_PICTURE_ICON, Icon.class));
 
             // NOTE: The documentation of EXTRA_AUDIO_CONTENTS_URI explicitly says that it is a
             // String representation of a Uri, but the previous implementation (and unit test) of
@@ -2838,7 +2838,7 @@ public class Notification implements Parcelable
                 }
             }
 
-            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON);
+            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
             if (person != null) {
                 visitor.accept(person.getIconUri());
             }
@@ -6473,7 +6473,7 @@ public class Notification implements Parcelable
         public static Notification.Builder recoverBuilder(Context context, Notification n) {
             // Re-create notification context so we can access app resources.
             ApplicationInfo applicationInfo = n.extras.getParcelable(
-                    EXTRA_BUILDER_APPLICATION_INFO);
+                    EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
             Context builderContext;
             if (applicationInfo != null) {
                 try {
@@ -6925,9 +6925,8 @@ public class Notification implements Parcelable
         boolean isMediaStyle = (MediaStyle.class.equals(style)
                 || DecoratedMediaCustomViewStyle.class.equals(style));
 
-        boolean hasMediaSession = (extras.getParcelable(Notification.EXTRA_MEDIA_SESSION) != null
-                && extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
-                instanceof MediaSession.Token);
+        boolean hasMediaSession = extras.getParcelable(Notification.EXTRA_MEDIA_SESSION,
+                MediaSession.Token.class) != null;
 
         return isMediaStyle && hasMediaSession;
     }
@@ -7522,7 +7521,7 @@ public class Notification implements Parcelable
 
             if (extras.containsKey(EXTRA_LARGE_ICON_BIG)) {
                 mBigLargeIconSet = true;
-                mBigLargeIcon = extras.getParcelable(EXTRA_LARGE_ICON_BIG);
+                mBigLargeIcon = extras.getParcelable(EXTRA_LARGE_ICON_BIG, Icon.class);
             }
 
             if (extras.containsKey(EXTRA_PICTURE_CONTENT_DESCRIPTION)) {
@@ -7542,11 +7541,11 @@ public class Notification implements Parcelable
             // When this style adds a picture, we only add one of the keys.  If both were added,
             // it would most likely be a legacy app trying to override the picture in some way.
             // Because of that case it's better to give precedence to the legacy field.
-            Bitmap bitmapPicture = extras.getParcelable(EXTRA_PICTURE);
+            Bitmap bitmapPicture = extras.getParcelable(EXTRA_PICTURE, Bitmap.class);
             if (bitmapPicture != null) {
                 return Icon.createWithBitmap(bitmapPicture);
             } else {
-                return extras.getParcelable(EXTRA_PICTURE_ICON);
+                return extras.getParcelable(EXTRA_PICTURE_ICON, Icon.class);
             }
         }
 
@@ -8165,7 +8164,7 @@ public class Notification implements Parcelable
         protected void restoreFromExtras(Bundle extras) {
             super.restoreFromExtras(extras);
 
-            mUser = extras.getParcelable(EXTRA_MESSAGING_PERSON);
+            mUser = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
             if (mUser == null) {
                 CharSequence displayName = extras.getCharSequence(EXTRA_SELF_DISPLAY_NAME);
                 mUser = new Person.Builder().setName(displayName).build();
@@ -8177,7 +8176,7 @@ public class Notification implements Parcelable
             mHistoricMessages = Message.getMessagesFromBundleArray(histMessages);
             mIsGroupConversation = extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION);
             mUnreadMessageCount = extras.getInt(EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
-            mShortcutIcon = extras.getParcelable(EXTRA_CONVERSATION_ICON);
+            mShortcutIcon = extras.getParcelable(EXTRA_CONVERSATION_ICON, Icon.class);
         }
 
         /**
@@ -8731,7 +8730,7 @@ public class Notification implements Parcelable
                         return null;
                     } else {
 
-                        Person senderPerson = bundle.getParcelable(KEY_SENDER_PERSON);
+                        Person senderPerson = bundle.getParcelable(KEY_SENDER_PERSON, Person.class);
                         if (senderPerson == null) {
                             // Legacy apps that use compat don't actually provide the sender objects
                             // We need to fix the compat version to provide people / use
@@ -8748,7 +8747,7 @@ public class Notification implements Parcelable
                         if (bundle.containsKey(KEY_DATA_MIME_TYPE) &&
                                 bundle.containsKey(KEY_DATA_URI)) {
                             message.setData(bundle.getString(KEY_DATA_MIME_TYPE),
-                                    (Uri) bundle.getParcelable(KEY_DATA_URI));
+                                    bundle.getParcelable(KEY_DATA_URI, Uri.class));
                         }
                         if (bundle.containsKey(KEY_EXTRAS_BUNDLE)) {
                             message.getExtras().putAll(bundle.getBundle(KEY_EXTRAS_BUNDLE));
@@ -9154,7 +9153,7 @@ public class Notification implements Parcelable
             super.restoreFromExtras(extras);
 
             if (extras.containsKey(EXTRA_MEDIA_SESSION)) {
-                mToken = extras.getParcelable(EXTRA_MEDIA_SESSION);
+                mToken = extras.getParcelable(EXTRA_MEDIA_SESSION, MediaSession.Token.class);
             }
             if (extras.containsKey(EXTRA_COMPACT_ACTIONS)) {
                 mActionsToShowInCompact = extras.getIntArray(EXTRA_COMPACT_ACTIONS);
@@ -9166,7 +9165,8 @@ public class Notification implements Parcelable
                 mDeviceIcon = extras.getInt(EXTRA_MEDIA_REMOTE_ICON);
             }
             if (extras.containsKey(EXTRA_MEDIA_REMOTE_INTENT)) {
-                mDeviceIntent = extras.getParcelable(EXTRA_MEDIA_REMOTE_INTENT);
+                mDeviceIntent = extras.getParcelable(
+                        EXTRA_MEDIA_REMOTE_INTENT, PendingIntent.class);
             }
         }
 
@@ -9758,12 +9758,12 @@ public class Notification implements Parcelable
             super.restoreFromExtras(extras);
             mCallType = extras.getInt(EXTRA_CALL_TYPE);
             mIsVideo = extras.getBoolean(EXTRA_CALL_IS_VIDEO);
-            mPerson = extras.getParcelable(EXTRA_CALL_PERSON);
+            mPerson = extras.getParcelable(EXTRA_CALL_PERSON, Person.class);
             mVerificationIcon = extras.getParcelable(EXTRA_VERIFICATION_ICON);
             mVerificationText = extras.getCharSequence(EXTRA_VERIFICATION_TEXT);
-            mAnswerIntent = extras.getParcelable(EXTRA_ANSWER_INTENT);
-            mDeclineIntent = extras.getParcelable(EXTRA_DECLINE_INTENT);
-            mHangUpIntent = extras.getParcelable(EXTRA_HANG_UP_INTENT);
+            mAnswerIntent = extras.getParcelable(EXTRA_ANSWER_INTENT, PendingIntent.class);
+            mDeclineIntent = extras.getParcelable(EXTRA_DECLINE_INTENT, PendingIntent.class);
+            mHangUpIntent = extras.getParcelable(EXTRA_HANG_UP_INTENT, PendingIntent.class);
             mAnswerButtonColor = extras.containsKey(EXTRA_ANSWER_COLOR)
                     ? extras.getInt(EXTRA_ANSWER_COLOR) : null;
             mDeclineButtonColor = extras.containsKey(EXTRA_DECLINE_COLOR)
@@ -10824,9 +10824,9 @@ public class Notification implements Parcelable
         // Keys within EXTRA_WEARABLE_EXTENSIONS for wearable options.
         private static final String KEY_ACTIONS = "actions";
         private static final String KEY_FLAGS = "flags";
-        private static final String KEY_DISPLAY_INTENT = "displayIntent";
+        static final String KEY_DISPLAY_INTENT = "displayIntent";
         private static final String KEY_PAGES = "pages";
-        private static final String KEY_BACKGROUND = "background";
+        static final String KEY_BACKGROUND = "background";
         private static final String KEY_CONTENT_ICON = "contentIcon";
         private static final String KEY_CONTENT_ICON_GRAVITY = "contentIconGravity";
         private static final String KEY_CONTENT_ACTION_INDEX = "contentActionIndex";
@@ -10883,7 +10883,8 @@ public class Notification implements Parcelable
                 }
 
                 mFlags = wearableBundle.getInt(KEY_FLAGS, DEFAULT_FLAGS);
-                mDisplayIntent = wearableBundle.getParcelable(KEY_DISPLAY_INTENT);
+                mDisplayIntent = wearableBundle.getParcelable(
+                        KEY_DISPLAY_INTENT, PendingIntent.class);
 
                 Notification[] pages = getParcelableArrayFromBundle(
                         wearableBundle, KEY_PAGES, Notification.class);
@@ -10891,7 +10892,7 @@ public class Notification implements Parcelable
                     Collections.addAll(mPages, pages);
                 }
 
-                mBackground = wearableBundle.getParcelable(KEY_BACKGROUND);
+                mBackground = wearableBundle.getParcelable(KEY_BACKGROUND, Bitmap.class);
                 mContentIcon = wearableBundle.getInt(KEY_CONTENT_ICON);
                 mContentIconGravity = wearableBundle.getInt(KEY_CONTENT_ICON_GRAVITY,
                         DEFAULT_CONTENT_ICON_GRAVITY);
@@ -11604,7 +11605,7 @@ public class Notification implements Parcelable
             Bundle carBundle = notif.extras == null ?
                     null : notif.extras.getBundle(EXTRA_CAR_EXTENDER);
             if (carBundle != null) {
-                mLargeIcon = carBundle.getParcelable(EXTRA_LARGE_ICON);
+                mLargeIcon = carBundle.getParcelable(EXTRA_LARGE_ICON, Bitmap.class);
                 mColor = carBundle.getInt(EXTRA_COLOR, Notification.COLOR_DEFAULT);
 
                 Bundle b = carBundle.getBundle(EXTRA_CONVERSATION);
@@ -11710,9 +11711,9 @@ public class Notification implements Parcelable
             private static final String KEY_AUTHOR = "author";
             private static final String KEY_TEXT = "text";
             private static final String KEY_MESSAGES = "messages";
-            private static final String KEY_REMOTE_INPUT = "remote_input";
-            private static final String KEY_ON_REPLY = "on_reply";
-            private static final String KEY_ON_READ = "on_read";
+            static final String KEY_REMOTE_INPUT = "remote_input";
+            static final String KEY_ON_REPLY = "on_reply";
+            static final String KEY_ON_READ = "on_read";
             private static final String KEY_PARTICIPANTS = "participants";
             private static final String KEY_TIMESTAMP = "timestamp";
 
@@ -11837,10 +11838,10 @@ public class Notification implements Parcelable
                     }
                 }
 
-                PendingIntent onRead = b.getParcelable(KEY_ON_READ);
-                PendingIntent onReply = b.getParcelable(KEY_ON_REPLY);
+                PendingIntent onRead = b.getParcelable(KEY_ON_READ, PendingIntent.class);
+                PendingIntent onReply = b.getParcelable(KEY_ON_REPLY, PendingIntent.class);
 
-                RemoteInput remoteInput = b.getParcelable(KEY_REMOTE_INPUT);
+                RemoteInput remoteInput = b.getParcelable(KEY_REMOTE_INPUT, RemoteInput.class);
 
                 String[] participants = b.getStringArray(KEY_PARTICIPANTS);
                 if (participants == null || participants.length != 1) {
@@ -11982,8 +11983,8 @@ public class Notification implements Parcelable
 
         private static final String EXTRA_TV_EXTENDER = "android.tv.EXTENSIONS";
         private static final String EXTRA_FLAGS = "flags";
-        private static final String EXTRA_CONTENT_INTENT = "content_intent";
-        private static final String EXTRA_DELETE_INTENT = "delete_intent";
+        static final String EXTRA_CONTENT_INTENT = "content_intent";
+        static final String EXTRA_DELETE_INTENT = "delete_intent";
         private static final String EXTRA_CHANNEL_ID = "channel_id";
         private static final String EXTRA_SUPPRESS_SHOW_OVER_APPS = "suppressShowOverApps";
 
@@ -12015,8 +12016,8 @@ public class Notification implements Parcelable
                 mFlags = bundle.getInt(EXTRA_FLAGS);
                 mChannelId = bundle.getString(EXTRA_CHANNEL_ID);
                 mSuppressShowOverApps = bundle.getBoolean(EXTRA_SUPPRESS_SHOW_OVER_APPS);
-                mContentIntent = bundle.getParcelable(EXTRA_CONTENT_INTENT);
-                mDeleteIntent = bundle.getParcelable(EXTRA_DELETE_INTENT);
+                mContentIntent = bundle.getParcelable(EXTRA_CONTENT_INTENT, PendingIntent.class);
+                mDeleteIntent = bundle.getParcelable(EXTRA_DELETE_INTENT, PendingIntent.class);
             }
         }
 
