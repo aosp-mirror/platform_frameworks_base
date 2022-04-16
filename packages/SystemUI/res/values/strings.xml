@@ -2440,14 +2440,16 @@
 
     <!-- Label for the entry point to open the dialog which shows currently running applications [CHAR LIMIT=NONE]-->
     <plurals name="fgs_manager_footer_label">
-        <item quantity="one"><xliff:g id="count" example="1">%s</xliff:g> active app</item>
-        <item quantity="other"><xliff:g id="count" example="2">%s</xliff:g> active apps</item>
+        <item quantity="one"><xliff:g id="count" example="1">%s</xliff:g> app is active</item>
+        <item quantity="other"><xliff:g id="count" example="2">%s</xliff:g> apps are active</item>
     </plurals>
     <!-- Content description for a dot indicator in the running application indicating that there
     is new information [CHAR LIMIT=NONE] -->
     <string name="fgs_dot_content_description">New information</string>
     <!-- Title for dialog listing applications currently running [CHAR LIMIT=NONE]-->
     <string name="fgs_manager_dialog_title">Active apps</string>
+    <!-- Detailed message for dialog listing applications currently running [CHAR LIMIT=NONE]-->
+    <string name="fgs_manager_dialog_message">Even if you\u2019re not using these apps, they\u2019re still active and might affect battery life</string>
     <!-- Label of the button to stop an app from running [CHAR LIMIT=12]-->
     <string name="fgs_manager_app_item_stop_button_label">Stop</string>
     <!-- Label of the button to stop an app from running but the app is already stopped and the button is disabled [CHAR LIMIT=12]-->

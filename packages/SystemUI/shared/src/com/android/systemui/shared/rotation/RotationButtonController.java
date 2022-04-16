@@ -568,7 +568,7 @@ public class RotationButtonController {
         }
     }
 
-    private class TaskStackListenerImpl extends TaskStackChangeListener {
+    private class TaskStackListenerImpl implements TaskStackChangeListener {
         // Invalidate any rotation suggestion on task change or activity orientation change
         // Note: all callbacks happen on main thread
 

@@ -1274,6 +1274,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private class SurfaceViewPositionUpdateListener implements RenderNode.PositionUpdateListener {
         private final int mRtSurfaceWidth;
         private final int mRtSurfaceHeight;
+        private boolean mRtFirst = true;
         private final SurfaceControl.Transaction mPositionChangedTransaction =
                 new SurfaceControl.Transaction();
 
@@ -1284,14 +1285,15 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         @Override
         public void positionChanged(long frameNumber, int left, int top, int right, int bottom) {
-            if (mRTLastReportedPosition.left == left
+            if (!mRtFirst && (mRTLastReportedPosition.left == left
                     && mRTLastReportedPosition.top == top
                     && mRTLastReportedPosition.right == right
                     && mRTLastReportedPosition.bottom == bottom
                     && mRTLastReportedSurfaceSize.x == mRtSurfaceWidth
-                    && mRTLastReportedSurfaceSize.y == mRtSurfaceHeight) {
+                    && mRTLastReportedSurfaceSize.y == mRtSurfaceHeight)) {
                 return;
             }
+            mRtFirst = false;
             try {
                 if (DEBUG_POSITION) {
                     Log.d(TAG, String.format(
