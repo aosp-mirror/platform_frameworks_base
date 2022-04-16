@@ -561,6 +561,9 @@
     <!-- The height of the gap between adjacent notification sections. -->
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>
 
+    <!-- The height of the gap between adjacent notification sections on lockscreen. -->
+    <dimen name="notification_section_divider_height_lockscreen">4dp</dimen>
+
     <!-- Size of the face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_size">24dp</dimen>
 

@@ -85,9 +85,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private NotificationShelfController mController;
     private float mActualWidth = -1;
 
-    /** Fraction of lockscreen to shade animation (on lockscreen swipe down). */
-    private float mFractionToShade;
-
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -231,13 +228,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
             mShelfIcons.setActualLayoutWidth((int) actualWidth);
         }
         mActualWidth = actualWidth;
-    }
-
-    /**
-     * @param fractionToShade Fraction of lockscreen to shade transition
-     */
-    public void setFractionToShade(float fractionToShade) {
-        mFractionToShade = fractionToShade;
     }
 
     /**
@@ -411,7 +401,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 || !mShowNotificationShelf
                 || numViewsInShelf < 1f;
 
-        final float fractionToShade = Interpolators.STANDARD.getInterpolation(mFractionToShade);
+        final float fractionToShade = Interpolators.STANDARD.getInterpolation(
+                mAmbientState.getFractionToShade());
         final float shortestWidth = mShelfIcons.calculateWidthFor(numViewsInShelf);
         updateActualWidth(fractionToShade, shortestWidth);
 
