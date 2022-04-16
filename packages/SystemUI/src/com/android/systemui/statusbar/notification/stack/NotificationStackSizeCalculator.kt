@@ -19,9 +19,11 @@ package com.android.systemui.statusbar.notification.stack
 import android.content.res.Resources
 import android.util.Log
 import android.view.View.GONE
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -41,6 +43,7 @@ class NotificationStackSizeCalculator
 @Inject
 constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
+    private val lockscreenShadeTransitionController: LockscreenShadeTransitionController,
     @Main private val resources: Resources
 ) {
 
@@ -129,7 +132,7 @@ constructor(
         yield(dividerHeight + shelfIntrinsicHeight) // Only shelf.
 
         children.forEachIndexed { i, currentNotification ->
-            height += currentNotification.spaceNeeded(i, previous, stack, onLockscreen)
+            height += spaceNeeded(currentNotification, i, previous, stack, onLockscreen)
             previous = currentNotification
 
             val shelfHeight =
@@ -156,22 +159,28 @@ constructor(
     private val NotificationStackScrollLayout.childrenSequence: Sequence<ExpandableView>
         get() = children.map { it as ExpandableView }
 
-    private fun onLockscreen() = statusBarStateController.state == KEYGUARD
+    @VisibleForTesting
+    fun onLockscreen() : Boolean {
+        return statusBarStateController.state == KEYGUARD
+                && lockscreenShadeTransitionController.fractionToShade == 0f
+    }
 
-    private fun ExpandableView.spaceNeeded(
+    @VisibleForTesting
+    fun spaceNeeded(
+        view: ExpandableView,
         visibleIndex: Int,
         previousView: ExpandableView?,
         stack: NotificationStackScrollLayout,
         onLockscreen: Boolean
     ): Float {
-        assert(isShowable(onLockscreen))
+        assert(view.isShowable(onLockscreen))
         var size =
             if (onLockscreen) {
-                getMinHeight(/* ignoreTemporaryStates= */ true).toFloat()
+                view.getMinHeight(/* ignoreTemporaryStates= */ true).toFloat()
             } else {
-                intrinsicHeight.toFloat()
+                view.intrinsicHeight.toFloat()
             }
-        size += calculateGapAndDividerHeight(stack, previousView, current = this, visibleIndex)
+        size += calculateGapAndDividerHeight(stack, previousView, current = view, visibleIndex)
         return size
     }
 
