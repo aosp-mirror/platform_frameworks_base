@@ -266,22 +266,16 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 }
                 FrameworkStatsLog.write(FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO,
                         uid,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_UNKNOWN,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__THRESHOLD__THRESHOLD_UNKNOWN,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__UNKNOWN_TRACKER,
+                        AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN, // RestrictionLevel
+                        AppBackgroundRestrictionsInfo.THRESHOLD_UNKNOWN,
+                        AppBackgroundRestrictionsInfo.UNKNOWN_TRACKER,
                         null /*byte[] fgs_tracker_info*/,
                         getBatteryTrackerInfoProtoLocked(uid) /*byte[] battery_tracker_info*/,
                         null /*byte[] broadcast_events_tracker_info*/,
                         null /*byte[] bind_service_events_tracker_info*/,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_UNKNOWN,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__UNKNOWN,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_UNKNOWN,
+                        AppBackgroundRestrictionsInfo.REASON_UNKNOWN, // ExemptionReason
+                        AppBackgroundRestrictionsInfo.UNKNOWN, // OptimizationLevel
+                        AppBackgroundRestrictionsInfo.SDK_UNKNOWN, // TargetSdk
                         isLowRamDeviceStatic());
             }
         }

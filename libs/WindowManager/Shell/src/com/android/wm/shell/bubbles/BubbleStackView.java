@@ -1608,6 +1608,13 @@ public class BubbleStackView extends FrameLayout
     }
 
     /**
+     * Whether the stack of bubbles is animating a switch between bubbles.
+     */
+    public boolean isSwitchAnimating() {
+        return mIsBubbleSwitchAnimating;
+    }
+
+    /**
      * The {@link Bubble} that is expanded, null if one does not exist.
      */
     @VisibleForTesting
@@ -2467,6 +2474,10 @@ public class BubbleStackView extends FrameLayout
 
     private void dismissBubbleIfExists(@Nullable BubbleViewProvider bubble) {
         if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
+            if (mIsExpanded && mBubbleData.getBubbles().size() > 1) {
+                // If we have more than 1 bubble we will perform the switch animation
+                mIsBubbleSwitchAnimating = true;
+            }
             mBubbleData.dismissBubbleWithKey(bubble.getKey(), Bubbles.DISMISS_USER_GESTURE);
         }
     }
@@ -2887,7 +2898,10 @@ public class BubbleStackView extends FrameLayout
         PhysicsAnimator.getInstance(mAnimatingOutSurfaceContainer).cancel();
         mAnimatingOutSurfaceContainer.setScaleX(1f);
         mAnimatingOutSurfaceContainer.setScaleY(1f);
-        mAnimatingOutSurfaceContainer.setTranslationX(mExpandedViewContainer.getPaddingLeft());
+        final float translationX = mPositioner.showBubblesVertically() && mStackOnLeftOrWillBe
+                ? mExpandedViewContainer.getPaddingLeft() + mPositioner.getPointerSize()
+                : mExpandedViewContainer.getPaddingLeft();
+        mAnimatingOutSurfaceContainer.setTranslationX(translationX);
         mAnimatingOutSurfaceContainer.setTranslationY(0);
 
         final int[] taskViewLocation =

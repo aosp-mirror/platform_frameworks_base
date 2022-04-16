@@ -385,7 +385,9 @@ public class BubbleController {
                 mMainExecutor.execute(() -> {
                     int expandedId = INVALID_TASK_ID;
                     if (mStackView != null && mStackView.getExpandedBubble() != null
-                            && isStackExpanded() && !mStackView.isExpansionAnimating()) {
+                            && isStackExpanded()
+                            && !mStackView.isExpansionAnimating()
+                            && !mStackView.isSwitchAnimating()) {
                         expandedId = mStackView.getExpandedBubble().getTaskId();
                     }
                     if (expandedId != INVALID_TASK_ID && expandedId != taskId) {

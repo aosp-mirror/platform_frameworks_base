@@ -3210,7 +3210,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected void startUnlockHintAnimation() {
-        if (mPowerManager.isPowerSaveMode()) {
+        if (mPowerManager.isPowerSaveMode() || mAmbientState.getDozeAmount() > 0f) {
             onUnlockHintStarted();
             onUnlockHintFinished();
             return;
