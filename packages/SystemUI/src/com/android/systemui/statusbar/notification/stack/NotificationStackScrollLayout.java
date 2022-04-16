@@ -2295,7 +2295,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             int visibleIndex
     ) {
        return mStackScrollAlgorithm.getGapHeightForChild(mSectionsManager, visibleIndex, current,
-                previous);
+                previous, mAmbientState.getFractionToShade(), mAmbientState.isOnKeyguard());
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5501,7 +5501,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      *                 where it remains until the next lockscreen-to-shade transition.
      */
     public void setFractionToShade(float fraction) {
-        mShelf.setFractionToShade(fraction);
+        mAmbientState.setFractionToShade(fraction);
         requestChildrenUpdate();
     }
 
