@@ -90,7 +90,6 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "TEST_KEY"
-private const val BG_COLOR = Color.RED
 private const val PACKAGE = "PKG"
 private const val ARTIST = "ARTIST"
 private const val TITLE = "TITLE"
@@ -171,8 +170,18 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var recommendationViewHolder: RecommendationViewHolder
     @Mock private lateinit var smartspaceAction: SmartspaceAction
     private lateinit var smartspaceData: SmartspaceMediaData
-    @Mock private lateinit var coverContainer: ViewGroup
-    private lateinit var coverItem: ImageView
+    @Mock private lateinit var coverContainer1: ViewGroup
+    @Mock private lateinit var coverContainer2: ViewGroup
+    @Mock private lateinit var coverContainer3: ViewGroup
+    private lateinit var coverItem1: ImageView
+    private lateinit var coverItem2: ImageView
+    private lateinit var coverItem3: ImageView
+    private lateinit var recTitle1: TextView
+    private lateinit var recTitle2: TextView
+    private lateinit var recTitle3: TextView
+    private lateinit var recSubtitle1: TextView
+    private lateinit var recSubtitle2: TextView
+    private lateinit var recSubtitle3: TextView
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -237,7 +246,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         session.setActive(true)
 
         mediaData = MediaTestUtils.emptyMediaData.copy(
-                backgroundColor = BG_COLOR,
                 artist = ARTIST,
                 song = TITLE,
                 packageName = PACKAGE,
@@ -371,14 +379,30 @@ public class MediaControlPanelTest : SysuiTestCase() {
      * Initialize elements for the recommendation view holder
      */
     private fun initRecommendationViewHolderMocks() {
+        recTitle1 = TextView(context)
+        recTitle2 = TextView(context)
+        recTitle3 = TextView(context)
+        recSubtitle1 = TextView(context)
+        recSubtitle2 = TextView(context)
+        recSubtitle3 = TextView(context)
+
         whenever(recommendationViewHolder.recommendations).thenReturn(view)
         whenever(recommendationViewHolder.cardIcon).thenReturn(appIcon)
 
         // Add a recommendation item
-        coverItem = ImageView(context).also { it.setId(R.id.media_cover1) }
-        whenever(coverContainer.id).thenReturn(R.id.media_cover1_container)
-        whenever(recommendationViewHolder.mediaCoverItems).thenReturn(listOf(coverItem))
-        whenever(recommendationViewHolder.mediaCoverContainers).thenReturn(listOf(coverContainer))
+        coverItem1 = ImageView(context).also { it.setId(R.id.media_cover1) }
+        coverItem2 = ImageView(context).also { it.setId(R.id.media_cover2) }
+        coverItem3 = ImageView(context).also { it.setId(R.id.media_cover3) }
+
+        whenever(recommendationViewHolder.mediaCoverItems)
+            .thenReturn(listOf(coverItem1, coverItem2, coverItem3))
+        whenever(recommendationViewHolder.mediaCoverContainers)
+            .thenReturn(listOf(coverContainer1, coverContainer2, coverContainer3))
+        whenever(recommendationViewHolder.mediaTitles)
+            .thenReturn(listOf(recTitle1, recTitle2, recTitle3))
+        whenever(recommendationViewHolder.mediaSubtitles).thenReturn(
+            listOf(recSubtitle1, recSubtitle2, recSubtitle3)
+        )
 
         // Long press menu
         whenever(recommendationViewHolder.settings).thenReturn(settings)
@@ -391,7 +415,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // Needed for card and item action click
         val mockContext = mock(Context::class.java)
         whenever(view.context).thenReturn(mockContext)
-        whenever(coverContainer.context).thenReturn(mockContext)
+        whenever(coverContainer1.context).thenReturn(mockContext)
+        whenever(coverContainer2.context).thenReturn(mockContext)
+        whenever(coverContainer3.context).thenReturn(mockContext)
+
     }
 
     @After
@@ -673,9 +700,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
             MediaAction(icon, null, "custom 0", bg),
             MediaAction(icon, Runnable {}, "custom 1", bg)
         )
-        val state = mediaData.copy(actions = actions,
+        val state = mediaData.copy(
+            actions = actions,
             actionsToShowInCompact = listOf(1, 2),
-            semanticActions = null)
+            semanticActions = null
+        )
 
         player.attachPlayer(viewHolder)
         player.bindPlayer(state, PACKAGE)
@@ -724,11 +753,14 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val icon = context.getDrawable(R.drawable.ic_media_play)
         val bg = context.getDrawable(R.drawable.ic_media_play_container)
         val semanticActions0 = MediaButton(
-                playOrPause = MediaAction(mockAvd0, Runnable {}, "play", null))
+            playOrPause = MediaAction(mockAvd0, Runnable {}, "play", null)
+        )
         val semanticActions1 = MediaButton(
-                playOrPause = MediaAction(mockAvd1, Runnable {}, "pause", null))
+            playOrPause = MediaAction(mockAvd1, Runnable {}, "pause", null)
+        )
         val semanticActions2 = MediaButton(
-                playOrPause = MediaAction(mockAvd2, Runnable {}, "loading", null))
+            playOrPause = MediaAction(mockAvd2, Runnable {}, "loading", null)
+        )
         val state0 = mediaData.copy(semanticActions = semanticActions0)
         val state1 = mediaData.copy(semanticActions = semanticActions1)
         val state2 = mediaData.copy(semanticActions = semanticActions2)
@@ -768,8 +800,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(actionPlayPause.getBackground()).isNull()
         verify(mockAvd0, times(1))
             .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd1, times(1)
-            ).registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        verify(mockAvd1, times(1))
+            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
         verify(mockAvd2, times(1))
             .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
         verify(mockAvd0, times(1))
@@ -1219,10 +1251,68 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.attachRecommendation(recommendationViewHolder)
         player.bindRecommendation(smartspaceData)
 
-        verify(coverContainer).setOnClickListener(captor.capture())
+        verify(coverContainer1).setOnClickListener(captor.capture())
         captor.value.onClick(recommendationViewHolder.recommendations)
 
         verify(logger).logRecommendationItemTap(eq(PACKAGE), eq(instanceId), eq(0))
+    }
+
+    @Test
+    fun bindRecommendation_hasTitlesAndSubtitles() {
+        player.attachRecommendation(recommendationViewHolder)
+
+        val title1 = "Title1"
+        val title2 = "Title2"
+        val title3 = "Title3"
+        val subtitle1 = "Subtitle1"
+        val subtitle2 = "Subtitle2"
+        val subtitle3 = "Subtitle3"
+
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", title1)
+                    .setSubtitle(subtitle1)
+                    .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", title2)
+                    .setSubtitle(subtitle2)
+                    .setIcon(Icon.createWithResource(context, R.drawable.ic_alarm))
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id3", title3)
+                    .setSubtitle(subtitle3)
+                    .setIcon(Icon.createWithResource(context, R.drawable.ic_3g_mobiledata))
+                    .setExtras(Bundle.EMPTY)
+                    .build()
+            )
+        )
+        player.bindRecommendation(data)
+
+        assertThat(recTitle1.text).isEqualTo(title1)
+        assertThat(recTitle2.text).isEqualTo(title2)
+        assertThat(recTitle3.text).isEqualTo(title3)
+        assertThat(recSubtitle1.text).isEqualTo(subtitle1)
+        assertThat(recSubtitle2.text).isEqualTo(subtitle2)
+        assertThat(recSubtitle3.text).isEqualTo(subtitle3)
+    }
+
+    @Test
+    fun bindRecommendation_noTitle_subtitleNotShown() {
+        player.attachRecommendation(recommendationViewHolder)
+
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", "")
+                    .setSubtitle("fake subtitle")
+                    .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
+                    .setExtras(Bundle.EMPTY)
+                    .build()
+            )
+        )
+        player.bindRecommendation(data)
+
+        assertThat(recSubtitle1.text).isEqualTo("")
     }
 
     private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =

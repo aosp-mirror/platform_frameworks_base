@@ -57,7 +57,6 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
     private static final String OLD_KEY = "TEST_KEY_OLD";
     private static final String APP = "APP";
     private static final String PACKAGE = "PKG";
-    private static final int BG_COLOR = Color.RED;
     private static final String ARTIST = "ARTIST";
     private static final String TITLE = "TITLE";
     private static final String DEVICE_NAME = "DEVICE_NAME";
@@ -76,7 +75,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
         mManager.addListener(mListener);
 
         mMediaData = new MediaData(
-                USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null,
+                USER_ID, true, APP, null, ARTIST, TITLE, null,
                 new ArrayList<>(), new ArrayList<>(), null, PACKAGE, null, null, null, true, null,
                 MediaData.PLAYBACK_LOCAL, false, KEY, false, false, false, 0L,
                 InstanceId.fakeInstanceId(-1), -1);

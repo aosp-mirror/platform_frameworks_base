@@ -34,11 +34,23 @@ class RecommendationViewHolder private constructor(itemView: View) {
     val mediaCoverItems = listOf<ImageView>(
         itemView.requireViewById(R.id.media_cover1),
         itemView.requireViewById(R.id.media_cover2),
-        itemView.requireViewById(R.id.media_cover3))
+        itemView.requireViewById(R.id.media_cover3)
+    )
     val mediaCoverContainers = listOf<ViewGroup>(
         itemView.requireViewById(R.id.media_cover1_container),
         itemView.requireViewById(R.id.media_cover2_container),
-        itemView.requireViewById(R.id.media_cover3_container))
+        itemView.requireViewById(R.id.media_cover3_container)
+    )
+    val mediaTitles: List<TextView> = listOf(
+        itemView.requireViewById(R.id.media_title1),
+        itemView.requireViewById(R.id.media_title2),
+        itemView.requireViewById(R.id.media_title3)
+    )
+    val mediaSubtitles: List<TextView> = listOf(
+        itemView.requireViewById(R.id.media_subtitle1),
+        itemView.requireViewById(R.id.media_subtitle2),
+        itemView.requireViewById(R.id.media_subtitle3)
+    )
 
     // Settings/Guts screen
     val longPressText = itemView.requireViewById<TextView>(R.id.remove_text)

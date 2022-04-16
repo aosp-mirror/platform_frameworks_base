@@ -17,6 +17,30 @@
 package android.app;
 
 import static android.app.Notification.Builder.ensureColorSpanContrast;
+import static android.app.Notification.CarExtender.UnreadConversation.KEY_ON_READ;
+import static android.app.Notification.CarExtender.UnreadConversation.KEY_ON_REPLY;
+import static android.app.Notification.CarExtender.UnreadConversation.KEY_REMOTE_INPUT;
+import static android.app.Notification.EXTRA_ANSWER_INTENT;
+import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
+import static android.app.Notification.EXTRA_CALL_PERSON;
+import static android.app.Notification.EXTRA_CONVERSATION_ICON;
+import static android.app.Notification.EXTRA_DECLINE_INTENT;
+import static android.app.Notification.EXTRA_HANG_UP_INTENT;
+import static android.app.Notification.EXTRA_LARGE_ICON;
+import static android.app.Notification.EXTRA_LARGE_ICON_BIG;
+import static android.app.Notification.EXTRA_MEDIA_REMOTE_INTENT;
+import static android.app.Notification.EXTRA_MEDIA_SESSION;
+import static android.app.Notification.EXTRA_MESSAGING_PERSON;
+import static android.app.Notification.EXTRA_PICTURE;
+import static android.app.Notification.EXTRA_PICTURE_ICON;
+import static android.app.Notification.MessagingStyle.Message.KEY_DATA_URI;
+import static android.app.Notification.MessagingStyle.Message.KEY_SENDER_PERSON;
+import static android.app.Notification.MessagingStyle.Message.KEY_TEXT;
+import static android.app.Notification.MessagingStyle.Message.KEY_TIMESTAMP;
+import static android.app.Notification.TvExtender.EXTRA_CONTENT_INTENT;
+import static android.app.Notification.TvExtender.EXTRA_DELETE_INTENT;
+import static android.app.Notification.WearableExtender.KEY_BACKGROUND;
+import static android.app.Notification.WearableExtender.KEY_DISPLAY_INTENT;
 
 import static com.android.compatibility.common.util.SystemUtil.runShellCommand;
 import static com.android.internal.util.ContrastColorUtilTest.assertContrastIsAtLeast;
@@ -32,6 +56,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.spy;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -43,6 +68,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -170,7 +196,7 @@ public class NotificationTest {
         assertNotSame(q.getLargeIcon(), n.getLargeIcon());
 
         assertTrue(q.getLargeIcon().getBitmap().sameAs(n.getLargeIcon().getBitmap()));
-        assertSame(q.getLargeIcon(), q.extras.getParcelable(Notification.EXTRA_LARGE_ICON));
+        assertSame(q.getLargeIcon(), q.extras.getParcelable(EXTRA_LARGE_ICON));
     }
 
     @Test
@@ -179,12 +205,12 @@ public class NotificationTest {
                 mContext.getResources(), com.android.frameworks.coretests.R.drawable.test128x96));
 
         Notification n = new Notification.Builder(mContext).build();
-        n.extras.putParcelable(Notification.EXTRA_LARGE_ICON, originalIcon);
+        n.extras.putParcelable(EXTRA_LARGE_ICON, originalIcon);
         assertSame(n.getLargeIcon(), null);
 
         Notification q = writeAndReadParcelable(n);
         assertSame(q.getLargeIcon(), null);
-        assertTrue(((Icon) q.extras.getParcelable(Notification.EXTRA_LARGE_ICON)).getBitmap()
+        assertTrue(((Icon) q.extras.getParcelable(EXTRA_LARGE_ICON)).getBitmap()
                 .sameAs(originalIcon.getBitmap()));
     }
 
@@ -641,7 +667,7 @@ public class NotificationTest {
     public void testIsMediaNotification_invalidSession_returnsFalse() {
         // Extra was set manually to an invalid type
         Bundle extras = new Bundle();
-        extras.putParcelable(Notification.EXTRA_MEDIA_SESSION, new Intent());
+        extras.putParcelable(EXTRA_MEDIA_SESSION, new Intent());
         Notification.MediaStyle mediaStyle = new Notification.MediaStyle();
         Notification notification = new Notification.Builder(mContext, "test id")
                 .setStyle(mediaStyle)
@@ -650,6 +676,7 @@ public class NotificationTest {
         assertFalse(notification.isMediaNotification());
     }
 
+    @Test
     public void validateColorizedPaletteForColor(int rawColor) {
         Notification.Colors cDay = new Notification.Colors();
         Notification.Colors cNight = new Notification.Colors();
@@ -679,6 +706,174 @@ public class NotificationTest {
             assertEquals(cDay.getContrastColor(), cNight.getContrastColor());
             assertEquals(cDay.getRippleAlpha(), cNight.getRippleAlpha());
         }
+    }
+
+    @Test
+    public void testVisitUris_invalidExtra_noCrash() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(0)
+                .build();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_LARGE_ICON_BIG, new Bundle());
+        fakeTypes.putParcelable(EXTRA_PICTURE_ICON, new Bundle());
+        fakeTypes.putParcelable(EXTRA_MESSAGING_PERSON, new Bundle());
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+
+        // no crash, good
+    }
+
+    @Test
+    public void testRecoverBuilder_invalidExtra_noCrash() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(0)
+                .build();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_BUILDER_APPLICATION_INFO, new Bundle());
+
+        Notification.Builder.recoverBuilder(mContext, n);
+
+        // no crash, good
+    }
+
+    @Test
+    public void testIsMediaNotification_invalidExtra_noCrash() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(0)
+                .setStyle(new Notification.MediaStyle())
+                .build();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_MEDIA_SESSION, new Bundle());
+
+        n.isMediaNotification();
+
+        // no crash, good
+    }
+
+    @Test
+    public void testRestoreFromExtras_BigText_invalidExtra_noCrash() {
+        Notification.Style style = new Notification.BigTextStyle();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_LARGE_ICON_BIG, new Bundle());
+
+        style.restoreFromExtras(fakeTypes);
+
+        // no crash, good
+    }
+
+    @Test
+    public void testRestoreFromExtras_Messaging_invalidExtra_noCrash() {
+        Notification.Style style = new Notification.MessagingStyle();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_MESSAGING_PERSON, new Bundle());
+        fakeTypes.putParcelable(EXTRA_CONVERSATION_ICON, new Bundle());
+
+        style.restoreFromExtras(fakeTypes);
+
+        // no crash, good
+    }
+
+    @Test
+    public void testRestoreFromExtras_Media_invalidExtra_noCrash() {
+        Notification.Style style = new Notification.MediaStyle();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_MEDIA_SESSION, new Bundle());
+        fakeTypes.putParcelable(EXTRA_MEDIA_REMOTE_INTENT, new Bundle());
+
+        style.restoreFromExtras(fakeTypes);
+
+        // no crash, good
+    }
+
+    @Test
+    public void testRestoreFromExtras_Call_invalidExtra_noCrash() {
+        Notification.Style style = new Notification.CallStyle();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_CALL_PERSON, new Bundle());
+        fakeTypes.putParcelable(EXTRA_ANSWER_INTENT, new Bundle());
+        fakeTypes.putParcelable(EXTRA_DECLINE_INTENT, new Bundle());
+        fakeTypes.putParcelable(EXTRA_HANG_UP_INTENT, new Bundle());
+
+        style.restoreFromExtras(fakeTypes);
+
+        // no crash, good
+    }
+
+    @Test
+    public void testGetPictureIcon_invalidExtra_noCrash() {
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_PICTURE, new Bundle());
+        fakeTypes.putParcelable(EXTRA_PICTURE_ICON, new Bundle());
+
+        Notification.BigPictureStyle.getPictureIcon(fakeTypes);
+
+        // no crash, good
+    }
+
+    @Test
+    public void testWearableExtender_invalidExtra_noCrash() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(0)
+                .setStyle(new Notification.MediaStyle())
+                .build();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(KEY_DISPLAY_INTENT, new Bundle());
+        fakeTypes.putParcelable(KEY_BACKGROUND, new Bundle());
+        Notification.WearableExtender extender = new Notification.WearableExtender(n);
+
+        // no crash, good
+    }
+
+    @Test
+    public void testCarExtender_invalidExtra_noCrash() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(0)
+                .setStyle(new Notification.MediaStyle())
+                .build();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_LARGE_ICON, new Bundle());
+        Notification.CarExtender extender = new Notification.CarExtender(n);
+
+        // no crash, good
+    }
+
+    @Test
+    public void testTvExtender_invalidExtra_noCrash() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(0)
+                .setStyle(new Notification.MediaStyle())
+                .build();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_CONTENT_INTENT, new Bundle());
+        fakeTypes.putParcelable(EXTRA_DELETE_INTENT, new Bundle());
+        Notification.TvExtender extender = new Notification.TvExtender(n);
+
+        // no crash, good
+    }
+
+    @Test
+    public void testGetUnreadConversationFromBundle_invalidExtra_noCrash() {
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(KEY_ON_READ, new Bundle());
+        fakeTypes.putParcelable(KEY_ON_REPLY, new Bundle());
+        fakeTypes.putParcelable(KEY_REMOTE_INPUT, new Bundle());
+        Notification.CarExtender.UnreadConversation.getUnreadConversationFromBundle(fakeTypes);
+
+        // no crash, good
+    }
+
+    @Test
+    public void testGetMessageFromBundle_invalidExtra_noCrash() {
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(KEY_SENDER_PERSON, new Bundle());
+        fakeTypes.putString(KEY_TEXT, "text");
+        fakeTypes.putLong(KEY_TIMESTAMP, 0);
+        fakeTypes.putParcelable(KEY_REMOTE_INPUT, new Bundle());
+        fakeTypes.putParcelable(KEY_DATA_URI, new Bundle());
+        Notification.MessagingStyle.Message.getMessageFromBundle(fakeTypes);
+
+        // no crash, good
     }
 
     private void assertValid(Notification.Colors c) {

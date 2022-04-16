@@ -3210,7 +3210,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected void startUnlockHintAnimation() {
-        if (mPowerManager.isPowerSaveMode()) {
+        if (mPowerManager.isPowerSaveMode() || mAmbientState.getDozeAmount() > 0f) {
             onUnlockHintStarted();
             onUnlockHintFinished();
             return;
@@ -3335,6 +3335,12 @@ public class NotificationPanelViewController extends PanelViewController {
                         mLockscreenGestureLogger
                             .log(LockscreenUiEvent.LOCKSCREEN_LOCK_SHOW_HINT);
                         startUnlockHintAnimation();
+                    }
+                    if (mUpdateMonitor.isFaceEnrolled()
+                            && mUpdateMonitor.mRequestActiveUnlockOnUnlockIntent
+                            && mKeyguardBypassController.canBypass()) {
+                        mUpdateMonitor.requestActiveUnlock("unlock-intent,"
+                                + " extra=lockScreenEmptySpaceTap", true);
                     }
                 }
                 return true;

@@ -980,7 +980,8 @@
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
     <dimen name="qs_media_rec_album_size">88dp</dimen>
-    <dimen name="qs_media_rec_album_margin">16dp</dimen>
+    <dimen name="qs_media_rec_album_side_margin">16dp</dimen>
+    <dimen name="qs_media_rec_album_bottom_margin">8dp</dimen>
     <dimen name="qs_media_rec_icon_size">24dp</dimen>
 
     <!-- Media tap-to-transfer chip for sender device -->
@@ -1364,7 +1365,7 @@
 
     <dimen name="keyguard_unfold_translation_x">16dp</dimen>
 
-    <dimen name="fgs_manager_min_width_minor">100%</dimen>
+    <dimen name="fgs_manager_list_top_spacing">12dp</dimen>
 
     <!-- Dream overlay related dimensions -->
     <dimen name="dream_overlay_status_bar_height">60dp</dimen>

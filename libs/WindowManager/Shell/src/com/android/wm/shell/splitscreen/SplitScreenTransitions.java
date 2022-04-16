@@ -66,7 +66,7 @@ class SplitScreenTransitions {
     IBinder mPendingRecent = null;
 
     private IBinder mAnimatingTransition = null;
-    private OneShotRemoteHandler mPendingRemoteHandler = null;
+    OneShotRemoteHandler mPendingRemoteHandler = null;
     private OneShotRemoteHandler mActiveRemoteHandler = null;
 
     private final Transitions.TransitionFinishCallback mRemoteFinishCB = this::onFinish;
