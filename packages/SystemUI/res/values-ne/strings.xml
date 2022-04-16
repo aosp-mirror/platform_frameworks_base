@@ -36,7 +36,7 @@
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ब्याट्री सेभर अन गर्ने हो?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"ब्याट्री सेभरका बारेमा"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"अन गर्नुहोस्"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"ब्याट्री सेभर सक्रिय गर्नुहोस्"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"ब्याट्री सेभर अन गर्नुहोस्"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"सेटिङहरू"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"स्वत:घुम्ने स्क्रिन"</string>
@@ -975,7 +975,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"मोबाइल डेटा"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi‑Fi निष्क्रिय छ"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi‑Fi अफ छ"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ब्लुटुथ निष्क्रिय छ"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प निष्क्रिय छ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"कुनै स्वचालित नियमले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रियो गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
@@ -997,10 +997,10 @@
     <string name="slice_permission_allow" msgid="6340449521277951123">"अनुमति दिनुहोस्"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"अस्वीकार गर्नु…"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"ब्याट्री सेभरको समयतालिका बनाउन ट्याप गर्नुहोस्"</string>
-    <string name="auto_saver_text" msgid="3214960308353838764">"ब्याट्री सकिने सम्भावना भएमा सक्रिय गर्नुहोस्"</string>
+    <string name="auto_saver_text" msgid="3214960308353838764">"ब्याट्री सकिने सम्भावना भएमा अन गर्नुहोस्"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"पर्दैन धन्यवाद"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"ब्याट्री सेभरको समयतालिका सक्रिय गरियो"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"ब्याट्री <xliff:g id="PERCENTAGE">%d</xliff:g>%% भन्दा कम भएको बेला ब्याट्री सेभर स्वतः सक्रिय हुने छ।"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"ब्याट्री <xliff:g id="PERCENTAGE">%d</xliff:g>%% भन्दा कम भएको बेला ब्याट्री सेभर स्वतः अन हुने छ।"</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"सेटिङहरू"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"बुझेँ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>

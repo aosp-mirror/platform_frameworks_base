@@ -1325,7 +1325,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Je nastaven tichý vyzvánění"</string>
     <string name="volume_call" msgid="7625321655265747433">"Hlasitost hovoru"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Hlasitost příchozích hovorů při připojení Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Hlasitost budíku"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Hlasitost budíků"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Hlasitost oznámení"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Hlasitost"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Hlasitost Bluetooth"</string>

@@ -101,7 +101,7 @@
     <string name="kg_pin_accepted" msgid="1625501841604389716">"ক\'ড গ্ৰহণ কৰা হ’ল!"</string>
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"কোনো সেৱা নাই।"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ইনপুট পদ্ধতি সলনি কৰক"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"এয়াৰপ্লেন ম\'ড"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"এয়াৰপ্লে’ন ম’ড"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত আৰ্হি দিয়াটো বাধ্যতামূলক"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত পিন দিয়াটো বাধ্যতামূলক"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত পাছৱৰ্ড দিয়াটো বাধ্যতামূলক"</string>

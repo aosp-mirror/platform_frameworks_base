@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"कभी भी HDCP जाँच का उपयोग न करें"</item>
-    <item msgid="8254225038262324761">"HDCP जांच का उपयोग सिर्फ़ डीआरएम कॉन्टेंट के लिए करें"</item>
+    <item msgid="8254225038262324761">"HDCP जांच का इस्तेमाल सिर्फ़ डीआरएम कॉन्टेंट के लिए करें"</item>
     <item msgid="6421717003037072581">"हमेशा HDCP जाँच का उपयोग करें"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
@@ -64,7 +64,7 @@
     <item msgid="2779123106632690576">"चालू है"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="6603880723315236832">"एवीआरसीपी 1.5 (डिफ़ॉल्ट)"</item>
+    <item msgid="6603880723315236832">"AVRCP 1.5 (डिफ़ॉल्ट)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
     <item msgid="5896162189744596291">"एवीआरसीपी 1.4"</item>
     <item msgid="7556896992111771426">"AVRCP 1.6"</item>
@@ -133,7 +133,7 @@
     <item msgid="927546067692441494">"स्टीरियो"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="1997302811102880485">"सिस्टम चुनाव का उपयोग करें (डिफ़ॉल्ट)"</item>
+    <item msgid="1997302811102880485">"सिस्टम से चुने जाने का इस्तेमाल करें (डिफ़ॉल्ट)"</item>
     <item msgid="8005696114958453588">"मोनो"</item>
     <item msgid="1333279807604675720">"स्टीरियो"</item>
   </string-array>
@@ -173,7 +173,7 @@
     <item msgid="409235464399258501">"बंद"</item>
     <item msgid="4195153527464162486">"64K प्रति लॉग बफ़र"</item>
     <item msgid="7464037639415220106">"256K प्रति लॉग बफ़र"</item>
-    <item msgid="8539423820514360724">"1 एमबी प्रति लॉग बफ़र"</item>
+    <item msgid="8539423820514360724">"1M प्रति लॉग बफ़र"</item>
     <item msgid="1984761927103140651">"4M प्रति लॉग बफ़र"</item>
     <item msgid="2983219471251787208">"8 एमबी प्रति लॉग बफ़र"</item>
   </string-array>
