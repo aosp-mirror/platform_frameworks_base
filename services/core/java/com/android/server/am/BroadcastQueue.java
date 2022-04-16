@@ -2218,7 +2218,7 @@ public final class BroadcastQueue {
     }
 
     boolean isIdle() {
-        return mParallelBroadcasts.isEmpty() && mDispatcher.isEmpty()
+        return mParallelBroadcasts.isEmpty() && mDispatcher.isIdle()
                 && (mPendingBroadcast == null);
     }
 
