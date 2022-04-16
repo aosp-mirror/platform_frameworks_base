@@ -1913,7 +1913,7 @@
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> तक"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> तक"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (अगले अलार्म) तक"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"जब तक आप बंद नहीं करते"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"जब तक बंद नहीं की जाती"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"जब तक कि आप परेशान ना करें को बंद नहीं कर देते"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"छोटा करें"</string>

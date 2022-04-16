@@ -34,7 +34,7 @@
     <string name="invalid_charger_text" msgid="2339310107232691577">"Koristite punjač koji ste dobili uz uređaj"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Postavke"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Uključiti Uštedu baterije?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Informacije o Uštedi baterije"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"O Uštedi baterije"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Uključi"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Uključi Uštedu baterije"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Postavke"</string>
@@ -664,7 +664,7 @@
     <string name="quick_settings" msgid="6211774484997470203">"Brze postavke"</string>
     <string name="status_bar" msgid="4357390266055077437">"Statusna traka"</string>
     <string name="overview" msgid="3522318590458536816">"Pregled"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Način rada za demonstraciju Sistemskog UI-a"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Demo način rada Sistemskog UI-ja"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Omogući način rada za demonstraciju"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Prikaži način rada za demonstraciju"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>

@@ -1629,7 +1629,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Simsiz monitor"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Translatsiya qilish"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Qurilmaga ulanish"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Ekran translatsiyasi"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Ekranni qurilmaga translatsiya qilish"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Qurilmalar qidirilmoqda..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Sozlamalar"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Uzish"</string>
@@ -1875,8 +1875,8 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Quvvat tejash funksiyasi Tungi mavzuni va cheklovlarni yoqadi hamda fondagi harakatlar, vizual effektlar, ayrim funksiyalar va tarmoq aloqalari kabi boshqa funksiyalarni faolsizlantiradi yoki cheklaydi."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Quvvat tejash funksiyasi Tungi mavzuni va cheklovlarni yoqadi hamda fondagi harakatlar, vizual effektlar, ayrim funksiyalar va tarmoq aloqalari kabi boshqa funksiyalarni faolsizlantiradi yoki cheklaydi."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash yoqilsinmi?"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda Internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizga qadar yuklanmaydi."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash rejimi yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Yoqish"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d daqiqa (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> gacha)</item>
