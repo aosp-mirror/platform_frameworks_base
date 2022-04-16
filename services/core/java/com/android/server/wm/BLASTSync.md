@@ -106,3 +106,88 @@ to the client via ClientTransaction), we haven't even incremented the seqId yet,
 at the same time as the state? We solve this by pushing all client communication through a handler thread that has to
 acquire the lock. This ensures we uphold requirement 2.
     
+= Transaction ordering =
+
+Applying transactions from different process, and in to different server side transaction queues
+raises various questions about transaction ordering. There are two tricky questions in this
+domain that we address here:
+    1. The ordering of Transactions from a single BLASTBufferQueue wrt to eachother
+    2. The ordering of non synced WM updates to syncable state, wrt a BLASTSyncEngine
+       transaction
+       
+== Ordering of Transactions in a single BBQ ==
+
+We can see if sync is never involved, there are never any real questions about ordering.
+Even using one-way setTransactionState, the calls are from a single thread to a single
+interface on another, and will be ordered. When we hand out transactions for sync
+is where issues can start to arise. Obviously if we apply another transaction
+immediately after handing out the sync transaction it could arrive first, and this would
+cause an ordering issue. It's also possible that the sync transaction arrives before the
+transaction applied before it (since setTransactionState is one way from BBQ). Even if
+the transactions are applied in the right order, it's possible for them to be
+commited out of sync, as the BBQ and SyncConsumer may be using different apply tokens
+resulting in the transaction being placed in different server side queues.
+
+To solve these issues, we use a scheme involving "barrier transactions". We show how
+this scheme handles every permutation of (Sync, NotSync).
+
+1. NotSync, NotSync: This is the trivial case. As long as both buffers are submitted from
+   the same thread, they will arrive in SF in order, and SF will place them in the same
+   queue (since there is a shared apply token), which it will process in order.
+2. Sync, NotSync: For sync transactions we register a commit callback, and require it to
+   be fired before applying the next transaction. Since the commit callback is only
+   fired when the transaction has latched on the server side, any transaction applied
+   later, must occur later.
+3. Sync, Sync: Ordering of consecutive sync transactions is delegated to the sync
+    consumer
+4. NotSync, Sync: This is the trickiest case, as we don't want to set a commit callback
+   on not sync transactions (as this would incur an unacceptable performance overhead).
+   Further complicating matters, we want to apply them with one-way binder, since
+   this is the hot path for all graphical updates. To solve this we use a
+   "setBufferHasBarrier" system. Sync transactions (before they are handed out)
+   are tagged with a barrier, referring to the frame number of the last
+   non sync transaction. SurfaceFlinger will ensure the correct ordering
+   by stalling transactions in the queue until barriers are fulfilled. This barrier
+   primitive is dangerous, because it could result in deadlocking, but its ok in
+   this scenario since only BBQ uses its apply token.
+   
+We can see from this that all frames are in order.
+
+== Ordering of WM updates to syncable state ==
+
+A second interesting question, is about the ordering of WM updates to syncable-state. In
+the WM we frequently write code like
+    getPendingTransaction/getSyncTransaction().show(mSurfaceControl).
+In normal operation, getSyncTransaction and getPendingTransaction both refer to the same
+transaction which is the displaycontent pendingtransaction, applied by the WindowManager.
+During sync, each syncing container will instead use its mSyncTransaction, which will
+eventually be merged to be applied by the WindowManager. We can see that we have a congruent
+"problem" to BLASTBufferQueue transaction ordering. Namely, earlier state updates which were
+given to SysUI could end up being applied later than state updates which were made later but
+directly applied by the WM. We can break this down in to two cases:
+=== getPendingTransaction() and getSyncTransaction() ordering ===
+It's possible for code like this to occur:
+getSyncTransaction().OP1
+getPendingTransaction().OP2
+applyPendingTransaction
+applySyncTransaction
+
+in this case the change in OP2 was made later, but occurs first. We define this case as
+intended behavior, and say there is no ordering guarantee between the pending
+and sync transactions. This means the pending transaction is only useful in
+some marginal cases and should probably be considered a deprecated primitive.
+=== getSyncTransaction() and getSyncTransaction() ordering ===
+However, we take great care to ensure usage of getSyncTransaction() reflects
+the ordering the developer would expect. BLASTSyncEngine will register
+a commit callback on all transactions it hands out. In the interval between
+receiving this commit callback and sending out the transaction, we may have other
+data enter getSyncTransaction. If we returned the pending transaction
+(as we do in normal time), then we could create ordering issues, since the pending
+transactions ordering is undefined. Instead we continue to return the sync transaction
+during this interval. If no second sync has started by the time we receive
+the commit callback, then we directly apply this left over data in the sync transaction
+guaranteed it will be ordered correctly, and return to using the pending
+transaction. If a second sync has started, then we just allow the data
+to persist in the mSyncTransaction, potentially to be overwritten
+by the new sync. It will eventually apply with SysUI's apply token and
+ordering will be maintained.

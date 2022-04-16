@@ -258,6 +258,8 @@ public abstract class NotificationListenerService extends Service {
     public static final int REASON_CLEAR_DATA = 21;
     /** Notification was canceled due to an assistant adjustment update. */
     public static final int REASON_ASSISTANT_CANCEL = 22;
+    /** Notification was canceled when lockdown mode is enabled. */
+    public static final int REASON_LOCKDOWN = 22;
 
     /**
      * @hide
@@ -285,6 +287,7 @@ public abstract class NotificationListenerService extends Service {
             REASON_CHANNEL_REMOVED,
             REASON_CLEAR_DATA,
             REASON_ASSISTANT_CANCEL,
+            REASON_LOCKDOWN,
     })
     public @interface NotificationCancelReason{};
 

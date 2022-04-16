@@ -85,12 +85,13 @@ typealias ColorTransitionFactory = (Int, (ColorScheme) -> Int, (Int) -> Unit) ->
  */
 class ColorSchemeTransition internal constructor(
     private val context: Context,
-    bgColor: Int,
     mediaViewHolder: MediaViewHolder,
     colorTransitionFactory: ColorTransitionFactory
 ) {
-    constructor(context: Context, bgColor: Int, mediaViewHolder: MediaViewHolder) :
-        this(context, bgColor, mediaViewHolder, ::ColorTransition)
+    constructor(context: Context, mediaViewHolder: MediaViewHolder) :
+        this(context, mediaViewHolder, ::ColorTransition)
+
+    val bgColor = context.getColor(com.android.systemui.R.color.material_dynamic_secondary95)
 
     val surfaceColor = colorTransitionFactory(
         bgColor,

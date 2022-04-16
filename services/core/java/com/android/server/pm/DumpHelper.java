@@ -52,6 +52,7 @@ import java.io.PrintWriter;
 final class DumpHelper {
     private final PermissionManagerServiceInternal mPermissionManager;
     private final ApexManager mApexManager;
+    private final ApexPackageInfo mApexPackageInfo;
     private final StorageEventHelper mStorageEventHelper;
     private final DomainVerificationManagerInternal mDomainVerificationManager;
     private final PackageInstallerService mInstallerService;
@@ -64,6 +65,7 @@ final class DumpHelper {
 
     DumpHelper(
             PermissionManagerServiceInternal permissionManager, ApexManager apexManager,
+            ApexPackageInfo apexPackageInfo,
             StorageEventHelper storageEventHelper,
             DomainVerificationManagerInternal domainVerificationManager,
             PackageInstallerService installerService, String requiredVerifierPackage,
@@ -74,6 +76,7 @@ final class DumpHelper {
             PerUidReadTimeouts[] perUidReadTimeouts) {
         mPermissionManager = permissionManager;
         mApexManager = apexManager;
+        mApexPackageInfo = apexPackageInfo;
         mStorageEventHelper = storageEventHelper;
         mDomainVerificationManager = domainVerificationManager;
         mInstallerService = installerService;
@@ -271,7 +274,7 @@ final class DumpHelper {
         // Return if the package doesn't exist.
         if (packageName != null
                 && snapshot.getPackageStateInternal(packageName) == null
-                && !mApexManager.isApexPackage(packageName)) {
+                && !mApexPackageInfo.isApexPackage(packageName)) {
             pw.println("Unable to find package: " + packageName);
             return;
         }
@@ -555,8 +558,9 @@ final class DumpHelper {
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_APEX)
-                && (packageName == null || mApexManager.isApexPackage(packageName))) {
+                && (packageName == null || mApexPackageInfo.isApexPackage(packageName))) {
             mApexManager.dump(pw, packageName);
+            mApexPackageInfo.dump(pw, packageName);
         }
 
         if (!checkin

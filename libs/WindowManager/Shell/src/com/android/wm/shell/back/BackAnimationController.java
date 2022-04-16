@@ -301,7 +301,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         int backType = mBackNavigationInfo.getType();
         RemoteAnimationTarget animationTarget = mBackNavigationInfo.getDepartingAnimationTarget();
 
-        BackEvent backEvent = new BackEvent(0, 0, progress, swipeEdge, animationTarget);
+        BackEvent backEvent = new BackEvent(
+                event.getX(), event.getY(), progress, swipeEdge, animationTarget);
         IOnBackInvokedCallback targetCallback = null;
         if (shouldDispatchToLauncher(backType)) {
             targetCallback = mBackToLauncherCallback;

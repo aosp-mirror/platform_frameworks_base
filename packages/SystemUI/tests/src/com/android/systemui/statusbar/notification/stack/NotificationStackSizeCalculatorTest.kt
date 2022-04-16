@@ -23,6 +23,8 @@ import android.view.View.VISIBLE
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.LockscreenShadeTransitionController
+import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -44,7 +46,7 @@ import org.mockito.MockitoAnnotations
 class NotificationStackSizeCalculatorTest : SysuiTestCase() {
 
     @Mock private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
-
+    @Mock private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
     @Mock private lateinit var stackLayout: NotificationStackScrollLayout
 
     private val testableResources = mContext.getOrCreateTestableResources()
@@ -63,6 +65,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
         sizeCalculator =
             NotificationStackSizeCalculator(
                 statusBarStateController = sysuiStatusBarStateController,
+                lockscreenShadeTransitionController = lockscreenShadeTransitionController,
                 testableResources.resources)
     }
 
@@ -153,6 +156,55 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
 
         val height = sizeCalculator.computeHeight(stackLayout, maxNotifications, this.shelfHeight)
         assertThat(height).isAtMost(availableSpace)
+    }
+
+    @Test
+    fun onLockscreen_onKeyguard_AndNotGoingToShade_returnsTrue() {
+        whenever(sysuiStatusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
+        whenever(lockscreenShadeTransitionController.fractionToShade).thenReturn(0f)
+        assertThat(sizeCalculator.onLockscreen()).isTrue()
+    }
+
+    @Test
+    fun onLockscreen_goingToShade_returnsFalse() {
+        whenever(sysuiStatusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
+        whenever(lockscreenShadeTransitionController.fractionToShade).thenReturn(0.5f)
+        assertThat(sizeCalculator.onLockscreen()).isFalse()
+    }
+
+    @Test
+    fun onLockscreen_notOnLockscreen_returnsFalse() {
+        whenever(sysuiStatusBarStateController.state).thenReturn(StatusBarState.SHADE)
+        whenever(lockscreenShadeTransitionController.fractionToShade).thenReturn(1f)
+        assertThat(sizeCalculator.onLockscreen()).isFalse()
+    }
+
+    @Test
+    fun spaceNeeded_onLockscreen_usesMinHeight() {
+        setGapHeight(0f)
+        // No divider height since we're testing one element where index = 0
+
+        val expandableView = createMockRow(rowHeight)
+        whenever(expandableView.getMinHeight(any())).thenReturn(5)
+        whenever(expandableView.intrinsicHeight).thenReturn(10)
+
+        val space = sizeCalculator.spaceNeeded(expandableView, visibleIndex = 0,
+                previousView = null, stack = stackLayout, onLockscreen = true)
+        assertThat(space).isEqualTo(5)
+    }
+
+    @Test
+    fun spaceNeeded_notOnLockscreen_usesIntrinsicHeight() {
+        setGapHeight(0f)
+        // No divider height since we're testing one element where index = 0
+
+        val expandableView = createMockRow(rowHeight)
+        whenever(expandableView.getMinHeight(any())).thenReturn(5)
+        whenever(expandableView.intrinsicHeight).thenReturn(10)
+
+        val space = sizeCalculator.spaceNeeded(expandableView, visibleIndex = 0,
+                previousView = null, stack = stackLayout, onLockscreen = false)
+        assertThat(space).isEqualTo(10)
     }
 
     private fun computeMaxKeyguardNotifications(

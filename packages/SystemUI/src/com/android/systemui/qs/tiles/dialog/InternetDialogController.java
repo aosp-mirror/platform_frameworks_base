@@ -649,12 +649,40 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     }
 
     void connectCarrierNetwork() {
-        final MergedCarrierEntry mergedCarrierEntry =
-                mAccessPointController.getMergedCarrierEntry();
-        if (mergedCarrierEntry != null && mergedCarrierEntry.canConnect()) {
-            mergedCarrierEntry.connect(null /* ConnectCallback */, false);
-            makeOverlayToast(R.string.wifi_wont_autoconnect_for_now);
+        String errorLogPrefix = "Fail to connect carrier network : ";
+
+        if (!isMobileDataEnabled()) {
+            if (DEBUG) {
+                Log.d(TAG, errorLogPrefix + "settings OFF");
+            }
+            return;
         }
+        if (isDeviceLocked()) {
+            if (DEBUG) {
+                Log.d(TAG, errorLogPrefix + "device locked");
+            }
+            return;
+        }
+        if (activeNetworkIsCellular()) {
+            Log.d(TAG, errorLogPrefix + "already active");
+            return;
+        }
+
+        MergedCarrierEntry mergedCarrierEntry =
+                mAccessPointController.getMergedCarrierEntry();
+        if (mergedCarrierEntry == null) {
+            Log.e(TAG, errorLogPrefix + "no merged entry");
+            return;
+        }
+
+        if (!mergedCarrierEntry.canConnect()) {
+            Log.w(TAG, errorLogPrefix + "merged entry connect state "
+                    + mergedCarrierEntry.getConnectedState());
+            return;
+        }
+
+        mergedCarrierEntry.connect(null /* ConnectCallback */, false);
+        makeOverlayToast(R.string.wifi_wont_autoconnect_for_now);
     }
 
     boolean isCarrierNetworkActive() {

@@ -78,6 +78,9 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        overrideResource(
+            com.android.internal.R.integer.config_unfoldTransitionHalfFoldedTimeout,
+            HALF_OPENED_TIMEOUT_MILLIS.toInt())
         deviceStates = FoldableTestUtils.findDeviceStates(context)
 
         foldStateProvider =
@@ -318,5 +321,9 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     private fun sendHingeAngleEvent(angle: Int) {
         hingeAngleCaptor.value.accept(angle.toFloat())
+    }
+
+    companion object {
+        private const val HALF_OPENED_TIMEOUT_MILLIS = 300L
     }
 }

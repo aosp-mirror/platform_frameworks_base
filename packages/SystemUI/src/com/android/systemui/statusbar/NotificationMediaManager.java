@@ -454,7 +454,7 @@ public class NotificationMediaManager implements Dumpable {
      * update this manager's internal state.
      * @return whether the current MediaMetadata changed (and needs to be announced to listeners).
      */
-    private boolean findPlayingMediaNotification(
+    boolean findPlayingMediaNotification(
             @NonNull Collection<NotificationEntry> allNotifications) {
         boolean metaDataChanged = false;
         // Promote the media notification with a controller in 'playing' state, if any.
@@ -465,7 +465,7 @@ public class NotificationMediaManager implements Dumpable {
             if (notif.isMediaNotification()) {
                 final MediaSession.Token token =
                         entry.getSbn().getNotification().extras.getParcelable(
-                                Notification.EXTRA_MEDIA_SESSION);
+                                Notification.EXTRA_MEDIA_SESSION, MediaSession.Token.class);
                 if (token != null) {
                     MediaController aController = new MediaController(mContext, token);
                     if (PlaybackState.STATE_PLAYING

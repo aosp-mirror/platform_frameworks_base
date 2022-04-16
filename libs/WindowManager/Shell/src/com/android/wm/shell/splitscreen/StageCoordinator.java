@@ -1432,6 +1432,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final SurfaceControl.Transaction t = mTransactionPool.acquire();
             finishEnterSplitScreen(t);
             mSplitTransitions.mPendingEnter = null;
+            mSplitTransitions.mPendingRemoteHandler = null;
             t.apply();
             mTransactionPool.release(t);
         }

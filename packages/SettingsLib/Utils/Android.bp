@@ -15,7 +15,6 @@ android_library {
 
     static_libs: [
         "androidx.annotation_annotation",
-        "modules-utils-build",
     ],
 
     sdk_version: "system_current",

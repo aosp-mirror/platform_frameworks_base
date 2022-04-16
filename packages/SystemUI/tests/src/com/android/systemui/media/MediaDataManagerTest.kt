@@ -277,6 +277,49 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testLoadMediaDataInBg_invalidTokenNoCrash() {
+        val bundle = Bundle()
+        // wrong data type
+        bundle.putParcelable(Notification.EXTRA_MEDIA_SESSION, Bundle())
+        val rcn = SbnBuilder().run {
+            setPkg(SYSTEM_PACKAGE_NAME)
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.addExtras(bundle)
+                it.setStyle(MediaStyle().apply {
+                    setRemotePlaybackInfo("Remote device", 0, null)
+                })
+            }
+            build()
+        }
+
+        mediaDataManager.loadMediaDataInBg(KEY, rcn, null)
+        // no crash even though the data structure is incorrect
+    }
+
+    @Test
+    fun testLoadMediaDataInBg_invalidMediaRemoteIntentNoCrash() {
+        val bundle = Bundle()
+        // wrong data type
+        bundle.putParcelable(Notification.EXTRA_MEDIA_REMOTE_INTENT, Bundle())
+        val rcn = SbnBuilder().run {
+            setPkg(SYSTEM_PACKAGE_NAME)
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.addExtras(bundle)
+                it.setStyle(MediaStyle().apply {
+                    setMediaSession(session.sessionToken)
+                    setRemotePlaybackInfo("Remote device", 0, null)
+                })
+            }
+            build()
+        }
+
+        mediaDataManager.loadMediaDataInBg(KEY, rcn, null)
+        // no crash even though the data structure is incorrect
+    }
+
+    @Test
     fun testOnNotificationRemoved_callsListener() {
         addNotificationAndLoad()
         val data = mediaDataCaptor.value

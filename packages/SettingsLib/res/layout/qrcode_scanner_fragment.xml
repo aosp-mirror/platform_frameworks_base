@@ -92,6 +92,7 @@
             android:layout_marginStart="?attr/sudMarginStart"
             android:layout_marginEnd="?attr/sudMarginEnd"
             android:gravity="center"
+            android:layout_gravity="center"
             android:visibility="invisible"/>
 
     </LinearLayout>
