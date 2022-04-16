@@ -2658,9 +2658,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return;
         }
 
-        // bail out if no public version
-        if (mPublicLayout.getChildCount() == 0) return;
-
         if (!animated) {
             mPublicLayout.animate().cancel();
             mPrivateLayout.animate().cancel();
