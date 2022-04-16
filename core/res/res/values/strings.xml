@@ -876,19 +876,19 @@
     <string name="permgroupdesc_sms">send and view SMS messages</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_storage">Files &amp; documents</string>
+    <string name="permgrouplab_storage">Files and documents</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_storage">access files and documents on your device</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
-    <string name="permgrouplab_readMediaAural">Music &amp; other audio</string>
+    <string name="permgrouplab_readMediaAural">Music and audio</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
-    <string name="permgroupdesc_readMediaAural">access audio files on your device</string>
+    <string name="permgroupdesc_readMediaAural">access music and audio on your device</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
-    <string name="permgrouplab_readMediaVisual">Photos &amp; videos</string>
+    <string name="permgrouplab_readMediaVisual">Photos and videos</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
-    <string name="permgroupdesc_readMediaVisual">access images and video files on your device</string>
+    <string name="permgroupdesc_readMediaVisual">access photos and videos on your device</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_microphone">Microphone</string>
