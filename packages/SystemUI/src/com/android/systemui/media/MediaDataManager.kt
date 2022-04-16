@@ -85,7 +85,6 @@ private const val EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY = "dismiss_intent"
 private val LOADING = MediaData(
         userId = -1,
         initialized = false,
-        backgroundColor = 0,
         app = null,
         appIcon = null,
         artist = null,
@@ -177,7 +176,6 @@ class MediaDataManager(
 
     private val themeText = com.android.settingslib.Utils.getColorAttr(context,
             com.android.internal.R.attr.textColorPrimary).defaultColor
-    private val bgColor = context.getColor(R.color.material_dynamic_secondary95)
 
     // Internal listeners are part of the internal pipeline. External listeners (those registered
     // with [MediaDeviceManager.addListener]) receive events after they have propagated through
@@ -591,7 +589,7 @@ class MediaDataManager(
         val mediaAction = getResumeMediaAction(resumeAction)
         val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
-            onMediaDataLoaded(packageName, null, MediaData(userId, true, bgColor, appName,
+            onMediaDataLoaded(packageName, null, MediaData(userId, true, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
                     MediaButton(playOrPause = mediaAction), packageName, token, appIntent,
                     device = null, active = false,
@@ -601,14 +599,17 @@ class MediaDataManager(
         }
     }
 
-    private fun loadMediaDataInBg(
+    fun loadMediaDataInBg(
         key: String,
         sbn: StatusBarNotification,
         oldKey: String?,
         logEvent: Boolean = false
     ) {
-        val token = sbn.notification.extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
-                as MediaSession.Token?
+        val token = sbn.notification.extras.getParcelable(
+                Notification.EXTRA_MEDIA_SESSION, MediaSession.Token::class.java)
+        if (token == null) {
+            return
+        }
         val mediaController = mediaControllerFactory.create(token)
         val metadata = mediaController.metadata
 
@@ -655,8 +656,8 @@ class MediaDataManager(
             val extras = sbn.notification.extras
             val deviceName = extras.getCharSequence(Notification.EXTRA_MEDIA_REMOTE_DEVICE, null)
             val deviceIcon = extras.getInt(Notification.EXTRA_MEDIA_REMOTE_ICON, -1)
-            val deviceIntent = extras.getParcelable(Notification.EXTRA_MEDIA_REMOTE_INTENT)
-                    as PendingIntent?
+            val deviceIntent = extras.getParcelable(
+                    Notification.EXTRA_MEDIA_REMOTE_INTENT, PendingIntent::class.java)
             Log.d(TAG, "$key is RCN for $deviceName")
 
             if (deviceName != null && deviceIcon > -1) {
@@ -710,7 +711,7 @@ class MediaDataManager(
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
             val active = mediaEntries[key]?.active ?: true
-            onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
+            onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, app,
                     smallIcon, artist, song, artWorkIcon, actionIcons, actionsToShowCollapsed,
                     semanticActions, sbn.packageName, token, notif.contentIntent, device,
                     active, resumeAction = resumeAction, playbackLocation = playbackLocation,

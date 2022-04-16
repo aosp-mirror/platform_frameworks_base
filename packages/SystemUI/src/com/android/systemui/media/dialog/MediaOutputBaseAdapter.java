@@ -144,6 +144,7 @@ public abstract class MediaOutputBaseAdapter extends
         final LinearLayout mTwoLineLayout;
         final ImageView mStatusIcon;
         final CheckBox mCheckBox;
+        final LinearLayout mEndTouchArea;
         private String mDeviceId;
 
         MediaDeviceBaseViewHolder(View view) {
@@ -159,6 +160,7 @@ public abstract class MediaOutputBaseAdapter extends
             mSeekBar = view.requireViewById(R.id.volume_seekbar);
             mStatusIcon = view.requireViewById(R.id.media_output_item_status);
             mCheckBox = view.requireViewById(R.id.check_box);
+            mEndTouchArea = view.requireViewById(R.id.end_action_area);
         }
 
         void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
