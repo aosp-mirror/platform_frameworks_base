@@ -190,7 +190,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"संश्लेषित उच्चारांच्या आवाजास प्रभावित करते"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"भाषा"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"सिस्टम भाषा वापरा"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"सिस्टीमची भाषा वापरा"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"भाषा निवडलेली नाही"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"बोललेल्या मजकुरासाठी भाषा-विशिष्ट आवाज सेट करते"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"उदाहरण ऐका"</string>
@@ -655,12 +655,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR कोड स्कॅन करा"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ऐकणे सुरू करण्यासाठी, खालील QR कोड मध्यभागी ठेवा"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR कोडचा फॉरमॅट चुकीचा आहे"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> चे प्रसारण थांबवायचे आहे का?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"तुम्ही <xliff:g id="SWITCHAPP">%1$s</xliff:g> चे प्रसारण केल्यास किंवा आउटपुट बदलल्यास, तुमचे सध्याचे प्रसारण बंद होईल"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> चे प्रसारण करा"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"आउटपूट बदला"</string>
 </resources>
