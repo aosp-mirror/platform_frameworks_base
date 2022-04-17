@@ -49,12 +49,6 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER;
-import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED;
-import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
-import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
-import static android.net.ConnectivityManager.BLOCKED_REASON_DOZE;
-import static android.net.ConnectivityManager.BLOCKED_REASON_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
@@ -136,6 +130,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.ProcessList.ProcStartHandler;
+import static com.android.server.net.NetworkPolicyManagerInternal.updateBlockedReasonsWithProcState;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -17296,7 +17291,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final long procStateSeq = mProcessList.getNextProcStateSeq();
                     mNetworkPolicyUidObserver.onUidStateChanged(uid, PROCESS_STATE_TOP,
                             procStateSeq, PROCESS_CAPABILITY_ALL);
-                    if (thread != null && isNetworkingBlockedForUid(uid)) {
+                    if (thread != null && shouldWaitForNetworkRulesUpdate(uid)) {
                         thread.setNetworkBlockSeq(procStateSeq);
                     }
                 } catch (RemoteException e) {
@@ -17305,29 +17300,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        private boolean isNetworkingBlockedForUid(int uid) {
+        private boolean shouldWaitForNetworkRulesUpdate(int uid) {
             synchronized (mUidNetworkBlockedReasons) {
-                // TODO: We can consider only those blocked reasons that will be overridden
-                // by the TOP state. For other ones, there is no point in waiting.
                 // TODO: We can reuse this data in
                 // ProcessList#incrementProcStateSeqAndNotifyAppsLOSP instead of calling into
                 // NetworkManagementService.
                 final int uidBlockedReasons = mUidNetworkBlockedReasons.get(
                         uid, BLOCKED_REASON_NONE);
-                if (uidBlockedReasons == BLOCKED_REASON_NONE) {
-                    return false;
-                }
-                final int topExemptedBlockedReasons = BLOCKED_REASON_BATTERY_SAVER
-                        | BLOCKED_REASON_DOZE
-                        | BLOCKED_REASON_APP_STANDBY
-                        | BLOCKED_REASON_LOW_POWER_STANDBY
-                        | BLOCKED_METERED_REASON_DATA_SAVER
-                        | BLOCKED_METERED_REASON_USER_RESTRICTED;
-                final int effectiveBlockedReasons =
-                        uidBlockedReasons & ~topExemptedBlockedReasons;
-                // Only consider it as blocked if it is not blocked by a reason
-                // that is not exempted by app being in the top state.
-                return effectiveBlockedReasons == BLOCKED_REASON_NONE;
+                // We should only inform the uid to block if it is currently blocked but will be
+                // unblocked once it comes to the TOP state.
+                return uidBlockedReasons != BLOCKED_REASON_NONE
+                        && updateBlockedReasonsWithProcState(uidBlockedReasons, PROCESS_STATE_TOP)
+                        == BLOCKED_REASON_NONE;
             }
         }
 
