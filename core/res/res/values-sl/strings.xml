@@ -2276,11 +2276,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Sporočilo »<xliff:g id="MESSAGE">%1$s</xliff:g>« je prevedeno."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Sporočilo je prevedeno iz jezika »<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>« v jezik »<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>«."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Dejavnost v ozadju"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Energijsko potratna aplikacija"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Aplikacija je še vedno aktivna"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> se izvaja v ozadju. Za upravljanje porabe energije baterije se dotaknite."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> morda vpliva na čas delovanja baterije. Dotaknite se za pregled aktivnih aplikacij."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Preverite aktivne aplikacije"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ni mogoče dostopati do fotoaparata telefona prek naprave <xliff:g id="DEVICE">%1$s</xliff:g>."</string>

@@ -307,9 +307,9 @@
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
     <string name="permgrouplab_storage" msgid="9173334109512154196">"Файл болон документ"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"таны төхөөрөмж дээрх файл болон документод хандах"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Хөгжим &amp; бусад аудио"</string>
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Хөгжим, бусад аудио"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"таны төхөөрөмж дээрх аудио файлд хандах"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Зураг &amp; видео"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Зураг, видео"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"таны төхөөрөмж дээрх зураг болон видео файлд хандах"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"дуу хураах"</string>
@@ -2274,11 +2274,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Орчуулсан."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Мессежийг <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>-с <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> руу орчуулсан."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Дэвсгэрийн үйл ажиллагаа"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Апп батарейг зарцуулж байна"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Апп идэвхтэй хэвээр байна"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> ард ажиллаж байна. Батарей ашиглалтыг удирдахын тулд товшино уу."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> батарейн ажиллах хугацаанд нөлөөлж болзошгүй. Идэвхтэй аппыг хянахын тулд товшино уу."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Идэвхтэй аппуудыг шалгах"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Таны <xliff:g id="DEVICE">%1$s</xliff:g>-с утасны камерт хандах боломжгүй"</string>

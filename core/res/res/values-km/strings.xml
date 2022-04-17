@@ -1839,7 +1839,7 @@
     <string name="select_day" msgid="2060371240117403147">"ជ្រើស​ខែ និង​ថ្ងៃ"</string>
     <string name="select_year" msgid="1868350712095595393">"ជ្រើស​ឆ្នាំ"</string>
     <string name="deleted_key" msgid="9130083334943364001">"បាន​លុប <xliff:g id="KEY">%1$s</xliff:g>"</string>
-    <string name="managed_profile_label_badge" msgid="6762559569999499495">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g>​ការងារ"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 3"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"សួរ​រក​កូដ PIN មុន​ពេលដកខ្ទាស់"</string>
@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"មិនអាច​ប្រើ <xliff:g id="APP_NAME">%1$s</xliff:g> នៅពេល​នេះ​បានទេ​។"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"មិនអាចប្រើ <xliff:g id="ACTIVITY">%1$s</xliff:g> បានទេ"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"តម្រូវឱ្យមាន​ការអនុញ្ញាត"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"មិនអាចប្រើ​កាមេរ៉ា​បានទេ"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"បន្ត​នៅលើ​ទូរសព្ទ"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"មិនអាចប្រើ​មីក្រូហ្វូនបានទេ"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"មិនអាចប្រើការកំណត់ Android TV បានទេ"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"មិនអាចប្រើ​ការកំណត់ថេប្លេត​បានទេ"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"មិនអាចប្រើ​ការកំណត់ទូរសព្ទ​បានទេ"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"មិនអាច​ចូលប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នកទេ។ សូមសាកល្បងប្រើ​នៅលើ​ឧបករណ៍ Android TV របស់អ្នក​ជំនួសវិញ។"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"មិនអាច​ចូលប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នកទេ។ សូមសាកល្បងប្រើ​នៅលើ​ថេប្លេត​របស់អ្នក​ជំនួសវិញ។"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"មិនអាច​ចូលប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នកទេ។ សូមសាកល្បងប្រើ​នៅលើ​ទូរសព្ទរបស់អ្នក​ជំនួសវិញ។"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ឧបករណ៍ Android TV របស់អ្នក​ជំនួសវិញ។"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ថេប្លេត​របស់អ្នក​ជំនួសវិញ។"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ទូរសព្ទរបស់អ្នក​ជំនួសវិញ។"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"កម្មវិធីនេះ​កំពុងស្នើសុំ​សុវត្ថិភាពបន្ថែម។ សូមសាកល្បងប្រើ​នៅលើ​ឧបករណ៍ Android TV របស់អ្នក​ជំនួសវិញ។"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"កម្មវិធីនេះ​កំពុងស្នើសុំ​សុវត្ថិភាពបន្ថែម។ សូមសាកល្បងប្រើ​នៅលើ​ថេប្លេត​របស់អ្នក​ជំនួសវិញ។"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"កម្មវិធីនេះ​កំពុងស្នើសុំ​សុវត្ថិភាពបន្ថែម។ សូមសាកល្បងប្រើ​នៅលើ​ទូរសព្ទរបស់អ្នក​ជំនួសវិញ។"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"កម្មវិធី​នេះ​ត្រូវបាន​បង្កើត​ឡើង​សម្រាប់​កំណែ​ប្រព័ន្ធ​ប្រតិបត្តិការ Android ចាស់ ហើយ​វាអាច​ដំណើរការ​ខុសប្រក្រតី។ សូម​សាកល្បង​ពិនិត្យមើល​កំណែ​ថ្មី ឬ​ទាក់ទង​ទៅអ្នក​អភិវឌ្ឍន៍។"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"រក​មើល​កំណែ​ថ្មី"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"អ្នកមានសារថ្មី"</string>
@@ -2067,14 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ចុចដើម្បីស្វែងយល់បន្ថែម និងផ្លាស់ប្ដូរ។"</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"មុខងារ​កុំ​រំខាន​ត្រូវ​បាន​ប្ដូរ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"សូមចុច​ដើម្បី​មើល​ថា​​បានទប់ស្កាត់អ្វីខ្លះ។"</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"ពិនិត្យមើលការកំណត់ការជូនដំណឹង"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"ក្នុង Android 13 កម្មវិធីដែលអ្នកដំឡើងត្រូវការការអនុញ្ញាតរបស់អ្នក ដើម្បីផ្ញើការជូនដំណឹង។ សូមចុចដើម្បីផ្លាស់ប្ដូរការអនុញ្ញាតនេះសម្រាប់កម្មវិធីដែលមានស្រាប់។"</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"រំលឹក​ខ្ញុំ​ពេលក្រោយ"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ច្រានចោល"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ប្រព័ន្ធ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ការកំណត់"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"កាមេរ៉ា"</string>
@@ -2293,11 +2274,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"បាន​បកប្រែ <xliff:g id="MESSAGE">%1$s</xliff:g>។"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"បានបកប្រែសារពីភាសា<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ទៅភាសា<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>។"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"សកម្មភាពនៅផ្ទៃខាងក្រោយ"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"កម្មវិធីមួយកំពុង​ធ្វើឱ្យឆាប់អស់ថ្ម"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"កម្មវិធីនៅតែសកម្មដដែល"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> កំពុងដំណើរការ​នៅផ្ទៃខាងក្រោយ។ សូមចុច​ដើម្បីគ្រប់គ្រង​ការប្រើប្រាស់ថ្ម។"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> អាច​ប៉ះពាល់ដល់​កម្រិតថាមពលថ្ម។ សូមចុច ដើម្បីពិនិត្យមើល​កម្មវិធីដែលសកម្ម។"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ពិនិត្យមើលកម្មវិធីសកម្ម"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"មិនអាច​ចូលប្រើ​កាមេរ៉ាទូរសព្ទ​ពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>

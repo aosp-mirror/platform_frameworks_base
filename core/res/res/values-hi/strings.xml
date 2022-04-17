@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> इस समय उपलब्ध नहीं है."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध नहीं है"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"अनुमति ज़रूरी है"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"कैमरा उपलब्ध नहीं है"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"फ़ोन पर जारी रखें"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"माइक्रोफ़ोन उपलब्ध नहीं है"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV की सेटिंग उपलब्ध नहीं हैं"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"टैबलेट की सेटिंग उपलब्ध नहीं हैं"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"फ़ोन की सेटिंग उपलब्ध नहीं हैं"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने Android TV डिवाइस पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने टैबलेट पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने Android TV डिवाइस पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने टैबलेट पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने Android TV डिवाइस पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने टैबलेट पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"यह ऐप्लिकेशन Android के पुराने वर्शन के लिए बनाया गया था, इसलिए हो सकता है कि यह सही से काम न करे. देखें कि अपडेट मौजूद हैं या नहीं, या फिर डेवलपर से संपर्क करें."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"देखें कि अपडेट मौजूद है या नहीं"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"आपके पास नए संदेश हैं"</string>
@@ -2067,14 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ज़्यादा जानने और बदलाव करने के लिए टैप करें."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"परेशान न करें की सुविधा बदल गई है"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"टैप करके देखें कि किन चीज़ों पर रोक लगाई गई है."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"सूचना सेटिंग देखें"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 में जो ऐप्लिकेशन इंस्टॉल किए जाएंगे, उन्हें आपको सूचनाएं भेजने के लिए अनुमति लेनी होगी. पहले से इंस्टॉल किए गए ऐप्लिकेशन को दी गई अनुमति बदलने के लिए टैप करें."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"बाद में याद दिलाएं"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"बंद करें"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"सिस्टम"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"सेटिंग"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"कैमरा"</string>
@@ -2090,7 +2071,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"चालू करें"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"बंद करें"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ज़्यादा जानें"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 में, ज़रूरत के हिसाब से सूचनाएं पाने की सुविधा की जगह अब \'बेहतर सूचनाएं\' सुविधा काम करेगी. यह सुविधा आपको कार्रवाइयों और जवाबों के सुझाव दिखाती है. साथ ही, आपके डिवाइस पर मिलने वाली सूचनाओं को व्यवस्थित करती है.\n\n\'बेहतर सूचनाएं\' सुविधा, डिवाइस पर मिलने वाली सभी सूचनाओं का कॉन्टेंट ऐक्सेस कर सकती है. इसमें आपकी निजी जानकारी, जैसे कि संपर्कों के नाम और मैसेज शामिल हैं. यह सुविधा, सूचनाओं को खारिज कर सकती है या उनका जवाब भी दे सकती है, जैसे कि फ़ोन कॉल का जवाब देना और \'परेशान न करें\' को कंट्रोल करना."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 में, ज़रूरत के हिसाब से सूचनाएं पाने की सुविधा की जगह अब \'बेहतर सूचनाएं\' सुविधा काम करेगी. यह सुविधा आपको कार्रवाइयों और जवाबों के सुझाव दिखाती है. साथ ही, आपके डिवाइस पर मिलने वाली सूचनाओं को व्यवस्थित करती है.\n\n\'बेहतर सूचनाएं\' सुविधा, डिवाइस पर मिलने वाली सूचनाओं का कॉन्टेंट ऐक्सेस कर सकती है. इसमें आपकी निजी जानकारी, जैसे कि संपर्कों के नाम और मैसेज शामिल हैं. यह सुविधा, सूचनाओं को खारिज कर सकती है या उनका जवाब भी दे सकती है, जैसे कि फ़ोन कॉल का जवाब देना और \'परेशान न करें\' को कंट्रोल करना."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"रूटीन मोड जानकारी की सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"बैटरी आम तौर पर जितने समय चलती है, उससे पहले खत्म हो सकती है"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बैटरी लाइफ़ बढ़ाने के लिए \'बैटरी सेवर\' चालू हो गया है"</string>

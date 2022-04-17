@@ -2274,11 +2274,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> অনুবাদ কৰা হ’ল।"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"বাৰ্তাটো <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ৰ পৰা <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>লৈ অনুবাদ কৰা হ’ল।"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"নেপথ্যত চলি থকা কাৰ্যকলাপ"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"এটা এপে অত্যধিক বেটাৰি খৰচ কৰি আছে"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"এটা এপ্ এতিয়াও সক্ৰিয় হৈ আছে"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> নেপথ্যত চলি আছে। বেটাৰিৰ ব্যৱহাৰ পৰিচালনা কৰিবলৈ টিপক।"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g>এ বেটাৰীৰ জীৱনকালৰ ওপৰত প্ৰভাৱ পেলাব পাৰে। সক্ৰিয় এপ্ পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"সক্ৰিয় এপ্‌সমূহ পৰীক্ষা কৰক"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা ফ’নটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
