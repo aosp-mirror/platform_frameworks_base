@@ -506,6 +506,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‏‏‏‎‎‏‎‎‏‏‏‎‎‎‎‏‏‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‏‎‏‎‎‏‏‏‎‎‏‏‎‏‎‎‎‏‎‏‎Priority‎‏‎‎‏‎"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‏‎‏‏‏‎‏‏‎‎‎‏‎‏‏‎‏‎‏‏‏‎‎‎‎‏‏‎‎‎‎‏‎‎‎‏‏‎‏‏‎‎‎‏‎‏‏‏‎‏‏‏‎‎‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ doesn’t support conversation features‎‏‎‎‏‎"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‎‎‏‎‏‎‎‏‏‎‏‏‏‎‎‎‎‎‎‎‏‏‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‏‎‏‎‏‎‎‎These notifications can\'t be modified.‎‏‎‎‏‎"</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‎‏‏‏‎‏‎‏‎‏‎‏‏‎‏‏‏‎‎‎‏‏‎‎‏‎‏‏‎‏‎‎‏‎‎‏‏‎‎‏‎‎‏‎Call notifications can\'t be modified.‎‏‎‎‏‎"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‎‏‎‏‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎‏‏‎‎‏‎‏‏‎‏‏‎‏‏‏‏‎‎‎‏‎‏‏‎‎‏‎‎‏‎‎‏‏‎This group of notifications cannot be configured here‎‏‎‎‏‎"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‏‎‎‎‏‏‎‎‎‏‏‏‎‎‎‏‎‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‏‎‏‏‏‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‎‎‎‎Proxied notification‎‏‎‎‏‎"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‎‏‏‏‎‎‏‏‏‎‏‏‎‏‎‎‏‎‎‏‎‎‏‎‏‎‎‎‏‎‎‎‎‎‏‏‎‎‎‏‎‏‎‎‏‎‎‏‎‎‏‏‎All ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ notifications‎‏‎‎‏‎"</string>
@@ -910,12 +911,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‎‏‎‎‏‏‎‏‎‏‎‎‏‏‎‎‎‏‎‏‎‎‎‎‎‏‎‏‏‎‏‏‎‏‏‏‎‎‏‎‎‏‎‎‎‎‎‎‎Add tile‎‏‎‎‏‎"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎‎‏‏‎‏‎‎‎‏‎‏‏‏‎‏‏‎‏‏‎‏‏‏‏‏‏‎‏‏‎‏‎‎‏‎‏‏‎‎‎‎‎‎Do not add tile‎‏‎‎‏‎"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‎‏‎‏‎‏‎‏‏‏‏‏‎‎‎‎‏‏‏‎‏‎‎‎‏‏‎‎‎‎‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‏‏‎‏‏‎‎Select user‎‏‎‎‏‎"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‎‏‎‎‏‏‎‎‎‏‏‏‏‏‎‎‎‎‏‏‎‏‏‏‎‎‏‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%s</xliff:g>‎‏‎‎‏‏‏‎ active apps‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‎‏‎‎‏‏‎‎‎‏‏‏‏‏‎‎‎‎‏‏‎‏‏‏‎‎‏‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%s</xliff:g>‎‏‎‎‏‏‏‎ active app‎‏‎‎‏‎</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‎‎‎‎‏‎‏‏‎‎‎‏‏‏‎‏‏‎‎‎‏‎‏‎‏‎‎‏‎‏‏‏‏‎‎‎‎‏‎‎‏‎‏‏‏‎‎‎‎‏‏‎‎‎‎New information‎‏‎‎‏‎"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‎‎‏‎‏‏‏‎‎‎‎‏‏‏‎‏‏‏‎‏‏‏‎‏‏‎‎‎‏‏‎‏‏‏‎‏‎‏‎‎‏‎‎‎‎‏‏‏‎‎‏‎‏‎‏‎Active apps‎‏‎‎‏‎"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‏‎‎‎‎‏‎‎‎‎‎‏‎‎‏‎‎‎‏‏‎‏‏‏‎‎‎‎‏‎‎‎‎‎‎‏‎‏‎‏‏‎‏‎‎‎‎‏‎‎‎‎‏‎‎‎Stop‎‏‎‎‏‎"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‏‏‏‎‏‎‎‏‎‏‏‎‏‏‏‏‎‎‏‏‎‏‏‏‎‏‏‏‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‏‏‏‎‎‏‏‎‎‏‎‎Stopped‎‏‎‎‏‎"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‏‎‏‎‏‏‏‎‎‎‏‏‎‏‏‏‎‎‎‏‎‏‎‏‏‏‏‎‏‎‏‎‏‎‏‎‎‏‏‎‎‎‎‏‏‏‎‎‎‎‏‎‎‏‎Done‎‏‎‎‏‎"</string>
