@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"В момента няма достъп до <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> не е налице"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Необходимо е разрешение"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Няма достъп до камерата"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Продължете на телефона"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Микрофонът не е достъпен"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Настройките за Android TV не са достъпни"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Настройките за таблета не са достъпни"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Настройките за телефона не са достъпни"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Не може да се осъществи достъп от устройството ви <xliff:g id="DEVICE">%1$s</xliff:g>. Вместо това опитайте от устройството си с Android TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Не може да се осъществи достъп от устройството ви <xliff:g id="DEVICE">%1$s</xliff:g>. Вместо това опитайте от таблета си."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Не може да се осъществи достъп от устройството ви <xliff:g id="DEVICE">%1$s</xliff:g>. Вместо това опитайте от телефона си."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Понастоящем не може да се осъществи достъп от устройството ви <xliff:g id="DEVICE">%1$s</xliff:g>. Вместо това опитайте от устройството си с Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Понастоящем не може да се осъществи достъп от устройството ви <xliff:g id="DEVICE">%1$s</xliff:g>. Вместо това опитайте от таблета си."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Понастоящем не може да се осъществи достъп от устройството ви <xliff:g id="DEVICE">%1$s</xliff:g>. Вместо това опитайте от телефона си."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Това приложение изисква допълнителна стъпка за сигурност. Вместо това опитайте от устройството си с Android TV."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Това приложение изисква допълнителна стъпка за сигурност. Вместо това опитайте от таблета си."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Това приложение изисква допълнителна стъпка за сигурност. Вместо това опитайте от телефона си."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Това приложение бе създадено за по-стара версия на Android и може да не работи правилно. Опитайте да проверите за актуализации или се свържете с програмиста."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за актуализация"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови съобщения"</string>
@@ -2067,14 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Докоснете, за да научите повече и да извършите промени."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Настройките за „Не безпокойте“ са променени"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Докоснете, за да проверите какво е блокирано."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Преглед на настройките за известия"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Под Android 13 инсталираните от вас приложения трябва да получат разрешението ви, за да изпращат известия. Докоснете, за да промените това разрешение за съществуващите приложения."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Напомняне по-късно"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Отхвърляне"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Система"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Настройки"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>

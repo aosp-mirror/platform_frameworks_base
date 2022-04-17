@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূর্তে <xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপ পাওয়া যাচ্ছে না।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> উপলভ্য নেই"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"অনুমতি প্রয়োজন"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"ক্যামেরা উপলভ্য নেই"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ফোনে চালিয়ে যান"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"মাইক্রোফোন উপলভ্য নেই"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-এর সেটিংস উপলভ্য নেই"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"ট্যাবলেটের সেটিংস উপলভ্য নেই"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"ফোনের সেটিংস উপলভ্য নেই"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"এটি আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার Android TV ডিভাইস ব্যবহার করে দেখুন।"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"এটি আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার ট্যাবলেটে ব্যবহার করে দেখুন।"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"এটি আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার ফোনে ব্যবহার করে দেখুন।"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"এই সময়ে আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ এটি অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার Android TV ডিভাইস ব্যবহার করে দেখুন।"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"এই সময়ে আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ এটি অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার ট্যাবলেটে ব্যবহার করে দেখুন।"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"এই সময়ে আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ এটি অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার ফোনে ব্যবহার করে দেখুন।"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"এই অ্যাপ অতিরিক্ত নিরাপত্তার জন্য অনুরোধ করছে। পরিবর্তে আপনার Android TV ডিভাইস ব্যবহার করে দেখুন।"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"এই অ্যাপ অতিরিক্ত নিরাপত্তার জন্য অনুরোধ করছে। পরিবর্তে আপনার ট্যাবলেটে ব্যবহার করে দেখুন।"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"এই অ্যাপ অতিরিক্ত নিরাপত্তার জন্য অনুরোধ করছে। পরিবর্তে আপনার ফোনে ব্যবহার করে দেখুন।"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"এই অ্যাপটি Android এর একটি পুরনো ভার্সনের জন্য তৈরি করা হয়েছিল, তাই এখানে সেটি ঠিকমতো কাজ নাও করতে পারে। আপডেট পাওয়া যাচ্ছে কিনা দেখুন বা ডেভেলপারের সাথে যোগাযোগ করুন।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"আপডেট পাওয়া যাচ্ছে কিনা দেখুন"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"আপনার নতুন মেসেজ আছে"</string>
@@ -2067,14 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"আরও জানতে এবং পরিবর্তন করতে ট্যাপ করুন।"</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'বিরক্ত করবে না\' মোডের সেটিং বদলে গেছে"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"কী কী ব্লক করা আছে তা দেখতে ট্যাপ করুন।"</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"বিজ্ঞপ্তির সেটিংস পর্যালোচনা করুন"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13-এ, আপনার ইনস্টল করা অ্যাপের বিজ্ঞপ্তি পাঠানোর জন্য অনুমতি প্রয়োজন। আগে থাকা অ্যাপের জন্য এই অনুমতি পরিবর্তন করতে ট্যাপ করুন।"</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"পরে মনে করিয়ে দিও"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"বাতিল করুন"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"সিস্টেম"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"সেটিংস"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"ক্যামেরা"</string>
