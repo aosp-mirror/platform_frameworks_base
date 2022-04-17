@@ -57,6 +57,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
@@ -110,7 +112,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         mTouchHandler = new BouncerSwipeTouchHandler(
                 mDisplayMetrics,
                 mStatusBarKeyguardViewManager,
-                mCentralSurfaces,
+                Optional.of(mCentralSurfaces),
                 mNotificationShadeWindowController,
                 mValueAnimatorCreator,
                 mVelocityTrackerFactory,

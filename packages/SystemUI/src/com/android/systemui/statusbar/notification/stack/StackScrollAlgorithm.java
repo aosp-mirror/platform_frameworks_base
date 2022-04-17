@@ -54,6 +54,7 @@ public class StackScrollAlgorithm {
 
     private int mPaddingBetweenElements;
     private int mGapHeight;
+    private int mGapHeightOnLockscreen;
     private int mCollapsedSize;
 
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
@@ -87,6 +88,8 @@ public class StackScrollAlgorithm {
         mPinnedZTranslationExtra = res.getDimensionPixelSize(
                 R.dimen.heads_up_pinned_elevation);
         mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
+        mGapHeightOnLockscreen = res.getDimensionPixelSize(
+                R.dimen.notification_section_divider_height_lockscreen);
         mNotificationScrimPadding = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
         mMarginBottom = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
     }
@@ -305,7 +308,8 @@ public class StackScrollAlgorithm {
                     ambientState.getSectionProvider(), i,
                     view, getPreviousView(i, state));
             if (applyGapHeight) {
-                currentY += mGapHeight;
+                currentY += getGapForLocation(
+                        ambientState.getFractionToShade(), ambientState.isOnKeyguard());
             }
 
             if (ambientState.getShelf() != null) {
@@ -454,8 +458,10 @@ public class StackScrollAlgorithm {
                         ambientState.getSectionProvider(), i,
                         view, getPreviousView(i, algorithmState));
         if (applyGapHeight) {
-            algorithmState.mCurrentYPosition += expansionFraction * mGapHeight;
-            algorithmState.mCurrentExpandedYPosition += mGapHeight;
+            final float gap = getGapForLocation(
+                    ambientState.getFractionToShade(), ambientState.isOnKeyguard());
+            algorithmState.mCurrentYPosition += expansionFraction * gap;
+            algorithmState.mCurrentExpandedYPosition += gap;
         }
 
         viewState.yTranslation = algorithmState.mCurrentYPosition;
@@ -539,14 +545,27 @@ public class StackScrollAlgorithm {
             SectionProvider sectionProvider,
             int visibleIndex,
             View child,
-            View previousChild) {
+            View previousChild,
+            float fractionToShade,
+            boolean onKeyguard) {
 
         if (childNeedsGapHeight(sectionProvider, visibleIndex, child,
                 previousChild)) {
-            return mGapHeight;
+            return getGapForLocation(fractionToShade, onKeyguard);
         } else {
             return 0;
         }
+    }
+
+    @VisibleForTesting
+    float getGapForLocation(float fractionToShade, boolean onKeyguard) {
+        if (fractionToShade > 0f) {
+            return MathUtils.lerp(mGapHeightOnLockscreen, mGapHeight, fractionToShade);
+        }
+        if (onKeyguard) {
+            return mGapHeightOnLockscreen;
+        }
+        return mGapHeight;
     }
 
     /**

@@ -72,6 +72,9 @@ class LockscreenShadeTransitionController @Inject constructor(
     dumpManager: DumpManager
 ) : Dumpable {
     private var pulseHeight: Float = 0f
+    @get:VisibleForTesting
+    var fractionToShade: Float = 0f
+        private set
     private var useSplitShade: Boolean = false
     private lateinit var nsslController: NotificationStackScrollLayoutController
     lateinit var notificationPanelController: NotificationPanelViewController
@@ -405,9 +408,9 @@ class LockscreenShadeTransitionController @Inject constructor(
             if (field != value || forceApplyAmount) {
                 field = value
                 if (!nsslController.isInLockedDownShade() || field == 0f || forceApplyAmount) {
-                    val notificationShelfProgress =
+                    fractionToShade =
                         MathUtils.saturate(dragDownAmount / notificationShelfTransitionDistance)
-                    nsslController.setTransitionToFullShadeAmount(notificationShelfProgress)
+                    nsslController.setTransitionToFullShadeAmount(fractionToShade)
 
                     qSDragProgress = MathUtils.saturate(dragDownAmount / qsTransitionDistance)
                     qS.setTransitionToFullShadeAmount(field, qSDragProgress)
