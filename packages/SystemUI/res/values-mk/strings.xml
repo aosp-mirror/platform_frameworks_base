@@ -506,8 +506,8 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Штедачот на батерија е вклучен"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Ја намалува изведбата и податоците во заднина"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Исклучете го штедачот на батерија"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинките, деталите за плаќање, фотографиите, пораките и аудиото што го пуштате."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинките, деталите за плаќање, фотографиите, пораките и аудиото што го пуштате."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Да почне снимање или емитување?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Да почне снимање или емитување со <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Не покажувај повторно"</string>
@@ -833,7 +833,7 @@
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Numpad <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Отстрани го прилогот"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Систем"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Почетна страница"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Почетен екран"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Неодамнешни"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Назад"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Известувања"</string>

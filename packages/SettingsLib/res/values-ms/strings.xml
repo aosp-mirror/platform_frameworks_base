@@ -359,7 +359,7 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Nyahpepijat operasi keratan bukan segi empat tepat"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Pemaparan HWUI profil"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Dayakan lepasan nyahpepijat GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Bnrkn pemuatan lpsn nyhppjt GPU utk apl pnyhppjtn"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Benarkan pemuatan lapisan nyahpepijat GPU untuk apl penyahpepijatan"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Dayakan pengelogan vendor berjela"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sertakan log tambahan vendor khusus peranti dalam laporan pepijat, yang mungkin mengandungi maklumat peribadi, menggunakan lebih banyak kuasa bateri dan/atau menggunakan lebih banyak storan."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala animasi tetingkap"</string>

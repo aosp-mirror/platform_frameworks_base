@@ -287,8 +287,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"Колчырак күйүк."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Колчырак өчүрүлдү."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Колчырак күйгүзүлдү."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Түстү өзгөртүү аракети өчүрүлдү."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Түстү өзгөртүү аракети күйгүзүлдү."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Түстөрдү инверсиялоо өчүрүлдү."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Түстөрдү инверсиялоо күйгүзүлдү."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Мобилдик байланыш түйүнү өчүрүлдү."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Мобилдик байланыш түйүнү күйгүзүлдү."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Тышкы экранга чыгаруу аракети токтотулду."</string>

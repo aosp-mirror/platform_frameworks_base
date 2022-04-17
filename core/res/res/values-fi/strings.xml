@@ -1700,7 +1700,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"EI PÄÄLLÄ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Saako <xliff:g id="SERVICE">%1$s</xliff:g> laitteesi täyden käyttöoikeuden?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jos <xliff:g id="SERVICE">%1$s</xliff:g> otetaan käyttöön, laitteesi ei käytä näytön lukitusta tiedon salauksen parantamiseen."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täysi käyttöoikeus sopii esteettömyyssovelluksille, mutta ei useimmille sovelluksille."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täysi käyttöoikeus sopii saavutettavuussovelluksille, mutta ei useimmille sovelluksille."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Näytön katselu ja ohjaus"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Se voi lukea kaiken näytön sisällön ja näyttää sisältöä kaikista sovelluksista."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Toimintojen näkeminen ja suorittaminen"</string>

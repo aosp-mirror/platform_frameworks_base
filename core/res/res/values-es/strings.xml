@@ -1283,14 +1283,14 @@
     <string name="volume_music" msgid="7727274216734955095">"Volumen de multimedia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Reproduciendo a través de Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Tono de silencio establecido"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Volumen de llamada"</string>
-    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volumen de llamada Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Volumen de alarma"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Volumen de llamadas"</string>
+    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volumen de llamadas Bluetooth"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Volumen de alarmas"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Volumen de notificaciones"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volumen"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volumen de Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Volumen del tono"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volumen de llamada"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volumen de llamadas"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Volumen de multimedia"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volumen de notificaciones"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Tono por defecto"</string>
@@ -1875,7 +1875,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Ahorro de batería activa el tema oscuro y limita o desactiva la actividad en segundo plano, algunos efectos visuales, ciertas funciones y algunas conexiones de red."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Ahorro de batería activa el tema oscuro y limita o desactiva la actividad en segundo plano, algunos efectos visuales, ciertas funciones y algunas conexiones de red."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que puede reducir el uso de datos. Una aplicación activa puede acceder a los datos, aunque con menos frecuencia. Esto significa que es posible que, por ejemplo, algunas imágenes no se muestren hasta que las toques."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para reducir el uso de datos, Ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano. Si estás usando una aplicación, podrá acceder a datos, pero con menos frecuencia. Esto significa que es posible que, por ejemplo, algunas imágenes no se muestren hasta que las toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1915,7 +1915,7 @@
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Hasta las <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Hasta que lo desactives"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Hasta que desactives la opción No molestar"</string>
-    <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
+    <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Contraer"</string>
     <string name="zen_mode_feature_name" msgid="3785547207263754500">"No molestar"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Periodo de descanso"</string>

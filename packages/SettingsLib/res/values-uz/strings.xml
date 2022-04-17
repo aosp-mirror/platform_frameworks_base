@@ -299,7 +299,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Joylashuv emulyatsiyasiga ruxsat berish"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Alomatlar tekshiruvini yoqish"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mobil internet har doim yoniq tursin, hatto Wi-Fi yoniq bo‘lsa ham (bir tarmoqdan ikkinchisiga tezroq o‘tish uchun)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Modem rejimida apparatli tezlashtirishdan foydalanish (agar mavjud bo‘lsa)"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Modem rejimida apparatli tezlatishdan foydalanish (mavjud bo‘lsa)."</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB orqali nosozliklarni tuzatishga ruxsat berilsinmi?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB orqali nosozliklarni aniqlash faqat dasturlash maqsadlarida yoqiladi. Undan maʼlumotlarni qurilmangiz va kompyuter o‘rtasida ko‘chirish, ilovalarni xabarnomasiz o‘rnatish va jurnal maʼlumotlarini o‘qish uchun foydalaniladi."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Wi-Fi orqali debagging uchun ruxsat berilsinmi?"</string>
@@ -347,14 +347,14 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Ekranda tasvirlarni biriktirish uchun doim GPU ishlatilsin"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Rang maydonini simulyatsiyalash"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL trassasini yoqish"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Audio uzatishni o‘ch. qo‘yish (USB)"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Tashqi USB qurilmaga avto-yo‘naltirishni o‘ch. qo‘yish"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Audio uzatishni faolsizlantirish (USB)"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Tashqi USB qurilmaga avto-yo‘naltirishni faolsizlantirish"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Elementlar hoshiyasi"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Klip, maydon va h.k. chegaralarini ko‘rsatish"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"O‘ngdan chapga qarab yozish"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Barcha tillarda o‘ngdan chapga qarab yozish"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Oyna xiralashga ruxsat"</string>
-    <string name="force_msaa" msgid="4081288296137775550">"4x MSAAni yoqish"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"4x MSAA sozlamasini yoqish"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ilovasidan 4x MSAAni yoqish"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"To‘g‘ri burchakli bo‘lmagan kesishma amallarini tuzatish"</string>
     <string name="track_frame_time" msgid="522674651937771106">"HWUI ishlash vaqtining hisobi"</string>

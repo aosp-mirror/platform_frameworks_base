@@ -205,10 +205,10 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Этот пользователь не может изменять настройки режима модема"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Этот пользователь не может изменять настройки точки доступа"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Отладка по USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Включить режим отладки при подключении к компьютеру по USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Отозвать доступ для USB-отладки"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Режим отладки при подключении по USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Отозвать доступ для отладки по USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Отладка по Wi-Fi"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Режим отладки при подключении к сети Wi‑Fi"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Режим отладки при подключении по Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Ошибка"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Отладка по Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Чтобы увидеть и использовать доступные устройства, включите отладку по Wi-Fi."</string>
@@ -253,7 +253,7 @@
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Подробный журнал Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Ограничивать поиск сетей Wi‑Fi"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Случайные MAC-адреса в сети Wi-Fi"</string>
-    <string name="mobile_data_always_on" msgid="8275958101875563572">"Не отключать мобильный Интернет"</string>
+    <string name="mobile_data_always_on" msgid="8275958101875563572">"Не отключать мобильный интернет"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Аппаратное ускорение в режиме модема"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Показывать Bluetooth-устройства без названий"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Отключить абсолютный уровень громкости"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показывать параметры сертификации беспроводных мониторов"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Вести подробный журнал, показывать RSSI для каждого SSID при выборе сети"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Уменьшает расход заряда батареи и улучшает работу сети"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Если этот режим активирован, MAC-адрес устройства может меняться при каждом подключении к сети, в которой возможно создание случайных MAC-адресов."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Если этот режим активирован, MAC-адрес устройства может меняться при каждом подключении к сети, в которой возможно создание случайных MAC-адресов"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Сеть с тарификацией трафика"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сеть без тарификации трафика"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Размер буфера журнала"</string>
@@ -352,7 +352,7 @@
     <string name="debug_layout" msgid="1659216803043339741">"Показывать границы элементов"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Показывать границы обрезки, поля и т. п."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Отразить интерфейс"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Принудительно расположить элементы интерфейса справа налево во всех локалях"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Принудительно расположить элементы интерфейса справа налево вне зависимости от региональных настроек"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Размытие на уровне окон"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Включить 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Включить 4x MSAA в приложениях OpenGL ES 2.0"</string>
@@ -532,7 +532,7 @@
     <string name="storage_category" msgid="2287342585424631813">"Хранилище"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Общие данные"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Просмотр и изменение общих данных"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Нет общих данных для этого пользователя."</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Для этого пользователя нет общих данных"</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"При получении общих данных произошла ошибка. Повторите попытку."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Идентификатор общих данных: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Срок действия истекает <xliff:g id="DATE">%s</xliff:g>"</string>

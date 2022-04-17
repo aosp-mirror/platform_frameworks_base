@@ -665,7 +665,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"I-enable ang demo mode"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Ipakita ang demo mode"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"I-set up para makapagsagawa ng mas mabibilis, mas secure na pagbili gamit ang telepono mo"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Ipakita lahat"</string>
