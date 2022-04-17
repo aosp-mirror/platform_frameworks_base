@@ -136,6 +136,12 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmado"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Toque em Confirmar para concluir."</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Desbloqueado c/ rosto. Prima o ícone de desb. p/ continuar."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Utilizar PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utilizar padrão"</string>
@@ -312,6 +318,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Deslize rapidamente para cima para abrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Prima o ícone de desbloqueio para abrir"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Desbloqueado com o rosto. Prima o ícone de desbl. p/ abrir."</string>
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Deslize rapidamente para cima para tentar novamente."</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquear para utilizar o NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence à sua entidade."</string>
@@ -338,14 +350,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Pretende continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Recomeçar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sim, continuar"</string>
-    <!-- no translation found for guest_notification_app_name (2110425506754205509) -->
-    <skip />
-    <!-- no translation found for guest_notification_session_active (5567273684713471450) -->
-    <skip />
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Modo convidado"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Está no modo convidado"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Adicionar um novo utilizador?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores."</string>
-    <!-- no translation found for user_add_user_message_guest_remove (5589286604543355007) -->
-    <skip />
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Ao adicionar um novo utilizador, o modo convidado é fechado e todas as apps e dados da sessão de convidado atual são eliminados."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite de utilizadores alcançado"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Pode adicionar até <xliff:g id="COUNT">%d</xliff:g> utilizadores.</item>
@@ -486,7 +495,7 @@
     <string name="tuner_toast" msgid="3812684836514766951">"Parabéns! O Sintonizador da interface do sistema foi adicionado às Definições"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Remover das Definições"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Remover o Sintonizador da interface do sistema das Definições e deixar de utilizar todas as respetivas funcionalidades?"</string>
-    <string name="enable_bluetooth_title" msgid="866883307336662596">"Pretende ativar o Bluetooth?"</string>
+    <string name="enable_bluetooth_title" msgid="866883307336662596">"Ativar o Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Para ligar o teclado ao tablet, tem de ativar primeiro o Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Ativar"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controlos de notificações do consumo de energia"</string>
@@ -514,6 +523,8 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> não suporta funcionalidades de conversa."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Não é possível modificar estas notificações."</string>
+    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
+    <skip />
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Não é possível configurar este grupo de notificações aqui."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notificação de app proxy"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Todas as notificações da app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -711,7 +722,7 @@
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"O modo Não incomodar foi ativado por uma regra automática ou por uma app."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps em execução em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Toque para obter detalhes acerca da utilização da bateria e dos dados"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Pretende desativar os dados móveis?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Desativar os dados móveis?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Não terá acesso a dados ou à Internet através do operador <xliff:g id="CARRIER">%s</xliff:g>. A Internet estará disponível apenas por Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"o seu operador"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Uma vez que uma app está a ocultar um pedido de autorização, as Definições não conseguem validar a sua resposta."</string>
@@ -813,8 +824,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pausar"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Faixa anterior"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Faixa seguinte"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"A ligar…"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Reproduzir"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Abrir <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Reproduzir <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> a partir da app <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -918,12 +928,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Adicionar mosaico"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Não adicion. mosaico"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Selecione utilizador"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apps ativas</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> app ativa</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Novas informações"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apps ativas"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Parar"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Parada"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Concluir"</string>
