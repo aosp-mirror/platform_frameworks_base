@@ -82,6 +82,23 @@ public class AmbientState {
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
 
+    /** Fraction of lockscreen to shade animation (on lockscreen swipe down). */
+    private float mFractionToShade;
+
+    /**
+     * @param fractionToShade Fraction of lockscreen to shade transition
+     */
+    public void setFractionToShade(float fractionToShade) {
+        mFractionToShade = fractionToShade;
+    }
+
+    /**
+     * @return fractionToShade Fraction of lockscreen to shade transition
+     */
+    public float getFractionToShade() {
+        return mFractionToShade;
+    }
+
     /** How we much we are sleeping. 1f fully dozing (AOD), 0f fully awake (for all other states) */
     private float mDozeAmount = 0.0f;
 
