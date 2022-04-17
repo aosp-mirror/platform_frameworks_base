@@ -42,8 +42,6 @@
     <string name="consent_yes" msgid="8344487259618762872">"اجازت دیں"</string>
     <string name="consent_no" msgid="2640796915611404382">"اجازت نہ دیں"</string>
     <string name="consent_back" msgid="2560683030046918882">"پیچھے"</string>
-    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"‏ایپس کو ;‎&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&amp;gt پر اجازت دیں یکساں اجازتیں جو ‎&lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>;&lt;/strong&amp;gt پر کے بطور ہیں؟"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"‏&lt;p&gt;اس میں مائیکروفون، کیمرا اور مقام تک رسائی اور ;‎&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&amp;gt پر دیگر حساس اجازتیں شامل ہو سکتی ہیں۔&lt;/p&gt; &lt;p&gt;آپ ‎&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>;&lt;/strong&amp;gt پر کسی بھی وقت اپنی ترتیبات میں ان اجازتوں کو تبدیل کر سکتے ہیں۔&lt;/p&gt;"</string>
 </resources>

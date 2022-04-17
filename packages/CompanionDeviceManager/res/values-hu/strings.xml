@@ -42,8 +42,6 @@
     <string name="consent_yes" msgid="8344487259618762872">"Engedélyezés"</string>
     <string name="consent_no" msgid="2640796915611404382">"Tiltás"</string>
     <string name="consent_back" msgid="2560683030046918882">"Vissza"</string>
-    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Ugyanolyan engedélyeket ad a(z) &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; eszközön található alkalmazásoknak, mint a(z) &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; eszköz esetén?"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;Ide tartozhatnak a mikrofonhoz, a kamerához és a helyhez való hozzáférések, valamint a(z) &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; eszközön érvényes egyéb, bizalmas adatokra vonatkozó hozzáférési engedélyek is.&lt;/p&gt; &lt;p&gt;Ezeket az engedélyeket bármikor módosíthatja a(z) &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; eszköz beállításai között.&lt;/p&gt;"</string>
 </resources>
