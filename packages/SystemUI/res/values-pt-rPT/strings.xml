@@ -699,7 +699,7 @@
     <string name="qs_rearrange" msgid="484816665478662911">"Reorganizar as Definições rápidas"</string>
     <string name="show_brightness" msgid="6700267491672470007">"Mostrar luminosidade nas Definições rápidas"</string>
     <string name="experimental" msgid="3549865454812314826">"Experimental"</string>
-    <string name="enable_bluetooth_title" msgid="866883307336662596">"Pretende ativar o Bluetooth?"</string>
+    <string name="enable_bluetooth_title" msgid="866883307336662596">"Ativar o Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Para ligar o teclado ao tablet, tem de ativar primeiro o Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Ativar"</string>
     <string name="show_silently" msgid="5629369640872236299">"Mostrar notificações sem som"</string>
@@ -986,7 +986,7 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Substituir"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps em execução em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Toque para obter detalhes acerca da utilização da bateria e dos dados"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Pretende desativar os dados móveis?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Desativar os dados móveis?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Não terá acesso a dados ou à Internet através do operador <xliff:g id="CARRIER">%s</xliff:g>. A Internet estará disponível apenas por Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"o seu operador"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Uma vez que uma app está a ocultar um pedido de autorização, as Definições não conseguem validar a sua resposta."</string>
