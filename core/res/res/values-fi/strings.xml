@@ -2153,7 +2153,7 @@
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Kuvakaappaus"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Näytöllä näkyvä esteettömyyspainike"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Näytöllä näkyvän esteettömyyspainikkeen valitsin"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Esteettömyyspainike"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Saavutettavuuspainike"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Sulje ilmoitusalue"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Tekstityspalkki: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> on nyt rajoitettujen ryhmässä"</string>
