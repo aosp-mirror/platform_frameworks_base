@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Жок"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Жупташканда байланыштарыңыз менен чалуу таржымалыңызды пайдалана аласыз."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> менен жупташуу мүмкүн эмес."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN же код туура эмес болгондуктан, <xliff:g id="DEVICE_NAME">%1$s</xliff:g> туташуу мүмкүн эмес."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN-код же сырсөз туура эмес болгондуктан, \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" түзмөгүнө туташуу мүмкүн болгон жок."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> менен байланышуу мүмкүн эмес."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Жупташтырууну <xliff:g id="DEVICE_NAME">%1$s</xliff:g> четке какты."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>

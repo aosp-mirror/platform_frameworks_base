@@ -47,7 +47,7 @@
     <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
     <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"නැත/වැඩි දියුණු කළ විවෘත"</string>
-    <string name="wifi_security_owe" msgid="3343421403561657809">"වැඩි දියුණු කළ විවෘත"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise බිටු-192"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"සුරකින ලදි"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"විසන්ධි විය"</string>
@@ -655,12 +655,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR කේතය ස්කෑන් කරන්න"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"සවන් දීම ආරම්භ කිරීමට, පහත QR කේතය මධ්‍යගත කරන්න"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR කේතය වලංගු ආකෘතියක් නොවේ"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> විකාශනය කිරීම නවත්වන්නද?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ඔබ <xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය කළහොත් හෝ ප්‍රතිදානය වෙනස් කළහොත්, ඔබගේ වත්මන් විකාශනය නවතිනු ඇත."</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ප්‍රතිදානය වෙනස් කරන්න"</string>
 </resources>
