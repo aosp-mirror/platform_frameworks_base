@@ -136,6 +136,12 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potwierdzono"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Aby zakończyć, kliknij Potwierdź"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Odblokowano skanem twarzy. Aby kontynuować, kliknij ikonę odblokowywania."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Uwierzytelniono"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Użyj kodu PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Użyj wzoru"</string>
@@ -316,6 +322,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Przesuń w górę, by otworzyć"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Aby otworzyć, kliknij ikonę odblokowywania"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Odblokowano skanem twarzy. Aby otworzyć, kliknij ikonę odblokowywania."</string>
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Przesuń w górę, by spróbować ponownie"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Odblokuj, by użyć komunikacji NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"To urządzenie należy do Twojej organizacji"</string>
@@ -496,10 +508,10 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Ciche"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Domyślne"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatycznie"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brak dźwięku i wibracji"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Bez dźwięku i wibracji"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brak dźwięku i wibracji, wyświetla się niżej w sekcji rozmów"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Może włączyć dzwonek lub wibracje w zależności od ustawień telefonu"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Może włączyć dzwonek lub wibracje w zależności od ustawień telefonu. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Może włączać dzwonek lub wibracje w zależności od ustawień telefonu"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Może włączać dzwonek lub wibracje w zależności od ustawień telefonu. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Pozwól systemowi decydować, czy o powiadomieniu powinien informować dźwięk czy wibracja"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stan:&lt;/b&gt; zmieniony na Domyślny"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stan:&lt;/b&gt; zmieniono na Ciche"</string>
@@ -512,6 +524,8 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorytetowe"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje funkcji rozmów"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tych powiadomień nie można zmodyfikować."</string>
+    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
+    <skip />
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tej grupy powiadomień nie można tu skonfigurować"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Powiadomienie w zastępstwie"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Wszystkie powiadomienia z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -922,14 +936,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj kafelek"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nie dodawaj kafelka"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Wybierz użytkownika"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aktywne aplikacje</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> aktywnych aplikacji</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktywnej aplikacji</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aktywna aplikacja</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nowa informacja"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktywne aplikacje"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zatrzymaj"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zatrzymano"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gotowe"</string>

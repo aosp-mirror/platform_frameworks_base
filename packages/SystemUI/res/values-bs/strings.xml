@@ -136,6 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potvrđeno"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Dodirnite Potvrdi da završite"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Otključano licem. Pritisnite ikonu za otklj. da nastavite."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Otključano licem. Pritisnite da nastavite."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Lice prepoznato. Pritisnite da nastavite."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Lice prepoznato. Pritisnite ikonu za otklj. da nastavite."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentificirano"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Koristi PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Koristi uzorak"</string>
@@ -314,6 +317,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Prevucite da otvorite"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pritisnite ikonu za otključavanje da otvorite."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Otključano licem. Pritisnite ikonu za otklj. da otvorite."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Otključano licem. Pritisnite da otvorite."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Lice prepoznato. Pritisnite da otvorite."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Lice prepoznato. Pritisnite ikonu za otklj. da otvorite."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Prevucite prema gore da pokušate ponovo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Otključajte da koristite NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ovaj uređaj pripada vašoj organizaciji"</string>
@@ -509,6 +515,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava funkcije razgovora"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ta obavještenja se ne mogu izmijeniti."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Nije moguće izmijeniti obavještenja o pozivima."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ovu grupu obavještenja nije moguće konfigurirati ovdje"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Obavještenje preko proksi servera"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Sva obavještenja aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -916,13 +923,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj karticu"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nemoj dodati karticu"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Odaberite korisnika"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> aktivna aplikacija</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aktivne aplikacije</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktivnih aplikacija</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nove informacije"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zaustavi"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zaustavljeno"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gotovo"</string>

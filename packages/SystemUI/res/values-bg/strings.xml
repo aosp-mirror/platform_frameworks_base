@@ -136,6 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Потвърдено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Докоснете „Потвърждаване“ за завършване"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Отключено с лице. Натиснете иконата за отключване, за да продължите."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Отключено с лице. Натиснете, за да продължите."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Лицето бе разпознато. Натиснете, за да продължите."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лицето бе разпознато. Продължете чрез иконата за отключване."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Удостоверено"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Използване на ПИН"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Използване на фигура"</string>
@@ -312,6 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Прекарайте пръст нагоре, за да отключите"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Натиснете иконата за отключване, за да отворите"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Отключено с лице. Натиснете иконата за отключване, за да отворите."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Отключено с лице. Натиснете за отваряне."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Лицето бе разпознато. Натиснете за отваряне."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Лицето бе разпознато. Отворете чрез иконата за отключване."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Плъзнете бързо нагоре, за да опитате отново"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Отключете, за да използвате NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Това устройство принадлежи на организацията ви"</string>
@@ -506,6 +512,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддържа функциите за разговор"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Тези известия не могат да бъдат променяни."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Известията за обаждания не могат да бъдат променяни."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Тази група от известия не може да бъде конфигурирана тук"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Известие, получено чрез делегиране"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Всички известия от <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -805,8 +812,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Пауза"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Предишен запис"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Следващ запис"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Установява се връзка"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Google Play"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Отваряне на <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Пускане на <xliff:g id="SONG_NAME">%1$s</xliff:g> на <xliff:g id="ARTIST_NAME">%2$s</xliff:g> от <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -911,12 +917,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Добавяне на панел"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Отмяна на добавянето"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Избор на потребител"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> активни приложения</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> активно приложение</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Нова информация"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Активни приложения"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Спиране"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Спряно"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Готово"</string>
