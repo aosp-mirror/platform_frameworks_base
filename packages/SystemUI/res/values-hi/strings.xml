@@ -136,6 +136,12 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"पुष्टि हो गई"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"\'पुष्टि करें\' पर टैप करके पूरा करें"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"चेहरे से अनलॉक किया. जारी रखने के लिए, अनलॉक आइकॉन को दबाएं."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"पुष्टि हो गई"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"पिन इस्तेमाल करें"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"पैटर्न इस्तेमाल करें"</string>
@@ -312,6 +318,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"खोलने के लिए ऊपर स्वाइप करें"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"डिवाइस अनलॉक करने के लिए, अनलॉक आइकॉन को दबाएं"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"चेहरे से अनलॉक किया. डिवाइस अनलॉक करने के लिए, अनलॉक आइकॉन को दबाएं."</string>
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"फिर से कोशिश करने के लिए ऊपर की ओर स्वाइप करें"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"एनएफ़सी इस्तेमाल करने के लिए स्क्रीन को अनलॉक करें"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है"</string>
@@ -506,6 +518,8 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर बातचीत की सुविधाएं काम नहीं करतीं"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>
+    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
+    <skip />
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"सूचनाओं के इस समूह को यहां कॉन्फ़िगर नहीं किया जा सकता"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी सूचना"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"सभी <xliff:g id="APP_NAME">%1$s</xliff:g> सूचनाएं"</string>
@@ -805,8 +819,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"रोकें"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"पिछला ट्रैक"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"अगला ट्रैक"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"कनेक्ट किया जा रहा है"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"चलाएं"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> खोलें"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> पर, <xliff:g id="ARTIST_NAME">%2$s</xliff:g> का <xliff:g id="SONG_NAME">%1$s</xliff:g> चलाएं"</string>
@@ -911,12 +924,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"टाइल जोड़ें"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"टाइल न जोड़ें"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"उपयोगकर्ता चुनें"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> ऐप्लिकेशन चालू है</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> ऐप्लिकेशन चालू हैं</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"नई जानकारी"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ये ऐप्लिकेशन चालू हैं"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"बंद करें"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"बंद है"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"हो गया"</string>
