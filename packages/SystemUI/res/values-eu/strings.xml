@@ -230,7 +230,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audioa"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Entzungailua"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Sarrera"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Audiofonoak"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Audifonoak"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Aktibatzen…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Biratze automatikoa"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Biratu pantaila automatikoki"</string>

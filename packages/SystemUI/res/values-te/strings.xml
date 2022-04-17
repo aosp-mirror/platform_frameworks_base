@@ -118,7 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"ఫోన్‌ను తెరువు"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"వాయిస్ అసిస్టెంట్‌ను తెరువు"</string>
     <string name="camera_label" msgid="8253821920931143699">"కెమెరాను తెరవండి"</string>
-    <string name="cancel" msgid="1089011503403416730">"రద్దు చేయి"</string>
+    <string name="cancel" msgid="1089011503403416730">"రద్దు చేయండి"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"నిర్ధారించు"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"మళ్లీ ప్రయత్నించు"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ప్రామాణీకరణను రద్దు చేయడానికి నొక్కండి"</string>

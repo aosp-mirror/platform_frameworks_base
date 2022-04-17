@@ -418,7 +418,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"App is vastgezet"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Overzicht en houd deze vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Home en houd deze vast om het scherm los te maken."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zo blijft het scherm zichtbaar totdat je dit losmaakt. Swipe omhoog en houd vast om los te maken."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zo blijft het scherm zichtbaar totdat je het losmaakt. Swipe omhoog en houd vast om los te maken."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Overzicht en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Home en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Persoonlijke informatie kan toegankelijk zijn (zoals contacten en e-mailcontent)."</string>

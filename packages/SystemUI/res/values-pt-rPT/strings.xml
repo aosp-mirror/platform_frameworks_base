@@ -483,7 +483,7 @@
     <string name="tuner_toast" msgid="3812684836514766951">"Parabéns! O Sintonizador da interface do sistema foi adicionado às Definições"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Remover das Definições"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Remover o Sintonizador da interface do sistema das Definições e deixar de utilizar todas as respetivas funcionalidades?"</string>
-    <string name="enable_bluetooth_title" msgid="866883307336662596">"Pretende ativar o Bluetooth?"</string>
+    <string name="enable_bluetooth_title" msgid="866883307336662596">"Ativar o Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Para ligar o teclado ao tablet, tem de ativar primeiro o Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Ativar"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controlos de notificações do consumo de energia"</string>
@@ -708,7 +708,7 @@
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"O modo Não incomodar foi ativado por uma regra automática ou por uma app."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps em execução em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Toque para obter detalhes acerca da utilização da bateria e dos dados"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Pretende desativar os dados móveis?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Desativar os dados móveis?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Não terá acesso a dados ou à Internet através do operador <xliff:g id="CARRIER">%s</xliff:g>. A Internet estará disponível apenas por Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"o seu operador"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Uma vez que uma app está a ocultar um pedido de autorização, as Definições não conseguem validar a sua resposta."</string>
