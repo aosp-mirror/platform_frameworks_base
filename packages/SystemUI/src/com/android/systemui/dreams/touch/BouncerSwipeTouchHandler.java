@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -77,7 +78,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private float mCurrentExpansion;
-    private final CentralSurfaces mCentralSurfaces;
+    private final Optional<CentralSurfaces> mCentralSurfaces;
 
     private VelocityTracker mVelocityTracker;
 
@@ -107,7 +108,9 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                         // If the user scrolling favors a vertical direction, begin capturing
                         // scrolls.
                         mCapture = Math.abs(distanceY) > Math.abs(distanceX);
-                        mBouncerInitiallyShowing = mCentralSurfaces.isBouncerShowing();
+                        mBouncerInitiallyShowing = mCentralSurfaces
+                                .map(CentralSurfaces::isBouncerShowing)
+                                .orElse(false);
 
                         if (mCapture) {
                             // Since the user is dragging the bouncer up, set scrimmed to false.
@@ -129,13 +132,17 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                         return true;
                     }
 
+                    if (!mCentralSurfaces.isPresent()) {
+                        return true;
+                    }
+
                     // For consistency, we adopt the expansion definition found in the
                     // PanelViewController. In this case, expansion refers to the view above the
                     // bouncer. As that view's expansion shrinks, the bouncer appears. The bouncer
                     // is fully hidden at full expansion (1) and fully visible when fully collapsed
                     // (0).
                     final float screenTravelPercentage = Math.abs(e1.getY() - e2.getY())
-                            / mCentralSurfaces.getDisplayHeight();
+                            / mCentralSurfaces.get().getDisplayHeight();
                     setPanelExpansion(mBouncerInitiallyShowing
                             ? screenTravelPercentage : 1 - screenTravelPercentage);
                     return true;
@@ -144,8 +151,8 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private void setPanelExpansion(float expansion) {
         mCurrentExpansion = expansion;
-        mCentralSurfaces.setBouncerShowingOverDream(
-                mCurrentExpansion != KeyguardBouncer.EXPANSION_HIDDEN);
+        mCentralSurfaces.ifPresent(centralSurfaces -> centralSurfaces.setBouncerShowingOverDream(
+                mCurrentExpansion != KeyguardBouncer.EXPANSION_HIDDEN));
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(mCurrentExpansion, false, true);
     }
 
@@ -173,7 +180,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     public BouncerSwipeTouchHandler(
             DisplayMetrics displayMetrics,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            CentralSurfaces centralSurfaces,
+            Optional<CentralSurfaces> centralSurfaces,
             NotificationShadeWindowController notificationShadeWindowController,
             ValueAnimatorCreator valueAnimatorCreator,
             VelocityTrackerFactory velocityTrackerFactory,
@@ -197,7 +204,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     @Override
     public void getTouchInitiationRegion(Region region) {
-        if (mCentralSurfaces.isBouncerShowing()) {
+        if (mCentralSurfaces.map(CentralSurfaces::isBouncerShowing).orElse(false)) {
             region.op(new Rect(0, 0, mDisplayMetrics.widthPixels,
                             Math.round(
                                     mDisplayMetrics.heightPixels * mBouncerZoneScreenPercentage)),
@@ -308,8 +315,12 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     }
 
     protected void flingToExpansion(float velocity, float expansion) {
+        if (!mCentralSurfaces.isPresent()) {
+            return;
+        }
+
         // The animation utils deal in pixel units, rather than expansion height.
-        final float viewHeight = mCentralSurfaces.getDisplayHeight();
+        final float viewHeight = mCentralSurfaces.get().getDisplayHeight();
         final float currentHeight = viewHeight * mCurrentExpansion;
         final float targetHeight = viewHeight * expansion;
 
