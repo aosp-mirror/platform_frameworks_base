@@ -25,7 +25,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.ActivityTaskManager;
 import android.app.Instrumentation;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -511,14 +510,11 @@ public abstract class GameSession {
                             callback.onActivityResult(result.getResultCode(), result.getData());
                         }, executor);
 
-        final Intent trampolineIntent = new Intent();
-        trampolineIntent.setComponent(
-                new ComponentName(
-                        "android", "android.service.games.GameSessionTrampolineActivity"));
-        trampolineIntent.putExtra(GameSessionTrampolineActivity.INTENT_KEY, intent);
-        trampolineIntent.putExtra(GameSessionTrampolineActivity.OPTIONS_KEY, options);
-        trampolineIntent.putExtra(
-                GameSessionTrampolineActivity.FUTURE_KEY, future);
+        final Intent trampolineIntent =
+                GameSessionTrampolineActivity.createIntent(
+                        intent,
+                        options,
+                        future);
 
         try {
             int result = ActivityTaskManager.getService().startActivityFromGameSession(
