@@ -483,7 +483,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"La plus grande"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Personnalisée (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Menu"</string>
-    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Entrez m. passe pour réinit. en mode démo"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Entrez m. passe pour réinit. en mode Démo"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Suivant"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Mot de passe obligatoire"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Modes de saisie actifs"</string>

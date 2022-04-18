@@ -352,7 +352,7 @@
     <string name="debug_layout" msgid="1659216803043339741">"Düzen sınırlarını göster"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Klip sınırlarını, kenar boşluklarını vb. göster"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Sağdan sola düzenini zorla"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tüm yerel ayarlar için sağdan sola ekran düzenini zorlar"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tüm yerel ayarlar için sağdan sola ekran düzenini zorla"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Pencere bulanıklaştırmaya izin ver"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA\'yı zorla"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 uygulamalarda 4x MSAA\'yı etkinleştir"</string>
@@ -371,7 +371,7 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Kullanıcının ayrıldığı her etkinliği hemen yok et"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Arka plan işlem sınırı"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Arka plan ANR\'leri göster"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor mesajını göster"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor iletişimini göster"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Bildirim kanalı uyarılarını göster"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bir uygulama geçerli kanal olmadan bildirim yayınladığında ekranda uyarı gösterir"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Harici birimdeki uygulamalara izin vermeye zorla"</string>
