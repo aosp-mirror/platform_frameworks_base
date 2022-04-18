@@ -286,6 +286,11 @@ message SystemMessage {
     // Package: android
     NOTE_MTE_OVERRIDE_ENABLED = 69;
 
+    // Notify the user that this is a guest session with information
+    // about first login and ephemeral state
+    // Package: android
+    NOTE_GUEST_SESSION = 70;
+
     // Inform the user of notification permissions changes.
     // Package: android
     NOTE_REVIEW_NOTIFICATION_PERMISSIONS = 71;
