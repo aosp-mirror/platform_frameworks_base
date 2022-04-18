@@ -510,7 +510,6 @@ class MediaDataManagerTest : SysuiTestCase() {
                 cardAction = mediaSmartspaceBaseAction,
                 recommendations = listOf(mediaRecommendationItem),
                 dismissIntent = DISMISS_INTENT,
-                backgroundColor = 0,
                 headphoneConnectionTimeMillis = 1234L,
                 instanceId = InstanceId.fakeInstanceId(instanceId))),
             eq(false))
