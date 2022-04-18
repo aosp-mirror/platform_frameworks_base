@@ -2013,6 +2013,15 @@ public final class Settings {
             "android.settings.ALL_APPS_NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show app settings specifically for sending notifications. Same as
+     * ALL_APPS_NOTIFICATION_SETTINGS but meant for internal use.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW =
+            "android.settings.ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW";
+
+    /**
      * Activity Action: Show notification settings for a single app.
      * <p>
      *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
@@ -7668,6 +7677,20 @@ public final class Settings {
         @Readable
         public static final String ZEN_SETTINGS_SUGGESTION_VIEWED =
                 "zen_settings_suggestion_viewed";
+
+        /**
+         * State of whether review notification permissions notification needs to
+         * be shown the user, and whether the user has interacted.
+         *
+         * Valid values:
+         *   -1 = UNKNOWN
+         *    0 = SHOULD_SHOW
+         *    1 = USER_INTERACTED
+         *    2 = DISMISSED
+         * @hide
+         */
+        public static final String REVIEW_PERMISSIONS_NOTIFICATION_STATE =
+                "review_permissions_notification_state";
 
         /**
          * Whether the in call notification is enabled to play sound during calls.  The value is
