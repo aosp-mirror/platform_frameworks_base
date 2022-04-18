@@ -37,6 +37,8 @@ import com.android.internal.os.BaseCommand;
 import com.android.internal.telecom.ITelecomService;
 
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public final class Telecom extends BaseCommand {
 
@@ -88,6 +90,10 @@ public final class Telecom extends BaseCommand {
     private static final String COMMAND_GET_MAX_PHONES = "get-max-phones";
     private static final String COMMAND_SET_TEST_EMERGENCY_PHONE_ACCOUNT_PACKAGE_FILTER =
             "set-test-emergency-phone-account-package-filter";
+    /**
+     * Command used to emit a distinct "mark" in the logs.
+     */
+    private static final String COMMAND_LOG_MARK = "log-mark";
 
     private ComponentName mComponent;
     private String mAccountId;
@@ -156,6 +162,8 @@ public final class Telecom extends BaseCommand {
                         + " package name that will be used for test emergency calls. To clear,"
                         + " send an empty package name. Real emergency calls will still be placed"
                         + " over Telephony.\n"
+                + "telecom log-mark <MESSAGE>: emits a message into the telecom logs.  Useful for "
+                        + "testers to indicate where in the logs various test steps take place.\n"
         );
     }
 
@@ -256,6 +264,9 @@ public final class Telecom extends BaseCommand {
                 break;
             case COMMAND_SET_TEST_EMERGENCY_PHONE_ACCOUNT_PACKAGE_FILTER:
                 runSetEmergencyPhoneAccountPackageFilter();
+                break;
+            case COMMAND_LOG_MARK:
+                runLogMark();
                 break;
             default:
                 Log.w(this, "onRun: unknown command: %s", command);
@@ -427,6 +438,11 @@ public final class Telecom extends BaseCommand {
             System.out.println("Success = filter set to " + packageName);
         }
 
+    }
+
+    private void runLogMark() throws RemoteException {
+        String message = Arrays.stream(mArgs.peekRemainingArgs()).collect(Collectors.joining(" "));
+        mTelecomService.requestLogMark(message);
     }
 
     private PhoneAccountHandle getPhoneAccountHandleFromArgs() throws RemoteException {
