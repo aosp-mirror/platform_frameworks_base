@@ -1279,6 +1279,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         pw.println("  mAfterKeyguardGoneAction: " + mAfterKeyguardGoneAction);
         pw.println("  mAfterKeyguardGoneRunnables: " + mAfterKeyguardGoneRunnables);
         pw.println("  mPendingWakeupAction: " + mPendingWakeupAction);
+        pw.println("  isBouncerShowing(): " + isBouncerShowing());
+        pw.println("  bouncerIsOrWillBeShowing(): " + bouncerIsOrWillBeShowing());
 
         if (mBouncer != null) {
             mBouncer.dump(pw);
