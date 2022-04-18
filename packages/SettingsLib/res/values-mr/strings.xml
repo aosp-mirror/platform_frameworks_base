@@ -68,7 +68,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"डिस्कनेक्ट करत आहे..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"कनेक्ट करत आहे..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>कनेक्ट केले"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"जोडत आहे…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"पेअर करत आहे…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"कनेक्ट केले (फोन नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"कनेक्ट केले (मीडिया नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"कनेक्ट केले (मेसेज अ‍ॅक्सेस नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -118,7 +118,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"रद्द करा"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"कनेक्‍ट केल्यावर पेअरिंग तुमचे संपर्क आणि कॉल इतिहास यामध्ये अ‍ॅक्सेस देते."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> शी जोडू शकलो नाही."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"अयोग्य पिन किंवा पासकीमुळे <xliff:g id="DEVICE_NAME">%1$s</xliff:g> सह जोडू शकलो नाही."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"अयोग्य पिन किंवा पासकीमुळे <xliff:g id="DEVICE_NAME">%1$s</xliff:g> सह पेअर करू शकलो नाही."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> शी संवाद प्रस्थापित करू शकत नाही."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> द्वारे पेअरिंग नाकारले."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"कॉंप्युटर"</string>
@@ -162,7 +162,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"संश्लेषित उच्चारांच्या आवाजास प्रभावित करते"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"भाषा"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"सिस्टम भाषा वापरा"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"सिस्टीमची भाषा वापरा"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"भाषा निवडलेली नाही"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"बोललेल्या मजकुरासाठी भाषा-विशिष्ट आवाज सेट करते"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"उदाहरण ऐका"</string>
