@@ -2688,11 +2688,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final DevicePolicyData policy = getUserData(userId);
         if (who != null) {
             ActiveAdmin admin = policy.mAdminMap.get(who);
-            if (admin == null) {
-                throw new SecurityException("No active admin " + who);
-            }
-            if (admin.getUid() != uid) {
-                throw new SecurityException("Admin " + who + " is not owned by uid " + uid);
+            if (admin == null || admin.getUid() != uid) {
+                throw new SecurityException(
+                        "Admin " + who + " is not active or not owned by uid " + uid);
             }
             if (isActiveAdminWithPolicyForUserLocked(admin, reqPolicy, userId)) {
                 return admin;
