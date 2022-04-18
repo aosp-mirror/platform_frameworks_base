@@ -16167,7 +16167,8 @@ public class TelephonyManager {
      * may encounter an {@link IllegalStateException} when trying to register more callbacks.
      *
      * @param executor The executor of where the callback will execute.
-     * @param callback The {@link TelephonyCallback} object to register.
+     * @param callback The {@link TelephonyCallback} object to register. The caller should hold a
+     * reference to the callback. The framework only holds a weak reference.
      */
     public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
@@ -16258,7 +16259,8 @@ public class TelephonyManager {
      * @param includeLocationData Specifies if the caller would like to receive
      * location related information.
      * @param executor The executor of where the callback will execute.
-     * @param callback The {@link TelephonyCallback} object to register.
+     * @param callback The {@link TelephonyCallback} object to register. The caller should hold a
+     * reference to the callback. The framework only holds a weak reference.
      */
     public void registerTelephonyCallback(@IncludeLocationData int includeLocationData,
             @NonNull @CallbackExecutor Executor executor,
