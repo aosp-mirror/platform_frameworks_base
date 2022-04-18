@@ -24,6 +24,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static com.android.server.pm.PackageManagerService.DEBUG_ABI_SELECTION;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_APEX;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_FULL_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_ODM;
@@ -852,6 +853,8 @@ final class ScanPackageUtils {
             parsedPackage
                     .markNotActivitiesAsNotExportedIfSingleUser();
         }
+
+        parsedPackage.setApex((scanFlags & SCAN_AS_APEX) != 0);
 
         parsedPackage.setPrivileged((scanFlags & SCAN_AS_PRIVILEGED) != 0)
                 .setOem((scanFlags & SCAN_AS_OEM) != 0)

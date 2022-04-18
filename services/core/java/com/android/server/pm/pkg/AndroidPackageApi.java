@@ -331,6 +331,8 @@ public interface AndroidPackageApi {
 
     boolean isFactoryTest();
 
+    boolean isApex();
+
     boolean isNativeLibraryRootRequiresIsa();
 
     boolean isOdm();
