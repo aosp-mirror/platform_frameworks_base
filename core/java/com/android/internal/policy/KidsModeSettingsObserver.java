@@ -24,17 +24,17 @@ import android.os.UserHandle;
 import android.provider.Settings;
 
 /**
- * A ContentObserver for listening force show navigation bar relative setting keys:
+ * A ContentObserver for listening kids mode relative setting keys:
  *  - {@link Settings.Secure#NAVIGATION_MODE}
- *  - {@link Settings.Secure#NAV_BAR_FORCE_VISIBLE}
+ *  - {@link Settings.Secure#NAV_BAR_KIDS_MODE}
  *
  * @hide
  */
-public class ForceShowNavigationBarSettingsObserver extends ContentObserver {
+public class KidsModeSettingsObserver extends ContentObserver {
     private Context mContext;
     private Runnable mOnChangeRunnable;
 
-    public ForceShowNavigationBarSettingsObserver(Handler handler, Context context) {
+    public KidsModeSettingsObserver(Handler handler, Context context) {
         super(handler);
         mContext = context;
     }
@@ -52,7 +52,7 @@ public class ForceShowNavigationBarSettingsObserver extends ContentObserver {
                 Settings.Secure.getUriFor(Settings.Secure.NAVIGATION_MODE),
                 false, this, UserHandle.USER_ALL);
         r.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.NAV_BAR_FORCE_VISIBLE),
+                Settings.Secure.getUriFor(Settings.Secure.NAV_BAR_KIDS_MODE),
                 false, this, UserHandle.USER_ALL);
     }
 
@@ -78,6 +78,6 @@ public class ForceShowNavigationBarSettingsObserver extends ContentObserver {
         return Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.NAVIGATION_MODE, 0, UserHandle.USER_CURRENT) == 0
                 && Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.NAV_BAR_FORCE_VISIBLE, 0, UserHandle.USER_CURRENT) == 1;
+                Settings.Secure.NAV_BAR_KIDS_MODE, 0, UserHandle.USER_CURRENT) == 1;
     }
 }
