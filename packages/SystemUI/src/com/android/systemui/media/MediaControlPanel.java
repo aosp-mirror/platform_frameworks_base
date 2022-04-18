@@ -60,6 +60,7 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
+import com.android.settingslib.Utils;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.R;
@@ -953,11 +954,11 @@ public class MediaControlPanel {
         }
 
         mSmartspaceId = SmallHash.hash(data.getTargetId());
-        int backgroundColor = data.getBackgroundColor();
         mPackageName = data.getPackageName();
         mInstanceId = data.getInstanceId();
         TransitionLayout recommendationCard = mRecommendationViewHolder.getRecommendations();
-        recommendationCard.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
+        recommendationCard.setBackgroundTintList(
+                Utils.getColorAttr(mContext, com.android.internal.R.attr.colorSurface));
 
         List<SmartspaceAction> mediaRecommendationList = data.getRecommendations();
         if (mediaRecommendationList == null || mediaRecommendationList.isEmpty()) {
@@ -1057,6 +1058,8 @@ public class MediaControlPanel {
             TextView titleView =
                     mRecommendationViewHolder.getMediaTitles().get(uiComponentIndex);
             titleView.setText(title);
+            titleView.setTextColor(Utils.getColorAttrDefaultColor(
+                    mContext, com.android.internal.R.attr.textColorPrimary));
             // TODO(b/223603970): If none of them have titles, should we then hide the views?
 
             // Set up subtitle
@@ -1067,6 +1070,8 @@ public class MediaControlPanel {
             boolean shouldShowSubtitleText = !TextUtils.isEmpty(title);
             CharSequence subtitleText = shouldShowSubtitleText ? subtitle : "";
             subtitleView.setText(subtitleText);
+            subtitleView.setTextColor(Utils.getColorAttrDefaultColor(
+                    mContext, com.android.internal.R.attr.textColorSecondary));
             // TODO(b/223603970): If none of them have subtitles, should we then hide the views?
 
             uiComponentIndex++;
