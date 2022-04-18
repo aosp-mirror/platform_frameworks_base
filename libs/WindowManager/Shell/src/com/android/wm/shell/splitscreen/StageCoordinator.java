@@ -1827,15 +1827,17 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         @Override
         public void onNoLongerSupportMultiWindow() {
             if (mMainStage.isActive()) {
+                final boolean isMainStage = mMainStageListener == this;
                 if (!ENABLE_SHELL_TRANSITIONS) {
-                    StageCoordinator.this.exitSplitScreen(null /* childrenToTop */,
+                    StageCoordinator.this.exitSplitScreen(isMainStage ? mMainStage : mSideStage,
                             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW);
+                    return;
                 }
 
+                final int stageType = isMainStage ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
-                prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
-                mSplitTransitions.startDismissTransition(wct,
-                        StageCoordinator.this, STAGE_TYPE_UNDEFINED,
+                prepareExitSplitScreen(stageType, wct);
+                mSplitTransitions.startDismissTransition(wct,StageCoordinator.this, stageType,
                         EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW);
             }
         }
