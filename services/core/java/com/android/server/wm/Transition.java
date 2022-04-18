@@ -52,6 +52,7 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
+import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
 
@@ -670,8 +671,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
         handleNonAppWindowsInTransition(dc, mType, mFlags);
 
-        reportStartReasonsToLogger();
-
         // The callback is only populated for custom activity-level client animations
         sendRemoteCallback(mClientAnimationStartCallback);
 
@@ -763,6 +762,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
         mSyncId = -1;
         mOverrideOptions = null;
+
+        reportStartReasonsToLogger();
     }
 
     /**
@@ -975,11 +976,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             ActivityRecord r = mParticipants.valueAt(i).asActivityRecord();
             if (r == null || !r.mVisibleRequested) continue;
+            int transitionReason = APP_TRANSITION_WINDOWS_DRAWN;
             // At this point, r is "ready", but if it's not "ALL ready" then it is probably only
             // ready due to starting-window.
-            reasons.put(r, (r.mStartingData instanceof SplashScreenStartingData
-                    && !r.mLastAllReadyAtSync)
-                    ? APP_TRANSITION_SPLASH_SCREEN : APP_TRANSITION_WINDOWS_DRAWN);
+            if (r.mStartingData instanceof SplashScreenStartingData && !r.mLastAllReadyAtSync) {
+                transitionReason = APP_TRANSITION_SPLASH_SCREEN;
+            } else if (r.isActivityTypeHomeOrRecents() && isTransientLaunch(r)) {
+                transitionReason = APP_TRANSITION_RECENTS_ANIM;
+            }
+            reasons.put(r, transitionReason);
         }
         mController.mAtm.mTaskSupervisor.getActivityMetricsLogger().notifyTransitionStarting(
                 reasons);
