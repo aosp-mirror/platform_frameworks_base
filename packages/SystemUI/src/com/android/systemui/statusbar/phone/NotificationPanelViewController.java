@@ -2155,8 +2155,6 @@ public class NotificationPanelViewController extends PanelViewController {
             mNotificationsQSContainerController.setQsExpanded(expanded);
             mPulseExpansionHandler.setQsExpanded(expanded);
             mKeyguardBypassController.setQSExpanded(expanded);
-            mStatusBarKeyguardViewManager.setQsExpanded(expanded);
-            mLockIconViewController.setQsExpanded(expanded);
             mPrivacyDotViewController.setQsExpanded(expanded);
         }
     }
@@ -2269,6 +2267,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         mDepthController.setQsPanelExpansion(qsExpansionFraction);
+        mStatusBarKeyguardViewManager.setQsExpansion(qsExpansionFraction);
 
         // updateQsExpansion will get called whenever mTransitionToFullShadeProgress or
         // mLockscreenShadeTransitionController.getDragProgress change.
