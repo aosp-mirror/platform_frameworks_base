@@ -295,6 +295,9 @@ message SystemMessage {
     // Package: android
     NOTE_REVIEW_NOTIFICATION_PERMISSIONS = 71;
 
+    // Notify the user to setup their dock
+    NOTE_SETUP_DOCK = 72;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
