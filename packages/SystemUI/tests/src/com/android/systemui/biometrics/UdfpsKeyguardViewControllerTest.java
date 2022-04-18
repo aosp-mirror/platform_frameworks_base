@@ -124,7 +124,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         when(mView.getContext()).thenReturn(mResourceContext);
         when(mResourceContext.getString(anyInt())).thenReturn("test string");
         when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(false);
-        when(mView.getDialogSuggestedAlpha()).thenReturn(1f);
+        when(mView.getUnpausedAlpha()).thenReturn(255);
         mController = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
@@ -212,11 +212,11 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldPauseAuthDialogSuggestedAlpha0() {
+    public void testShouldPauseAuthUnpausedAlpha0() {
         mController.onViewAttached();
         captureStatusBarStateListeners();
 
-        when(mView.getDialogSuggestedAlpha()).thenReturn(0f);
+        when(mView.getUnpausedAlpha()).thenReturn(0);
         sendStatusBarStateChanged(StatusBarState.KEYGUARD);
 
         assertTrue(mController.shouldPauseAuth());
