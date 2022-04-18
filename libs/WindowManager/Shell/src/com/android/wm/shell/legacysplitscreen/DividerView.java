@@ -25,6 +25,7 @@ import static com.android.wm.shell.animation.Interpolators.SLOWDOWN_INTERPOLATOR
 import static com.android.wm.shell.common.split.DividerView.TOUCH_ANIMATION_DURATION;
 import static com.android.wm.shell.common.split.DividerView.TOUCH_RELEASE_ANIMATION_DURATION;
 
+import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -140,6 +141,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private DividerImeController mImeController;
     private DividerCallbacks mCallback;
 
+    private AnimationHandler mSfVsyncAnimationHandler;
     private ValueAnimator mCurrentAnimator;
     private boolean mEntranceAnimationRunning;
     private boolean mExitAnimationRunning;
@@ -258,6 +260,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         final DisplayManager displayManager =
                 (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
         mDefaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+    }
+
+    public void setAnimationHandler(AnimationHandler sfVsyncAnimationHandler) {
+        mSfVsyncAnimationHandler = sfVsyncAnimationHandler;
     }
 
     @Override
@@ -651,6 +657,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             }
         });
         mCurrentAnimator = anim;
+        mCurrentAnimator.setAnimationHandler(mSfVsyncAnimationHandler);
         return anim;
     }
 
