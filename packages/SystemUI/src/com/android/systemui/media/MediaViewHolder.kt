@@ -187,5 +187,17 @@ class MediaViewHolder constructor(itemView: View) {
             R.id.action3,
             R.id.action4
         )
+
+        val expandedBottomActionIds = setOf(
+            R.id.actionPrev,
+            R.id.actionNext,
+            R.id.action0,
+            R.id.action1,
+            R.id.action2,
+            R.id.action3,
+            R.id.action4,
+            R.id.media_scrubbing_elapsed_time,
+            R.id.media_scrubbing_total_time
+        )
     }
 }
