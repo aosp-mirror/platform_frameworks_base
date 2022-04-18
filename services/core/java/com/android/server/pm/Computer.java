@@ -217,11 +217,16 @@ public interface Computer extends PackageDataSnapshot {
     boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId);
     boolean shouldFilterApplication(@Nullable PackageStateInternal ps, int callingUid,
             @Nullable ComponentName component, @PackageManager.ComponentType int componentType,
+            int userId, boolean filterUninstall);
+    boolean shouldFilterApplication(@Nullable PackageStateInternal ps, int callingUid,
+            @Nullable ComponentName component, @PackageManager.ComponentType int componentType,
             int userId);
     boolean shouldFilterApplication(@Nullable PackageStateInternal ps, int callingUid,
             int userId);
     boolean shouldFilterApplication(@NonNull SharedUserSetting sus, int callingUid,
             int userId);
+    boolean shouldFilterApplicationIncludingUninstalled(@Nullable PackageStateInternal ps,
+            int callingUid, int userId);
     int checkUidPermission(String permName, int uid);
     int getPackageUidInternal(String packageName, long flags, int userId, int callingUid);
     long updateFlagsForApplication(long flags, int userId);

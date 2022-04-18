@@ -34,6 +34,7 @@
         <option name="push" value="AppEnumerationSyncProviderTestApp.apk->/data/local/tmp/appenumerationtests/AppEnumerationSyncProviderTestApp.apk" />
         <option name="push" value="AppEnumerationHasAppOpPermissionTestApp.apk->/data/local/tmp/appenumerationtests/AppEnumerationHasAppOpPermissionTestApp.apk" />
         <option name="push" value="AppEnumerationSharedUserTestApp.apk->/data/local/tmp/appenumerationtests/AppEnumerationSharedUserTestApp.apk" />
+        <option name="push" value="AppEnumerationCrossUserPackageVisibilityTestApp.apk->/data/local/tmp/appenumerationtests/AppEnumerationCrossUserPackageVisibilityTestApp.apk" />
     </target_preparer>
 
     <option name="test-tag" value="AppEnumerationInternalTest" />

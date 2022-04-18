@@ -30,6 +30,7 @@ android_test {
         "compatibility-device-util-axt",
         "androidx.test.runner",
         "truth-prebuilt",
+        "Harrier",
     ],
     platform_apis: true,
     test_suites: ["device-tests"],
