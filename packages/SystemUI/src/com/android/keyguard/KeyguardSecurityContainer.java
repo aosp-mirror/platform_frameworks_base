@@ -555,7 +555,9 @@ public class KeyguardSecurityContainer extends FrameLayout {
         int bottomInset = insets.getInsetsIgnoringVisibility(systemBars()).bottom;
         int imeInset = insets.getInsets(ime()).bottom;
         int inset = max(bottomInset, imeInset);
-        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), inset);
+        int paddingBottom = max(inset, getContext().getResources()
+                .getDimensionPixelSize(R.dimen.keyguard_security_view_bottom_margin));
+        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), paddingBottom);
         return insets.inset(0, 0, 0, inset);
     }
 
