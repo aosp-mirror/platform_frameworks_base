@@ -81,7 +81,7 @@ per-file LayoutlibLoader.cpp = file:/graphics/java/android/graphics/OWNERS
 per-file LayoutlibLoader.cpp = diegoperez@google.com, jgaillard@google.com
 
 # Verity
-per-file com_android_internal_security_Verity* = ebiggers@google.com, victorhsieh@google.com
+per-file com_android_internal_security_Verity* = file:platform/system/security:/fsverity/OWNERS
 
 # VINTF
 per-file android_os_VintfObject* = file:platform/system/libvintf:/OWNERS
