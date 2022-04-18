@@ -91,6 +91,7 @@ message ReceiverListProto {
     repeated BroadcastFilterProto filters = 7;
     // Used to find this ReceiverList object in IntentResolver
     optional string hex_hash = 8;
+    optional int32 number_receivers = 9;
 }
 
 message ProcessRecordProto {
