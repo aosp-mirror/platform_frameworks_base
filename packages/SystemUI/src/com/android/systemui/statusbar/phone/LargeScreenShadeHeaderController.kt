@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.app.StatusBarManager
 import android.view.View
 import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.settingslib.Utils
@@ -68,6 +69,9 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private val iconContainer: StatusIconContainer
     private val carrierIconSlots: List<String>
     private val qsCarrierGroupController: QSCarrierGroupController
+
+    private var qsDisabled = false
+
     private var visible = false
         set(value) {
             if (field == value) {
@@ -177,6 +181,13 @@ class LargeScreenShadeHeaderController @Inject constructor(
         updateConstraints()
     }
 
+    fun disable(state1: Int, state2: Int, animate: Boolean) {
+        val disabled = state2 and StatusBarManager.DISABLE2_QUICK_SETTINGS != 0
+        if (disabled == qsDisabled) return
+        qsDisabled = disabled
+        updateVisibility()
+    }
+
     private fun updateScrollY() {
         if (!active && combinedHeaders) {
             header.scrollY = qsScrollY
@@ -204,7 +215,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
     }
 
     private fun updateVisibility() {
-        val visibility = if (!active && !combinedHeaders) {
+        val visibility = if (!active && !combinedHeaders || qsDisabled) {
             View.GONE
         } else if (shadeExpanded) {
             View.VISIBLE
