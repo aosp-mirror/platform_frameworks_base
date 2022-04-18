@@ -205,6 +205,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
         captureAltAuthInterceptor();
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing()).thenReturn(true);
         mAltAuthInterceptor.onBouncerVisibilityChanged();
 
         assertTrue(mController.shouldPauseAuth());
