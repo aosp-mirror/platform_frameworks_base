@@ -1522,7 +1522,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
             return 0;
         }
-        if (taskFragment.isEmbeddedTaskFragmentInPip()) {
+        if (taskFragment.isEmbeddedTaskFragmentInPip()
+                // When the Task enters PiP before the organizer removes the empty TaskFragment, we
+                // should allow it to do the cleanup.
+                && taskFragment.getTopNonFinishingActivity() != null) {
             final Throwable exception = new IllegalArgumentException(
                     "Not allowed to delete TaskFragment in PIP Task");
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
