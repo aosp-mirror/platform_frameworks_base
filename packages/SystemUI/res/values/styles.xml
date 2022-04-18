@@ -655,18 +655,6 @@
 
     <style name="MediaPlayer.Recommendation"/>
 
-    <style name="MediaPlayer.Recommendation.AppIcon">
-        <item name="android:background">@drawable/qs_media_icon_background</item>
-        <item name="android:backgroundTint">@color/media_player_solid_button_bg</item>
-        <item name="android:layout_width">@dimen/qs_media_rec_icon_size</item>
-        <item name="android:layout_height">@dimen/qs_media_rec_icon_size</item>
-        <item name="layout_constraintTop_toTopOf">parent</item>
-        <item name="layout_constraintStart_toStartOf">parent</item>
-        <item name="android:layout_marginTop">@dimen/qs_media_padding</item>
-        <item name="android:layout_marginStart">@dimen/qs_media_padding</item>
-        <item name="android:src">@drawable/ic_headset</item>
-    </style>
-
     <style name="MediaPlayer.Recommendation.AlbumContainer">
         <item name="android:layout_width">@dimen/qs_media_rec_album_size</item>
         <item name="android:layout_height">@dimen/qs_media_rec_album_size</item>
