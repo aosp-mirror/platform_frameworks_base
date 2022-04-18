@@ -3412,6 +3412,9 @@
   <!-- Network Recommendation -->
   <java-symbol type="string" name="config_defaultNetworkRecommendationProviderPackage" />
 
+  <!-- Search Selector -->
+  <java-symbol type="string" name="config_defaultSearchSelectorPackageName" />
+
   <!-- Optional IPsec algorithms -->
   <java-symbol type="array" name="config_optionalIpSecAlgorithms" />
 

@@ -610,6 +610,10 @@ final class DefaultPermissionGrantPolicy {
                     pm, setupWizardPackage, userId, NEARBY_DEVICES_PERMISSIONS);
         }
 
+        // SearchSelector
+        grantPermissionsToSystemPackage(pm, getDefaultSearchSelectorPackage(), userId,
+                NOTIFICATION_PERMISSIONS);
+
         // Camera
         grantPermissionsToSystemPackage(pm,
                 getDefaultSystemHandlerActivityPackage(pm, MediaStore.ACTION_IMAGE_CAPTURE, userId),
@@ -936,6 +940,10 @@ final class DefaultPermissionGrantPolicy {
             String category, int userId) {
         return getDefaultSystemHandlerActivityPackage(pm,
                 new Intent(Intent.ACTION_MAIN).addCategory(category), userId);
+    }
+
+    private String getDefaultSearchSelectorPackage() {
+        return mContext.getString(R.string.config_defaultSearchSelectorPackageName);
     }
 
     @SafeVarargs

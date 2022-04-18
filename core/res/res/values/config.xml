@@ -1860,6 +1860,11 @@
      -->
     <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false"></string>
 
+    <!-- The package name of the default search selector app. Must be granted the POST_NOTIFICATIONS
+         permission.
+    -->
+    <string name="config_defaultSearchSelectorPackageName" translatable="false"></string>
+
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
          config_geocoderProviderPackageName package will be searched for
