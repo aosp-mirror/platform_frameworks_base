@@ -527,6 +527,14 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         verify(mAtm.mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
                 eq(errorToken), any(IllegalArgumentException.class));
         assertNotNull(mAtm.mWindowOrganizerController.getTaskFragment(mFragmentToken));
+
+        // Allow organizer to delete empty TaskFragment for cleanup.
+        final Task task = mTaskFragment.getTask();
+        mTaskFragment.removeChild(mTaskFragment.getTopMostActivity());
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        assertNull(mAtm.mWindowOrganizerController.getTaskFragment(mFragmentToken));
+        assertNull(task.getTopChild());
     }
 
     @Test
