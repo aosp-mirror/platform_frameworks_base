@@ -43,7 +43,7 @@ public final class SystemBarUtils {
      * Gets the status bar height with a specific display cutout.
      */
     public static int getStatusBarHeight(Resources res, DisplayCutout cutout) {
-        final int defaultSize = res.getDimensionPixelSize(R.dimen.status_bar_height);
+        final int defaultSize = res.getDimensionPixelSize(R.dimen.status_bar_height_default);
         final int safeInsetTop = cutout == null ? 0 : cutout.getSafeInsetTop();
         final int waterfallInsetTop = cutout == null ? 0 : cutout.getWaterfallInsets().top;
         // The status bar height should be:

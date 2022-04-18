@@ -26,6 +26,7 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.admin.DeviceAdminReceiver.ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE;
+import static android.app.admin.DevicePolicyManager.ACTION_MANAGED_PROFILE_PROVISIONED;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
@@ -56,6 +57,7 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
 import static android.app.admin.DevicePolicyManager.DELEGATION_SECURITY_LOGGING;
 import static android.app.admin.DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_INDIVIDUAL_ATTESTATION;
@@ -10540,6 +10542,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 saveSettingsLocked(userHandle);
             }
         }
+    }
+
+    @Override
+    public void finalizeWorkProfileProvisioning(UserHandle managedProfileUser,
+            Account migratedAccount) {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
+        if (!isManagedProfile(managedProfileUser.getIdentifier())) {
+            throw new IllegalStateException("Given user is not a managed profile");
+        }
+        ComponentName profileOwnerComponent =
+                mOwners.getProfileOwnerComponent(managedProfileUser.getIdentifier());
+        if (profileOwnerComponent == null) {
+            throw new IllegalStateException("There is no profile owner on the given profile");
+        }
+        Intent primaryProfileSuccessIntent = new Intent(ACTION_MANAGED_PROFILE_PROVISIONED);
+        primaryProfileSuccessIntent.setPackage(profileOwnerComponent.getPackageName());
+        primaryProfileSuccessIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES
+                | Intent.FLAG_RECEIVER_FOREGROUND);
+        primaryProfileSuccessIntent.putExtra(Intent.EXTRA_USER, managedProfileUser);
+
+        if (migratedAccount != null) {
+            primaryProfileSuccessIntent.putExtra(EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE,
+                    migratedAccount);
+        }
+
+        mContext.sendBroadcastAsUser(primaryProfileSuccessIntent,
+                UserHandle.of(getProfileParentId(managedProfileUser.getIdentifier())));
     }
 
     @Override
