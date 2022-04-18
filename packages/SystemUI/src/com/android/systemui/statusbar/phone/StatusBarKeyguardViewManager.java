@@ -217,7 +217,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastPulsing;
     private int mLastBiometricMode;
     private boolean mLastScreenOffAnimationPlaying;
-    private boolean mQsExpanded;
+    private float mQsExpansion;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private Runnable mKeyguardGoneCancelAction;
@@ -1307,16 +1307,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     /**
      * Whether qs is currently expanded.
      */
-    public boolean isQsExpanded() {
-        return mQsExpanded;
+    public float getQsExpansion() {
+        return mQsExpansion;
     }
+
     /**
-     * Set whether qs is currently expanded
+     * Update qs expansion.
      */
-    public void setQsExpanded(boolean expanded) {
-        mQsExpanded = expanded;
+    public void setQsExpansion(float qsExpansion) {
+        mQsExpansion = qsExpansion;
         if (mAlternateAuthInterceptor != null) {
-            mAlternateAuthInterceptor.setQsExpanded(expanded);
+            mAlternateAuthInterceptor.setQsExpansion(qsExpansion);
         }
     }
 
@@ -1428,9 +1429,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean isAnimating();
 
         /**
-         * Set whether qs is currently expanded.
+         * How much QS is fully expanded where 0f is not showing and 1f is fully expanded.
          */
-        void setQsExpanded(boolean expanded);
+        void setQsExpansion(float qsExpansion);
 
         /**
          * Forward potential touches to authentication interceptor
