@@ -360,7 +360,7 @@
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Memantau"</string>
     <string name="strict_mode" msgid="889864762140862437">"Mode ketat diaktifkan"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"Mengedipkan layar saat apl berjalan lama di utas utama"</string>
-    <string name="pointer_location" msgid="7516929526199520173">"Lokasi penunjuk"</string>
+    <string name="pointer_location" msgid="7516929526199520173">"Lokasi kursor"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Overlay layar menampilkan data sentuhan saat ini"</string>
     <string name="show_touches" msgid="8437666942161289025">"Tampilkan ketukan"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Menampilkan efek visual untuk ketukan"</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Reset"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Hapus"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Mereset tamu …"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Reset sesi tamu?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tindakan ini akan memulai sesi tamu baru dan menghapus semua aplikasi serta data dari sesi saat ini"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Keluar dari mode tamu?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tindakan ini akan menghapus aplikasi dan data dari sesi tamu saat ini"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Keluar"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Simpan aktivitas tamu?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Anda bisa menyimpan aktivitas sesi saat ini atau menghapus semua aplikasi &amp; data"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Hapus"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Simpan"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Keluar dari mode tamu"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Reset sesi tamu"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Keluar dari mode tamu"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Semua aktivitas akan dihapus saat Anda keluar"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Anda dapat menyimpan atau menghapus aktivitas saat keluar"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reset untuk menghapus aktivitas sesi sekarang, atau Anda dapat menyimpan atau menghapus aktivitas saat keluar"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Ambil foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Pilih gambar"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Pilih foto"</string>

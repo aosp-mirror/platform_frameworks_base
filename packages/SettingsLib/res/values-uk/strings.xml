@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Скасувати"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Якщо ви під’єднаєте інший пристрій, він матиме доступ до ваших контактів та історії дзвінків."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не вдалося створити пару з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не вдалося створити пару з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g> через неправильний PIN-код чи ключ доступу."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Помилка підключення до пристрою <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: неправильний PIN-код чи ключ доступу."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Неможливо зв’язатися з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Створ. пари відхилено <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Комп’ютер"</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Скинути"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Вилучити"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Скидання сеансу в режимі \"Гість\"…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Скинути сеанс у режимі гостя?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Почнеться новий сеанс у режимі гостя, а всі додатки й дані з поточного сеансу буде видалено"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Вийти з режиму гостя?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Усі додатки й дані з поточного сеансу в режимі гостя буде видалено."</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Вийти"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Зберегти дії в режимі гостя?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ви можете зберегти дії з поточного сеансу або видалити всі додатки й дані"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Видалити"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Зберегти"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Вийти з режиму гостя"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Скинути сеанс у режимі гостя"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Вийти з режиму гостя"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Під час виходу буде видалено всі дії"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Під час виходу можна зберегти або видалити ваші дії"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Скиньте, щоб зараз видалити дії під час сеансу. Ви також можете зберегти чи видалити дії під час виходу."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зробити фотографію"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Вибрати зображення"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Вибрати фотографію"</string>
@@ -674,7 +659,7 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"Погода"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Якість повітря"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Акторський склад"</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Вибрати зображення профілю"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Виберіть зображення профілю"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Значок користувача за умовчанням"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Фізична клавіатура"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Вибрати розкладку клавіатури"</string>

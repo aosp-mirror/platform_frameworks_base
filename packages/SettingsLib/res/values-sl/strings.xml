@@ -376,7 +376,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Simul. barvnega prostora"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Omogoči sledi OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Onem. usmerjanje zvoka prek USB"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Onem. samod. usmerjanja na zun. zvoč. naprave USB."</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Onem. samod. usmerjanje na zun. zvoč. naprave USB."</string>
     <string name="debug_layout" msgid="1659216803043339741">"Prikaži meje postavitve"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Pokaži meje obrezovanja, obrobe ipd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Vsili od desne proti levi"</string>
@@ -393,7 +393,7 @@
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Merilo animacije okna"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Merilo animacije prehoda"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Merilo trajanja animacije"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simul. sekund. prikazov."</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simuliraj sekundarne zaslone"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacije"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ne obdrži dejavnosti"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Uniči vsako dejavnost, ko uporabnik preneha z njo."</string>

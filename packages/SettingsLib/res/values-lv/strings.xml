@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Atiestatīt"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Noņemt"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Notiek viesa sesijas atiestatīšana…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vai atiestatīt viesa sesiju?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tādējādi tiks sākta jauna viesa sesijas un visas pašreizējās sesijas lietotnes un dati tiks dzēsti"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vai iziet no viesa režīma?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tādējādi tiks dzēstas pašreizējās viesa sesijas lietotnes un dati."</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Iziet"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vai saglabāt viesa darbības?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Varat saglabāt pašreizējās sesijas darbības vai dzēst visas lietotnes un datus"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Dzēst"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Saglabāt"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Iziet no viesa režīma"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Atiestatīt viesa sesiju"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Iziet no viesa režīma"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Izejot tiks dzēstas visas darbības"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Izejot varat saglabāt vai dzēst savas darbības"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Atiestatiet, lai tagad dzēstu sesijas darbības. Izejot varēsiet saglabāt vai dzēst darbības."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Uzņemt fotoattēlu"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Izvēlēties attēlu"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Atlasīt fotoattēlu"</string>
@@ -685,12 +670,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Kvadrātkoda skenēšana"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Lai sāktu klausīties, centrējiet tālāk norādīto kvadrātkodu."</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Kvadrātkoda formāts nav derīgs."</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vai apturēt lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> apraidīšanu?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ja sāksiet lietotnes <xliff:g id="SWITCHAPP">%1$s</xliff:g> apraidīšanu vai mainīsiet izvadi, pašreizējā apraide tiks apturēta"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Lietotnes <xliff:g id="SWITCHAPP">%1$s</xliff:g> apraide"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Izvades maiņa"</string>
 </resources>

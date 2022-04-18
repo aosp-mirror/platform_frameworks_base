@@ -380,7 +380,7 @@
     <string name="debug_layout" msgid="1659216803043339741">"Düzen sınırlarını göster"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Klip sınırlarını, kenar boşluklarını vb. göster"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Sağdan sola düzenini zorla"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tüm yerel ayarlar için sağdan sola ekran düzenini zorlar"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tüm yerel ayarlar için sağdan sola ekran düzenini zorla"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Pencere bulanıklaştırmaya izin ver"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA\'yı zorla"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 uygulamalarda 4x MSAA\'yı etkinleştir"</string>
@@ -399,7 +399,7 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Kullanıcının ayrıldığı her etkinliği hemen yok et"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Arka plan işlem sınırı"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Arka plan ANR\'leri göster"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor mesajını göster"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor iletişimini göster"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Bildirim kanalı uyarılarını göster"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bir uygulama geçerli kanal olmadan bildirim yayınladığında ekranda uyarı gösterir"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Harici birimdeki uygulamalara izin vermeye zorla"</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Sıfırla"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Kaldır"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Misafir oturumu sıfırlanıyor…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Misafir oturumu sıfırlansın mı?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Bu işlem, yeni bir misafir oturumu başlatarak mevcut oturumdaki tüm uygulamaları ve verileri siler"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Misafir modundan çıkılsın mı?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Bu işlem mevcut misafir oturumundaki tüm uygulamaları ve verileri siler"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Çık"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Misafir etkinliği kaydedilsin mi?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Oturumdaki etkinliği kaydedebilir ya da tüm uygulama ve verileri silebilirsiniz"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Sil"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Kaydet"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Misafir modundan çık"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Misafir oturumunu sıfırla"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Misafir modundan çık"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Çıkış yapıldığında tüm etkinlikler silinir"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Etkinliklerinizi çıkarken kaydedebilir veya silebilirsiniz"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Oturum etkinliklerini hemen silmek için sıfırlayın. Etkinlikleri çıkarken kaydetmeyi veya silmeyi de tercih edebilirsiniz"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotoğraf çek"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Resim seç"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Fotoğraf seç"</string>
@@ -685,12 +670,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR kodunu tara"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Dinlemeye başlamak için aşağıdaki QR kodunu ortalayın"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kodu geçerli bir biçim değil"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulamasında anons durdurulsun mu?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapar veya çıkışı değiştirirseniz mevcut anonsunuz duraklatılır"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapın"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Çıkışı değiştirme"</string>
 </resources>

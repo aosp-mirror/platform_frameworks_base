@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"အဆက်အသွယ်ဖြတ်တောက်သည်"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"ချိတ်ဆက်နေသည်"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"တွဲချိတ်ပါ"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"တွဲချိတ်နေသည်…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (ဖုန်းမရှိပါ)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (မီဒီယာ မရှိပါ)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (မက်ဆေ့ဂျ် သုံး၍မရပါ)"</string>
@@ -599,36 +599,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ပြင်ဆင်သတ်မှတ်ရန်"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ဖယ်ရှားရန်"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ဧည့်သည်ကို ပြင်ဆင်သတ်မှတ်နေသည်…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ဧည့်သည် စက်ရှင် ပြင်ဆင်သတ်မှတ်မလား။"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"၎င်းသည် ဧည့်သည် စက်ရှင်အသစ်ကို စတင်မည်ဖြစ်ပြီး လက်ရှိစက်ရှင်မှ အက်ပ်နှင့် ဒေတာအားလုံးကို ဖျက်ပါမည်"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ဧည့်သည်မုဒ်မှ ထွက်မလား။"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"၎င်းသည် လက်ရှိဧည့်သည် စက်ရှင်မှ အက်ပ်နှင့် ဒေတာအားလုံးကို ဖျက်လိုက်ပါမည်"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ထွက်ရန်"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ဧည့်သည်လုပ်ဆောင်ချက် သိမ်းမလား။"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"လက်ရှိစက်ရှင်မှ လုပ်ဆောင်ချက် သိမ်းနိုင်သည် (သို့) အက်ပ်နှင့် ဒေတာအားလုံး ဖျက်နိုင်သည်"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ဖျက်ရန်"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"သိမ်းရန်"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"ဧည့်သည်မုဒ်မှ ထွက်ရန်"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"ဧည့်သည် စက်ရှင် ပြင်ဆင်သတ်မှတ်ရန်"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ဧည့်သည့်မှ ထွက်ရန်"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ထွက်သည့်အခါ လုပ်ဆောင်ချက်အားလုံးကို ဖျက်လိုက်မည်"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ထွက်သည့်အခါ လုပ်ဆောင်ချက်ကို သိမ်းနိုင် (သို့) ဖျက်နိုင်သည်"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"စက်ရှင်လုပ်ဆောင်ချက်ကို ယခုဖျက်ရန် ပြင်ဆင်သတ်မှတ်နိုင်သည် (သို့) ထွက်သည့်အခါ လုပ်ဆောင်ချက်ကို သိမ်းနိုင် (သို့) ဖျက်နိုင်သည်"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ဓာတ်ပုံရိုက်ရန်"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ပုံရွေးရန်"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ဓာတ်ပုံရွေးရန်"</string>
@@ -686,12 +671,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR ကုဒ်ကို စကင်ဖတ်ရန်"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"စတင်နားဆင်ရန် အောက်ရှိ QR ကုဒ်ကို အလယ်တွင်ထားပါ"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR ကုဒ်သည် မှန်ကန်သောဖော်မက် မဟုတ်ပါ"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ထုတ်လွှင့်ခြင်းကို ရပ်မလား။"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ကို ထုတ်လွှင့်သောအခါ (သို့) အထွက်ကို ပြောင်းသောအခါ သင့်လက်ရှိထုတ်လွှင့်ခြင်း ရပ်သွားမည်"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ထုတ်လွှင့်ခြင်း"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"အထွက်ကို ပြောင်းခြင်း"</string>
 </resources>
