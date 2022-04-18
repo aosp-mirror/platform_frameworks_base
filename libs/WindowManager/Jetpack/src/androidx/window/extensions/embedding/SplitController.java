@@ -60,7 +60,8 @@ import java.util.function.Consumer;
 public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmentCallback,
         ActivityEmbeddingComponent {
 
-    private final SplitPresenter mPresenter;
+    @VisibleForTesting
+    final SplitPresenter mPresenter;
 
     // Currently applied split configuration.
     private final List<EmbeddingRule> mSplitRules = new ArrayList<>();
@@ -149,6 +150,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return;
         }
 
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         final boolean wasInPip = isInPictureInPicture(container);
         container.setInfo(taskFragmentInfo);
         final boolean isInPip = isInPictureInPicture(container);
@@ -159,13 +161,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 // Do not finish the dependents if the last activity is reparented to PiP.
                 // Instead, the original split should be cleanup, and the dependent may be expanded
                 // to fullscreen.
-                cleanupForEnterPip(container);
-                mPresenter.cleanupContainer(container, false /* shouldFinishDependent */);
+                cleanupForEnterPip(wct, container);
+                mPresenter.cleanupContainer(container, false /* shouldFinishDependent */, wct);
             } else {
                 // Do not finish the dependents if this TaskFragment was cleared due to launching
                 // activity in the Task.
                 final boolean shouldFinishDependent = !taskFragmentInfo.isTaskClearedForReuse();
-                mPresenter.cleanupContainer(container, shouldFinishDependent);
+                mPresenter.cleanupContainer(container, shouldFinishDependent, wct);
             }
         } else if (wasInPip && isInPip) {
             // No update until exit PIP.
@@ -174,12 +176,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // Enter PIP.
             // All overrides will be cleanup.
             container.setLastRequestedBounds(null /* bounds */);
-            cleanupForEnterPip(container);
+            cleanupForEnterPip(wct, container);
         } else if (wasInPip) {
             // Exit PIP.
             // Updates the presentation of the container. Expand or launch placeholder if needed.
-            mPresenter.updateContainer(container);
+            updateContainer(wct, container);
         }
+        mPresenter.applyTransaction(wct);
         updateCallbackIfNecessary();
     }
 
@@ -188,7 +191,15 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         final TaskFragmentContainer container = getContainer(taskFragmentInfo.getFragmentToken());
         if (container != null) {
             // Cleanup if the TaskFragment vanished is not requested by the organizer.
-            mPresenter.cleanupContainer(container, true /* shouldFinishDependent */);
+            removeContainer(container);
+            // Make sure the top container is updated.
+            final TaskFragmentContainer newTopContainer = getTopActiveContainer(
+                    container.getTaskId());
+            if (newTopContainer != null) {
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                updateContainer(wct, newTopContainer);
+                mPresenter.applyTransaction(wct);
+            }
             updateCallbackIfNecessary();
         }
         cleanupTaskFragment(taskFragmentInfo.getFragmentToken());
@@ -452,7 +463,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /** Cleanups all the dependencies when the TaskFragment is entering PIP. */
-    private void cleanupForEnterPip(@NonNull TaskFragmentContainer container) {
+    private void cleanupForEnterPip(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentContainer container) {
         final int taskId = container.getTaskId();
         final TaskContainer taskContainer = mTaskContainers.get(taskId);
         if (taskContainer == null) {
@@ -482,7 +494,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // If there is any TaskFragment split with the PIP TaskFragment, update their presentations
         // since the split is dismissed.
         // We don't want to close any of them even if they are dependencies of the PIP TaskFragment.
-        mPresenter.updateContainers(containersToUpdate);
+        for (TaskFragmentContainer containerToUpdate : containersToUpdate) {
+            updateContainer(wct, containerToUpdate);
+        }
     }
 
     /**
@@ -502,6 +516,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // TaskFragment there.
         taskContainer.mFinishedContainer.add(container.getTaskFragmentToken());
 
+        // Cleanup any split references.
         final List<SplitContainer> containersToRemove = new ArrayList<>();
         for (SplitContainer splitContainer : taskContainer.mSplitContainers) {
             if (container.equals(splitContainer.getSecondaryContainer())
@@ -510,6 +525,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
         }
         taskContainer.mSplitContainers.removeAll(containersToRemove);
+
+        // Cleanup any dependent references.
+        for (TaskFragmentContainer containerToUpdate : taskContainer.mContainers) {
+            containerToUpdate.removeContainerToFinishOnExit(container);
+        }
     }
 
     /**
