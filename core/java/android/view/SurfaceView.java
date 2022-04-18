@@ -848,7 +848,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 }
             }
             applyTransactionOnVriDraw(surfaceUpdateTransaction);
-            updateEmbeddedAccessibilityMatrix();
+            updateEmbeddedAccessibilityMatrix(false);
 
             mSurfaceFrame.left = 0;
             mSurfaceFrame.top = 0;
@@ -1748,7 +1748,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         mRemoteAccessibilityController.assosciateHierarchy(connection,
             getViewRootImpl().mLeashToken, getAccessibilityViewId());
 
-        updateEmbeddedAccessibilityMatrix();
+        updateEmbeddedAccessibilityMatrix(true);
     }
 
     private void notifySurfaceDestroyed() {
@@ -1776,7 +1776,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
-    void updateEmbeddedAccessibilityMatrix() {
+    void updateEmbeddedAccessibilityMatrix(boolean force) {
         if (!mRemoteAccessibilityController.connected()) {
             return;
         }
@@ -1790,7 +1790,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         mTmpMatrix.setTranslate(mTmpRect.left, mTmpRect.top);
         mTmpMatrix.postScale(mScreenRect.width() / (float) mSurfaceWidth,
                 mScreenRect.height() / (float) mSurfaceHeight);
-        mRemoteAccessibilityController.setWindowMatrix(mTmpMatrix);
+        mRemoteAccessibilityController.setWindowMatrix(mTmpMatrix, force);
     }
 
     @Override
