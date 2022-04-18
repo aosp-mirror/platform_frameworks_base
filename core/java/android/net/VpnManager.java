@@ -187,14 +187,24 @@ public class VpnManager {
     /**
      * The network that was underlying the VPN when the event occurred, as a {@link Network}.
      *
-     * This extra will be null if there was no underlying network at the time of the event.
+     * <p>This extra will be null if there was no underlying network at the time of the event, or
+     *    the underlying network has no bearing on the event, as in the case of:
+     * <ul>
+     *   <li>CATEGORY_EVENT_DEACTIVATED_BY_USER
+     *   <li>CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED
+     * </ul>
      */
     public static final String EXTRA_UNDERLYING_NETWORK = "android.net.extra.UNDERLYING_NETWORK";
 
     /**
      * The {@link NetworkCapabilities} of the underlying network when the event occurred.
      *
-     * This extra will be null if there was no underlying network at the time of the event.
+     * <p>This extra will be null if there was no underlying network at the time of the event, or
+     *    the underlying network has no bearing on the event, as in the case of:
+     * <ul>
+     *   <li>CATEGORY_EVENT_DEACTIVATED_BY_USER
+     *   <li>CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED
+     * </ul>
      */
     public static final String EXTRA_UNDERLYING_NETWORK_CAPABILITIES =
             "android.net.extra.UNDERLYING_NETWORK_CAPABILITIES";
@@ -202,7 +212,12 @@ public class VpnManager {
     /**
      * The {@link LinkProperties} of the underlying network when the event occurred.
      *
-     * This extra will be null if there was no underlying network at the time of the event.
+     * <p>This extra will be null if there was no underlying network at the time of the event, or
+     *    the underlying network has no bearing on the event, as in the case of:
+     * <ul>
+     *   <li>CATEGORY_EVENT_DEACTIVATED_BY_USER
+     *   <li>CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED
+     * </ul>
      */
     public static final String EXTRA_UNDERLYING_LINK_PROPERTIES =
             "android.net.extra.UNDERLYING_LINK_PROPERTIES";
