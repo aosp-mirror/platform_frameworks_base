@@ -3766,7 +3766,7 @@ public class ComputerEngine implements Computer {
         if (ps == null || ps.getPkg() == null) {
             return -1;
         }
-        if (shouldFilterApplication(ps, Binder.getCallingUid(),
+        if (shouldFilterApplicationIncludingUninstalled(ps, Binder.getCallingUid(),
                 UserHandle.getCallingUserId())) {
             return -1;
         }
@@ -4213,8 +4213,8 @@ public class ComputerEngine implements Computer {
         }
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
-        if (shouldFilterApplication(ps1, callingUid, callingUserId)
-                || shouldFilterApplication(ps2, callingUid, callingUserId)) {
+        if (shouldFilterApplicationIncludingUninstalled(ps1, callingUid, callingUserId)
+                || shouldFilterApplicationIncludingUninstalled(ps2, callingUid, callingUserId)) {
             return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
         }
         return checkSignaturesInternal(p1.getSigningDetails(), p2.getSigningDetails());
@@ -5022,7 +5022,7 @@ public class ComputerEngine implements Computer {
         if (pkg == null || ArrayUtils.isEmpty(pkg.getActivities())) {
             return ParceledListSlice.emptyList();
         }
-        if (shouldFilterApplication(ps, callingUid, callingUserId)) {
+        if (shouldFilterApplicationIncludingUninstalled(ps, callingUid, callingUserId)) {
             return ParceledListSlice.emptyList();
         }
         final int count = ArrayUtils.size(pkg.getActivities());
@@ -5057,7 +5057,7 @@ public class ComputerEngine implements Computer {
         String installerPackageName = installSource.installerPackageName;
         if (installerPackageName != null) {
             final PackageStateInternal ps = mSettings.getPackage(installerPackageName);
-            if (ps == null || shouldFilterApplication(ps, callingUid,
+            if (ps == null || shouldFilterApplicationIncludingUninstalled(ps, callingUid,
                     UserHandle.getUserId(callingUid))) {
                 installerPackageName = null;
             }
@@ -5074,8 +5074,8 @@ public class ComputerEngine implements Computer {
             return InstallSource.EMPTY;
         }
 
-        if (ps == null
-                || shouldFilterApplication(ps, callingUid, UserHandle.getUserId(callingUid))) {
+        if (ps == null || shouldFilterApplicationIncludingUninstalled(
+                ps, callingUid, UserHandle.getUserId(callingUid))) {
             return null;
         }
 
@@ -5100,7 +5100,8 @@ public class ComputerEngine implements Computer {
         installerPackageName = installSource.installerPackageName;
         if (installerPackageName != null) {
             final PackageStateInternal ps = mSettings.getPackage(installerPackageName);
-            if (ps == null || shouldFilterApplication(ps, callingUid, userId)) {
+            if (ps == null
+                    || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
                 installerPackageName = null;
             }
         }
@@ -5125,7 +5126,8 @@ public class ComputerEngine implements Computer {
             } else {
                 initiatingPackageName = installSource.initiatingPackageName;
                 final PackageStateInternal ps = mSettings.getPackage(initiatingPackageName);
-                if (ps == null || shouldFilterApplication(ps, callingUid, userId)) {
+                if (ps == null
+                        || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
                     initiatingPackageName = null;
                 }
             }
@@ -5134,7 +5136,8 @@ public class ComputerEngine implements Computer {
         originatingPackageName = installSource.originatingPackageName;
         if (originatingPackageName != null) {
             final PackageStateInternal ps = mSettings.getPackage(originatingPackageName);
-            if (ps == null || shouldFilterApplication(ps, callingUid, userId)) {
+            if (ps == null
+                    || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
                 originatingPackageName = null;
             }
         }
