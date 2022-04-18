@@ -44,7 +44,7 @@ import android.window.WindowContainerTransaction;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.policy.ForceShowNavigationBarSettingsObserver;
+import com.android.internal.policy.KidsModeSettingsObserver;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
@@ -72,7 +72,7 @@ public class KidsModeTaskOrganizerTest {
     @Mock private SurfaceControl mLeash;
     @Mock private WindowContainerToken mToken;
     @Mock private WindowContainerTransaction mTransaction;
-    @Mock private ForceShowNavigationBarSettingsObserver mObserver;
+    @Mock private KidsModeSettingsObserver mObserver;
     @Mock private StartingWindowController mStartingWindowController;
     @Mock private DisplayInsetsController mDisplayInsetsController;
 
