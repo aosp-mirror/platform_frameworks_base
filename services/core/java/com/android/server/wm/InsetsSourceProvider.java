@@ -42,6 +42,7 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -513,12 +514,13 @@ abstract class InsetsSourceProvider {
         if (mWindowContainer.asWindowState() == null) {
             return false;
         }
-        final int[] provides = ((WindowState) mWindowContainer).mAttrs.providesInsetsTypes;
-        if (provides == null) {
+        final InsetsFrameProvider[] providers =
+                ((WindowState) mWindowContainer).mAttrs.providedInsets;
+        if (providers == null) {
             return false;
         }
-        for (int i = 0; i < provides.length; i++) {
-            if (provides[i] == ITYPE_IME) {
+        for (int i = 0; i < providers.length; i++) {
+            if (providers[i].type == ITYPE_IME) {
                 return true;
             }
         }

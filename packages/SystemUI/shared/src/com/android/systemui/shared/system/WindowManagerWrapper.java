@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.InsetsController;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -105,7 +106,11 @@ public class WindowManagerWrapper {
      */
     public void setProvidesInsetsTypes(WindowManager.LayoutParams params,
             int[] providesInsetsTypes) {
-        params.providesInsetsTypes = providesInsetsTypes;
+        final int length = providesInsetsTypes.length;
+        params.providedInsets = new InsetsFrameProvider[length];
+        for (int i = 0; i < length; i++) {
+            params.providedInsets[i] = new InsetsFrameProvider(providesInsetsTypes[i]);
+        }
     }
 
     /**
