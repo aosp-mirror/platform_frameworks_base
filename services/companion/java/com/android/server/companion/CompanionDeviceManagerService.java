@@ -650,6 +650,12 @@ public class CompanionDeviceManagerService extends SystemService {
 
         private void registerDevicePresenceListenerActive(String packageName, String deviceAddress,
                 boolean active) throws RemoteException {
+            if (DEBUG) {
+                Log.i(TAG, "registerDevicePresenceListenerActive()"
+                        + " active=" + active
+                        + " deviceAddress=" + deviceAddress);
+            }
+
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE,
                     "[un]registerDevicePresenceListenerService");
@@ -665,6 +671,12 @@ public class CompanionDeviceManagerService extends SystemService {
                         + " for user " + userId));
             }
 
+            // If already at specified state, then no-op.
+            if (active == association.isNotifyOnDeviceNearby()) {
+                if (DEBUG) Log.d(TAG, "Device presence listener is already at desired state.");
+                return;
+            }
+
             // AssociationInfo class is immutable: create a new AssociationInfo object with updated
             // flag.
             association = AssociationInfo.builder(association)
@@ -675,7 +687,17 @@ public class CompanionDeviceManagerService extends SystemService {
             // an application sets/unsets the mNotifyOnDeviceNearby flag.
             mAssociationStore.updateAssociation(association);
 
-            // TODO(b/218615198): correctly handle the case when the device is currently present.
+            // If device is already present, then trigger callback.
+            if (active && mDevicePresenceMonitor.isDevicePresent(association.getId())) {
+                if (DEBUG) Log.d(TAG, "Device is already present. Triggering callback.");
+                onDeviceAppearedInternal(association.getId());
+            }
+
+            // If last listener is unregistered, then unbind application.
+            if (!active && !shouldBindPackage(userId, packageName)) {
+                if (DEBUG) Log.d(TAG, "Last listener unregistered. Unbinding application.");
+                mCompanionAppController.unbindCompanionApplication(userId, packageName);
+            }
         }
 
         @Override
