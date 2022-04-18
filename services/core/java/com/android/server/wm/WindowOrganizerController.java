@@ -411,11 +411,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 if (transition != null) transition.collect(wc);
 
-                if (finishTransition != null) {
-                    // Deal with edge-cases in recents where it pretends to finish itself.
-                    if ((entry.getValue().getChangeMask()
-                            & WindowContainerTransaction.Change.CHANGE_FORCE_NO_PIP) != 0) {
+                if ((entry.getValue().getChangeMask()
+                        & WindowContainerTransaction.Change.CHANGE_FORCE_NO_PIP) != 0) {
+                    // Disable entering pip (eg. when recents pretends to finish itself)
+                    if (finishTransition != null) {
                         finishTransition.setCanPipOnFinish(false /* canPipOnFinish */);
+                    } else if (transition != null) {
+                        transition.setCanPipOnFinish(false /* canPipOnFinish */);
                     }
                 }
 
