@@ -518,8 +518,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         // longer has activities. As a result, the organizer will never get this info changed event
         // and will not delete the TaskFragment because the organizer thinks the TaskFragment still
         // has running activities.
+        // Another case is when an organized TaskFragment became empty because the last running
+        // activity is reparented to a new Task due to enter PiP. We also want to notify the
+        // organizer, so it can remove the empty TaskFragment and update the paired TaskFragment
+        // without causing the extra delay.
         return event.mEventType == PendingTaskFragmentEvent.EVENT_INFO_CHANGED
-                && task.topRunningActivity() == null && lastInfo != null
+                && (task.topRunningActivity() == null || info.isTaskFragmentClearedForPip())
+                && lastInfo != null
                 && lastInfo.getRunningActivityCount() > 0 && info.getRunningActivityCount() == 0;
     }
 

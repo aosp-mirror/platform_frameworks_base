@@ -2097,11 +2097,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             r.setWindowingMode(intermediateWindowingMode);
             r.mWaitForEnteringPinnedMode = true;
             rootTask.forAllTaskFragments(tf -> {
-                // When the Task is entering picture-in-picture, we should clear all override from
-                // the client organizer, so the PIP activity can get the correct config from the
-                // Task, and prevent conflict with the PipTaskOrganizer.
-                if (tf.isOrganizedTaskFragment()) {
-                    tf.resetAdjacentTaskFragment();
+                if (!tf.isOrganizedTaskFragment()) {
+                    return;
+                }
+                tf.resetAdjacentTaskFragment();
+                if (tf.getTopNonFinishingActivity() != null) {
+                    // When the Task is entering picture-in-picture, we should clear all override
+                    // from the client organizer, so the PIP activity can get the correct config
+                    // from the Task, and prevent conflict with the PipTaskOrganizer.
                     tf.updateRequestedOverrideConfiguration(EMPTY);
                 }
             });
@@ -2116,7 +2119,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // to the root pinned task
             r.supportsEnterPipOnTaskSwitch = false;
 
-            if (organizedTf != null && organizedTf.mClearedTaskFragmentForPip) {
+            if (organizedTf != null && organizedTf.mClearedTaskFragmentForPip
+                    && organizedTf.isTaskVisibleRequested()) {
                 // Dispatch the pending info to TaskFragmentOrganizer before PIP animation.
                 // Otherwise, it will keep waiting for the empty TaskFragment to be non-empty.
                 mService.mTaskFragmentOrganizerController.dispatchPendingInfoChangedEvent(
