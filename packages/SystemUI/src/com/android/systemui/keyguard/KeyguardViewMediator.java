@@ -119,6 +119,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -2780,6 +2781,13 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     public void onWakeAndUnlocking() {
         Trace.beginSection("KeyguardViewMediator#onWakeAndUnlocking");
         mWakeAndUnlocking = true;
+
+        // We're going to animate in the Launcher, so ask WM to clear the task snapshot so we don't
+        // initially display an old snapshot with all of the icons visible. We're System UI, so
+        // we're allowed to pass in null to ask WM to find the home activity for us to prevent
+        // needing to IPC to Launcher.
+        ActivityManagerWrapper.getInstance().invalidateHomeTaskSnapshot(null /* homeActivity */);
+
         keyguardDone();
         Trace.endSection();
     }
