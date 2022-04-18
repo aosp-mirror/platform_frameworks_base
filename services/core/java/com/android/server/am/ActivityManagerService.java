@@ -15126,7 +15126,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final boolean canGcNowLocked() {
         for (BroadcastQueue q : mBroadcastQueues) {
-            if (!q.mParallelBroadcasts.isEmpty() || !q.mDispatcher.isEmpty()) {
+            if (!q.mParallelBroadcasts.isEmpty() || !q.mDispatcher.isIdle()) {
                 return false;
             }
         }
