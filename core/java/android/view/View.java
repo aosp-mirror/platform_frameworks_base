@@ -23838,6 +23838,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
         rebuildOutline();
+        if (onCheckIsTextEditor()) {
+            setHandwritingArea(new Rect(0, 0, newWidth, newHeight));
+        }
     }
 
     /**

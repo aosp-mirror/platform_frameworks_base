@@ -17,7 +17,6 @@
 package android.widget;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.Spannable;
@@ -172,12 +171,6 @@ public class EditText extends TextView {
     @Override
     public CharSequence getAccessibilityClassName() {
         return EditText.class.getName();
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        setHandwritingArea(new Rect(0, 0, w, h));
     }
 
     /** @hide */
