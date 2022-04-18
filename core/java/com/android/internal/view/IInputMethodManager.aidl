@@ -22,6 +22,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
@@ -54,7 +55,8 @@ interface IInputMethodManager {
             in IInputMethodClient client, in IBinder windowToken,
             /* @StartInputFlags */ int startInputFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
-            int windowFlags, in EditorInfo attribute, IInputContext inputContext,
+            int windowFlags, in EditorInfo attribute, in IInputContext inputContext,
+            in IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,

@@ -155,8 +155,10 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.DirectBootAwareness;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
@@ -398,7 +400,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // Id of the accessibility service.
         final int mId;
 
-        public IInputMethodSession mSession;
+        public IAccessibilityInputMethodSession mSession;
 
         @Override
         public String toString() {
@@ -410,7 +412,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         AccessibilitySessionState(ClientState client, int id,
-                IInputMethodSession session) {
+                IAccessibilityInputMethodSession session) {
             mClient = client;
             mId = id;
             mSession = session;
@@ -588,6 +590,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * The input context last provided by the current client.
      */
     IInputContext mCurInputContext;
+
+    /**
+     * The {@link IRemoteAccessibilityInputConnection} last provided by the current client.
+     */
+    @Nullable IRemoteAccessibilityInputConnection mCurRemoteAccessibilityInputConnection;
 
     /**
      * The attributes last provided by the current client.
@@ -2567,7 +2574,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final InputMethodInfo curInputMethodInfo = mMethodMap.get(curId);
         final boolean suppressesSpellChecker =
                 curInputMethodInfo != null && curInputMethodInfo.suppressesSpellChecker();
-        final SparseArray<IInputMethodSession> accessibilityInputMethodSessions =
+        final SparseArray<IAccessibilityInputMethodSession> accessibilityInputMethodSessions =
                 createAccessibilityInputMethodSessions(mCurClient.mAccessibilitySessions);
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
                 session.session, accessibilityInputMethodSessions,
@@ -2606,7 +2613,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     InputBindResult attachNewAccessibilityLocked(@StartInputReason int startInputReason,
             boolean initial, int id) {
         if (!mBoundToAccessibility) {
-            AccessibilityManagerInternal.get().bindInput(mCurClient.binding);
+            AccessibilityManagerInternal.get().bindInput();
             mBoundToAccessibility = true;
         }
 
@@ -2620,14 +2627,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (startInputReason != StartInputReason.SESSION_CREATED_BY_ACCESSIBILITY) {
             final Binder startInputToken = new Binder();
             setEnabledSessionForAccessibilityLocked(mCurClient.mAccessibilitySessions);
-            AccessibilityManagerInternal.get().startInput(startInputToken, mCurInputContext,
+            AccessibilityManagerInternal.get().startInput(mCurRemoteAccessibilityInputConnection,
                     mCurAttribute, !initial /* restarting */);
         }
 
         if (accessibilitySession != null) {
             final SessionState session = mCurClient.curSession;
             IInputMethodSession imeSession = session == null ? null : session.session;
-            final SparseArray<IInputMethodSession> accessibilityInputMethodSessions =
+            final SparseArray<IAccessibilityInputMethodSession> accessibilityInputMethodSessions =
                     createAccessibilityInputMethodSessions(mCurClient.mAccessibilitySessions);
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WITH_ACCESSIBILITY_SESSION,
@@ -2638,9 +2645,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         return null;
     }
 
-    private SparseArray<IInputMethodSession> createAccessibilityInputMethodSessions(
+    private SparseArray<IAccessibilityInputMethodSession> createAccessibilityInputMethodSessions(
             SparseArray<AccessibilitySessionState> accessibilitySessions) {
-        final SparseArray<IInputMethodSession> accessibilityInputMethodSessions =
+        final SparseArray<IAccessibilityInputMethodSession> accessibilityInputMethodSessions =
                 new SparseArray<>();
         if (accessibilitySessions != null) {
             for (int i = 0; i < accessibilitySessions.size(); i++) {
@@ -2662,8 +2669,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     @NonNull
     private InputBindResult startInputUncheckedLocked(@NonNull ClientState cs,
-            IInputContext inputContext, @NonNull EditorInfo attribute,
-            @StartInputFlags int startInputFlags, @StartInputReason int startInputReason,
+            IInputContext inputContext,
+            @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
+            @NonNull EditorInfo attribute, @StartInputFlags int startInputFlags,
+            @StartInputReason int startInputReason,
             int unverifiedTargetSdkVersion) {
         // If no method is currently selected, do nothing.
         final String selectedMethodId = getSelectedMethodIdLocked();
@@ -2707,6 +2716,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         advanceSequenceNumberLocked();
         mCurClient = cs;
         mCurInputContext = inputContext;
+        mCurRemoteAccessibilityInputConnection = remoteAccessibilityInputConnection;
         mCurVirtualDisplayToScreenMatrix =
                 getVirtualDisplayToScreenMatrixLocked(cs.selfReportedDisplayId,
                         mDisplayIdToShowIme);
@@ -3709,10 +3719,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputReason int startInputReason, IInputMethodClient client, IBinder windowToken,
             @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
             int windowFlags, @Nullable EditorInfo attribute, IInputContext inputContext,
+            IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion) {
         return startInputOrWindowGainedFocusInternal(startInputReason, client, windowToken,
                 startInputFlags, softInputMode, windowFlags, attribute, inputContext,
-                unverifiedTargetSdkVersion);
+                remoteAccessibilityInputConnection, unverifiedTargetSdkVersion);
     }
 
     @NonNull
@@ -3720,6 +3731,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputReason int startInputReason, IInputMethodClient client, IBinder windowToken,
             @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
             int windowFlags, @Nullable EditorInfo attribute, @Nullable IInputContext inputContext,
+            @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion) {
         if (windowToken == null) {
             Slog.e(TAG, "windowToken cannot be null.");
@@ -3756,7 +3768,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     result = startInputOrWindowGainedFocusInternalLocked(startInputReason,
                             client, windowToken, startInputFlags, softInputMode, windowFlags,
-                            attribute, inputContext, unverifiedTargetSdkVersion, userId);
+                            attribute, inputContext, remoteAccessibilityInputConnection,
+                            unverifiedTargetSdkVersion, userId);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -3782,7 +3795,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputReason int startInputReason, IInputMethodClient client,
             @NonNull IBinder windowToken, @StartInputFlags int startInputFlags,
             @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
-            IInputContext inputContext, int unverifiedTargetSdkVersion, @UserIdInt int userId) {
+            IInputContext inputContext,
+            @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
+            int unverifiedTargetSdkVersion, @UserIdInt int userId) {
         if (DEBUG) {
             Slog.v(TAG, "startInputOrWindowGainedFocusInternalLocked: reason="
                     + InputMethodDebug.startInputReasonToString(startInputReason)
@@ -3875,7 +3890,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         + InputMethodDebug.startInputReasonToString(startInputReason));
             }
             if (attribute != null) {
-                return startInputUncheckedLocked(cs, inputContext, attribute, startInputFlags,
+                return startInputUncheckedLocked(cs, inputContext,
+                        remoteAccessibilityInputConnection, attribute, startInputFlags,
                         startInputReason, unverifiedTargetSdkVersion);
             }
             return new InputBindResult(
@@ -3916,8 +3932,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // UI for input.
         if (isTextEditor && attribute != null
                 && shouldRestoreImeVisibility(windowToken, softInputMode)) {
-            res = startInputUncheckedLocked(cs, inputContext, attribute, startInputFlags,
-                    startInputReason, unverifiedTargetSdkVersion);
+            res = startInputUncheckedLocked(cs, inputContext, remoteAccessibilityInputConnection,
+                    attribute, startInputFlags, startInputReason, unverifiedTargetSdkVersion);
             showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
                     SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY);
             return res;
@@ -3955,8 +3971,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     // is more room for the target window + IME.
                     if (DEBUG) Slog.v(TAG, "Unspecified window will show input");
                     if (attribute != null) {
-                        res = startInputUncheckedLocked(cs, inputContext, attribute,
-                                startInputFlags, startInputReason, unverifiedTargetSdkVersion);
+                        res = startInputUncheckedLocked(cs, inputContext,
+                                remoteAccessibilityInputConnection, attribute, startInputFlags,
+                                startInputReason, unverifiedTargetSdkVersion);
                         didStart = true;
                     }
                     showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
@@ -3986,8 +4003,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     if (isSoftInputModeStateVisibleAllowed(
                             unverifiedTargetSdkVersion, startInputFlags)) {
                         if (attribute != null) {
-                            res = startInputUncheckedLocked(cs, inputContext, attribute,
-                                    startInputFlags, startInputReason, unverifiedTargetSdkVersion);
+                            res = startInputUncheckedLocked(cs, inputContext,
+                                    remoteAccessibilityInputConnection, attribute, startInputFlags,
+                                    startInputReason, unverifiedTargetSdkVersion);
                             didStart = true;
                         }
                         showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
@@ -4005,8 +4023,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         unverifiedTargetSdkVersion, startInputFlags)) {
                     if (!sameWindowFocused) {
                         if (attribute != null) {
-                            res = startInputUncheckedLocked(cs, inputContext, attribute,
-                                    startInputFlags, startInputReason, unverifiedTargetSdkVersion);
+                            res = startInputUncheckedLocked(cs, inputContext,
+                                    remoteAccessibilityInputConnection, attribute, startInputFlags,
+                                    startInputReason, unverifiedTargetSdkVersion);
                             didStart = true;
                         }
                         showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
@@ -4034,7 +4053,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR);
                     }
                 }
-                res = startInputUncheckedLocked(cs, inputContext, attribute, startInputFlags,
+                res = startInputUncheckedLocked(cs, inputContext,
+                        remoteAccessibilityInputConnection, attribute, startInputFlags,
                         startInputReason, unverifiedTargetSdkVersion);
             } else {
                 res = InputBindResult.NULL_EDITOR_INFO;
@@ -4790,7 +4810,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     void setEnabledSessionForAccessibilityLocked(
             SparseArray<AccessibilitySessionState> accessibilitySessions) {
         // mEnabledAccessibilitySessions could the same object as accessibilitySessions.
-        SparseArray<IInputMethodSession> disabledSessions = new SparseArray<>();
+        SparseArray<IAccessibilityInputMethodSession> disabledSessions = new SparseArray<>();
         for (int i = 0; i < mEnabledAccessibilitySessions.size(); i++) {
             if (!accessibilitySessions.contains(mEnabledAccessibilitySessions.keyAt(i))) {
                 AccessibilitySessionState sessionState  = mEnabledAccessibilitySessions.valueAt(i);
@@ -4804,7 +4824,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             AccessibilityManagerInternal.get().setImeSessionEnabled(disabledSessions,
                     false);
         }
-        SparseArray<IInputMethodSession> enabledSessions = new SparseArray<>();
+        SparseArray<IAccessibilityInputMethodSession> enabledSessions = new SparseArray<>();
         for (int i = 0; i < accessibilitySessions.size(); i++) {
             if (!mEnabledAccessibilitySessions.contains(accessibilitySessions.keyAt(i))) {
                 AccessibilitySessionState sessionState = accessibilitySessions.valueAt(i);
@@ -5649,7 +5669,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
-                IInputMethodSession session) {
+                IAccessibilityInputMethodSession session) {
             synchronized (ImfLock.class) {
                 if (mCurClient != null) {
                     clearClientSessionForAccessibilityLocked(mCurClient, accessibilityConnectionId);

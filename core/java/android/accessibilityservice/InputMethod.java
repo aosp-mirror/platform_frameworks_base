@@ -18,36 +18,23 @@ package android.accessibilityservice;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
-import android.graphics.Rect;
-import android.inputmethodservice.IInputMethodSessionWrapper;
-import android.inputmethodservice.RemoteInputConnection;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.inputmethod.CompletionInfo;
-import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.ExtractedText;
-import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InputMethodSession;
 import android.view.inputmethod.SurroundingText;
 import android.view.inputmethod.TextAttribute;
 
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputSessionWithIdCallback;
-
-import java.util.concurrent.Executor;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
+import com.android.internal.inputmethod.RemoteAccessibilityInputConnection;
 
 /**
  * This class provides input method APIs. Some public methods such as
@@ -61,9 +48,8 @@ public class InputMethod {
     private static final String LOG_TAG = "A11yInputMethod";
 
     private final AccessibilityService mService;
-    private InputBinding mInputBinding;
     private boolean mInputStarted;
-    private InputConnection mStartedInputConnection;
+    private RemoteAccessibilityInputConnection mStartedInputConnection;
     private EditorInfo mInputEditorInfo;
 
     /**
@@ -131,9 +117,7 @@ public class InputMethod {
      * to perform whatever behavior you would like.
      */
     public void onFinishInput() {
-        if (mStartedInputConnection != null) {
-            mStartedInputConnection.finishComposingText();
-        }
+        // Intentionally empty
     }
 
     /**
@@ -152,41 +136,26 @@ public class InputMethod {
         // Intentionally empty
     }
 
-    final void createImeSession(IInputSessionWithIdCallback callback) {
-        InputMethodSession session = onCreateInputMethodSessionInterface();
+    final void createImeSession(IAccessibilityInputMethodSessionCallback callback) {
+        final AccessibilityInputMethodSessionWrapper wrapper =
+                new AccessibilityInputMethodSessionWrapper(mService.getMainLooper(),
+                        new SessionImpl());
         try {
-            IInputMethodSessionWrapper wrap =
-                    new IInputMethodSessionWrapper(mService, session, null);
-            callback.sessionCreated(wrap, mService.getConnectionId());
+            callback.sessionCreated(wrapper, mService.getConnectionId());
         } catch (RemoteException ignored) {
         }
     }
 
-    final void setImeSessionEnabled(@NonNull InputMethodSession session, boolean enabled) {
-        ((InputMethodSessionForAccessibility) session).setEnabled(enabled);
-    }
-
-    final void bindInput(@NonNull InputBinding binding) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AccessibilityService.bindInput");
-        mInputBinding = binding;
-        Log.v(LOG_TAG, "bindInput(): binding=" + binding);
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-    }
-
-    final void unbindInput() {
-        Log.v(LOG_TAG, "unbindInput(): binding=" + mInputBinding);
-        // Unbind input is per process per display.
-        mInputBinding = null;
-    }
-
-    final void startInput(@Nullable InputConnection ic, @NonNull EditorInfo attribute) {
+    final void startInput(@Nullable RemoteAccessibilityInputConnection ic,
+            @NonNull EditorInfo attribute) {
         Log.v(LOG_TAG, "startInput(): editor=" + attribute);
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.startInput");
         doStartInput(ic, attribute, false /* restarting */);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    final void restartInput(@Nullable InputConnection ic, @NonNull EditorInfo attribute) {
+    final void restartInput(@Nullable RemoteAccessibilityInputConnection ic,
+            @NonNull EditorInfo attribute) {
         Log.v(LOG_TAG, "restartInput(): editor=" + attribute);
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.restartInput");
         doStartInput(ic, attribute, true /* restarting */);
@@ -194,7 +163,8 @@ public class InputMethod {
     }
 
 
-    final void doStartInput(InputConnection ic, EditorInfo attribute, boolean restarting) {
+    final void doStartInput(RemoteAccessibilityInputConnection ic, EditorInfo attribute,
+            boolean restarting) {
         if ((ic == null || !restarting) && mInputStarted) {
             doFinishInput();
             if (ic == null) {
@@ -220,17 +190,13 @@ public class InputMethod {
         mInputEditorInfo = null;
     }
 
-    private InputMethodSession onCreateInputMethodSessionInterface() {
-        return new InputMethodSessionForAccessibility();
-    }
-
     /**
      * This class provides the allowed list of {@link InputConnection} APIs for
      * accessibility services.
      */
     public final class AccessibilityInputConnection {
-        private InputConnection mIc;
-        AccessibilityInputConnection(InputConnection ic) {
+        private final RemoteAccessibilityInputConnection mIc;
+        AccessibilityInputConnection(RemoteAccessibilityInputConnection ic) {
             this.mIc = ic;
         }
 
@@ -249,7 +215,7 @@ public class InputMethod {
          * int, int)} on the current accessibility service after the batch input is over.
          * <strong>Editor authors</strong>, for this to happen you need to
          * make the changes known to the accessibility service by calling
-         * {@link InputMethodManager#updateSelection(View, int, int, int, int)},
+         * {@link InputMethodManager#updateSelection(android.view.View, int, int, int, int)},
          * but be careful to wait until the batch edit is over if one is
          * in progress.</p>
          *
@@ -282,7 +248,7 @@ public class InputMethod {
          * int,int, int)} on the current IME after the batch input is over.
          * <strong>Editor authors</strong>, for this to happen you need to
          * make the changes known to the input method by calling
-         * {@link InputMethodManager#updateSelection(View, int, int, int, int)},
+         * {@link InputMethodManager#updateSelection(android.view.View, int, int, int, int)},
          * but be careful to wait until the batch edit is over if one is
          * in progress.</p>
          *
@@ -367,9 +333,8 @@ public class InputMethod {
          * delete only half of a surrogate pair. Also take care not to
          * delete more characters than are in the editor, as that may have
          * ill effects on the application. Calling this method will cause
-         * the editor to call
-         * {@link android.inputmethodservice.InputMethodService#onUpdateSelection(int, int, int, int,
-         * int, int)} on your service after the batch input is over.</p>
+         * the editor to call {@link InputMethod#onUpdateSelection(int, int, int, int, int, int)}
+         * on your service after the batch input is over.</p>
          *
          * <p><strong>Editor authors:</strong> please be careful of race
          * conditions in implementing this call. An IME can make a change
@@ -381,7 +346,7 @@ public class InputMethod {
          * indices to the size of the contents to avoid crashes. Since
          * this changes the contents of the editor, you need to make the
          * changes known to the input method by calling
-         * {@link InputMethodManager#updateSelection(View, int, int, int, int)},
+         * {@link InputMethodManager#updateSelection(android.view.View, int, int, int, int)},
          * but be careful to wait until the batch edit is over if one is
          * in progress.</p>
          *
@@ -522,12 +487,13 @@ public class InputMethod {
     }
 
     /**
-     * Concrete implementation of InputMethodSession that provides all of the standard behavior
-     * for an input method session.
+     * Concrete implementation of {@link AccessibilityInputMethodSession} that provides all of the
+     * standard behavior for an A11y input method session.
      */
-    private final class InputMethodSessionForAccessibility implements InputMethodSession {
+    private final class SessionImpl implements AccessibilityInputMethodSession {
         boolean mEnabled = true;
 
+        @Override
         public void setEnabled(boolean enabled) {
             mEnabled = enabled;
         }
@@ -549,86 +515,15 @@ public class InputMethod {
         }
 
         @Override
-        public void viewClicked(boolean focusChanged) {
-        }
-
-        @Override
-        public void updateCursor(@NonNull Rect newCursor) {
-        }
-
-        @Override
-        public void displayCompletions(
-                @SuppressLint("ArrayReturn") @NonNull CompletionInfo[] completions) {
-        }
-
-        @Override
-        public void updateExtractedText(int token, @NonNull ExtractedText text) {
-        }
-
-        public void dispatchKeyEvent(int seq, @NonNull KeyEvent event,
-                @NonNull @CallbackExecutor Executor executor, @NonNull EventCallback callback) {
-        }
-
-        @Override
-        public void dispatchKeyEvent(int seq, @NonNull KeyEvent event,
-                @NonNull EventCallback callback) {
-        }
-
-        public void dispatchTrackballEvent(int seq, @NonNull MotionEvent event,
-                @NonNull @CallbackExecutor Executor executor, @NonNull EventCallback callback) {
-        }
-
-        @Override
-        public void dispatchTrackballEvent(int seq, @NonNull MotionEvent event,
-                @NonNull EventCallback callback) {
-        }
-
-        public void dispatchGenericMotionEvent(int seq, @NonNull MotionEvent event,
-                @NonNull @CallbackExecutor Executor executor, @NonNull EventCallback callback) {
-        }
-
-        @Override
-        public void dispatchGenericMotionEvent(int seq, @NonNull MotionEvent event,
-                @NonNull EventCallback callback) {
-        }
-
-        @Override
-        public void appPrivateCommand(@NonNull String action, @NonNull Bundle data) {
-        }
-
-        @Override
-        public void toggleSoftInput(int showFlags, int hideFlags) {
-        }
-
-        @Override
-        public void updateCursorAnchorInfo(@NonNull CursorAnchorInfo cursorAnchorInfo) {
-        }
-
-        @Override
-        public void notifyImeHidden() {
-        }
-
-        @Override
-        public void removeImeSurface() {
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void invalidateInputInternal(EditorInfo editorInfo, IInputContext inputContext,
-                int sessionId) {
-            if (mStartedInputConnection instanceof RemoteInputConnection) {
-                final RemoteInputConnection ric =
-                        (RemoteInputConnection) mStartedInputConnection;
-                if (!ric.isSameConnection(inputContext)) {
-                    // This is not an error, and can be safely ignored.
-                    return;
-                }
-                editorInfo.makeCompatible(
-                        mService.getApplicationInfo().targetSdkVersion);
-                restartInput(new RemoteInputConnection(ric, sessionId), editorInfo);
+        public void invalidateInput(EditorInfo editorInfo,
+                IRemoteAccessibilityInputConnection connection, int sessionId) {
+            if (!mStartedInputConnection.isSameConnection(connection)) {
+                // This is not an error, and can be safely ignored.
+                return;
             }
+            editorInfo.makeCompatible(mService.getApplicationInfo().targetSdkVersion);
+            restartInput(new RemoteAccessibilityInputConnection(mStartedInputConnection, sessionId),
+                    editorInfo);
         }
     }
 }
