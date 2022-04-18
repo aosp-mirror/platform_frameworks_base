@@ -1123,7 +1123,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     /** Makes the process have top state before oom-adj is computed from a posted message. */
     void addToPendingTop() {
-        mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
+        mAtm.mAmInternal.addPendingTopUid(mUid, mPid, mThread);
     }
 
     void updateServiceConnectionActivities() {
@@ -1176,7 +1176,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         // update ActivityManagerService.PendingStartActivityUids list.
         if (topProcessState == ActivityManager.PROCESS_STATE_TOP) {
-            mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
+            mAtm.mAmInternal.addPendingTopUid(mUid, mPid, mThread);
         }
         prepareOomAdjustment();
         // Posting the message at the front of queue so WM lock isn't held when we call into AM,
