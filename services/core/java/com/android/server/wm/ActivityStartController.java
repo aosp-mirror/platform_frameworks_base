@@ -90,6 +90,8 @@ public class ActivityStartController {
 
     boolean mCheckedForSetup = false;
 
+    private boolean mInExecution = false;
+
     /**
      * TODO(b/64750076): Capture information necessary for dump and
      * {@link #postStartActivityProcessingForLastStarter} rather than keeping the entire object
@@ -123,7 +125,15 @@ public class ActivityStartController {
         return mFactory.obtain().setIntent(intent).setReason(reason);
     }
 
+    void onExecutionStarted(ActivityStarter starter) {
+        mInExecution = true;
+    }
+
+    boolean isInExecution() {
+        return mInExecution;
+    }
     void onExecutionComplete(ActivityStarter starter) {
+        mInExecution = false;
         if (mLastStarter == null) {
             mLastStarter = mFactory.obtain();
         }
