@@ -1380,14 +1380,6 @@ class Task extends TaskFragment {
         return getActivity(ActivityRecord::canBeTopRunning);
     }
 
-    int getActivityCount() {
-        final int[] activityCount = new int[1];
-        forAllActivities(ar -> {
-            activityCount[0]++;
-        });
-        return activityCount[0];
-    }
-
     /**
      * Return true if any activities in this task belongs to input uid.
      */
