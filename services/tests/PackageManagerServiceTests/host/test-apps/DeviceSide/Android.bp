@@ -25,7 +25,6 @@ package {
 
 android_test_helper_app {
     name: "PackageManagerServiceDeviceSideTests",
-    sdk_version: "test_current",
     srcs: ["src/**/*.kt"],
     libs: [
         "android.test.base",
