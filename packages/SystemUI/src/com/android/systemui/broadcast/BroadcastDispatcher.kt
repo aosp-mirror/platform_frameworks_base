@@ -31,10 +31,13 @@ import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
 import java.io.PrintWriter
 import java.util.concurrent.Executor
+import javax.inject.Inject
 
 data class ReceiverData(
     val receiver: BroadcastReceiver,
@@ -63,14 +66,15 @@ private const val DEBUG = true
  * Broadcast handling may be asynchronous *without* calling goAsync(), as it's running within sysui
  * and doesn't need to worry about being killed.
  */
-open class BroadcastDispatcher @JvmOverloads constructor (
+@SysUISingleton
+open class BroadcastDispatcher @Inject constructor(
     private val context: Context,
-    private val bgLooper: Looper,
-    private val bgExecutor: Executor,
+    @Background private val bgLooper: Looper,
+    @Background private val bgExecutor: Executor,
     private val dumpManager: DumpManager,
     private val logger: BroadcastDispatcherLogger,
     private val userTracker: UserTracker,
-    private val removalPendingStore: PendingRemovalStore = PendingRemovalStore(logger)
+    private val removalPendingStore: PendingRemovalStore
 ) : Dumpable {
 
     // Only modify in BG thread
