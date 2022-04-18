@@ -18,7 +18,6 @@ package com.android.settingslib.wifi;
 
 import android.content.Context;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.UserManager;
 import android.util.Log;
 
@@ -37,13 +36,9 @@ public class WifiEnterpriseRestrictionUtils {
      * @return whether the device is permitted to use Wi-Fi Tethering
      */
     public static boolean isWifiTetheringAllowed(Context context) {
-        final UserManager userManager = context.getSystemService(UserManager.class);
-        final Bundle restrictions = userManager.getUserRestrictions();
-        if (isAtLeastT() && restrictions.getBoolean(UserManager.DISALLOW_WIFI_TETHERING)) {
-            Log.i(TAG, "Wi-Fi Tethering isn't available due to user restriction.");
-            return false;
-        }
-        return true;
+        if (!hasUserRestrictionFromT(context, UserManager.DISALLOW_WIFI_TETHERING)) return true;
+        Log.w(TAG, "Wi-Fi Tethering isn't available due to user restriction.");
+        return false;
     }
 
     /**
@@ -53,13 +48,9 @@ public class WifiEnterpriseRestrictionUtils {
      * @return whether the device is permitted to use Wi-Fi Direct
      */
     public static boolean isWifiDirectAllowed(Context context) {
-        final UserManager userManager = context.getSystemService(UserManager.class);
-        final Bundle restrictions = userManager.getUserRestrictions();
-        if (isAtLeastT() && restrictions.getBoolean(UserManager.DISALLOW_WIFI_DIRECT)) {
-            Log.i(TAG, "Wi-Fi Direct isn't available due to user restriction.");
-            return false;
-        }
-        return true;
+        if (!hasUserRestrictionFromT(context, UserManager.DISALLOW_WIFI_DIRECT)) return true;
+        Log.w(TAG, "Wi-Fi Direct isn't available due to user restriction.");
+        return false;
     }
 
     /**
@@ -69,13 +60,9 @@ public class WifiEnterpriseRestrictionUtils {
      * @return whether the device is permitted to add new Wi-Fi config
      */
     public static boolean isAddWifiConfigAllowed(Context context) {
-        final UserManager userManager = context.getSystemService(UserManager.class);
-        final Bundle restrictions = userManager.getUserRestrictions();
-        if (isAtLeastT() && restrictions.getBoolean(UserManager.DISALLOW_ADD_WIFI_CONFIG)) {
-            Log.i(TAG, "Wi-Fi Add network isn't available due to user restriction.");
-            return false;
-        }
-        return true;
+        if (!hasUserRestrictionFromT(context, UserManager.DISALLOW_ADD_WIFI_CONFIG)) return true;
+        Log.w(TAG, "Wi-Fi Add network isn't available due to user restriction.");
+        return false;
     }
 
     /**
@@ -98,7 +85,7 @@ public class WifiEnterpriseRestrictionUtils {
         return userManager.hasUserRestriction(restrictionKey);
     }
 
-    @ChecksSdkIntAtLeast(api=Build.VERSION_CODES.TIRAMISU)
+    @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.TIRAMISU)
     private static boolean isAtLeastT() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;
     }
