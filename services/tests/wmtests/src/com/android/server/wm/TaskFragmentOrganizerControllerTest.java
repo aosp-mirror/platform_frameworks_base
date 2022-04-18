@@ -26,6 +26,7 @@ import static com.android.server.wm.testing.Assert.assertThrows;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.Intent;
@@ -63,6 +65,7 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 /**
  * Build/Install/Run:
@@ -220,6 +223,85 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         verify(mOrganizer).onTaskFragmentError(eq(errorCallbackToken), eq(exception));
+    }
+
+    @Test
+    public void testOnActivityReparentToTask_activityInOrganizerProcess_useActivityToken() {
+        // Make sure the activity pid/uid is the same as the organizer caller.
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        mController.registerOrganizer(mIOrganizer);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        final Task task = activity.getTask();
+        activity.info.applicationInfo.uid = uid;
+        doReturn(pid).when(activity).getPid();
+        task.effectiveUid = uid;
+
+        // No need to notify organizer if it is not embedded.
+        mController.onActivityReparentToTask(activity);
+        mController.dispatchPendingEvents();
+
+        verify(mOrganizer, never()).onActivityReparentToTask(anyInt(), any(), any());
+
+        // Notify organizer if it was embedded before entered Pip.
+        activity.mLastTaskFragmentOrganizerBeforePip = mIOrganizer;
+        mController.onActivityReparentToTask(activity);
+        mController.dispatchPendingEvents();
+
+        verify(mOrganizer).onActivityReparentToTask(task.mTaskId, activity.intent, activity.token);
+
+        // Notify organizer if there is any embedded in the Task.
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(mOrganizer)
+                .build();
+        taskFragment.setTaskFragmentOrganizer(mOrganizer.getOrganizerToken(), uid,
+                DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
+        activity.reparent(taskFragment, POSITION_TOP);
+        activity.mLastTaskFragmentOrganizerBeforePip = null;
+        mController.onActivityReparentToTask(activity);
+        mController.dispatchPendingEvents();
+
+        verify(mOrganizer, times(2))
+                .onActivityReparentToTask(task.mTaskId, activity.intent, activity.token);
+    }
+
+    @Test
+    public void testOnActivityReparentToTask_activityNotInOrganizerProcess_useTemporaryToken() {
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizer.getOrganizerToken(), uid,
+                DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
+        mAtm.mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
+        mController.registerOrganizer(mIOrganizer);
+        mOrganizer.applyTransaction(mTransaction);
+        final Task task = createTask(mDisplayContent);
+        task.addChild(mTaskFragment, POSITION_TOP);
+        final ActivityRecord activity = createActivityRecord(task);
+
+        // Make sure the activity belongs to the same app, but it is in a different pid.
+        activity.info.applicationInfo.uid = uid;
+        doReturn(pid + 1).when(activity).getPid();
+        task.effectiveUid = uid;
+        final ArgumentCaptor<IBinder> token = ArgumentCaptor.forClass(IBinder.class);
+
+        // Notify organizer if it was embedded before entered Pip.
+        // Create a temporary token since the activity doesn't belong to the same process.
+        activity.mLastTaskFragmentOrganizerBeforePip = mIOrganizer;
+        mController.onActivityReparentToTask(activity);
+        mController.dispatchPendingEvents();
+
+        // Allow organizer to reparent activity in other process using the temporary token.
+        verify(mOrganizer).onActivityReparentToTask(eq(task.mTaskId), eq(activity.intent),
+                token.capture());
+        final IBinder temporaryToken = token.getValue();
+        assertNotEquals(activity.token, temporaryToken);
+        mTransaction.reparentActivityToTaskFragment(mFragmentToken, temporaryToken);
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        assertEquals(mTaskFragment, activity.getTaskFragment());
+        // The temporary token can only be used once.
+        assertNull(mController.getReparentActivityFromTemporaryToken(mIOrganizer, temporaryToken));
     }
 
     @Test

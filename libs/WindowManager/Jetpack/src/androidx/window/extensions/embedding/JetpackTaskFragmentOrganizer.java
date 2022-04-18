@@ -70,6 +70,8 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo);
         void onTaskFragmentParentInfoChanged(@NonNull IBinder fragmentToken,
                 @NonNull Configuration parentConfig);
+        void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
+                @NonNull IBinder activityToken);
     }
 
     /**
@@ -298,6 +300,14 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
 
         if (mCallback != null) {
             mCallback.onTaskFragmentParentInfoChanged(fragmentToken, parentConfig);
+        }
+    }
+
+    @Override
+    public void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
+            @NonNull IBinder activityToken) {
+        if (mCallback != null) {
+            mCallback.onActivityReparentToTask(taskId, activityIntent, activityToken);
         }
     }
 }
