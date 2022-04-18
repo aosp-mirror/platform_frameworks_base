@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (C) 2021 The Android Open Source Project
 #
@@ -208,17 +208,17 @@ def _parse_stream(f, api={}):
 
 def _parse_stream_path(path):
     api = {}
-    print "Parsing", path
+    print("Parsing %s" % path)
     for f in os.listdir(path):
         f = os.path.join(path, f)
         if not os.path.isfile(f): continue
         if not f.endswith(".txt"): continue
         if f.endswith("removed.txt"): continue
-        print "\t", f
+        print("\t%s" % f)
         with open(f) as s:
             api = _parse_stream(s, api)
-    print "Parsed", len(api), "APIs"
-    print
+    print("Parsed %d APIs" % len(api))
+    print()
     return api
 
 
@@ -306,8 +306,8 @@ if __name__ == "__main__":
             if "@Deprecated " in i.raw:
                 error(clazz, i, None, "Found API deprecation at birth " + i.ident)
 
-    print "%s Deprecated at birth %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True),
-                                            format(reset=True)))
+    print("%s Deprecated at birth %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True),
+                                            format(reset=True))))
     for f in sorted(failures):
-        print failures[f]
-        print
+        print(failures[f])
+        print()
