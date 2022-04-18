@@ -1481,13 +1481,13 @@ public final class OverlayManagerService extends SystemService {
                     new ArrayMap<>(targetPackageNames.size());
             synchronized (mLock) {
                 final OverlayPaths frameworkOverlays =
-                        mImpl.getEnabledOverlayPaths("android", userId);
+                        mImpl.getEnabledOverlayPaths("android", userId, false);
                 for (final String targetPackageName : targetPackageNames) {
                     final OverlayPaths.Builder list = new OverlayPaths.Builder();
+                    list.addAll(frameworkOverlays);
                     if (!"android".equals(targetPackageName)) {
-                        list.addAll(frameworkOverlays);
+                        list.addAll(mImpl.getEnabledOverlayPaths(targetPackageName, userId, true));
                     }
-                    list.addAll(mImpl.getEnabledOverlayPaths(targetPackageName, userId));
                     pendingChanges.put(targetPackageName, list.build());
                 }
             }
