@@ -164,7 +164,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         @Override
         public void onVisibilityChanged(boolean isVisible) {
             if (!isVisible) {
-                cancelPostAuthActions();
                 mCentralSurfaces.setBouncerHiddenFraction(KeyguardBouncer.EXPANSION_HIDDEN);
             }
             if (mAlternateAuthInterceptor != null) {
@@ -502,42 +501,52 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void dismissWithAction(OnDismissAction r, Runnable cancelAction,
             boolean afterKeyguardGone, String message) {
         if (mShowing) {
-            cancelPendingWakeupAction();
-            // If we're dozing, this needs to be delayed until after we wake up - unless we're
-            // wake-and-unlocking, because there dozing will last until the end of the transition.
-            if (mDozing && !isWakeAndUnlocking()) {
-                mPendingWakeupAction = new DismissWithActionRequest(
-                        r, cancelAction, afterKeyguardGone, message);
-                return;
-            }
+            try {
+                Trace.beginSection("StatusBarKeyguardViewManager#dismissWithAction");
+                cancelPendingWakeupAction();
+                // If we're dozing, this needs to be delayed until after we wake up - unless we're
+                // wake-and-unlocking, because there dozing will last until the end of the
+                // transition.
+                if (mDozing && !isWakeAndUnlocking()) {
+                    mPendingWakeupAction = new DismissWithActionRequest(
+                            r, cancelAction, afterKeyguardGone, message);
+                    return;
+                }
 
-            mAfterKeyguardGoneAction = r;
-            mKeyguardGoneCancelAction = cancelAction;
-            mDismissActionWillAnimateOnKeyguard = r != null && r.willRunAnimationOnKeyguard();
+                mAfterKeyguardGoneAction = r;
+                mKeyguardGoneCancelAction = cancelAction;
+                mDismissActionWillAnimateOnKeyguard = r != null && r.willRunAnimationOnKeyguard();
 
-            // If there is an an alternate auth interceptor (like the UDFPS), show that one instead
-            // of the bouncer.
-            if (shouldShowAltAuth()) {
-                if (!afterKeyguardGone) {
-                    mBouncer.setDismissAction(mAfterKeyguardGoneAction, mKeyguardGoneCancelAction);
+                // If there is an an alternate auth interceptor (like the UDFPS), show that one
+                // instead of the bouncer.
+                if (shouldShowAltAuth()) {
+                    if (!afterKeyguardGone) {
+                        mBouncer.setDismissAction(mAfterKeyguardGoneAction,
+                                mKeyguardGoneCancelAction);
+                        mAfterKeyguardGoneAction = null;
+                        mKeyguardGoneCancelAction = null;
+                    }
+
+                    updateAlternateAuthShowing(
+                            mAlternateAuthInterceptor.showAlternateAuthBouncer());
+                    return;
+                }
+
+                if (afterKeyguardGone) {
+                    // we'll handle the dismiss action after keyguard is gone, so just show the
+                    // bouncer
+                    mBouncer.show(false /* resetSecuritySelection */);
+                } else {
+                    // after authentication success, run dismiss action with the option to defer
+                    // hiding the keyguard based on the return value of the OnDismissAction
+                    mBouncer.showWithDismissAction(mAfterKeyguardGoneAction,
+                            mKeyguardGoneCancelAction);
+                    // bouncer will handle the dismiss action, so we no longer need to track it here
                     mAfterKeyguardGoneAction = null;
                     mKeyguardGoneCancelAction = null;
                 }
-
-                updateAlternateAuthShowing(mAlternateAuthInterceptor.showAlternateAuthBouncer());
-                return;
-            }
-
-            if (afterKeyguardGone) {
-                // we'll handle the dismiss action after keyguard is gone, so just show the bouncer
-                mBouncer.show(false /* resetSecuritySelection */);
-            } else {
-                // after authentication success, run dismiss action with the option to defer
-                // hiding the keyguard based on the return value of the OnDismissAction
-                mBouncer.showWithDismissAction(mAfterKeyguardGoneAction, mKeyguardGoneCancelAction);
-                // bouncer will handle the dismiss action, so we no longer need to track it here
-                mAfterKeyguardGoneAction = null;
-                mKeyguardGoneCancelAction = null;
+            } finally {
+                Trace.endSection();
             }
         }
         updateStates();
