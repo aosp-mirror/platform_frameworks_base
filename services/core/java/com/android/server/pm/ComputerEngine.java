@@ -4992,7 +4992,7 @@ public class ComputerEngine implements Computer {
         enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 false /* checkShell */, "isPackageSuspendedForUser for user " + userId);
         final PackageStateInternal ps = mSettings.getPackage(packageName);
-        if (ps == null || shouldFilterApplication(ps, callingUid, userId)) {
+        if (ps == null || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
             throw new IllegalArgumentException("Unknown target package: " + packageName);
         }
         return ps.getUserStateOrDefault(userId).isSuspended();
