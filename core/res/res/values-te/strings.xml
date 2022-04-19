@@ -1162,7 +1162,7 @@
     <string name="paste" msgid="461843306215520225">"అతికించు"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"సాదా వచనం లాగా అతికించు"</string>
     <string name="replace" msgid="7842675434546657444">"భర్తీ చేయండి..."</string>
-    <string name="delete" msgid="1514113991712129054">"తొలగించు"</string>
+    <string name="delete" msgid="1514113991712129054">"తొలగించండి"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URLని కాపీ చేయి"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"వచనాన్ని ఎంచుకోండి"</string>
     <string name="undo" msgid="3175318090002654673">"చర్య రద్దు చేయి"</string>
@@ -1170,7 +1170,7 @@
     <string name="autofill" msgid="511224882647795296">"ఆటోఫిల్"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"వచన ఎంపిక"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"నిఘంటువుకు జోడించు"</string>
-    <string name="deleteText" msgid="4200807474529938112">"తొలగించు"</string>
+    <string name="deleteText" msgid="4200807474529938112">"తొలగించండి"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"వచనానికి సంబంధించిన చర్యలు"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"నిల్వ ఖాళీ అయిపోతోంది"</string>
@@ -1179,9 +1179,9 @@
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> అమలులో ఉంది"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"మరింత సమాచారం కోసం లేదా యాప్‌ను ఆపివేయడం కోసం నొక్కండి."</string>
     <string name="ok" msgid="2646370155170753815">"సరే"</string>
-    <string name="cancel" msgid="6908697720451760115">"రద్దు చేయి"</string>
+    <string name="cancel" msgid="6908697720451760115">"రద్దు చేయండి"</string>
     <string name="yes" msgid="9069828999585032361">"సరే"</string>
-    <string name="no" msgid="5122037903299899715">"రద్దు చేయి"</string>
+    <string name="no" msgid="5122037903299899715">"రద్దు చేయండి"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"గమనిక"</string>
     <string name="loading" msgid="3138021523725055037">"లోడ్ చేస్తోంది…"</string>
     <string name="capital_on" msgid="2770685323900821829">"ఆన్‌లో ఉంది"</string>
@@ -1341,7 +1341,7 @@
     <string name="sms_short_code_details" msgid="2723725738333388351">"దీని వలన మీ మొబైల్ ఖాతాకు "<b>"ఛార్జీలు విధించబడవచ్చు"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"దీని వలన మీ మొబైల్ ఖాతాకు ఛార్జీలు విధించబడవచ్చు."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"పంపు"</string>
-    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"రద్దు చేయి"</string>
+    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"రద్దు చేయండి"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"నా ఎంపికను గుర్తుంచుకో"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"మీరు దీన్ని తర్వాత సెట్టింగ్‌లు &gt; అనువర్తనాలులో మార్చవచ్చు"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"ఎల్లప్పుడూ అనుమతించు"</string>
@@ -1513,7 +1513,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"నెట్‌వర్క్ లేదా VPN సెట్టింగ్‌లను మార్చండి"</string>
     <string name="upload_file" msgid="8651942222301634271">"ఫైల్‌ను ఎంచుకోండి"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"ఫైల్ ఎంచుకోబడలేదు"</string>
-    <string name="reset" msgid="3865826612628171429">"రీసెట్ చేయి"</string>
+    <string name="reset" msgid="3865826612628171429">"రీసెట్ చేయండి"</string>
     <string name="submit" msgid="862795280643405865">"సమర్పించు"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"డ్రైవింగ్ యాప్ అమలవుతోంది"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"డ్రైవింగ్ యాప్ నుండి నిష్క్రమించడం కోసం నొక్కండి."</string>
@@ -1565,8 +1565,8 @@
     <string name="date_picker_prev_month_button" msgid="3418694374017868369">"మునుపటి నెల"</string>
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"తర్వాత నెల"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"రద్దు చేయి"</string>
-    <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"తొలగించు"</string>
+    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"రద్దు చేయండి"</string>
+    <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"తొలగించండి"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"పూర్తయింది"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"మోడ్ మార్పు"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"షిఫ్ట్"</string>

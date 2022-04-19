@@ -1871,7 +1871,7 @@
     <string name="select_day" msgid="2060371240117403147">"ជ្រើស​ខែ និង​ថ្ងៃ"</string>
     <string name="select_year" msgid="1868350712095595393">"ជ្រើស​ឆ្នាំ"</string>
     <string name="deleted_key" msgid="9130083334943364001">"បាន​លុប <xliff:g id="KEY">%1$s</xliff:g>"</string>
-    <string name="managed_profile_label_badge" msgid="6762559569999499495">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g>​ការងារ"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 3"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"សួរ​រក​កូដ PIN មុន​ពេលដកខ្ទាស់"</string>
