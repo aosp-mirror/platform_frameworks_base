@@ -188,6 +188,7 @@ public class DisplayPolicy {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayPolicy" : TAG_WM;
 
     private static final boolean ALTERNATE_CAR_MODE_NAV_SIZE = false;
+    private static final boolean LEGACY_TASKBAR_GESTURE_INSETS = false;
 
     // The panic gesture may become active only after the keyguard is dismissed and the immersive
     // app shows again. If that doesn't happen for 30s we drop the gesture.
@@ -1275,6 +1276,35 @@ public class DisplayPolicy {
                         if (!INSETS_LAYOUT_GENERALIZATION) {
                             mDisplayContent.setInsetProvider(insetsType, win, null,
                                     imeFrameProvider);
+                            if (LEGACY_TASKBAR_GESTURE_INSETS) {
+                                if (mNavigationBar == null && (insetsType == ITYPE_NAVIGATION_BAR
+                                        || insetsType == ITYPE_EXTRA_NAVIGATION_BAR)) {
+                                    mDisplayContent.setInsetProvider(ITYPE_LEFT_GESTURES, win,
+                                            (displayFrames, windowState, inOutFrame) -> {
+                                                final int leftSafeInset =
+                                                        Math.max(displayFrames.mDisplayCutoutSafe
+                                                                .left,
+                                                                0);
+                                                inOutFrame.left = 0;
+                                                inOutFrame.top = 0;
+                                                inOutFrame.bottom = displayFrames.mDisplayHeight;
+                                                inOutFrame.right =
+                                                        leftSafeInset + mLeftGestureInset;
+                                            });
+                                    mDisplayContent.setInsetProvider(ITYPE_RIGHT_GESTURES, win,
+                                            (displayFrames, windowState, inOutFrame) -> {
+                                                final int rightSafeInset =
+                                                        Math.min(displayFrames.mDisplayCutoutSafe
+                                                                .right,
+                                                                displayFrames.mUnrestricted.right);
+                                                inOutFrame.left =
+                                                        rightSafeInset - mRightGestureInset;
+                                                inOutFrame.top = 0;
+                                                inOutFrame.bottom = displayFrames.mDisplayHeight;
+                                                inOutFrame.right = displayFrames.mDisplayWidth;
+                                            });
+                                }
+                            }
                         } else {
                             mDisplayContent.setInsetProvider(insetsType, win, (displayFrames,
                                     windowState, inOutFrame) -> inOutFrame.inset(
