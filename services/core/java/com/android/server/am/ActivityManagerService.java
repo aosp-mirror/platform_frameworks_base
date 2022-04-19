@@ -49,12 +49,6 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER;
-import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED;
-import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
-import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
-import static android.net.ConnectivityManager.BLOCKED_REASON_DOZE;
-import static android.net.ConnectivityManager.BLOCKED_REASON_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
@@ -101,7 +95,6 @@ import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
-import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
@@ -136,6 +129,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.ProcessList.ProcStartHandler;
+import static com.android.server.net.NetworkPolicyManagerInternal.updateBlockedReasonsWithProcState;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -540,11 +534,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     // If set, we will push process association information in to procstats.
     static final boolean TRACK_PROCSTATS_ASSOCIATIONS = true;
 
-    /**
-     * Default value for {@link Settings.Global#NETWORK_ACCESS_TIMEOUT_MS}.
-     */
-    private static final long NETWORK_ACCESS_TIMEOUT_DEFAULT_MS = 200; // 0.2 sec
-
     // The minimum memory growth threshold (in KB) for low RAM devices.
     private static final int MINIMUM_MEMORY_GROWTH_THRESHOLD = 10 * 1000; // 10 MB
 
@@ -715,12 +704,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final AppErrors mAppErrors;
     final PackageWatchdog mPackageWatchdog;
-
-    /**
-     * Indicates the maximum time spent waiting for the network rules to get updated.
-     */
-    @VisibleForTesting
-    long mWaitForNetworkTimeoutMs;
 
     /**
      * Uids of apps with current active camera sessions.  Access synchronized on
@@ -7924,8 +7907,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean waitForDebugger = Settings.Global.getInt(resolver, WAIT_FOR_DEBUGGER, 0) != 0;
         final boolean alwaysFinishActivities =
                 Settings.Global.getInt(resolver, ALWAYS_FINISH_ACTIVITIES, 0) != 0;
-        final long waitForNetworkTimeoutMs = Settings.Global.getLong(resolver,
-                NETWORK_ACCESS_TIMEOUT_MS, NETWORK_ACCESS_TIMEOUT_DEFAULT_MS);
         mHiddenApiBlacklist.registerObserver();
         mPlatformCompat.registerContentObserver();
 
@@ -7946,7 +7927,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     com.android.internal.R.bool.config_multiuserDelayUserDataLocking);
             mUserController.setInitialConfig(userSwitchUiEnabled, maxRunningUsers,
                     delayUserDataLocking);
-            mWaitForNetworkTimeoutMs = waitForNetworkTimeoutMs;
         }
         mAppErrors.loadAppsNotReportingCrashesFromConfig(res.getString(
                 com.android.internal.R.string.config_appsNotReportingCrashes));
@@ -17286,7 +17266,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final long procStateSeq = mProcessList.getNextProcStateSeq();
                     mNetworkPolicyUidObserver.onUidStateChanged(uid, PROCESS_STATE_TOP,
                             procStateSeq, PROCESS_CAPABILITY_ALL);
-                    if (thread != null && isNetworkingBlockedForUid(uid)) {
+                    if (thread != null && shouldWaitForNetworkRulesUpdate(uid)) {
                         thread.setNetworkBlockSeq(procStateSeq);
                     }
                 } catch (RemoteException e) {
@@ -17295,29 +17275,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        private boolean isNetworkingBlockedForUid(int uid) {
+        private boolean shouldWaitForNetworkRulesUpdate(int uid) {
             synchronized (mUidNetworkBlockedReasons) {
-                // TODO: We can consider only those blocked reasons that will be overridden
-                // by the TOP state. For other ones, there is no point in waiting.
                 // TODO: We can reuse this data in
                 // ProcessList#incrementProcStateSeqAndNotifyAppsLOSP instead of calling into
                 // NetworkManagementService.
                 final int uidBlockedReasons = mUidNetworkBlockedReasons.get(
                         uid, BLOCKED_REASON_NONE);
-                if (uidBlockedReasons == BLOCKED_REASON_NONE) {
-                    return false;
-                }
-                final int topExemptedBlockedReasons = BLOCKED_REASON_BATTERY_SAVER
-                        | BLOCKED_REASON_DOZE
-                        | BLOCKED_REASON_APP_STANDBY
-                        | BLOCKED_REASON_LOW_POWER_STANDBY
-                        | BLOCKED_METERED_REASON_DATA_SAVER
-                        | BLOCKED_METERED_REASON_USER_RESTRICTED;
-                final int effectiveBlockedReasons =
-                        uidBlockedReasons & ~topExemptedBlockedReasons;
-                // Only consider it as blocked if it is not blocked by a reason
-                // that is not exempted by app being in the top state.
-                return effectiveBlockedReasons == BLOCKED_REASON_NONE;
+                // We should only inform the uid to block if it is currently blocked but will be
+                // unblocked once it comes to the TOP state.
+                return uidBlockedReasons != BLOCKED_REASON_NONE
+                        && updateBlockedReasonsWithProcState(uidBlockedReasons, PROCESS_STATE_TOP)
+                        == BLOCKED_REASON_NONE;
             }
         }
 
@@ -17619,10 +17588,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 final long startTime = SystemClock.uptimeMillis();
                 record.procStateSeqWaitingForNetwork = procStateSeq;
-                record.networkStateLock.wait(mWaitForNetworkTimeoutMs);
+                record.networkStateLock.wait(mConstants.mNetworkAccessTimeoutMs);
                 record.procStateSeqWaitingForNetwork = 0;
                 final long totalTime = SystemClock.uptimeMillis() - startTime;
-                if (totalTime >= mWaitForNetworkTimeoutMs || DEBUG_NETWORK) {
+                if (totalTime >= mConstants.mNetworkAccessTimeoutMs || DEBUG_NETWORK) {
                     Slog.w(TAG_NETWORK, "Total time waited for network rules to get updated: "
                             + totalTime + ". Uid: " + callingUid + " procStateSeq: "
                             + procStateSeq + " UidRec: " + record
