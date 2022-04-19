@@ -507,7 +507,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"La plus grande"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Personnalisée (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Menu"</string>
-    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Entrez m. passe pour réinit. en mode démo"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Entrez m. passe pour réinit. en mode Démo"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Suivant"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Mot de passe obligatoire"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Modes de saisie actifs"</string>
@@ -655,12 +655,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Numériser le code QR"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Pour commencer à écouter, centrez le code QR ci-dessous"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Le format du code QR est incorrect"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou changez la sortie, votre diffusion actuelle s\'arrêtera"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Changer la sortie"</string>
 </resources>
