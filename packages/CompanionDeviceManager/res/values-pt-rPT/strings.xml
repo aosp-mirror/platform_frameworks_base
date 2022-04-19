@@ -42,8 +42,6 @@
     <string name="consent_yes" msgid="8344487259618762872">"Permitir"</string>
     <string name="consent_no" msgid="2640796915611404382">"Não permitir"</string>
     <string name="consent_back" msgid="2560683030046918882">"Voltar"</string>
-    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Atribuir às apps no dispositivo &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; as mesmas autorizações que no dispositivo &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;Isto pode incluir o acesso ao microfone, câmara e localização, bem como a outras autorizações confidenciais no dispositivo &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;Pode alterar estas autorizações em qualquer altura nas Definições do dispositivo &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;"</string>
 </resources>

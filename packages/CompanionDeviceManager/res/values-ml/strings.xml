@@ -42,8 +42,6 @@
     <string name="consent_yes" msgid="8344487259618762872">"അനുവദിക്കുക"</string>
     <string name="consent_no" msgid="2640796915611404382">"അനുവദിക്കരുത്"</string>
     <string name="consent_back" msgid="2560683030046918882">"മടങ്ങുക"</string>
-    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; എന്നതിലെ അതേ അനുമതികൾ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; എന്നതിലെ ആപ്പുകൾക്ക് നൽകണോ?"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; എന്നതിലെ മൈക്രോഫോൺ, ക്യാമറ, ലൊക്കേഷൻ ആക്‌സസ്, സെൻസിറ്റീവ് വിവരങ്ങൾക്കുള്ള മറ്റ് അനുമതികൾ എന്നിവയും ഇതിൽ ഉൾപ്പെട്ടേക്കാം&lt;p&gt;നിങ്ങൾക്ക് &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; എന്നതിലെ ക്രമീകരണത്തിൽ ഏതുസമയത്തും ഈ അനുമതികൾ മാറ്റാം."</string>
 </resources>

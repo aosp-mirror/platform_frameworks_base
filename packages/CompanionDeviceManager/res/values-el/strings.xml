@@ -42,8 +42,6 @@
     <string name="consent_yes" msgid="8344487259618762872">"Να επιτρέπεται"</string>
     <string name="consent_no" msgid="2640796915611404382">"Να μην επιτρέπεται"</string>
     <string name="consent_back" msgid="2560683030046918882">"Πίσω"</string>
-    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Παραχώρηση στις εφαρμογές στη συσκευή &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; των ίδιων αδειών όπως στη συσκευή &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;;"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;Αυτές μπορεί να περιλαμβάνουν πρόσβαση σε μικρόφωνο, κάμερα και τοποθεσία και άλλες άδειες πρόσβασης σε ευαίσθητες πληροφορίες στη συσκευή &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;Μπορείτε να αλλάξετε αυτές τις άδειες ανά πάσα στιγμή στις Ρυθμίσεις σας στη συσκευή &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;"</string>
 </resources>

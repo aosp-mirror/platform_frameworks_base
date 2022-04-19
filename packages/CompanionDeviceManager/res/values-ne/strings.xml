@@ -42,8 +42,6 @@
     <string name="consent_yes" msgid="8344487259618762872">"अनुमति दिनुहोस्"</string>
     <string name="consent_no" msgid="2640796915611404382">"अनुमति नदिनुहोस्"</string>
     <string name="consent_back" msgid="2560683030046918882">"पछाडि"</string>
-    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; मा भएका एपहरूलाई पनि &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; मा दिइएकै अनुमति दिने हो?"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;यसअन्तर्गत &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; का माइक्रोफोन, क्यामेरा र लोकेसन प्रयोग गर्ने अनुमतिका तथा अन्य संवेदनशील अनुमति समावेश हुन्छन्।&lt;/p&gt; &lt;p&gt;तपाईं &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; का सेटिङमा गई जुनसुकै बेला यी अनुमति परिवर्तन गर्न सक्नुहुन्छ।&lt;/p&gt;"</string>
 </resources>
