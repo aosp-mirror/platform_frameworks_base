@@ -140,9 +140,9 @@ class RemoteAccessibilityController {
         return mConnectionWrapper;
     }
 
-    void setWindowMatrix(Matrix m) {
-        // If the window matrix is identity or doesn't change, do nothing.
-        if (m.isIdentity() || m.equals(mWindowMatrixForEmbeddedHierarchy)) {
+    void setWindowMatrix(Matrix m, boolean force) {
+        // If the window matrix doesn't change, do nothing.
+        if (!force && m.equals(mWindowMatrixForEmbeddedHierarchy)) {
             return;
         }
 
