@@ -7026,7 +7026,13 @@ public final class ActivityThread extends ClientTransactionHandler
                 // local, we'll need to wait for the publishing of the provider.
                 if (holder != null && holder.provider == null && !holder.mLocal) {
                     synchronized (key.mLock) {
-                        key.mLock.wait(ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS);
+                        if (key.mHolder != null) {
+                            if (DEBUG_PROVIDER) {
+                                Slog.i(TAG, "already received provider: " + auth);
+                            }
+                        } else {
+                            key.mLock.wait(ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS);
+                        }
                         holder = key.mHolder;
                     }
                     if (holder != null && holder.provider == null) {
