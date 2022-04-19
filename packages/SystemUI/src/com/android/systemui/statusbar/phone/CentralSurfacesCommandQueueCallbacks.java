@@ -296,6 +296,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 mShadeController.animateCollapsePanels();
             }
         }
+
+        mNotificationPanelViewController.disable(state1, state2, animate);
     }
 
     /**
