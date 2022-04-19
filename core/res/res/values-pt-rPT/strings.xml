@@ -1689,10 +1689,10 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Aumentar o volume acima do nível recomendado?\n\nOuvir com um volume elevado durante longos períodos poderá ser prejudicial para a sua audição."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Pretende utilizar o atalho de acessibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando o atalho está ativado, premir ambos os botões de volume durante 3 segundos inicia uma funcionalidade de acessibilidade."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Pretende ativar o atalho das funcionalidades de acessibilidade?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Ativar o atalho das funcionalidades de acessibilidade?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Manter premidas ambas as teclas de volume durante alguns segundos ativa as funcionalidades de acessibilidade. Estas podem alterar a forma como o seu dispositivo funciona.\n\nFuncionalidades atuais:\n<xliff:g id="SERVICE">%1$s</xliff:g>\npode alterar as funcionalidades selecionadas em Definições &gt; Acessibilidade."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Pretende ativar o atalho do serviço <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Ativar o atalho do serviço <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Manter premidas ambas as teclas de volume durante alguns segundos ativa o serviço <xliff:g id="SERVICE">%1$s</xliff:g>, uma funcionalidade de acessibilidade. Esta pode alterar a forma como o seu dispositivo funciona.\n\nPode alterar este atalho para outra funcionalidade em Definições &gt; Acessibilidade."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ativar"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Não ativar"</string>
