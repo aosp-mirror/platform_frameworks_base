@@ -1934,36 +1934,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu este disponibilă momentan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nu este disponibilă"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Necesită permisiune"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Camera video nu este disponibilă"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continuați pe telefon"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microfon indisponibil"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Setările pentru Android TV sunt indisponibile"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Setările pentru tabletă sunt indisponibile"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Setările pentru telefon sunt indisponibile"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Aplicația nu se poate accesa pe <xliff:g id="DEVICE">%1$s</xliff:g>. Încercați pe dispozitivul Android TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Aplicația nu se poate accesa pe <xliff:g id="DEVICE">%1$s</xliff:g>. Încercați pe tabletă."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Aplicația nu se poate accesa pe <xliff:g id="DEVICE">%1$s</xliff:g>. Încercați pe telefon."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe dispozitivul Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe tabletă."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încercați pe telefon."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Aplicația necesită securitate suplimentară. Încercați pe dispozitivul Android TV."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Aplicația necesită securitate suplimentară. Încercați pe tabletă."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Aplicația necesită securitate suplimentară. Încercați pe telefon."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Această aplicație a fost creată pentru o versiune Android mai veche și este posibil să nu funcționeze corect. Încercați să căutați actualizări sau contactați dezvoltatorul."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Căutați actualizări"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Aveți mesaje noi"</string>
@@ -2290,11 +2275,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> a fost tradus."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mesaj tradus din <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> în <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Activitate de fundal"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"O aplicație consumă bateria"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"O aplicație este încă activă"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> rulează în fundal. Atingeți pentru a gestiona utilizarea bateriei."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> poate afecta autonomia bateriei. Atingeți pentru a examina aplicațiile active."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificați aplicațiile active"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nu se poate accesa camera foto a telefonului de pe <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

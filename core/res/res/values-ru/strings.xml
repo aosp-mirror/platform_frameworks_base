@@ -1935,36 +1935,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" сейчас недоступно."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Требуется разрешение"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Камера недоступна"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Продолжите на телефоне"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Микрофон недоступен"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Настройки Android TV недоступны"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Настройки планшета недоступны"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Настройки телефона недоступны"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Эта функция недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте Android TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Эта функция недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте планшет."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Эта функция недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте телефон."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Эта функция пока недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Эта функция пока недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте планшет."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Эта функция пока недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте телефон."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Это приложение запрашивает дополнительные меры защиты. Используйте Android TV."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Это приложение запрашивает дополнительные меры защиты. Используйте планшет."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Это приложение запрашивает дополнительные меры защиты. Используйте телефон."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Это приложение было создано для более ранней версии Android и может работать со сбоями. Проверьте наличие обновлений или свяжитесь с разработчиком."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверить обновления"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Новые сообщения"</string>
@@ -2009,7 +1994,7 @@
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Нет вариантов автозаполнения"</string>
     <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{1 вариант автозаполнения}one{# вариант автозаполнения}few{# варианта автозаполнения}many{# вариантов автозаполнения}other{# варианта автозаполнения}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Сохранить в сервисе "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Сохранить данные (<xliff:g id="TYPE">%1$s</xliff:g>) в сервисе "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Сохран. данные (<xliff:g id="TYPE">%1$s</xliff:g>) в сервисе "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Сохранить данные (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>) в сервисе "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"Сохранить данные (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g>) в сервисе "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title" msgid="3630695947047069136">"Обновить в сервисе "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
@@ -2069,14 +2054,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Нажмите, чтобы узнать больше и изменить настройки."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Настройки режима \"Не беспокоить\" изменены"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Нажмите, чтобы проверить настройки."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Проверьте настройки уведомлений"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Если вы хотите получать уведомления от приложения в Android 13, после установки ему нужно предоставить надлежащее разрешение. Нажмите, чтобы настроить разрешения для установленных приложений."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Напомнить позже"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Закрыть"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Система"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Настройки"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>
@@ -2295,11 +2276,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Сообщение \"<xliff:g id="MESSAGE">%1$s</xliff:g>\" переведено."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Сообщение переведено на <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>. Язык оригинала: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Работа в фоновом режиме"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Одно из приложений быстро расходует заряд батареи"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Приложение все ещё активно"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"\"<xliff:g id="APP">%1$s</xliff:g>\" работает в фоновом режиме. Нажмите, чтобы изменить настройки, связанные с расходом заряда батареи."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\" может влиять на время работы батареи. Нажмите, чтобы увидеть активные приложения."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверить активные приложения"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"У устройства \"<xliff:g id="DEVICE">%1$s</xliff:g>\" нет доступа к камере телефона."</string>

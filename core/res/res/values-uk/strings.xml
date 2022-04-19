@@ -2069,14 +2069,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Торкніться, щоб дізнатися більше та змінити."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Налаштування режиму \"Не турбувати\" змінено"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Торкніться, щоб перевірити, що заблоковано."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Перегляньте налаштування сповіщень"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"В ОС Android 13 встановленим додаткам потрібно надати дозвіл, щоб вони могли надсилати сповіщення. Натисніть, щоб змінити цей дозвіл для наявних додатків."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Нагадати пізніше"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Закрити"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Система"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Налаштування"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>

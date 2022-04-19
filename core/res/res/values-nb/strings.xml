@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ikke tilgjengelig for øyeblikket."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> er utilgjengelig"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Du må gi tillatelse"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kameraet er utilgjengelig"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Fortsett på telefonen"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofonen er utilgjengelig"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-innstillingene er utilgjengelige"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Nettbrettinnstillingene er utilgjengelige"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Telefoninnstillingene er utilgjengelige"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Dette er ikke tilgjengelig på <xliff:g id="DEVICE">%1$s</xliff:g>. Prøv på Android TV-enheten din i stedet."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Dette er ikke tilgjengelig på <xliff:g id="DEVICE">%1$s</xliff:g>. Prøv på nettbrettet ditt i stedet."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Dette er ikke tilgjengelig på <xliff:g id="DEVICE">%1$s</xliff:g>. Prøv på telefonen din i stedet."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Dette er ikke tilgjengelig på <xliff:g id="DEVICE">%1$s</xliff:g> for øyeblikket. Prøv på Android TV-enheten din i stedet."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Dette er ikke tilgjengelig på <xliff:g id="DEVICE">%1$s</xliff:g> for øyeblikket. Prøv på nettbrettet ditt i stedet."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Dette er ikke tilgjengelig på <xliff:g id="DEVICE">%1$s</xliff:g> for øyeblikket. Prøv på telefonen din i stedet."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Denne appen ber om ekstra sikkerhet. Prøv på Android TV-enheten din i stedet."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Denne appen ber om ekstra sikkerhet. Prøv på nettbrettet ditt i stedet."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Denne appen ber om ekstra sikkerhet. Prøv på telefonen din i stedet."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Denne appen er utviklet for en eldre versjon av Android og fungerer kanskje ikke som den skal. Prøv å se etter oppdateringer, eller kontakt utvikleren."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Se etter oppdateringer"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nye meldinger"</string>
@@ -2067,14 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Trykk for å finne ut mer og endre."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ikke forstyrr er endret"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Trykk for å sjekke hva som er blokkert."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Gjennomgå varslingsinnstillingene"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"I Android 13 må apper du installerer, få tillatelse til å sende varsler. Trykk for å endre denne tillatelsen for eksisterende apper."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Påminn meg senere"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Lukk"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Innstillinger"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>

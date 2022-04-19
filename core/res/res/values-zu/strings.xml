@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayitholakali khona manje."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"okungatholakali <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Kudingeka imvume"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Ikhamera ayitholakali"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Qhubeka kufoni"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Imakrofoni ayitholakali"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Amasethingi e-Android TV awatholakali"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Amasethingi ethebulethi awatholakali"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Amasethingi efoni awatholakali"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho. Zama kudivayisi yakho ye-Android TV kunalokho."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho. Zama kuthebhulethi yakho kunalokho."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho. Zama efonini yakho kunalokho."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho ngalesi sikhathi. Zama kudivayisi yakho ye-Android TV kunalokho."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho ngalesi sikhathi. Zama kuthebhulethi yakho kunalokho."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho ngalesi sikhathi. Zama efonini yakho kunalokho."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Le app icela ukuvikeleka okwengeziwe. Zama kudivayisi yakho ye-Android TV kunalokho."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Le app icela ukuvikeleka okwengeziwe. Zama kuthebhulethi yakho kunalokho."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Le app icela ukuvikeleka okwengeziwe. Zama efonini yakho kunalokho."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Lolu hlelo lokusebenza belakhelwe inguqulo endala ye-Android futhi kungenzeka lungasebenzi kahle. Zama ukuhlolela izibuyekezo, noma uxhumane nonjiniyela."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Hlola izibuyekezo"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Unemilayezo emisha"</string>
@@ -2067,14 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Thepha ukuze ufunde kabanzi futhi ushintshe."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ukungaphazamisi kushintshile"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Thepha ukuze uhlole ukuthi yini evinjelwe."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Buyekeza amasethingi wesaziso"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Ku-Android 13, ama-app owafakayo adinga imvume yakho yokuthumela izaziso. Thepha ukuze ushintshe le mvume yama-app akhona kakade."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ngikhumbuze ngesinye isikhathi"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Chitha"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Isistimu"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Izilungiselelo"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Ikhamera"</string>
@@ -2293,11 +2274,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Uhunyushiwe."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Umlayezo uhunyushwe kusuka ku-<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> kuya ku-<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Umsebenzi Wangemuva"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"I-app idla ibhethri"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"I-app isasebenza"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"I-<xliff:g id="APP">%1$s</xliff:g> isebenza kungemuva. Thepha ukuze ulawule ukusetshenziswa kwebhethri."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"I-<xliff:g id="APP">%1$s</xliff:g> ingase ithinte impilo yebhethri. Thepha ukuze ubuyekeze ama-app asebenzayo."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Hlola ama-app asebenzayo"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ayikwazi ukufinyelela ikhamera yefoni kusuka ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho"</string>
