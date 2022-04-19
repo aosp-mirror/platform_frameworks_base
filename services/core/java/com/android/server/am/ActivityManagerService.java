@@ -10850,7 +10850,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             "Native",
             "System", "Persistent", "Persistent Service", "Foreground",
             "Visible", "Perceptible", "Perceptible Low", "Perceptible Medium",
-            "Heavy Weight", "Backup",
+            "Backup", "Heavy Weight",
             "A Services", "Home",
             "Previous", "B Services", "Cached"
     };
@@ -10858,7 +10858,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             "native",
             "sys", "pers", "persvc", "fore",
             "vis", "percept", "perceptl", "perceptm",
-            "heavy", "backup",
+            "backup", "heavy",
             "servicea", "home",
             "prev", "serviceb", "cached"
     };
