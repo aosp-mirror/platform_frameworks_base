@@ -27,7 +27,6 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.util.DisplayMetrics;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 
@@ -64,9 +63,7 @@ public class HandwritingInitiatorPerfTest {
         mTouchSlop = viewConfiguration.getScaledTouchSlop();
         final InputMethodManager inputMethodManager =
                 mContext.getSystemService(InputMethodManager.class);
-        final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
-        mHandwritingInitiator = new HandwritingInitiator(viewConfiguration, inputMethodManager,
-                displayMetrics);
+        mHandwritingInitiator = new HandwritingInitiator(viewConfiguration, inputMethodManager);
     }
 
     @Test

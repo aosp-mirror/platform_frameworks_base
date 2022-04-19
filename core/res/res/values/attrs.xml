@@ -3376,6 +3376,50 @@
              <p>This is true by default.
              See {@link android.view.View#setAutoHandwritingEnabled}. -->
         <attr name="autoHandwritingEnabled" format="boolean" />
+
+        <!-- <p>The amount of offset that is applied to the left edge of the view's stylus
+             handwriting bounds, which by default is the view's visible bounds.
+
+             <p>This attribute is mainly used to enlarge the view's handwriting bounds for better
+             user experience. Note that a positive offset means the bounds is extended outwards,
+             and vice versa. See {@link android.view.View#setHandwritingBoundsOffsets}
+
+             <p> The default value is 10dp for {@link android.widget.TextView} and
+             {@link android.widget.EditText}, and 0dp for other views. -->
+        <attr name="handwritingBoundsOffsetLeft" format="dimension" />
+
+        <!-- <p>The amount of offset that is applied to the top edge of the view's stylus
+             handwriting bounds, which by default is the view's visible bounds.
+
+             <p>This attribute is mainly used to enlarge the view's handwriting bounds for better
+             user experience. Note that a positive offset means the bounds is extended outwards,
+             and vice versa. See {@link android.view.View#setHandwritingBoundsOffsets}
+
+             <p> The default value is 40dp for {@link android.widget.TextView} and
+             {@link android.widget.EditText}, and 0dp for other views. -->
+        <attr name="handwritingBoundsOffsetTop" format="dimension" />
+
+        <!-- <p>The amount of offset that is applied to the right edge of the view's stylus
+             handwriting bounds, which by default is the view's visible bounds.
+
+             <p>This attribute is mainly used to enlarge the view's handwriting bounds for better
+             user experience. Note that a positive offset means the bounds is extended outwards,
+             and vice versa. See {@link android.view.View#setHandwritingBoundsOffsets}
+
+             <p> The default value is 10dp for {@link android.widget.TextView} and
+             {@link android.widget.EditText}, and 0dp for other views. -->
+        <attr name="handwritingBoundsOffsetRight" format="dimension" />
+
+        <!-- <p>The amount of offset that is applied to the bottom edge of the view's stylus
+             handwriting bounds, which by default is the view's visible bounds.
+
+             <p>This attribute is mainly used to enlarge the view's handwriting bounds for better
+             user experience. Note that a positive offset means the bounds is extended outwards,
+             and vice versa. See {@link android.view.View#setHandwritingBoundsOffsets}
+
+             <p> The default value is 40dp for {@link android.widget.TextView} and
+             {@link android.widget.EditText}, and 0dp for all other views. -->
+        <attr name="handwritingBoundsOffsetBottom" format="dimension" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->

@@ -110,6 +110,10 @@
   <eat-comment/>
 
   <staging-public-group type="attr" first-id="0x01ce0000">
+    <public name="handwritingBoundsOffsetLeft" />
+    <public name="handwritingBoundsOffsetTop" />
+    <public name="handwritingBoundsOffsetRight" />
+    <public name="handwritingBoundsOffsetBottom" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01cd0000">

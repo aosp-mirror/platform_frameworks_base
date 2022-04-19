@@ -505,6 +505,10 @@ please see styles_device_defaults.xml.
         <item name="textCursorDrawable">?attr/textCursorDrawable</item>
         <item name="breakStrategy">high_quality</item>
         <item name="hyphenationFrequency">@dimen/config_preferredHyphenationFrequency</item>
+        <item name="handwritingBoundsOffsetLeft">@dimen/handwriting_bounds_offset_left</item>
+        <item name="handwritingBoundsOffsetTop">@dimen/handwriting_bounds_offset_top</item>
+        <item name="handwritingBoundsOffsetRight">@dimen/handwriting_bounds_offset_right</item>
+        <item name="handwritingBoundsOffsetBottom">@dimen/handwriting_bounds_offset_bottom</item>
     </style>
 
     <style name="Widget.CheckedTextView">
@@ -540,6 +544,10 @@ please see styles_device_defaults.xml.
         <item name="breakStrategy">simple</item>
         <item name="hyphenationFrequency">@dimen/config_preferredHyphenationFrequency</item>
         <item name="defaultFocusHighlightEnabled">false</item>
+        <item name="handwritingBoundsOffsetLeft">@dimen/handwriting_bounds_offset_left</item>
+        <item name="handwritingBoundsOffsetTop">@dimen/handwriting_bounds_offset_top</item>
+        <item name="handwritingBoundsOffsetRight">@dimen/handwriting_bounds_offset_right</item>
+        <item name="handwritingBoundsOffsetBottom">@dimen/handwriting_bounds_offset_bottom</item>
     </style>
 
     <style name="Widget.ExpandableListView" parent="Widget.ListView">

@@ -786,6 +786,10 @@ package android {
     field public static final int hand_secondTintMode = 16844349; // 0x101063d
     field public static final int handle = 16843354; // 0x101025a
     field public static final int handleProfiling = 16842786; // 0x1010022
+    field public static final int handwritingBoundsOffsetBottom;
+    field public static final int handwritingBoundsOffsetLeft;
+    field public static final int handwritingBoundsOffsetRight;
+    field public static final int handwritingBoundsOffsetTop;
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
     field public static final int hardwareAccelerated = 16843475; // 0x10102d3
     field public static final int hasCode = 16842764; // 0x101000c
@@ -49714,6 +49718,10 @@ package android.view {
     method public boolean getGlobalVisibleRect(android.graphics.Rect, android.graphics.Point);
     method public final boolean getGlobalVisibleRect(android.graphics.Rect);
     method public android.os.Handler getHandler();
+    method public float getHandwritingBoundsOffsetBottom();
+    method public float getHandwritingBoundsOffsetLeft();
+    method public float getHandwritingBoundsOffsetRight();
+    method public float getHandwritingBoundsOffsetTop();
     method public final boolean getHasOverlappingRendering();
     method public final int getHeight();
     method public void getHitRect(android.graphics.Rect);
@@ -50077,6 +50085,7 @@ package android.view {
     method public void setForegroundTintBlendMode(@Nullable android.graphics.BlendMode);
     method public void setForegroundTintList(@Nullable android.content.res.ColorStateList);
     method public void setForegroundTintMode(@Nullable android.graphics.PorterDuff.Mode);
+    method public void setHandwritingBoundsOffsets(float, float, float, float);
     method public void setHapticFeedbackEnabled(boolean);
     method public void setHasTransientState(boolean);
     method public void setHorizontalFadingEdgeEnabled(boolean);

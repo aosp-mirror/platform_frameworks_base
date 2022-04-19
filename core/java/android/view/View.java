@@ -4464,6 +4464,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected int mPaddingBottom;
 
     /**
+     * The amount of pixel offset applied to the left edge of this view's handwriting bounds.
+     */
+    private float mHandwritingBoundsOffsetLeft;
+
+    /**
+     * The amount of pixel offset applied to the top edge of this view's handwriting bounds.
+     */
+    private float mHandwritingBoundsOffsetTop;
+
+    /**
+     * The amount of pixel offset applied to the right edge of this view's handwriting bounds.
+     */
+    private float mHandwritingBoundsOffsetRight;
+
+    /**
+     * The amount of pixel offset applied to the bottom edge of this view's handwriting bounds.
+     */
+    private float mHandwritingBoundsOffsetBottom;
+
+    /**
      * The layout insets in pixels, that is the distance in pixels between the
      * visible edges of this view its bounds.
      */
@@ -6069,6 +6089,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case R.styleable.View_autoHandwritingEnabled:
                     setAutoHandwritingEnabled(a.getBoolean(attr, true));
+                    break;
+                case R.styleable.View_handwritingBoundsOffsetLeft:
+                    mHandwritingBoundsOffsetLeft = a.getDimension(attr, 0);
+                    break;
+                case R.styleable.View_handwritingBoundsOffsetTop:
+                    mHandwritingBoundsOffsetTop = a.getDimension(attr, 0);
+                    break;
+                case R.styleable.View_handwritingBoundsOffsetRight:
+                    mHandwritingBoundsOffsetRight = a.getDimension(attr, 0);
+                    break;
+                case R.styleable.View_handwritingBoundsOffsetBottom:
+                    mHandwritingBoundsOffsetBottom = a.getDimension(attr, 0);
                     break;
             }
         }
@@ -12005,12 +12037,91 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Set a list of handwriting areas in this view. If there is any stylus {@link MotionEvent}
-     * occurs within those areas, it will trigger stylus handwriting mode. This can be disabled by
+     * Set the amount of offset applied to this view's stylus handwriting bounds. A positive offset
+     * will offset the edge outwards.The base handwriting bounds of a view is its visible bounds.
+     * The handwriting bounds offsets are applied to the base handwriting bounds to determine the
+     * final handwriting bounds.
+     * <p> This method is mainly used to enlarge the view's handwriting bounds for a better user
+     * experience.
+     * <p> Note that when the view is clipped (e.g. the view is in a
+     * {@link android.widget.ScrollView}), the offsets are applied after the view's handwriting
+     * bounds is clipped.
+     *
+     * @param offsetLeft the amount of pixel offset applied to the left edge outwards of the view's
+     *                   handwriting bounds.
+     * @param offsetTop the amount of pixel offset applied to the top edge outwards of the view's
+     *                  handwriting bounds.
+     * @param offsetRight the amount of pixel offset applied to the right edge outwards of the
+     *                    view's handwriting bounds.
+     * @param offsetBottom the amount of pixel offset applied to the bottom edge outwards of the
+     *                     view's handwriting bounds.
+     *
+     * @see #setAutoHandwritingEnabled(boolean)
+     * @see #getHandwritingBoundsOffsetLeft()
+     * @see #getHandwritingBoundsOffsetTop()
+     * @see #getHandwritingBoundsOffsetRight()
+     * @see #getHandwritingBoundsOffsetBottom()
+     */
+    public void setHandwritingBoundsOffsets(float offsetLeft, float offsetTop,
+            float offsetRight, float offsetBottom) {
+        mHandwritingBoundsOffsetLeft = offsetLeft;
+        mHandwritingBoundsOffsetTop = offsetTop;
+        mHandwritingBoundsOffsetRight = offsetRight;
+        mHandwritingBoundsOffsetBottom = offsetBottom;
+    }
+
+    /**
+     * Return the amount of offset applied to the left edge of this view's handwriting bounds,
+     * in the unit of pixel.
+     *
+     * @see #setAutoHandwritingEnabled(boolean)
+     * @see #setHandwritingBoundsOffsets(float, float, float, float)
+     */
+    public float getHandwritingBoundsOffsetLeft() {
+        return mHandwritingBoundsOffsetLeft;
+    }
+
+    /**
+     * Return the amount of offset applied to the top edge of this view's handwriting bounds,
+     * in the unit of pixel.
+     *
+     * @see #setAutoHandwritingEnabled(boolean)
+     * @see #setHandwritingBoundsOffsets(float, float, float, float)
+     */
+    public float getHandwritingBoundsOffsetTop() {
+        return mHandwritingBoundsOffsetTop;
+    }
+
+    /**
+     * Return the amount of offset applied to the right edge of this view's handwriting bounds, in
+     * the unit of pixel.
+     *
+     * @see #setAutoHandwritingEnabled(boolean)
+     * @see #setHandwritingBoundsOffsets(float, float, float, float)
+     */
+    public float getHandwritingBoundsOffsetRight() {
+        return mHandwritingBoundsOffsetRight;
+    }
+
+    /**
+     * Return the amount of offset applied to the bottom edge of this view's handwriting bounds, in
+     * the unit of pixel.
+     *
+     * @see #setAutoHandwritingEnabled(boolean)
+     * @see #setHandwritingBoundsOffsets(float, float, float, float)
+     */
+    public float getHandwritingBoundsOffsetBottom() {
+        return mHandwritingBoundsOffsetBottom;
+    }
+
+
+    /**
+     * Set a handwriting area in this view. If there is any stylus {@link MotionEvent}
+     * occurs within this area, it will trigger stylus handwriting mode. This can be disabled by
      * disabling the auto handwriting initiation by calling
      * {@link #setAutoHandwritingEnabled(boolean)} with false.
      *
-     * @attr rects a list of handwriting area in the view's local coordiniates.
+     * @attr rect the handwriting area in the view's local coordiniates.
      *
      * @see android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)
      * @see #setAutoHandwritingEnabled(boolean)

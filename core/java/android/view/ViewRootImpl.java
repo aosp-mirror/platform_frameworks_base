@@ -901,8 +901,7 @@ public final class ViewRootImpl implements ViewParent,
         mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
         mHandwritingInitiator = new HandwritingInitiator(
                 mViewConfiguration,
-                mContext.getSystemService(InputMethodManager.class),
-                context.getResources().getDisplayMetrics());
+                mContext.getSystemService(InputMethodManager.class));
 
         String processorOverrideName = context.getResources().getString(
                                     R.string.config_inputEventCompatProcessorOverrideClassName);
