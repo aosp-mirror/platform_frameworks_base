@@ -23,12 +23,10 @@ import static android.view.stylus.HandwritingTestUtil.createView;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
 import android.content.Context;
@@ -59,12 +57,12 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class HandwritingInitiatorTest {
-    private static final int TOUCH_SLOP = 8;
     private static final long TIMEOUT = ViewConfiguration.getLongPressTimeout();
     private static final int HW_BOUNDS_OFFSETS_LEFT_PX = 10;
     private static final int HW_BOUNDS_OFFSETS_TOP_PX = 20;
     private static  final int HW_BOUNDS_OFFSETS_RIGHT_PX = 30;
     private static final int HW_BOUNDS_OFFSETS_BOTTOM_PX = 40;
+    private int mHandwritingSlop = 4;
 
     private static final Rect sHwArea = new Rect(100, 200, 500, 500);
 
@@ -76,8 +74,9 @@ public class HandwritingInitiatorTest {
     public void setup() {
         final Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mContext = mInstrumentation.getTargetContext();
-        final ViewConfiguration viewConfiguration = mock(ViewConfiguration.class);
-        when(viewConfiguration.getScaledTouchSlop()).thenReturn(TOUCH_SLOP);
+
+        final ViewConfiguration viewConfiguration = ViewConfiguration.get(mContext);
+        mHandwritingSlop = viewConfiguration.getScaledHandwritingSlop();
 
         InputMethodManager inputMethodManager = mContext.getSystemService(InputMethodManager.class);
         mHandwritingInitiator =
@@ -99,7 +98,7 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
-        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int x2 = x1 + mHandwritingSlop * 2;
         final int y2 = y1;
 
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
@@ -117,13 +116,13 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
-        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int x2 = x1 + mHandwritingSlop * 2;
         final int y2 = y1;
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
 
-        final int x3 = x2 + TOUCH_SLOP * 2;
+        final int x3 = x2 + mHandwritingSlop * 2;
         final int y3 = y2;
         MotionEvent stylusEvent3 = createStylusEvent(ACTION_MOVE, x3, y3, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent3);
@@ -143,7 +142,7 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
-        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int x2 = x1 + mHandwritingSlop * 2;
         final int y2 = y1;
 
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
@@ -160,7 +159,7 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
-        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int x2 = x1 + mHandwritingSlop * 2;
         final int y2 = y1;
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
@@ -178,7 +177,7 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
-        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int x2 = x1 + mHandwritingSlop * 2;
         final int y2 = y1;
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
@@ -197,7 +196,7 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
-        final int x2 = x1 + TOUCH_SLOP / 2;
+        final int x2 = x1 + mHandwritingSlop / 2;
         final int y2 = y1;
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_UP, x2, y2, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
@@ -213,7 +212,7 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
-        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int x2 = x1 + mHandwritingSlop * 2;
         final int y2 = y1;
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
@@ -230,7 +229,7 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
-        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int x2 = x1 + mHandwritingSlop * 2;
         final int y2 = y1;
         final long time2 = time1 + TIMEOUT + 10L;
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, time2);
@@ -247,7 +246,7 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
-        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int x2 = x1 + mHandwritingSlop * 2;
         final int y2 = y1;
 
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
@@ -264,7 +263,7 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
-        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int x2 = x1 + mHandwritingSlop * 2;
         final int y2 = y1;
 
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
@@ -283,7 +282,7 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
-        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int x2 = x1 + mHandwritingSlop * 2;
         final int y2 = y1;
 
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);

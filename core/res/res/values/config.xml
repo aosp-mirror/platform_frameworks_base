@@ -2572,6 +2572,10 @@
          movement threshold where scrolling should begin. -->
     <dimen name="config_viewConfigurationTouchSlop">8dp</dimen>
 
+    <!-- Base "handwriting slop" value used by ViewConfiguration as a
+     movement threshold where stylus handwriting should begin. -->
+    <dimen name="config_viewConfigurationHandwritingSlop">4dp</dimen>
+
     <!-- Base "hover slop" value used by ViewConfiguration as a
          movement threshold under which hover is considered "stationary". -->
     <dimen name="config_viewConfigurationHoverSlop">4dp</dimen>

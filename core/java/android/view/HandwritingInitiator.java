@@ -50,10 +50,10 @@ import java.util.List;
  */
 public class HandwritingInitiator {
     /**
-     * The touchSlop from {@link ViewConfiguration} used to decide whether a pointer is considered
-     * moving or stationary.
+     * The maximum amount of distance a stylus touch can wander before it is considered
+     * handwriting.
      */
-    private final int mTouchSlop;
+    private final int mHandwritingSlop;
     /**
      * The timeout used to distinguish tap or long click from handwriting. If the stylus doesn't
      * move before this timeout, it's not considered as handwriting.
@@ -79,7 +79,7 @@ public class HandwritingInitiator {
     @VisibleForTesting
     public HandwritingInitiator(@NonNull ViewConfiguration viewConfiguration,
             @NonNull InputMethodManager inputMethodManager) {
-        mTouchSlop = viewConfiguration.getScaledTouchSlop();
+        mHandwritingSlop = viewConfiguration.getScaledHandwritingSlop();
         mHandwritingTimeoutInMillis = ViewConfiguration.getLongPressTimeout();
         mImm = inputMethodManager;
     }
@@ -113,7 +113,7 @@ public class HandwritingInitiator {
                 mState.mStylusDownCandidateView = new WeakReference<>(
                         findBestCandidateView(mState.mStylusDownX, mState.mStylusDownY));
                 mState.mShouldInitHandwriting = true;
-                mState.mExceedTouchSlop = false;
+                mState.mExceedHandwritingSlop = false;
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 final int pointerId = motionEvent.getPointerId(motionEvent.getActionIndex());
@@ -131,7 +131,7 @@ public class HandwritingInitiator {
             case MotionEvent.ACTION_MOVE:
                 // Either we've already tried to initiate handwriting, or the ongoing MotionEvent
                 // sequence is considered to be tap, long-click or other gestures.
-                if (!mState.mShouldInitHandwriting || mState.mExceedTouchSlop) {
+                if (!mState.mShouldInitHandwriting || mState.mExceedHandwritingSlop) {
                     return;
                 }
 
@@ -146,7 +146,7 @@ public class HandwritingInitiator {
                 final float x = motionEvent.getX(pointerIndex);
                 final float y = motionEvent.getY(pointerIndex);
                 if (largerThanTouchSlop(x, y, mState.mStylusDownX, mState.mStylusDownY)) {
-                    mState.mExceedTouchSlop = true;
+                    mState.mExceedHandwritingSlop = true;
                     View candidateView = mState.mStylusDownCandidateView.get();
                     if (candidateView == null || !candidateView.isAttachedToWindow()) {
                         // If there was no candidate view found in the stylus down event, or if that
@@ -233,7 +233,7 @@ public class HandwritingInitiator {
      * next ACTION_DOWN.
      */
     private void tryStartHandwriting() {
-        if (!mState.mExceedTouchSlop) {
+        if (!mState.mExceedHandwritingSlop) {
             return;
         }
         final View connectedView = getConnectedView();
@@ -421,7 +421,7 @@ public class HandwritingInitiator {
     private boolean largerThanTouchSlop(float x1, float y1, float x2, float y2) {
         float dx = x1 - x2;
         float dy = y1 - y2;
-        return dx * dx + dy * dy > mTouchSlop * mTouchSlop;
+        return dx * dx + dy * dy > mHandwritingSlop * mHandwritingSlop;
     }
 
     /** Object that keeps the MotionEvent related states for HandwritingInitiator. */
@@ -440,11 +440,12 @@ public class HandwritingInitiator {
          */
         private boolean mShouldInitHandwriting = false;
         /**
-         * Whether the current ongoing stylus MotionEvent sequence already exceeds the touchSlop.
-         * It's used for the case where the stylus exceeds touchSlop before the target View built
-         * InputConnection.
+         * Whether the current ongoing stylus MotionEvent sequence already exceeds the
+         * handwriting slop.
+         * It's used for the case where the stylus exceeds handwriting slop before the target View
+         * built InputConnection.
          */
-        private boolean mExceedTouchSlop = false;
+        private boolean mExceedHandwritingSlop = false;
 
         /** The pointer id of the stylus pointer that is being tracked. */
         private int mStylusPointerId = -1;
