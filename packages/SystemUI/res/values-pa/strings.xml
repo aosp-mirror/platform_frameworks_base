@@ -333,7 +333,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ਵਿੱਚ ਪੂਰਾ ਚਾਰਜ ਹੋਵੇਗਾ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ਡੌਕ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ਵਿੱਚ ਪੂਰਾ ਚਾਰਜ ਹੋਵੇਗਾ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ਵਰਤੋਂਕਾਰ ਸਵਿੱਚ ਕਰੋ"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿੱਚ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿਚਲੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ਮਹਿਮਾਨ, ਫਿਰ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ਕੀ ਤੁਸੀਂ ਆਪਣਾ ਸੈਸ਼ਨ ਜਾਰੀ ਰੱਖਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
@@ -506,6 +506,8 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਗੱਲਬਾਤ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
+    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
+    <skip />
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ਇਹ ਸੂਚਨਾਵਾਂ ਦਾ ਗਰੁੱਪ ਇੱਥੇ ਸੰਰੂਪਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ਇੱਕ ਐਪ ਦੀ ਥਾਂ \'ਤੇ ਦੂਜੀ ਐਪ ਰਾਹੀਂ ਦਿੱਤੀ ਗਈ ਸੂਚਨਾ"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"ਸਾਰੀਆਂ <xliff:g id="APP_NAME">%1$s</xliff:g> ਸੂਚਨਾਵਾਂ"</string>
@@ -910,12 +912,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ਟਾਇਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ਟਾਇਲ ਸ਼ਾਮਲ ਨਾ ਕਰੋ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ਵਰਤੋਂਕਾਰ ਚੁਣੋ"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> ਕਿਰਿਆਸ਼ੀਲ ਐਪ</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> ਕਿਰਿਆਸ਼ੀਲ ਐਪਾਂ</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"ਨਵੀਂ ਜਾਣਕਾਰੀ"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ਕਿਰਿਆਸ਼ੀਲ ਐਪਾਂ"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ਬੰਦ ਕਰੋ"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ਬੰਦ ਹੈ"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"ਹੋ ਗਿਆ"</string>
