@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"प्रतिबंधित प्रोफ़ाइल"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"नया उपयोगकर्ता जोड़ें?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"आप और ज़्यादा उपयोगकर्ता बनाकर इस डिवाइस को दूसरे लोगों के साथ शेयर कर सकते हैं. हर उपयोगकर्ता के पास अपनी जगह होती है, जिसमें वह मनपसंद तरीके से ऐप्लिकेशन, वॉलपेपर और दूसरी चीज़ों में बदलाव कर सकते हैं. उपयोगकर्ता वाई-फ़ाई जैसी डिवाइस सेटिंग में भी बदलाव कर सकते हैं, जिसका असर हर किसी पर पड़ेगा.\n\nजब आप कोई नया उपयोगकर्ता जोड़ते हैं तो उन्हें अपनी जगह सेट करनी होगी.\n\nकोई भी उपयोगकर्ता दूसरे सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है. ऐसा भी हो सकता है कि सुलभता सेटिंग और सेवाएं नए उपयोगकर्ता को ट्रांसफ़र न हो पाएं."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"जब आप कोई नया उपयोगकर्ता जोड़ते हैं, तो उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"कोई नया उपयोगकर्ता जोड़ने पर, उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"उपयोगकर्ता को अभी सेट करें?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"पक्का करें कि व्यक्ति डिवाइस का इस्तेमाल करने और अपनी जगह सेट करने के लिए मौजूद है"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"प्रोफ़ाइल अभी सेट करें?"</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"रीसेट करें"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"हटाएं"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"मेहमान के तौर पर ब्राउज़ करने का सेशन रीसेट किया जा रहा है…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"क्या मेहमान मोड के मौजूदा सेशन को रीसेट करना है?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ऐसा करने पर, मेहमान के तौर पर ब्राउज़ करने का एक नया सेशन शुरू हो जाएगा. साथ ही, पिछले सेशन में मौजूद डेटा और इस्तेमाल किए जा रहे ऐप्लिकेशन को मिटा दिया जाएगा"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"मेहमान मोड से बाहर निकलना है?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"इससे, मेहमान मोड के मौजूदा सेशन का डेटा और इसमें इस्तेमाल हो रहे ऐप मिट जाएंगे"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"बाहर निकलें"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"मेहमान मोड की गतिविधि को सेव करना है?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"मौजूदा सेशन की गतिविधि को सेव किया जा सकता है या सभी ऐप और डेटा को मिटाया जा सकता है"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"मिटाएं"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"सेव करें"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"मेहमान मोड से बाहर निकलें?"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"मेहमान मोड के सेशन को रीसेट करें?"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"मेहमान मोड से बाहर निकलें"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"बाहर निकलने पर, सारी गतिविधि मिट जाएगी"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"बाहर निकलने पर, गतिविधि को मिटाया या सेव किया जा सकता है"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"सेशन की गतिविधि को अभी मिटाने के लिए, रीसेट करें. इसके अलावा, बाहर निकलने पर, गतिविधि को मिटाया या सेव किया जा सकता है"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"फ़ोटो खींचें"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"कोई इमेज चुनें"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"फ़ोटो चुनें"</string>
@@ -685,12 +670,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"क्यूआर कोड को स्कैन करें"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"सुनने के लिए, दिए गए क्यूआर कोड को बीच में लाएं"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"क्यूआर कोड का फ़ॉर्मैट गलत है"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर ब्रॉडकास्ट करना रोकें?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> पर ब्रॉडकास्ट शुरू करने पर या आउटपुट बदलने पर, आपका मौजूदा ब्रॉडकास्ट बंद हो जाएगा"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> पर ब्रॉडकास्ट करें"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"आउटपुट बदलें"</string>
 </resources>

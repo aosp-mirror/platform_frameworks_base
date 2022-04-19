@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Batal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Berpasangan memberi anda akses kepada kenalan dan sejarah panggilan apabila disambungkan."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Tidak dapat berpasangan dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Tidak dapat berpasangan dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> kerana PIN atau kunci laluan yang salah."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Tidak dapat berganding dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> kerana PIN atau kunci laluan yang salah."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Tidak boleh berkomunikasi dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Pasangan ditolak oleh <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Komputer"</string>
@@ -670,12 +670,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Imbas kod QR"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Untuk mula mendengar, pusatkan kod QR di bawah"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Kod QR bukan dalam format yang sah"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Hentikan siaran <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Jika anda siarkan <xliff:g id="SWITCHAPP">%1$s</xliff:g> atau tukarkan output, siaran semasa anda akan berhenti"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Siarkan <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Tukar output"</string>
 </resources>

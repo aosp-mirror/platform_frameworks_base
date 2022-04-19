@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"재설정"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"삭제"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"게스트 재설정 중…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"게스트 세션을 재설정하시겠습니까?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"이렇게 하면 새로운 게스트 세션이 시작되고 기존 세션의 모든 앱과 데이터가 삭제됩니다."</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"게스트 모드를 종료하시겠습니까?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"기존 게스트 세션의 앱과 데이터가 삭제됩니다."</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"종료"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"게스트 활동을 저장하시겠습니까?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"기존 세션의 활동을 저장하거나 모든 앱과 데이터를 삭제할 수 있습니다."</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"삭제"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"저장"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"게스트 모드 종료"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"게스트 세션 재설정"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"게스트 종료"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"종료하면 모든 활동이 삭제됩니다."</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"종료 시 활동을 저장하거나 삭제할 수 있습니다."</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"지금 재설정하여 활동 세션을 삭제하거나 종료 시 활동을 저장 또는 삭제할 수 있습니다."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"사진 찍기"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"이미지 선택"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"사진 선택"</string>
@@ -685,12 +670,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR 코드 스캔"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"아래의 QR 코드가 스캐너 가운데에 오도록 맞춘 다음 듣기를 시작하세요"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR 코드의 형식이 유효하지 않습니다."</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> 방송을 중지하시겠습니까?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> 앱을 방송하거나 출력을 변경하면 기존 방송이 중단됩니다"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> 방송"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"출력 변경"</string>
 </resources>
