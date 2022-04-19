@@ -17,13 +17,20 @@
 package androidx.window.extensions.embedding;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 
+import android.app.Activity;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.platform.test.annotations.Presubmit;
+import android.window.TaskFragmentInfo;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -32,12 +39,14 @@ import androidx.window.extensions.embedding.SplitController.TaskContainer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Test class for {@link SplitController}.
  *
  * Build/Install/Run:
- *  atest WMJetpackUnitTests:SplitController
+ *  atest WMJetpackUnitTests:SplitControllerTest
  */
 @Presubmit
 @SmallTest
@@ -45,12 +54,24 @@ import org.junit.runner.RunWith;
 public class SplitControllerTest {
     private static final int TASK_ID = 10;
 
+    @Mock
+    private Activity mActivity;
+    @Mock
+    private Resources mActivityResources;
+    @Mock
+    private TaskFragmentInfo mInfo;
     private SplitController mSplitController;
+    private SplitPresenter mSplitPresenter;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         mSplitController = new SplitController();
+        mSplitPresenter = mSplitController.mPresenter;
         spyOn(mSplitController);
+        spyOn(mSplitPresenter);
+        doReturn(mActivityResources).when(mActivity).getResources();
+        doReturn(new Configuration()).when(mActivityResources).getConfiguration();
     }
 
     @Test
@@ -82,5 +103,18 @@ public class SplitControllerTest {
 
         assertWithMessage("Must return null because tf1 has no running activity.")
                 .that(mSplitController.getTopActiveContainer(TASK_ID)).isNull();
+    }
+
+    @Test
+    public void testOnTaskFragmentVanished() {
+        final TaskFragmentContainer tf = mSplitController.newContainer(mActivity, TASK_ID);
+        doReturn(tf.getTaskFragmentToken()).when(mInfo).getFragmentToken();
+
+        // The TaskFragment has been removed in the server, we only need to cleanup the reference.
+        mSplitController.onTaskFragmentVanished(mInfo);
+
+        verify(mSplitPresenter, never()).deleteTaskFragment(any(), any());
+        verify(mSplitController).removeContainer(tf);
+        verify(mActivity, never()).finish();
     }
 }

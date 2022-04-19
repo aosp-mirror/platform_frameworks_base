@@ -91,6 +91,7 @@ class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) 
                     .then()
                     .isVisible(FlickerComponentName.IME_SNAPSHOT)
                     .then()
+                    .isInvisible(FlickerComponentName.IME_SNAPSHOT)
                     .isInvisible(FlickerComponentName.IME)
         }
     }

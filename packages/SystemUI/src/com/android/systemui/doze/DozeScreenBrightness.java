@@ -147,9 +147,11 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
                 setLightSensorEnabled(true);
                 break;
             case DOZE:
-            case DOZE_AOD_PAUSED:
                 setLightSensorEnabled(false);
                 resetBrightnessToDefault();
+                break;
+            case DOZE_AOD_PAUSED:
+                setLightSensorEnabled(false);
                 break;
             case FINISH:
                 onDestroy();

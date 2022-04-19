@@ -64,6 +64,15 @@ public abstract class GlobalConcurrencyModule {
     }
 
     /**
+     * @deprecated Use @Main Handler.
+     */
+    @Deprecated
+    @Provides
+    public static Handler provideHandler() {
+        return new Handler();
+    }
+
+    /**
      * Provide a Main-Thread Executor.
      */
     @Provides

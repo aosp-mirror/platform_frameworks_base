@@ -68,6 +68,7 @@ import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_METRICS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_TIMEOUT;
 import static com.android.server.wm.EventLogTags.WM_ACTIVITY_LAUNCH_TIME;
 
@@ -102,6 +103,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -771,6 +773,12 @@ class ActivityMetricsLogger {
             info.mReason = activityToReason.valueAt(index);
             info.mLoggedTransitionStarting = true;
             if (info.mIsDrawn) {
+                if (info.mReason == APP_TRANSITION_RECENTS_ANIM) {
+                    final LatencyTracker latencyTracker = r.mWmService.mLatencyTracker;
+                    final int duration = info.mSourceEventDelayMs + info.mCurrentTransitionDelayMs;
+                    mLoggerHandler.post(() -> latencyTracker.logAction(
+                            LatencyTracker.ACTION_START_RECENTS_ANIMATION, duration));
+                }
                 done(false /* abort */, info, "notifyTransitionStarting drawn", timestampNs);
             }
         }

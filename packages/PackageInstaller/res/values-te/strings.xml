@@ -20,7 +20,7 @@
     <string name="install" msgid="711829760615509273">"ఇన్‌స్టాల్ చేయి"</string>
     <string name="update" msgid="3932142540719227615">"అప్‌డేట్ చేయి"</string>
     <string name="done" msgid="6632441120016885253">"పూర్తయింది"</string>
-    <string name="cancel" msgid="1018267193425558088">"రద్దు చేయి"</string>
+    <string name="cancel" msgid="1018267193425558088">"రద్దు చేయండి"</string>
     <string name="installing" msgid="4921993079741206516">"ఇన్‌స్టాల్ చేస్తోంది…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేస్తోంది…"</string>
     <string name="install_done" msgid="5987363587661783896">"యాప్ ఇన్‌స్టాల్ చేయబడింది."</string>

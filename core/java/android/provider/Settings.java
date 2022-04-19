@@ -2013,6 +2013,15 @@ public final class Settings {
             "android.settings.ALL_APPS_NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show app settings specifically for sending notifications. Same as
+     * ALL_APPS_NOTIFICATION_SETTINGS but meant for internal use.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW =
+            "android.settings.ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW";
+
+    /**
      * Activity Action: Show notification settings for a single app.
      * <p>
      *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
@@ -7670,6 +7679,20 @@ public final class Settings {
                 "zen_settings_suggestion_viewed";
 
         /**
+         * State of whether review notification permissions notification needs to
+         * be shown the user, and whether the user has interacted.
+         *
+         * Valid values:
+         *   -1 = UNKNOWN
+         *    0 = SHOULD_SHOW
+         *    1 = USER_INTERACTED
+         *    2 = DISMISSED
+         * @hide
+         */
+        public static final String REVIEW_PERMISSIONS_NOTIFICATION_STATE =
+                "review_permissions_notification_state";
+
+        /**
          * Whether the in call notification is enabled to play sound during calls.  The value is
          * boolean (1 or 0).
          * @hide
@@ -10896,6 +10919,14 @@ public final class Settings {
          */
         @Readable
         public static final String ADD_USERS_WHEN_LOCKED = "add_users_when_locked";
+
+        /**
+         * Whether guest user should be removed on exit from guest mode.
+         * <p>
+         * Type: int
+         * @hide
+         */
+        public static final String REMOVE_GUEST_ON_EXIT = "remove_guest_on_exit";
 
         /**
          * Whether applying ramping ringer on incoming phone call ringtone.

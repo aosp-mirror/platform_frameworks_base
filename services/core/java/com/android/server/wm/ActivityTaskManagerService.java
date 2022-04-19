@@ -62,7 +62,6 @@ import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIV
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
 import static android.provider.Settings.Global.HIDE_ERROR_DIALOGS;
 import static android.provider.Settings.System.FONT_SCALE;
-import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_WAKE;
@@ -284,7 +283,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -382,7 +380,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private AppOpsManager mAppOpsManager;
     /** All active uids in the system. */
     final MirrorActiveUids mActiveUids = new MirrorActiveUids();
-    private final SparseArray<String> mPendingTempAllowlist = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
     /** All processes we currently have running mapped by pid and uid */
@@ -6436,20 +6433,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onUidProcStateChanged(int uid, int procState) {
             mActiveUids.onUidProcStateChanged(uid, procState);
-        }
-
-        @Override
-        public void onUidAddedToPendingTempAllowlist(int uid, String tag) {
-            synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempAllowlist.put(uid, tag);
-            }
-        }
-
-        @Override
-        public void onUidRemovedFromPendingTempAllowlist(int uid) {
-            synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempAllowlist.remove(uid);
-            }
         }
 
         @Override

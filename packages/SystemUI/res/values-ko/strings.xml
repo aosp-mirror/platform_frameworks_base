@@ -136,6 +136,12 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"확인함"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"완료하려면 확인을 탭하세요."</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"얼굴 인식으로 잠금 해제되었습니다. 계속하려면 잠금 해제 아이콘을 누르세요."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"인증됨"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN 사용"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"패턴 사용"</string>
@@ -312,6 +318,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"위로 스와이프하여 열기"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"기기를 열려면 잠금 해제 아이콘을 누르세요."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"얼굴 인식으로 잠금 해제되었습니다. 기기를 열려면 잠금 해제 아이콘을 누르세요."</string>
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"위로 스와이프하여 다시 시도해 주세요"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"잠금 해제하여 NFC 사용"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"내 조직에 속한 기기입니다."</string>
@@ -506,6 +518,8 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱은 대화 기능을 지원하지 않습니다."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"이 알림은 수정할 수 없습니다."</string>
+    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
+    <skip />
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"이 알림 그룹은 여기에서 설정할 수 없습니다."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"프록시를 통한 알림"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"모든 <xliff:g id="APP_NAME">%1$s</xliff:g> 알림"</string>
@@ -805,8 +819,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"일시중지"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"이전 트랙"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"다음 트랙"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"연결 중"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"재생"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> 열기"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g>에서 <xliff:g id="ARTIST_NAME">%2$s</xliff:g>의 <xliff:g id="SONG_NAME">%1$s</xliff:g> 재생"</string>
@@ -911,12 +924,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"타일 추가"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"타일 추가 안함"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"사용자 선택"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other">활성 상태의 앱 <xliff:g id="COUNT_1">%s</xliff:g>개</item>
-      <item quantity="one">활성 상태의 앱 <xliff:g id="COUNT_0">%s</xliff:g>개</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"새로운 정보"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"활성 상태의 앱"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"중지"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"중지됨"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"완료"</string>

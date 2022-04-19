@@ -45,6 +45,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyCallback;
 import android.text.TextUtils;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -63,6 +64,7 @@ import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.users.UserCreatingDialog;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dumpable;
+import com.android.systemui.GuestResetOrExitSessionReceiver;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
@@ -120,6 +122,8 @@ public class UserSwitcherController implements Dumpable {
     private final ArrayList<WeakReference<BaseUserAdapter>> mAdapters = new ArrayList<>();
     @VisibleForTesting
     final GuestResumeSessionReceiver mGuestResumeSessionReceiver;
+    @VisibleForTesting
+    final GuestResetOrExitSessionReceiver mGuestResetOrExitSessionReceiver;
     private final KeyguardStateController mKeyguardStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final DevicePolicyManager mDevicePolicyManager;
@@ -185,7 +189,9 @@ public class UserSwitcherController implements Dumpable {
             InteractionJankMonitor interactionJankMonitor,
             LatencyTracker latencyTracker,
             DumpManager dumpManager,
-            DialogLaunchAnimator dialogLaunchAnimator) {
+            DialogLaunchAnimator dialogLaunchAnimator,
+            GuestResumeSessionReceiver guestResumeSessionReceiver,
+            GuestResetOrExitSessionReceiver guestResetOrExitSessionReceiver) {
         mContext = context;
         mActivityManager = activityManager;
         mUserTracker = userTracker;
@@ -197,14 +203,13 @@ public class UserSwitcherController implements Dumpable {
         mInteractionJankMonitor = interactionJankMonitor;
         mLatencyTracker = latencyTracker;
         mGlobalSettings = globalSettings;
-        mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(
-                this, mUserTracker, mUiEventLogger, secureSettings);
+        mGuestResumeSessionReceiver = guestResumeSessionReceiver;
+        mGuestResetOrExitSessionReceiver = guestResetOrExitSessionReceiver;
         mBgExecutor = bgExecutor;
         mLongRunningExecutor = longRunningExecutor;
         mUiExecutor = uiExecutor;
-        if (!UserManager.isGuestUserEphemeral()) {
-            mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
-        }
+        mGuestResumeSessionReceiver.register();
+        mGuestResetOrExitSessionReceiver.register();
         mGuestUserAutoCreated = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_guestUserAutoCreated);
         mGuestIsResetting = new AtomicBoolean();
@@ -272,6 +277,10 @@ public class UserSwitcherController implements Dumpable {
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         refreshUsers(UserHandle.USER_NULL);
+    }
+
+    private static boolean isEnableGuestModeUxChanges(Context context) {
+        return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_GUEST_MODE_UX_CHANGES);
     }
 
     /**
@@ -520,20 +529,31 @@ public class UserSwitcherController implements Dumpable {
 
     private void onUserListItemClicked(int id, UserRecord record, DialogShower dialogShower) {
         int currUserId = mUserTracker.getUserId();
+        // If switching from guest and guest is ephemeral, then follow the flow
+        // of showExitGuestDialog to remove current guest,
+        // and switch to selected user
+        UserInfo currUserInfo = mUserTracker.getUserInfo();
         if (currUserId == id) {
             if (record.isGuest) {
-                showExitGuestDialog(id, dialogShower);
+                showExitGuestDialog(id, currUserInfo.isEphemeral(), dialogShower);
             }
             return;
         }
-        if (UserManager.isGuestUserEphemeral()) {
-            // If switching from guest, we want to bring up the guest exit dialog instead of switching
-            UserInfo currUserInfo = mUserManager.getUserInfo(currUserId);
-            if (currUserInfo != null && currUserInfo.isGuest()) {
-                showExitGuestDialog(currUserId, record.resolveId(), dialogShower);
+
+        if (currUserInfo != null && currUserInfo.isGuest()) {
+            if (isEnableGuestModeUxChanges(mContext)) {
+                showExitGuestDialog(currUserId, currUserInfo.isEphemeral(),
+                        record.resolveId(), dialogShower);
                 return;
+            } else {
+                if (currUserInfo.isEphemeral()) {
+                    showExitGuestDialog(currUserId, currUserInfo.isEphemeral(),
+                            record.resolveId(), dialogShower);
+                    return;
+                }
             }
         }
+
         if (dialogShower != null) {
             // If we haven't morphed into another dialog, it means we have just switched users.
             // Then, dismiss the dialog.
@@ -555,7 +575,7 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
-    private void showExitGuestDialog(int id, DialogShower dialogShower) {
+    private void showExitGuestDialog(int id, boolean isGuestEphemeral, DialogShower dialogShower) {
         int newId = UserHandle.USER_SYSTEM;
         if (mResumeUserOnGuestLogout && mLastNonGuestUser != UserHandle.USER_SYSTEM) {
             UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
@@ -563,14 +583,15 @@ public class UserSwitcherController implements Dumpable {
                 newId = info.id;
             }
         }
-        showExitGuestDialog(id, newId, dialogShower);
+        showExitGuestDialog(id, isGuestEphemeral, newId, dialogShower);
     }
 
-    private void showExitGuestDialog(int id, int targetId, DialogShower dialogShower) {
+    private void showExitGuestDialog(int id, boolean isGuestEphemeral,
+                        int targetId, DialogShower dialogShower) {
         if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
             mExitGuestDialog.cancel();
         }
-        mExitGuestDialog = new ExitGuestDialog(mContext, id, targetId);
+        mExitGuestDialog = new ExitGuestDialog(mContext, id, isGuestEphemeral, targetId);
         if (dialogShower != null) {
             dialogShower.showDialog(mExitGuestDialog);
         } else {
@@ -803,6 +824,52 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
+    /**
+     * Exits guest user and switches to previous non-guest user. The guest must be the current
+     * user.
+     *
+     * @param guestUserId user id of the guest user to exit
+     * @param targetUserId user id of the guest user to exit, set to UserHandle.USER_NULL when
+     *                       target user id is not known
+     * @param forceRemoveGuestOnExit true: remove guest before switching user,
+     *                               false: remove guest only if its ephemeral, else keep guest
+     */
+    public void exitGuestUser(@UserIdInt int guestUserId, @UserIdInt int targetUserId,
+                    boolean forceRemoveGuestOnExit) {
+        UserInfo currentUser = mUserTracker.getUserInfo();
+        if (currentUser.id != guestUserId) {
+            Log.w(TAG, "User requesting to start a new session (" + guestUserId + ")"
+                    + " is not current user (" + currentUser.id + ")");
+            return;
+        }
+        if (!currentUser.isGuest()) {
+            Log.w(TAG, "User requesting to start a new session (" + guestUserId + ")"
+                    + " is not a guest");
+            return;
+        }
+
+        int newUserId = UserHandle.USER_SYSTEM;
+        if (targetUserId == UserHandle.USER_NULL) {
+            // when target user is not specified switch to last non guest user
+            if (mResumeUserOnGuestLogout && mLastNonGuestUser != UserHandle.USER_SYSTEM) {
+                UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
+                if (info != null && info.isEnabled() && info.supportsSwitchToByUser()) {
+                    newUserId = info.id;
+                }
+            }
+        } else {
+            newUserId = targetUserId;
+        }
+
+        if (currentUser.isEphemeral() || forceRemoveGuestOnExit) {
+            mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
+            removeGuestUser(currentUser.id, newUserId);
+        } else {
+            mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_SWITCH);
+            switchToUserId(newUserId);
+        }
+    }
+
     private void scheduleGuestCreation() {
         if (!mGuestCreationScheduled.compareAndSet(false, true)) {
             return;
@@ -970,9 +1037,14 @@ public class UserSwitcherController implements Dumpable {
         public String getName(Context context, UserRecord item) {
             if (item.isGuest) {
                 if (item.isCurrent) {
-                    return context.getString(mController.mGuestUserAutoCreated
+                    if (isEnableGuestModeUxChanges(context)) {
+                        return context.getString(
+                                com.android.settingslib.R.string.guest_exit_quick_settings_button);
+                    } else {
+                        return context.getString(mController.mGuestUserAutoCreated
                             ? com.android.settingslib.R.string.guest_reset_guest
                             : com.android.settingslib.R.string.guest_exit_guest);
+                    }
                 } else {
                     if (item.info != null) {
                         return context.getString(com.android.internal.R.string.guest_name);
@@ -989,8 +1061,13 @@ public class UserSwitcherController implements Dumpable {
                                             ? com.android.settingslib.R.string.guest_resetting
                                             : com.android.internal.R.string.guest_name);
                         } else {
-                            return context.getString(
-                                    com.android.settingslib.R.string.guest_new_guest);
+                            if (isEnableGuestModeUxChanges(context)) {
+                                // we always show "guest" as string, instead of "add guest"
+                                return context.getString(com.android.internal.R.string.guest_name);
+                            } else {
+                                return context.getString(
+                                        com.android.settingslib.R.string.guest_new_guest);
+                            }
                         }
                     }
                 }
@@ -1012,7 +1089,11 @@ public class UserSwitcherController implements Dumpable {
         protected static Drawable getIconDrawable(Context context, UserRecord item) {
             int iconRes;
             if (item.isAddUser) {
-                iconRes = R.drawable.ic_account_circle_filled;
+                if (isEnableGuestModeUxChanges(context)) {
+                    iconRes = R.drawable.ic_add;
+                } else {
+                    iconRes = R.drawable.ic_account_circle_filled;
+                }
             } else if (item.isGuest) {
                 iconRes = R.drawable.ic_account_circle;
             } else if (item.isAddSupervisedUser) {
@@ -1157,24 +1238,58 @@ public class UserSwitcherController implements Dumpable {
 
         private final int mGuestId;
         private final int mTargetId;
+        private final boolean mIsGuestEphemeral;
 
-        public ExitGuestDialog(Context context, int guestId, int targetId) {
+        ExitGuestDialog(Context context, int guestId, boolean isGuestEphemeral,
+                    int targetId) {
             super(context);
-            setTitle(mGuestUserAutoCreated
-                    ? com.android.settingslib.R.string.guest_reset_guest_dialog_title
-                    : com.android.settingslib.R.string.guest_remove_guest_dialog_title);
-            setMessage(context.getString(R.string.guest_exit_guest_dialog_message));
-            setButton(DialogInterface.BUTTON_NEUTRAL,
-                    context.getString(android.R.string.cancel), this);
-            setButton(DialogInterface.BUTTON_POSITIVE,
-                    context.getString(mGuestUserAutoCreated
+            if (isEnableGuestModeUxChanges(context)) {
+                if (isGuestEphemeral) {
+                    setTitle(context.getString(
+                                com.android.settingslib.R.string.guest_exit_dialog_title));
+                    setMessage(context.getString(
+                                com.android.settingslib.R.string.guest_exit_dialog_message));
+                    setButton(DialogInterface.BUTTON_NEUTRAL,
+                            context.getString(android.R.string.cancel), this);
+                    setButton(DialogInterface.BUTTON_POSITIVE,
+                            context.getString(
+                                com.android.settingslib.R.string.guest_exit_dialog_button), this);
+                } else {
+                    setTitle(context.getString(
+                                com.android.settingslib
+                                    .R.string.guest_exit_dialog_title_non_ephemeral));
+                    setMessage(context.getString(
+                                com.android.settingslib
+                                    .R.string.guest_exit_dialog_message_non_ephemeral));
+                    setButton(DialogInterface.BUTTON_NEUTRAL,
+                            context.getString(android.R.string.cancel), this);
+                    setButton(DialogInterface.BUTTON_NEGATIVE,
+                            context.getString(
+                                com.android.settingslib.R.string.guest_exit_clear_data_button),
+                            this);
+                    setButton(DialogInterface.BUTTON_POSITIVE,
+                            context.getString(
+                                com.android.settingslib.R.string.guest_exit_save_data_button),
+                            this);
+                }
+            } else {
+                setTitle(mGuestUserAutoCreated
+                        ? com.android.settingslib.R.string.guest_reset_guest_dialog_title
+                        : com.android.settingslib.R.string.guest_remove_guest_dialog_title);
+                setMessage(context.getString(R.string.guest_exit_guest_dialog_message));
+                setButton(DialogInterface.BUTTON_NEUTRAL,
+                        context.getString(android.R.string.cancel), this);
+                setButton(DialogInterface.BUTTON_POSITIVE,
+                        context.getString(mGuestUserAutoCreated
                             ? com.android.settingslib.R.string.guest_reset_guest_confirm_button
                             : com.android.settingslib.R.string.guest_remove_guest_confirm_button),
-                    this);
+                        this);
+            }
             SystemUIDialog.setWindowOnTop(this, mKeyguardStateController.isShowing());
             setCanceledOnTouchOutside(false);
             mGuestId = guestId;
             mTargetId = targetId;
+            mIsGuestEphemeral = isGuestEphemeral;
         }
 
         @Override
@@ -1184,12 +1299,40 @@ public class UserSwitcherController implements Dumpable {
             if (mFalsingManager.isFalseTap(penalty)) {
                 return;
             }
-            if (which == BUTTON_NEUTRAL) {
-                cancel();
+            if (isEnableGuestModeUxChanges(getContext())) {
+                if (mIsGuestEphemeral) {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
+                        mDialogLaunchAnimator.dismissStack(this);
+                        // Ephemeral guest: exit guest, guest is removed by the system
+                        // on exit, since its marked ephemeral
+                        exitGuestUser(mGuestId, mTargetId, false);
+                    } else if (which == DialogInterface.BUTTON_NEGATIVE) {
+                        // Cancel clicked, do nothing
+                        cancel();
+                    }
+                } else {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
+                        mDialogLaunchAnimator.dismissStack(this);
+                        // Non-ephemeral guest: exit guest, guest is not removed by the system
+                        // on exit, since its marked non-ephemeral
+                        exitGuestUser(mGuestId, mTargetId, false);
+                    } else if (which == DialogInterface.BUTTON_NEGATIVE) {
+                        mDialogLaunchAnimator.dismissStack(this);
+                        // Non-ephemeral guest: remove guest and then exit
+                        exitGuestUser(mGuestId, mTargetId, true);
+                    } else if (which == DialogInterface.BUTTON_NEUTRAL) {
+                        // Cancel clicked, do nothing
+                        cancel();
+                    }
+                }
             } else {
-                mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
-                mDialogLaunchAnimator.dismissStack(this);
-                removeGuestUser(mGuestId, mTargetId);
+                if (which == BUTTON_NEUTRAL) {
+                    cancel();
+                } else {
+                    mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
+                    mDialogLaunchAnimator.dismissStack(this);
+                    removeGuestUser(mGuestId, mTargetId);
+                }
             }
         }
     }
@@ -1198,10 +1341,17 @@ public class UserSwitcherController implements Dumpable {
     final class AddUserDialog extends SystemUIDialog implements
             DialogInterface.OnClickListener {
 
-        public AddUserDialog(Context context) {
+        AddUserDialog(Context context) {
             super(context);
+
             setTitle(com.android.settingslib.R.string.user_add_user_title);
-            setMessage(com.android.settingslib.R.string.user_add_user_message_short);
+            String message = context.getString(
+                                com.android.settingslib.R.string.user_add_user_message_short);
+            UserInfo currentUser = mUserTracker.getUserInfo();
+            if (currentUser != null && currentUser.isGuest() && currentUser.isEphemeral()) {
+                message += context.getString(R.string.user_add_user_message_guest_remove);
+            }
+            setMessage(message);
             setButton(DialogInterface.BUTTON_NEUTRAL,
                     context.getString(android.R.string.cancel), this);
             setButton(DialogInterface.BUTTON_POSITIVE,

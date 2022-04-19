@@ -36,7 +36,6 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.util.Collection;
 import java.util.concurrent.Executor;
 
 /**
@@ -73,16 +72,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     /**
-     * Updates the presentation of the provided containers.
+     * Deletes the specified container and all other associated and dependent containers in the same
+     * transaction.
      */
-    void updateContainers(@NonNull Collection<TaskFragmentContainer> containers) {
-        if (containers.isEmpty()) {
-            return;
-        }
+    void cleanupContainer(@NonNull TaskFragmentContainer container, boolean shouldFinishDependent) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        for (TaskFragmentContainer container : containers) {
-            mController.updateContainer(wct, container);
-        }
+        cleanupContainer(container, shouldFinishDependent, wct);
         applyTransaction(wct);
     }
 
@@ -90,9 +85,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * Deletes the specified container and all other associated and dependent containers in the same
      * transaction.
      */
-    void cleanupContainer(@NonNull TaskFragmentContainer container, boolean shouldFinishDependent) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-
+    void cleanupContainer(@NonNull TaskFragmentContainer container, boolean shouldFinishDependent,
+            @NonNull WindowContainerTransaction wct) {
         container.finish(shouldFinishDependent, this, wct, mController);
 
         final TaskFragmentContainer newTopContainer = mController.getTopActiveContainer(
@@ -100,8 +94,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         if (newTopContainer != null) {
             mController.updateContainer(wct, newTopContainer);
         }
-
-        applyTransaction(wct);
     }
 
     /**
