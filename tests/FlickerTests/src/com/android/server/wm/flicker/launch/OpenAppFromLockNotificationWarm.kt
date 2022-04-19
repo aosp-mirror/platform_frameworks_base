@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -96,6 +97,11 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter)
             isEmpty()
         }
     }
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 229735718)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         /**
