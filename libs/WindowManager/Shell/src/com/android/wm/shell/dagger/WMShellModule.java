@@ -42,6 +42,7 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenUnfoldController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
@@ -108,6 +109,7 @@ public class WMShellModule {
             ShellTaskOrganizer organizer,
             DisplayController displayController,
             @DynamicOverride Optional<OneHandedController> oneHandedOptional,
+            DragAndDropController dragAndDropController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             TaskViewTransitions taskViewTransitions,
@@ -116,7 +118,7 @@ public class WMShellModule {
                 floatingContentCoordinator, statusBarService, windowManager,
                 windowManagerShellWrapper, launcherApps, taskStackListener,
                 uiEventLogger, organizer, displayController, oneHandedOptional,
-                mainExecutor, mainHandler, taskViewTransitions, syncQueue);
+                dragAndDropController, mainExecutor, mainHandler, taskViewTransitions, syncQueue);
     }
 
     //
