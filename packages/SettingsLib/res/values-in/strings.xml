@@ -360,7 +360,7 @@
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Memantau"</string>
     <string name="strict_mode" msgid="889864762140862437">"Mode ketat diaktifkan"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"Mengedipkan layar saat apl berjalan lama di utas utama"</string>
-    <string name="pointer_location" msgid="7516929526199520173">"Lokasi penunjuk"</string>
+    <string name="pointer_location" msgid="7516929526199520173">"Lokasi kursor"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Overlay layar menampilkan data sentuhan saat ini"</string>
     <string name="show_touches" msgid="8437666942161289025">"Tampilkan ketukan"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Menampilkan efek visual untuk ketukan"</string>

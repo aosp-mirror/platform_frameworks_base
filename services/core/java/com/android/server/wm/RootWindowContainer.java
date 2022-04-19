@@ -2007,8 +2007,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             r.getDisplayContent().prepareAppTransition(TRANSIT_NONE);
 
             final TaskFragment organizedTf = r.getOrganizedTaskFragment();
-            // TODO: Does it make sense to only count non-finishing activities?
-            final boolean singleActivity = task.getActivityCount() == 1;
+            final boolean singleActivity = task.getNonFinishingActivityCount() == 1;
             if (singleActivity) {
                 rootTask = task;
 

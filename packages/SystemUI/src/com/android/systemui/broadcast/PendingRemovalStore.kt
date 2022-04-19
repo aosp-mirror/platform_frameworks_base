@@ -8,6 +8,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.util.indentIfPossible
 import java.io.PrintWriter
+import javax.inject.Inject
 
 /**
  * Store information about requests for unregistering receivers from [BroadcastDispatcher], before
@@ -15,7 +16,7 @@ import java.io.PrintWriter
  *
  * This helps make unregistering a receiver a *sync* operation.
  */
-class PendingRemovalStore(
+class PendingRemovalStore @Inject constructor(
     private val logger: BroadcastDispatcherLogger
 ) : Dumpable {
     @GuardedBy("pendingRemoval")
