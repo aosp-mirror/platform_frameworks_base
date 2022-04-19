@@ -203,6 +203,43 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
+    fun testUnfoldedOpenedHingeAngleEmitted_isFinishedOpeningIsFalse() {
+        setFoldState(folded = false)
+
+        sendHingeAngleEvent(10)
+
+        assertThat(foldStateProvider.isFinishedOpening).isFalse()
+    }
+
+    @Test
+    fun testFoldedHalfOpenHingeAngleEmitted_isFinishedOpeningIsFalse() {
+        setFoldState(folded = true)
+
+        sendHingeAngleEvent(10)
+
+        assertThat(foldStateProvider.isFinishedOpening).isFalse()
+    }
+
+    @Test
+    fun testFoldedFullyOpenHingeAngleEmitted_isFinishedOpeningIsTrue() {
+        setFoldState(folded = false)
+
+        sendHingeAngleEvent(180)
+
+        assertThat(foldStateProvider.isFinishedOpening).isTrue()
+    }
+
+    @Test
+    fun testUnfoldedHalfOpenOpened_afterTimeout_isFinishedOpeningIsTrue() {
+        setFoldState(folded = false)
+
+        sendHingeAngleEvent(10)
+        simulateTimeout(HALF_OPENED_TIMEOUT_MILLIS)
+
+        assertThat(foldStateProvider.isFinishedOpening).isTrue()
+    }
+
+    @Test
     fun startClosingEvent_afterTimeout_abortEmitted() {
         sendHingeAngleEvent(90)
         sendHingeAngleEvent(80)
