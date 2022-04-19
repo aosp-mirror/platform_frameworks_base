@@ -138,6 +138,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private DialogLaunchAnimator mDialogLaunchAnimator;
     @Mock
     private View mDialogLaunchView;
+    @Mock
+    private WifiStateWorker mWifiStateWorker;
 
     private TestableResources mTestableResources;
     private InternetDialogController mInternetDialogController;
@@ -166,6 +168,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         when(mSystemUIToast.getView()).thenReturn(mToastView);
         when(mSystemUIToast.getGravity()).thenReturn(GRAVITY_FLAGS);
         when(mSystemUIToast.getInAnimation()).thenReturn(mAnimator);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
 
         mInternetDialogController = new InternetDialogController(mContext,
                 mock(UiEventLogger.class), mock(ActivityStarter.class), mAccessPointController,
@@ -173,7 +176,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 mock(ConnectivityManager.class), mHandler, mExecutor, mBroadcastDispatcher,
                 mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
                 mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker,
-                mLocationController, mDialogLaunchAnimator);
+                mLocationController, mDialogLaunchAnimator, mWifiStateWorker);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(mInternetDialogCallback, true);
@@ -239,7 +242,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Test
     public void getSubtitleText_withApmOnAndWifiOff_returnWifiIsOff() {
         fakeAirplaneModeEnabled(true);
-        when(mWifiManager.isWifiEnabled()).thenReturn(false);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(false);
 
         assertThat(mInternetDialogController.getSubtitleText(false))
                 .isEqualTo(getResourcesString("wifi_is_off"));
@@ -254,7 +257,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Test
     public void getSubtitleText_withWifiOff_returnWifiIsOff() {
         fakeAirplaneModeEnabled(false);
-        when(mWifiManager.isWifiEnabled()).thenReturn(false);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(false);
 
         assertThat(mInternetDialogController.getSubtitleText(false))
                 .isEqualTo(getResourcesString("wifi_is_off"));
@@ -269,7 +272,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Test
     public void getSubtitleText_withNoWifiEntry_returnSearchWifi() {
         fakeAirplaneModeEnabled(false);
-        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
         mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
 
         assertThat(mInternetDialogController.getSubtitleText(true))
@@ -286,7 +289,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     public void getSubtitleText_withWifiEntry_returnTapToConnect() {
         // The preconditions WiFi Entries is already in setUp()
         fakeAirplaneModeEnabled(false);
-        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
 
         assertThat(mInternetDialogController.getSubtitleText(false))
                 .isEqualTo(getResourcesString("tap_a_network_to_connect"));
@@ -301,7 +304,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Test
     public void getSubtitleText_deviceLockedWithWifiOn_returnUnlockToViewNetworks() {
         fakeAirplaneModeEnabled(false);
-        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
 
         assertTrue(TextUtils.equals(mInternetDialogController.getSubtitleText(false),
@@ -311,7 +314,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Test
     public void getSubtitleText_withNoService_returnNoNetworksAvailable() {
         fakeAirplaneModeEnabled(false);
-        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
         mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
 
         doReturn(ServiceState.STATE_OUT_OF_SERVICE).when(mServiceState).getState();
@@ -325,7 +328,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Test
     public void getSubtitleText_withMobileDataDisabled_returnNoOtherAvailable() {
         fakeAirplaneModeEnabled(false);
-        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
         mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
 
         doReturn(ServiceState.STATE_IN_SERVICE).when(mServiceState).getState();
@@ -346,7 +349,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Test
     public void getSubtitleText_withCarrierNetworkActiveOnly_returnNoOtherAvailable() {
         fakeAirplaneModeEnabled(false);
-        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
         mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
         when(mMergedCarrierEntry.isDefaultNetwork()).thenReturn(true);
 
