@@ -28,10 +28,6 @@ class RoundedCornerDecorProviderFactory(
             hasTop || hasBottom
         }
 
-    override fun onDisplayUniqueIdChanged(displayUniqueId: String?) {
-        roundedCornerResDelegate.updateDisplayUniqueId(displayUniqueId, null)
-    }
-
     override val providers: List<DecorProvider>
     get() {
         val hasTop = roundedCornerResDelegate.hasTop
