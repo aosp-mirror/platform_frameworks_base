@@ -121,13 +121,13 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
         roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
 
         val factor = 5
-        roundedCornerResDelegate.updateTuningSizeFactor(factor, 1)
+        roundedCornerResDelegate.tuningSizeFactor = factor
         val length = (factor * mContext.resources.displayMetrics.density).toInt()
 
         assertEquals(Size(length, length), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(length, length), roundedCornerResDelegate.bottomRoundedSize)
 
-        roundedCornerResDelegate.updateTuningSizeFactor(null, 2)
+        roundedCornerResDelegate.tuningSizeFactor = null
 
         assertEquals(Size(3, 3), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
