@@ -17,12 +17,14 @@
 package com.android.systemui.decor
 
 import android.content.res.TypedArray
-import android.graphics.drawable.VectorDrawable
+import android.graphics.drawable.Drawable
 import android.testing.AndroidTestingRunner
-import android.testing.TestableResources
 import android.util.Size
+import androidx.annotation.DrawableRes
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.internal.R as InternalR
+import com.android.systemui.R as SystemUIR
+import com.android.systemui.tests.R
 import com.android.systemui.SysuiTestCase
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -45,66 +47,76 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
     }
 
     @Test
+    fun testTopAndBottomRoundedCornerExist() {
+        setupResources(radius = 5)
+        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
+        assertEquals(true, roundedCornerResDelegate.hasTop)
+        assertEquals(true, roundedCornerResDelegate.hasBottom)
+    }
+
+    @Test
+    fun testTopRoundedCornerExist() {
+        setupResources(radiusTop = 10)
+        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
+        assertEquals(true, roundedCornerResDelegate.hasTop)
+        assertEquals(false, roundedCornerResDelegate.hasBottom)
+    }
+
+    @Test
+    fun testBottomRoundedCornerExist() {
+        setupResources(radiusBottom = 15)
+        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
+        assertEquals(false, roundedCornerResDelegate.hasTop)
+        assertEquals(true, roundedCornerResDelegate.hasBottom)
+    }
+
+    @Test
     fun testUpdateDisplayUniqueId() {
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                radius = 3,
-                radiusTop = 0,
-                radiusBottom = 4,
-                multipleRadius = false)
+        setupResources(radius = 100,
+                roundedTopDrawable = getTestsDrawable(R.drawable.rounded3px),
+                roundedBottomDrawable = getTestsDrawable(R.drawable.rounded4px))
 
         roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
 
         assertEquals(Size(3, 3), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
-        assertEquals(false, roundedCornerResDelegate.isMultipleRadius)
 
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                radius = 5,
-                radiusTop = 6,
-                radiusBottom = 0)
+        setupResources(radius = 100,
+                roundedTopDrawable = getTestsDrawable(R.drawable.rounded4px),
+                roundedBottomDrawable = getTestsDrawable(R.drawable.rounded5px))
 
         roundedCornerResDelegate.updateDisplayUniqueId("test", null)
 
-        assertEquals(Size(6, 6), roundedCornerResDelegate.topRoundedSize)
+        assertEquals(Size(4, 4), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(5, 5), roundedCornerResDelegate.bottomRoundedSize)
     }
 
     @Test
     fun testNotUpdateDisplayUniqueIdButChangeRefreshToken() {
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                radius = 3,
-                radiusTop = 0,
-                radiusBottom = 4,
-                multipleRadius = false)
+        setupResources(radius = 100,
+                roundedTopDrawable = getTestsDrawable(R.drawable.rounded3px),
+                roundedBottomDrawable = getTestsDrawable(R.drawable.rounded4px))
 
         roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
 
         assertEquals(Size(3, 3), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
-        assertEquals(false, roundedCornerResDelegate.isMultipleRadius)
 
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                radius = 5,
-                radiusTop = 6,
-                radiusBottom = 0)
+        setupResources(radius = 100,
+                roundedTopDrawable = getTestsDrawable(R.drawable.rounded4px),
+                roundedBottomDrawable = getTestsDrawable(R.drawable.rounded5px))
 
         roundedCornerResDelegate.updateDisplayUniqueId(null, 1)
 
-        assertEquals(Size(6, 6), roundedCornerResDelegate.topRoundedSize)
+        assertEquals(Size(4, 4), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(5, 5), roundedCornerResDelegate.bottomRoundedSize)
     }
 
     @Test
     fun testUpdateTuningSizeFactor() {
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                radiusTop = 2,
-                radiusBottom = 0,
-                multipleRadius = false)
+        setupResources(radius = 100,
+                roundedTopDrawable = getTestsDrawable(R.drawable.rounded3px),
+                roundedBottomDrawable = getTestsDrawable(R.drawable.rounded4px))
 
         roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
 
@@ -115,62 +127,43 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
         assertEquals(Size(length, length), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(length, length), roundedCornerResDelegate.bottomRoundedSize)
 
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                radiusTop = 1,
-                radiusBottom = 2,
-                multipleRadius = false)
         roundedCornerResDelegate.updateTuningSizeFactor(null, 2)
 
-        assertEquals(Size(1, 1), roundedCornerResDelegate.topRoundedSize)
-        assertEquals(Size(2, 2), roundedCornerResDelegate.bottomRoundedSize)
-    }
-
-    @Test
-    fun testReadDefaultRadiusWhen0() {
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                radius = 3,
-                radiusTop = 0,
-                radiusBottom = 0,
-                multipleRadius = false)
-
-        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
-
         assertEquals(Size(3, 3), roundedCornerResDelegate.topRoundedSize)
-        assertEquals(Size(3, 3), roundedCornerResDelegate.bottomRoundedSize)
+        assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
     }
 
-    @Test
-    fun testReadMultipleRadius() {
-        val d = mContext.getDrawable(R.drawable.rounded) as VectorDrawable
-        val multipleRadiusSize = Size(d.intrinsicWidth, d.intrinsicHeight)
-        mContext.orCreateTestableResources.addOverrides(
-                mockTypeArray = mockTypedArray,
-                multipleRadius = true)
-        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
-        assertEquals(multipleRadiusSize, roundedCornerResDelegate.topRoundedSize)
-        assertEquals(multipleRadiusSize, roundedCornerResDelegate.bottomRoundedSize)
+    private fun getTestsDrawable(@DrawableRes drawableId: Int): Drawable? {
+        return mContext.createPackageContext("com.android.systemui.tests", 0)
+                .getDrawable(drawableId)
     }
-}
 
-private fun TestableResources.addOverrides(
-    mockTypeArray: TypedArray,
-    radius: Int? = null,
-    radiusTop: Int? = null,
-    radiusBottom: Int? = null,
-    multipleRadius: Boolean? = null
-) {
-    addOverride(com.android.internal.R.array.config_displayUniqueIdArray, arrayOf<String>())
-    addOverride(com.android.internal.R.array.config_roundedCornerRadiusArray, mockTypeArray)
-    addOverride(com.android.internal.R.array.config_roundedCornerTopRadiusArray, mockTypeArray)
-    addOverride(com.android.internal.R.array.config_roundedCornerBottomRadiusArray, mockTypeArray)
-    addOverride(R.array.config_roundedCornerDrawableArray, mockTypeArray)
-    addOverride(R.array.config_roundedCornerTopDrawableArray, mockTypeArray)
-    addOverride(R.array.config_roundedCornerBottomDrawableArray, mockTypeArray)
-    addOverride(R.array.config_roundedCornerMultipleRadiusArray, mockTypeArray)
-    radius?.let { addOverride(com.android.internal.R.dimen.rounded_corner_radius, it) }
-    radiusTop?.let { addOverride(com.android.internal.R.dimen.rounded_corner_radius_top, it) }
-    radiusBottom?.let { addOverride(com.android.internal.R.dimen.rounded_corner_radius_bottom, it) }
-    multipleRadius?.let { addOverride(R.bool.config_roundedCornerMultipleRadius, it) }
+    private fun setupResources(
+        radius: Int? = null,
+        radiusTop: Int? = null,
+        radiusBottom: Int? = null,
+        roundedTopDrawable: Drawable? = null,
+        roundedBottomDrawable: Drawable? = null
+    ) {
+        mContext.orCreateTestableResources.let { res ->
+            res.addOverride(InternalR.array.config_displayUniqueIdArray, arrayOf<String>())
+            res.addOverride(InternalR.array.config_roundedCornerRadiusArray, mockTypedArray)
+            res.addOverride(InternalR.array.config_roundedCornerTopRadiusArray, mockTypedArray)
+            res.addOverride(InternalR.array.config_roundedCornerBottomRadiusArray, mockTypedArray)
+            res.addOverride(SystemUIR.array.config_roundedCornerDrawableArray, mockTypedArray)
+            res.addOverride(SystemUIR.array.config_roundedCornerTopDrawableArray, mockTypedArray)
+            res.addOverride(SystemUIR.array.config_roundedCornerBottomDrawableArray, mockTypedArray)
+            res.addOverride(SystemUIR.array.config_roundedCornerMultipleRadiusArray, mockTypedArray)
+            res.addOverride(com.android.internal.R.dimen.rounded_corner_radius, radius ?: 0)
+            res.addOverride(com.android.internal.R.dimen.rounded_corner_radius_top, radiusTop ?: 0)
+            res.addOverride(com.android.internal.R.dimen.rounded_corner_radius_bottom,
+                    radiusBottom ?: 0)
+            roundedTopDrawable?.let { drawable ->
+                res.addOverride(SystemUIR.drawable.rounded_corner_top, drawable)
+            }
+            roundedBottomDrawable?.let { drawable ->
+                res.addOverride(SystemUIR.drawable.rounded_corner_bottom, drawable)
+            }
+        }
+    }
 }
