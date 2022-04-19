@@ -14649,6 +14649,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new SecurityException(
                     "Only the system can mark a profile owner of organization-owned device.");
         }
+        // Only a test admin can be unmarked as a profile owner on an organization-owned device.
+        synchronized (getLockObject()) {
+            if (!isProfileOwnerOnOrganizationOwnedDevice && !isAdminTestOnlyLocked(who, userId)) {
+                throw new SecurityException("Only a test admin can be unmarked as a "
+                        + "profile owner of organization-owned device.");
+            }
+        }
 
         if (isAdb(caller)) {
             if (hasIncompatibleAccountsOrNonAdbNoLock(caller, userId, who)) {
