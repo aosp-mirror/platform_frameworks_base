@@ -460,6 +460,15 @@ public class NotificationManagerService extends SystemService {
     private static final long NOTIFICATION_TRAMPOLINE_BLOCK = 167676448L;
 
     /**
+     * Activity starts coming from broadcast receivers or services in response to notification and
+     * notification action clicks will be blocked for UX and performance reasons for previously
+     * exempt role holders (browser).
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S_V2)
+    private static final long NOTIFICATION_TRAMPOLINE_BLOCK_FOR_EXEMPT_ROLES = 227752274L;
+
+    /**
      * Whether a notification listeners can understand new, more specific, cancellation reasons.
      */
     @ChangeId
@@ -11532,7 +11541,8 @@ public class NotificationManagerService extends SystemService {
 
         private boolean blockTrampoline(int uid) {
             if (mRoleObserver != null && mRoleObserver.isUidExemptFromTrampolineRestrictions(uid)) {
-                return false;
+                return CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK_FOR_EXEMPT_ROLES,
+                        uid);
             }
             return CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
         }
