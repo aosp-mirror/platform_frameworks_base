@@ -2160,14 +2160,6 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_PROCESS_NOT_DEFINED = -122;
 
     /**
-     * Installation parse return code: system is in a minimal boot state, and the parser only
-     * allows the package with {@code coreApp} manifest attribute to be a valid application.
-     *
-     * @hide
-     */
-    public static final int INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED = -123;
-
-    /**
      * Installation failed return code: the {@code resources.arsc} of one of the APKs being
      * installed is compressed or not aligned on a 4-byte boundary. Resource tables that cannot be
      * memory mapped exert excess memory pressure on the system and drastically slow down
