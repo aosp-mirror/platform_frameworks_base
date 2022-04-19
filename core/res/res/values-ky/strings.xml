@@ -402,7 +402,7 @@
     <string name="permlab_getPackageSize" msgid="375391550792886641">"колдонмо сактагычынын мейкиндигин өлчөө"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Колдонмого өз кодун, дайындарын жана кэш өлчөмдөрүн түшүрүп алуу мүмкүнчүлүгүн берет"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"система тууралоолорун өзгөртүү"</string>
-    <string name="permdesc_writeSettings" msgid="8293047411196067188">"Колдонмого тутумдун коопсуздук жөндөөлөрүнүн дайындарын өзгөртүү мүмкүнчүлүгүн берет. Кесепттүү колдонмолор тутумуңуздун конфигурациясын бузуп салышы мүмкүн."</string>
+    <string name="permdesc_writeSettings" msgid="8293047411196067188">"Колдонмого системанын коопсуздук жөндөөлөрүнүн дайындарын өзгөртүү мүмкүнчүлүгүн берет. Кесепттүү колдонмолор тутумуңуздун конфигурациясын бузуп салышы мүмкүн."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"түзмөктү жандырганда иштеп баштоо"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"Колдонмого тутум жүктөлүп бүтөөрү менен өзүн-өзү иштетүү мүмкүнчүлүгүн берет. Бул планшеттин ишке киргизилишин кыйла создуктуруп, планшеттин үзгүлтүксүз иштешин жайлатып салышы мүмкүн."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"Тутум күйгүзүлөрү менен колдонмого өз алдынча иштеп баштоого уруксат берет. Ага байланыштуу Android TV түзмөгүңүз кечирээк күйгүзүлүп, ошондой эле колдонмо такай иштеп тургандыктан, түзмөк жайыраак иштеп калышы мүмкүн."</string>
@@ -459,8 +459,8 @@
     <string name="permdesc_camera" msgid="5240801376168647151">"Бул колдонмо иштеп жатканда камера менен сүрөт же видеолорду тарта алат."</string>
     <string name="permlab_backgroundCamera" msgid="7549917926079731681">"Фондо сүрөткө жана видеого тартат"</string>
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Бул колдонмо каалаган убакта камера менен сүрөт же видеолорду тарта алат."</string>
-    <string name="permlab_systemCamera" msgid="3642917457796210580">"Сүрөткө тартып, видеолорду жаздыруу үчүн бул колдонмого же кызматка тутумдун камерасын колдонууга уруксат берүү"</string>
-    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Бул артыкчылыктуу тутум колдонмосу тутумдун камерасын каалаган убакта колдонуп, сүрөткө тартып, видео жаздыра алат. Ошондой эле колдонмого android.permission.CAMERA уруксатын берүү керек"</string>
+    <string name="permlab_systemCamera" msgid="3642917457796210580">"Сүрөткө тартып, видеолорду жаздыруу үчүн бул колдонмого же кызматка системанын камерасын колдонууга уруксат берүү"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Бул артыкчылыктуу тутум колдонмосу системанын камерасын каалаган убакта колдонуп, сүрөткө тартып, видео жаздыра алат. Ошондой эле колдонмого android.permission.CAMERA уруксатын берүү керек"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Колдонмого же кызматка камера ачылып же жабылып жатканда чалууларды кабыл алууга уруксат берүү."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Бул колдонмо камера ачылып (аны ачып жаткан колдонмо көрсөтүлгөндө) же жабылып жатканда чалууларды кабыл алат."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"титирөөнү башкаруу"</string>
@@ -497,7 +497,7 @@
     <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"Колдонмого Android TV түзмөгүңүздүн инфракызыл өткөргүчүн колдонууга уруксат берет."</string>
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Колдонмого телефондун инфракызыл өткөргүчүн колдонуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"тушкагаз коюу"</string>
-    <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Колдонмого тутумдун тушкагазын коюу мүмкүнчүлүгүн берет."</string>
+    <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Колдонмого системанын тушкагазын коюу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"тушкагазыңыздын өлчөмүн өзгөртүү"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Колдонмого тутум тушкагазынын өлчөмдөрүн коюу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"убакыт алкагын коюу"</string>
@@ -2274,11 +2274,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Билдирүү (<xliff:g id="MESSAGE">%1$s</xliff:g>) которулду."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Билдирүү <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> тилинен <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> тилине которулду."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Фондогу активдүүлүк"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Колдонмо батареяны отургузууда"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Колдонмо дагы эле иштеп жатат"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> фондо иштеп жатат. Батареянын колдонулушун башкаруу үчүн таптап коюңуз."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> батареянын кубатынын мөөнөтүн азайтышы мүмкүн. Жигердүү колдонмолорду көрүү үчүн таптап коюңуз."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Жигердүү колдонмолорду карап чыгуу"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн телефондун камерасына мүмкүнчүлүк жок"</string>

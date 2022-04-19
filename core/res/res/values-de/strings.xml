@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ist derzeit nicht verfügbar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nicht verfügbar"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Berechtigung erforderlich"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera nicht verfügbar"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Weiter auf Smartphone"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon nicht verfügbar"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-Einstellungen nicht verfügbar"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tablet-Einstellungen nicht verfügbar"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Smartphone-Einstellungen nicht verfügbar"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Tablet."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuch es stattdessen auf deinem Tablet."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Tablet."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Smartphone."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Diese App wurde für eine ältere Android-Version entwickelt und funktioniert möglicherweise nicht mehr richtig. Prüfe, ob Updates verfügbar sind oder kontaktiere den Entwickler."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Auf Updates prüfen"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du hast neue Nachrichten"</string>
@@ -2067,14 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Für weitere Informationen und zum Ändern tippen."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„Bitte nicht stören“ wurde geändert"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tippe, um zu überprüfen, welche Inhalte blockiert werden."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Benachrichtigungseinstellungen überprüfen"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Bei Android 13 benötigen Apps, die du installierst, die Berechtigung zum Senden von Benachrichtigungen. Wenn du diese Berechtigung für bereits installierte Apps ändern möchtest, tippe hier."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Später erinnern"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Schließen"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Einstellungen"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
@@ -2293,11 +2274,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"„<xliff:g id="MESSAGE">%1$s</xliff:g>“ wurde übersetzt."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Nachricht wurde von <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> auf <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> übersetzt."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Hintergrundaktivität"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Eine App belastet den Akku übermäßig"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Eine App ist immer noch aktiv"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> läuft im Hintergrund. Tippe hier, um die Akkunutzung zu verwalten."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> kann die Akkulaufzeit beeinträchtigen. Tippe, um die aktiven Apps zu prüfen."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktive Apps prüfen"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Zugriff auf die Kamera des Smartphones über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
