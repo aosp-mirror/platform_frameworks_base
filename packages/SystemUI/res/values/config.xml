@@ -288,9 +288,6 @@
     <!-- Enable the default volume level warning dialog -->
     <bool name="enable_safety_warning">true</bool>
 
-    <!-- Whether to show operator name in the status bar -->
-    <bool name="config_showOperatorNameInStatusBar">false</bool>
-
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
 

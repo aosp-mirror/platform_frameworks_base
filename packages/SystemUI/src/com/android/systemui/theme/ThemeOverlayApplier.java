@@ -31,6 +31,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 
 import com.google.android.collect.Lists;
@@ -44,6 +45,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Responsible for orchestrating overlays, based on user preferences and other inputs from
@@ -134,17 +138,17 @@ public class ThemeOverlayApplier implements Dumpable {
     private final Map<String, String> mCategoryToTargetPackage = new ArrayMap<>();
     private final OverlayManager mOverlayManager;
     private final Executor mBgExecutor;
-    private final Executor mMainExecutor;
     private final String mLauncherPackage;
     private final String mThemePickerPackage;
 
+    @Inject
     public ThemeOverlayApplier(OverlayManager overlayManager,
-            Executor bgExecutor,
-            Executor mainExecutor,
-            String launcherPackage, String themePickerPackage, DumpManager dumpManager) {
+            @Background Executor bgExecutor,
+            @Named(ThemeModule.LAUNCHER_PACKAGE) String launcherPackage,
+            @Named(ThemeModule.THEME_PICKER_PACKAGE) String themePickerPackage,
+            DumpManager dumpManager) {
         mOverlayManager = overlayManager;
         mBgExecutor = bgExecutor;
-        mMainExecutor = mainExecutor;
         mLauncherPackage = launcherPackage;
         mThemePickerPackage = themePickerPackage;
         mTargetPackageToCategories.put(ANDROID_PACKAGE, Sets.newHashSet(

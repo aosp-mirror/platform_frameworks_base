@@ -445,7 +445,7 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         final int taskCount = visibleTasks.size();
-        for (int i = 0; i < taskCount; i++) {
+        for (int i = taskCount - 1; i >= 0; i--) {
             final Task task = visibleTasks.get(i);
             if (skipAnimation(task)) {
                 continue;
@@ -746,7 +746,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                         "collectTaskRemoteAnimations, target: %s", target);
             }
-        }, true);
+        }, false /* traverseTopToBottom */);
     }
 
     void logRecentsAnimationStartTime(int durationMs) {

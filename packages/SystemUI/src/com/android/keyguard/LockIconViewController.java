@@ -114,7 +114,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mIsBouncerShowing;
     private boolean mRunningFPS;
     private boolean mCanDismissLockScreen;
-    private boolean mQsExpanded;
     private int mStatusBarState;
     private boolean mIsKeyguardShowing;
     private boolean mUserUnlockedWithBiometric;
@@ -245,14 +244,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         return mView.getLocationTop();
     }
 
-    /**
-     * Set whether qs is expanded. When QS is expanded, don't show a DisabledUdfps affordance.
-     */
-    public void setQsExpanded(boolean expanded) {
-        mQsExpanded = expanded;
-        updateVisibility();
-    }
-
     private void updateVisibility() {
         if (mCancelDelayedUpdateVisibilityRunnable != null) {
             mCancelDelayedUpdateVisibilityRunnable.run();
@@ -331,7 +322,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean isLockScreen() {
         return !mIsDozing
                 && !mIsBouncerShowing
-                && !mQsExpanded
                 && mStatusBarState == StatusBarState.KEYGUARD;
     }
 
@@ -394,7 +384,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println("  mRunningFPS: " + mRunningFPS);
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
         pw.println("  mStatusBarState: " + StatusBarState.toString(mStatusBarState));
-        pw.println("  mQsExpanded: " + mQsExpanded);
         pw.println("  mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
 
         if (mView != null) {

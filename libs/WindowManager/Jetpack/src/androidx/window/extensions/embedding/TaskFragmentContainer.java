@@ -257,7 +257,8 @@ class TaskFragmentContainer {
 
         // Finish dependent containers
         for (TaskFragmentContainer container : mContainersToFinishOnExit) {
-            if (controller.shouldRetainAssociatedContainer(this, container)) {
+            if (container.mIsFinished
+                    || controller.shouldRetainAssociatedContainer(this, container)) {
                 continue;
             }
             container.finish(true /* shouldFinishDependent */, presenter,
@@ -267,18 +268,13 @@ class TaskFragmentContainer {
 
         // Finish associated activities
         for (Activity activity : mActivitiesToFinishOnExit) {
-            if (controller.shouldRetainAssociatedActivity(this, activity)) {
+            if (activity.isFinishing()
+                    || controller.shouldRetainAssociatedActivity(this, activity)) {
                 continue;
             }
             activity.finish();
         }
         mActivitiesToFinishOnExit.clear();
-
-        // Finish activities that were being re-parented to this container.
-        for (Activity activity : mPendingAppearedActivities) {
-            activity.finish();
-        }
-        mPendingAppearedActivities.clear();
     }
 
     boolean isFinished() {

@@ -17,9 +17,9 @@
 package com.android.systemui.util.leak;
 
 import android.os.Build;
+import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
 
@@ -132,18 +132,5 @@ public class LeakDetector implements Dumpable {
         }
         pw.decreaseIndent();
         pw.println();
-    }
-
-    public static LeakDetector create(DumpManager dumpManager) {
-        if (ENABLED) {
-            TrackedCollections collections = new TrackedCollections();
-            return new LeakDetector(
-                    collections,
-                    new TrackedGarbage(collections),
-                    new TrackedObjects(collections),
-                    dumpManager);
-        } else {
-            return new LeakDetector(null, null, null, dumpManager);
-        }
     }
 }

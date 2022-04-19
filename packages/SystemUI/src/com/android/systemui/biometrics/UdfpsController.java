@@ -385,6 +385,7 @@ public class UdfpsController implements DozeReceiver {
                     mActivePointerId = event.getPointerId(0);
                     mVelocityTracker.addMovement(event);
                     handled = true;
+                    mAcquiredReceived = false;
                 }
                 if ((withinSensorArea || fromUdfpsView) && shouldTryToDismissKeyguard()) {
                     Log.v(TAG, "onTouch | dismiss keyguard ACTION_DOWN");
