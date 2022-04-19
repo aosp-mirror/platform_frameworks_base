@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Beperkt profiel"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Nieuwe gebruiker toevoegen?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Je kunt dit apparaat met anderen delen door extra gebruikers te maken. Elke gebruiker heeft een eigen profiel met zelf gekozen apps, achtergrond, enzovoort. Gebruikers kunnen ook apparaatinstellingen aanpassen die van invloed zijn op alle gebruikers, zoals wifi.\n\nWanneer je een nieuwe gebruiker toevoegt, moet die persoon een eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers. Toegankelijkheidsinstellingen en -services worden mogelijk niet overgezet naar de nieuwe gebruiker."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer je een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer je een nieuwe gebruiker toevoegt, moet die persoon diens eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Gebruiker nu instellen?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Zorg ervoor dat de persoon het apparaat kan overnemen om een profiel in te stellen"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Profiel nu instellen?"</string>
@@ -655,12 +655,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR-code scannen"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Centreer de onderstaande QR-code om te beginnen met luisteren"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-code heeft geen geldige indeling"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Uitzending van <xliff:g id="APP_NAME">%1$s</xliff:g> stopzetten?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Als je <xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzendt of de uitvoer wijzigt, wordt je huidige uitzending gestopt"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzenden"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Uitvoer wijzigen"</string>
 </resources>
