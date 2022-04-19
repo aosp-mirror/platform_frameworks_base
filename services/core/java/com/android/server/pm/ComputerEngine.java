@@ -5244,10 +5244,11 @@ public class ComputerEngine implements Computer {
         if (packageName == null || alias == null) {
             return null;
         }
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
         final AndroidPackage pkg = mPackages.get(packageName);
-        if (pkg == null
-                || shouldFilterApplication(getPackageStateInternal(pkg.getPackageName()),
-                Binder.getCallingUid(), UserHandle.getCallingUserId())) {
+        if (pkg == null || shouldFilterApplicationIncludingUninstalled(
+                getPackageStateInternal(pkg.getPackageName()), callingUid, callingUserId)) {
             Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
@@ -5264,9 +5265,8 @@ public class ComputerEngine implements Computer {
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         final AndroidPackage pkg = mPackages.get(packageName);
-        if (pkg == null
-                || shouldFilterApplication(getPackageStateInternal(pkg.getPackageName()),
-                callingUid, callingUserId)) {
+        if (pkg == null || shouldFilterApplicationIncludingUninstalled(
+                getPackageStateInternal(pkg.getPackageName()), callingUid, callingUserId)) {
             Slog.w(TAG, "KeySet requested for unknown package: " + packageName
                     + ", uid:" + callingUid);
             throw new IllegalArgumentException("Unknown package: " + packageName);
