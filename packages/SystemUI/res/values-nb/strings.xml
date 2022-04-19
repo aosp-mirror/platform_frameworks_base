@@ -136,6 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bekreftet"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Trykk på Bekreft for å fullføre"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Låst opp med ansiktet. Trykk på lås opp-ikon for å fortsette"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Låst opp med ansiktet. Trykk for å fortsette."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Ansiktet er gjenkjent. Trykk for å fortsette."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Ansiktet er gjenkjent. Trykk på lås opp-ikon for å fortsette"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentisert"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Bruk PIN-kode"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Bruk mønster"</string>
@@ -312,6 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Sveip opp for å åpne"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Trykk på lås opp-ikonet for å åpne"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Låst opp med ansiktet. Trykk på lås opp-ikon for å fortsette"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Låst opp med ansiktet. Trykk for å åpne."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Ansiktet er gjenkjent. Trykk for å åpne."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Ansiktet er gjenkjent. Trykk på lås opp-ikon for å fortsette"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Sveip opp for å prøve igjen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås opp for å bruke NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Denne enheten tilhører organisasjonen din"</string>
@@ -333,7 +339,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lader sakte • Fulladet om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ladedokk • Fulladet om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Bytt bruker"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle appene og all informasjon i denne økten slettes."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle apper og data i denne økten blir slettet."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Velkommen tilbake, gjest!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vil du fortsette økten?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Start på nytt"</string>
@@ -506,6 +512,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> støtter ikke samtalefunksjoner"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Disse varslene kan ikke endres."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Anropsvarsler kan ikke endres."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Denne varselgruppen kan ikke konfigureres her"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Omdirigert varsel"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g>: alle varsler"</string>
@@ -805,8 +812,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pause"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Forrige spor"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Neste spor"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Kobler til"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Spill av"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Åpne <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Spill av <xliff:g id="SONG_NAME">%1$s</xliff:g> av <xliff:g id="ARTIST_NAME">%2$s</xliff:g> fra <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -911,12 +917,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Legg til brikke"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ikke legg til brikke"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Velg bruker"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktive apper</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aktiv app</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Ny informasjon"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktive apper"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stopp"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Stoppet"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Ferdig"</string>
