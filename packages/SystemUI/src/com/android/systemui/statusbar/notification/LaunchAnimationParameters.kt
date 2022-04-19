@@ -7,8 +7,8 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.min
 
-/** Parameters for the notifications expand animations. */
-class ExpandAnimationParameters(
+/** Parameters for the notifications launch expanding animations. */
+class LaunchAnimationParameters(
     top: Int,
     bottom: Int,
     left: Int,
