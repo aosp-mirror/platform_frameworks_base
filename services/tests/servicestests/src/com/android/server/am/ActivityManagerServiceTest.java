@@ -164,7 +164,7 @@ public class ActivityManagerServiceTest {
         mHandler = new TestHandler(mHandlerThread.getLooper());
         mInjector = new TestInjector(mContext);
         mAms = new ActivityManagerService(mInjector, mServiceThreadRule.getThread());
-        mAms.mWaitForNetworkTimeoutMs = 2000;
+        mAms.mConstants.mNetworkAccessTimeoutMs = 2000;
         mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());
         mHandler.setRunnablesToIgnore(
