@@ -136,6 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bevestig"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tik op Bevestig om te voltooi"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Ontsluit met gesig. Druk die ontsluitikoon om voort te gaan."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ontsluit met gesig. Druk om voort te gaan."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Gesig is herken. Druk om voort te gaan."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Gesig is herken. Druk die ontsluitikoon om voort te gaan."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Gestaaf"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Gebruik PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Gebruik patroon"</string>
@@ -312,6 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Swiep op om oop te maak"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Druk die onsluitikoon om oop te maak"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Ontsluit met gesig. Druk die ontsluitikoon om oop te maak."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Ontsluit met gesig. Druk om oop te maak."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Gesig is herken. Druk om oop te maak."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Gesig is herken. Druk die ontsluitikoon om oop te maak."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Swiep op om weer te probeer"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ontsluit om NFC te gebruik"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Hierdie toestel behoort aan jou organisasie"</string>
@@ -506,6 +512,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> steun nie gesprekskenmerke nie"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hierdie kennisgewings kan nie gewysig word nie."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Oproepkennisgewings kan nie gewysig word nie."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Hierdie groep kennisgewings kan nie hier opgestel word nie"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Instaanbediener-kennisgewing"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Alle <xliff:g id="APP_NAME">%1$s</xliff:g>-kennisgewings"</string>
@@ -910,12 +917,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Voeg teël by"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Moenie teël byvoeg nie"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Kies gebruiker"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktiewe programme</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aktiewe program</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nuwe inligting"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiewe programme"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stop"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Gestop"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Klaar"</string>

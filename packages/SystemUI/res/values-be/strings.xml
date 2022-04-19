@@ -136,6 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Пацверджана"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Націсніце \"Пацвердзіць\", каб завяршыць"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Твар распазнаны. Для працягу націсніце значок разблакіроўкі."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Разблакіравана распазнаваннем твару. Націсніце для працягу."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Твар распазнаны. Націсніце для працягу."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Твар распазнаны. Для працягу націсніце значок разблакіроўкі."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Распазнана"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Увесці PIN-код"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Выкарыстаць узор разблакіроўкі"</string>
@@ -316,6 +319,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Каб адкрыць, прагарніце ўверх"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Каб адкрыць, націсніце значок разблакіроўкі"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Твар распазнаны. Для адкрыцця націсніце значок разблакіроўкі"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Разблакіравана распазнаваннем твару. Націсніце, каб адкрыць."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Твар распазнаны. Націсніце, каб адкрыць."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Твар распазнаны. Для адкрыцця націсніце значок разблакіроўкі."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Прагартайце ўверх, каб паўтарыць спробу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Разблакіруйце, каб выкарыстоўваць NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Гэта прылада належыць вашай арганізацыі"</string>
@@ -512,6 +518,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Прыярытэт"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не падтрымлівае функцыі размовы"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Гэтыя апавяшчэнні нельга змяніць."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Апавяшчэнні пра выклікі нельга змяніць."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Тут канфігурыраваць гэту групу апавяшчэнняў забаронена"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Праксіраванае апавяшчэнне"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Усе апавяшчэнні праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
@@ -817,8 +824,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Прыпыніць"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Папярэдні трэк"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Наступны трэк"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Падключэнне"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Прайграць"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Адкрыйце праграму \"<xliff:g id="APP_LABEL">%1$s</xliff:g>\""</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Прайграйце кампазіцыю \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" (выканаўца – <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) з дапамогай праграмы \"<xliff:g id="APP_LABEL">%3$s</xliff:g>\""</string>
@@ -923,14 +929,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Дадаць плітку"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не дадаваць плітку"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Выбар карыстальніка"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> актыўная праграма</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> актыўныя праграмы</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> актыўных праграм</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> актыўнай праграмы</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Новая інфармацыя"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Актыўныя праграмы"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Спыніць"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Спынена"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Гатова"</string>
