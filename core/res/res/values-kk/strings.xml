@@ -2067,14 +2067,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Толығырақ ақпарат алу және өзгерту үшін түртіңіз."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Мазаламау режимі өзгерді"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Түймені түртіп, неге тыйым салынатынын көріңіз."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Хабарландыру параметрлерін қарау"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 нұсқасында орнатылатын қолданбалар үшін хабарландырулар жіберу рұқсаты керек. Бұрынғы қолданбаларда осы рұқсатты өзгерту үшін түртіңіз."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Кейінірек еске салу"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Жабу"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Жүйе"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Параметрлер"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>
@@ -2090,7 +2086,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Жарайды"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Өшіру"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Толығырақ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 жүйесінде кеңейтілген хабарландырулар функциясы бейімделетін хабарландырулар функциясын алмастырды. Бұл функция ұсынылған әрекеттер мен жауаптарды көрсетіп, хабарландыруларыңызды ретке келтіреді.\n\nОл хабарландыру мазмұнын, соның ішінде жеке ақпаратыңызды (мысалы, контакт аттары мен хабарлар) пайдалана алады. Сондай-ақ бұл функция арқылы хабарландыруларды жабуға немесе оларға жауап беруге (мысалы, телефон қоңырауларына жауап беру және Мазаламау режимін басқару) болады."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 жүйесінде \"Бейімделетін хабарландырулар\" функциясын \"Кеңейтілген хабарландырулар\" алмастырды. Бұл функция ұсынылған әрекеттер мен жауаптарды көрсетіп, хабарландыруларыңызды ретке келтіреді.\n\nОл хабарландыру мазмұнын, соның ішінде жеке ақпаратыңызды (мысалы, контакт аттары мен хабарларды) пайдалана алады. Сондай-ақ бұл функция арқылы хабарландыруларды жабуға немесе оларға жауап беруге (мысалы, телефон қоңырауларына жауап беруге және Мазаламау режимін басқаруға) болады."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режим туралы хабарландыру"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея заряды азаюы мүмкін"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарея ұзаққа жетуі үшін, Батареяны үнемдеу режимі іске қосылды"</string>

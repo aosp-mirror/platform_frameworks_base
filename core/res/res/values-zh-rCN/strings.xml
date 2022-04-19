@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g>目前无法使用。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>不可用"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"需要权限"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"无法使用摄像头"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"继续在手机上操作"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"无法使用麦克风"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"无法使用 Android TV 设置"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"无法使用平板电脑设置"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"无法使用手机设置"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在 Android TV 设备上访问。"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在平板电脑上访问。"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在手机上访问。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在 Android TV 设备上访问。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在平板电脑上访问。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在手机上访问。"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"此应用要求进行额外的安全性验证，您可以尝试在 Android TV 设备上访问。"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"此应用要求进行额外的安全性验证，您可以尝试在平板电脑上访问。"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"此应用要求进行额外的安全性验证，您可以尝试在手机上访问。"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"此应用专为旧版 Android 打造，因此可能无法正常运行。请尝试检查更新或与开发者联系。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"检查更新"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"您有新消息"</string>
@@ -2067,14 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"点按即可了解详情以及进行更改。"</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"“勿扰”设置有变更"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"点按即可查看屏蔽内容。"</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"查看通知设置"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"在 Android 13 中，您安装的应用需要您授予相应权限才能发送通知。点按即可为现有应用更改此权限。"</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"稍后提醒我"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"关闭"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"系统"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"设置"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"相机"</string>
@@ -2293,11 +2274,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"已翻译“<xliff:g id="MESSAGE">%1$s</xliff:g>”。"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"已将消息内容从<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>翻译成<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>。"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"后台活动"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"某个应用正在消耗大量电池电量"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"某个应用仍在使用中"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"“<xliff:g id="APP">%1$s</xliff:g>”正在后台运行。点按即可管理电池用量。"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"“<xliff:g id="APP">%1$s</xliff:g>”可能会影响电池续航时间。点按即可查看使用中的应用。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的应用"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问手机的摄像头"</string>
