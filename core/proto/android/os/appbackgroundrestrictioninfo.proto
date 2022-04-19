@@ -169,6 +169,8 @@ message AppBackgroundRestrictionsInfo {
         REASON_ROLE_EMERGENCY = 319;
         REASON_SYSTEM_MODULE = 320;
         REASON_CARRIER_PRIVILEGED_APP = 321;
+        REASON_DPO_PROTECTED_APP = 322;
+        REASON_DISALLOW_APPS_CONTROL = 323;
         // app requested to be exempt
         REASON_OPT_OUT_REQUESTED = 1000;
     }
