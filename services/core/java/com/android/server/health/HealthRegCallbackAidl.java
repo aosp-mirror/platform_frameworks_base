@@ -115,5 +115,13 @@ public class HealthRegCallbackAidl {
         public void healthInfoChanged(HealthInfo healthInfo) throws RemoteException {
             mServiceInfoCallback.update(healthInfo);
         }
+        @Override
+        public String getInterfaceHash() {
+            return IHealthInfoCallback.HASH;
+        }
+        @Override
+        public int getInterfaceVersion() {
+            return IHealthInfoCallback.VERSION;
+        }
     }
 }
