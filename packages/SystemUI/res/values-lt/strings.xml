@@ -512,6 +512,8 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetiniai"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ nepalaiko pokalbių funkcijų"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šių pranešimų keisti negalima."</string>
+    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
+    <skip />
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Šios grupės pranešimai čia nekonfigūruojami"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Per tarpinį serverį gautas pranešimas"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Visi „<xliff:g id="APP_NAME">%1$s</xliff:g>“ pranešimai"</string>
@@ -817,8 +819,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pristabdyti"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Ankstesnis takelis"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Kitas takelis"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Prijungiama"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Leisti"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Atidaryti „<xliff:g id="APP_LABEL">%1$s</xliff:g>“"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Leisti <xliff:g id="ARTIST_NAME">%2$s</xliff:g> – „<xliff:g id="SONG_NAME">%1$s</xliff:g>“ iš „<xliff:g id="APP_LABEL">%3$s</xliff:g>“"</string>
@@ -923,14 +924,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Pridėti išklotinės elementą"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nepridėti išklotinės elemento"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Naudotojo pasirinkimas"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> aktyvi programa</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aktyvios programos</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> aktyvios programos</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktyvių programų</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nauja informacija"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktyvios programos"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Sustabdyti"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Sustabdyta"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Atlikta"</string>
