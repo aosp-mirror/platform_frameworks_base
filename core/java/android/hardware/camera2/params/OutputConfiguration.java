@@ -245,6 +245,26 @@ public final class OutputConfiguration implements Parcelable {
      */
     public static final int TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED = 4;
 
+    /**
+     * Timestamp is the start of readout in the same time domain as TIMESTAMP_BASE_SENSOR.
+     *
+     * <p>The start of the camera sensor readout after exposure. For a rolling shutter camera
+     * sensor, the timestamp is typically equal to the start of exposure time +
+     * exposure time + certain fixed offset. The fixed offset could be due to camera sensor
+     * level crop. The benefit of using readout time is that when camera runs in a fixed
+     * frame rate, the timestamp intervals between frames are constant.</p>
+     *
+     * <p>This timestamp is in the same time domain as in TIMESTAMP_BASE_SENSOR, with the exception
+     * that one is start of exposure, and the other is start of readout.</p>
+     *
+     * <p>This timestamp base is supported only if {@link
+     * CameraCharacteristics#SENSOR_READOUT_TIMESTAMP} is
+     * {@link CameraMetadata#SENSOR_READOUT_TIMESTAMP_HARDWARE}.</p>
+     *
+     * @hide
+     */
+    public static final int TIMESTAMP_BASE_READOUT_SENSOR = 5;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"TIMESTAMP_BASE_"}, value =
@@ -252,7 +272,8 @@ public final class OutputConfiguration implements Parcelable {
          TIMESTAMP_BASE_SENSOR,
          TIMESTAMP_BASE_MONOTONIC,
          TIMESTAMP_BASE_REALTIME,
-         TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED})
+         TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED,
+         TIMESTAMP_BASE_READOUT_SENSOR})
     public @interface TimestampBase {};
 
     /** @hide */
@@ -974,7 +995,7 @@ public final class OutputConfiguration implements Parcelable {
     public void setTimestampBase(@TimestampBase int timestampBase) {
         // Verify that the value is in range
         if (timestampBase < TIMESTAMP_BASE_DEFAULT ||
-                timestampBase > TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED) {
+                timestampBase > TIMESTAMP_BASE_READOUT_SENSOR) {
             throw new IllegalArgumentException("Not a valid timestamp base value " +
                     timestampBase);
         }
