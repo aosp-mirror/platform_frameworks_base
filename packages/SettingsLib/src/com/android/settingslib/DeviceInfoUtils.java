@@ -26,7 +26,6 @@ import android.system.Os;
 import android.system.StructUtsname;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.BidiFormatter;
 import android.text.TextDirectionHeuristics;
@@ -34,10 +33,7 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 
-import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
-
-import com.android.settingslib.utils.BuildCompatUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -183,8 +179,10 @@ public class DeviceInfoUtils {
             SubscriptionInfo subscriptionInfo) {
         String formattedNumber = null;
         if (subscriptionInfo != null) {
-            final String rawNumber = getRawPhoneNumber(
-                    context, subscriptionInfo.getSubscriptionId());
+            final TelephonyManager telephonyManager = context.getSystemService(
+                    TelephonyManager.class);
+            final String rawNumber = telephonyManager.createForSubscriptionId(
+                    subscriptionInfo.getSubscriptionId()).getLine1Number();
             if (!TextUtils.isEmpty(rawNumber)) {
                 formattedNumber = PhoneNumberUtils.formatNumber(rawNumber);
             }
@@ -196,10 +194,12 @@ public class DeviceInfoUtils {
             List<SubscriptionInfo> subscriptionInfoList) {
         StringBuilder sb = new StringBuilder();
         if (subscriptionInfoList != null) {
+            final TelephonyManager telephonyManager = context.getSystemService(
+                    TelephonyManager.class);
             final int count = subscriptionInfoList.size();
             for (SubscriptionInfo subscriptionInfo : subscriptionInfoList) {
-                final String rawNumber = getRawPhoneNumber(
-                        context, subscriptionInfo.getSubscriptionId());
+                final String rawNumber = telephonyManager.createForSubscriptionId(
+                        subscriptionInfo.getSubscriptionId()).getLine1Number();
                 if (!TextUtils.isEmpty(rawNumber)) {
                     sb.append(PhoneNumberUtils.formatNumber(rawNumber)).append("\n");
                 }
@@ -218,22 +218,5 @@ public class DeviceInfoUtils {
             SubscriptionInfo subscriptionInfo) {
         final String phoneNumber = getFormattedPhoneNumber(context, subscriptionInfo);
         return BidiFormatter.getInstance().unicodeWrap(phoneNumber, TextDirectionHeuristics.LTR);
-    }
-
-    private static String getRawPhoneNumber(Context context, int subscriptionId) {
-        if (BuildCompatUtils.isAtLeastT()) {
-            return getRawPhoneNumberFromT(context, subscriptionId);
-        } else {
-            final TelephonyManager telephonyManager = context.getSystemService(
-                    TelephonyManager.class);
-            return telephonyManager.createForSubscriptionId(subscriptionId).getLine1Number();
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private static String getRawPhoneNumberFromT(Context context, int subscriptionId) {
-        final SubscriptionManager subscriptionManager = context.getSystemService(
-                    SubscriptionManager.class);
-        return subscriptionManager.getPhoneNumber(subscriptionId);
     }
 }
