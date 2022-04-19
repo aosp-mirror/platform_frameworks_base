@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"డిస్‌కనెక్ట్ చేస్తోంది..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"కనెక్ట్ చేస్తోంది..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"కనెక్ట్ చేయబడిన<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"జత చేస్తోంది..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"పెయిరింగ్..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"కనెక్ట్ చేయబడింది (ఫోన్ కాదు)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"కనెక్ట్ చేయబడింది (మీడియా కాదు)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"కనెక్ట్ చేయబడింది (సందేశ యాక్సెస్ లేదు)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -594,7 +594,7 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"గెస్ట్‌ను తీసివేయండి"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"గెస్ట్ సెషన్‌ను రీసెట్ చేయండి"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"గెస్ట్ సెషన్‌ను రీసెట్ చేయాలా?"</string>
-    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"అతిథిని తీసివేయాలా?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"గెస్ట్‌ను తీసివేయాలా?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"రీసెట్ చేయండి"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"తీసివేయండి"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"గెస్ట్ సెషన్‌ను రీసెట్ చేస్తోంది…"</string>
