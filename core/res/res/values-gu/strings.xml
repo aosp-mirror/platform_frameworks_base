@@ -2052,14 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"વધુ જાણવા અને બદલવા માટે ટૅપ કરો."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ખલેલ પાડશો નહીંમાં ફેરફાર થયો છે"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"શું બ્લૉક કરેલ છે તે તપાસવા માટે ટૅપ કરો."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"નોટિફિકેશનના સેટિંગ રિવ્યૂ કરો"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13માં તમે જે પણ ઍપ ઇન્સ્ટૉલ કરશો, તેને નોટિફિકેશન મોકલવા માટે તમારી પરવાનગીની જરૂર રહેશે. હાલની બધી ઍપ માટે આ પરવાનગીમાં ફેરફાર કરવા માટે ટૅપ કરો."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"મને પછી યાદ અપાવજો"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"છોડી દો"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"સિસ્ટમ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"સેટિંગ"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"કૅમેરા"</string>

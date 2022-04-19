@@ -1224,7 +1224,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"ఎల్లప్పుడూ చూపు"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Android OS యొక్క అననుకూల వెర్షన్ కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> రూపొందించబడింది మరియు ఊహించని సమస్యలు తలెత్తవచ్చు. యాప్ యొక్క అప్‌డేట్ చేసిన వెర్షన్ అందుబాటులో ఉండవచ్చు."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"ఎల్లప్పుడూ చూపు"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"అప్‌డేట్ కోసం తనిఖీ చేయి"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"అప్‌డేట్ కోసం చెక్ చేయి"</string>
     <string name="smv_application" msgid="3775183542777792638">"<xliff:g id="APPLICATION">%1$s</xliff:g> యాప్ (<xliff:g id="PROCESS">%2$s</xliff:g> ప్రాసెస్) అది స్వయంగా అమలు చేసే ఖచ్చితమైన మోడ్ విధానాన్ని ఉల్లంఘించింది."</string>
     <string name="smv_process" msgid="1398801497130695446">"ప్రక్రియ <xliff:g id="PROCESS">%1$s</xliff:g> అది స్వయంగా అమలు చేసే ఖచ్చితమైన మోడ్ విధానాన్ని ఉల్లంఘించింది."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"ఫోన్ అప్‌డేట్‌ అవుతోంది…"</string>
@@ -2274,11 +2274,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> అనువదించబడింది."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"మెసేజ్ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> నుండి <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>‌కు అనువదించబడింది."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"బ్యాక్‌గ్రౌండ్ యాక్టివిటీ"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"యాప్ బ్యాటరీని డ్రెయిన్ చేస్తోంది"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"యాప్ ఇప్పటికీ యాక్టివ్‌గా ఉంది"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> బ్యాక్‌గ్రౌండ్‌లో రన్ అవుతోంది. బ్యాటరీ వినియోగాన్ని మేనేజ్ చేయడానికి."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> బ్యాటరీ జీవితకాలాన్ని ప్రభావితం చేయవచ్చు. యాక్టివ్ యాప్‌లను రివ్యూ చేయడానికి ట్యాప్ చేయండి."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"యాక్టివ్‌గా ఉన్న యాప్‌లను చెక్ చేయండి"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"మీ <xliff:g id="DEVICE">%1$s</xliff:g> నుండి ఫోన్ కెమెరాను యాక్సెస్ చేయడం సాధ్యపడదు"</string>

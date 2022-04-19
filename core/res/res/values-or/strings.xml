@@ -2274,11 +2274,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ଅନୁବାଦ କରାଯାଇଛି।"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"ମେସେଜ୍, <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ରୁ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>କୁ ଅନୁବାଦ କରାଯାଇଛି।"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"ଏକ ଆପ ବ୍ୟାଟେରୀର ଚାର୍ଜ ଶୀଘ୍ର ସମାପ୍ତ କରୁଛି"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ଏକ ଆପ ଏବେ ବି ସକ୍ରିୟ ଅଛି"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> ପୃଷ୍ଠପଟରେ ଚାଲୁଛି। ବ୍ୟାଟେରୀ ବ୍ୟବହାର ପରିଚାଳନା କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ବ୍ୟାଟେରୀ ଲାଇଫକୁ ପ୍ରଭାବିତ କରିପାରେ। ସକ୍ରିୟ ଆପ୍ସକୁ ସମୀକ୍ଷା କରିବା ପାଇଁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ସକ୍ରିୟ ଆପଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଫୋନର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>
