@@ -62,3 +62,17 @@ android_test_helper_app {
     test_suites: ["device-tests"],
     platform_apis: true,
 }
+
+android_test_helper_app {
+    name: "AppEnumerationCrossUserPackageVisibilityTestApp",
+    srcs: ["src/**/*.java"],
+    manifest: "AndroidManifest-crossUserPackageVisibility.xml",
+    dex_preopt: {
+        enabled: false,
+    },
+    optimize: {
+        enabled: false,
+    },
+    test_suites: ["device-tests"],
+    platform_apis: true,
+}

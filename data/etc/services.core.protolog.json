@@ -889,6 +889,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1256520588": {
+      "message": "performEnableScreen: mDisplayEnabled=%b mForceDisplayEnabled=%b mShowingBootMessages=%b mSystemBooted=%b. %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_BOOT",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-1248645819": {
       "message": "\tAdd container=%s",
       "level": "DEBUG",
@@ -1518,12 +1524,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/TransitionController.java"
-    },
-    "-618015844": {
-      "message": "performEnableScreen: mDisplayEnabled=%b mForceDisplayEnabled=%b mShowingBootMessages=%b mSystemBooted=%b mOnlyCore=%b. %s",
-      "level": "INFO",
-      "group": "WM_DEBUG_BOOT",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-597091183": {
       "message": "Delete TaskDisplayArea uid=%d",

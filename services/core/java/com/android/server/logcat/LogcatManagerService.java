@@ -208,7 +208,7 @@ public final class LogcatManagerService extends SystemService {
                         .getUidProcessState(mUid);
                 // If the process is foreground and we can retrieve the package name, show a dialog
                 // for user consent
-                if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+                if (procState == ActivityManager.PROCESS_STATE_TOP) {
                     String packageName = getPackageName(mUid, mGid, mPid, mFd);
                     if (packageName != null) {
                         final Intent mIntent = createIntent(packageName, mUid, mGid, mPid, mFd);

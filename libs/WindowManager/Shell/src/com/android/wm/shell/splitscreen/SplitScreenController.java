@@ -418,7 +418,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel, RemoteAnimationTarget[] apps) {
-        if (ENABLE_SHELL_TRANSITIONS || apps.length < 2) return null;
+        if (ENABLE_SHELL_TRANSITIONS || !isSplitScreenVisible()) return null;
         // TODO(b/206487881): Integrate this with shell transition.
         SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
         if (mSplitTasksContainerLayer != null) {

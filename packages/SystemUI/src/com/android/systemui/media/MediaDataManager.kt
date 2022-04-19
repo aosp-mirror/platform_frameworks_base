@@ -110,7 +110,6 @@ internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData(
     cardAction = null,
     recommendations = emptyList(),
     dismissIntent = null,
-    backgroundColor = 0,
     headphoneConnectionTimeMillis = 0,
     instanceId = InstanceId.fakeInstanceId(-1))
 
@@ -1228,7 +1227,6 @@ class MediaDataManager(
                 cardAction = target.baseAction,
                 recommendations = target.iconGrid,
                 dismissIntent = dismissIntent,
-                backgroundColor = 0,
                 headphoneConnectionTimeMillis = target.creationTimeMillis,
                 instanceId = logger.getNewInstanceId())
         }

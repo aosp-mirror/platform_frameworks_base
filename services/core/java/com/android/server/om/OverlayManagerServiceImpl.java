@@ -744,7 +744,7 @@ final class OverlayManagerServiceImpl {
     }
 
     OverlayPaths getEnabledOverlayPaths(@NonNull final String targetPackageName,
-            final int userId) {
+            final int userId, boolean includeImmutableOverlays) {
         final List<OverlayInfo> overlays = mSettings.getOverlaysForTarget(targetPackageName,
                 userId);
         final OverlayPaths.Builder paths = new OverlayPaths.Builder();
@@ -752,6 +752,9 @@ final class OverlayManagerServiceImpl {
         for (int i = 0; i < n; i++) {
             final OverlayInfo oi = overlays.get(i);
             if (!oi.isEnabled()) {
+                continue;
+            }
+            if (!includeImmutableOverlays && !oi.isMutable) {
                 continue;
             }
             if (oi.isFabricated()) {

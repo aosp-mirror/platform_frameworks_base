@@ -16,7 +16,15 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.server.pm.test.appenumeration">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.android.server.pm.test.appenumeration">
+
+    <queries>
+        <package android:name="com.android.appenumeration.crossuserpackagevisibility" />
+    </queries>
+
+    <!-- It's merged from Harrier library. Remove it since this test should not hold it. -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:node="remove" />
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
                      android:targetPackage="com.android.server.pm.test.appenumeration"

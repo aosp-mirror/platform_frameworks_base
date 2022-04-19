@@ -1565,8 +1565,7 @@ public final class SystemServer implements Dumpable {
             // WMS needs sensor service ready
             mSystemServiceManager.startBootPhase(t, SystemService.PHASE_WAIT_FOR_SENSOR_SERVICE);
             wm = WindowManagerService.main(context, inputManager, !mFirstBoot,
-                    /* onlyCore= */ false, new PhoneWindowManager(),
-                    mActivityManagerService.mActivityTaskManager);
+                    new PhoneWindowManager(), mActivityManagerService.mActivityTaskManager);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm, /* allowIsolated= */ false,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PROTO);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager,
