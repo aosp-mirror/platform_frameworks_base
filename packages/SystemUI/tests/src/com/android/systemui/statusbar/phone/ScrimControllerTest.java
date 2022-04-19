@@ -1269,7 +1269,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void notificationAlpha_unnocclusionAnimating_bouncerActive_usesKeyguardNotifAlpha() {
-        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
+        mScrimController.setClipsQsScrim(true);
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.setUnocclusionAnimationRunning(true);
@@ -1311,7 +1312,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void notificationAlpha_inKeyguardState_bouncerActive_usesInvertedBouncerInterpolator() {
-        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
+        mScrimController.setClipsQsScrim(true);
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
 
@@ -1330,7 +1332,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void notificationAlpha_inKeyguardState_bouncerNotActive_usesInvertedShadeInterpolator() {
-        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
+        mScrimController.setClipsQsScrim(true);
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
 
@@ -1476,6 +1479,15 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront, TRANSPARENT,
                 mScrimBehind, TRANSPARENT,
                 mNotificationsScrim, TRANSPARENT));
+    }
+
+    @Test
+    public void notificationAlpha_inKeyguardState_bouncerNotActive_clipsQsScrimFalse() {
+        mScrimController.setClipsQsScrim(false);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+
+        float expansion = 0.8f;
+        assertAlphaAfterExpansion(mNotificationsScrim, 0f, expansion);
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
