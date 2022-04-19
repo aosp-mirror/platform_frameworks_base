@@ -1086,6 +1086,12 @@ class Task extends TaskFragment {
             updateTaskDescription();
         }
         mSupportsPictureInPicture = info.supportsPictureInPicture();
+
+        // Re-adding the task to Recents once updated
+        if (inRecents) {
+            mTaskSupervisor.mRecentTasks.remove(this);
+            mTaskSupervisor.mRecentTasks.add(this);
+        }
     }
 
     /** Sets the original minimal width and height. */
