@@ -971,10 +971,10 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                     cutoutView.updateRotation(mRotation);
                 }
             }
-        }
 
-        // update all provider views inside overlay
-        updateOverlayProviderViews();
+            // update all provider views inside overlay
+            updateOverlayProviderViews();
+        }
     }
 
     private boolean hasRoundedCorners() {

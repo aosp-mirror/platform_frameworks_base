@@ -63,6 +63,7 @@ import android.util.RotationUtils;
 import android.util.Size;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -974,6 +975,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 getTestsDrawable(com.android.systemui.tests.R.drawable.rounded4px)
                 /* roundedBottomDrawable */,
                 0 /* roundedPadding */, false /* fillCutout */, true /* privacyDot */);
+        doReturn(Surface.ROTATION_0).when(mDisplay).getRotation();
 
         mScreenDecorations.start();
 
@@ -987,6 +989,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 getTestsDrawable(com.android.systemui.tests.R.drawable.rounded5px)
                 /* roundedBottomDrawable */,
                 0 /* roundedPadding */, false /* fillCutout */, true /* privacyDot */);
+        doReturn(Surface.ROTATION_270).when(mDisplay).getRotation();
+
         mScreenDecorations.onConfigurationChanged(null);
 
         assertEquals(new Size(4, 4), resDelegate.getTopRoundedSize());
