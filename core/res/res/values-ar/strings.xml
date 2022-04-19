@@ -2057,7 +2057,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"تم تغيير ميزة \"عدم الإزعاج\""</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"انقر للاطّلاع على ما تم حظره."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"مراجعة إعدادات الإشعارات"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"‏في نظام التشغيل Android 13، يجب أن تحصل التطبيقات التي تُثبِّتها على إذن لإرسال الإشعارات. انقر لتغيير هذا الإذن للتطبيقات الحالية."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"تذكيري لاحقًا"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"إغلاق"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"النظام"</string>
@@ -2278,11 +2279,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> (مُترجَم)."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"الرسالة مُترجَمة من <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> إلى <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"النشاط في الخلفية"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"تطبيق يستنزف طاقة البطارية"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ثمة تطبيق لا يزال نشطًا"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"التطبيق <xliff:g id="APP">%1$s</xliff:g> قيد التشغيل في الخلفية. انقر لإدارة استخدام البطارية."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"قد يؤثر استخدام التطبيق <xliff:g id="APP">%1$s</xliff:g> على عمر البطارية. انقر للاطّلاع على التطبيقات النشطة."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"التحقّق من التطبيقات النشطة"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"يتعذّر الوصول إلى كاميرا الهاتف من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
