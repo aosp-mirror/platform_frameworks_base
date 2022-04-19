@@ -153,7 +153,6 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
             res.addOverride(SystemUIR.array.config_roundedCornerDrawableArray, mockTypedArray)
             res.addOverride(SystemUIR.array.config_roundedCornerTopDrawableArray, mockTypedArray)
             res.addOverride(SystemUIR.array.config_roundedCornerBottomDrawableArray, mockTypedArray)
-            res.addOverride(SystemUIR.array.config_roundedCornerMultipleRadiusArray, mockTypedArray)
             res.addOverride(com.android.internal.R.dimen.rounded_corner_radius, radius ?: 0)
             res.addOverride(com.android.internal.R.dimen.rounded_corner_radius_top, radiusTop ?: 0)
             res.addOverride(com.android.internal.R.dimen.rounded_corner_radius_bottom,
