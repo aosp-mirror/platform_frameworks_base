@@ -411,11 +411,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 if (transition != null) transition.collect(wc);
 
-                if (finishTransition != null) {
-                    // Deal with edge-cases in recents where it pretends to finish itself.
-                    if ((entry.getValue().getChangeMask()
-                            & WindowContainerTransaction.Change.CHANGE_FORCE_NO_PIP) != 0) {
+                if ((entry.getValue().getChangeMask()
+                        & WindowContainerTransaction.Change.CHANGE_FORCE_NO_PIP) != 0) {
+                    // Disable entering pip (eg. when recents pretends to finish itself)
+                    if (finishTransition != null) {
                         finishTransition.setCanPipOnFinish(false /* canPipOnFinish */);
+                    } else if (transition != null) {
+                        transition.setCanPipOnFinish(false /* canPipOnFinish */);
                     }
                 }
 
@@ -1522,7 +1524,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
             return 0;
         }
-        if (taskFragment.isEmbeddedTaskFragmentInPip()) {
+        if (taskFragment.isEmbeddedTaskFragmentInPip()
+                // When the Task enters PiP before the organizer removes the empty TaskFragment, we
+                // should allow it to do the cleanup.
+                && taskFragment.getTopNonFinishingActivity() != null) {
             final Throwable exception = new IllegalArgumentException(
                     "Not allowed to delete TaskFragment in PIP Task");
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);

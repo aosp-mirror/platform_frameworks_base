@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Скасувати"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Якщо ви під’єднаєте інший пристрій, він матиме доступ до ваших контактів та історії дзвінків."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не вдалося створити пару з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не вдалося створити пару з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g> через неправильний PIN-код чи ключ доступу."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Помилка підключення до пристрою <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: неправильний PIN-код чи ключ доступу."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Неможливо зв’язатися з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Створ. пари відхилено <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Комп’ютер"</string>
@@ -644,7 +644,7 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"Погода"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Якість повітря"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Акторський склад"</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Вибрати зображення профілю"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Виберіть зображення профілю"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Значок користувача за умовчанням"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Фізична клавіатура"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Вибрати розкладку клавіатури"</string>

@@ -970,6 +970,7 @@
     <dimen name="qs_seamless_icon_size">12dp</dimen>
     <dimen name="qs_media_disabled_seekbar_height">1dp</dimen>
     <dimen name="qs_media_enabled_seekbar_height">2dp</dimen>
+    <dimen name="qs_media_app_icon_size">24dp</dimen>
 
     <dimen name="qs_media_session_enabled_seekbar_vertical_padding">15dp</dimen>
     <dimen name="qs_media_session_disabled_seekbar_vertical_padding">16dp</dimen>
@@ -985,7 +986,6 @@
     <dimen name="qs_media_rec_album_size">88dp</dimen>
     <dimen name="qs_media_rec_album_side_margin">16dp</dimen>
     <dimen name="qs_media_rec_album_bottom_margin">8dp</dimen>
-    <dimen name="qs_media_rec_icon_size">24dp</dimen>
 
     <!-- Media tap-to-transfer chip for sender device -->
     <dimen name="media_ttt_chip_outer_padding">16dp</dimen>
