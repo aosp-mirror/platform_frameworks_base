@@ -136,6 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Vahvistettu"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Valitse lopuksi Vahvista"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Avattu kasvojen avulla. Jatka lukituksen avauskuvakkeella."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Avattu kasvojen avulla. Jatka painamalla."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Kasvot tunnistettu. Jatka painamalla."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Kasvot tunnistettu. Jatka lukituksen avauskuvakkeella."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Todennettu"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Käytä PIN-koodia"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Käytä kuviota"</string>
@@ -312,6 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Avaa pyyhkäisemällä ylös"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Jatka painamalla lukituksen avauskuvaketta."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Avattu kasvojen avulla. Jatka lukituksen avauskuvakkeella."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Avattu kasvojen avulla. Avaa painamalla."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Kasvot tunnistettu. Avaa painamalla."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Kasvot tunnistettu. Jatka lukituksen avauskuvakkeella."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Yritä uudelleen pyyhkäisemällä ylös"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Avaa lukitus, jotta voit käyttää NFC:tä"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Organisaatiosi omistaa tämän laitteen"</string>
@@ -338,14 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Haluatko jatkaa istuntoa?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Aloita alusta"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Kyllä, haluan jatkaa"</string>
-    <!-- no translation found for guest_notification_app_name (2110425506754205509) -->
-    <skip />
-    <!-- no translation found for guest_notification_session_active (5567273684713471450) -->
-    <skip />
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Vierastila"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Olet vierastilassa"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Lisätäänkö uusi käyttäjä?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Kun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää sovelluksia muille käyttäjille."</string>
-    <!-- no translation found for user_add_user_message_guest_remove (5589286604543355007) -->
-    <skip />
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Uuden käyttäjän lisääminen poistaa sinut vierastilasta. Kaikki sovellukset ja data poistetaan myös samalla nykyisestä vierailija-käyttökerrasta."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Käyttäjäraja saavutettu"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Voit lisätä korkeintaan <xliff:g id="COUNT">%d</xliff:g> käyttäjää.</item>
@@ -514,6 +517,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Tärkeä"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei tue keskusteluominaisuuksia"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Näitä ilmoituksia ei voi muokata"</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Puheluilmoituksia ei voi muokata."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tätä ilmoitusryhmää ei voi määrittää tässä"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Välitetty ilmoitus"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Kaikki <xliff:g id="APP_NAME">%1$s</xliff:g> ‑ilmoitukset"</string>
@@ -813,8 +817,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Keskeytä"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Edellinen kappale"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Seuraava kappale"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Yhdistetään"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Toista"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Avaa <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Soita <xliff:g id="SONG_NAME">%1$s</xliff:g> (<xliff:g id="ARTIST_NAME">%2$s</xliff:g>) sovelluksessa <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -918,12 +921,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Lisää laatta"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Älä lisää laattaa"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Valitse käyttäjä"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktiivista sovellusta</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aktiivinen sovellus</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Uutta tietoa"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiiviset sovellukset"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Lopeta"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Pysäytetty"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Valmis"</string>
