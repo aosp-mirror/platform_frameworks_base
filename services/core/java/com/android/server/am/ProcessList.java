@@ -4792,7 +4792,7 @@ public final class ProcessList {
             final UidRecord uidRec = activeUids.valueAt(i);
             uidRec.curProcStateSeq = getNextProcStateSeq();
         }
-        if (mService.mWaitForNetworkTimeoutMs <= 0) {
+        if (mService.mConstants.mNetworkAccessTimeoutMs <= 0) {
             return;
         }
         // Used for identifying which uids need to block for network.
