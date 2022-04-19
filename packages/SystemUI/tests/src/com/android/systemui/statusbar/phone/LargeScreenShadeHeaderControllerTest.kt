@@ -1,5 +1,6 @@
 package com.android.systemui.statusbar.phone
 
+import android.app.StatusBarManager
 import android.testing.AndroidTestingRunner
 import android.view.View
 import androidx.test.filters.SmallTest
@@ -114,6 +115,23 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
         makeShadeVisible()
 
         verify(statusIcons).addIgnoredSlots(carrierIconSlots)
+    }
+
+    @Test
+    fun disableQS_notDisabled_visible() {
+        makeShadeVisible()
+        mLargeScreenShadeHeaderController.disable(0, 0, false)
+
+        assertThat(viewVisibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun disableQS_disabled_gone() {
+        makeShadeVisible()
+        mLargeScreenShadeHeaderController.disable(0, StatusBarManager.DISABLE2_QUICK_SETTINGS,
+            false)
+
+        assertThat(viewVisibility).isEqualTo(View.GONE)
     }
 
     private fun makeShadeVisible() {

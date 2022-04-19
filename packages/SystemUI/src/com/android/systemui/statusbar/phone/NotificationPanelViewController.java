@@ -4140,6 +4140,10 @@ public class NotificationPanelViewController extends PanelViewController {
         return mNotificationStackScrollLayoutController;
     }
 
+    public void disable(int state1, int state2, boolean animated) {
+        mLargeScreenShadeHeaderController.disable(state1, state2, animated);
+    }
+
     /**
      * Close the keyguard user switcher if it is open and capable of closing.
      *
