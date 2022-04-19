@@ -380,7 +380,7 @@
     <string name="debug_layout" msgid="1659216803043339741">"Düzen sınırlarını göster"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Klip sınırlarını, kenar boşluklarını vb. göster"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Sağdan sola düzenini zorla"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tüm yerel ayarlar için sağdan sola ekran düzenini zorlar"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tüm yerel ayarlar için sağdan sola ekran düzenini zorla"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Pencere bulanıklaştırmaya izin ver"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA\'yı zorla"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 uygulamalarda 4x MSAA\'yı etkinleştir"</string>
@@ -399,7 +399,7 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Kullanıcının ayrıldığı her etkinliği hemen yok et"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Arka plan işlem sınırı"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Arka plan ANR\'leri göster"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor mesajını göster"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor iletişimini göster"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Bildirim kanalı uyarılarını göster"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bir uygulama geçerli kanal olmadan bildirim yayınladığında ekranda uyarı gösterir"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Harici birimdeki uygulamalara izin vermeye zorla"</string>
@@ -655,12 +655,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR kodunu tara"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Dinlemeye başlamak için aşağıdaki QR kodunu ortalayın"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kodu geçerli bir biçim değil"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulamasında anons durdurulsun mu?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapar veya çıkışı değiştirirseniz mevcut anonsunuz duraklatılır"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapın"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Çıkışı değiştirme"</string>
 </resources>
