@@ -16,10 +16,8 @@
 
 package com.android.server.logcat;
 
-import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -42,22 +40,16 @@ import java.util.concurrent.Executors;
  * Service responsible for managing the access to Logcat.
  */
 public final class LogcatManagerService extends SystemService {
-
     private static final String TAG = "LogcatManagerService";
+    static final String EXTRA_UID = "com.android.server.logcat.uid";
+    static final String EXTRA_GID = "com.android.server.logcat.gid";
+    static final String EXTRA_PID = "com.android.server.logcat.pid";
+    static final String EXTRA_FD = "com.android.server.logcat.fd";
+
     private final Context mContext;
     private final BinderService mBinderService;
     private final ExecutorService mThreadExecutor;
     private ILogd mLogdService;
-    private @NonNull ActivityManager mActivityManager;
-    private ActivityManagerInternal mActivityManagerInternal;
-    private static final int MAX_UID_IMPORTANCE_COUNT_LISTENER = 2;
-    private static final String TARGET_PACKAGE_NAME = "android";
-    private static final String TARGET_ACTIVITY_NAME =
-            "com.android.server.logcat.LogAccessDialogActivity";
-    private static final String EXTRA_UID = "com.android.server.logcat.uid";
-    private static final String EXTRA_GID = "com.android.server.logcat.gid";
-    private static final String EXTRA_PID = "com.android.server.logcat.pid";
-    private static final String EXTRA_FD = "com.android.server.logcat.fd";
 
     private final class BinderService extends ILogcatManagerService.Stub {
         @Override
@@ -153,11 +145,6 @@ public final class LogcatManagerService extends SystemService {
         }
     }
 
-    private static String getClientInfo(int uid, int gid, int pid, int fd) {
-        return "UID=" + Integer.toString(uid) + " GID=" + Integer.toString(gid) + " PID="
-                + Integer.toString(pid) + " FD=" + Integer.toString(fd);
-    }
-
     private class LogdMonitor implements Runnable {
 
         private final int mUid;
@@ -232,7 +219,6 @@ public final class LogcatManagerService extends SystemService {
         mContext = context;
         mBinderService = new BinderService();
         mThreadExecutor = Executors.newCachedThreadPool();
-        mActivityManager = context.getSystemService(ActivityManager.class);
     }
 
     @Override
@@ -252,7 +238,7 @@ public final class LogcatManagerService extends SystemService {
      * Create the Intent for LogAccessDialogActivity.
      */
     public Intent createIntent(String targetPackageName, int uid, int gid, int pid, int fd) {
-        final Intent intent = new Intent();
+        final Intent intent = new Intent(mContext, LogAccessDialogActivity.class);
 
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
@@ -261,8 +247,6 @@ public final class LogcatManagerService extends SystemService {
         intent.putExtra(EXTRA_GID, gid);
         intent.putExtra(EXTRA_PID, pid);
         intent.putExtra(EXTRA_FD, fd);
-
-        intent.setComponent(new ComponentName(TARGET_PACKAGE_NAME, TARGET_ACTIVITY_NAME));
 
         return intent;
     }
