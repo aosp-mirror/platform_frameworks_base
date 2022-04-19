@@ -512,9 +512,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onUidInactive(int uid);
     public abstract void onUidProcStateChanged(int uid, int procState);
 
-    public abstract void onUidAddedToPendingTempAllowlist(int uid, String tag);
-    public abstract void onUidRemovedFromPendingTempAllowlist(int uid);
-
     /** Handle app crash event in {@link android.app.IActivityController} if there is one. */
     public abstract boolean handleAppCrashInActivityController(String processName, int pid,
             String shortMsg, String longMsg, long timeMillis, String stackTrace,
