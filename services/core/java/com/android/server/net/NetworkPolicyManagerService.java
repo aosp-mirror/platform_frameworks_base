@@ -6315,6 +6315,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return effectiveBlockedReasons;
         }
 
+        static int getAllowedReasonsForProcState(int procState) {
+            if (procState > NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE) {
+                return ALLOWED_REASON_NONE;
+            } else if (procState <= NetworkPolicyManager.TOP_THRESHOLD_STATE) {
+                return ALLOWED_REASON_TOP | ALLOWED_REASON_FOREGROUND
+                        | ALLOWED_METERED_REASON_FOREGROUND;
+            } else {
+                return ALLOWED_REASON_FOREGROUND | ALLOWED_METERED_REASON_FOREGROUND;
+            }
+        }
+
         @Override
         public String toString() {
             return toString(blockedReasons, allowedReasons, effectiveBlockedReasons);
