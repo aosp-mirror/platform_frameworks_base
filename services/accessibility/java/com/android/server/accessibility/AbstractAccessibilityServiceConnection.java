@@ -84,16 +84,15 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputBinding;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodSession;
-import com.android.internal.view.IInputSessionWithIdCallback;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
@@ -1655,21 +1654,22 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mInvocationHandler.createImeSessionLocked();
     }
 
-    public void setImeSessionEnabledLocked(IInputMethodSession session, boolean enabled) {
+    public void setImeSessionEnabledLocked(IAccessibilityInputMethodSession session,
+            boolean enabled) {
         mInvocationHandler.setImeSessionEnabledLocked(session, enabled);
     }
 
-    public void bindInputLocked(InputBinding binding) {
-        mInvocationHandler.bindInputLocked(binding);
+    public void bindInputLocked() {
+        mInvocationHandler.bindInputLocked();
     }
 
     public  void unbindInputLocked() {
         mInvocationHandler.unbindInputLocked();
     }
 
-    public void startInputLocked(IBinder startInputToken, IInputContext inputContext,
+    public void startInputLocked(IRemoteAccessibilityInputConnection connection,
             EditorInfo editorInfo, boolean restarting) {
-        mInvocationHandler.startInputLocked(startInputToken, inputContext, editorInfo, restarting);
+        mInvocationHandler.startInputLocked(connection, editorInfo, restarting);
     }
 
 
@@ -1827,7 +1827,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    private void setImeSessionEnabledInternal(IInputMethodSession session, boolean enabled) {
+    private void setImeSessionEnabledInternal(IAccessibilityInputMethodSession session,
+            boolean enabled) {
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null && session != null) {
             try {
@@ -1842,14 +1843,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    private void bindInputInternal(InputBinding binding) {
+    private void bindInputInternal() {
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
                 if (svcClientTracingEnabled()) {
-                    logTraceSvcClient("bindInput", binding.toString());
+                    logTraceSvcClient("bindInput", "");
                 }
-                listener.bindInput(binding);
+                listener.bindInput();
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG,
                         "Error binding input to " + mService, re);
@@ -1872,16 +1873,16 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    private void startInputInternal(IBinder startInputToken, IInputContext inputContext,
+    private void startInputInternal(IRemoteAccessibilityInputConnection connection,
             EditorInfo editorInfo, boolean restarting) {
         final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
         if (listener != null) {
             try {
                 if (svcClientTracingEnabled()) {
-                    logTraceSvcClient("startInput", startInputToken + " "
-                            + inputContext + " " + editorInfo + restarting);
+                    logTraceSvcClient("startInput", "editorInfo=" + editorInfo
+                            + " restarting=" + restarting);
                 }
-                listener.startInput(startInputToken, inputContext, editorInfo, restarting);
+                listener.startInput(connection, editorInfo, restarting);
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG,
                         "Error starting input to " + mService, re);
@@ -2141,12 +2142,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     break;
                 case MSG_SET_IME_SESSION_ENABLED:
                     final boolean enabled = (message.arg1 != 0);
-                    final IInputMethodSession session = (IInputMethodSession) message.obj;
+                    final IAccessibilityInputMethodSession session =
+                            (IAccessibilityInputMethodSession) message.obj;
                     setImeSessionEnabledInternal(session, enabled);
                     break;
                 case MSG_BIND_INPUT:
-                    final InputBinding binding = (InputBinding) message.obj;
-                    bindInputInternal(binding);
+                    bindInputInternal();
                     break;
                 case MSG_UNBIND_INPUT:
                     unbindInputInternal();
@@ -2154,10 +2155,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 case MSG_START_INPUT:
                     final boolean restarting = (message.arg1 != 0);
                     final SomeArgs args = (SomeArgs) message.obj;
-                    final IBinder startInputToken = (IBinder) args.arg1;
-                    final IInputContext inputContext = (IInputContext) args.arg2;
-                    final EditorInfo editorInfo = (EditorInfo) args.arg3;
-                    startInputInternal(startInputToken, inputContext, editorInfo, restarting);
+                    final IRemoteAccessibilityInputConnection connection =
+                            (IRemoteAccessibilityInputConnection) args.arg1;
+                    final EditorInfo editorInfo = (EditorInfo) args.arg2;
+                    startInputInternal(connection, editorInfo, restarting);
+                    args.recycle();
                     break;
                 default: {
                     throw new IllegalArgumentException("Unknown message: " + type);
@@ -2227,14 +2229,15 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             msg.sendToTarget();
         }
 
-        public void setImeSessionEnabledLocked(IInputMethodSession session, boolean enabled) {
+        public void setImeSessionEnabledLocked(IAccessibilityInputMethodSession session,
+                boolean enabled) {
             final Message msg = obtainMessage(MSG_SET_IME_SESSION_ENABLED, (enabled ? 1 : 0),
                     0, session);
             msg.sendToTarget();
         }
 
-        public void bindInputLocked(InputBinding binding) {
-            final Message msg = obtainMessage(MSG_BIND_INPUT, binding);
+        public void bindInputLocked() {
+            final Message msg = obtainMessage(MSG_BIND_INPUT);
             msg.sendToTarget();
         }
 
@@ -2243,12 +2246,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             msg.sendToTarget();
         }
 
-        public void startInputLocked(IBinder startInputToken, IInputContext inputContext,
+        public void startInputLocked(
+                IRemoteAccessibilityInputConnection connection,
                 EditorInfo editorInfo, boolean restarting) {
             final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = startInputToken;
-            args.arg2 = inputContext;
-            args.arg3 = editorInfo;
+            args.arg1 = connection;
+            args.arg2 = editorInfo;
             final Message msg = obtainMessage(MSG_START_INPUT, restarting ? 1 : 0, 0, args);
             msg.sendToTarget();
         }
@@ -2402,10 +2405,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    private static final class AccessibilityCallback extends IInputSessionWithIdCallback.Stub {
+    private static final class AccessibilityCallback
+            extends IAccessibilityInputMethodSessionCallback.Stub {
         @Override
-        public void sessionCreated(IInputMethodSession session, int id) {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.sessionCreated");
+        public void sessionCreated(IAccessibilityInputMethodSession session, int id) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AACS.sessionCreated");
             final long ident = Binder.clearCallingIdentity();
             try {
                 InputMethodManagerInternal.get().onSessionForAccessibilityCreated(id, session);
