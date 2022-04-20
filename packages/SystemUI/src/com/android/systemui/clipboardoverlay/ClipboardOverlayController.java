@@ -137,7 +137,6 @@ public class ClipboardOverlayController {
 
     private Runnable mOnSessionCompleteListener;
 
-
     private InputMonitor mInputMonitor;
     private InputEventReceiver mInputEventReceiver;
 
@@ -145,6 +144,7 @@ public class ClipboardOverlayController {
     private BroadcastReceiver mScreenshotReceiver;
 
     private boolean mBlockAttach = false;
+    private Animator mExitAnimator;
 
     public ClipboardOverlayController(Context context,
             BroadcastDispatcher broadcastDispatcher,
@@ -200,6 +200,7 @@ public class ClipboardOverlayController {
             @Override
             public void onSwipeDismissInitiated(Animator animator) {
                 mUiEventLogger.log(CLIPBOARD_OVERLAY_SWIPE_DISMISSED);
+                mExitAnimator = animator;
                 animator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationStart(Animator animation) {
@@ -233,7 +234,6 @@ public class ClipboardOverlayController {
             mWindow.setContentView(mContainer);
             updateInsets(mWindowManager.getCurrentWindowMetrics().getWindowInsets());
             mView.requestLayout();
-            mView.post(this::animateIn);
         });
 
         mTimeoutHandler.setOnTimeoutRunnable(() -> {
@@ -273,6 +273,9 @@ public class ClipboardOverlayController {
     }
 
     void setClipData(ClipData clipData, String clipSource) {
+        if (mExitAnimator != null && mExitAnimator.isRunning()) {
+            mExitAnimator.cancel();
+        }
         reset();
         if (clipData == null || clipData.getItemCount() == 0) {
             showTextPreview(mContext.getResources().getString(
@@ -305,6 +308,7 @@ public class ClipboardOverlayController {
         } else {
             mRemoteCopyChip.setVisibility(View.GONE);
         }
+        withWindowAttached(() -> mContainer.post(this::animateIn));
         mTimeoutHandler.resetTimeout();
     }
 
@@ -411,7 +415,7 @@ public class ClipboardOverlayController {
     private void showTextPreview(CharSequence text) {
         mTextPreview.setVisibility(View.VISIBLE);
         mImagePreview.setVisibility(View.GONE);
-        mTextPreview.setText(text);
+        mTextPreview.setText(text.subSequence(0, Math.min(500, text.length())));
         mEditChip.setVisibility(View.GONE);
     }
 
@@ -428,10 +432,6 @@ public class ClipboardOverlayController {
     }
 
     private void showEditableImage(Uri uri) {
-        mTextPreview.setVisibility(View.GONE);
-        mImagePreview.setVisibility(View.VISIBLE);
-        mEditChip.setAlpha(1f);
-        mActionContainerBackground.setVisibility(View.VISIBLE);
         ContentResolver resolver = mContext.getContentResolver();
         try {
             int size = mContext.getResources().getDimensionPixelSize(R.dimen.overlay_x_scale);
@@ -441,7 +441,14 @@ public class ClipboardOverlayController {
             mImagePreview.setImageBitmap(thumbnail);
         } catch (IOException e) {
             Log.e(TAG, "Thumbnail loading failed", e);
+            showTextPreview(
+                    mContext.getResources().getString(R.string.clipboard_overlay_text_copied));
+            return;
         }
+        mTextPreview.setVisibility(View.GONE);
+        mImagePreview.setVisibility(View.VISIBLE);
+        mEditChip.setAlpha(1f);
+        mActionContainerBackground.setVisibility(View.VISIBLE);
         View.OnClickListener listener = v -> editImage(uri);
         mEditChip.setOnClickListener(listener);
         mEditChip.setContentDescription(
@@ -472,12 +479,23 @@ public class ClipboardOverlayController {
     private void animateOut() {
         Animator anim = getExitAnimation();
         anim.addListener(new AnimatorListenerAdapter() {
+            private boolean mCancelled;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                super.onAnimationCancel(animation);
+                mCancelled = true;
+            }
+
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                hideImmediate();
+                if (!mCancelled) {
+                    hideImmediate();
+                }
             }
         });
+        mExitAnimator = anim;
         anim.start();
     }
 
@@ -630,6 +648,7 @@ public class ClipboardOverlayController {
     private void reset() {
         mView.setTranslationX(0);
         mContainer.setAlpha(0);
+        mActionContainerBackground.setVisibility(View.GONE);
         resetActionChips();
         mTimeoutHandler.cancelTimeout();
     }
