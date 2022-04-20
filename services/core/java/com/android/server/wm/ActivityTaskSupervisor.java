@@ -93,6 +93,7 @@ import android.app.AppOpsManagerInternal;
 import android.app.IActivityClientController;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
+import android.app.TaskInfo;
 import android.app.WaitResult;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ClientTransaction;
@@ -154,6 +155,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 // TODO: This class has become a dumping ground. Let's
 // - Move things relating to the hierarchy to RootWindowContainer
@@ -244,6 +246,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     /** Helper class to abstract out logic for fetching the set of currently running tasks */
     private RunningTasks mRunningTasks;
+
+    /** Helper for {@link Task#fillTaskInfo}. */
+    final TaskInfoHelper mTaskInfoHelper = new TaskInfoHelper();
 
     private final ActivityTaskSupervisorHandler mHandler;
     final Looper mLooper;
@@ -2615,6 +2620,41 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         } finally {
             synchronized (mService.mGlobalLock) {
                 mService.continueWindowLayout();
+            }
+        }
+    }
+
+    /**
+     * Fills the info that needs to iterate all activities of task, such as the number of
+     * non-finishing activities and collecting launch cookies.
+     */
+    static class TaskInfoHelper implements Consumer<ActivityRecord> {
+        private TaskInfo mInfo;
+        private ActivityRecord mTopRunning;
+
+        ActivityRecord fillAndReturnTop(Task task, TaskInfo info) {
+            info.numActivities = 0;
+            info.baseActivity = null;
+            mInfo = info;
+            task.forAllActivities(this);
+            final ActivityRecord top = mTopRunning;
+            mTopRunning = null;
+            mInfo = null;
+            return top;
+        }
+
+        @Override
+        public void accept(ActivityRecord r) {
+            if (r.finishing) {
+                return;
+            }
+            if (r.mLaunchCookie != null) {
+                mInfo.addLaunchCookie(r.mLaunchCookie);
+            }
+            mInfo.numActivities++;
+            mInfo.baseActivity = r.mActivityComponent;
+            if (mTopRunning == null) {
+                mTopRunning = r;
             }
         }
     }
