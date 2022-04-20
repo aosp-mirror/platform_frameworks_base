@@ -176,6 +176,7 @@
 
     <!-- media -->
     <color name="media_seamless_border">?android:attr/colorAccent</color>
+    <color name="media_paging_indicator">@color/material_dynamic_neutral_variant80</color>
 
     <!-- media output dialog-->
     <color name="media_dialog_background" android:lstar="98">@color/material_dynamic_neutral90</color>
