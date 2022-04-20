@@ -1718,8 +1718,8 @@ class Task extends TaskFragment {
     /** Returns {@code true} if this task is currently in split-screen. */
     boolean inSplitScreen() {
         return getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
-                && getRootTask() != null
-                && getRootTask().getAdjacentTaskFragment() != null;
+                && getCreatedByOrganizerTask() != null
+                && getCreatedByOrganizerTask().getAdjacentTaskFragment() != null;
     }
 
     private boolean supportsSplitScreenWindowingModeInner(@Nullable TaskDisplayArea tda) {
