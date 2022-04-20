@@ -66,6 +66,13 @@ import java.util.function.Supplier;
  * {@link IInputContext} binder calls in the IME client (editor app) process, and forwards them to
  * {@link InputConnection} that the IME client provided, on the {@link Looper} associated to the
  * {@link InputConnection}.</p>
+ *
+ * <p>{@link com.android.internal.inputmethod.RemoteAccessibilityInputConnection} code is executed
+ * in the {@link android.accessibilityservice.AccessibilityService} process. It makes
+ * {@link com.android.internal.inputmethod.IRemoteAccessibilityInputConnection} binder calls under
+ * the hood. {@link #mAccessibilityInputConnection} receives the binder calls in the IME client
+ * (editor app) process, and forwards them to {@link InputConnection} that the IME client provided,
+ * on the {@link Looper} associated to the {@link InputConnection}.</p>
  */
 public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     private static final String TAG = "RemoteInputConnectionImpl";
@@ -1041,6 +1048,175 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             }
             ic.setImeConsumesInput(imeConsumesInput);
         });
+    }
+
+    private final IRemoteAccessibilityInputConnection mAccessibilityInputConnection =
+            new IRemoteAccessibilityInputConnection.Stub() {
+        @Dispatching(cancellable = true)
+        @Override
+        public void commitText(InputConnectionCommandHeader header, CharSequence text,
+                int newCursorPosition, @Nullable TextAttribute textAttribute) {
+            dispatchWithTracing("commitTextFromA11yIme", () -> {
+                if (header.mSessionId != mCurrentSessionId.get()) {
+                    return;  // cancelled
+                }
+                InputConnection ic = getInputConnection();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "commitText on inactive InputConnection");
+                    return;
+                }
+                ic.commitText(text, newCursorPosition, textAttribute);
+            });
+        }
+
+        @Dispatching(cancellable = true)
+        @Override
+        public void setSelection(InputConnectionCommandHeader header, int start, int end) {
+            dispatchWithTracing("setSelectionFromA11yIme", () -> {
+                if (header.mSessionId != mCurrentSessionId.get()) {
+                    return;  // cancelled
+                }
+                InputConnection ic = getInputConnection();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "setSelection on inactive InputConnection");
+                    return;
+                }
+                ic.setSelection(start, end);
+            });
+        }
+
+        @Dispatching(cancellable = true)
+        @Override
+        public void getSurroundingText(InputConnectionCommandHeader header, int beforeLength,
+                int afterLength, int flags, AndroidFuture future /* T=SurroundingText */) {
+            dispatchWithTracing("getSurroundingTextFromA11yIme", future, () -> {
+                if (header.mSessionId != mCurrentSessionId.get()) {
+                    return null;  // cancelled
+                }
+                final InputConnection ic = getInputConnection();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "getSurroundingText on inactive InputConnection");
+                    return null;
+                }
+                if (beforeLength < 0) {
+                    Log.i(TAG, "Returning null to getSurroundingText due to an invalid"
+                            + " beforeLength=" + beforeLength);
+                    return null;
+                }
+                if (afterLength < 0) {
+                    Log.i(TAG, "Returning null to getSurroundingText due to an invalid"
+                            + " afterLength=" + afterLength);
+                    return null;
+                }
+                return ic.getSurroundingText(beforeLength, afterLength, flags);
+            }, useImeTracing() ? result -> buildGetSurroundingTextProto(
+                    beforeLength, afterLength, flags, result) : null);
+        }
+
+        @Dispatching(cancellable = true)
+        @Override
+        public void deleteSurroundingText(InputConnectionCommandHeader header, int beforeLength,
+                int afterLength) {
+            dispatchWithTracing("deleteSurroundingTextFromA11yIme", () -> {
+                if (header.mSessionId != mCurrentSessionId.get()) {
+                    return;  // cancelled
+                }
+                InputConnection ic = getInputConnection();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "deleteSurroundingText on inactive InputConnection");
+                    return;
+                }
+                ic.deleteSurroundingText(beforeLength, afterLength);
+            });
+        }
+
+        @Dispatching(cancellable = true)
+        @Override
+        public void sendKeyEvent(InputConnectionCommandHeader header, KeyEvent event) {
+            dispatchWithTracing("sendKeyEventFromA11yIme", () -> {
+                if (header.mSessionId != mCurrentSessionId.get()) {
+                    return;  // cancelled
+                }
+                InputConnection ic = getInputConnection();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "sendKeyEvent on inactive InputConnection");
+                    return;
+                }
+                ic.sendKeyEvent(event);
+            });
+        }
+
+        @Dispatching(cancellable = true)
+        @Override
+        public void performEditorAction(InputConnectionCommandHeader header, int id) {
+            dispatchWithTracing("performEditorActionFromA11yIme", () -> {
+                if (header.mSessionId != mCurrentSessionId.get()) {
+                    return;  // cancelled
+                }
+                InputConnection ic = getInputConnection();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "performEditorAction on inactive InputConnection");
+                    return;
+                }
+                ic.performEditorAction(id);
+            });
+        }
+
+        @Dispatching(cancellable = true)
+        @Override
+        public void performContextMenuAction(InputConnectionCommandHeader header, int id) {
+            dispatchWithTracing("performContextMenuActionFromA11yIme", () -> {
+                if (header.mSessionId != mCurrentSessionId.get()) {
+                    return;  // cancelled
+                }
+                InputConnection ic = getInputConnection();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "performContextMenuAction on inactive InputConnection");
+                    return;
+                }
+                ic.performContextMenuAction(id);
+            });
+        }
+
+        @Dispatching(cancellable = true)
+        @Override
+        public void getCursorCapsMode(InputConnectionCommandHeader header, int reqModes,
+                AndroidFuture future /* T=Integer */) {
+            dispatchWithTracing("getCursorCapsModeFromA11yIme", future, () -> {
+                if (header.mSessionId != mCurrentSessionId.get()) {
+                    return 0;  // cancelled
+                }
+                final InputConnection ic = getInputConnection();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "getCursorCapsMode on inactive InputConnection");
+                    return 0;
+                }
+                return ic.getCursorCapsMode(reqModes);
+            }, useImeTracing() ? result -> buildGetCursorCapsModeProto(reqModes, result) : null);
+        }
+
+        @Dispatching(cancellable = true)
+        @Override
+        public void clearMetaKeyStates(InputConnectionCommandHeader header, int states) {
+            dispatchWithTracing("clearMetaKeyStatesFromA11yIme", () -> {
+                if (header.mSessionId != mCurrentSessionId.get()) {
+                    return;  // cancelled
+                }
+                InputConnection ic = getInputConnection();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "clearMetaKeyStates on inactive InputConnection");
+                    return;
+                }
+                ic.clearMetaKeyStates(states);
+            });
+        }
+    };
+
+    /**
+     * @return {@link IRemoteAccessibilityInputConnection} associated with this object.
+     */
+    public IRemoteAccessibilityInputConnection asIRemoteAccessibilityInputConnection() {
+        return mAccessibilityInputConnection;
     }
 
     private void dispatch(@NonNull Runnable runnable) {
