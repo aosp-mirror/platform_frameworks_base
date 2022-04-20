@@ -29,8 +29,6 @@ import android.view.View;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 
 /**
  * A view that can be used for both the dimmed and normal background of an notification.

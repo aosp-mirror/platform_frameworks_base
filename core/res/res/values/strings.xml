@@ -5773,7 +5773,7 @@
     <!-- Title for notification inviting users to review their notification settings [CHAR LIMIT=NONE] -->
     <string name="review_notification_settings_title">Review notification settings</string>
     <!-- Content of notification informing users of notification permission change, and inviting them to modify current settings. [CHAR LIMIT=NONE]-->
-    <string name="review_notification_settings_text">In Android 13, apps that you install need your permission to send notifications. Tap to change this permission for existing apps.</string>
+    <string name="review_notification_settings_text">Starting in Android 13, apps that you install need your permission to send notifications. Tap to change this permission for existing apps.</string>
     <!-- Notification action text for having this notification come back later [CHAR LIMIT=20] -->
     <string name="review_notification_settings_remind_me_action">Remind me later</string>
     <!-- Notification action text to dismiss this notification [CHAR LIMIT=20]-->

@@ -85,37 +85,37 @@ class ScreenDecorHwcLayerTest : SysuiTestCase() {
 
     @Test
     fun testTransparentRegion_noCutout_noRoundedCorner_noProtection() {
-        setupConfigs(null, 0, 0, RectF(), 0f)
+        setupConfigs(null, false, false, 0, 0, RectF(), 0f)
 
         decorHwcLayer.calculateTransparentRect()
 
         assertThat(decorHwcLayer.transparentRect)
-            .isEqualTo(Rect(0, 0, decorHwcLayer.width, decorHwcLayer.height))
+                .isEqualTo(Rect(0, 0, decorHwcLayer.width, decorHwcLayer.height))
     }
 
     @Test
     fun testTransparentRegion_onlyShortEdgeCutout() {
-        setupConfigs(cutoutTop, 0, 0, RectF(), 0f)
+        setupConfigs(cutoutTop, false, false, 0, 0, RectF(), 0f)
 
         decorHwcLayer.calculateTransparentRect()
 
         assertThat(decorHwcLayer.transparentRect)
-            .isEqualTo(Rect(0, cutoutSize, decorHwcLayer.width, decorHwcLayer.height))
+                .isEqualTo(Rect(0, cutoutSize, decorHwcLayer.width, decorHwcLayer.height))
     }
 
     @Test
     fun testTransparentRegion_onlyLongEdgeCutout() {
-        setupConfigs(cutoutRight, 0, 0, RectF(), 0f)
+        setupConfigs(cutoutRight, false, false, 0, 0, RectF(), 0f)
 
         decorHwcLayer.calculateTransparentRect()
 
         assertThat(decorHwcLayer.transparentRect)
-            .isEqualTo(Rect(0, 0, decorHwcLayer.width - cutoutSize, decorHwcLayer.height))
+                .isEqualTo(Rect(0, 0, decorHwcLayer.width - cutoutSize, decorHwcLayer.height))
     }
 
     @Test
     fun testTransparentRegion_onlyRoundedCorners() {
-        setupConfigs(null, roundedSizeTop, roundedSizeBottom, RectF(), 0f)
+        setupConfigs(null, true, true, roundedSizeTop, roundedSizeBottom, RectF(), 0f)
 
         decorHwcLayer.calculateTransparentRect()
 
@@ -126,7 +126,7 @@ class ScreenDecorHwcLayerTest : SysuiTestCase() {
 
     @Test
     fun testTransparentRegion_onlyCutoutProtection() {
-        setupConfigs(null, 0, 0, RectF(48f, 1f, 52f, 5f), 0.5f)
+        setupConfigs(null, false, false, 0, 0, RectF(48f, 1f, 52f, 5f), 0.5f)
 
         decorHwcLayer.calculateTransparentRect()
 
@@ -143,7 +143,8 @@ class ScreenDecorHwcLayerTest : SysuiTestCase() {
 
     @Test
     fun testTransparentRegion_hasShortEdgeCutout_hasRoundedCorner_hasCutoutProtection() {
-        setupConfigs(cutoutTop, roundedSizeTop, roundedSizeBottom, RectF(48f, 1f, 52f, 5f), 1f)
+        setupConfigs(cutoutTop, true, true, roundedSizeTop, roundedSizeBottom,
+                RectF(48f, 1f, 52f, 5f), 1f)
 
         decorHwcLayer.calculateTransparentRect()
 
@@ -153,7 +154,8 @@ class ScreenDecorHwcLayerTest : SysuiTestCase() {
 
     @Test
     fun testTransparentRegion_hasLongEdgeCutout_hasRoundedCorner_hasCutoutProtection() {
-        setupConfigs(cutoutRight, roundedSizeTop, roundedSizeBottom, RectF(48f, 1f, 52f, 5f), 1f)
+        setupConfigs(cutoutRight, true, true, roundedSizeTop, roundedSizeBottom,
+                RectF(48f, 1f, 52f, 5f), 1f)
 
         decorHwcLayer.calculateTransparentRect()
 
@@ -163,6 +165,8 @@ class ScreenDecorHwcLayerTest : SysuiTestCase() {
 
     private fun setupConfigs(
         cutout: DisplayCutout?,
+        hasRoundedTop: Boolean,
+        hasRoundedBottom: Boolean,
         roundedTop: Int,
         roundedBottom: Int,
         protectionRect: RectF,
@@ -174,7 +178,8 @@ class ScreenDecorHwcLayerTest : SysuiTestCase() {
             info.displayCutout = cutout
             return@then true
         }
-        decorHwcLayer.updateRoundedCornerSize(roundedTop, roundedBottom)
+        decorHwcLayer.updateRoundedCornerExistenceAndSize(hasRoundedTop, hasRoundedBottom,
+                roundedTop, roundedBottom)
         decorHwcLayer.protectionRect.set(protectionRect)
         decorHwcLayer.cameraProtectionProgress = protectionProgress
         decorHwcLayer.updateCutout()

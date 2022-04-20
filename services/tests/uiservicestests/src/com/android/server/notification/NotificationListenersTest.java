@@ -28,6 +28,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
@@ -37,15 +38,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.pm.VersionedPackage;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.IInterface;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationRankingUpdate;
+import android.service.notification.StatusBarNotification;
 import android.testing.TestableContext;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -54,6 +63,8 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.server.UiServiceTestCase;
+
+import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,6 +75,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 public class NotificationListenersTest extends UiServiceTestCase {
 
@@ -387,5 +399,35 @@ public class NotificationListenersTest extends UiServiceTestCase {
 
         verify(mContext).sendBroadcastAsUser(
                 any(), eq(UserHandle.of(userId)), nullable(String.class));
+    }
+
+    @Test
+    public void testImplicitGrant() {
+        String pkg = "pkg";
+        int uid = 9;
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setTimeoutAfter(1);
+
+        StatusBarNotification sbn = new StatusBarNotification(pkg, pkg, 8, "tag", uid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(uid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, channel);
+
+        ManagedServices.ManagedServiceInfo info = mListeners.new ManagedServiceInfo(
+                null, new ComponentName("a", "a"), sbn.getUserId(), false, null, 33, 33);
+        List<ManagedServices.ManagedServiceInfo> services = ImmutableList.of(info);
+        when(mListeners.getServices()).thenReturn(services);
+
+        when(mNm.isVisibleToListener(any(), anyInt(), any())).thenReturn(true);
+        when(mNm.makeRankingUpdateLocked(info)).thenReturn(mock(NotificationRankingUpdate.class));
+        mNm.mPackageManagerInternal = mPmi;
+
+        mListeners.notifyPostedLocked(r, null);
+
+        verify(mPmi).grantImplicitAccess(sbn.getUserId(), null, UserHandle.getAppId(33),
+                sbn.getUid(), false, false);
     }
 }

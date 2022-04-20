@@ -28,41 +28,42 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
 import androidx.window.common.RawFoldingFeatureProducer;
-import androidx.window.util.DataProducer;
+import androidx.window.util.BaseDataProducer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Reference implementation of androidx.window.sidecar OEM interface for use with
  * WindowManager Jetpack.
  */
 class SampleSidecarImpl extends StubSidecar {
-    private static final String TAG = "SampleSidecar";
-
-    private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
-
+    private List<CommonFoldingFeature> mStoredFeatures = new ArrayList<>();
 
     SampleSidecarImpl(Context context) {
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
-        DataProducer<String> settingsFeatureProducer = new RawFoldingFeatureProducer(context);
-        mFoldingFeatureProducer = new DeviceStateManagerFoldingFeatureProducer(context,
-                settingsFeatureProducer);
+        BaseDataProducer<String> settingsFeatureProducer = new RawFoldingFeatureProducer(context);
+        BaseDataProducer<List<CommonFoldingFeature>> foldingFeatureProducer =
+                new DeviceStateManagerFoldingFeatureProducer(context,
+                        settingsFeatureProducer);
 
-        mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
+        foldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }
 
-    private void onDisplayFeaturesChanged() {
+    private void setStoredFeatures(List<CommonFoldingFeature> storedFeatures) {
+        mStoredFeatures = storedFeatures;
+    }
+
+    private void onDisplayFeaturesChanged(List<CommonFoldingFeature> storedFeatures) {
+        setStoredFeatures(storedFeatures);
         updateDeviceState(getDeviceState());
         for (IBinder windowToken : getWindowsListeningForLayoutChanges()) {
             SidecarWindowLayoutInfo newLayout = getWindowLayoutInfo(windowToken);
@@ -79,16 +80,16 @@ class SampleSidecarImpl extends StubSidecar {
     }
 
     private int deviceStateFromFeature() {
-        List<CommonFoldingFeature> storedFeatures = mFoldingFeatureProducer.getData()
-                .orElse(Collections.emptyList());
-        for (int i = 0; i < storedFeatures.size(); i++) {
-            CommonFoldingFeature feature = storedFeatures.get(i);
+        for (int i = 0; i < mStoredFeatures.size(); i++) {
+            CommonFoldingFeature feature = mStoredFeatures.get(i);
             final int state = feature.getState();
             switch (state) {
                 case CommonFoldingFeature.COMMON_STATE_FLAT:
                     return SidecarDeviceState.POSTURE_OPENED;
                 case CommonFoldingFeature.COMMON_STATE_HALF_OPENED:
                     return SidecarDeviceState.POSTURE_HALF_OPENED;
+                case CommonFoldingFeature.COMMON_STATE_UNKNOWN:
+                    return SidecarDeviceState.POSTURE_UNKNOWN;
             }
         }
         return SidecarDeviceState.POSTURE_UNKNOWN;
@@ -109,7 +110,6 @@ class SampleSidecarImpl extends StubSidecar {
     private List<SidecarDisplayFeature> getDisplayFeatures(@NonNull Activity activity) {
         int displayId = activity.getDisplay().getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
-            Log.w(TAG, "This sample doesn't support display features on secondary displays");
             return Collections.emptyList();
         }
 
@@ -119,18 +119,15 @@ class SampleSidecarImpl extends StubSidecar {
             return Collections.emptyList();
         }
 
-        Optional<List<CommonFoldingFeature>> storedFeatures = mFoldingFeatureProducer.getData();
         List<SidecarDisplayFeature> features = new ArrayList<>();
-        if (storedFeatures.isPresent()) {
-            for (CommonFoldingFeature baseFeature : storedFeatures.get()) {
-                SidecarDisplayFeature feature = new SidecarDisplayFeature();
-                Rect featureRect = baseFeature.getRect();
-                rotateRectToDisplayRotation(displayId, featureRect);
-                transformToWindowSpaceRect(activity, featureRect);
-                feature.setRect(featureRect);
-                feature.setType(baseFeature.getType());
-                features.add(feature);
-            }
+        for (CommonFoldingFeature baseFeature : mStoredFeatures) {
+            SidecarDisplayFeature feature = new SidecarDisplayFeature();
+            Rect featureRect = baseFeature.getRect();
+            rotateRectToDisplayRotation(displayId, featureRect);
+            transformToWindowSpaceRect(activity, featureRect);
+            feature.setRect(featureRect);
+            feature.setType(baseFeature.getType());
+            features.add(feature);
         }
         return Collections.unmodifiableList(features);
     }
@@ -138,7 +135,7 @@ class SampleSidecarImpl extends StubSidecar {
     @Override
     protected void onListenersChanged() {
         if (hasListeners()) {
-            onDisplayFeaturesChanged();
+            onDisplayFeaturesChanged(mStoredFeatures);
         }
     }
 
@@ -158,7 +155,7 @@ class SampleSidecarImpl extends StubSidecar {
         private void onDisplayFeaturesChangedForActivity(@NonNull Activity activity) {
             IBinder token = activity.getWindow().getAttributes().token;
             if (token == null || mWindowLayoutChangeListenerTokens.contains(token)) {
-                onDisplayFeaturesChanged();
+                onDisplayFeaturesChanged(mStoredFeatures);
             }
         }
     }

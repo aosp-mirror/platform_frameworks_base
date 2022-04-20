@@ -35,7 +35,7 @@ aidl_interface {
         "aidl/android/media/soundtrigger_middleware/SoundTriggerModuleDescriptor.aidl",
     ],
     imports: [
-        "android.media.audio.common.types",
+        "android.media.audio.common.types-V1",
         "android.media.soundtrigger.types-V1",
         "media_permission-aidl",
     ],

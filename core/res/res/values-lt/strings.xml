@@ -2054,14 +2054,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Palieskite, kad sužinotumėte daugiau ir pakeistumėte."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Netrukdymo režimas pakeistas"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Palieskite, kad patikrintumėte, kas blokuojama."</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Peržiūrėkite pranešimų nustatymus"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"13 versijos „Android” jūsų įdiegtoms programoms reikia suteikti leidimą siųsti pranešimus. Palieskite, kad pakeistumėte šį leidimą esamoms programoms."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Priminti vėliau"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Atsisakyti"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Nustatymai"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparatas"</string>
