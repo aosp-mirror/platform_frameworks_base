@@ -2054,7 +2054,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režīms “Netraucēt” ir mainīts"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Pieskarieties, lai uzzinātu, kas tiek bloķēts."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Pārskatīt paziņojumu iestatījumus"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Operētājsistēmā Android 13 jūsu instalētajām lietotnēm ir nepieciešama jūsu atļauja, lai sūtītu paziņojumus. Pieskarieties, lai mainītu šo atļauju esošajām lietotnēm."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Atgādināt vēlāk"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Noraidīt"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistēma"</string>
@@ -2275,11 +2276,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Iztulkots: <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Ziņojums ir iztulkots no šādas valodas: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> šādā valodā: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Darbība fonā"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Lietotnes darbības dēļ notiek akumulatora izlāde"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Lietotne joprojām ir aktīva"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"Lietotne <xliff:g id="APP">%1$s</xliff:g> darbojas fonā. Pieskarieties, lai pārvaldītu akumulatora lietojumu."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Lietotne <xliff:g id="APP">%1$s</xliff:g> var ietekmēt akumulatora darbības ilgumu. Pieskarieties, lai pārskatītu aktīvās lietotnes."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Pārbaudiet aktīvās lietotnes"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nevar piekļūt tālruņa kamerai no jūsu ierīces (<xliff:g id="DEVICE">%1$s</xliff:g>)."</string>
