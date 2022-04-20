@@ -23,8 +23,8 @@ import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import static com.android.server.tare.TareUtils.appToString;
+import static com.android.server.tare.TareUtils.cakeToString;
 import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
-import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -528,9 +528,9 @@ public class InternalResourceService extends SystemService {
     void maybePerformQuantitativeEasingLocked() {
         // We don't need to increase the limit if the device runs out of consumable credits
         // when the battery is low.
-        final long remainingConsumableNarcs = mScribe.getRemainingConsumableNarcsLocked();
+        final long remainingConsumableCakes = mScribe.getRemainingConsumableCakesLocked();
         if (mCurrentBatteryLevel <= QUANTITATIVE_EASING_BATTERY_THRESHOLD
-                || remainingConsumableNarcs > 0) {
+                || remainingConsumableCakes > 0) {
             return;
         }
         final long currentConsumptionLimit = mScribe.getSatiatedConsumptionLimitLocked();
@@ -539,8 +539,8 @@ public class InternalResourceService extends SystemService {
         final long newConsumptionLimit = Math.min(currentConsumptionLimit + shortfall,
                 mCompleteEconomicPolicy.getHardSatiatedConsumptionLimit());
         if (newConsumptionLimit != currentConsumptionLimit) {
-            Slog.i(TAG, "Increasing consumption limit from " + narcToString(currentConsumptionLimit)
-                    + " to " + narcToString(newConsumptionLimit));
+            Slog.i(TAG, "Increasing consumption limit from " + cakeToString(currentConsumptionLimit)
+                    + " to " + cakeToString(newConsumptionLimit));
             mScribe.setConsumptionLimitLocked(newConsumptionLimit);
             adjustCreditSupplyLocked(/* allowIncrease */ true);
         }
@@ -562,16 +562,16 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     private void adjustCreditSupplyLocked(boolean allowIncrease) {
         final long newLimit = getConsumptionLimitLocked();
-        final long remainingConsumableNarcs = mScribe.getRemainingConsumableNarcsLocked();
-        if (remainingConsumableNarcs == newLimit) {
+        final long remainingConsumableCakes = mScribe.getRemainingConsumableCakesLocked();
+        if (remainingConsumableCakes == newLimit) {
             return;
         }
-        if (remainingConsumableNarcs > newLimit) {
-            mScribe.adjustRemainingConsumableNarcsLocked(newLimit - remainingConsumableNarcs);
+        if (remainingConsumableCakes > newLimit) {
+            mScribe.adjustRemainingConsumableCakesLocked(newLimit - remainingConsumableCakes);
         } else if (allowIncrease) {
             final double perc = mCurrentBatteryLevel / 100d;
-            final long shortfall = newLimit - remainingConsumableNarcs;
-            mScribe.adjustRemainingConsumableNarcsLocked((long) (perc * shortfall));
+            final long shortfall = newLimit - remainingConsumableCakes;
+            mScribe.adjustRemainingConsumableCakesLocked((long) (perc * shortfall));
         }
         mAgent.onCreditSupplyChanged();
     }
@@ -919,7 +919,7 @@ public class InternalResourceService extends SystemService {
                             + cost.price * (action.ongoingDurationMs / 1000);
                 }
                 return mAgent.getBalanceLocked(userId, pkgName) >= requiredBalance
-                        && mScribe.getRemainingConsumableNarcsLocked() >= requiredBalance;
+                        && mScribe.getRemainingConsumableCakesLocked() >= requiredBalance;
             }
         }
 
@@ -947,7 +947,7 @@ public class InternalResourceService extends SystemService {
                 }
                 final long minBalance = Math.min(
                         mAgent.getBalanceLocked(userId, pkgName),
-                        mScribe.getRemainingConsumableNarcsLocked());
+                        mScribe.getRemainingConsumableCakesLocked());
                 return minBalance * 1000 / totalCostPerSecond;
             }
         }
@@ -1103,21 +1103,21 @@ public class InternalResourceService extends SystemService {
 
             final long consumptionLimit = getConsumptionLimitLocked();
             pw.print("Consumption limit (current/initial-satiated/current-satiated): ");
-            pw.print(narcToString(consumptionLimit));
+            pw.print(cakeToString(consumptionLimit));
             pw.print("/");
-            pw.print(narcToString(mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit()));
+            pw.print(cakeToString(mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit()));
             pw.print("/");
-            pw.println(narcToString(mScribe.getSatiatedConsumptionLimitLocked()));
+            pw.println(cakeToString(mScribe.getSatiatedConsumptionLimitLocked()));
 
-            final long remainingConsumable = mScribe.getRemainingConsumableNarcsLocked();
+            final long remainingConsumable = mScribe.getRemainingConsumableCakesLocked();
             pw.print("Goods remaining: ");
-            pw.print(narcToString(remainingConsumable));
+            pw.print(cakeToString(remainingConsumable));
             pw.print(" (");
             pw.print(String.format("%.2f", 100f * remainingConsumable / consumptionLimit));
             pw.println("% of current limit)");
 
             pw.print("Device wealth: ");
-            pw.println(narcToString(mScribe.getNarcsInCirculationForLoggingLocked()));
+            pw.println(cakeToString(mScribe.getCakesInCirculationForLoggingLocked()));
 
             pw.println();
             pw.print("Exempted apps", mExemptedApps);

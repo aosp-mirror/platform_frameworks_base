@@ -105,5 +105,7 @@ consumed.
 
 * ARC: Android Resource Credits are the "currency" units used as an abstraction layer over the real
   battery drain. They allow the system to standardize costs and prices across various devices.
+* Cake: A lie; also the smallest unit of an ARC (1 cake = one-billionth of an ARC = 1 nano-ARC).
+  When the apps request to do something, we shall let them eat cake.
 * NARC: The smallest unit of an ARC. A narc is 1 nano-ARC.
 * Satiated: used to refer to when the device is fully charged (at 100% battery level)
