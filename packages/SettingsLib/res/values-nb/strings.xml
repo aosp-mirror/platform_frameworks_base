@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Tilbakestill"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Fjern"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Tilbakestiller gjesten …"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vil du tilbakestille gjesteøkten?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dette starter en ny gjesteøkt og sletter alle apper og data fra den gjeldende økten"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vil du avslutte gjestemodus?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Dette sletter apper og data fra den gjeldende gjesteøkten"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Avslutt"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vil du lagre gjesteaktivitet?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Du kan lagre aktivitet fra den gjeldende økten eller slette alle apper og data"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Slett"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Lagre"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Avslutt gjestemodus"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Tilbakestill gjesteøkten"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Avslutt gjesteøkten"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"All aktivitet slettes når du avslutter"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Du kan lagre eller slette aktiviteten når du avslutter"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Tilbakestill for å slette øktaktivitet nå, eller du kan lagre eller slette aktivitet når du avslutter"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Ta et bilde"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Velg et bilde"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Velg et bilde"</string>

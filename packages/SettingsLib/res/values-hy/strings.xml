@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Չեղարկել"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Զուգակցում է մուտքի թույլտվությունը դեպի ձեր կոնտակտները և զանգերի պատմությունը, երբ միացված է:"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Հնարավոր չեղավ զուգակցվել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ սխալ PIN-ի կամ անցաբառի պատճառով:."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ սխալ PIN-ի կամ անցաբառի պատճառով:"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Հնարավոր չէ կապ հաստատել  <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Զուգավորումը մերժվեց <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի կողմից:"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Համակարգիչ"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Զրոյացնել"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Հեռացնել"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Հյուրի աշխատաշրջանը վերակայվում է…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Վերակայե՞լ հյուրի աշխատաշրջանը"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Կսկսվի հյուրի նոր աշխատաշրջան, իսկ նախորդ աշխատաշրջանի բոլոր հավելվածներն ու տվյալները կջնջվեն"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Դուրս գա՞լ հյուրի ռեժիմից"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Հյուրի ընթացիկ աշխատաշրջանի բոլոր հավելվածներն ու տվյալները կջնջվեն"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Դուրս գալ"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Պահե՞լ հյուրի ռեժիմի պատմությունը"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Պահեք ընթացիկ աշխատաշրջանի պատմությունը կամ ջնջեք հավելվածներն ու տվյալները"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Ջնջել"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Պահել"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Դուրս գալ հյուրի ռեժիմից"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Վերակայել հյուրի աշխատաշրջանը"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Դուրս գալ հյուրի ռեժիմից"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Դուրս գալու դեպքում ամբողջ պատմությունը կջնջվի"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Դուրս գալիս կարող եք պահել կամ ջնջել ձեր պատմությունը"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Վերակայեք աշխատաշրջանի պատմությունը հիմա կամ պահեք/ջնջեք այն դուրս գալիս"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Լուսանկարել"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Ընտրել պատկեր"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Ընտրեք լուսանկար"</string>

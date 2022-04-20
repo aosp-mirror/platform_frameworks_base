@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"रीसेट करा"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"काढून टाका"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"अतिथीला रीसेट करत आहे…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"अतिथी सत्र रीसेट करायचे का?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"हे नवीन अतिथी सत्र सुरू करेल आणि सध्याच्या सत्रातील सर्व अ‍ॅप्स व डेटा हटवेल"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"अतिथी मोडमधून बाहेर पडायचे का?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"हे सध्याच्या अतिथी सत्रातील अ‍ॅप्स आणि डेटा हटवेल"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"बाहेर पडा"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"अतिथी अ‍ॅक्टिव्हिटी सेव्ह करायची का?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"सध्याच्या सत्रातील अ‍ॅक्टिव्हिटी सेव्ह करू किंवा सर्व अ‍ॅप्स व डेटा हटवू शकता"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"हटवा"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"सेव्ह करा"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"अतिथी मोडमधून बाहेर पडा"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"अतिथी सत्र रीसेट करा"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"अतिथी मोडमधून बाहेर पडा"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"बाहेर पडल्यावर सर्व अ‍ॅक्टिव्हिटी हटवली जाईल"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"बाहेर पडल्यावर तुमची अ‍ॅक्टिव्हिटी सेव्ह करू किंवा हटवू शकता"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"सत्र अ‍ॅक्टिव्हिटी आता हटवण्यासाठी रीसेट करा किंवा तुम्ही बाहेर पडल्यावर अ‍ॅक्टिव्हिटी सेव्ह करू अथवा हटवू शकता"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"फोटो काढा"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"इमेज निवडा"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"फोटो निवडा"</string>

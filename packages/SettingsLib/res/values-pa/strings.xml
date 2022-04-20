@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"ਡਿਸਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"ਪੇਅਰ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"ਜੋੜਾਬੱਧ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ (ਕੋਈ ਫ਼ੋਨ ਨਹੀਂ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ (ਕੋਈ ਮੀਡੀਆ ਨਹੀਂ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ (ਸੁਨੇਹੇ \'ਤੇ ਪਹੁੰਚ ਨਹੀਂ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ਰੀਸੈੱਟ ਕਰੋ"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ਹਟਾਓ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ਮਹਿਮਾਨ ਨੂੰ ਰੀਸੈੱਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ਕੀ ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਨੂੰ ਰੀਸੈੱਟ ਕਰਨਾ ਹੈ?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ਇਸ ਨਾਲ ਨਵਾਂ ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਸ਼ੁਰੂ ਹੋ ਜਾਵੇਗਾ ਅਤੇ ਮੌਜੂਦਾ ਸੈਸ਼ਨ ਦੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟ ਜਾਵੇਗਾ"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ਕੀ ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਣਾ ਹੈ?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ਇਸ ਨਾਲ ਮੌਜੂਦਾ ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਦੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟ ਜਾਵੇਗਾ"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ਬਾਹਰ ਜਾਓ"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ਕੀ ਮਹਿਮਾਨ ਸਰਗਰਮੀ ਰੱਖਿਅਤ ਕਰਨੀ ਹੈ?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ਤੁਸੀਂ ਮੌਜੂਦਾ ਸੈਸ਼ਨ ਦੀ ਸਰਗਰਮੀ ਨੂੰ ਰੱਖਿਅਤ ਕਰ ਸਕਦੇ ਹੋ ਜਾਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ਮਿਟਾਓ"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ਰੱਖਿਅਤ ਕਰੋ"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਨੂੰ ਰੀਸੈੱਟ ਕਰੋ"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ਬਾਹਰ ਜਾਣ \'ਤੇ ਸਾਰੀ ਸਰਗਰਮੀ ਮਿਟਾਈ ਜਾਵੇਗੀ"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ਤੁਸੀਂ ਬਾਹਰ ਜਾਣ \'ਤੇ ਆਪਣੀ ਸਭ ਸਰਗਰਮੀ ਰੱਖਿਅਤ ਕਰ ਜਾਂ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"ਸੈਸ਼ਨ ਦੀ ਸਰਗਰਮੀ ਮਿਟਾਉਣ ਹੁਣੇ ਲਈ ਰੀਸੈੱਟ ਕਰੋ ਜਾਂ ਤੁਸੀਂ ਬਾਹਰ ਜਾਣ \'ਤੇ ਸਰਗਰਮੀ ਨੂੰ ਰੱਖਿਅਤ ਕਰ ਜਾਂ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ਇੱਕ ਫ਼ੋਟੋ ਖਿੱਚੋ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ਕੋਈ ਚਿੱਤਰ ਚੁਣੋ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ਫ਼ੋਟੋ ਚੁਣੋ"</string>
