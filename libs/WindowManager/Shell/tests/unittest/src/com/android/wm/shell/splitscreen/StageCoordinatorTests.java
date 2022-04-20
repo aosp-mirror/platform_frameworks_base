@@ -34,6 +34,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,6 +59,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -67,8 +69,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
-
-import javax.inject.Provider;
 
 /**
  * Tests for {@link StageCoordinator}
@@ -84,10 +84,6 @@ public class StageCoordinatorTests extends ShellTestCase {
     private MainStage mMainStage;
     @Mock
     private SideStage mSideStage;
-    @Mock
-    private StageTaskUnfoldController mMainUnfoldController;
-    @Mock
-    private StageTaskUnfoldController mSideUnfoldController;
     @Mock
     private SplitLayout mSplitLayout;
     @Mock
@@ -107,6 +103,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     private final Rect mBounds1 = new Rect(10, 20, 30, 40);
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
+    private final Rect mRootBounds = new Rect(0, 0, 45, 60);
 
     private SurfaceSession mSurfaceSession = new SurfaceSession();
     private SurfaceControl mRootLeash;
@@ -119,11 +116,12 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator = spy(new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool, mLogger,
-                mMainExecutor, Optional.empty(), new UnfoldControllerProvider()));
+                mMainExecutor, Optional.empty()));
         doNothing().when(mStageCoordinator).updateActivityOptions(any(), anyInt());
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
+        when(mSplitLayout.getRootBounds()).thenReturn(mRootBounds);
         when(mSplitLayout.isLandscape()).thenReturn(false);
 
         mRootTask = new TestRunningTaskInfoBuilder().build();
@@ -168,13 +166,6 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testRootTaskAppeared_initializesUnfoldControllers() {
-        verify(mMainUnfoldController).init();
-        verify(mSideUnfoldController).init();
-        verify(mStageCoordinator).onRootTaskAppeared();
-    }
-
-    @Test
     public void testRootTaskInfoChanged_updatesSplitLayout() {
         mStageCoordinator.onTaskInfoChanged(mRootTask);
 
@@ -184,26 +175,25 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Test
     public void testLayoutChanged_topLeftSplitPosition_updatesUnfoldStageBounds() {
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null);
-        clearInvocations(mMainUnfoldController, mSideUnfoldController);
+        final SplitScreenListener listener = mock(SplitScreenListener.class);
+        mStageCoordinator.registerSplitScreenListener(listener);
+        clearInvocations(listener);
 
         mStageCoordinator.onLayoutSizeChanged(mSplitLayout);
 
-        verify(mMainUnfoldController).onLayoutChanged(mBounds2, SPLIT_POSITION_BOTTOM_OR_RIGHT,
-                false);
-        verify(mSideUnfoldController).onLayoutChanged(mBounds1, SPLIT_POSITION_TOP_OR_LEFT, false);
+        verify(listener).onSplitBoundsChanged(mRootBounds, mBounds2, mBounds1);
     }
 
     @Test
     public void testLayoutChanged_bottomRightSplitPosition_updatesUnfoldStageBounds() {
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, null);
-        clearInvocations(mMainUnfoldController, mSideUnfoldController);
+        final SplitScreenListener listener = mock(SplitScreenListener.class);
+        mStageCoordinator.registerSplitScreenListener(listener);
+        clearInvocations(listener);
 
         mStageCoordinator.onLayoutSizeChanged(mSplitLayout);
 
-        verify(mMainUnfoldController).onLayoutChanged(mBounds1, SPLIT_POSITION_TOP_OR_LEFT,
-                false);
-        verify(mSideUnfoldController).onLayoutChanged(mBounds2, SPLIT_POSITION_BOTTOM_OR_RIGHT,
-                false);
+        verify(listener).onSplitBoundsChanged(mRootBounds, mBounds1, mBounds2);
     }
 
     @Test
@@ -313,21 +303,5 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.finishEnterSplitScreen(new SurfaceControl.Transaction());
 
         verify(mSplitLayout).applySurfaceChanges(any(), any(), any(), any(), any(), eq(false));
-    }
-
-    private class UnfoldControllerProvider implements
-            Provider<Optional<StageTaskUnfoldController>> {
-
-        private boolean isMain = true;
-
-        @Override
-        public Optional<StageTaskUnfoldController> get() {
-            if (isMain) {
-                isMain = false;
-                return Optional.of(mMainUnfoldController);
-            } else {
-                return Optional.of(mSideUnfoldController);
-            }
-        }
     }
 }

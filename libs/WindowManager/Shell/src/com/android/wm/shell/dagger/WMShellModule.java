@@ -45,7 +45,6 @@ import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
-import com.android.wm.shell.fullscreen.FullscreenUnfoldController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -67,17 +66,22 @@ import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
-import com.android.wm.shell.splitscreen.StageTaskUnfoldController;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 import com.android.wm.shell.unfold.UnfoldBackgroundController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 import com.android.wm.shell.unfold.animation.FullscreenUnfoldTaskAnimator;
+import com.android.wm.shell.unfold.animation.SplitTaskUnfoldAnimator;
+import com.android.wm.shell.unfold.animation.UnfoldTaskAnimator;
+import com.android.wm.shell.unfold.qualifier.UnfoldTransition;
+import com.android.wm.shell.unfold.qualifier.UnfoldShellTransition;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Provider;
-
+import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
@@ -91,7 +95,7 @@ import dagger.Provides;
  * dependencies should go into {@link WMShellBaseModule}.
  */
 @Module(includes = WMShellBaseModule.class)
-public class WMShellModule {
+public abstract class WMShellModule {
 
     //
     // Bubbles
@@ -172,12 +176,11 @@ public class WMShellModule {
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool, IconProvider iconProvider,
-            Optional<RecentTasksController> recentTasks,
-            Provider<Optional<StageTaskUnfoldController>> stageTaskUnfoldControllerProvider) {
+            Optional<RecentTasksController> recentTasks) {
         return new SplitScreenController(shellTaskOrganizer, syncQueue, context,
                 rootTaskDisplayAreaOrganizer, mainExecutor, displayController, displayImeController,
                 displayInsetsController, transitions, transactionPool, iconProvider,
-                recentTasks, stageTaskUnfoldControllerProvider);
+                recentTasks);
     }
 
     //
@@ -324,29 +327,64 @@ public class WMShellModule {
     //
     // Unfold transition
     //
-
     @WMSingleton
     @Provides
     @DynamicOverride
-    static FullscreenUnfoldController provideFullscreenUnfoldController(
+    static UnfoldAnimationController provideUnfoldAnimationController(
             Optional<ShellUnfoldProgressProvider> progressProvider,
-            Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
-            FullscreenUnfoldTaskAnimator fullscreenUnfoldTaskAnimator,
-            UnfoldBackgroundController unfoldBackgroundController,
+            TransactionPool transactionPool,
+            @UnfoldTransition SplitTaskUnfoldAnimator splitAnimator,
+            FullscreenUnfoldTaskAnimator fullscreenAnimator,
+            Lazy<Optional<UnfoldTransitionHandler>> unfoldTransitionHandler,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
-        return new FullscreenUnfoldController(mainExecutor,
-                unfoldBackgroundController, progressProvider.get(),
-                unfoldTransitionHandler.get(), fullscreenUnfoldTaskAnimator);
+        final List<UnfoldTaskAnimator> animators = new ArrayList<>();
+        animators.add(splitAnimator);
+        animators.add(fullscreenAnimator);
+
+        return new UnfoldAnimationController(
+                        transactionPool,
+                        progressProvider.get(),
+                        animators,
+                        unfoldTransitionHandler,
+                        mainExecutor
+                );
     }
+
 
     @Provides
     static FullscreenUnfoldTaskAnimator provideFullscreenUnfoldTaskAnimator(
             Context context,
+            UnfoldBackgroundController unfoldBackgroundController,
             DisplayInsetsController displayInsetsController
     ) {
-        return new FullscreenUnfoldTaskAnimator(context, displayInsetsController);
+        return new FullscreenUnfoldTaskAnimator(context, unfoldBackgroundController,
+                displayInsetsController);
     }
+
+    @Provides
+    static SplitTaskUnfoldAnimator provideSplitTaskUnfoldAnimatorBase(
+            Context context,
+            UnfoldBackgroundController backgroundController,
+            @ShellMainThread ShellExecutor executor,
+            Lazy<Optional<SplitScreenController>> splitScreenOptional,
+            DisplayInsetsController displayInsetsController
+    ) {
+        return new SplitTaskUnfoldAnimator(context, executor, splitScreenOptional,
+                backgroundController, displayInsetsController);
+    }
+
+    @WMSingleton
+    @UnfoldShellTransition
+    @Binds
+    abstract SplitTaskUnfoldAnimator provideShellSplitTaskUnfoldAnimator(
+            SplitTaskUnfoldAnimator splitTaskUnfoldAnimator);
+
+    @WMSingleton
+    @UnfoldTransition
+    @Binds
+    abstract SplitTaskUnfoldAnimator provideSplitTaskUnfoldAnimator(
+            SplitTaskUnfoldAnimator splitTaskUnfoldAnimator);
 
     @WMSingleton
     @Provides
@@ -354,32 +392,12 @@ public class WMShellModule {
     static UnfoldTransitionHandler provideUnfoldTransitionHandler(
             Optional<ShellUnfoldProgressProvider> progressProvider,
             FullscreenUnfoldTaskAnimator animator,
-            UnfoldBackgroundController backgroundController,
+            @UnfoldShellTransition SplitTaskUnfoldAnimator unfoldAnimator,
             TransactionPool transactionPool,
             Transitions transitions,
             @ShellMainThread ShellExecutor executor) {
         return new UnfoldTransitionHandler(progressProvider.get(), animator,
-                transactionPool, backgroundController, executor, transitions);
-    }
-
-    @Provides
-    static Optional<StageTaskUnfoldController> provideStageTaskUnfoldController(
-            Optional<ShellUnfoldProgressProvider> progressProvider,
-            Context context,
-            TransactionPool transactionPool,
-            Lazy<UnfoldBackgroundController> unfoldBackgroundController,
-            DisplayInsetsController displayInsetsController,
-            @ShellMainThread ShellExecutor mainExecutor
-    ) {
-        return progressProvider.map(shellUnfoldTransitionProgressProvider ->
-                new StageTaskUnfoldController(
-                        context,
-                        transactionPool,
-                        shellUnfoldTransitionProgressProvider,
-                        displayInsetsController,
-                        unfoldBackgroundController.get(),
-                        mainExecutor
-                ));
+                unfoldAnimator, transactionPool, executor, transitions);
     }
 
     @WMSingleton
