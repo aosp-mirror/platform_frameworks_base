@@ -19111,41 +19111,41 @@ package android.location {
     field @NonNull public static final android.os.Parcelable.Creator<android.location.Address> CREATOR;
   }
 
-  public class Criteria implements android.os.Parcelable {
-    ctor public Criteria();
-    ctor public Criteria(android.location.Criteria);
-    method public int describeContents();
-    method public int getAccuracy();
-    method public int getBearingAccuracy();
-    method public int getHorizontalAccuracy();
-    method public int getPowerRequirement();
-    method public int getSpeedAccuracy();
-    method public int getVerticalAccuracy();
-    method public boolean isAltitudeRequired();
-    method public boolean isBearingRequired();
-    method public boolean isCostAllowed();
-    method public boolean isSpeedRequired();
-    method public void setAccuracy(int);
-    method public void setAltitudeRequired(boolean);
-    method public void setBearingAccuracy(int);
-    method public void setBearingRequired(boolean);
-    method public void setCostAllowed(boolean);
-    method public void setHorizontalAccuracy(int);
-    method public void setPowerRequirement(int);
-    method public void setSpeedAccuracy(int);
-    method public void setSpeedRequired(boolean);
-    method public void setVerticalAccuracy(int);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final int ACCURACY_COARSE = 2; // 0x2
-    field public static final int ACCURACY_FINE = 1; // 0x1
-    field public static final int ACCURACY_HIGH = 3; // 0x3
-    field public static final int ACCURACY_LOW = 1; // 0x1
-    field public static final int ACCURACY_MEDIUM = 2; // 0x2
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.Criteria> CREATOR;
-    field public static final int NO_REQUIREMENT = 0; // 0x0
-    field public static final int POWER_HIGH = 3; // 0x3
-    field public static final int POWER_LOW = 1; // 0x1
-    field public static final int POWER_MEDIUM = 2; // 0x2
+  @Deprecated public class Criteria implements android.os.Parcelable {
+    ctor @Deprecated public Criteria();
+    ctor @Deprecated public Criteria(android.location.Criteria);
+    method @Deprecated public int describeContents();
+    method @Deprecated public int getAccuracy();
+    method @Deprecated public int getBearingAccuracy();
+    method @Deprecated public int getHorizontalAccuracy();
+    method @Deprecated public int getPowerRequirement();
+    method @Deprecated public int getSpeedAccuracy();
+    method @Deprecated public int getVerticalAccuracy();
+    method @Deprecated public boolean isAltitudeRequired();
+    method @Deprecated public boolean isBearingRequired();
+    method @Deprecated public boolean isCostAllowed();
+    method @Deprecated public boolean isSpeedRequired();
+    method @Deprecated public void setAccuracy(int);
+    method @Deprecated public void setAltitudeRequired(boolean);
+    method @Deprecated public void setBearingAccuracy(int);
+    method @Deprecated public void setBearingRequired(boolean);
+    method @Deprecated public void setCostAllowed(boolean);
+    method @Deprecated public void setHorizontalAccuracy(int);
+    method @Deprecated public void setPowerRequirement(int);
+    method @Deprecated public void setSpeedAccuracy(int);
+    method @Deprecated public void setSpeedRequired(boolean);
+    method @Deprecated public void setVerticalAccuracy(int);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated public static final int ACCURACY_COARSE = 2; // 0x2
+    field @Deprecated public static final int ACCURACY_FINE = 1; // 0x1
+    field @Deprecated public static final int ACCURACY_HIGH = 3; // 0x3
+    field @Deprecated public static final int ACCURACY_LOW = 1; // 0x1
+    field @Deprecated public static final int ACCURACY_MEDIUM = 2; // 0x2
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.location.Criteria> CREATOR;
+    field @Deprecated public static final int NO_REQUIREMENT = 0; // 0x0
+    field @Deprecated public static final int POWER_HIGH = 3; // 0x3
+    field @Deprecated public static final int POWER_LOW = 1; // 0x1
+    field @Deprecated public static final int POWER_MEDIUM = 2; // 0x2
   }
 
   public final class Geocoder {
@@ -19600,7 +19600,7 @@ package android.location {
     method @Deprecated public void clearTestProviderLocation(@NonNull String);
     method @Deprecated public void clearTestProviderStatus(@NonNull String);
     method @NonNull public java.util.List<java.lang.String> getAllProviders();
-    method @Nullable public String getBestProvider(@NonNull android.location.Criteria, boolean);
+    method @Deprecated @Nullable public String getBestProvider(@NonNull android.location.Criteria, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull String, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull String, @NonNull android.location.LocationRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
     method @Nullable public java.util.List<android.location.GnssAntennaInfo> getGnssAntennaInfos();
@@ -19612,7 +19612,7 @@ package android.location {
     method @Deprecated @Nullable public android.location.LocationProvider getProvider(@NonNull String);
     method @Nullable public android.location.provider.ProviderProperties getProviderProperties(@NonNull String);
     method @NonNull public java.util.List<java.lang.String> getProviders(boolean);
-    method @NonNull public java.util.List<java.lang.String> getProviders(@NonNull android.location.Criteria, boolean);
+    method @Deprecated @NonNull public java.util.List<java.lang.String> getProviders(@NonNull android.location.Criteria, boolean);
     method public boolean hasProvider(@NonNull String);
     method public boolean isLocationEnabled();
     method public boolean isProviderEnabled(@NonNull String);
