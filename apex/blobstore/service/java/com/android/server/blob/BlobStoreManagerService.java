@@ -554,6 +554,21 @@ public class BlobStoreManagerService extends SystemService {
         }
     }
 
+    private void releaseAllLeasesInternal(int callingUid, String callingPackage) {
+        synchronized (mBlobsLock) {
+            // Remove the package from the leasee list
+            mBlobsMap.forEach((blobHandle, blobMetadata) -> {
+                blobMetadata.removeLeasee(callingPackage, callingUid);
+            });
+            writeBlobsInfoAsync();
+
+            if (LOGV) {
+                Slog.v(TAG, "Release all leases associated with pkg="
+                        + callingPackage + ", uid=" + callingUid);
+            }
+        }
+    }
+
     private long getRemainingLeaseQuotaBytesInternal(int callingUid, String callingPackage) {
         synchronized (mBlobsLock) {
             final long remainingQuota = BlobStoreConfig.getAppDataBytesLimit()
@@ -1376,7 +1391,7 @@ public class BlobStoreManagerService extends SystemService {
         }
     }
 
-    private boolean isAllowedBlobAccess(int uid, String packageName) {
+    private boolean isAllowedBlobStoreAccess(int uid, String packageName) {
         return (!Process.isSdkSandboxUid(uid) && !Process.isIsolated(uid)
                 && !mPackageManagerInternal.isInstantApp(packageName, UserHandle.getUserId(uid)));
     }
@@ -1442,7 +1457,7 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            if (!isAllowedBlobAccess(callingUid, packageName)) {
+            if (!isAllowedBlobStoreAccess(callingUid, packageName)) {
                 throw new SecurityException("Caller not allowed to create session; "
                         + "callingUid=" + callingUid + ", callingPackage=" + packageName);
             }
@@ -1491,7 +1506,7 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            if (!isAllowedBlobAccess(callingUid, packageName)) {
+            if (!isAllowedBlobStoreAccess(callingUid, packageName)) {
                 throw new SecurityException("Caller not allowed to open blob; "
                         + "callingUid=" + callingUid + ", callingPackage=" + packageName);
             }
@@ -1522,7 +1537,7 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            if (!isAllowedBlobAccess(callingUid, packageName)) {
+            if (!isAllowedBlobStoreAccess(callingUid, packageName)) {
                 throw new SecurityException("Caller not allowed to open blob; "
                         + "callingUid=" + callingUid + ", callingPackage=" + packageName);
             }
@@ -1546,12 +1561,27 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            if (!isAllowedBlobAccess(callingUid, packageName)) {
+            if (!isAllowedBlobStoreAccess(callingUid, packageName)) {
                 throw new SecurityException("Caller not allowed to open blob; "
                         + "callingUid=" + callingUid + ", callingPackage=" + packageName);
             }
 
             releaseLeaseInternal(blobHandle, callingUid, packageName);
+        }
+
+        @Override
+        public void releaseAllLeases(@NonNull String packageName) {
+            Objects.requireNonNull(packageName, "packageName must not be null");
+
+            final int callingUid = Binder.getCallingUid();
+            verifyCallingPackage(callingUid, packageName);
+
+            if (!isAllowedBlobStoreAccess(callingUid, packageName)) {
+                throw new SecurityException("Caller not allowed to open blob; "
+                        + "callingUid=" + callingUid + ", callingPackage=" + packageName);
+            }
+
+            releaseAllLeasesInternal(callingUid, packageName);
         }
 
         @Override
@@ -1629,7 +1659,7 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            if (!isAllowedBlobAccess(callingUid, packageName)) {
+            if (!isAllowedBlobStoreAccess(callingUid, packageName)) {
                 throw new SecurityException("Caller not allowed to open blob; "
                         + "callingUid=" + callingUid + ", callingPackage=" + packageName);
             }
