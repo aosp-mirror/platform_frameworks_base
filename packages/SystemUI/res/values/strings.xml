@@ -2296,6 +2296,10 @@
     <string name="media_output_broadcast_code">Password</string>
     <!-- Button for change broadcast name and broadcast code [CHAR LIMIT=60] -->
     <string name="media_output_broadcast_dialog_save">Save</string>
+    <!-- The "starting" text when Broadcast is starting [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_starting">Starting&#8230;</string>
+    <!-- The button text when Broadcast start failed [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_start_failed">Can\u2019t broadcast</string>
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>
