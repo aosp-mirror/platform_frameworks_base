@@ -330,6 +330,8 @@ public final class AppRestrictionController {
     })
     @interface TrackerType {}
 
+    private final TrackerInfo mEmptyTrackerInfo = new TrackerInfo();
+
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -916,7 +918,7 @@ public final class AppRestrictionController {
                 final int curBucket = mInjector.getAppStandbyInternal().getAppStandbyBucket(
                         packageName, UserHandle.getUserId(uid), now, false);
                 if (applyLevel) {
-                    applyRestrictionLevel(packageName, uid, curLevel, TRACKER_TYPE_UNKNOWN,
+                    applyRestrictionLevel(packageName, uid, curLevel, mEmptyTrackerInfo,
                             curBucket, true, reason & REASON_MAIN_MASK, reason & REASON_SUB_MASK);
                 } else {
                     pkgSettings.update(curLevel,
@@ -1333,6 +1335,25 @@ public final class AppRestrictionController {
         }
     }
 
+    /**
+     * A helper object which holds an app state tracker's type and its relevant info used for
+     * logging atoms to statsd.
+     */
+    private class TrackerInfo {
+        final int mType; // tracker type
+        final byte[] mInfo; // tracker info proto object for statsd
+
+        TrackerInfo() {
+            mType = TRACKER_TYPE_UNKNOWN;
+            mInfo = null;
+        }
+
+        TrackerInfo(int type, byte[] info) {
+            mType = type;
+            mInfo = info;
+        }
+    }
+
     private final ConstantsObserver mConstantsObserver;
 
     private final AppStateTracker.BackgroundRestrictedAppListener mBackgroundRestrictionListener =
@@ -1580,7 +1601,7 @@ public final class AppRestrictionController {
                 Slog.e(TAG, "Unable to find " + info.mPackageName + "/u" + userId);
                 continue;
             }
-            final Pair<Integer, Integer> levelTypePair = calcAppRestrictionLevel(
+            final Pair<Integer, TrackerInfo> levelTypePair = calcAppRestrictionLevel(
                     userId, uid, info.mPackageName, info.mStandbyBucket, false, false);
             if (DEBUG_BG_RESTRICTION_CONTROLLER) {
                 Slog.i(TAG, "Proposed restriction level of " + info.mPackageName + "/"
@@ -1604,8 +1625,8 @@ public final class AppRestrictionController {
         final long now = SystemClock.elapsedRealtime();
         for (String pkg: packages) {
             final int curBucket = appStandbyInternal.getAppStandbyBucket(pkg, userId, now, false);
-            final Pair<Integer, Integer> levelTypePair = calcAppRestrictionLevel(userId, uid, pkg,
-                    curBucket, allowRequestBgRestricted, true);
+            final Pair<Integer, TrackerInfo> levelTypePair = calcAppRestrictionLevel(userId, uid,
+                    pkg, curBucket, allowRequestBgRestricted, true);
             if (DEBUG_BG_RESTRICTION_CONTROLLER) {
                 Slog.i(TAG, "Proposed restriction level of " + pkg + "/"
                         + UserHandle.formatUid(uid) + ": "
@@ -1616,14 +1637,14 @@ public final class AppRestrictionController {
         }
     }
 
-    private Pair<Integer, Integer> calcAppRestrictionLevel(@UserIdInt int userId, int uid,
+    private Pair<Integer, TrackerInfo> calcAppRestrictionLevel(@UserIdInt int userId, int uid,
             String packageName, @UsageStatsManager.StandbyBuckets int standbyBucket,
             boolean allowRequestBgRestricted, boolean calcTrackers) {
         if (mInjector.getAppHibernationInternal().isHibernatingForUser(packageName, userId)) {
-            return new Pair<>(RESTRICTION_LEVEL_HIBERNATION, TRACKER_TYPE_UNKNOWN);
+            return new Pair<>(RESTRICTION_LEVEL_HIBERNATION, mEmptyTrackerInfo);
         }
         @RestrictionLevel int level;
-        @TrackerType int trackerType = TRACKER_TYPE_UNKNOWN;
+        TrackerInfo trackerInfo = null;
         switch (standbyBucket) {
             case STANDBY_BUCKET_EXEMPTED:
                 level = RESTRICTION_LEVEL_EXEMPTED;
@@ -1639,22 +1660,22 @@ public final class AppRestrictionController {
             default:
                 if (mInjector.getAppStateTracker()
                         .isAppBackgroundRestricted(uid, packageName)) {
-                    return new Pair<>(RESTRICTION_LEVEL_BACKGROUND_RESTRICTED, trackerType);
+                    return new Pair<>(RESTRICTION_LEVEL_BACKGROUND_RESTRICTED, mEmptyTrackerInfo);
                 }
                 level = mConstantsObserver.mRestrictedBucketEnabled
                         && standbyBucket == STANDBY_BUCKET_RESTRICTED
                         ? RESTRICTION_LEVEL_RESTRICTED_BUCKET
                         : RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
                 if (calcTrackers) {
-                    Pair<Integer, Integer> levelTypePair = calcAppRestrictionLevelFromTackers(
+                    Pair<Integer, TrackerInfo> levelTypePair = calcAppRestrictionLevelFromTackers(
                             uid, packageName, RESTRICTION_LEVEL_MAX);
                     @RestrictionLevel int l = levelTypePair.first;
                     if (l == RESTRICTION_LEVEL_EXEMPTED) {
                         return new Pair<>(RESTRICTION_LEVEL_EXEMPTED, levelTypePair.second);
                     }
-                    level = Math.max(l, level);
-                    if (l == level) {
-                        trackerType = levelTypePair.second;
+                    if (l > level) {
+                        level = l;
+                        trackerInfo = levelTypePair.second;
                     }
                     if (level == RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
                         // This level can't be entered without user consent
@@ -1666,29 +1687,29 @@ public final class AppRestrictionController {
                         levelTypePair = calcAppRestrictionLevelFromTackers(uid, packageName,
                                 RESTRICTION_LEVEL_BACKGROUND_RESTRICTED);
                         level = levelTypePair.first;
-                        trackerType = levelTypePair.second;
+                        trackerInfo = levelTypePair.second;
                     }
                 }
                 break;
         }
-        return new Pair<>(level, trackerType);
+        return new Pair<>(level, trackerInfo);
     }
 
     /**
      * Ask each of the trackers for their proposed restriction levels for the given uid/package,
-     * and return the most restrictive level along with the type of tracker which applied this
-     * restriction level as a {@code Pair<@RestrictionLevel, @TrackerType>}.
+     * and return the most restrictive level along with the type of tracker and its relevant info
+     * which applied this restriction level as a {@code Pair<@RestrictionLevel, TrackerInfo>}.
      *
      * <p>Note, it's different from the {@link #getRestrictionLevel} where it returns the least
      * restrictive level. We're returning the most restrictive level here because each tracker
      * monitors certain dimensions of the app, the abusive behaviors could be detected in one or
      * more of these dimensions, but not necessarily all of them. </p>
      */
-    private Pair<Integer, Integer> calcAppRestrictionLevelFromTackers(int uid, String packageName,
-            @RestrictionLevel int maxLevel) {
+    private Pair<Integer, TrackerInfo> calcAppRestrictionLevelFromTackers(int uid,
+            String packageName, @RestrictionLevel int maxLevel) {
         @RestrictionLevel int level = RESTRICTION_LEVEL_UNKNOWN;
         @RestrictionLevel int prevLevel = level;
-        @TrackerType int trackerType = TRACKER_TYPE_UNKNOWN;
+        BaseAppStateTracker resultTracker = null;
         final boolean isRestrictedBucketEnabled = mConstantsObserver.mRestrictedBucketEnabled;
         for (int i = mAppStateTrackers.size() - 1; i >= 0; i--) {
             @RestrictionLevel int l = mAppStateTrackers.get(i).getPolicy()
@@ -1698,11 +1719,15 @@ public final class AppRestrictionController {
             }
             level = Math.max(level, l);
             if (level != prevLevel) {
-                trackerType = mAppStateTrackers.get(i).getType();
+                resultTracker = mAppStateTrackers.get(i);
                 prevLevel = level;
             }
         }
-        return new Pair<>(level, trackerType);
+        final TrackerInfo trackerInfo = resultTracker == null
+                                            ? mEmptyTrackerInfo
+                                            : new TrackerInfo(resultTracker.getType(),
+                                                    resultTracker.getTrackerInfoForStatsd(uid));
+        return new Pair<>(level, trackerInfo);
     }
 
     private static @RestrictionLevel int standbyBucketToRestrictionLevel(
@@ -2019,7 +2044,7 @@ public final class AppRestrictionController {
     }
 
     private void applyRestrictionLevel(String pkgName, int uid,
-            @RestrictionLevel int level, @TrackerType int trackerType,
+            @RestrictionLevel int level, TrackerInfo trackerInfo,
             int curBucket, boolean allowUpdateBucket, int reason, int subReason) {
         int curLevel;
         int prevReason;
@@ -2100,14 +2125,17 @@ public final class AppRestrictionController {
                     reason, subReason);
         }
 
+        if (trackerInfo == null) {
+            trackerInfo = mEmptyTrackerInfo;
+        }
         FrameworkStatsLog.write(FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO, uid,
                 getRestrictionLevelStatsd(level),
                 getThresholdStatsd(reason),
-                getTrackerTypeStatsd(trackerType),
-                null, // FgsTrackerInfo
-                null, // BatteryTrackerInfo
-                null, // BroadcastEventsTrackerInfo
-                null, // BindServiceEventsTrackerInfo
+                getTrackerTypeStatsd(trackerInfo.mType),
+                trackerInfo.mType == TRACKER_TYPE_FGS ? trackerInfo.mInfo : null,
+                trackerInfo.mType == TRACKER_TYPE_BATTERY ? trackerInfo.mInfo : null,
+                trackerInfo.mType == TRACKER_TYPE_BROADCAST_EVENTS ? trackerInfo.mInfo : null,
+                trackerInfo.mType == TRACKER_TYPE_BIND_SERVICE_EVENTS ? trackerInfo.mInfo : null,
                 getExemptionReasonStatsd(uid, level),
                 getOptimizationLevelStatsd(level),
                 getTargetSdkStatsd(pkgName),
@@ -2129,7 +2157,7 @@ public final class AppRestrictionController {
             // The app could fall into the background restricted with user consent only,
             // so set the reason to it.
             applyRestrictionLevel(pkgName, uid, RESTRICTION_LEVEL_BACKGROUND_RESTRICTED,
-                    TRACKER_TYPE_UNKNOWN, curBucket, true, REASON_MAIN_FORCED_BY_USER,
+                    mEmptyTrackerInfo, curBucket, true, REASON_MAIN_FORCED_BY_USER,
                     REASON_SUB_FORCED_USER_FLAG_INTERACTION);
             mBgHandler.obtainMessage(BgHandler.MSG_CANCEL_REQUEST_BG_RESTRICTED, uid, 0, pkgName)
                     .sendToTarget();
@@ -2142,7 +2170,7 @@ public final class AppRestrictionController {
                     ? STANDBY_BUCKET_EXEMPTED
                     : (lastLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET
                             ? STANDBY_BUCKET_RESTRICTED : STANDBY_BUCKET_RARE);
-            final Pair<Integer, Integer> levelTypePair = calcAppRestrictionLevel(
+            final Pair<Integer, TrackerInfo> levelTypePair = calcAppRestrictionLevel(
                     UserHandle.getUserId(uid), uid, pkgName, tentativeBucket, false, true);
 
             applyRestrictionLevel(pkgName, uid, levelTypePair.first, levelTypePair.second,
@@ -2186,7 +2214,7 @@ public final class AppRestrictionController {
             @UserIdInt int userId) {
         final int uid = mInjector.getPackageManagerInternal().getPackageUid(
                 packageName, STOCK_PM_FLAGS, userId);
-        final Pair<Integer, Integer> levelTypePair = calcAppRestrictionLevel(
+        final Pair<Integer, TrackerInfo> levelTypePair = calcAppRestrictionLevel(
                 userId, uid, packageName, bucket, false, false);
         applyRestrictionLevel(packageName, uid, levelTypePair.first, levelTypePair.second,
                 bucket, false, REASON_MAIN_DEFAULT, REASON_SUB_DEFAULT_UNDEFINED);
