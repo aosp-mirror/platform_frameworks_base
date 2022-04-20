@@ -509,6 +509,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava funkcije konverzacije"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ova obaveštenja ne mogu da se menjaju."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Obaveštenja o pozivima ne mogu da se menjaju."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ova grupa obaveštenja ne može da se konfiguriše ovde"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Obaveštenje preko proksija"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Sva obaveštenja aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -916,13 +917,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj pločicu"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne dodaj pločicu"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Izaberite korisnika"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> aktivna aplikacija</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aktivne aplikacije</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktivnih aplikacija</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nove informacije"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zaustavi"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zaustavljeno"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gotovo"</string>

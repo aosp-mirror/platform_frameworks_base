@@ -167,23 +167,6 @@ class BackNavigationController {
                 currentActivity = window.mActivityRecord;
                 currentTask = window.getTask();
                 callbackInfo = window.getOnBackInvokedCallbackInfo();
-                final DisplayContent displayContent = window.getDisplayContent();
-
-                // When IME is shown, return the more prioritized callback between IME and app.
-                // Priority ordering follows: OVERLAY, IME, DEFAULT.
-                if (displayContent != null && displayContent.getImeContainer().isVisible()) {
-                    WindowState imeWindow = displayContent.getImeContainer().getWindow(
-                            windowState -> windowState.getOnBackInvokedCallbackInfo() != null);
-                    if (imeWindow != null) {
-                        OnBackInvokedCallbackInfo imeCallbackInfo =
-                                imeWindow.getOnBackInvokedCallbackInfo();
-                        if (imeCallbackInfo != null && (callbackInfo == null
-                                || callbackInfo.getPriority() <= imeCallbackInfo.getPriority())) {
-                            callbackInfo = imeCallbackInfo;
-                        }
-                    }
-                }
-
                 if (callbackInfo == null) {
                     Slog.e(TAG, "No callback registered, returning null.");
                     return null;
@@ -206,10 +189,12 @@ class BackNavigationController {
             // If we don't need to set up the animation, we return early. This is the case when
             // - We have an application callback.
             // - We don't have any ActivityRecord or Task to animate.
+            // - The IME is opened, and we just need to close it.
             // - The home activity is the focused activity.
             if (backType == BackNavigationInfo.TYPE_CALLBACK
                     || currentActivity == null
                     || currentTask == null
+                    || currentTask.getDisplayContent().getImeContainer().isVisible()
                     || currentActivity.isActivityTypeHome()) {
                 return infoBuilder
                         .setType(backType)

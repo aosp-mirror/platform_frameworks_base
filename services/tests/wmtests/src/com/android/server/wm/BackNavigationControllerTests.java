@@ -20,8 +20,6 @@ import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_EXT_ENABLE_ON_BACK
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.window.BackNavigationInfo.typeToString;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -83,8 +81,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Test
     public void backNavInfo_HomeWhenBackToLauncher() {
-        IOnBackInvokedCallback callback =
-                withCallback(createTopTaskWithActivity(), OnBackInvokedDispatcher.PRIORITY_SYSTEM);
+        Task task = createTopTaskWithActivity();
+        IOnBackInvokedCallback callback = withSystemCallback(task);
 
         SurfaceControl.Transaction tx = mock(SurfaceControl.Transaction.class);
         BackNavigationInfo backNavigationInfo = mBackNavigationController.startBackNavigation(mWm,
@@ -105,7 +103,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     public void backTypeCrossTaskWhenBackToPreviousTask() {
         Task taskA = createTask(mDefaultDisplay);
         createActivityRecord(taskA);
-        withCallback(createTopTaskWithActivity(), OnBackInvokedDispatcher.PRIORITY_SYSTEM);
+        withSystemCallback(createTopTaskWithActivity());
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
         assertThat(typeToString(backNavigationInfo.getType()))
@@ -157,7 +155,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     @Test
     public void preparesForBackToHome() {
         Task task = createTopTaskWithActivity();
-        withCallback(task, OnBackInvokedDispatcher.PRIORITY_SYSTEM);
+        withSystemCallback(task);
 
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertThat(typeToString(backNavigationInfo.getType()))
@@ -167,8 +165,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     @Test
     public void backTypeCallback() {
         Task task = createTopTaskWithActivity();
-        IOnBackInvokedCallback appCallback =
-                withCallback(task, OnBackInvokedDispatcher.PRIORITY_DEFAULT);
+        IOnBackInvokedCallback appCallback = withAppCallback(task);
 
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertThat(typeToString(backNavigationInfo.getType()))
@@ -229,61 +226,18 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 1, appLatch.getCount());
     }
 
-    @Test
-    public void returnsImeCallback_imeVisible() {
-        // Set up a top activity with a default priority callback.
-        IOnBackInvokedCallback appCallback =
-                withCallback(createTopTaskWithActivity(), OnBackInvokedDispatcher.PRIORITY_DEFAULT);
-        IOnBackInvokedCallback imeCallback = createOnBackInvokedCallback();
-
-        // Set up an IME window with also a default priority callback.
-        final DisplayArea.Tokens imeContainer = mDisplayContent.getImeContainer();
-        final WindowState imeWindow = createImeWindow();
-        imeWindow.setOnBackInvokedCallbackInfo(
-                new OnBackInvokedCallbackInfo(
-                        imeCallback, OnBackInvokedDispatcher.PRIORITY_DEFAULT));
-        spyOn(imeContainer);
-        // Simulate IME becoming visible.
-        doReturn(true).when(imeContainer).isVisible();
-        doReturn(imeWindow).when(imeContainer).getWindow(any());
-        BackNavigationInfo backNavigationInfo = startBackNavigation();
-
-        // Expect the IME callback to be selected.
-        assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(imeCallback);
-    }
-
-    @Test
-    public void returnsAppOverlayCallback_imeVisible() {
-        // Set up a top activity with an overlay priority callback.
-        IOnBackInvokedCallback appCallback =
-                withCallback(createTopTaskWithActivity(), OnBackInvokedDispatcher.PRIORITY_OVERLAY);
-        IOnBackInvokedCallback imeCallback = createOnBackInvokedCallback();
-
-        // Set up an IME window with a default priority callback.
-        final DisplayArea.Tokens imeContainer = mDisplayContent.getImeContainer();
-        final WindowState imeWindow = createImeWindow();
-        imeWindow.setOnBackInvokedCallbackInfo(
-                new OnBackInvokedCallbackInfo(
-                        imeCallback, OnBackInvokedDispatcher.PRIORITY_DEFAULT));
-        spyOn(imeContainer);
-        // Simulate IME becoming visible.
-        doReturn(true).when(imeContainer).isVisible();
-        doReturn(imeWindow).when(imeContainer).getWindow(any());
-        BackNavigationInfo backNavigationInfo = startBackNavigation();
-
-        // Expect the app callback to be selected.
-        assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(appCallback);
-    }
-
-    private IOnBackInvokedCallback withCallback(Task task, int priority) {
+    private IOnBackInvokedCallback withSystemCallback(Task task) {
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
         task.getTopMostActivity().getTopChild().setOnBackInvokedCallbackInfo(
-                new OnBackInvokedCallbackInfo(callback, priority));
+                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_SYSTEM));
         return callback;
     }
 
-    private WindowState createImeWindow() {
-        return createWindow(null, W_INPUT_METHOD, "mImeWindow", 12345 /* fake ime uide */);
+    private IOnBackInvokedCallback withAppCallback(Task task) {
+        IOnBackInvokedCallback callback = createOnBackInvokedCallback();
+        task.getTopMostActivity().getTopChild().setOnBackInvokedCallbackInfo(
+                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_DEFAULT));
+        return callback;
     }
 
     @Nullable

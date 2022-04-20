@@ -506,6 +506,8 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>は会話機能に対応していません"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
+    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
+    <skip />
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"このグループの通知はここでは設定できません"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g> のすべての通知"</string>
@@ -805,8 +807,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"一時停止"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"前のトラック"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"次のトラック"</string>
-    <!-- no translation found for controls_media_button_connecting (3138354625847598095) -->
-    <skip />
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"接続中"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"再生"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> を開く"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g>（アーティスト名: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>）を <xliff:g id="APP_LABEL">%3$s</xliff:g> で再生"</string>
@@ -911,12 +912,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"タイルを追加"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"タイルを追加しない"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ユーザーの選択"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other">実行中のアプリ: <xliff:g id="COUNT_1">%s</xliff:g> 個</item>
-      <item quantity="one">実行中のアプリ: <xliff:g id="COUNT_0">%s</xliff:g> 個</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"最新情報"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"実行中のアプリ"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"停止中"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完了"</string>
