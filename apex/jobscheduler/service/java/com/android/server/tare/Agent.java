@@ -28,8 +28,8 @@ import static com.android.server.tare.EconomicPolicy.TYPE_REWARD;
 import static com.android.server.tare.EconomicPolicy.eventToString;
 import static com.android.server.tare.EconomicPolicy.getEventType;
 import static com.android.server.tare.TareUtils.appToString;
+import static com.android.server.tare.TareUtils.cakeToString;
 import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
-import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -161,7 +161,7 @@ class Agent {
 
     @GuardedBy("mLock")
     private boolean isAffordableLocked(long balance, long price, long ctp) {
-        return balance >= price && mScribe.getRemainingConsumableNarcsLocked() >= ctp;
+        return balance >= price && mScribe.getRemainingConsumableCakesLocked() >= ctp;
     }
 
     @GuardedBy("mLock")
@@ -464,13 +464,13 @@ class Agent {
                     + eventToString(transaction.eventId)
                     + (transaction.tag == null ? "" : ":" + transaction.tag)
                     + " for " + appToString(userId, pkgName)
-                    + " by " + narcToString(transaction.delta - newDelta));
+                    + " by " + cakeToString(transaction.delta - newDelta));
             transaction = new Ledger.Transaction(
                     transaction.startTimeMs, transaction.endTimeMs,
                     transaction.eventId, transaction.tag, newDelta, transaction.ctp);
         }
         ledger.recordTransaction(transaction);
-        mScribe.adjustRemainingConsumableNarcsLocked(-transaction.ctp);
+        mScribe.adjustRemainingConsumableCakesLocked(-transaction.ctp);
         if (transaction.delta != 0 && notifyOnAffordabilityChange) {
             final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
                     mActionAffordabilityNotes.get(userId, pkgName);
@@ -724,7 +724,7 @@ class Agent {
     private void reclaimAssetsLocked(final int userId, @NonNull final String pkgName) {
         final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
         if (ledger.getCurrentBalance() != 0) {
-            mScribe.adjustRemainingConsumableNarcsLocked(-ledger.getCurrentBalance());
+            mScribe.adjustRemainingConsumableCakesLocked(-ledger.getCurrentBalance());
         }
         mScribe.discardLedgerLocked(userId, pkgName);
         mCurrentOngoingEvents.delete(userId, pkgName);
@@ -872,7 +872,7 @@ class Agent {
             return;
         }
         mTrendCalculator.reset(getBalanceLocked(userId, pkgName),
-                mScribe.getRemainingConsumableNarcsLocked(),
+                mScribe.getRemainingConsumableCakesLocked(),
                 mActionAffordabilityNotes.get(userId, pkgName));
         ongoingEvents.forEach(mTrendCalculator);
         final long lowerTimeMs = mTrendCalculator.getTimeToCrossLowerThresholdMs();
@@ -1260,11 +1260,11 @@ class Agent {
                         pw.print(" runtime=");
                         TimeUtils.formatDuration(nowElapsed - ongoingEvent.startTimeElapsed, pw);
                         pw.print(" delta/sec=");
-                        pw.print(narcToString(ongoingEvent.getDeltaPerSec()));
+                        pw.print(cakeToString(ongoingEvent.getDeltaPerSec()));
                         final long ctp = ongoingEvent.getCtpPerSec();
                         if (ctp != 0) {
                             pw.print(" ctp/sec=");
-                            pw.print(narcToString(ongoingEvent.getCtpPerSec()));
+                            pw.print(cakeToString(ongoingEvent.getCtpPerSec()));
                         }
                         pw.print(" refCount=");
                         pw.print(ongoingEvent.refCount);
