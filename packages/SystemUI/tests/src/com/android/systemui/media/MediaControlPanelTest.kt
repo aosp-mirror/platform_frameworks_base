@@ -291,7 +291,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         seamlessButton = View(context)
         seamlessIcon = ImageView(context)
         seamlessText = TextView(context)
-        seekBar = SeekBar(context)
+        seekBar = SeekBar(context).also { it.id = R.id.media_progress_bar }
         settings = ImageButton(context)
         cancel = View(context)
         cancelText = TextView(context)
@@ -539,8 +539,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun bind_seekBarDisabled_seekBarVisibilityIsSetToInvisible() {
-        whenever(seekBarViewModel.getEnabled()).thenReturn(false)
+    fun bind_seekBarDisabled_hasActions_seekBarVisibilityIsSetToInvisible() {
+        useRealConstraintSets()
 
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val semanticActions = MediaButton(
@@ -550,21 +550,84 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val state = mediaData.copy(semanticActions = semanticActions)
 
         player.attachPlayer(viewHolder)
+        getEnabledChangeListener().onEnabledChanged(enabled = false)
+
         player.bindPlayer(state, PACKAGE)
 
-        verify(expandedSet).setVisibility(R.id.media_progress_bar, ConstraintSet.INVISIBLE)
+        assertThat(expandedSet.getVisibility(seekBar.id)).isEqualTo(ConstraintSet.INVISIBLE)
     }
 
     @Test
     fun bind_seekBarDisabled_noActions_seekBarVisibilityIsSetToGone() {
-        whenever(seekBarViewModel.getEnabled()).thenReturn(false)
+        useRealConstraintSets()
+
+        val state = mediaData.copy(semanticActions = MediaButton())
+        player.attachPlayer(viewHolder)
+        getEnabledChangeListener().onEnabledChanged(enabled = false)
+
+        player.bindPlayer(state, PACKAGE)
+
+        assertThat(expandedSet.getVisibility(seekBar.id)).isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun bind_seekBarEnabled_seekBarVisible() {
+        useRealConstraintSets()
+
+        val state = mediaData.copy(semanticActions = MediaButton())
+        player.attachPlayer(viewHolder)
+        getEnabledChangeListener().onEnabledChanged(enabled = true)
+
+        player.bindPlayer(state, PACKAGE)
+
+        assertThat(expandedSet.getVisibility(seekBar.id)).isEqualTo(ConstraintSet.VISIBLE)
+    }
+
+    @Test
+    fun seekBarChangesToEnabledAfterBind_seekBarChangesToVisible() {
+        useRealConstraintSets()
+
+        val state = mediaData.copy(semanticActions = MediaButton())
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        getEnabledChangeListener().onEnabledChanged(enabled = true)
+
+        assertThat(expandedSet.getVisibility(seekBar.id)).isEqualTo(ConstraintSet.VISIBLE)
+    }
+
+    @Test
+    fun seekBarChangesToDisabledAfterBind_noActions_seekBarChangesToGone() {
+        useRealConstraintSets()
 
         val state = mediaData.copy(semanticActions = MediaButton())
 
         player.attachPlayer(viewHolder)
+        getEnabledChangeListener().onEnabledChanged(enabled = true)
         player.bindPlayer(state, PACKAGE)
 
-        verify(expandedSet).setVisibility(R.id.media_progress_bar, ConstraintSet.INVISIBLE)
+        getEnabledChangeListener().onEnabledChanged(enabled = false)
+
+        assertThat(expandedSet.getVisibility(seekBar.id)).isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun seekBarChangesToDisabledAfterBind_hasActions_seekBarChangesToInvisible() {
+        useRealConstraintSets()
+
+        val icon = context.getDrawable(android.R.drawable.ic_media_play)
+        val semanticActions = MediaButton(
+            nextOrCustom = MediaAction(icon, Runnable {}, "next", null)
+        )
+        val state = mediaData.copy(semanticActions = semanticActions)
+
+        player.attachPlayer(viewHolder)
+        getEnabledChangeListener().onEnabledChanged(enabled = true)
+        player.bindPlayer(state, PACKAGE)
+
+        getEnabledChangeListener().onEnabledChanged(enabled = false)
+
+        assertThat(expandedSet.getVisibility(seekBar.id)).isEqualTo(ConstraintSet.INVISIBLE)
     }
 
     @Test
@@ -1317,4 +1380,24 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =
         withArgCaptor { verify(seekBarViewModel).setScrubbingChangeListener(capture()) }
+
+    private fun getEnabledChangeListener(): SeekBarViewModel.EnabledChangeListener =
+        withArgCaptor { verify(seekBarViewModel).setEnabledChangeListener(capture()) }
+
+    /**
+     *  Update our test to use real ConstraintSets instead of mocks.
+     *
+     *  Some item visibilities, such as the seekbar visibility, are dependent on other action's
+     *  visibilities. If we use mocks for the ConstraintSets, then action visibility changes are
+     *  just thrown away instead of being saved for reference later. This method sets us up to use
+     *  ConstraintSets so that we do save visibility changes.
+     *
+     *  TODO(b/229740380): Can/should we use real expanded and collapsed sets for all tests?
+     */
+    private fun useRealConstraintSets() {
+        expandedSet = ConstraintSet()
+        collapsedSet = ConstraintSet()
+        whenever(mediaViewController.expandedLayout).thenReturn(expandedSet)
+        whenever(mediaViewController.collapsedLayout).thenReturn(collapsedSet)
+    }
 }
