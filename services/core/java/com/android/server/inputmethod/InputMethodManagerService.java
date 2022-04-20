@@ -286,6 +286,30 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     private final Set<String> mNonPreemptibleInputMethods;
 
+    private static final class CreateInlineSuggestionsRequest {
+        @NonNull final InlineSuggestionsRequestInfo mRequestInfo;
+        @NonNull final IInlineSuggestionsRequestCallback mCallback;
+        @NonNull final String mPackageName;
+
+        CreateInlineSuggestionsRequest(
+                @NonNull InlineSuggestionsRequestInfo requestInfo,
+                @NonNull IInlineSuggestionsRequestCallback callback,
+                @NonNull String packageName) {
+            mRequestInfo = requestInfo;
+            mCallback = callback;
+            mPackageName = packageName;
+        }
+    }
+
+    /**
+     * If a request to create inline autofill suggestions comes in while the IME is unbound
+     * due to {@link #mPreventImeStartupUnlessTextEditor}, this is where it is stored, so
+     * that it may be fulfilled once the IME rebinds.
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    private CreateInlineSuggestionsRequest mPendingInlineSuggestionsRequest;
+
     @UserIdInt
     private int mLastSwitchUserId;
 
@@ -2137,22 +2161,58 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private void onCreateInlineSuggestionsRequestLocked(@UserIdInt int userId,
             InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback callback,
             boolean touchExplorationEnabled) {
+        clearPendingInlineSuggestionsRequestLocked();
         final InputMethodInfo imi = mMethodMap.get(getSelectedMethodIdLocked());
         try {
-            IInputMethodInvoker curMethod = getCurMethodLocked();
-            if (userId == mSettings.getCurrentUserId() && curMethod != null
+            if (userId == mSettings.getCurrentUserId()
                     && imi != null && isInlineSuggestionsEnabled(imi, touchExplorationEnabled)) {
-                final IInlineSuggestionsRequestCallback callbackImpl =
-                        new InlineSuggestionsRequestCallbackDecorator(callback,
-                                imi.getPackageName(), mCurTokenDisplayId, getCurTokenLocked(),
-                                this);
-                curMethod.onCreateInlineSuggestionsRequest(requestInfo, callbackImpl);
+                mPendingInlineSuggestionsRequest = new CreateInlineSuggestionsRequest(
+                        requestInfo, callback, imi.getPackageName());
+                if (getCurMethodLocked() != null) {
+                    // In the normal case when the IME is connected, we can make the request here.
+                    performOnCreateInlineSuggestionsRequestLocked();
+                } else {
+                    // Otherwise, the next time the IME connection is established,
+                    // InputMethodBindingController.mMainConnection#onServiceConnected() will call
+                    // into #performOnCreateInlineSuggestionsRequestLocked() to make the request.
+                    if (DEBUG) {
+                        Slog.d(TAG, "IME not connected. Delaying inline suggestions request.");
+                    }
+                }
             } else {
                 callback.onInlineSuggestionsUnsupported();
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest(): " + e);
         }
+    }
+
+    @GuardedBy("ImfLock.class")
+    void performOnCreateInlineSuggestionsRequestLocked() {
+        if (mPendingInlineSuggestionsRequest == null) {
+            return;
+        }
+        IInputMethodInvoker curMethod = getCurMethodLocked();
+        if (DEBUG) {
+            Slog.d(TAG, "Performing onCreateInlineSuggestionsRequest. mCurMethod = " + curMethod);
+        }
+        if (curMethod != null) {
+            final IInlineSuggestionsRequestCallback callback =
+                    new InlineSuggestionsRequestCallbackDecorator(
+                            mPendingInlineSuggestionsRequest.mCallback,
+                            mPendingInlineSuggestionsRequest.mPackageName,
+                            mCurTokenDisplayId, getCurTokenLocked(), this);
+            curMethod.onCreateInlineSuggestionsRequest(
+                    mPendingInlineSuggestionsRequest.mRequestInfo, callback);
+        } else {
+            Slog.w(TAG, "No IME connected! Abandoning inline suggestions creation request.");
+        }
+        clearPendingInlineSuggestionsRequestLocked();
+    }
+
+    @GuardedBy("ImfLock.class")
+    private void clearPendingInlineSuggestionsRequestLocked() {
+        mPendingInlineSuggestionsRequest = null;
     }
 
     private static boolean isInlineSuggestionsEnabled(InputMethodInfo imi,
