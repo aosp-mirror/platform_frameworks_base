@@ -97,8 +97,8 @@ import static com.android.server.tare.Modifier.COST_MODIFIER_CHARGING;
 import static com.android.server.tare.Modifier.COST_MODIFIER_DEVICE_IDLE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_PROCESS_STATE;
-import static com.android.server.tare.TareUtils.arcToNarc;
-import static com.android.server.tare.TareUtils.narcToString;
+import static com.android.server.tare.TareUtils.arcToCake;
+import static com.android.server.tare.TareUtils.cakeToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -219,143 +219,143 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
             Slog.e(TAG, "Global setting key incorrect: ", e);
         }
 
-        mMinSatiatedBalanceExempted = arcToNarc(mParser.getInt(KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED,
+        mMinSatiatedBalanceExempted = arcToCake(mParser.getInt(KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED,
                 DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED));
-        mMinSatiatedBalanceOther = arcToNarc(mParser.getInt(KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP,
+        mMinSatiatedBalanceOther = arcToCake(mParser.getInt(KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP,
                 DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP));
-        mMaxSatiatedBalance = arcToNarc(mParser.getInt(KEY_AM_MAX_SATIATED_BALANCE,
+        mMaxSatiatedBalance = arcToCake(mParser.getInt(KEY_AM_MAX_SATIATED_BALANCE,
                 DEFAULT_AM_MAX_SATIATED_BALANCE));
-        mInitialSatiatedConsumptionLimit = arcToNarc(mParser.getInt(
+        mInitialSatiatedConsumptionLimit = arcToCake(mParser.getInt(
                 KEY_AM_INITIAL_CONSUMPTION_LIMIT, DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT));
         mHardSatiatedConsumptionLimit = Math.max(mInitialSatiatedConsumptionLimit,
-                arcToNarc(mParser.getInt(
+                arcToCake(mParser.getInt(
                         KEY_AM_HARD_CONSUMPTION_LIMIT, DEFAULT_AM_HARD_CONSUMPTION_LIMIT)));
 
-        final long exactAllowWhileIdleWakeupBasePrice = arcToNarc(
+        final long exactAllowWhileIdleWakeupBasePrice = arcToCake(
                 mParser.getInt(KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE,
                         DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE));
 
         mActions.put(ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE,
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP)),
                         exactAllowWhileIdleWakeupBasePrice));
         mActions.put(ACTION_ALARM_WAKEUP_EXACT,
                 new Action(ACTION_ALARM_WAKEUP_EXACT,
-                        arcToNarc(mParser.getInt(KEY_AM_ACTION_ALARM_EXACT_WAKEUP_CTP,
+                        arcToCake(mParser.getInt(KEY_AM_ACTION_ALARM_EXACT_WAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_CTP)),
-                        arcToNarc(mParser.getInt(KEY_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE,
+                        arcToCake(mParser.getInt(KEY_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE,
                                 DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE))));
 
         final long inexactAllowWhileIdleWakeupBasePrice =
-                arcToNarc(mParser.getInt(
+                arcToCake(mParser.getInt(
                         KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE,
                         DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE));
 
         mActions.put(ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE,
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP)),
                         inexactAllowWhileIdleWakeupBasePrice));
         mActions.put(ACTION_ALARM_WAKEUP_INEXACT,
                 new Action(ACTION_ALARM_WAKEUP_INEXACT,
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP)),
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE,
                                 DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE))));
 
         final long exactAllowWhileIdleNonWakeupBasePrice =
-                arcToNarc(mParser.getInt(
+                arcToCake(mParser.getInt(
                         KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_BASE_PRICE,
                         DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE));
 
         mActions.put(ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE,
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP)),
                         exactAllowWhileIdleNonWakeupBasePrice));
         mActions.put(ACTION_ALARM_NONWAKEUP_EXACT,
                 new Action(ACTION_ALARM_NONWAKEUP_EXACT,
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP)),
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE,
                                 DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE))));
 
         final long inexactAllowWhileIdleNonWakeupBasePrice =
-                arcToNarc(mParser.getInt(
+                arcToCake(mParser.getInt(
                         KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE,
                         DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE));
 
         mActions.put(ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE,
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP)),
                         inexactAllowWhileIdleNonWakeupBasePrice));
         mActions.put(ACTION_ALARM_NONWAKEUP_INEXACT,
                 new Action(ACTION_ALARM_NONWAKEUP_INEXACT,
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP)),
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE,
                                 DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE))));
         mActions.put(ACTION_ALARM_CLOCK,
                 new Action(ACTION_ALARM_CLOCK,
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_ALARMCLOCK_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_CTP)),
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE,
                                 DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE))));
 
         mRewards.put(REWARD_TOP_ACTIVITY, new Reward(REWARD_TOP_ACTIVITY,
-                arcToNarc(mParser.getInt(KEY_AM_REWARD_TOP_ACTIVITY_INSTANT,
+                arcToCake(mParser.getInt(KEY_AM_REWARD_TOP_ACTIVITY_INSTANT,
                         DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT)),
-                (long) (arcToNarc(1) * mParser.getFloat(KEY_AM_REWARD_TOP_ACTIVITY_ONGOING,
+                (long) (arcToCake(1) * mParser.getFloat(KEY_AM_REWARD_TOP_ACTIVITY_ONGOING,
                         DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING)),
-                arcToNarc(mParser.getInt(KEY_AM_REWARD_TOP_ACTIVITY_MAX,
+                arcToCake(mParser.getInt(KEY_AM_REWARD_TOP_ACTIVITY_MAX,
                         DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX))));
         mRewards.put(REWARD_NOTIFICATION_SEEN, new Reward(REWARD_NOTIFICATION_SEEN,
-                arcToNarc(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_INSTANT,
+                arcToCake(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_INSTANT,
                         DEFAULT_AM_REWARD_NOTIFICATION_SEEN_INSTANT)),
-                arcToNarc(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_ONGOING,
+                arcToCake(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_ONGOING,
                         DEFAULT_AM_REWARD_NOTIFICATION_SEEN_ONGOING)),
-                arcToNarc(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_MAX,
+                arcToCake(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_MAX,
                         DEFAULT_AM_REWARD_NOTIFICATION_SEEN_MAX))));
         mRewards.put(REWARD_NOTIFICATION_INTERACTION,
                 new Reward(REWARD_NOTIFICATION_INTERACTION,
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT,
                                 DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT)),
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING,
                                 DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING)),
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_REWARD_NOTIFICATION_INTERACTION_MAX,
                                 DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_MAX))));
         mRewards.put(REWARD_WIDGET_INTERACTION, new Reward(REWARD_WIDGET_INTERACTION,
-                arcToNarc(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_INSTANT,
+                arcToCake(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_INSTANT,
                         DEFAULT_AM_REWARD_WIDGET_INTERACTION_INSTANT)),
-                arcToNarc(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_ONGOING,
+                arcToCake(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_ONGOING,
                         DEFAULT_AM_REWARD_WIDGET_INTERACTION_ONGOING)),
-                arcToNarc(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_MAX,
+                arcToCake(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_MAX,
                         DEFAULT_AM_REWARD_WIDGET_INTERACTION_MAX))));
         mRewards.put(REWARD_OTHER_USER_INTERACTION,
                 new Reward(REWARD_OTHER_USER_INTERACTION,
-                        arcToNarc(mParser.getInt(KEY_AM_REWARD_OTHER_USER_INTERACTION_INSTANT,
+                        arcToCake(mParser.getInt(KEY_AM_REWARD_OTHER_USER_INTERACTION_INSTANT,
                                 DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_INSTANT)),
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_REWARD_OTHER_USER_INTERACTION_ONGOING,
                                 DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_ONGOING)),
-                        arcToNarc(mParser.getInt(
+                        arcToCake(mParser.getInt(
                                 KEY_AM_REWARD_OTHER_USER_INTERACTION_MAX,
                                 DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_MAX))));
     }
@@ -364,14 +364,14 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     void dump(IndentingPrintWriter pw) {
         pw.println("Min satiated balances:");
         pw.increaseIndent();
-        pw.print("Exempted", narcToString(mMinSatiatedBalanceExempted)).println();
-        pw.print("Other", narcToString(mMinSatiatedBalanceOther)).println();
+        pw.print("Exempted", cakeToString(mMinSatiatedBalanceExempted)).println();
+        pw.print("Other", cakeToString(mMinSatiatedBalanceOther)).println();
         pw.decreaseIndent();
-        pw.print("Max satiated balance", narcToString(mMaxSatiatedBalance)).println();
+        pw.print("Max satiated balance", cakeToString(mMaxSatiatedBalance)).println();
         pw.print("Consumption limits: [");
-        pw.print(narcToString(mInitialSatiatedConsumptionLimit));
+        pw.print(cakeToString(mInitialSatiatedConsumptionLimit));
         pw.print(", ");
-        pw.print(narcToString(mHardSatiatedConsumptionLimit));
+        pw.print(cakeToString(mHardSatiatedConsumptionLimit));
         pw.println("]");
 
         pw.println();

@@ -107,7 +107,7 @@ public class ScribeTest {
     @Test
     public void testWriteHighLevelStateToDisk() {
         long lastReclamationTime = System.currentTimeMillis();
-        long remainingConsumableNarcs = 2000L;
+        long remainingConsumableCakes = 2000L;
         long consumptionLimit = 500_000L;
         when(mIrs.getConsumptionLimitLocked()).thenReturn(consumptionLimit);
 
@@ -118,20 +118,20 @@ public class ScribeTest {
         ledger.recordTransaction(new Ledger.Transaction(0, 1000L, 1, null, -5000, 3000));
         mScribeUnderTest.setLastReclamationTimeLocked(lastReclamationTime);
         mScribeUnderTest.setConsumptionLimitLocked(consumptionLimit);
-        mScribeUnderTest.adjustRemainingConsumableNarcsLocked(
-                remainingConsumableNarcs - consumptionLimit);
+        mScribeUnderTest.adjustRemainingConsumableCakesLocked(
+                remainingConsumableCakes - consumptionLimit);
 
         assertEquals(lastReclamationTime, mScribeUnderTest.getLastReclamationTimeLocked());
-        assertEquals(remainingConsumableNarcs,
-                mScribeUnderTest.getRemainingConsumableNarcsLocked());
+        assertEquals(remainingConsumableCakes,
+                mScribeUnderTest.getRemainingConsumableCakesLocked());
         assertEquals(consumptionLimit, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
 
         mScribeUnderTest.writeImmediatelyForTesting();
         mScribeUnderTest.loadFromDiskLocked();
 
         assertEquals(lastReclamationTime, mScribeUnderTest.getLastReclamationTimeLocked());
-        assertEquals(remainingConsumableNarcs,
-                mScribeUnderTest.getRemainingConsumableNarcsLocked());
+        assertEquals(remainingConsumableCakes,
+                mScribeUnderTest.getRemainingConsumableCakesLocked());
         assertEquals(consumptionLimit, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
     }
 
@@ -234,32 +234,32 @@ public class ScribeTest {
     @Test
     public void testChangingConsumable() {
         assertEquals(0, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
-        assertEquals(0, mScribeUnderTest.getRemainingConsumableNarcsLocked());
+        assertEquals(0, mScribeUnderTest.getRemainingConsumableCakesLocked());
 
         // Limit increased, so remaining value should be adjusted as well
         mScribeUnderTest.setConsumptionLimitLocked(1000);
         assertEquals(1000, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
-        assertEquals(1000, mScribeUnderTest.getRemainingConsumableNarcsLocked());
+        assertEquals(1000, mScribeUnderTest.getRemainingConsumableCakesLocked());
 
         // Limit decreased below remaining, so remaining value should be adjusted as well
         mScribeUnderTest.setConsumptionLimitLocked(500);
         assertEquals(500, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
-        assertEquals(500, mScribeUnderTest.getRemainingConsumableNarcsLocked());
+        assertEquals(500, mScribeUnderTest.getRemainingConsumableCakesLocked());
 
-        mScribeUnderTest.adjustRemainingConsumableNarcsLocked(-100);
+        mScribeUnderTest.adjustRemainingConsumableCakesLocked(-100);
         assertEquals(500, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
-        assertEquals(400, mScribeUnderTest.getRemainingConsumableNarcsLocked());
+        assertEquals(400, mScribeUnderTest.getRemainingConsumableCakesLocked());
 
         // Limit increased, so remaining value should be adjusted by the difference as well
         mScribeUnderTest.setConsumptionLimitLocked(1000);
         assertEquals(1000, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
-        assertEquals(900, mScribeUnderTest.getRemainingConsumableNarcsLocked());
+        assertEquals(900, mScribeUnderTest.getRemainingConsumableCakesLocked());
 
 
         // Limit decreased, but above remaining, so remaining value should left alone
         mScribeUnderTest.setConsumptionLimitLocked(950);
         assertEquals(950, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
-        assertEquals(900, mScribeUnderTest.getRemainingConsumableNarcsLocked());
+        assertEquals(900, mScribeUnderTest.getRemainingConsumableCakesLocked());
     }
 
     private void assertLedgersEqual(Ledger expected, Ledger actual) {
