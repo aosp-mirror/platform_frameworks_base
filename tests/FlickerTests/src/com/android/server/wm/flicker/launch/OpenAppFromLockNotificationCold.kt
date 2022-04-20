@@ -31,6 +31,8 @@ import org.junit.runners.Parameterized
 /**
  * Test cold launching an app from a notification from the lock screen.
  *
+ * This test assumes the device doesn't have AOD enabled
+ *
  * To run this test: `atest FlickerTests:OpenAppFromLockNotificationCold`
  */
 @RequiresDevice
