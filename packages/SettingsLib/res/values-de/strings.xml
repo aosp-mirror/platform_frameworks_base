@@ -655,12 +655,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR-Code scannen"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Scanne zum Anhören den QR-Code unten"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Das Format des QR-Codes ist nicht gültig"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> nicht mehr streamen?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Wenn du <xliff:g id="SWITCHAPP">%1$s</xliff:g> streamst oder die Ausgabe änderst, wird dein aktueller Stream beendet"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> streamen"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Ausgabe ändern"</string>
 </resources>

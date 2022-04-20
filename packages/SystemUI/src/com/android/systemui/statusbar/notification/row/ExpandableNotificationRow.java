@@ -93,7 +93,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
+import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
@@ -367,8 +367,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private SystemNotificationAsyncTask mSystemNotificationAsyncTask =
             new SystemNotificationAsyncTask();
 
-    private float mTopRoundnessDuringExpandAnimation;
-    private float mBottomRoundnessDuringExpandAnimation;
+    private float mTopRoundnessDuringLaunchAnimation;
+    private float mBottomRoundnessDuringLaunchAnimation;
 
     /**
      * Returns whether the given {@code statusBarNotification} is a system notification.
@@ -2130,7 +2130,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
 
-    public void applyExpandAnimationParams(ExpandAnimationParameters params) {
+    public void applyLaunchAnimationParams(LaunchAnimationParameters params) {
         if (params == null) {
             return;
         }
@@ -2195,11 +2195,29 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         setTranslationY(top);
 
-        mTopRoundnessDuringExpandAnimation = params.getTopCornerRadius() / mOutlineRadius;
-        mBottomRoundnessDuringExpandAnimation = params.getBottomCornerRadius() / mOutlineRadius;
+        mTopRoundnessDuringLaunchAnimation = params.getTopCornerRadius() / mOutlineRadius;
+        mBottomRoundnessDuringLaunchAnimation = params.getBottomCornerRadius() / mOutlineRadius;
         invalidateOutline();
 
         mBackgroundNormal.setExpandAnimationSize(params.getWidth(), actualHeight);
+    }
+
+    @Override
+    public float getCurrentTopRoundness() {
+        if (mExpandAnimationRunning) {
+            return mTopRoundnessDuringLaunchAnimation;
+        }
+
+        return super.getCurrentTopRoundness();
+    }
+
+    @Override
+    public float getCurrentBottomRoundness() {
+        if (mExpandAnimationRunning) {
+            return mBottomRoundnessDuringLaunchAnimation;
+        }
+
+        return super.getCurrentBottomRoundness();
     }
 
     public void setExpandAnimationRunning(boolean expandAnimationRunning) {

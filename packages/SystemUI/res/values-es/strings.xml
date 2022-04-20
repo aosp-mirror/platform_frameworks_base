@@ -136,6 +136,12 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmada"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Toca Confirmar para completar la acción"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Desbloqueado con datos faciales. Pulsa el icono desbloquear para continuar."</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Se ha autenticado"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Usar PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Usar patrón"</string>
@@ -312,6 +318,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pulsa el icono desbloquear para abrir"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Desbloqueado con datos faciales. Pulsa el icono desbloquear para abrir."</string>
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
+    <skip />
+    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
+    <skip />
     <string name="keyguard_retry" msgid="886802522584053523">"Desliza el dedo hacia arriba para volverlo a intentar"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquea para usar el NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertenece a tu organización"</string>
@@ -506,6 +518,8 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite funciones de conversación"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Estas notificaciones no se pueden modificar."</string>
+    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
+    <skip />
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Este grupo de notificaciones no se puede configurar aquí"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notificación mediante proxy"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Todas las notificaciones de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -910,12 +924,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Añadir recuadro"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"No añadir recuadro"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleccionar usuario"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplicaciones activas</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplicación activa</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Información nueva"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplicaciones activas"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Detener"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Detenida"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Hecho"</string>

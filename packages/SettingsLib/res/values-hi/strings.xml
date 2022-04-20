@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"प्रतिबंधित प्रोफ़ाइल"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"नया उपयोगकर्ता जोड़ें?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"आप और ज़्यादा उपयोगकर्ता बनाकर इस डिवाइस को दूसरे लोगों के साथ शेयर कर सकते हैं. हर उपयोगकर्ता के पास अपनी जगह होती है, जिसमें वह मनपसंद तरीके से ऐप्लिकेशन, वॉलपेपर और दूसरी चीज़ों में बदलाव कर सकते हैं. उपयोगकर्ता वाई-फ़ाई जैसी डिवाइस सेटिंग में भी बदलाव कर सकते हैं, जिसका असर हर किसी पर पड़ेगा.\n\nजब आप कोई नया उपयोगकर्ता जोड़ते हैं तो उन्हें अपनी जगह सेट करनी होगी.\n\nकोई भी उपयोगकर्ता दूसरे सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है. ऐसा भी हो सकता है कि सुलभता सेटिंग और सेवाएं नए उपयोगकर्ता को ट्रांसफ़र न हो पाएं."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"जब आप कोई नया उपयोगकर्ता जोड़ते हैं, तो उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"कोई नया उपयोगकर्ता जोड़ने पर, उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"उपयोगकर्ता को अभी सेट करें?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"पक्का करें कि व्यक्ति डिवाइस का इस्तेमाल करने और अपनी जगह सेट करने के लिए मौजूद है"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"प्रोफ़ाइल अभी सेट करें?"</string>
@@ -655,12 +655,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"क्यूआर कोड को स्कैन करें"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"सुनने के लिए, दिए गए क्यूआर कोड को बीच में लाएं"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"क्यूआर कोड का फ़ॉर्मैट गलत है"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर ब्रॉडकास्ट करना रोकें?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> पर ब्रॉडकास्ट शुरू करने पर या आउटपुट बदलने पर, आपका मौजूदा ब्रॉडकास्ट बंद हो जाएगा"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> पर ब्रॉडकास्ट करें"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"आउटपुट बदलें"</string>
 </resources>

@@ -61,6 +61,8 @@ import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
 import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.PowerExemptionManager.REASON_DEVICE_DEMO_MODE;
 import static android.os.PowerExemptionManager.REASON_DEVICE_OWNER;
+import static android.os.PowerExemptionManager.REASON_DISALLOW_APPS_CONTROL;
+import static android.os.PowerExemptionManager.REASON_DPO_PROTECTED_APP;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT;
@@ -2616,6 +2618,11 @@ public final class AppRestrictionController {
         if (UserManager.isDeviceInDemoMode(mContext)) {
             return REASON_DEVICE_DEMO_MODE;
         }
+        final int userId = UserHandle.getUserId(uid);
+        if (mInjector.getUserManagerInternal()
+                .hasUserRestriction(UserManager.DISALLOW_APPS_CONTROL, userId)) {
+            return REASON_DISALLOW_APPS_CONTROL;
+        }
         if (am.isDeviceOwner(uid)) {
             return REASON_DEVICE_OWNER;
         }
@@ -2631,6 +2638,7 @@ public final class AppRestrictionController {
         final String[] packages = mInjector.getPackageManager().getPackagesForUid(uid);
         if (packages != null) {
             final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
+            final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
             for (String pkg : packages) {
                 if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN,
                         uid, pkg) == AppOpsManager.MODE_ALLOWED) {
@@ -2646,6 +2654,8 @@ public final class AppRestrictionController {
                     return REASON_SYSTEM_ALLOW_LISTED;
                 } else if (mConstantsObserver.mBgRestrictionExemptedPackages.contains(pkg)) {
                     return REASON_ALLOWLISTED_PACKAGE;
+                } else if (pm.isPackageStateProtected(pkg, userId)) {
+                    return REASON_DPO_PROTECTED_APP;
                 }
             }
         }
