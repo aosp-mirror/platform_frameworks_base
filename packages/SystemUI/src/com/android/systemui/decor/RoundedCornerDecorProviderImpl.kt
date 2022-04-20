@@ -65,7 +65,7 @@ class RoundedCornerDecorProviderImpl(
     private fun initView(view: ImageView, @Surface.Rotation rotation: Int) {
         view.setRoundedCornerImage(roundedCornerResDelegate, isTop)
         view.adjustRotation(alignedBounds, rotation)
-        view.setColorFilter(IMAGE_TINT_COLOR)
+        view.imageTintList = roundedCornerResDelegate.colorTintList
     }
 
     override fun onReloadResAndMeasure(
@@ -92,8 +92,6 @@ class RoundedCornerDecorProviderImpl(
         }
     }
 }
-
-private const val IMAGE_TINT_COLOR: Int = 0xFF000000.toInt()
 
 @DisplayCutout.BoundsPosition
 private fun Int.toLayoutGravity(@Surface.Rotation rotation: Int): Int = when (rotation) {

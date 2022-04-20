@@ -18,7 +18,9 @@ package com.android.systemui.decor
 
 import android.annotation.ArrayRes
 import android.annotation.DrawableRes
+import android.content.res.ColorStateList
 import android.content.res.Resources
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.DisplayUtils
 import android.util.Size
@@ -54,6 +56,17 @@ class RoundedCornerResDelegate(
 
     var bottomRoundedSize = Size(0, 0)
         private set
+
+    var colorTintList = ColorStateList.valueOf(Color.BLACK)
+
+    var tuningSizeFactor: Int? = null
+        set(value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            reloadMeasures()
+        }
 
     init {
         reloadRes()
@@ -101,7 +114,7 @@ class RoundedCornerResDelegate(
         )
     }
 
-    private fun reloadMeasures(roundedSizeFactor: Int? = null) {
+    private fun reloadMeasures() {
         topRoundedDrawable?.let {
             topRoundedSize = Size(it.intrinsicWidth, it.intrinsicHeight)
         }
@@ -109,19 +122,18 @@ class RoundedCornerResDelegate(
             bottomRoundedSize = Size(it.intrinsicWidth, it.intrinsicHeight)
         }
 
-        if (roundedSizeFactor != null && roundedSizeFactor > 0) {
-            val length: Int = (roundedSizeFactor * density).toInt()
-            topRoundedSize = Size(length, length)
-            bottomRoundedSize = Size(length, length)
+        tuningSizeFactor?.let {
+            if (it <= 0) {
+                return
+            }
+            val length: Int = (it * density).toInt()
+            if (topRoundedSize.width > 0) {
+                topRoundedSize = Size(length, length)
+            }
+            if (bottomRoundedSize.width > 0) {
+                bottomRoundedSize = Size(length, length)
+            }
         }
-    }
-
-    fun updateTuningSizeFactor(factor: Int?, newReloadToken: Int) {
-        if (reloadToken == newReloadToken) {
-            return
-        }
-        reloadToken = newReloadToken
-        reloadMeasures(factor)
     }
 
     private fun getDrawable(
