@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'မနှောင့်ယှက်ရ\' ပြောင်းလဲသွားပါပြီ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"အကြောင်းကြားချက် ဆက်တင်များ စိစစ်ရန်"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 တွင် သင်ထည့်သွင်းသော အက်ပ်များသည် အကြောင်းကြားချက်များပို့ရန် သင်၏ခွင့်ပြုချက် လိုအပ်ပါမည်။ ရှိပြီးသားအက်ပ်များအတွက် ဤခွင့်ပြုချက်ကိုပြောင်းရန် တို့ပါ။"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"နောက်မှ သတိပေးပါ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ပယ်ရန်"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"စနစ်"</string>
