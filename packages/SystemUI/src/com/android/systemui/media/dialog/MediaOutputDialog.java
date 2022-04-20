@@ -27,7 +27,6 @@ import androidx.core.graphics.drawable.IconCompat;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
@@ -93,18 +92,41 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
             isActiveRemoteDevice = mMediaOutputController.isActiveRemoteDevice(
                     mMediaOutputController.getCurrentConnectedMediaDevice());
         }
-        boolean isBroadCastSupported = isBroadcastSupported();
+        boolean showBroadcastButton = isBroadcastSupported() && mMediaOutputController.isPlaying();
 
-        return (isActiveRemoteDevice || isBroadCastSupported) ? View.VISIBLE : View.GONE;
+        return (isActiveRemoteDevice || showBroadcastButton) ? View.VISIBLE : View.GONE;
     }
 
     @Override
     public boolean isBroadcastSupported() {
-        MediaDevice device = mMediaOutputController.getCurrentConnectedMediaDevice();
-        if (device == null) {
-            return false;
+        return mMediaOutputController.isBroadcastSupported();
+    }
+
+    @Override
+    public CharSequence getStopButtonText() {
+        int resId = R.string.keyboard_key_media_stop;
+        if (isBroadcastSupported() && mMediaOutputController.isPlaying()
+                && !mMediaOutputController.isBluetoothLeBroadcastEnabled()) {
+            resId = R.string.media_output_broadcast;
         }
-        return mMediaOutputController.isBluetoothLeDevice(device);
+        return mContext.getText(resId);
+    }
+
+    @Override
+    public void onStopButtonClick() {
+        if (isBroadcastSupported() && mMediaOutputController.isPlaying()) {
+            if (!mMediaOutputController.isBluetoothLeBroadcastEnabled()) {
+                if (startLeBroadcastDialogForFirstTime()) {
+                    return;
+                }
+                startLeBroadcast();
+            } else {
+                stopLeBroadcast();
+            }
+        } else {
+            mMediaOutputController.releaseSession();
+            dismiss();
+        }
     }
 
     @VisibleForTesting
