@@ -987,11 +987,6 @@ public class KeyguardIndicationController {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
                         mInitialTextColorState);
             } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
-                if (biometricSourceType == BiometricSourceType.FACE
-                        && shouldSuppressFaceMsgAndShowTryFingerprintMsg()) {
-                    showFaceFailedTryFingerprintMsg(msgId, helpString);
-                    return;
-                }
                 showBiometricMessage(helpString);
             } else if (showActionToUnlock) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SHOW_ACTION_TO_UNLOCK),
@@ -1003,13 +998,6 @@ public class KeyguardIndicationController {
         public void onBiometricError(int msgId, String errString,
                 BiometricSourceType biometricSourceType) {
             if (shouldSuppressBiometricError(msgId, biometricSourceType, mKeyguardUpdateMonitor)) {
-                return;
-            }
-            if (biometricSourceType == BiometricSourceType.FACE
-                    && shouldSuppressFaceMsgAndShowTryFingerprintMsg()
-                    && !mStatusBarKeyguardViewManager.isBouncerShowing()
-                    && mScreenLifecycle.getScreenState() == SCREEN_ON) {
-                showFaceFailedTryFingerprintMsg(msgId, errString);
                 return;
             }
             if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
@@ -1056,13 +1044,6 @@ public class KeyguardIndicationController {
                     && msgId != FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT)
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED);
-        }
-
-        private boolean shouldSuppressFaceMsgAndShowTryFingerprintMsg() {
-            // For dual biometric, don't show face auth messages
-            return mKeyguardUpdateMonitor.isFingerprintDetectionRunning()
-                    && mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
-                            true /* isStrongBiometric */);
         }
 
         private boolean shouldSuppressFaceError(int msgId, KeyguardUpdateMonitor updateMonitor) {

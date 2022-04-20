@@ -369,6 +369,16 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_CARRIER_PRIVILEGED_APP = 321;
+    /**
+     * Device/Profile owner protected apps.
+     * @hide
+     */
+    public static final int REASON_DPO_PROTECTED_APP = 322;
+    /**
+     * Apps control is disallowed for the user.
+     * @hide
+     */
+    public static final int REASON_DISALLOW_APPS_CONTROL = 323;
 
     /** @hide The app requests out-out. */
     public static final int REASON_OPT_OUT_REQUESTED = 1000;
@@ -447,6 +457,8 @@ public class PowerExemptionManager {
             REASON_SYSTEM_MODULE,
             REASON_CARRIER_PRIVILEGED_APP,
             REASON_OPT_OUT_REQUESTED,
+            REASON_DPO_PROTECTED_APP,
+            REASON_DISALLOW_APPS_CONTROL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReasonCode {}
@@ -653,6 +665,10 @@ public class PowerExemptionManager {
                 return AppBackgroundRestrictionsInfo.REASON_ROLE_DIALER;
             case REASON_ROLE_EMERGENCY:
                 return AppBackgroundRestrictionsInfo.REASON_ROLE_EMERGENCY;
+            case REASON_DPO_PROTECTED_APP:
+                return AppBackgroundRestrictionsInfo.REASON_DPO_PROTECTED_APP;
+            case REASON_DISALLOW_APPS_CONTROL:
+                return AppBackgroundRestrictionsInfo.REASON_DISALLOW_APPS_CONTROL;
             default:
                 return AppBackgroundRestrictionsInfo.REASON_DENIED;
         }
@@ -798,6 +814,10 @@ public class PowerExemptionManager {
                 return "SYSTEM_MODULE";
             case REASON_CARRIER_PRIVILEGED_APP:
                 return "CARRIER_PRIVILEGED_APP";
+            case REASON_DPO_PROTECTED_APP:
+                return "DPO_PROTECTED_APP";
+            case REASON_DISALLOW_APPS_CONTROL:
+                return "DISALLOW_APPS_CONTROL";
             case REASON_OPT_OUT_REQUESTED:
                 return "REASON_OPT_OUT_REQUESTED";
             default:

@@ -23,6 +23,7 @@ import android.view.Choreographer
 import android.view.View
 import android.view.ViewRootImpl
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dump.DumpManager
@@ -30,18 +31,22 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScrimController
+import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.WallpaperController
 import com.android.systemui.util.mockito.eq
 import com.google.common.truth.Truth.assertThat
+import java.util.function.Consumer
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.floatThat
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyFloat
@@ -51,7 +56,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import java.util.function.Consumer
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
@@ -80,6 +84,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     private var statusBarState = StatusBarState.SHADE
     private val maxBlur = 150
     private lateinit var notificationShadeDepthController: NotificationShadeDepthController
+    private val configurationController = FakeConfigurationController()
 
     @Before
     fun setup() {
@@ -97,10 +102,19 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
         `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
 
-        notificationShadeDepthController = NotificationShadeDepthController(
-                statusBarStateController, blurUtils, biometricUnlockController,
-                keyguardStateController, choreographer, wallpaperController,
-                notificationShadeWindowController, dozeParameters, dumpManager)
+        notificationShadeDepthController =
+            NotificationShadeDepthController(
+                statusBarStateController,
+                blurUtils,
+                biometricUnlockController,
+                keyguardStateController,
+                choreographer,
+                wallpaperController,
+                notificationShadeWindowController,
+                dozeParameters,
+                context,
+                dumpManager,
+                configurationController)
         notificationShadeDepthController.shadeAnimation = shadeAnimation
         notificationShadeDepthController.brightnessMirrorSpring = brightnessSpring
         notificationShadeDepthController.root = root
@@ -110,6 +124,8 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         statusBarStateListener = captor.value
         verify(notificationShadeWindowController)
                 .setScrimsVisibilityListener(scrimVisibilityCaptor.capture())
+
+        disableSplitShade()
     }
 
     @Test
@@ -223,6 +239,46 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(wallpaperController).setNotificationShadeZoom(
                 eq(ShadeInterpolation.getNotificationScrimAlpha(0.25f)))
+    }
+
+    @Test
+    fun expandPanel_inSplitShade_setsZoomToZero() {
+        enableSplitShade()
+
+        notificationShadeDepthController.onPanelExpansionChanged(
+            rawFraction = 1f, expanded = true, tracking = false)
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+
+        verify(wallpaperController).setNotificationShadeZoom(0f)
+    }
+
+    @Test
+    fun expandPanel_notInSplitShade_setsZoomValue() {
+        disableSplitShade()
+
+        notificationShadeDepthController.onPanelExpansionChanged(
+            rawFraction = 1f, expanded = true, tracking = false)
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+
+        verify(wallpaperController).setNotificationShadeZoom(floatThat { it > 0 })
+    }
+
+    @Test
+    fun expandPanel_splitShadeEnabledChanged_setsCorrectZoomValueAfterChange() {
+        disableSplitShade()
+        val rawFraction = 1f
+        val expanded = true
+        val tracking = false
+        val inOrder = Mockito.inOrder(wallpaperController)
+
+        notificationShadeDepthController.onPanelExpansionChanged(rawFraction, expanded, tracking)
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        inOrder.verify(wallpaperController).setNotificationShadeZoom(floatThat { it > 0 })
+
+        enableSplitShade()
+        notificationShadeDepthController.onPanelExpansionChanged(rawFraction, expanded, tracking)
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        inOrder.verify(wallpaperController).setNotificationShadeZoom(0f)
     }
 
     @Test
@@ -368,5 +424,18 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         `when`(shadeAnimation.radius).thenReturn(0f)
         notificationShadeDepthController.blursDisabledForAppLaunch = true
         verify(shadeAnimation, never()).animateTo(anyInt(), any())
+    }
+
+    private fun enableSplitShade() {
+        setSplitShadeEnabled(true)
+    }
+
+    private fun disableSplitShade() {
+        setSplitShadeEnabled(false)
+    }
+
+    private fun setSplitShadeEnabled(enabled: Boolean) {
+        overrideResource(R.bool.config_use_split_notification_shade, enabled)
+        configurationController.notifyConfigurationChanged()
     }
 }
