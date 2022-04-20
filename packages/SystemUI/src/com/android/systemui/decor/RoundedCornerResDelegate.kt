@@ -68,6 +68,15 @@ class RoundedCornerResDelegate(
             reloadMeasures()
         }
 
+    var physicalPixelDisplaySizeRatio: Float = 1f
+        set(value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            reloadMeasures()
+        }
+
     init {
         reloadRes()
         reloadMeasures()
@@ -134,6 +143,19 @@ class RoundedCornerResDelegate(
                 bottomRoundedSize = Size(length, length)
             }
         }
+
+        if (physicalPixelDisplaySizeRatio != 1f) {
+            if (topRoundedSize.width != 0) {
+                topRoundedSize = Size(
+                        (physicalPixelDisplaySizeRatio * topRoundedSize.width + 0.5f).toInt(),
+                        (physicalPixelDisplaySizeRatio * topRoundedSize.height + 0.5f).toInt())
+            }
+            if (bottomRoundedSize.width != 0) {
+                bottomRoundedSize = Size(
+                        (physicalPixelDisplaySizeRatio * bottomRoundedSize.width + 0.5f).toInt(),
+                        (physicalPixelDisplaySizeRatio * bottomRoundedSize.height + 0.5f).toInt())
+            }
+        }
     }
 
     private fun getDrawable(
@@ -160,5 +182,6 @@ class RoundedCornerResDelegate(
         pw.println("  topRoundedSize(w,h)=(${topRoundedSize.width},${topRoundedSize.height})")
         pw.println("  bottomRoundedSize(w,h)=(${bottomRoundedSize.width}," +
                 "${bottomRoundedSize.height})")
+        pw.println("  physicalPixelDisplaySizeRatio=$physicalPixelDisplaySizeRatio")
     }
 }

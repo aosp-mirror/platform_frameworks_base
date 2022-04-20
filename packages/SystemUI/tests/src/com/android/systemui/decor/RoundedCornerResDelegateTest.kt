@@ -133,6 +133,22 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
         assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
     }
 
+    @Test
+    fun testPhysicalPixelDisplaySizeChanged() {
+        setupResources(
+                roundedTopDrawable = getTestsDrawable(R.drawable.rounded4px),
+                roundedBottomDrawable = getTestsDrawable(R.drawable.rounded4px))
+
+        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
+        assertEquals(Size(4, 4), roundedCornerResDelegate.topRoundedSize)
+        assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
+
+        roundedCornerResDelegate.physicalPixelDisplaySizeRatio = 0.5f
+
+        assertEquals(Size(2, 2), roundedCornerResDelegate.topRoundedSize)
+        assertEquals(Size(2, 2), roundedCornerResDelegate.bottomRoundedSize)
+    }
+
     private fun getTestsDrawable(@DrawableRes drawableId: Int): Drawable? {
         return mContext.createPackageContext("com.android.systemui.tests", 0)
                 .getDrawable(drawableId)
