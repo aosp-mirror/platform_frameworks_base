@@ -176,7 +176,6 @@ public class LogModule {
         return factory.create("MediaTttReceiver", 20);
     }
 
-
     /**
      * Provides a logging buffer for logs related to the media mute-await connections. See
      * {@link com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager}.
@@ -197,6 +196,16 @@ public class LogModule {
     @NearbyMediaDevicesLog
     public static LogBuffer provideNearbyMediaDevicesLogBuffer(LogBufferFactory factory) {
         return factory.create("NearbyMediaDevicesLog", 20);
+    }
+
+    /**
+     * Provides a buffer for logs related to media view events
+     */
+    @Provides
+    @SysUISingleton
+    @MediaViewLog
+    public static LogBuffer provideMediaViewLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaView", 100);
     }
 
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
