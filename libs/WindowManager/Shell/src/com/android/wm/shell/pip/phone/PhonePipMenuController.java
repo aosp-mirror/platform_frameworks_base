@@ -121,6 +121,7 @@ public class PhonePipMenuController implements PipMenuController {
     private final Optional<SplitScreenController> mSplitScreenController;
     private final PipUiEventLogger mPipUiEventLogger;
     private ParceledListSlice<RemoteAction> mAppActions;
+    private RemoteAction mCloseAction;
     private ParceledListSlice<RemoteAction> mMediaActions;
     private SyncRtSurfaceTransactionApplier mApplier;
     private int mMenuState;
@@ -459,6 +460,7 @@ public class PhonePipMenuController implements PipMenuController {
     public void setAppActions(ParceledListSlice<RemoteAction> appActions,
             RemoteAction closeAction) {
         mAppActions = appActions;
+        mCloseAction = closeAction;
         updateMenuActions();
     }
 
@@ -490,9 +492,8 @@ public class PhonePipMenuController implements PipMenuController {
     private void updateMenuActions() {
         if (mPipMenuView != null) {
             final ParceledListSlice<RemoteAction> menuActions = resolveMenuActions();
-            if (menuActions != null) {
-                mPipMenuView.setActions(mPipBoundsState.getBounds(), menuActions.getList());
-            }
+            mPipMenuView.setActions(mPipBoundsState.getBounds(),
+                    menuActions == null ? null : menuActions.getList(), mCloseAction);
         }
     }
 
