@@ -2952,7 +2952,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         final String emulatedValue = SystemProperties
-                .get(UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY);
+                .get(UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY);
         if (TextUtils.isEmpty(emulatedValue)) {
             return;
         }
@@ -2970,7 +2970,7 @@ public class UserManagerService extends IUserManager.Stub {
                 break;
             default:
                 Slogf.wtf(LOG_TAG, "emulateSystemUserModeIfNeeded(): ignoring invalid valued of "
-                        + "property %s: %s", UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY,
+                        + "property %s: %s", UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY,
                         emulatedValue);
                 return;
         }
@@ -5796,20 +5796,13 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             Slogf.d(LOG_TAG, "Updating system property %s to %s",
-                    UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY, mode);
+                    UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY, mode);
 
-            // TODO(b/203885212): temp try/catch until the selinux permission is granted
-            try {
-                SystemProperties.set(UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY, mode);
-                pw.println("System user mode changed - please reboot (or restart Android runtime) "
-                        + "to continue");
-                pw.println("NOTICE: after restart, some apps might be uninstalled (and their data "
-                        + "will be lost)");
-            } catch (RuntimeException e) {
-                pw.printf("Failed to set property %s (%s). You might need to run "
-                        + "'adb shell setenforce 0' and try again.\n",
-                        UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY, e);
-            }
+            SystemProperties.set(UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY, mode);
+            pw.println("System user mode changed - please reboot (or restart Android runtime) "
+                    + "to continue");
+            pw.println("NOTICE: after restart, some apps might be uninstalled (and their data "
+                    + "will be lost)");
             return 0;
         }
 

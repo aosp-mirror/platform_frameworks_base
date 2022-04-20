@@ -1577,7 +1577,7 @@ public class UserManager {
      *
      * @hide
      */
-    public static final String DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY =
+    public static final String SYSTEM_USER_MODE_EMULATION_PROPERTY =
             "persist.debug.user_mode_emulation";
 
     /** @hide */
@@ -2049,7 +2049,7 @@ public class UserManager {
             return realMode;
         }
 
-        final String emulatedMode = SystemProperties.get(DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY);
+        final String emulatedMode = SystemProperties.get(SYSTEM_USER_MODE_EMULATION_PROPERTY);
         switch (emulatedMode) {
             case SYSTEM_USER_MODE_EMULATION_FULL:
                 Log.d(TAG, "isHeadlessSystemUserMode(): emulating as false");
@@ -2062,7 +2062,7 @@ public class UserManager {
                 return realMode;
             default:
                 Log.wtf(TAG, "isHeadlessSystemUserMode(): invalid value of property "
-                        + DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY + " (" + emulatedMode + "); using"
+                        + SYSTEM_USER_MODE_EMULATION_PROPERTY + " (" + emulatedMode + "); using"
                                 + " default value (headless=" + realMode + ")");
                 return realMode;
         }
