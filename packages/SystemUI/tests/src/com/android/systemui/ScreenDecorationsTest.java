@@ -213,6 +213,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mExecutor.runAllReady();
             }
         });
+        doReturn(1f).when(mScreenDecorations).getPhysicalPixelDisplaySizeRatio();
         reset(mTunerService);
 
         try {
