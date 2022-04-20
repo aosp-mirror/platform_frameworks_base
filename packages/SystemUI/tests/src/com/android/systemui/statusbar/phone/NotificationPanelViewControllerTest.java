@@ -589,6 +589,27 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void getLockscreenSpaceForNotifications_includesOverlapWithLockIcon() {
+        when(mResources.getDimensionPixelSize(R.dimen.keyguard_indication_bottom_padding))
+                .thenReturn(0);
+        mNotificationPanelViewController.setAmbientIndicationTop(
+                /* ambientIndicationTop= */ 0, /* ambientTextVisible */ false);
+
+        // Use lock icon padding (100 - 80 - 5 = 15) as bottom padding
+        when(mNotificationStackScrollLayoutController.getBottom()).thenReturn(100);
+        when(mLockIconViewController.getTop()).thenReturn(80f);
+        when(mResources.getDimensionPixelSize(R.dimen.shelf_and_lock_icon_overlap)).thenReturn(5);
+
+        // Available space (100 - 10 - 15 = 75)
+        when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(100);
+        when(mNotificationStackScrollLayoutController.getTopPadding()).thenReturn(10);
+        mNotificationPanelViewController.updateResources();
+
+        assertThat(mNotificationPanelViewController.getSpaceForLockscreenNotifications())
+                .isEqualTo(75);
+    }
+
+    @Test
     public void testSetPanelScrimMinFraction() {
         mNotificationPanelViewController.setPanelScrimMinFraction(0.5f);
         verify(mNotificationShadeDepthController).setPanelPullDownMinFraction(eq(0.5f));
