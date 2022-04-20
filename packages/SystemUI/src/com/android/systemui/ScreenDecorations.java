@@ -19,8 +19,6 @@ import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LENGTH;
 import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
-import static android.view.Surface.ROTATION_270;
-import static android.view.Surface.ROTATION_90;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -38,10 +36,10 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
@@ -51,10 +49,12 @@ import android.os.Handler;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
+import android.util.DisplayUtils;
 import android.util.Log;
 import android.util.Size;
 import android.view.DisplayCutout;
 import android.view.DisplayCutout.BoundsPosition;
+import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -320,13 +320,15 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     }
 
     private void startOnScreenDecorationsThread() {
+        mWindowManager = mContext.getSystemService(WindowManager.class);
+        mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mRotation = mContext.getDisplay().getRotation();
         mDisplayUniqueId = mContext.getDisplay().getUniqueId();
         mRoundedCornerResDelegate = new RoundedCornerResDelegate(mContext.getResources(),
                 mDisplayUniqueId);
+        mRoundedCornerResDelegate.setPhysicalPixelDisplaySizeRatio(
+                getPhysicalPixelDisplaySizeRatio());
         mRoundedCornerFactory = new RoundedCornerDecorProviderFactory(mRoundedCornerResDelegate);
-        mWindowManager = mContext.getSystemService(WindowManager.class);
-        mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mHwcScreenDecorationSupport = mContext.getDisplay().getDisplayDecorationSupport();
         updateHwLayerRoundedCornerDrawable();
         setupDecorations();
@@ -402,6 +404,16 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
 
                     updateOverlayProviderViews();
                 }
+
+                final float newRatio = getPhysicalPixelDisplaySizeRatio();
+                if (mRoundedCornerResDelegate.getPhysicalPixelDisplaySizeRatio() != newRatio) {
+                    mRoundedCornerResDelegate.setPhysicalPixelDisplaySizeRatio(newRatio);
+                    if (mScreenDecorHwcLayer != null) {
+                        updateHwLayerRoundedCornerExistAndSize();
+                    }
+                    updateOverlayProviderViews();
+                }
+
                 if (mCutoutViews != null) {
                     final int size = mCutoutViews.length;
                     for (int i = 0; i < size; i++) {
@@ -878,6 +890,16 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         }
     }
 
+    @VisibleForTesting
+    float getPhysicalPixelDisplaySizeRatio() {
+        final Point stableDisplaySize = mDisplayManager.getStableDisplaySize();
+        final DisplayInfo displayInfo = new DisplayInfo();
+        mContext.getDisplay().getDisplayInfo(displayInfo);
+        return DisplayUtils.getPhysicalPixelDisplaySizeRatio(
+                stableDisplaySize.x, stableDisplaySize.y, displayInfo.logicalWidth,
+                displayInfo.logicalHeight);
+    }
+
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         if (DEBUG_DISABLE_SCREEN_DECORATIONS) {
@@ -1182,25 +1204,12 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         }
 
         private void updateBoundingPath() {
-            int lw = displayInfo.logicalWidth;
-            int lh = displayInfo.logicalHeight;
-
-            boolean flipped = displayInfo.rotation == ROTATION_90
-                    || displayInfo.rotation == ROTATION_270;
-
-            int dw = flipped ? lh : lw;
-            int dh = flipped ? lw : lh;
-
-            Path path = DisplayCutout.pathFromResources(
-                    getResources(), getDisplay().getUniqueId(), dw, dh);
+            final Path path = displayInfo.displayCutout.getCutoutPath();
             if (path != null) {
                 cutoutPath.set(path);
             } else {
                 cutoutPath.reset();
             }
-            Matrix m = new Matrix();
-            transformPhysicalToLogicalCoordinates(displayInfo.rotation, dw, dh, m);
-            cutoutPath.transform(m);
         }
 
         private void updateGravity() {
