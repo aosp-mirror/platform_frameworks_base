@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.view.Choreographer;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -270,15 +271,14 @@ public class PipAnimationController {
             mEndValue = endValue;
             addListener(this);
             addUpdateListener(this);
-            mSurfaceControlTransactionFactory =
-                    new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
+            mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
             mTransitionDirection = TRANSITION_DIRECTION_NONE;
         }
 
         @Override
         public void onAnimationStart(Animator animation) {
             mCurrentValue = mStartValue;
-            onStartTransaction(mLeash, mSurfaceControlTransactionFactory.getTransaction());
+            onStartTransaction(mLeash, newSurfaceControlTransaction());
             if (mPipAnimationCallback != null) {
                 mPipAnimationCallback.onPipAnimationStart(mTaskInfo, this);
             }
@@ -286,16 +286,14 @@ public class PipAnimationController {
 
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
-            applySurfaceControlTransaction(mLeash,
-                    mSurfaceControlTransactionFactory.getTransaction(),
+            applySurfaceControlTransaction(mLeash, newSurfaceControlTransaction(),
                     animation.getAnimatedFraction());
         }
 
         @Override
         public void onAnimationEnd(Animator animation) {
             mCurrentValue = mEndValue;
-            final SurfaceControl.Transaction tx =
-                    mSurfaceControlTransactionFactory.getTransaction();
+            final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
             onEndTransaction(mLeash, tx, mTransitionDirection);
             if (mPipAnimationCallback != null) {
                 mPipAnimationCallback.onPipAnimationEnd(mTaskInfo, tx, this);
@@ -342,8 +340,7 @@ public class PipAnimationController {
         }
 
         PipTransitionAnimator<T> setUseContentOverlay(Context context) {
-            final SurfaceControl.Transaction tx =
-                    mSurfaceControlTransactionFactory.getTransaction();
+            final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
             if (mContentOverlay != null) {
                 // remove existing content overlay if there is any.
                 tx.remove(mContentOverlay);
@@ -418,7 +415,7 @@ public class PipAnimationController {
         void setDestinationBounds(Rect destinationBounds) {
             mDestinationBounds.set(destinationBounds);
             if (mAnimationType == ANIM_TYPE_ALPHA) {
-                onStartTransaction(mLeash, mSurfaceControlTransactionFactory.getTransaction());
+                onStartTransaction(mLeash, newSurfaceControlTransaction());
             }
         }
 
@@ -451,6 +448,16 @@ public class PipAnimationController {
          */
         public void updateEndValue(T endValue) {
             mEndValue = endValue;
+        }
+
+        /**
+         * @return {@link SurfaceControl.Transaction} instance with vsync-id.
+         */
+        protected SurfaceControl.Transaction newSurfaceControlTransaction() {
+            final SurfaceControl.Transaction tx =
+                    mSurfaceControlTransactionFactory.getTransaction();
+            tx.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
+            return tx;
         }
 
         @VisibleForTesting
