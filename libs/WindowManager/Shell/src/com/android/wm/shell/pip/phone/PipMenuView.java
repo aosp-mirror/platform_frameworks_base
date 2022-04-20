@@ -33,8 +33,10 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.PendingIntent.CanceledException;
+import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -72,6 +74,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -113,6 +116,7 @@ public class PipMenuView extends FrameLayout {
     private boolean mFocusedTaskAllowSplitScreen;
 
     private final List<RemoteAction> mActions = new ArrayList<>();
+    private RemoteAction mCloseAction;
 
     private AccessibilityManager mAccessibilityManager;
     private Drawable mBackgroundDrawable;
@@ -151,6 +155,9 @@ public class PipMenuView extends FrameLayout {
     protected View mTopEndContainer;
     protected PipMenuIconsAlgorithm mPipMenuIconsAlgorithm;
 
+    // How long the shell will wait for the app to close the PiP if a custom action is set.
+    private final int mPipForceCloseDelay;
+
     public PipMenuView(Context context, PhonePipMenuController controller,
             ShellExecutor mainExecutor, Handler mainHandler,
             Optional<SplitScreenController> splitScreenController,
@@ -165,6 +172,9 @@ public class PipMenuView extends FrameLayout {
 
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         inflate(context, R.layout.pip_menu, this);
+
+        mPipForceCloseDelay = context.getResources().getInteger(
+                R.integer.config_pipForceCloseDelay);
 
         mBackgroundDrawable = mContext.getDrawable(R.drawable.pip_menu_background);
         mBackgroundDrawable.setAlpha(0);
@@ -437,9 +447,13 @@ public class PipMenuView extends FrameLayout {
         return new Size(width, height);
     }
 
-    void setActions(Rect stackBounds, List<RemoteAction> actions) {
+    void setActions(Rect stackBounds, @Nullable List<RemoteAction> actions,
+            @Nullable RemoteAction closeAction) {
         mActions.clear();
-        mActions.addAll(actions);
+        if (actions != null && !actions.isEmpty()) {
+            mActions.addAll(actions);
+        }
+        mCloseAction = closeAction;
         if (mMenuState == MENU_STATE_FULL) {
             updateActionViews(mMenuState, stackBounds);
         }
@@ -492,6 +506,8 @@ public class PipMenuView extends FrameLayout {
                     final RemoteAction action = mActions.get(i);
                     final PipMenuActionView actionView =
                             (PipMenuActionView) mActionsGroup.getChildAt(i);
+                    final boolean isCloseAction = mCloseAction != null && Objects.equals(
+                            mCloseAction.getActionIntent(), action.getActionIntent());
 
                     // TODO: Check if the action drawable has changed before we reload it
                     action.getIcon().loadDrawableAsync(mContext, d -> {
@@ -500,16 +516,12 @@ public class PipMenuView extends FrameLayout {
                             actionView.setImageDrawable(d);
                         }
                     }, mMainHandler);
+                    actionView.setCustomCloseBackgroundVisibility(
+                            isCloseAction ? View.VISIBLE : View.GONE);
                     actionView.setContentDescription(action.getContentDescription());
                     if (action.isEnabled()) {
-                        actionView.setOnClickListener(v -> {
-                            try {
-                                action.getActionIntent().send();
-                            } catch (CanceledException e) {
-                                ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                                        "%s: Failed to send action, %s", TAG, e);
-                            }
-                        });
+                        actionView.setOnClickListener(
+                                v -> onActionViewClicked(action.getActionIntent(), isCloseAction));
                     }
                     actionView.setEnabled(action.isEnabled());
                     actionView.setAlpha(action.isEnabled() ? 1f : DISABLED_ACTION_ALPHA);
@@ -556,6 +568,32 @@ public class PipMenuView extends FrameLayout {
             // and the menu view at the same time.
             mController.onPipDismiss();
             mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_TAP_TO_REMOVE);
+        }
+    }
+
+    /**
+     * Execute the {@link PendingIntent} attached to the {@link PipMenuActionView}.
+     * If the given {@link PendingIntent} matches {@link #mCloseAction}, we need to make sure
+     * the PiP is removed after a certain timeout in case the app does not respond in a
+     * timely manner.
+     */
+    private void onActionViewClicked(@NonNull PendingIntent intent, boolean isCloseAction) {
+        try {
+            intent.send();
+        } catch (PendingIntent.CanceledException e) {
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Failed to send action, %s", TAG, e);
+        }
+        if (isCloseAction) {
+            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_CUSTOM_CLOSE);
+            mAllowTouches = false;
+            mMainExecutor.executeDelayed(() -> {
+                hideMenu();
+                // TODO: it's unsafe to call onPipDismiss with a delay here since
+                // we may have a different PiP by the time this runnable is executed.
+                mController.onPipDismiss();
+                mAllowTouches = true;
+            }, mPipForceCloseDelay);
         }
     }
 
