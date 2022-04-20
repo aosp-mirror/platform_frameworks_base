@@ -91,6 +91,7 @@ public class ShadeListBuilder implements Dumpable {
     private final SystemClock mSystemClock;
     private final ShadeListBuilderLogger mLogger;
     private final NotificationInteractionTracker mInteractionTracker;
+    private final DumpManager mDumpManager;
     // used exclusivly by ShadeListBuilder#notifySectionEntriesUpdated
     private final ArrayList<ListEntry> mTempSectionMembers = new ArrayList<>();
     private final boolean mAlwaysLogList;
@@ -133,14 +134,12 @@ public class ShadeListBuilder implements Dumpable {
             ShadeListBuilderLogger logger,
             SystemClock systemClock
     ) {
-        Assert.isMainThread();
         mSystemClock = systemClock;
         mLogger = logger;
         mAlwaysLogList = flags.isDevLoggingEnabled();
         mInteractionTracker = interactionTracker;
         mChoreographer = pipelineChoreographer;
-        dumpManager.registerDumpable(TAG, this);
-
+        mDumpManager = dumpManager;
         setSectioners(Collections.emptyList());
     }
 
@@ -150,6 +149,7 @@ public class ShadeListBuilder implements Dumpable {
      */
     public void attach(NotifCollection collection) {
         Assert.isMainThread();
+        mDumpManager.registerDumpable(TAG, this);
         collection.addCollectionListener(mInteractionTracker);
         collection.setBuildListener(mReadyForBuildListener);
         mChoreographer.addOnEvalListener(this::buildList);
