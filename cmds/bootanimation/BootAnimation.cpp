@@ -575,8 +575,8 @@ status_t BootAnimation::readyToRun() {
     mDisplay = display;
     mContext = context;
     mSurface = surface;
-    mWidth = w;
-    mHeight = h;
+    mInitWidth = mWidth = w;
+    mInitHeight = mHeight = h;
     mFlingerSurfaceControl = control;
     mFlingerSurface = s;
     mTargetInset = -1;
@@ -609,6 +609,7 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroySurface(mDisplay, mSurface);
 
+    mFlingerSurfaceControl->updateDefaultBufferSize(newWidth, newHeight);
     const auto limitedSize = limitSurfaceSize(newWidth, newHeight);
     mWidth = limitedSize.width;
     mHeight = limitedSize.height;
@@ -1496,8 +1497,10 @@ bool BootAnimation::playAnimation(const Animation& animation) {
 
                 processDisplayEvents();
 
-                const int animationX = (mWidth - animation.width) / 2;
-                const int animationY = (mHeight - animation.height) / 2;
+                const double ratio_w = static_cast<double>(mWidth) / mInitWidth;
+                const double ratio_h = static_cast<double>(mHeight) / mInitHeight;
+                const int animationX = (mWidth - animation.width * ratio_w) / 2;
+                const int animationY = (mHeight - animation.height * ratio_h) / 2;
 
                 const Animation::Frame& frame(part.frames[j]);
                 nsecs_t lastFrame = systemTime();
@@ -1513,12 +1516,16 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     initTexture(frame.map, &w, &h, false /* don't premultiply alpha */);
                 }
 
-                const int xc = animationX + frame.trimX;
-                const int yc = animationY + frame.trimY;
+                const int trimWidth = frame.trimWidth * ratio_w;
+                const int trimHeight = frame.trimHeight * ratio_h;
+                const int trimX = frame.trimX * ratio_w;
+                const int trimY = frame.trimY * ratio_h;
+                const int xc = animationX + trimX;
+                const int yc = animationY + trimY;
                 glClear(GL_COLOR_BUFFER_BIT);
                 // specify the y center as ceiling((mHeight - frame.trimHeight) / 2)
                 // which is equivalent to mHeight - (yc + frame.trimHeight)
-                const int frameDrawY = mHeight - (yc + frame.trimHeight);
+                const int frameDrawY = mHeight - (yc + trimHeight);
 
                 float fade = 0;
                 // if the part hasn't been stopped yet then continue fading if necessary
@@ -1535,7 +1542,7 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     glUniform1f(mImageColorProgressLocation, colorProgress);
                 }
                 glEnable(GL_BLEND);
-                drawTexturedQuad(xc, frameDrawY, frame.trimWidth, frame.trimHeight);
+                drawTexturedQuad(xc, frameDrawY, trimWidth, trimHeight);
                 glDisable(GL_BLEND);
 
                 if (mClockEnabled && mTimeIsAccurate && validClock(part)) {
