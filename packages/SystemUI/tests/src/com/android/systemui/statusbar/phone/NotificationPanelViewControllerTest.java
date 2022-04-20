@@ -128,6 +128,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
+import com.android.systemui.statusbar.phone.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -337,6 +338,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock
+    private ShadeTransitionController mShadeTransitionController;
+    @Mock
     private QS mQs;
     @Mock
     private View mQsHeader;
@@ -527,7 +530,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNotificationListContainer,
                 mPanelEventsEmitter,
                 mNotificationStackSizeCalculator,
-                mUnlockedScreenOffAnimationController);
+                mUnlockedScreenOffAnimationController,
+                mShadeTransitionController);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},
