@@ -1294,6 +1294,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private TaskFragment mParentTaskFragment;
 
         private boolean mCreateActivity = false;
+        private boolean mCreatedByOrganizer = false;
 
         TaskBuilder(ActivityTaskSupervisor supervisor) {
             mSupervisor = supervisor;
@@ -1385,6 +1386,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        TaskBuilder setCreatedByOrganizer(boolean createdByOrganizer) {
+            mCreatedByOrganizer = createdByOrganizer;
+            return this;
+        }
+
         Task build() {
             SystemServicesTestRule.checkHoldsLock(mSupervisor.mService.mGlobalLock);
 
@@ -1420,7 +1426,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     .setActivityInfo(mActivityInfo)
                     .setIntent(mIntent)
                     .setOnTop(mOnTop)
-                    .setVoiceSession(mVoiceSession);
+                    .setVoiceSession(mVoiceSession)
+                    .setCreatedByOrganizer(mCreatedByOrganizer);
             final Task task;
             if (mParentTaskFragment == null) {
                 task = builder.setActivityType(mActivityType)

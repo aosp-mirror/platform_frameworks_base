@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -559,6 +560,37 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                 new ArraySet<>(new WindowContainer[]{activity2.getTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, false /* visible */));
+    }
+
+    @Test
+    public void testGetAnimationTargets_splitScreenOpening() {
+        // [DisplayContent] - [Task] -+- [split task 1] -+- [Task1] - [AR1] (opening, invisible)
+        //                            +- [split task 2] -+- [Task2] - [AR2] (opening, invisible)
+        final Task singleTopRoot = createTask(mDisplayContent);
+        final TaskBuilder builder = new TaskBuilder(mSupervisor)
+                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
+                .setParentTaskFragment(singleTopRoot)
+                .setCreatedByOrganizer(true);
+        final Task splitRoot1 = builder.build();
+        final Task splitRoot2 = builder.build();
+        splitRoot1.setAdjacentTaskFragment(splitRoot2, false /* moveTogether */);
+        final ActivityRecord activity1 = createActivityRecordWithParentTask(splitRoot1);
+        activity1.setVisible(false);
+        activity1.mVisibleRequested = true;
+        final ActivityRecord activity2 = createActivityRecordWithParentTask(splitRoot2);
+        activity2.setVisible(false);
+        activity2.mVisibleRequested = true;
+
+        final ArraySet<ActivityRecord> opening = new ArraySet<>();
+        opening.add(activity1);
+        opening.add(activity2);
+        final ArraySet<ActivityRecord> closing = new ArraySet<>();
+
+        // Promote animation targets up to Task level, not beyond.
+        assertEquals(
+                new ArraySet<>(new WindowContainer[]{splitRoot1, splitRoot2}),
+                AppTransitionController.getAnimationTargets(
+                        opening, closing, true /* visible */));
     }
 
     @Test
