@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.util.TimeUtils.NANOS_PER_MS;
 import static android.view.Choreographer.CALLBACK_TRAVERSAL;
 import static android.view.Choreographer.getSfInstance;
@@ -26,14 +27,13 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
-import android.graphics.Canvas;
 import android.graphics.Insets;
-import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.power.Boost;
 import android.os.Handler;
 import android.os.PowerManagerInternal;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Choreographer;
@@ -50,6 +50,8 @@ import com.android.server.AnimationThread;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 /**
@@ -82,6 +84,12 @@ class SurfaceAnimationRunner {
     private final AnimatorFactory mAnimatorFactory;
     private final PowerManagerInternal mPowerManagerInternal;
     private boolean mApplyScheduled;
+
+    // Executor to perform the edge extension.
+    // With two threads because in practice we will want to extend two surfaces in one animation,
+    // in which case we want to be able to parallelize those two extensions to cut down latency in
+    // starting the animation.
+    private final ExecutorService mEdgeExtensionExecutor = Executors.newFixedThreadPool(2);
 
     @GuardedBy("mLock")
     @VisibleForTesting
@@ -173,7 +181,7 @@ class SurfaceAnimationRunner {
 
                 // We must wait for t to be committed since otherwise the leash doesn't have the
                 // windows we want to screenshot and extend as children.
-                t.addTransactionCommittedListener(Runnable::run, () -> {
+                t.addTransactionCommittedListener(mEdgeExtensionExecutor, () -> {
                     final WindowAnimationSpec animationSpec = a.asWindowAnimationSpec();
 
                     final Transaction edgeExtensionCreationTransaction = new Transaction();
@@ -403,30 +411,17 @@ class SurfaceAnimationRunner {
     private void createExtensionSurface(SurfaceControl leash, Rect edgeBounds,
             Rect extensionRect, int xPos, int yPos, String layerName,
             Transaction startTransaction) {
-        synchronized (mEdgeExtensionLock) {
-            if (!mEdgeExtensions.containsKey(leash)) {
-                // Animation leash has already been removed so we shouldn't perform any extension
-                return;
-            }
-            createExtensionSurfaceLocked(leash, edgeBounds, extensionRect, xPos, yPos, layerName,
-                    startTransaction);
-        }
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "createExtensionSurface");
+        doCreateExtensionSurface(leash, edgeBounds, extensionRect, xPos, yPos, layerName,
+                startTransaction);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    private void createExtensionSurfaceLocked(SurfaceControl surfaceToExtend, Rect edgeBounds,
+    private void doCreateExtensionSurface(SurfaceControl leash, Rect edgeBounds,
             Rect extensionRect, int xPos, int yPos, String layerName,
             Transaction startTransaction) {
-        final SurfaceControl edgeExtensionLayer = new SurfaceControl.Builder()
-                .setName(layerName)
-                .setParent(surfaceToExtend)
-                .setHidden(true)
-                .setCallsite("DefaultTransitionHandler#startAnimation")
-                .setOpaque(true)
-                .setBufferSize(extensionRect.width(), extensionRect.height())
-                .build();
-
         SurfaceControl.LayerCaptureArgs captureArgs =
-                new SurfaceControl.LayerCaptureArgs.Builder(surfaceToExtend)
+                new SurfaceControl.LayerCaptureArgs.Builder(leash /* surfaceToExtend */)
                         .setSourceCrop(edgeBounds)
                         .setFrameScale(1)
                         .setPixelFormat(PixelFormat.RGBA_8888)
@@ -437,30 +432,75 @@ class SurfaceAnimationRunner {
                 SurfaceControl.captureLayers(captureArgs);
 
         if (edgeBuffer == null) {
+            // The leash we are trying to screenshot may have been removed by this point, which is
+            // likely the reason for ending up with a null edgeBuffer, in which case we just want to
+            // return and do nothing.
             Log.e("SurfaceAnimationRunner", "Failed to create edge extension - "
                     + "edge buffer is null");
             return;
         }
 
-        android.graphics.BitmapShader shader =
-                new android.graphics.BitmapShader(edgeBuffer.asBitmap(),
-                        android.graphics.Shader.TileMode.CLAMP,
-                        android.graphics.Shader.TileMode.CLAMP);
-        final Paint paint = new Paint();
-        paint.setShader(shader);
+        final SurfaceControl edgeExtensionLayer = new SurfaceControl.Builder()
+                .setName(layerName)
+                .setHidden(true)
+                .setCallsite("DefaultTransitionHandler#startAnimation")
+                .setOpaque(true)
+                .setBufferSize(edgeBounds.width(), edgeBounds.height())
+                .build();
 
         final Surface surface = new Surface(edgeExtensionLayer);
-        Canvas c = surface.lockHardwareCanvas();
-        c.drawRect(extensionRect, paint);
-        surface.unlockCanvasAndPost(c);
+        surface.attachAndQueueBufferWithColorSpace(edgeBuffer.getHardwareBuffer(),
+                edgeBuffer.getColorSpace());
         surface.release();
 
-        startTransaction.setLayer(edgeExtensionLayer, Integer.MIN_VALUE);
-        startTransaction.setPosition(edgeExtensionLayer, xPos, yPos);
-        startTransaction.setVisibility(edgeExtensionLayer, true);
+        final float scaleX = getScaleXForExtensionSurface(edgeBounds, extensionRect);
+        final float scaleY = getScaleYForExtensionSurface(edgeBounds, extensionRect);
 
-        mEdgeExtensions.get(surfaceToExtend).add(edgeExtensionLayer);
+        synchronized (mEdgeExtensionLock) {
+            if (!mEdgeExtensions.containsKey(leash)) {
+                // The animation leash has already been removed, so we don't want to attach the
+                // edgeExtension layer and should immediately remove it instead.
+                startTransaction.remove(edgeExtensionLayer);
+                return;
+            }
+
+            startTransaction.setScale(edgeExtensionLayer, scaleX, scaleY);
+            startTransaction.reparent(edgeExtensionLayer, leash);
+            startTransaction.setLayer(edgeExtensionLayer, Integer.MIN_VALUE);
+            startTransaction.setPosition(edgeExtensionLayer, xPos, yPos);
+            startTransaction.setVisibility(edgeExtensionLayer, true);
+
+            mEdgeExtensions.get(leash).add(edgeExtensionLayer);
+        }
     }
+
+    private float getScaleXForExtensionSurface(Rect edgeBounds, Rect extensionRect) {
+        if (edgeBounds.width() == extensionRect.width()) {
+            // Top or bottom edge extension, no need to scale the X axis of the extension surface.
+            return 1;
+        }
+        if (edgeBounds.width() == 1) {
+            // Left or right edge extension, scale the surface to be the extensionRect's width.
+            return extensionRect.width();
+        }
+
+        throw new RuntimeException("Unexpected edgeBounds and extensionRect widths");
+    }
+
+    private float getScaleYForExtensionSurface(Rect edgeBounds, Rect extensionRect) {
+        if (edgeBounds.height() == extensionRect.height()) {
+            // Left or right edge extension, no need to scale the Y axis of the extension surface.
+            return 1;
+        }
+        if (edgeBounds.height() == 1) {
+            // Top or bottom edge extension, scale the surface to be the extensionRect's height.
+            return extensionRect.height();
+        }
+
+        throw new RuntimeException("Unexpected edgeBounds and extensionRect heights");
+    }
+
+
 
     private static final class RunningAnimation {
         final AnimationSpec mAnimSpec;
