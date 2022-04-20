@@ -26,9 +26,11 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -131,6 +133,26 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
     @Presubmit
     @Test
     override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 229735718)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowReplacesLauncherAsTopWindow() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        super.appWindowReplacesLauncherAsTopWindow()
+    }
+
+    @FlakyTest(bugId = 229738092)
+    @Test
+    fun appWindowReplacesLauncherAsTopWindow_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        super.appWindowReplacesLauncherAsTopWindow()
+    }
 
     companion object {
         /**
