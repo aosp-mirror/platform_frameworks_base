@@ -118,7 +118,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"İptal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Eşleme işlemi, bağlantı kurulduğunda kişilerinize ve çağrı geçmişine erişim izni verir."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN veya parola yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN veya parola yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile iletişim kurulamıyor."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Eşleme <xliff:g id="DEVICE_NAME">%1$s</xliff:g> tarafından reddedildi."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Bilgisayar"</string>
@@ -339,7 +339,7 @@
     <string name="show_screen_updates" msgid="2078782895825535494">"Yüzey güncellemelerini göster"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Güncellenirken tüm pencere yüzeylerini yakıp söndür"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Görünüm güncellemelerini göster"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Çizim yapılırken görünümleri pencerede çiz"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Çizildiğinde pencerelerin içini yakıp söndür"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Donanım katmanı güncellemelerini göster"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Güncellenirken donanım katmanlarını yeşil renkte yanıp söndür"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU fazla çizim hatasını ayıkla"</string>
