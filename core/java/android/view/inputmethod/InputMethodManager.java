@@ -93,6 +93,7 @@ import android.view.autofill.AutofillManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.DirectBootAwareness;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
@@ -506,8 +507,8 @@ public final class InputMethodManager {
      */
     @Nullable
     @GuardedBy("mH")
-    private final SparseArray<InputMethodSessionWrapper> mAccessibilityInputMethodSession =
-            new SparseArray<>();
+    private final SparseArray<IAccessibilityInputMethodSessionInvoker>
+            mAccessibilityInputMethodSession = new SparseArray<>();
 
     InputChannel mCurChannel;
     ImeInputEventSender mCurSender;
@@ -669,7 +670,8 @@ public final class InputMethodManager {
                 if (mCurrentInputMethodSession != null) {
                     mCurrentInputMethodSession.finishInput();
                 }
-                forAccessibilitySessions(InputMethodSessionWrapper::finishInput);
+                forAccessibilitySessionsLocked(
+                        IAccessibilityInputMethodSessionInvoker::finishInput);
             }
         }
 
@@ -730,7 +732,7 @@ public final class InputMethodManager {
                             focusedView.getWindowToken(), startInputFlags, softInputMode,
                             windowFlags,
                             null,
-                            null,
+                            null, null,
                             mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -963,13 +965,13 @@ public final class InputMethodManager {
                         // we send a notification so that the a11y service knows the session is
                         // registered and update the a11y service with the current cursor positions.
                         if (res.accessibilitySessions != null) {
-                            InputMethodSessionWrapper wrapper =
-                                    InputMethodSessionWrapper.createOrNull(
+                            IAccessibilityInputMethodSessionInvoker invoker =
+                                    IAccessibilityInputMethodSessionInvoker.createOrNull(
                                             res.accessibilitySessions.get(id));
-                            if (wrapper != null) {
-                                mAccessibilityInputMethodSession.put(id, wrapper);
+                            if (invoker != null) {
+                                mAccessibilityInputMethodSession.put(id, invoker);
                                 if (mServedInputConnection != null) {
-                                    wrapper.updateSelection(mInitialSelStart, mInitialSelEnd,
+                                    invoker.updateSelection(mInitialSelStart, mInitialSelEnd,
                                             mCursorSelStart, mCursorSelEnd, mCursorCandStart,
                                             mCursorCandEnd);
                                 } else {
@@ -978,9 +980,7 @@ public final class InputMethodManager {
                                     // binds before or after input starts, it may wonder if it binds
                                     // after input starts, why it doesn't receive a notification of
                                     // the current cursor positions.
-                                    wrapper.updateSelection(-1, -1,
-                                            -1, -1, -1,
-                                            -1);
+                                    invoker.updateSelection(-1, -1, -1, -1, -1, -1);
                                 }
                             }
                         }
@@ -2148,8 +2148,10 @@ public final class InputMethodManager {
             editorInfo.setInitialSurroundingTextInternal(textSnapshot.getSurroundingText());
             mCurrentInputMethodSession.invalidateInput(editorInfo, mServedInputConnection,
                     sessionId);
-            forAccessibilitySessions(wrapper -> wrapper.invalidateInput(editorInfo,
-                    mServedInputConnection, sessionId));
+            final IRemoteAccessibilityInputConnection accessibilityInputConnection =
+                    mServedInputConnection.asIRemoteAccessibilityInputConnection();
+            forAccessibilitySessionsLocked(wrapper -> wrapper.invalidateInput(editorInfo,
+                    accessibilityInputConnection, sessionId));
             return true;
         }
     }
@@ -2323,6 +2325,8 @@ public final class InputMethodManager {
                 res = mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,
                         softInputMode, windowFlags, tba, servedInputConnection,
+                        servedInputConnection == null ? null
+                                : servedInputConnection.asIRemoteAccessibilityInputConnection(),
                         view.getContext().getApplicationInfo().targetSdkVersion);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -2347,8 +2351,9 @@ public final class InputMethodManager {
                 mAccessibilityInputMethodSession.clear();
                 if (res.accessibilitySessions != null) {
                     for (int i = 0; i < res.accessibilitySessions.size(); i++) {
-                        InputMethodSessionWrapper wrapper = InputMethodSessionWrapper.createOrNull(
-                                res.accessibilitySessions.valueAt(i));
+                        IAccessibilityInputMethodSessionInvoker wrapper =
+                                IAccessibilityInputMethodSessionInvoker.createOrNull(
+                                        res.accessibilitySessions.valueAt(i));
                         if (wrapper != null) {
                             mAccessibilityInputMethodSession.append(
                                     res.accessibilitySessions.keyAt(i), wrapper);
@@ -2598,7 +2603,7 @@ public final class InputMethodManager {
                 mCursorCandEnd = candidatesEnd;
                 mCurrentInputMethodSession.updateSelection(
                         oldSelStart, oldSelEnd, selStart, selEnd, candidatesStart, candidatesEnd);
-                forAccessibilitySessions(wrapper -> wrapper.updateSelection(oldSelStart,
+                forAccessibilitySessionsLocked(wrapper -> wrapper.updateSelection(oldSelStart,
                         oldSelEnd, selStart, selEnd, candidatesStart, candidatesEnd));
             }
         }
@@ -3658,7 +3663,8 @@ public final class InputMethodManager {
         }
     }
 
-    private void forAccessibilitySessions(Consumer<InputMethodSessionWrapper> consumer) {
+    private void forAccessibilitySessionsLocked(
+            Consumer<IAccessibilityInputMethodSessionInvoker> consumer) {
         for (int i = 0; i < mAccessibilityInputMethodSession.size(); i++) {
             consumer.accept(mAccessibilityInputMethodSession.valueAt(i));
         }
