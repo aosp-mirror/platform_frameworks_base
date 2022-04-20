@@ -32,6 +32,8 @@ import org.junit.runners.Parameterized
 /**
  * Test cold launching an app from a notification.
  *
+ * This test assumes the device doesn't have AOD enabled
+ *
  * To run this test: `atest FlickerTests:OpenAppFromNotificationCold`
  */
 @RequiresDevice
