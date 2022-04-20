@@ -21,8 +21,6 @@ import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Locale;
-
 /**
  * Describes a keyboard layout.
  *
@@ -157,9 +155,12 @@ public final class KeyboardLayout implements Parcelable,
 
     @Override
     public String toString() {
-        if (mCollection.isEmpty()) {
-            return mLabel;
-        }
-        return mLabel + " - " + mCollection;
+        String collectionString = mCollection.isEmpty() ? "" : " - " + mCollection;
+        return "KeyboardLayout " + mLabel + collectionString
+                + ", descriptor: " + mDescriptor
+                + ", priority: " + mPriority
+                + ", locales: " + mLocales.toString()
+                + ", vendorId: " + mVendorId
+                + ", productId: " + mProductId;
     }
 }
