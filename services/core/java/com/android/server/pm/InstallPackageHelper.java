@@ -59,6 +59,7 @@ import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.POST_INSTALL;
 import static com.android.server.pm.PackageManagerService.PRECOMPILE_LAYOUTS;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_APEX;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_APK_IN_APEX;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_FACTORY;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_FULL_APP;
@@ -92,6 +93,7 @@ import static com.android.server.pm.SharedUidMigration.BEST_EFFORT;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.apex.ApexInfo;
 import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.backup.IBackupManager;
@@ -870,7 +872,17 @@ final class InstallPackageHelper {
                                 + " got: " + apexes.length);
             }
             try (PackageParser2 packageParser = mPm.mInjector.getScanningPackageParser()) {
-                mApexManager.installPackage(apexes[0], packageParser, mPm.mApexPackageInfo);
+                ApexInfo apexInfo = mApexManager.installPackage(
+                        apexes[0], packageParser, mPm.mApexPackageInfo);
+                if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+                    ParsedPackage parsedPackage = packageParser.parsePackage(
+                            new File(apexInfo.modulePath), 0, /* useCaches= */ false);
+                    scanSystemPackageLI(parsedPackage, 0, SCAN_AS_APEX, null);
+                    mPm.mApexPackageInfo.notifyPackageInstalled(
+                            apexInfo, parsedPackage.hideAsFinal());
+                } else {
+                    mPm.mApexPackageInfo.notifyPackageInstalled(apexInfo, packageParser);
+                }
             }
         } catch (PackageManagerException e) {
             request.mInstallResult.setError("APEX installation failed", e);
@@ -3378,6 +3390,56 @@ final class InstallPackageHelper {
         }
     }
 
+    public List<ApexManager.ScanResult> scanApexPackages(ApexInfo[] allPackages, int parseFlags,
+            int scanFlags, PackageParser2 packageParser, ExecutorService executorService) {
+        if (allPackages == null) {
+            return Collections.EMPTY_LIST;
+        }
+
+        ParallelPackageParser parallelPackageParser =
+                new ParallelPackageParser(packageParser, executorService);
+
+        // Submit files for parsing in parallel
+        ArrayMap<File, ApexInfo> parsingApexInfo = new ArrayMap<>();
+        for (ApexInfo ai : allPackages) {
+            File apexFile = new File(ai.modulePath);
+            parallelPackageParser.submit(apexFile, parseFlags);
+            parsingApexInfo.put(apexFile, ai);
+        }
+
+        // Process results one by one
+        List<ApexManager.ScanResult> results = new ArrayList<>(parsingApexInfo.size());
+        for (int i = 0; i < parsingApexInfo.size(); i++) {
+            ParallelPackageParser.ParseResult parseResult = parallelPackageParser.take();
+            Throwable throwable = parseResult.throwable;
+            ApexInfo ai = parsingApexInfo.get(parseResult.scanFile);
+            int newScanFlags = scanFlags | SCAN_AS_APEX;
+
+            if (throwable == null) {
+                try {
+                    scanSystemPackageLI(parseResult.parsedPackage, parseFlags, newScanFlags, null);
+                    AndroidPackage pkg = parseResult.parsedPackage.hideAsFinal();
+                    results.add(new ApexManager.ScanResult(ai, pkg, pkg.getPackageName()));
+                } catch (PackageManagerException e) {
+                    throw new IllegalStateException("Failed to scan: " + ai.modulePath, e);
+                }
+            } else if (throwable instanceof PackageManagerException) {
+                final PackageManagerException e = (PackageManagerException) throwable;
+                // Skip parsing non-coreApp apex file if system is in minimal boot state.
+                if (e.error == PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED) {
+                    Slog.w(TAG, "Scan apex failed, not a coreApp:" + ai.modulePath);
+                    continue;
+                }
+                throw new IllegalStateException("Unable to parse: " + ai.modulePath, throwable);
+            } else {
+                throw new IllegalStateException("Unexpected exception occurred while parsing "
+                        + ai.modulePath, throwable);
+            }
+        }
+
+        return results;
+    }
+
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     public void installPackagesFromDir(File scanDir, List<File> frameworkSplits, int parseFlags,
             int scanFlags, PackageParser2 packageParser,
@@ -4079,8 +4141,12 @@ final class InstallPackageHelper {
         // after OTA.
         final boolean isUserInstall = (scanFlags & SCAN_BOOTING) == 0;
         final boolean isFirstBootOrUpgrade = (scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0;
+        // It is allowed to install a new APEX with the same name. But there shouldn't be
+        // conflicting names between APK and APEX.
+        final boolean installApex = (scanFlags & SCAN_AS_APEX) != 0;
         if ((isUserInstall || isFirstBootOrUpgrade)
-                && mPm.mApexPackageInfo.isApexPackage(pkg.getPackageName())) {
+                && mPm.mApexPackageInfo.isApexPackage(pkg.getPackageName())
+                && !installApex) {
             throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
                     pkg.getPackageName()
                             + " is an APEX package and can't be installed as an APK.");

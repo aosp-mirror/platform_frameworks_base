@@ -104,11 +104,11 @@ public abstract class ApexManager {
 
     static class ScanResult {
         public final ApexInfo apexInfo;
-        public final ParsedPackage parsedPackage;
+        public final AndroidPackage pkg;
         public final String packageName;
-        ScanResult(ApexInfo apexInfo, ParsedPackage parsedPackage, String packageName) {
+        ScanResult(ApexInfo apexInfo, AndroidPackage pkg, String packageName) {
             this.apexInfo = apexInfo;
-            this.parsedPackage = parsedPackage;
+            this.pkg = pkg;
             this.packageName = packageName;
         }
     }
@@ -357,8 +357,10 @@ public abstract class ApexManager {
 
     /**
      * Performs a non-staged install of the given {@code apexFile}.
+     *
+     * @return {@code ApeInfo} about the newly installed APEX package.
      */
-    abstract void installPackage(File apexFile, PackageParser2 packageParser,
+    abstract ApexInfo installPackage(File apexFile, PackageParser2 packageParser,
             ApexPackageInfo apexPackageInfo) throws PackageManagerException;
 
     /**
@@ -470,7 +472,7 @@ public abstract class ApexManager {
                 ApexInfo ai = scanResult.apexInfo;
                 String packageName = scanResult.packageName;
                 for (ParsedApexSystemService service :
-                        scanResult.parsedPackage.getApexSystemServices()) {
+                        scanResult.pkg.getApexSystemServices()) {
                     String minSdkVersion = service.getMinSdkVersion();
                     if (minSdkVersion != null && !UnboundedSdkLevel.isAtLeast(minSdkVersion)) {
                         Slog.d(TAG, String.format(
@@ -896,7 +898,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        void installPackage(File apexFile, PackageParser2 packageParser,
+        ApexInfo installPackage(File apexFile, PackageParser2 packageParser,
                 ApexPackageInfo apexPackageInfo)
                 throws PackageManagerException {
             try {
@@ -919,14 +921,7 @@ public abstract class ApexManager {
                             "It is forbidden to install new APEX packages");
                 }
                 checkApexSignature(existingApexPkg, newApexPkg);
-                ApexInfo apexInfo = waitForApexService().installAndActivatePackage(
-                        apexFile.getAbsolutePath());
-                final ParsedPackage parsedPackage2 = packageParser.parsePackage(
-                        new File(apexInfo.modulePath), flags, /* useCaches= */ false);
-                final PackageInfo finalApexPkg = PackageInfoWithoutStateUtils.generate(
-                        parsedPackage2, apexInfo, flags);
-                // Installation was successful, time to update cached PackageInfo
-                apexPackageInfo.notifyPackageInstalled(existingApexPkg, finalApexPkg);
+                return waitForApexService().installAndActivatePackage(apexFile.getAbsolutePath());
             } catch (RemoteException e) {
                 throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                         "apexservice not available");
@@ -1166,7 +1161,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        void installPackage(File apexFile, PackageParser2 packageParser,
+        ApexInfo installPackage(File apexFile, PackageParser2 packageParser,
                 ApexPackageInfo apexPackageInfo) {
             throw new UnsupportedOperationException("APEX updates are not supported");
         }

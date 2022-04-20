@@ -33,6 +33,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
@@ -50,6 +52,8 @@ import java.util.concurrent.ExecutorService;
  * including both APK and APEX. This class will no longer be needed when the migration is done.
  */
 class ApexPackageInfo {
+    public static final boolean ENABLE_FEATURE_SCAN_APEX = true;
+
     private static final String TAG = "ApexManager";
     private static final String VNDK_APEX_MODULE_NAME_PREFIX = "com.android.vndk.";
 
@@ -80,6 +84,12 @@ class ApexPackageInfo {
             @NonNull PackageParser2 packageParser, @NonNull ExecutorService executorService) {
         synchronized (mLock) {
             return scanApexPackagesInternalLocked(allPackages, packageParser, executorService);
+        }
+    }
+
+    void notifyScanResult(List<ApexManager.ScanResult> scanResults) {
+        synchronized (mLock) {
+            notifyScanResultLocked(scanResults);
         }
     }
 
@@ -200,12 +210,29 @@ class ApexPackageInfo {
     }
 
     /**
-     * Called by ApexManager to update cached PackageInfo when installing rebootless APEX.
+     * Called to update cached PackageInfo when installing rebootless APEX.
      */
-    void notifyPackageInstalled(PackageInfo oldApexPkg, PackageInfo newApexPkg) {
+    void notifyPackageInstalled(ApexInfo apexInfo, PackageParser2 packageParser)
+            throws PackageManagerException {
+        final int flags = PackageManager.GET_META_DATA
+                | PackageManager.GET_SIGNING_CERTIFICATES
+                | PackageManager.GET_SIGNATURES;
+        final ParsedPackage parsedPackage = packageParser.parsePackage(
+                new File(apexInfo.modulePath), flags, /* useCaches= */ false);
+        notifyPackageInstalled(apexInfo, parsedPackage.hideAsFinal());
+    }
+
+    void notifyPackageInstalled(ApexInfo apexInfo, AndroidPackage pkg) {
+        final int flags = PackageManager.GET_META_DATA
+                | PackageManager.GET_SIGNING_CERTIFICATES
+                | PackageManager.GET_SIGNATURES;
+        final PackageInfo newApexPkg = PackageInfoWithoutStateUtils.generate(
+                pkg, apexInfo, flags);
+        final String packageName = newApexPkg.packageName;
         synchronized (mLock) {
             for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
-                if (mAllPackagesCache.get(i).equals(oldApexPkg)) {
+                PackageInfo oldApexPkg = mAllPackagesCache.get(i);
+                if (oldApexPkg.isActiveApex && oldApexPkg.packageName.equals(packageName)) {
                     if (isFactory(oldApexPkg)) {
                         oldApexPkg.isActiveApex = false;
                         mAllPackagesCache.add(newApexPkg);
@@ -264,7 +291,7 @@ class ApexPackageInfo {
             ApexInfo ai = result.apexInfo;
 
             final PackageInfo packageInfo = PackageInfoWithoutStateUtils.generate(
-                    result.parsedPackage, ai, flags);
+                    result.pkg, ai, flags);
             if (packageInfo == null) {
                 throw new IllegalStateException("Unable to generate package info: "
                         + ai.modulePath);
