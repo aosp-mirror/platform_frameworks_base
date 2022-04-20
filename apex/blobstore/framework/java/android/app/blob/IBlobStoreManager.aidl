@@ -31,6 +31,7 @@ interface IBlobStoreManager {
     void acquireLease(in BlobHandle handle, int descriptionResId, in CharSequence description,
             long leaseTimeoutMillis, in String packageName);
     void releaseLease(in BlobHandle handle, in String packageName);
+    void releaseAllLeases(in String packageName);
     long getRemainingLeaseQuotaBytes(String packageName);
 
     void waitForIdle(in RemoteCallback callback);

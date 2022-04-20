@@ -507,6 +507,22 @@ public class BlobStoreManager {
     }
 
     /**
+     * Release all the leases which are currently held by the caller.
+     *
+     * @hide
+     */
+    public void releaseAllLeases() throws Exception {
+        try {
+            mService.releaseAllLeases(mContext.getOpPackageName());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return the remaining quota size for acquiring a lease (in bytes) which indicates the
      * remaining amount of data that an app can acquire a lease on before the System starts
      * rejecting lease requests.
