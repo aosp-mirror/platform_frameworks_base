@@ -507,7 +507,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Lo más grande posible"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Personalizado (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Menú"</string>
-    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Escribe una contraseña para restablecer estado de fábrica en modo demostración"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Escribe una contraseña para restablecer estado de fábrica en modo Demo"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Siguiente"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Contraseña obligatoria"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Métodos de introducción de texto activos"</string>
@@ -600,16 +600,16 @@
     <string name="guest_resetting" msgid="7822120170191509566">"Restableciendo invitado…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"¿Restablecer sesión de invitado?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Se iniciará una nueva sesión de invitado y se borrarán todas las aplicaciones y datos de esta sesión"</string>
-    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"¿Salir del modo invitados?"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"¿Salir del modo Invitados?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Se eliminarán todas las aplicaciones y datos de la sesión de invitado"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Salir"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"¿Guardar actividad de invitados?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puedes guardar la actividad de esta sesión o eliminar las aplicaciones y datos"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Eliminar"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Guardar"</string>
-    <string name="guest_exit_button" msgid="5774985819191803960">"Salir del modo invitados"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Salir del modo Invitados"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Restablecer sesión de invitado"</string>
-    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Salir del modo invitados"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Salir del modo Invitados"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toda la actividad se eliminará cuando salgas"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Puedes guardar o eliminar tu actividad cuando salgas"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Restablece la sesión para eliminar la actividad ahora, o guarda o elimina la actividad cuando salgas"</string>
