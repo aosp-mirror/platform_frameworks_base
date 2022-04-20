@@ -993,8 +993,8 @@
     <string name="save_password_label" msgid="9161712335355510035">"Konfirmasi"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Kiat: Ketuk dua kali untuk memperbesar dan memperkecil."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"Isi Otomatis"</string>
-    <string name="setup_autofill" msgid="5431369130866618567">"Siapkan Pengisian Otomatis"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"IsiOtomatis dengan <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
+    <string name="setup_autofill" msgid="5431369130866618567">"Siapkan Isi otomatis"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"Isi otomatis dengan <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">"  "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
@@ -2028,13 +2028,13 @@
     <string name="time_picker_prompt_label" msgid="303588544656363889">"Ketikkan waktu"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"Beralih ke mode masukan teks untuk masukan waktu."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"Beralih ke mode jam untuk masukan waktu."</string>
-    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Opsi IsiOtomatis"</string>
-    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Simpan untuk IsiOtomatis"</string>
+    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Opsi isi otomatis"</string>
+    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Simpan untuk Isi otomatis"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Konten tidak dapat diisi otomatis"</string>
-    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Tidak ada saran IsiOtomatis"</string>
+    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Tidak ada saran isi otomatis"</string>
     <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> saran IsiOtomatis</item>
-      <item quantity="one">1 saran IsiOtomatis</item>
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> saran isi otomatis</item>
+      <item quantity="one">1 saran isi otomatis</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"Simpan ke "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Simpan <xliff:g id="TYPE">%1$s</xliff:g> ke "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>

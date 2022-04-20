@@ -1343,7 +1343,7 @@
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Жөнөтүү"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Айнуу"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Менин тандоомду эстеп кал"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Муну кийин Тууралоолор &gt; Колдонмолордон өзгөртө аласыз"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Муну кийин Тууралоо &gt; Колдонмолордон өзгөртө аласыз"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Дайыма уруксат берүү"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Эч качан уруксат берилбесин"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"SIM-карта өчүрүлдү"</string>
@@ -2142,7 +2142,7 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Бөлүшкөнгө эч ким сунушталган жок"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Колдонмолордун тизмеси"</string>
-    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Бул колдонмонун жаздырууга уруксаты жок, бирок бул USB түзмөгү аркылуу аудиону жаздыра алат."</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Бул колдонмого жаздырууга уруксат берилген эмес, бирок ушул USB түзмөгү аркылуу үндөрдү жаза алат."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Башкы бет"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Артка"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Акыркы колдонмолор"</string>
