@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ez molestatzeko modua aldatu da"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Sakatu zer dagoen blokeatuta ikusteko."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Berrikusi jakinarazpen-ezarpenak"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13-n, jakinarazpenak bidaltzeko baimena eman behar diezu instalatzen dituzun aplikazioei. Sakatu hau lehendik dauden aplikazioen baimenak aldatzeko."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Gogorarazi geroago"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Baztertu"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
@@ -2274,11 +2275,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Itzuli da <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> hizkuntzatik <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> hizkuntzara itzuli da mezua."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Atzeko planoko jarduerak"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Aplikazio bat bateria agortzen ari da"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Aplikazio bat aktibo dago oraindik"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"Atzeko planoan funtzionatzen ari da <xliff:g id="APP">%1$s</xliff:g>. Bateria-erabilera kudeatzeko, sakatu hau."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Baliteke <xliff:g id="APP">%1$s</xliff:g> aplikazioak bateriaren iraupenean eragina izatea. Sakatu hau aplikazio aktiboak ikusteko."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Ikusi zer aplikazio dauden aktibo"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ezin da atzitu telefonoaren kamera <xliff:g id="DEVICE">%1$s</xliff:g> gailutik"</string>
