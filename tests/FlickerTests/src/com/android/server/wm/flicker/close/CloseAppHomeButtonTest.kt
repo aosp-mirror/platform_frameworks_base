@@ -101,11 +101,10 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
     }
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 229762973)
     @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
 
     companion object {
         /**
