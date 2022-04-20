@@ -269,10 +269,10 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                         AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN, // RestrictionLevel
                         AppBackgroundRestrictionsInfo.THRESHOLD_UNKNOWN,
                         AppBackgroundRestrictionsInfo.UNKNOWN_TRACKER,
-                        null /*byte[] fgs_tracker_info*/,
-                        getBatteryTrackerInfoProtoLocked(uid) /*byte[] battery_tracker_info*/,
-                        null /*byte[] broadcast_events_tracker_info*/,
-                        null /*byte[] bind_service_events_tracker_info*/,
+                        null, // FgsTrackerInfo
+                        getTrackerInfoForStatsd(uid),
+                        null, // BroadcastEventsTrackerInfo
+                        null, // BindServiceEventsTrackerInfo
                         AppBackgroundRestrictionsInfo.REASON_UNKNOWN, // ExemptionReason
                         AppBackgroundRestrictionsInfo.UNKNOWN, // OptimizationLevel
                         AppBackgroundRestrictionsInfo.SDK_UNKNOWN, // TargetSdk
@@ -282,14 +282,14 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
     }
 
     /**
-     * Get the BatteryTrackerInfo proto of a UID.
-     * @param uid
-     * @return byte array of the proto.
+     * Get the BatteryTrackerInfo object of the given uid.
+     * @return byte array of the proto object.
      */
-     @NonNull byte[] getBatteryTrackerInfoProtoLocked(int uid) {
+    @Override
+    byte[] getTrackerInfoForStatsd(int uid) {
         final ImmutableBatteryUsage temp = mUidBatteryUsageInWindow.get(uid);
         if (temp == null) {
-            return new byte[0];
+            return null;
         }
         final BatteryUsage bgUsage = temp.calcPercentage(uid, mInjector.getPolicy());
         final double allUsage = bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_UNSPECIFIED]
@@ -301,10 +301,12 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_BACKGROUND];
         final double usageFgs =
                 bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND_SERVICE];
-        Slog.d(TAG, "getBatteryTrackerInfoProtoLocked uid:" + uid
-                + " allUsage:" + String.format("%4.2f%%", allUsage)
-                + " usageBackground:" + String.format("%4.2f%%", usageBackground)
-                + " usageFgs:" + String.format("%4.2f%%", usageFgs));
+        if (DEBUG_BACKGROUND_BATTERY_TRACKER_VERBOSE) {
+            Slog.d(TAG, "getBatteryTrackerInfoProtoLocked uid:" + uid
+                    + " allUsage:" + String.format("%4.2f%%", allUsage)
+                    + " usageBackground:" + String.format("%4.2f%%", usageBackground)
+                    + " usageFgs:" + String.format("%4.2f%%", usageFgs));
+        }
         final ProtoOutputStream proto = new ProtoOutputStream();
         proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_24H,
                 allUsage * 10000);
