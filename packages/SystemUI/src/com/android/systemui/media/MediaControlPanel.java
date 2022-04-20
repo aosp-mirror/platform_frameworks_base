@@ -176,9 +176,12 @@ public class MediaControlPanel {
     private String mPackageName;
 
     private boolean mIsScrubbing = false;
+    private boolean mIsSeekBarEnabled = false;
 
     private final SeekBarViewModel.ScrubbingChangeListener mScrubbingChangeListener =
             this::setIsScrubbing;
+    private final SeekBarViewModel.EnabledChangeListener mEnabledChangeListener =
+            this::setIsSeekBarEnabled;
 
     /**
      * Initialize a new control panel
@@ -235,8 +238,9 @@ public class MediaControlPanel {
     public void onDestroy() {
         if (mSeekBarObserver != null) {
             mSeekBarViewModel.getProgress().removeObserver(mSeekBarObserver);
-            mSeekBarViewModel.removeScrubbingChangeListener(mScrubbingChangeListener);
         }
+        mSeekBarViewModel.removeScrubbingChangeListener(mScrubbingChangeListener);
+        mSeekBarViewModel.removeEnabledChangeListener(mEnabledChangeListener);
         mSeekBarViewModel.onDestroy();
         mMediaViewController.onDestroy();
     }
@@ -283,7 +287,7 @@ public class MediaControlPanel {
     }
 
     /** Sets whether the user is touching the seek bar to change the track position. */
-    public void setIsScrubbing(boolean isScrubbing) {
+    private void setIsScrubbing(boolean isScrubbing) {
         if (mMediaData == null || mMediaData.getSemanticActions() == null) {
             return;
         }
@@ -293,6 +297,14 @@ public class MediaControlPanel {
         this.mIsScrubbing = isScrubbing;
         mMainExecutor.execute(() ->
                 updateDisplayForScrubbingChange(mMediaData.getSemanticActions()));
+    }
+
+    private void setIsSeekBarEnabled(boolean isSeekBarEnabled) {
+        if (isSeekBarEnabled == this.mIsSeekBarEnabled) {
+            return;
+        }
+        this.mIsSeekBarEnabled = isSeekBarEnabled;
+        updateSeekBarVisibility();
     }
 
     /**
@@ -313,6 +325,7 @@ public class MediaControlPanel {
         mSeekBarViewModel.getProgress().observeForever(mSeekBarObserver);
         mSeekBarViewModel.attachTouchHandlers(vh.getSeekBar());
         mSeekBarViewModel.setScrubbingChangeListener(mScrubbingChangeListener);
+        mSeekBarViewModel.setEnabledChangeListener(mEnabledChangeListener);
         mMediaViewController.attach(player, MediaViewController.TYPE.PLAYER);
 
         vh.getPlayer().setOnLongClickListener(v -> {
@@ -450,8 +463,8 @@ public class MediaControlPanel {
 
         bindOutputSwitcherChip(data);
         bindLongPressMenu(data);
-        bindActionButtons(data);
         bindScrubbingTime(data);
+        bindActionButtons(data);
 
         boolean isSongUpdated = bindSongMetadata(data);
         bindArtworkAndColors(data, isSongUpdated);
@@ -735,13 +748,18 @@ public class MediaControlPanel {
                         /* showInCompact= */ false);
             }
         }
+
+        updateSeekBarVisibility();
+    }
+
+    private void updateSeekBarVisibility() {
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
         expandedSet.setVisibility(R.id.media_progress_bar, getSeekBarVisibility());
-        expandedSet.setAlpha(R.id.media_progress_bar, mSeekBarViewModel.getEnabled() ? 1.0f : 0.0f);
+        expandedSet.setAlpha(R.id.media_progress_bar, mIsSeekBarEnabled ? 1.0f : 0.0f);
     }
 
     private int getSeekBarVisibility() {
-        boolean seekbarEnabled = mSeekBarViewModel.getEnabled();
-        if (seekbarEnabled) {
+        if (mIsSeekBarEnabled) {
             return ConstraintSet.VISIBLE;
         }
         // If disabled and "neighbours" are visible, set progress bar to INVISIBLE instead of GONE
@@ -751,8 +769,7 @@ public class MediaControlPanel {
 
     private boolean areAnyExpandedBottomActionsVisible() {
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
-        int[] referencedIds = mMediaViewHolder.getActionsTopBarrier().getReferencedIds();
-        for (int id : referencedIds) {
+        for (int id : MediaViewHolder.Companion.getExpandedBottomActionIds()) {
             if (expandedSet.getVisibility(id) == ConstraintSet.VISIBLE) {
                 return true;
             }
@@ -872,7 +889,6 @@ public class MediaControlPanel {
     }
 
     /** Updates all the views that might change due to a scrubbing state change. */
-    // TODO(b/209656742): Handle scenarios where actionPrev and/or actionNext aren't active.
     private void updateDisplayForScrubbingChange(@NonNull MediaButton semanticActions) {
         // Update visibilities of the scrubbing time views and the scrubbing-dependent buttons.
         bindScrubbingTime(mMediaData);
