@@ -315,6 +315,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         Log.i(TAG, "Switching mode from " + modeToString(mCurrentMode) + " to "
                 + modeToString(mode));
         mCurrentMode = mode;
+        mViewMode.onDestroy();
 
         switch (mode) {
             case MODE_ONE_HANDED:
@@ -710,7 +711,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
      * Enscapsulates the differences between bouncer modes for the container.
      */
     interface ViewMode {
-
         default void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
@@ -738,6 +738,9 @@ public class KeyguardSecurityContainer extends FrameLayout {
         default int getChildWidthMeasureSpec(int parentWidthMeasureSpec) {
             return parentWidthMeasureSpec;
         }
+
+        /** Called when we are setting a new ViewMode */
+        default void onDestroy() {};
     }
 
     /**
@@ -781,6 +784,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
         private UserSwitcherController mUserSwitcherController;
         private KeyguardUserSwitcherPopupMenu mPopup;
         private Resources mResources;
+        private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
+                this::setupUserSwitcher;
 
         @Override
         public void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
@@ -805,6 +810,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
             mUserSwitcher = mView.findViewById(R.id.user_switcher_header);
             setupUserSwitcher();
+            mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
         }
 
         @Override
@@ -813,7 +819,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mPopup.dismiss();
                 mPopup = null;
             }
-            setupUserSwitcher();
+        }
+
+        @Override
+        public void onDestroy() {
+            mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
         }
 
         private Drawable findUserIcon(int userId) {
