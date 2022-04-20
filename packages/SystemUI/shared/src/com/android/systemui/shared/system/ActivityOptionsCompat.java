@@ -67,7 +67,7 @@ public abstract class ActivityOptionsCompat {
                 callbackHandler,
                 new ActivityOptions.OnAnimationStartedListener() {
                     @Override
-                    public void onAnimationStarted() {
+                    public void onAnimationStarted(long elapsedRealTime) {
                         if (callback != null) {
                             callbackHandler.post(callback);
                         }

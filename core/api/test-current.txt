@@ -168,11 +168,11 @@ package android.app {
   }
 
   public static interface ActivityOptions.OnAnimationFinishedListener {
-    method public void onAnimationFinished();
+    method public void onAnimationFinished(long);
   }
 
   public static interface ActivityOptions.OnAnimationStartedListener {
-    method public void onAnimationStarted();
+    method public void onAnimationStarted(long);
   }
 
   public class ActivityTaskManager {
