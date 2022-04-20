@@ -484,8 +484,6 @@ package android.app {
     field public static final int WINDOWING_MODE_FULLSCREEN = 1; // 0x1
     field public static final int WINDOWING_MODE_MULTI_WINDOW = 6; // 0x6
     field public static final int WINDOWING_MODE_PINNED = 2; // 0x2
-    field public static final int WINDOWING_MODE_SPLIT_SCREEN_PRIMARY = 3; // 0x3
-    field public static final int WINDOWING_MODE_SPLIT_SCREEN_SECONDARY = 4; // 0x4
     field public static final int WINDOWING_MODE_UNDEFINED = 0; // 0x0
   }
 

@@ -29,9 +29,9 @@ import com.android.systemui.dagger.DaggerGlobalRootComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
-import com.android.wm.shell.dagger.WMShellConcurrencyModule;
 import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
+import com.android.wm.shell.dagger.WMShellConcurrencyModule;
 import com.android.wm.shell.transition.ShellTransitions;
 
 import java.util.Map;
@@ -114,7 +114,6 @@ public class SystemUIFactory {
             // components that shouldn't be run in the test environment
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
                     .setPip(mWMComponent.getPip())
-                    .setLegacySplitScreen(mWMComponent.getLegacySplitScreen())
                     .setSplitScreen(mWMComponent.getSplitScreen())
                     .setOneHanded(mWMComponent.getOneHanded())
                     .setBubbles(mWMComponent.getBubbles())
@@ -135,7 +134,6 @@ public class SystemUIFactory {
             // is separating this logic into newly creating SystemUITestsFactory.
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
                     .setPip(Optional.ofNullable(null))
-                    .setLegacySplitScreen(Optional.ofNullable(null))
                     .setSplitScreen(Optional.ofNullable(null))
                     .setOneHanded(Optional.ofNullable(null))
                     .setBubbles(Optional.ofNullable(null))
