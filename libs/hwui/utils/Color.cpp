@@ -399,10 +399,12 @@ skcms_TransferFunction GetPQSkTransferFunction(float sdr_white_level) {
 // Skia skcms' default HLG maps encoded [0, 1] to linear [1, 12] in order to follow ARIB
 // but LinearEffect expects a decoded [0, 1] range instead to follow Rec 2100.
 std::optional<skcms_TransferFunction> GetHLGScaleTransferFunction() {
-    std::optional<skcms_TransferFunction> hlgFn = {};
-    skcms_TransferFunction_makeScaledHLGish(&hlgFn.value(), 1.f / 12.f, 2.f, 2.f, 1.f / 0.17883277f,
-                                            0.28466892f, 0.55991073f);
-    return hlgFn;
+    skcms_TransferFunction hlgFn;
+    if (skcms_TransferFunction_makeScaledHLGish(&hlgFn, 1.f / 12.f, 2.f, 2.f, 1.f / 0.17883277f,
+                                                0.28466892f, 0.55991073f)) {
+        return std::make_optional<skcms_TransferFunction>(hlgFn);
+    }
+    return {};
 }
 
 }  // namespace uirenderer
