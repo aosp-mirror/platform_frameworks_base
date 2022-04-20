@@ -860,7 +860,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         private void setupUserSwitcher() {
             final UserRecord currentUser = mUserSwitcherController.getCurrentUserRecord();
             if (currentUser == null) {
-                Log.wtf(TAG, "Current user in user switcher is null.");
+                Log.e(TAG, "Current user in user switcher is null.");
                 return;
             }
             Drawable userIcon = findUserIcon(currentUser.info.id);
