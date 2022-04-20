@@ -40,7 +40,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Use the "real" AudioSystem through the default adapter.
  * Use the "always ok" adapter to avoid dealing with the APM behaviors during a test.
  */
-public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
+public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
+        AudioSystem.VolumeRangeInitRequestCallback {
 
     private static final String TAG = "AudioSystemAdapter";
 
@@ -65,6 +66,9 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
     private static final Object sRoutingListenerLock = new Object();
     @GuardedBy("sRoutingListenerLock")
     private static @Nullable OnRoutingUpdatedListener sRoutingListener;
+    private static final Object sVolRangeInitReqListenerLock = new Object();
+    @GuardedBy("sVolRangeInitReqListenerLock")
+    private static @Nullable OnVolRangeInitRequestListener sVolRangeInitReqListener;
 
     /**
      * should be false except when trying to debug caching errors. When true, the value retrieved
@@ -102,6 +106,30 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
     }
 
     /**
+     * Implementation of AudioSystem.VolumeRangeInitRequestCallback
+     */
+    @Override
+    public void onVolumeRangeInitializationRequested() {
+        final OnVolRangeInitRequestListener listener;
+        synchronized (sVolRangeInitReqListenerLock) {
+            listener = sVolRangeInitReqListener;
+        }
+        if (listener != null) {
+            listener.onVolumeRangeInitRequestFromNative();
+        }
+    }
+
+    interface OnVolRangeInitRequestListener {
+        void onVolumeRangeInitRequestFromNative();
+    }
+
+    static void setVolRangeInitReqListener(@Nullable OnVolRangeInitRequestListener listener) {
+        synchronized (sVolRangeInitReqListenerLock) {
+            sVolRangeInitReqListener = listener;
+        }
+    }
+
+    /**
      * Create a wrapper around the {@link AudioSystem} static methods, all functions are directly
      * forwarded to the AudioSystem class.
      * @return an adapter around AudioSystem
@@ -110,6 +138,7 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
         if (sSingletonDefaultAdapter == null) {
             sSingletonDefaultAdapter = new AudioSystemAdapter();
             AudioSystem.setRoutingCallback(sSingletonDefaultAdapter);
+            AudioSystem.setVolumeRangeInitRequestCallback(sSingletonDefaultAdapter);
             if (USE_CACHE_FOR_GETDEVICES) {
                 sSingletonDefaultAdapter.mDevicesForAttrCache =
                         new ConcurrentHashMap<>(AudioSystem.getNumStreamTypes());
@@ -160,7 +189,15 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
             synchronized (mDevicesForAttrCache) {
                 res = mDevicesForAttrCache.get(key);
                 if (res == null) {
+                    // result from AudioSystem guaranteed non-null, but could be invalid
+                    // if there is a failure to talk to APM
                     res = AudioSystem.getDevicesForAttributes(attributes, forVolume);
+                    if (res.size() > 1 && res.get(0) != null
+                            && res.get(0).getInternalType() == AudioSystem.DEVICE_NONE) {
+                        Log.e(TAG, "unable to get devices for " + attributes);
+                        // return now, do not put invalid value in cache
+                        return res;
+                    }
                     mDevicesForAttrCache.put(key, res);
                     if (DEBUG_CACHE) {
                         Log.d(TAG, mMethodNames[METHOD_GETDEVICESFORATTRIBUTES]
