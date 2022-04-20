@@ -48,7 +48,50 @@
     <!-- The minimum display position of the arrow on the screen -->
     <dimen name="navigation_edge_arrow_min_y">64dp</dimen>
     <!-- The amount by which the arrow is shifted to avoid the finger-->
-    <dimen name="navigation_edge_finger_offset">48dp</dimen>
+    <dimen name="navigation_edge_finger_offset">64dp</dimen>
+
+    <!-- The thickness of the arrow -->
+    <dimen name="navigation_edge_arrow_thickness">4dp</dimen>
+    <!-- The minimum delta needed to change direction / stop triggering back -->
+    <dimen name="navigation_edge_minimum_x_delta_for_switch">32dp</dimen>
+
+    <!-- entry state -->
+    <dimen name="navigation_edge_entry_margin">4dp</dimen>
+    <dimen name="navigation_edge_entry_background_width">8dp</dimen>
+    <dimen name="navigation_edge_entry_background_height">60dp</dimen>
+    <dimen name="navigation_edge_entry_edge_corners">6dp</dimen>
+    <dimen name="navigation_edge_entry_far_corners">6dp</dimen>
+    <dimen name="navigation_edge_entry_arrow_length">10dp</dimen>
+    <dimen name="navigation_edge_entry_arrow_height">7dp</dimen>
+
+    <!-- pre-threshold -->
+    <dimen name="navigation_edge_pre_threshold_margin">4dp</dimen>
+    <dimen name="navigation_edge_pre_threshold_background_width">64dp</dimen>
+    <dimen name="navigation_edge_pre_threshold_background_height">60dp</dimen>
+    <dimen name="navigation_edge_pre_threshold_edge_corners">22dp</dimen>
+    <dimen name="navigation_edge_pre_threshold_far_corners">26dp</dimen>
+
+    <!-- post-threshold / active -->
+    <dimen name="navigation_edge_active_margin">14dp</dimen>
+    <dimen name="navigation_edge_active_background_width">60dp</dimen>
+    <dimen name="navigation_edge_active_background_height">60dp</dimen>
+    <dimen name="navigation_edge_active_edge_corners">30dp</dimen>
+    <dimen name="navigation_edge_active_far_corners">30dp</dimen>
+    <dimen name="navigation_edge_active_arrow_length">8dp</dimen>
+    <dimen name="navigation_edge_active_arrow_height">9dp</dimen>
+
+    <!-- stretch @412 dp -->
+    <dimen name="navigation_edge_stretch_threshold">412dp</dimen>
+    <dimen name="navigation_edge_stretch_margin">18dp</dimen>
+    <dimen name="navigation_edge_stretch_background_width">74dp</dimen>
+    <dimen name="navigation_edge_stretch_background_height">60dp</dimen>
+    <dimen name="navigation_edge_stretch_left_corners">30dp</dimen>
+    <dimen name="navigation_edge_stretch_right_corners">30dp</dimen>
+    <dimen name="navigation_edge_stretched_arrow_length">7dp</dimen>
+    <dimen name="navigation_edge_stretched_arrow_height">10dp</dimen>
+
+    <dimen name="navigation_edge_cancelled_arrow_length">12dp</dimen>
+    <dimen name="navigation_edge_cancelled_arrow_height">0dp</dimen>
 
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
