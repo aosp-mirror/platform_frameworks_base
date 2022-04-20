@@ -1933,36 +1933,21 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ယခု မရနိုင်ပါ။"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> မရနိုင်ပါ"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"ခွင့်ပြုချက်လိုအပ်သည်"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_camera_dialog (3935701653713853065) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_fingerprint_dialog (3516853717714141951) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_microphone_dialog (544822455127171206) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (196994247017450357) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (8222710146267948647) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_title_for_settings_dialog (6895719984375299791) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (5024599278277957935) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (7491114163056552686) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message (1245180131667647277) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6306583663205997979) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (6545624942642129664) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_dialog (8462740631707923000) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (3470977315395784567) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (698460091901465092) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_fingerprint_dialog (8552691971910603907) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"ကင်မရာ မရနိုင်ပါ"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ဖုန်းပေါ်တွင် ရှေ့ဆက်ပါ"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"မိုက်ခရိုဖုန်း မရနိုင်ပါ"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV ဆက်တင်များ မရနိုင်ပါ"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tablet ဆက်တင်များ မရနိုင်ပါ"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Phone ဆက်တင်များ မရနိုင်ပါ"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"၎င်းကို သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> တွင် သုံး၍မရပါ။ Android TV စက်တွင် စမ်းကြည့်ပါ။"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"၎င်းကို သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> တွင် သုံး၍မရပါ။ တက်ဘလက်တွင် စမ်းကြည့်ပါ။"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"၎င်းကို သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> တွင် သုံး၍မရပါ။ ဖုန်းတွင် စမ်းကြည့်ပါ။"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"၎င်းကို သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> တွင် ယခုသုံး၍မရပါ။ Android TV စက်တွင် စမ်းကြည့်ပါ။"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"၎င်းကို သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> တွင် ယခုသုံး၍မရပါ။ တက်ဘလက်တွင် စမ်းကြည့်ပါ။"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"၎င်းကို သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> တွင် ယခုသုံး၍မရပါ။ ဖုန်းတွင် စမ်းကြည့်ပါ။"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ဤအက်ပ်က ထပ်ဆောင်းလုံခြုံရေးကို တောင်းဆိုနေသည်။ Android TV စက်တွင် စမ်းကြည့်ပါ။"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ဤအက်ပ်က ထပ်ဆောင်းလုံခြုံရေးကို တောင်းဆိုနေသည်။ တက်ဘလက်တွင် စမ်းကြည့်ပါ။"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ဤအက်ပ်က ထပ်ဆောင်းလုံခြုံရေးကို တောင်းဆိုနေသည်။ ဖုန်းတွင် စမ်းကြည့်ပါ။"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ဤအက်ပ်ကို Android ဗားရှင်းဟောင်းအတွက် ပြုလုပ်ထားခြင်းဖြစ်ပြီး ပုံမှန်အလုပ်မလုပ်နိုင်ပါ။ အပ်ဒိတ်များအတွက် ရှာကြည့်ပါ သို့မဟုတ် ဆော့ဖ်ဝဲအင်ဂျင်နီယာကို ဆက်သွယ်ပါ။"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"အပ်ဒိတ်စစ်ရန်"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"သင့်ထံတွင် စာအသစ်များရောက်နေသည်"</string>
@@ -2067,14 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ပိုမိုလေ့လာရန်နှင့် ပြောင်းလဲရန် တို့ပါ။"</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'မနှောင့်ယှက်ရ\' ပြောင်းလဲသွားပါပြီ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
-    <!-- no translation found for review_notification_settings_title (5102557424459810820) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_text (5696497037817525074) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_remind_me_action (1081081018678480907) -->
-    <skip />
-    <!-- no translation found for review_notification_settings_dismiss (4160916504616428294) -->
-    <skip />
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"အကြောင်းကြားချက် ဆက်တင်များ စိစစ်ရန်"</string>
+    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 တွင် သင်ထည့်သွင်းသော အက်ပ်များသည် အကြောင်းကြားချက်များပို့ရန် သင်၏ခွင့်ပြုချက် လိုအပ်ပါမည်။ ရှိပြီးသားအက်ပ်များအတွက် ဤခွင့်ပြုချက်ကိုပြောင်းရန် တို့ပါ။"</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"နောက်မှ သတိပေးပါ"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ပယ်ရန်"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"စနစ်"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ဆက်တင်များ"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"ကင်မရာ"</string>
@@ -2293,11 +2274,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ကို ဘာသာပြန်ထားသည်။"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"မက်ဆေ့ဂျ်ကို <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> မှ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> သို့ ဘာသာပြန်ထားသည်။"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"နောက်ခံလုပ်ဆောင်ချက်"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"အက်ပ်က ဘက်ထရီအကုန်မြန်စေသည်"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"အက်ပ်က ပွင့်နေဆဲဖြစ်သည်"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> ကို နောက်ခံတွင် ဖွင့်ထားသည်။ ဘက်ထရီ အသုံးပြုမှုကို စီမံရန် တို့ပါ။"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> က ဘက်ထရီ သက်တမ်းကို ထိခိုက်နိုင်သည်။ ပွင့်နေသောအက်ပ်များ ပြန်ကြည့်ရန် တို့ပါ။"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ပွင့်နေသည့်အက်ပ်များ စစ်ဆေးရန်"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ ဖုန်းကင်မရာကို သုံး၍မရပါ"</string>

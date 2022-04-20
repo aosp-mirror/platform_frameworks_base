@@ -42,8 +42,6 @@
     <string name="consent_yes" msgid="8344487259618762872">"السماح"</string>
     <string name="consent_no" msgid="2640796915611404382">"عدم السماح"</string>
     <string name="consent_back" msgid="2560683030046918882">"رجوع"</string>
-    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"‏هل تريد منح التطبيقات على &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; نفس الأذونات على &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;؟"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"‏&lt;p&gt;قد تتضمَّن هذه الأذونات الوصول إلى الميكروفون والكاميرا والموقع الجغرافي وغيرها من أذونات الوصول إلى المعلومات الحسّاسة على &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;يمكنك تغيير هذه الأذونات في أي وقت في إعداداتك على &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;"</string>
 </resources>

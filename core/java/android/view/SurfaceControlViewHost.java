@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
+import android.window.WindowTokenClient;
 import android.view.InsetsState;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
@@ -193,6 +194,14 @@ public class SurfaceControlViewHost {
          * is more akin to a PopupWindow in that the size is user specified
          * independent of configuration width and height.
          *
+         * In order to receive the configuration change via 
+         * {@link View#onConfigurationChanged}, the context used with the
+         * SurfaceControlViewHost and it's embedded view hierarchy must
+         * be a WindowContext obtained from {@link Context#createWindowContext}.
+         *
+         * If a regular service context is used, then your embedded view hierarchy
+         * will always perceive the global configuration.
+         *
          * @param c The configuration to forward
          */
         public void notifyConfigurationChanged(@NonNull Configuration c) {
@@ -266,6 +275,8 @@ public class SurfaceControlViewHost {
             @NonNull WindowlessWindowManager wwm) {
         mWm = wwm;
         mViewRoot = new ViewRootImpl(c, d, mWm);
+        addConfigCallback(c, d);
+
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
 
         mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
@@ -294,9 +305,21 @@ public class SurfaceControlViewHost {
                 mSurfaceControl, hostToken);
 
         mViewRoot = new ViewRootImpl(context, display, mWm);
+        addConfigCallback(context, display);
+
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
 
         mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
+    }
+
+    private void addConfigCallback(Context c, Display d) {
+        final IBinder token = c.getWindowContextToken();
+        mViewRoot.addConfigCallback((conf) -> {
+            if (token instanceof WindowTokenClient) {
+                final WindowTokenClient w = (WindowTokenClient)  token;
+                w.onConfigurationChanged(conf, d.getDisplayId(), true);
+            }
+        });
     }
 
     /**

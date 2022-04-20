@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Kobler fra…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Kobler til…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Koblet til <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Sammenkobles …"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Kobler til …"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Koblet til (ingen telefon) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Koblet til (ingen medier) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Koblet til (ingen meldingstilgang) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begrenset profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du legge til en ny bruker?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enheten med andre folk ved å opprette flere brukere. Hver bruker har sin egen plass de kan tilpasse med apper, bakgrunner og annet. Brukere kan også justere enhetsinnstillinger, for eksempel Wi-Fi, som påvirker alle.\n\nNår du legger til en ny bruker, må vedkommende angi innstillinger for plassen sin.\n\nAlle brukere kan oppdatere apper for alle andre brukere. Innstillinger og tjenester for tilgjengelighet overføres kanskje ikke til den nye brukeren."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du legger til en ny bruker, må vedkommende konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du legger til en ny bruker, må hen konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Konfigurere brukeren nå?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for at brukeren er tilgjengelig for å konfigurere området sitt på enheten"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du konfigurere profilen nå?"</string>
@@ -590,7 +590,7 @@
     <string name="add_guest_failed" msgid="8074548434469843443">"Kunne ikke opprette en ny gjest"</string>
     <string name="user_nickname" msgid="262624187455825083">"Kallenavn"</string>
     <string name="user_add_user" msgid="7876449291500212468">"Legg til bruker"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Legg til en gjest"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Legg til gjest"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Fjern gjesten"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Tilbakestill gjest"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Vil du tilbakestille gjesten?"</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Tilbakestill"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Fjern"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Tilbakestiller gjesten …"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vil du tilbakestille gjesteøkten?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dette starter en ny gjesteøkt og sletter alle apper og data fra den gjeldende økten"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vil du avslutte gjestemodus?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Dette sletter apper og data fra den gjeldende gjesteøkten"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Avslutt"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vil du lagre gjesteaktivitet?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Du kan lagre aktivitet fra den gjeldende økten eller slette alle apper og data"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Slett"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Lagre"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Avslutt gjestemodus"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Tilbakestill gjesteøkten"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Avslutt gjesteøkten"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"All aktivitet slettes når du avslutter"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Du kan lagre eller slette aktiviteten når du avslutter"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Tilbakestill for å slette øktaktivitet nå, eller du kan lagre eller slette aktivitet når du avslutter"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Ta et bilde"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Velg et bilde"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Velg et bilde"</string>
@@ -685,12 +670,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skann QR-koden"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"For å begynne å lytte, midtstill QR-koden nedenfor"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-koden er ikke i et gyldig format"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vil du stoppe kringkastingen av <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Hvis du kringkaster <xliff:g id="SWITCHAPP">%1$s</xliff:g> eller endrer utgangen, stopper den nåværende kringkastingen din"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Kringkast <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Endre utgang"</string>
 </resources>

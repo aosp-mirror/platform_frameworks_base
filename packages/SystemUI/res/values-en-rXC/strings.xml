@@ -136,6 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‏‎‎‎‏‎‏‎‏‎‎‎‎‎‏‏‏‎‎‎‏‏‏‎‎‎‎‏‏‏‎‎‎‎‎‎‏‏‏‎‏‏‎‏‎‏‎‎‏‎‏‎‏‎‎Confirmed‎‏‎‎‏‎"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‏‏‎‏‎‏‏‎‏‏‎‏‏‏‎‎‏‏‏‏‏‎‎‎‏‎‏‎‏‏‎‏‎‏‏‎‎‎‎‏‎‏‏‏‏‏‎‎Tap Confirm to complete‎‏‎‎‏‎"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‎‏‎‎‏‏‏‏‎‏‏‏‏‏‎‎‎‏‎‏‏‏‏‎‏‏‏‏‏‏‎‎‎‏‏‏‎‎‎‏‎‏‏‏‎‏‎‏‎‏‎‎‏‏‏‎Unlocked by face. Press the unlock icon to continue.‎‏‎‎‏‎"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‎‎‎‎‏‏‎‎‎‎‎‏‎‏‏‏‎‏‏‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‎‎‏‎‎‎‎‎‏‎‏‏‏‏‎‏‏‏‎‏‎‎‏‎Unlocked by face. Press to continue.‎‏‎‎‏‎"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‏‎‎‏‏‏‎‎‎‎‏‎‏‎‏‎‎‏‏‎‏‏‎‏‏‎‏‏‎‏‎‎‎‎‎‎‏‏‏‎‏‎‎‎‏‎‎‏‎‏‎‎‎Face recognized. Press to continue.‎‏‎‎‏‎"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‎‏‏‎‏‏‎‏‏‏‏‎‏‏‏‎‎‎‏‎‏‏‎‏‎‏‎‎‏‏‎‎‏‏‏‎‏‎‎‏‎‏‏‏‎‎‏‏‏‏‎‎‏‎‏‏‎Face recognized. Press the unlock icon to continue.‎‏‎‎‏‎"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‎‏‎‎‏‎‏‏‎‎‏‎‎‎‏‎‎‏‏‏‏‎‏‏‎‏‏‎‏‏‎‎‎‎‏‎‏‎‏‏‏‎‏‎‎‎‏‎‏‎‎‏‎‎‎Authenticated‎‏‎‎‏‎"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‏‏‏‏‎‏‎‎‎‏‏‎‎‏‎‎‏‎‎‏‎‎‎‎‏‎‏‏‎‏‎‎‏‏‏‎‏‏‏‎‏‏‏‎‏‏‎‎‎‎‏‎‏‎Use PIN‎‏‎‎‏‎"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‎‎‏‎‎‎‏‎‏‎‏‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‏‎‏‎‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‎‏‎‏‎‏‏‏‎‏‎‎Use pattern‎‏‎‎‏‎"</string>
@@ -312,6 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‏‏‎‏‏‏‎‏‎‎‏‏‏‏‎‏‏‎‏‏‏‎‎‏‏‏‏‎‏‎‎‎‎‎‏‏‏‎‏‏‏‎‎‎‏‎‎‏‎‎‎‎‎‏‎Swipe up to open‎‏‎‎‏‎"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‎‎‏‏‎‎‎‏‎‎‎‏‏‏‏‏‎‎‏‎‏‏‏‎‎‎‎‏‎‎‎‎‏‏‎‎‎‎‏‎‏‏‎‎‏‎‎‏‎Press the unlock icon to open‎‏‎‎‏‎"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‎‏‏‏‏‎‏‏‎‏‎‏‎‏‎‏‎‏‏‎‎‏‎‏‎‎‏‎‎‏‎‏‏‏‎‎‏‏‎‏‎‎‏‎‎‎‎‎‏‎‏‏‏‎‏‏‏‎‎‎Unlocked by face. Press the unlock icon to open.‎‏‎‎‏‎"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‎‏‎‎‎‏‎‏‏‎‎‏‎‏‏‎‎‏‎‏‏‏‏‎‎‏‏‎‏‎‎‏‎‎‏‏‎‎‏‏‏‏‎‎‏‏‎‏‏‏‎‎‏‎‎Unlocked by face. Press to open.‎‏‎‎‏‎"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‏‎‏‏‏‎‏‏‎‎‏‏‎‎‏‏‎‏‎‏‏‎‏‎‎‏‎‎‎‏‏‎‏‏‎‏‏‎‏‏‏‎‏‏‎‎‏‎‏‏‎‎Face recognized. Press to open.‎‏‎‎‏‎"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‎‏‎‏‏‏‏‎‎‏‎‎‏‎‏‏‏‏‏‏‎‎‏‏‎‎‎‎‎‎‏‏‏‏‏‎‏‎‎‏‎‏‎‏‎‎‏‏‏‎‎‏‎‏‎‎Face recognized. Press the unlock icon to open.‎‏‎‎‏‎"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‎‏‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎‎‎‏‎‏‎‏‏‏‏‎‏‏‏‎‎‎‏‎‎‏‏‎Swipe up to try again‎‏‎‎‏‎"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‎‏‎‏‏‏‎‏‎‎‏‏‎‏‎‏‏‏‏‏‏‎‎‎‎‏‏‏‏‏‎‎‎‎‏‎‏‎‎‏‏‏‏‎Unlock to use NFC‎‏‎‎‏‎"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‏‏‎‎‏‏‏‏‎‎‏‏‎‏‎‎‏‎‏‏‏‏‎‎‎‏‎‏‎‎‏‎‎‏‏‎‏‎‏‏‎‎‏‎‏‏‏‏‎‏‏‏‏‏‎This device belongs to your organization‎‏‎‎‏‎"</string>
@@ -511,6 +517,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‏‏‏‎‎‏‎‎‏‏‏‎‎‎‎‏‏‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‏‎‏‎‎‏‏‏‎‎‏‏‎‏‎‎‎‏‎‏‎Priority‎‏‎‎‏‎"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‏‎‏‏‏‎‏‏‎‎‎‏‎‏‏‎‏‎‏‏‏‎‎‎‎‏‏‎‎‎‎‏‎‎‎‏‏‎‏‏‎‎‎‏‎‏‏‏‎‏‏‏‎‎‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ doesn’t support conversation features‎‏‎‎‏‎"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‎‎‏‎‏‎‎‏‏‎‏‏‏‎‎‎‎‎‎‎‏‏‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‏‎‏‎‏‎‎‎These notifications can\'t be modified.‎‏‎‎‏‎"</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‎‏‏‏‎‏‎‏‎‏‎‏‏‎‏‏‏‎‎‎‏‏‎‎‏‎‏‏‎‏‎‎‏‎‎‏‏‎‎‏‎‎‏‎Call notifications can\'t be modified.‎‏‎‎‏‎"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‎‏‎‏‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎‏‏‎‎‏‎‏‏‎‏‏‎‏‏‏‏‎‎‎‏‎‏‏‎‎‏‎‎‏‎‎‏‏‎This group of notifications cannot be configured here‎‏‎‎‏‎"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‏‎‎‎‏‏‎‎‎‏‏‏‎‎‎‏‎‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‏‎‏‏‏‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‎‎‎‎Proxied notification‎‏‎‎‏‎"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‎‏‏‏‎‎‏‏‏‎‏‏‎‏‎‎‏‎‎‏‎‎‏‎‏‎‎‎‏‎‎‎‎‎‏‏‎‎‎‏‎‏‎‎‏‎‎‏‎‎‏‏‎All ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ notifications‎‏‎‎‏‎"</string>
@@ -914,12 +921,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‎‏‎‎‏‏‎‏‎‏‎‎‏‏‎‎‎‏‎‏‎‎‎‎‎‏‎‏‏‎‏‏‎‏‏‏‎‎‏‎‎‏‎‎‎‎‎‎‎Add tile‎‏‎‎‏‎"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎‎‏‏‎‏‎‎‎‏‎‏‏‏‎‏‏‎‏‏‎‏‏‏‏‏‏‎‏‏‎‏‎‎‏‎‏‏‎‎‎‎‎‎Do not add tile‎‏‎‎‏‎"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‎‏‎‏‎‏‎‏‏‏‏‏‎‎‎‎‏‏‏‎‏‎‎‎‏‏‎‎‎‎‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‏‏‎‏‏‎‎Select user‎‏‎‎‏‎"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‎‏‎‎‏‏‎‎‎‏‏‏‏‏‎‎‎‎‏‏‎‏‏‏‎‎‏‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%s</xliff:g>‎‏‎‎‏‏‏‎ active apps‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‎‏‎‎‏‏‎‎‎‏‏‏‏‏‎‎‎‎‏‏‎‏‏‏‎‎‏‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%s</xliff:g>‎‏‎‎‏‏‏‎ active app‎‏‎‎‏‎</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‎‎‎‎‏‎‏‏‎‎‎‏‏‏‎‏‏‎‎‎‏‎‏‎‏‎‎‏‎‏‏‏‏‎‎‎‎‏‎‎‏‎‏‏‏‎‎‎‎‏‏‎‎‎‎New information‎‏‎‎‏‎"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‎‎‏‎‏‏‏‎‎‎‎‏‏‏‎‏‏‏‎‏‏‏‎‏‏‎‎‎‏‏‎‏‏‏‎‏‎‏‎‎‏‎‎‎‎‏‏‏‎‎‏‎‏‎‏‎Active apps‎‏‎‎‏‎"</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‏‎‎‎‎‏‎‎‎‎‎‏‎‎‏‎‎‎‏‏‎‏‏‏‎‎‎‎‏‎‎‎‎‎‎‏‎‏‎‏‏‎‏‎‎‎‎‏‎‎‎‎‏‎‎‎Stop‎‏‎‎‏‎"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‏‏‏‎‏‎‎‏‎‏‏‎‏‏‏‏‎‎‏‏‎‏‏‏‎‏‏‏‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‏‏‏‎‎‏‏‎‎‏‎‎Stopped‎‏‎‎‏‎"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‏‎‏‎‏‏‏‎‎‎‏‏‎‏‏‏‎‎‎‏‎‏‎‏‏‏‏‎‏‎‏‎‏‎‏‎‎‏‏‎‎‎‎‏‏‏‎‎‎‎‏‎‎‏‎Done‎‏‎‎‏‎"</string>

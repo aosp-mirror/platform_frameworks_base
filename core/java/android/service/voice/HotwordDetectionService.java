@@ -74,7 +74,7 @@ public abstract class HotwordDetectionService extends Service {
     private static final String TAG = "HotwordDetectionService";
     private static final boolean DBG = false;
 
-    private static final long UPDATE_TIMEOUT_MILLIS = 5000;
+    private static final long UPDATE_TIMEOUT_MILLIS = 20000;
 
     /** @hide */
     public static final String KEY_INITIALIZATION_STATUS = "initialization_status";

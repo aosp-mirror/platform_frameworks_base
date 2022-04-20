@@ -42,8 +42,6 @@
     <string name="consent_yes" msgid="8344487259618762872">"ခွင့်ပြုရန်"</string>
     <string name="consent_no" msgid="2640796915611404382">"ခွင့်မပြုပါ"</string>
     <string name="consent_back" msgid="2560683030046918882">"နောက်သို့"</string>
-    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"အက်ပ်များကို &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; တွင်ပေးထားသည့် ခွင့်ပြုချက်များအတိုင်း &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; တွင် ပေးမလား။"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;၎င်းတွင် မိုက်ခရိုဖုန်း၊ ကင်မရာ၊ တည်နေရာ အသုံးပြုခွင့်အပြင် &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;ပေါ်ရှိ အခြား သတိထားရမည့် ခွင့်ပြုချက်များ ပါဝင်နိုင်သည်။&lt;/p&gt; &lt;p&gt;ဤခွင့်ပြုချက်များကို &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;ပေါ်ရှိ သင်၏ဆက်တင်များတွင် အချိန်မရွေးပြောင်းနိုင်သည်။&lt;/p&gt;"</string>
 </resources>

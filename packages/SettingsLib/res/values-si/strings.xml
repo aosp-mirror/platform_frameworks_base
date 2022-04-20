@@ -47,7 +47,7 @@
     <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
     <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"නැත/වැඩි දියුණු කළ විවෘත"</string>
-    <string name="wifi_security_owe" msgid="3343421403561657809">"වැඩි දියුණු කළ විවෘත"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise බිටු-192"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"සුරකින ලදි"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"විසන්ධි විය"</string>
@@ -598,36 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"යළි සකසන්න"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ඉවත් කරන්න"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"අමුත්තා යළි සකසමින්…"</string>
-    <!-- no translation found for guest_reset_and_restart_dialog_title (3396657008451616041) -->
-    <skip />
-    <!-- no translation found for guest_reset_and_restart_dialog_message (2764425635305200790) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title (1846494656849381804) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message (1743218864242719783) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_button (1736401897067442044) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_title_non_ephemeral (7675327443743162986) -->
-    <skip />
-    <!-- no translation found for guest_exit_dialog_message_non_ephemeral (223385323235719442) -->
-    <skip />
-    <!-- no translation found for guest_exit_clear_data_button (3425812652180679014) -->
-    <skip />
-    <!-- no translation found for guest_exit_save_data_button (3690974510644963547) -->
-    <skip />
-    <!-- no translation found for guest_exit_button (5774985819191803960) -->
-    <skip />
-    <!-- no translation found for guest_reset_button (2515069346223503479) -->
-    <skip />
-    <!-- no translation found for guest_exit_quick_settings_button (1912362095913765471) -->
-    <skip />
-    <!-- no translation found for guest_notification_ephemeral (7263252466950923871) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral (6843799963012259330) -->
-    <skip />
-    <!-- no translation found for guest_notification_non_ephemeral_non_first_login (8009307983766934876) -->
-    <skip />
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ආගන්තුක සැසිය යළි සකසන්නද?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"මෙය නව ආගන්තුක සැසියක් ආරම්භ කර වත්මන් සැසියෙන් සියලු යෙදුම් සහ දත්ත මකනු ඇත"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ආගන්තුක ප්‍රකාරයෙන් පිටවන්නද?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"මෙය වත්මන් ආගන්තුක සැසියෙන් යෙදුම් සහ දත්ත මකනු ඇත"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"පිටවන්න"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ආගන්තුක ක්‍රියාකාරකම් සුරකින්නද?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ඔබට වත්මන් සැසියෙන් ක්‍රියාකාරකම් සුරැකීමට හෝ සියලු යෙදුම් සහ දත්ත මැකීමට හැකිය"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"මකන්න"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"සුරකින්න"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"ආගන්තුක ප්‍රකාරයෙන් පිටවන්න"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"ආගන්තුක සැසිය යළි සකසන්න"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"අමුත්තා පිටවීම"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"පිටවීමේදී සියලු ක්‍රියාකාරකම් මකනු ඇත"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ඔබට පිටවීමේදී ඔබගේ ක්‍රියාකාරකම් සුරැකීමට හෝ මැකීමට හැකිය"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"දැන් සැසි ක්‍රියාකාරකම් මැකීමට යළි සකසන්න, නැතහොත් ඔබට පිටවීමේදී ක්‍රියාකාරකම් සුරැකීමට හෝ මැකීමට හැකිය"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ඡායාරූපයක් ගන්න"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"රූපයක් තෝරන්න"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ඡායාරූපය තෝරන්න"</string>
@@ -685,12 +670,8 @@
     <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR කේතය ස්කෑන් කරන්න"</string>
     <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"සවන් දීම ආරම්භ කිරීමට, පහත QR කේතය මධ්‍යගත කරන්න"</string>
     <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR කේතය වලංගු ආකෘතියක් නොවේ"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> විකාශනය කිරීම නවත්වන්නද?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ඔබ <xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය කළහොත් හෝ ප්‍රතිදානය වෙනස් කළහොත්, ඔබගේ වත්මන් විකාශනය නවතිනු ඇත."</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ප්‍රතිදානය වෙනස් කරන්න"</string>
 </resources>

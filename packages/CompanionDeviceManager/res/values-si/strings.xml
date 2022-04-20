@@ -42,8 +42,6 @@
     <string name="consent_yes" msgid="8344487259618762872">"ඉඩ දෙන්න"</string>
     <string name="consent_no" msgid="2640796915611404382">"ඉඩ නොදෙන්න"</string>
     <string name="consent_back" msgid="2560683030046918882">"ආපසු"</string>
-    <!-- no translation found for permission_sync_confirmation_title (4409622174437248702) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (4866838188678457084) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; the හි යෙදුම්වලට &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; හි අවසරම දෙන්නද?"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;මෙයට මයික්‍රෆෝනය, කැමරාව සහ ස්ථාන ප්‍රවේශය සහ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; හි අනෙකුත් සංවේදී අවසර ඇතුළත් විය හැකිය.&lt;/p&gt; &lt;p&gt;ඔබට ඔබගේ සැකසීම් තුළ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; හිදී ඕනෑම වේලාවක මෙම අවසර වෙනස් කළ හැකිය.&lt;/p&gt;"</string>
 </resources>

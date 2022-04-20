@@ -83,7 +83,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
+import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -1733,8 +1733,8 @@ public class NotificationStackScrollLayoutController {
         }
 
         @Override
-        public void applyExpandAnimationParams(ExpandAnimationParameters params) {
-            mView.applyExpandAnimationParams(params);
+        public void applyLaunchAnimationParams(LaunchAnimationParameters params) {
+            mView.applyLaunchAnimationParams(params);
         }
 
         @Override

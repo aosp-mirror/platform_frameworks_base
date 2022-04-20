@@ -32,6 +32,7 @@ import com.android.internal.R;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Implementation of {@link androidx.window.util.DataProducer} that produces a
@@ -40,7 +41,7 @@ import java.util.Set;
  * settings where the {@link String} property is saved with the key
  * {@link RawFoldingFeatureProducer#DISPLAY_FEATURES}. If this value is null or empty then the
  * value in {@link android.content.res.Resources} is used. If both are empty then
- * {@link RawFoldingFeatureProducer#getData()} returns an empty object.
+ * {@link RawFoldingFeatureProducer#getData} returns an empty object.
  * {@link RawFoldingFeatureProducer} listens to changes in the setting so that it can override
  * the system {@link CommonFoldingFeature} data.
  */
@@ -63,12 +64,13 @@ public final class RawFoldingFeatureProducer extends BaseDataProducer<String> {
 
     @Override
     @NonNull
-    public Optional<String> getData() {
+    public void getData(Consumer<String> dataConsumer) {
         String displayFeaturesString = getFeatureString();
         if (displayFeaturesString == null) {
-            return Optional.empty();
+            dataConsumer.accept("");
+        } else {
+            dataConsumer.accept(displayFeaturesString);
         }
-        return Optional.of(displayFeaturesString);
     }
 
     /**
@@ -84,12 +86,18 @@ public final class RawFoldingFeatureProducer extends BaseDataProducer<String> {
     }
 
     @Override
-    protected void onListenersChanged(Set<Runnable> callbacks) {
+    protected void onListenersChanged(Set<Consumer<String>> callbacks) {
         if (callbacks.isEmpty()) {
             unregisterObserversIfNeeded();
         } else {
             registerObserversIfNeeded();
         }
+    }
+
+    @NonNull
+    @Override
+    public Optional<String> getCurrentData() {
+        return Optional.of(getFeatureString());
     }
 
     /**
@@ -125,7 +133,7 @@ public final class RawFoldingFeatureProducer extends BaseDataProducer<String> {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (mDisplayFeaturesUri.equals(uri)) {
-                notifyDataChanged();
+                notifyDataChanged(getFeatureString());
             }
         }
     }

@@ -44,9 +44,8 @@ class RoundedCornerDecorProviderFactoryTest : SysuiTestCase() {
 
     @Test
     fun testNoRoundedCorners() {
-        Mockito.doReturn(Size(0, 0)).`when`(roundedCornerResDelegate).topRoundedSize
-        Mockito.doReturn(Size(0, 0)).`when`(roundedCornerResDelegate).bottomRoundedSize
-        Mockito.doReturn(false).`when`(roundedCornerResDelegate).isMultipleRadius
+        Mockito.doReturn(false).`when`(roundedCornerResDelegate).hasTop
+        Mockito.doReturn(false).`when`(roundedCornerResDelegate).hasBottom
 
         roundedCornerDecorProviderFactory =
                 RoundedCornerDecorProviderFactory(roundedCornerResDelegate)
@@ -56,10 +55,10 @@ class RoundedCornerDecorProviderFactoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun testHasRoundedCornersIfTopWidthLargerThan0() {
-        Mockito.doReturn(Size(1, 0)).`when`(roundedCornerResDelegate).topRoundedSize
-        Mockito.doReturn(Size(0, 0)).`when`(roundedCornerResDelegate).bottomRoundedSize
-        Mockito.doReturn(false).`when`(roundedCornerResDelegate).isMultipleRadius
+    fun testOnlyHasTopRoundedCorners() {
+        Mockito.doReturn(true).`when`(roundedCornerResDelegate).hasTop
+        Mockito.doReturn(false).`when`(roundedCornerResDelegate).hasBottom
+        Mockito.doReturn(Size(1, 1)).`when`(roundedCornerResDelegate).topRoundedSize
 
         roundedCornerDecorProviderFactory =
                 RoundedCornerDecorProviderFactory(roundedCornerResDelegate)
@@ -82,9 +81,9 @@ class RoundedCornerDecorProviderFactoryTest : SysuiTestCase() {
 
     @Test
     fun testHasRoundedCornersIfBottomWidthLargerThan0() {
-        Mockito.doReturn(Size(0, 0)).`when`(roundedCornerResDelegate).topRoundedSize
+        Mockito.doReturn(false).`when`(roundedCornerResDelegate).hasTop
+        Mockito.doReturn(true).`when`(roundedCornerResDelegate).hasBottom
         Mockito.doReturn(Size(1, 1)).`when`(roundedCornerResDelegate).bottomRoundedSize
-        Mockito.doReturn(false).`when`(roundedCornerResDelegate).isMultipleRadius
 
         roundedCornerDecorProviderFactory =
                 RoundedCornerDecorProviderFactory(roundedCornerResDelegate)
@@ -107,9 +106,10 @@ class RoundedCornerDecorProviderFactoryTest : SysuiTestCase() {
 
     @Test
     fun test4CornerDecorProvidersInfo() {
+        Mockito.doReturn(true).`when`(roundedCornerResDelegate).hasTop
+        Mockito.doReturn(true).`when`(roundedCornerResDelegate).hasBottom
         Mockito.doReturn(Size(10, 10)).`when`(roundedCornerResDelegate).topRoundedSize
         Mockito.doReturn(Size(10, 10)).`when`(roundedCornerResDelegate).bottomRoundedSize
-        Mockito.doReturn(true).`when`(roundedCornerResDelegate).isMultipleRadius
 
         roundedCornerDecorProviderFactory =
                 RoundedCornerDecorProviderFactory(roundedCornerResDelegate)
