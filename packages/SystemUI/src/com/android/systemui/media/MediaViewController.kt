@@ -261,10 +261,7 @@ class MediaViewController @Inject constructor(
             TYPE.PLAYER -> MediaViewHolder.controlsIds
             TYPE.RECOMMENDATION -> RecommendationViewHolder.controlsIds
         }
-        val gutsIds = when (type) {
-            TYPE.PLAYER -> MediaViewHolder.gutsIds
-            TYPE.RECOMMENDATION -> RecommendationViewHolder.gutsIds
-        }
+        val gutsIds = GutsViewHolder.ids
         controlsIds.forEach { id ->
             viewState.widgetStates.get(id)?.let { state ->
                 // Make sure to use the unmodified state if guts are not visible.
