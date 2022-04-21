@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <SkCamera.h>
 #include <SkMatrix.h>
 
 #include <utils/LinearAllocator.h>
