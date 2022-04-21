@@ -24,6 +24,8 @@ import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.util.animation.TransitionLayout
 
+private const val TAG = "RecommendationViewHolder"
+
 /** ViewHolder for a Smartspace media recommendation. */
 class RecommendationViewHolder private constructor(itemView: View) {
 
@@ -52,26 +54,19 @@ class RecommendationViewHolder private constructor(itemView: View) {
         itemView.requireViewById(R.id.media_subtitle3)
     )
 
-    // Settings/Guts screen
-    val longPressText = itemView.requireViewById<TextView>(R.id.remove_text)
-    val cancel = itemView.requireViewById<View>(R.id.cancel)
-    val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
-    val dismissLabel = dismiss.getChildAt(0)
-    val settings = itemView.requireViewById<View>(R.id.settings)
-    val settingsText = itemView.requireViewById<TextView>(R.id.settings_text)
+    val gutsViewHolder = GutsViewHolder(itemView)
 
     init {
         (recommendations.background as IlluminationDrawable).let { background ->
             mediaCoverContainers.forEach { background.registerLightSource(it) }
-            background.registerLightSource(cancel)
-            background.registerLightSource(dismiss)
-            background.registerLightSource(dismissLabel)
-            background.registerLightSource(settings)
+            background.registerLightSource(gutsViewHolder.cancel)
+            background.registerLightSource(gutsViewHolder.dismiss)
+            background.registerLightSource(gutsViewHolder.settings)
         }
     }
 
     fun marquee(start: Boolean, delay: Long) {
-        longPressText.getHandler().postDelayed({ longPressText.setSelected(start) }, delay)
+        gutsViewHolder.marquee(start, delay, TAG)
     }
 
     companion object {
@@ -104,14 +99,12 @@ class RecommendationViewHolder private constructor(itemView: View) {
             R.id.media_cover1_container,
             R.id.media_cover2_container,
             R.id.media_cover3_container,
-        )
-
-        // Res Ids for the components on the guts panel.
-        val gutsIds = setOf(
-            R.id.remove_text,
-            R.id.cancel,
-            R.id.dismiss,
-            R.id.settings
+            R.id.media_title1,
+            R.id.media_title2,
+            R.id.media_title3,
+            R.id.media_subtitle1,
+            R.id.media_subtitle2,
+            R.id.media_subtitle3
         )
     }
 }
