@@ -488,6 +488,25 @@ public final class AutofillManager {
     public static final String DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED =
             "autofill_dialog_enabled";
 
+    /**
+     * Sets the autofill hints allowed list for the fields that can trigger the fill dialog
+     * feature at Activity starting.
+     *
+     * The list of autofill hints is {@code ":"} colon delimited.
+     *
+     * <p>For example, a list with 3 hints {@code password}, {@code phone}, and
+     * {@code emailAddress}, would be {@code password:phone:emailAddress}
+     *
+     * Note: By default the password field is enabled even there is no password hint in the list
+     *
+     * @see View#setAutofillHints(String...)
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_AUTOFILL_DIALOG_HINTS =
+            "autofill_dialog_hints";
+
+    private static final String DIALOG_HINTS_DELIMITER = ":";
+
     /** @hide */
     public static final int RESULT_OK = 0;
     /** @hide */
@@ -537,6 +556,7 @@ public final class AutofillManager {
     public static final int NO_SESSION = Integer.MAX_VALUE;
 
     private static final boolean HAS_FILL_DIALOG_UI_FEATURE_DEFAULT = false;
+    private static final String FILL_DIALOG_ENABLED_DEFAULT_HINTS = "";
 
     private final IAutoFillManager mService;
 
@@ -651,6 +671,8 @@ public final class AutofillManager {
 
     // Indicates whether called the showAutofillDialog() method.
     private boolean mShowAutofillDialogCalled = false;
+
+    private final String[] mFillDialogEnabledHints;
 
     /** @hide */
     public interface AutofillClient {
@@ -796,14 +818,29 @@ public final class AutofillManager {
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED,
                 HAS_FILL_DIALOG_UI_FEATURE_DEFAULT);
+        mFillDialogEnabledHints = getFillDialogEnabledHints();
         if (sDebug) {
-            Log.d(TAG, "Fill dialog is enabled:" + mIsFillDialogEnabled);
+            Log.d(TAG, "Fill dialog is enabled:" + mIsFillDialogEnabled
+                    + ", hints=" + Arrays.toString(mFillDialogEnabledHints));
         }
 
         if (mOptions != null) {
             sDebug = (mOptions.loggingLevel & FLAG_ADD_CLIENT_DEBUG) != 0;
             sVerbose = (mOptions.loggingLevel & FLAG_ADD_CLIENT_VERBOSE) != 0;
         }
+    }
+
+    private String[] getFillDialogEnabledHints() {
+        final String dialogHints = DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_AUTOFILL_DIALOG_HINTS,
+                FILL_DIALOG_ENABLED_DEFAULT_HINTS);
+        if (TextUtils.isEmpty(dialogHints)) {
+            return new String[0];
+        }
+
+        return ArrayUtils.filter(dialogHints.split(DIALOG_HINTS_DELIMITER), String[]::new,
+                (str) -> !TextUtils.isEmpty(str));
     }
 
     /**
@@ -1076,17 +1113,27 @@ public final class AutofillManager {
     }
 
     /**
-     * The view is autofillable, marked to perform a fill request after layout if
+     * The view have the allowed autofill hints, marked to perform a fill request after layout if
      * the field does not trigger a fill request.
      *
      * @hide
      */
-    public void enableFillRequestActivityStarted() {
-        mRequireAutofill = true;
+    public void enableFillRequestActivityStarted(View v) {
+        if (mRequireAutofill) {
+            return;
+        }
+
+        if (mIsFillDialogEnabled
+                || ArrayUtils.containsAny(v.getAutofillHints(), mFillDialogEnabledHints)) {
+            if (sDebug) {
+                Log.d(TAG, "Trigger fill request at starting");
+            }
+            mRequireAutofill = true;
+        }
     }
 
     private boolean hasFillDialogUiFeature() {
-        return mIsFillDialogEnabled;
+        return mIsFillDialogEnabled || !ArrayUtils.isEmpty(mFillDialogEnabledHints);
     }
 
     /**
@@ -2977,6 +3024,8 @@ public final class AutofillManager {
         pw.print(pfx); pw.print("compat mode enabled: ");
         synchronized (mLock) {
             pw.print(pfx); pw.print("fill dialog enabled: "); pw.println(mIsFillDialogEnabled);
+            pw.print(pfx); pw.print("fill dialog enabled hints: ");
+            pw.println(Arrays.toString(mFillDialogEnabledHints));
             if (mCompatibilityBridge != null) {
                 final String pfx2 = pfx + "  ";
                 pw.println("true");
