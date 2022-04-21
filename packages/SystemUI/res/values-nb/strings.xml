@@ -130,7 +130,7 @@
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Bekreft"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Prøv på nytt"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Trykk for å avbryte autentiseringen"</string>
-    <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Prøv igjen"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Prøv på nytt"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"Ser etter ansiktet ditt"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Ansiktet er autentisert"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bekreftet"</string>
@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vil du fortsette økten?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Start på nytt"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, fortsett"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Gjestemodus"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Du er i gjestemodus"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Vil du legge til en ny bruker?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Når du legger til en ny bruker, må vedkommende konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Hvis du legger til en ny bruker, avsluttes gjestemodus, og alle apper og data fra den gjeldende gjesteøkten slettes."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Grensen for antall brukere er nådd"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Du kan legge til opptil <xliff:g id="COUNT">%d</xliff:g> brukere.</item>
@@ -467,7 +472,7 @@
     <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Legg til et kort"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Oppdaterer"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås opp for å bruke"</string>
-    <string name="wallet_error_generic" msgid="257704570182963611">"Det oppsto et problem med henting av kortene. Prøv igjen senere"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"Det oppsto et problem med henting av kortene. Prøv på nytt senere"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Innstillinger for låseskjermen"</string>
     <string name="qr_code_scanner_title" msgid="5290201053875420785">"Skann QR-koden"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Work-profil"</string>

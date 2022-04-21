@@ -136,12 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bestätigt"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Zum Abschließen auf \"Bestätigen\" tippen"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Gerät mit dem Gesicht entsperrt. Tippe auf das Symbol „Entsperren“, um fortzufahren."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Gerät mit dem Gesicht entsperrt. Tippe, um fortzufahren."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Gesicht erkannt. Tippe, um fortzufahren."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Gesicht erkannt. Tippe zum Fortfahren auf das Symbol „Entsperren“."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authentifiziert"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN verwenden"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Muster verwenden"</string>
@@ -318,12 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Zum Öffnen nach oben wischen"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Tippe zum Öffnen auf das Symbol „Entsperren“"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Gerät mit dem Gesicht entsperrt. Tippe zum Öffnen auf das Symbol „Entsperren“."</string>
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Gerät mit dem Gesicht entsperrt. Tippe zum Öffnen."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Gesicht erkannt. Tippe zum Öffnen."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Gesicht erkannt. Tippe zum Öffnen auf das Symbol „Entsperren“."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Zum Wiederholen nach oben wischen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Zur Verwendung von NFC entsperren"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Dieses Gerät gehört deiner Organisation"</string>
@@ -350,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Möchtest du deine Sitzung fortsetzen?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Neu starten"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, weiter"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Gastmodus"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Du befindest dich im Gastmodus"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Neuen Nutzer hinzufügen?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Wenn du einen neuen Nutzer hinzufügst, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Durch Hinzufügen eines neuen Nutzers wird der Gastmodus beendet und alle Apps und Daten der aktuellen Gastsitzung werden gelöscht."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Nutzerlimit erreicht"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Du kannst bis zu <xliff:g id="COUNT">%d</xliff:g> Nutzer hinzufügen.</item>
@@ -518,8 +517,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorität"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> unterstützt keine Funktionen für Unterhaltungen"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Diese Benachrichtigungen können nicht geändert werden."</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Anrufbenachrichtigungen können nicht geändert werden."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Die Benachrichtigungsgruppe kann hier nicht konfiguriert werden"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Weitergeleitete Benachrichtigung"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Alle Benachrichtigungen von <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -924,11 +922,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Hinzufügen"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nicht hinzufügen"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Nutzer auswählen"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> Apps sind aktiv</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> App ist aktiv</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Neue Informationen"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktive Apps"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Auch wenn du diese Apps nicht verwendest, sind sie trotzdem aktiv und können sich auf die Akkulaufzeit auswirken"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Beenden"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Beendet"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Fertig"</string>

@@ -319,7 +319,7 @@
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Visage reconnu. Appuyez pour ouvrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Visage reconnu. Appuyez sur l\'icône de déverrouillage pour ouvrir."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Balayez l\'écran vers le haut pour réessayer"</string>
-    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Déverrouillez l\'écran pour pouvoir utiliser NFC"</string>
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Déverrouillez l\'écran pour pouvoir utiliser la NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Cet appareil appartient à votre organisation"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Cet appareil appartient à <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Cet appareil est fourni par <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Voulez-vous poursuivre la dernière session ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Non, nouvelle session"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Oui, continuer"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Mode Invité"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Vous êtes en mode Invité"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Ajouter un utilisateur ?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Lorsque vous ajoutez un utilisateur, celui-ci doit configurer son espace.\n\nN\'importe quel utilisateur peut mettre à jour les applications pour tous les autres utilisateurs."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Si vous ajoutez un utilisateur, le mode Invité sera désactivé et toutes les applis et les données de la session Invité actuelle seront supprimées."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite nombre utilisateurs atteinte"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Vous pouvez ajouter <xliff:g id="COUNT">%d</xliff:g> profil utilisateur.</item>
