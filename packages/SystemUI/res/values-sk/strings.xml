@@ -32,7 +32,7 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zariadeniu <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> pristupovať k zariadeniu <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTejto aplikácii nebolo udelené povolenie na nahrávanie, môže však snímať zvuk cez toto zariadenie USB."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Povoliť apl. <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zar. <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Otvoriť <xliff:g id="APPLICATION">%1$s</xliff:g> na spravovanie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Otvoriť aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g> na spravovanie zariadenia <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Tejto aplikácii nebolo udelené povolenie na nahrávanie, ale môže nahrávať zvuk cez toto zariadenie USB. Ak budete s týmto zariadením používať aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g>, nemusíte počuť hovory, upozornenia ani budíky."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ak budete s týmto zariadením používať aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g>, nemusíte počuť hovory, upozornenia ani budíky."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zariadeniu <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
@@ -424,7 +424,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikácia je pripnutá"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidiel Späť a Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidiel Späť a Domov."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Táto možnosť ponechá položku v zobrazení, dokým ju neodopnete. Odpojíte ju potiahnutím nahor a pridržaním."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Táto možnosť ponechá položku v zobrazení, dokým ju neodopnete potiahnutím nahor a pridržaním."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidla Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidla Domov."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Môže mať prístup k osobným údajom (napríklad kontaktom a obsahu správ)."</string>
