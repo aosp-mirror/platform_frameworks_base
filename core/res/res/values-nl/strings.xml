@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'Niet storen\' is gewijzigd"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tik om te controleren wat er is geblokkeerd."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Instellingen voor meldingen bekijken"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"In Android 13 hebben apps die je installeert je toestemming nodig om meldingen te sturen. Tik om deze toestemming voor bestaande apps te wijzigen."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Later herinneren"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Sluiten"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systeem"</string>
@@ -2274,11 +2275,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> vertaald."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Bericht vertaald vanuit het <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> naar het <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Achtergrondactiviteit"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Een app gebruikt de batterij overmatig"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Een app is nog actief"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> is op de achtergrond actief. Tik om het batterijgebruik te beheren."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> kan van invloed zijn op de batterijduur. Tik om actieve apps te bekijken."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Actieve apps checken"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Kan geen toegang tot de camera van de telefoon krijgen vanaf je <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
