@@ -52,7 +52,7 @@ class UnfoldMoveFromCenterAnimator @JvmOverloads constructor(
 
     private val animatedViews: MutableList<AnimatedView> = arrayListOf()
 
-    private var lastAnimationProgress: Float = 0f
+    private var lastAnimationProgress: Float = 1f
 
     /**
      * Updates display properties in order to calculate the initial position for the views

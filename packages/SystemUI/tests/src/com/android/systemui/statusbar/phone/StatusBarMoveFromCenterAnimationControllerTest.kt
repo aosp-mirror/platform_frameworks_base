@@ -61,6 +61,15 @@ class StatusBarMoveFromCenterAnimationControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun onStatusBarWidthChangedWithNoTransitionBefore_noTranslation() {
+        controller.onViewsReady(arrayOf(view))
+
+        controller.onStatusBarWidthChanged()
+
+        assertThat(view.translationX).isZero()
+    }
+
+    @Test
     fun onTransitionProgress_updatesTranslations() {
         controller.onViewsReady(arrayOf(view))
 
