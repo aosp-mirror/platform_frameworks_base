@@ -16,11 +16,6 @@
 
 package com.android.server.logcat;
 
-import static com.android.server.logcat.LogcatManagerService.EXTRA_FD;
-import static com.android.server.logcat.LogcatManagerService.EXTRA_GID;
-import static com.android.server.logcat.LogcatManagerService.EXTRA_PID;
-import static com.android.server.logcat.LogcatManagerService.EXTRA_UID;
-
 import android.annotation.StyleRes;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -32,10 +27,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.os.logcat.ILogcatManagerService;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
 import android.view.InflateException;
@@ -45,6 +37,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.android.internal.R;
+import com.android.server.LocalServices;
 
 /**
  * Dialog responsible for obtaining user consent per-use log access
@@ -56,14 +49,11 @@ public class LogAccessDialogActivity extends Activity implements
     private static final int DIALOG_TIME_OUT = Build.IS_DEBUGGABLE ? 60000 : 300000;
     private static final int MSG_DISMISS_DIALOG = 0;
 
-    private final ILogcatManagerService mLogcatManagerService =
-            ILogcatManagerService.Stub.asInterface(ServiceManager.getService("logcat"));
+    private final LogcatManagerService.LogcatManagerServiceInternal mLogcatManagerInternal =
+            LocalServices.getService(LogcatManagerService.LogcatManagerServiceInternal.class);
 
     private String mPackageName;
     private int mUid;
-    private int mGid;
-    private int mPid;
-    private int mFd;
 
     private String mAlertTitle;
     private AlertDialog.Builder mAlertDialog;
@@ -133,30 +123,12 @@ public class LogAccessDialogActivity extends Activity implements
             return false;
         }
 
-        if (!intent.hasExtra(EXTRA_UID)) {
+        if (!intent.hasExtra(Intent.EXTRA_UID)) {
             Slog.e(TAG, "Missing EXTRA_UID");
             return false;
         }
 
-        if (!intent.hasExtra(EXTRA_GID)) {
-            Slog.e(TAG, "Missing EXTRA_GID");
-            return false;
-        }
-
-        if (!intent.hasExtra(EXTRA_PID)) {
-            Slog.e(TAG, "Missing EXTRA_PID");
-            return false;
-        }
-
-        if (!intent.hasExtra(EXTRA_FD)) {
-            Slog.e(TAG, "Missing EXTRA_FD");
-            return false;
-        }
-
-        mUid = intent.getIntExtra(EXTRA_UID, 0);
-        mGid = intent.getIntExtra(EXTRA_GID, 0);
-        mPid = intent.getIntExtra(EXTRA_PID, 0);
-        mFd = intent.getIntExtra(EXTRA_FD, 0);
+        mUid = intent.getIntExtra(Intent.EXTRA_UID, 0);
 
         return true;
     }
@@ -223,11 +195,7 @@ public class LogAccessDialogActivity extends Activity implements
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.log_access_dialog_allow_button:
-                try {
-                    mLogcatManagerService.approve(mUid, mGid, mPid, mFd);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Fails to call remote functions", e);
-                }
+                mLogcatManagerInternal.approveAccessForClient(mUid, mPackageName);
                 finish();
                 break;
             case R.id.log_access_dialog_deny_button:
@@ -238,10 +206,6 @@ public class LogAccessDialogActivity extends Activity implements
     }
 
     private void declineLogAccess() {
-        try {
-            mLogcatManagerService.decline(mUid, mGid, mPid, mFd);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Fails to call remote functions", e);
-        }
+        mLogcatManagerInternal.declineAccessForClient(mUid, mPackageName);
     }
 }
