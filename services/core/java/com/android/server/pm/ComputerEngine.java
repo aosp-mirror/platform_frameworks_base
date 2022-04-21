@@ -1355,7 +1355,7 @@ public class ComputerEngine implements Computer {
                 PackageStateInternal resolvedSetting =
                         getPackageStateInternal(info.activityInfo.packageName, 0);
                 if (resolveForStart
-                        || !mAppsFilter.shouldFilterApplication(
+                        || !mAppsFilter.shouldFilterApplication(this,
                         filterCallingUid, callingSetting, resolvedSetting, userId)) {
                     continue;
                 }
@@ -1389,7 +1389,7 @@ public class ComputerEngine implements Computer {
                         mSettings.getSettingBase(UserHandle.getAppId(filterCallingUid));
                 PackageStateInternal resolvedSetting =
                         getPackageStateInternal(info.serviceInfo.packageName, 0);
-                if (!mAppsFilter.shouldFilterApplication(
+                if (!mAppsFilter.shouldFilterApplication(this,
                         filterCallingUid, callingSetting, resolvedSetting, userId)) {
                     continue;
                 }
@@ -2736,7 +2736,7 @@ public class ComputerEngine implements Computer {
         }
         int appId = UserHandle.getAppId(callingUid);
         final SettingBase callingPs = mSettings.getSettingBase(appId);
-        return mAppsFilter.shouldFilterApplication(callingUid, callingPs, ps, userId);
+        return mAppsFilter.shouldFilterApplication(this, callingUid, callingPs, ps, userId);
     }
 
     /**
@@ -5338,7 +5338,7 @@ public class ComputerEngine implements Computer {
         if (ps == null) {
             return null;
         }
-        return mAppsFilter.getVisibilityAllowList(ps, userIds, getPackageStates());
+        return mAppsFilter.getVisibilityAllowList(this, ps, userIds, getPackageStates());
     }
 
     @Nullable
@@ -5843,5 +5843,17 @@ public class ComputerEngine implements Computer {
     @Override
     public List<? extends PackageStateInternal> getVolumePackages(@NonNull String volumeUuid) {
         return mSettings.getVolumePackages(volumeUuid);
+    }
+
+    @Override
+    @NonNull
+    public Collection<SharedUserSetting> getAllSharedUsers() {
+        return mSettings.getAllSharedUsers();
+    }
+
+    @Override
+    @NonNull
+    public UserInfo[] getUserInfos() {
+        return mInjector.getUserManagerInternal().getUserInfos();
     }
 }
