@@ -76,7 +76,11 @@ class SeekBarViewModel @Inject constructor(
 ) {
     private var _data = Progress(false, false, false, false, null, 0)
         set(value) {
+            val enabledChanged = value.enabled != field.enabled
             field = value
+            if (enabledChanged) {
+                enabledChangeListener?.onEnabledChanged(value.enabled)
+            }
             _progress.postValue(value)
         }
     private val _progress = MutableLiveData<Progress>().apply {
@@ -122,6 +126,7 @@ class SeekBarViewModel @Inject constructor(
         }
 
     private var scrubbingChangeListener: ScrubbingChangeListener? = null
+    private var enabledChangeListener: EnabledChangeListener? = null
 
     /** Set to true when the user is touching the seek bar to change the position. */
     private var scrubbing = false
@@ -135,8 +140,6 @@ class SeekBarViewModel @Inject constructor(
         }
 
     lateinit var logSeek: () -> Unit
-
-    fun getEnabled() = _data.enabled
 
     /**
      * Event indicating that the user has started interacting with the seek bar.
@@ -189,6 +192,9 @@ class SeekBarViewModel @Inject constructor(
 
     /**
      * Updates media information.
+     *
+     * This function makes a binder call, so it must happen on a worker thread.
+     *
      * @param mediaController controller for media session
      */
     @WorkerThread
@@ -232,6 +238,7 @@ class SeekBarViewModel @Inject constructor(
         cancel?.run()
         cancel = null
         scrubbingChangeListener = null
+        enabledChangeListener = null
     }
 
     @WorkerThread
@@ -279,9 +286,24 @@ class SeekBarViewModel @Inject constructor(
         }
     }
 
+    fun setEnabledChangeListener(listener: EnabledChangeListener) {
+        enabledChangeListener = listener
+    }
+
+    fun removeEnabledChangeListener(listener: EnabledChangeListener) {
+        if (listener == enabledChangeListener) {
+            enabledChangeListener = null
+        }
+    }
+
     /** Listener interface to be notified when the user starts or stops scrubbing. */
     interface ScrubbingChangeListener {
         fun onScrubbingChanged(scrubbing: Boolean)
+    }
+
+    /** Listener interface to be notified when the seekbar's enabled status changes. */
+    interface EnabledChangeListener {
+        fun onEnabledChanged(enabled: Boolean)
     }
 
     private class SeekBarChangeListener(

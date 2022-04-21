@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -103,6 +104,11 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
         }
     }
 
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 229735718)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
     companion object {
         /**
          * Creates the test configurations.
@@ -113,7 +119,7 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return com.android.server.wm.flicker.FlickerTestParameterFactory.getInstance()
+            return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(repetitions = 3)
         }
     }

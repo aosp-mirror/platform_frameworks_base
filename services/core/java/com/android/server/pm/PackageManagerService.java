@@ -375,6 +375,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final int SCAN_AS_ODM = 1 << 22;
     static final int SCAN_AS_APK_IN_APEX = 1 << 23;
     static final int SCAN_AS_FACTORY = 1 << 24;
+    static final int SCAN_AS_APEX = 1 << 25;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
             SCAN_NO_DEX,

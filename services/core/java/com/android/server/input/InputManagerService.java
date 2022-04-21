@@ -151,7 +151,8 @@ import java.util.OptionalInt;
 public class InputManagerService extends IInputManager.Stub
         implements Watchdog.Monitor {
     static final String TAG = "InputManager";
-    static final boolean DEBUG = false;
+    // To enable these logs, run: 'adb shell setprop log.tag.InputManager DEBUG' (requires restart)
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
     private static final String PORT_ASSOCIATIONS_PATH = "etc/input-port-associations.xml";
@@ -1016,6 +1017,10 @@ public class InputManagerService extends IInputManager.Stub
                 final InputDevice inputDevice = mInputDevices[i];
                 deviceIdAndGeneration[i * 2] = inputDevice.getId();
                 deviceIdAndGeneration[i * 2 + 1] = inputDevice.getGeneration();
+                if (DEBUG) {
+                    Log.d(TAG, "device " + inputDevice.getId() + " generation "
+                            + inputDevice.getGeneration());
+                }
 
                 if (!inputDevice.isVirtual() && inputDevice.isFullKeyboard()) {
                     if (!containsInputDeviceWithDescriptor(oldInputDevices,
@@ -1539,8 +1544,8 @@ public class InputManagerService extends IInputManager.Stub
                 layout = mDataStore.getCurrentKeyboardLayout(identifier.getDescriptor());
             }
             if (DEBUG) {
-                Slog.d(TAG, "Loaded keyboard layout id for " + key + " and got "
-                        + layout);
+                Slog.d(TAG, "getCurrentKeyboardLayoutForInputDevice() "
+                        + identifier.toString() + ": " + layout);
             }
             return layout;
         }
@@ -1562,7 +1567,9 @@ public class InputManagerService extends IInputManager.Stub
             try {
                 if (mDataStore.setCurrentKeyboardLayout(key, keyboardLayoutDescriptor)) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Saved keyboard layout using " + key);
+                        Slog.d(TAG, "setCurrentKeyboardLayoutForInputDevice() " + identifier
+                                + " key: " + key
+                                + " keyboardLayoutDescriptor: " + keyboardLayoutDescriptor);
                     }
                     mHandler.sendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS);
                 }
