@@ -85,6 +85,7 @@ import java.util.function.Function;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class TransitionTests extends WindowTestsBase {
+    final SurfaceControl.Transaction mMockT = mock(SurfaceControl.Transaction.class);
 
     private Transition createTestTransition(int transitType) {
         TransitionController controller = mock(TransitionController.class);
@@ -121,7 +122,8 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(oldTask);
         participants.add(newTask);
         ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
+                mMockT);
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
 
@@ -129,7 +131,7 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(opening);
         participants.add(closing);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -137,7 +139,7 @@ public class TransitionTests extends WindowTestsBase {
         // Check combined prune and promote
         participants.remove(newTask);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -145,7 +147,7 @@ public class TransitionTests extends WindowTestsBase {
         // Check multi promote
         participants.remove(oldTask);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -186,7 +188,8 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(opening);
         participants.add(opening2);
         ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
+                mMockT);
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
@@ -195,7 +198,7 @@ public class TransitionTests extends WindowTestsBase {
         // Check that unchanging but visible descendant of sibling prevents promotion
         participants.remove(opening2);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newNestedTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -232,7 +235,8 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(showing);
         participants.add(showing2);
         ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
+                mMockT);
         assertEquals(1, info.getChanges().size());
         assertEquals(transit, info.getType());
         assertNotNull(info.getChange(tda.mRemoteToken.toWindowContainerToken()));
@@ -240,14 +244,14 @@ public class TransitionTests extends WindowTestsBase {
         // Check that organized tasks get reported even if not top
         makeTaskOrganized(showTask);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(tda.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(showTask.mRemoteToken.toWindowContainerToken()));
         // Even if DisplayArea explicitly participating
         participants.add(tda);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
         assertEquals(2, info.getChanges().size());
     }
 
@@ -271,7 +275,7 @@ public class TransitionTests extends WindowTestsBase {
         ArrayList<WindowContainer> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
         TransitionInfo info = Transition.calculateTransitionInfo(
-                0, 0, targets, transition.mChanges);
+                0, 0, targets, transition.mChanges, mMockT);
         assertEquals(2, info.getChanges().size());
         // There was an existence change on open, so it should be OPEN rather than SHOW
         assertEquals(TRANSIT_OPEN,
@@ -308,7 +312,7 @@ public class TransitionTests extends WindowTestsBase {
         ArrayList<WindowContainer> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
         TransitionInfo info = Transition.calculateTransitionInfo(
-                0, 0, targets, transition.mChanges);
+                0, 0, targets, transition.mChanges, mMockT);
         assertEquals(taskCount, info.getChanges().size());
         // verify order is top-to-bottem
         for (int i = 0; i < taskCount; ++i) {
@@ -358,7 +362,7 @@ public class TransitionTests extends WindowTestsBase {
         ArrayList<WindowContainer> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
         TransitionInfo info = Transition.calculateTransitionInfo(
-                0, 0, targets, transition.mChanges);
+                0, 0, targets, transition.mChanges, mMockT);
         // verify that wallpaper is at bottom
         assertEquals(taskCount + 1, info.getChanges().size());
         // The wallpaper is not organized, so it won't have a token; however, it will be marked
@@ -392,7 +396,7 @@ public class TransitionTests extends WindowTestsBase {
         ArrayList<WindowContainer> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
         TransitionInfo info = Transition.calculateTransitionInfo(
-                0, 0, targets, transition.mChanges);
+                0, 0, targets, transition.mChanges, mMockT);
         // The wallpaper is not organized, so it won't have a token; however, it will be marked
         // as IS_WALLPAPER
         assertEquals(FLAG_IS_WALLPAPER, info.getChanges().get(0).getFlags());
@@ -474,7 +478,8 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(changeTask);
         final ArrayList<WindowContainer> targets =
                 Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
+                mMockT);
         // Root changes should always be considered independent
         assertTrue(isIndependent(
                 info.getChange(openTask.mRemoteToken.toWindowContainerToken()), info));
@@ -526,7 +531,8 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(oldTask);
         participants.add(newTask);
         ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
+                mMockT);
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
 
@@ -566,7 +572,8 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(oldTask);
         participants.add(newTask);
         ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
+                mMockT);
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
 
@@ -608,7 +615,7 @@ public class TransitionTests extends WindowTestsBase {
             final int flags = 0;
             final TransitionInfo info = Transition.calculateTransitionInfo(transition.mType, flags,
                     Transition.calculateTargets(transition.mParticipants, transition.mChanges),
-                    transition.mChanges);
+                    transition.mChanges, mMockT);
             transition.abort();
             return info.getChanges().get(0);
         };
