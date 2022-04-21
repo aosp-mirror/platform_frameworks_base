@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"În curs de deconectare..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Se conectează..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"V-ați conectat la <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Se conectează…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Se asociază…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Conectat (fără telefon) la <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Conectat (fără conținut media) la <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Conectat (fără acces la mesaje) la <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetați"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Eliminați"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Se resetează invitatul…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Resetați sesiunea pentru invitați?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Astfel, va începe o nouă sesiune pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea actuală"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Ieșiți din modul pentru invitați?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Se vor șterge toate aplicațiile și datele din sesiunea pentru invitați actuală"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Ieșiți"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Salvați activitatea invitatului?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Salvați activitatea din sesiunea actuală sau ștergeți aplicațiile și datele"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Ștergeți"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Salvați"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Ieșiți din modul pentru invitați"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Resetați sesiunea pentru invitați"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Ieșiți din modul pentru invitați"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toate activitățile vor fi șterse la ieșire"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Puteți să salvați sau să ștergeți activitatea la ieșire"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetați pentru a șterge acum activitatea din sesiune sau salvați ori ștergeți activitatea la ieșire"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Faceți o fotografie"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Alegeți o imagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selectați fotografia"</string>

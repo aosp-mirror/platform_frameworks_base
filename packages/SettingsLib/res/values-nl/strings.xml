@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetten"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Verwijderen"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Gast resetten…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Gastsessie resetten?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Hierdoor wordt een nieuwe gastsessie gestart en worden alle apps en gegevens van de huidige sessie verwijderd"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Gastmodus sluiten?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Hierdoor worden apps en gegevens van de huidige gastsessie verwijderd"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Sluiten"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Gastactiviteit opslaan?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Sla activiteit van de huidige sessie op of verwijder alle apps en gegevens"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Verwijderen"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Opslaan"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Gastmodus sluiten"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Gastsessie resetten"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Gastmodus verlaten"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Alle activiteit wordt na het afsluiten verwijderd"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Je kunt je activiteit bij afsluiten opslaan of verwijderen"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Voer een reset uit om de sessie-activiteit nu te verwijderen of verwijder of sla je activiteit op bij afsluiten"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Foto maken"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Afbeelding kiezen"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Foto selecteren"</string>

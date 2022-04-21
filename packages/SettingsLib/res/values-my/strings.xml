@@ -599,6 +599,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ပြင်ဆင်သတ်မှတ်ရန်"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ဖယ်ရှားရန်"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ဧည့်သည်ကို ပြင်ဆင်သတ်မှတ်နေသည်…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ဧည့်သည် စက်ရှင် ပြင်ဆင်သတ်မှတ်မလား။"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"၎င်းသည် ဧည့်သည် စက်ရှင်အသစ်ကို စတင်မည်ဖြစ်ပြီး လက်ရှိစက်ရှင်မှ အက်ပ်နှင့် ဒေတာအားလုံးကို ဖျက်ပါမည်"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ဧည့်သည်မုဒ်မှ ထွက်မလား။"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"၎င်းသည် လက်ရှိဧည့်သည် စက်ရှင်မှ အက်ပ်နှင့် ဒေတာအားလုံးကို ဖျက်လိုက်ပါမည်"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ထွက်ရန်"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ဧည့်သည်လုပ်ဆောင်ချက် သိမ်းမလား။"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"လက်ရှိစက်ရှင်မှ လုပ်ဆောင်ချက် သိမ်းနိုင်သည် (သို့) အက်ပ်နှင့် ဒေတာအားလုံး ဖျက်နိုင်သည်"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ဖျက်ရန်"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"သိမ်းရန်"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"ဧည့်သည်မုဒ်မှ ထွက်ရန်"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"ဧည့်သည် စက်ရှင် ပြင်ဆင်သတ်မှတ်ရန်"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ဧည့်သည့်မှ ထွက်ရန်"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ထွက်သည့်အခါ လုပ်ဆောင်ချက်အားလုံးကို ဖျက်လိုက်မည်"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ထွက်သည့်အခါ လုပ်ဆောင်ချက်ကို သိမ်းနိုင် (သို့) ဖျက်နိုင်သည်"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"စက်ရှင်လုပ်ဆောင်ချက်ကို ယခုဖျက်ရန် ပြင်ဆင်သတ်မှတ်နိုင်သည် (သို့) ထွက်သည့်အခါ လုပ်ဆောင်ချက်ကို သိမ်းနိုင် (သို့) ဖျက်နိုင်သည်"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ဓာတ်ပုံရိုက်ရန်"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ပုံရွေးရန်"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ဓာတ်ပုံရွေးရန်"</string>
