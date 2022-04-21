@@ -512,9 +512,6 @@
     <!--  Flag to turn on the rendering of the above path or not  -->
     <bool name="config_enableDisplayCutoutProtection">false</bool>
 
-    <!-- Respect drawable/rounded.xml intrinsic size for multiple radius corner path customization -->
-    <bool name="config_roundedCornerMultipleRadius">false</bool>
-
     <!-- Controls can query 2 preferred applications for limited number of suggested controls.
          This config value should contain a list of package names of thoses preferred applications.
     -->
@@ -658,17 +655,6 @@
 
     <!-- Flag to activate notification to contents feature -->
     <bool name="config_notificationToContents">true</bool>
-
-    <!-- Respect drawable/rounded_secondary.xml intrinsic size for multiple radius corner path
-         customization for secondary display-->
-    <bool name="config_roundedCornerMultipleRadiusSecondary">false</bool>
-
-    <!-- Whether the rounded corners are multiple radius for each display in a multi-display device.
-         {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
-    <array name="config_roundedCornerMultipleRadiusArray">
-        <item>@bool/config_roundedCornerMultipleRadius</item>
-        <item>@bool/config_roundedCornerMultipleRadiusSecondary</item>
-    </array>
 
     <!-- The rounded corner drawable for each display in a multi-display device.
          {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
