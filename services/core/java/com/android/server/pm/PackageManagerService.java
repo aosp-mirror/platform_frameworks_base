@@ -5966,7 +5966,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             synchronized (mProtectedBroadcasts) {
                 protectedBroadcasts = new ArraySet<>(mProtectedBroadcasts);
             }
-            new DumpHelper(mPermissionManager, mApexManager, mApexPackageInfo, mStorageEventHelper,
+            new DumpHelper(mPermissionManager, mStorageEventHelper,
                     mDomainVerificationManager, mInstallerService, mRequiredVerifierPackage,
                     knownPackages, mChangedPackagesTracker, availableFeatures, protectedBroadcasts,
                     getPerUidReadTimeouts(snapshot)
@@ -6063,12 +6063,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         protected ApexManager getApexManager() {
             return mApexManager;
-        }
-
-        @NonNull
-        @Override
-        protected ApexPackageInfo getApexPackageInfo() {
-            return mApexPackageInfo;
         }
 
         @NonNull
@@ -6339,9 +6333,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return;
             }
             final ApexManager am = PackageManagerService.this.mApexManager;
-            final ApexPackageInfo api = PackageManagerService.this.mApexPackageInfo;
-            PackageInfo activePackage = api.getPackageInfo(packageName,
-                    ApexManager.MATCH_ACTIVE_PACKAGE);
+            PackageInfo activePackage = snapshot().getPackageInfo(
+                    packageName, PackageManager.MATCH_APEX, UserHandle.USER_SYSTEM);
             if (activePackage == null) {
                 adapter.onPackageDeleted(packageName, PackageManager.DELETE_FAILED_ABORTED,
                         packageName + " is not an apex package");

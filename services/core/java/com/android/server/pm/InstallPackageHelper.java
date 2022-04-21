@@ -2469,8 +2469,8 @@ final class InstallPackageHelper {
             long requiredInstalledVersionCode, int installFlags) {
         String packageName = pkgLite.packageName;
 
-        final PackageInfo activePackage = mPm.mApexPackageInfo.getPackageInfo(packageName,
-                ApexManager.MATCH_ACTIVE_PACKAGE);
+        final PackageInfo activePackage = mPm.snapshotComputer().getPackageInfo(
+                packageName, PackageManager.MATCH_APEX, UserHandle.USER_SYSTEM);
         if (activePackage == null) {
             String errorMsg = "Attempting to install new APEX package " + packageName;
             Slog.w(TAG, errorMsg);
@@ -4145,7 +4145,7 @@ final class InstallPackageHelper {
         // conflicting names between APK and APEX.
         final boolean installApex = (scanFlags & SCAN_AS_APEX) != 0;
         if ((isUserInstall || isFirstBootOrUpgrade)
-                && mPm.mApexPackageInfo.isApexPackage(pkg.getPackageName())
+                && mPm.snapshotComputer().isApexPackage(pkg.getPackageName())
                 && !installApex) {
             throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
                     pkg.getPackageName()

@@ -3127,7 +3127,7 @@ public class ComputerEngine implements Computer {
         final boolean checkin = dumpState.isCheckIn();
 
         // Return if the package doesn't exist.
-        if (packageName != null && setting == null) {
+        if (packageName != null && setting == null && !isApexPackage(packageName)) {
             return;
         }
 
@@ -3301,6 +3301,15 @@ public class ComputerEngine implements Computer {
                     }
                 }
                 ipw.decreaseIndent();
+                break;
+            }
+
+            case DumpState.DUMP_APEX: {
+                if (packageName == null || isApexPackage(packageName)) {
+                    mApexManager.dump(pw);
+                    mApexPackageInfo.dump(pw, packageName);
+                }
+                break;
             }
         } // switch
     }
@@ -3677,6 +3686,11 @@ public class ComputerEngine implements Computer {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isApexPackage(String packageName) {
+        return mApexPackageInfo.isApexPackage(packageName);
     }
 
     @Override
