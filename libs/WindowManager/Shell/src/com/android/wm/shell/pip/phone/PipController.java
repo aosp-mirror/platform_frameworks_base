@@ -521,6 +521,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         };
 
         if (mPipTaskOrganizer.isInPip() && saveRestoreSnapFraction) {
+            mMenuController.attachPipMenuView();
             // Calculate the snap fraction of the current stack along the old movement bounds
             final PipSnapAlgorithm pipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
             final Rect postChangeStackBounds = new Rect(mPipBoundsState.getBounds());
