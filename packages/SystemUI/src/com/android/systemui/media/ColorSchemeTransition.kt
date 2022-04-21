@@ -103,7 +103,7 @@ class ColorSchemeTransition internal constructor(
         mediaViewHolder.albumView.backgroundTintList = colorList
         mediaViewHolder.seamlessIcon.imageTintList = colorList
         mediaViewHolder.seamlessText.setTextColor(surfaceColor)
-        mediaViewHolder.dismissText.setTextColor(surfaceColor)
+        mediaViewHolder.gutsViewHolder.setSurfaceColor(surfaceColor)
     }
 
     val accentPrimary = colorTransitionFactory(
@@ -113,9 +113,7 @@ class ColorSchemeTransition internal constructor(
         val accentColorList = ColorStateList.valueOf(accentPrimary)
         mediaViewHolder.actionPlayPause.backgroundTintList = accentColorList
         mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
-        mediaViewHolder.settings.imageTintList = accentColorList
-        mediaViewHolder.cancelText.backgroundTintList = accentColorList
-        mediaViewHolder.dismissText.backgroundTintList = accentColorList
+        mediaViewHolder.gutsViewHolder.setAccentPrimaryColor(accentPrimary)
     }
 
     val textPrimary = colorTransitionFactory(
@@ -126,13 +124,12 @@ class ColorSchemeTransition internal constructor(
         val textColorList = ColorStateList.valueOf(textPrimary)
         mediaViewHolder.seekBar.thumb.setTintList(textColorList)
         mediaViewHolder.seekBar.progressTintList = textColorList
-        mediaViewHolder.longPressText.setTextColor(textColorList)
-        mediaViewHolder.cancelText.setTextColor(textColorList)
         mediaViewHolder.scrubbingElapsedTimeView.setTextColor(textColorList)
         mediaViewHolder.scrubbingTotalTimeView.setTextColor(textColorList)
         for (button in mediaViewHolder.getTransparentActionButtons()) {
             button.imageTintList = textColorList
         }
+        mediaViewHolder.gutsViewHolder.setTextPrimaryColor(textPrimary)
     }
 
     val textPrimaryInverse = colorTransitionFactory(
