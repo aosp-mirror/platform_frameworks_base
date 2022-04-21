@@ -1059,10 +1059,6 @@ public class InputMethodService extends AbstractInputMethodService {
         return viewRoot == null ? null : viewRoot.getInputToken();
     }
 
-    private void notifyImeHidden() {
-        requestHideSelf(0 /* flags */, SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
-    }
-
     private void scheduleImeSurfaceRemoval() {
         if (mShowInputRequested || mWindowVisible || mWindow == null
                 || mImeSurfaceScheduledForRemoval) {
@@ -1223,14 +1219,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 return;
             }
             InputMethodService.this.onUpdateCursorAnchorInfo(info);
-        }
-
-        /**
-         * Notify IME that window is hidden.
-         * @hide
-         */
-        public final void notifyImeHidden() {
-            InputMethodService.this.notifyImeHidden();
         }
 
         /**
