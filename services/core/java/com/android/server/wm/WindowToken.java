@@ -37,6 +37,7 @@ import static com.android.server.wm.WindowTokenProto.WAITING_TO_SHOW;
 import static com.android.server.wm.WindowTokenProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -569,13 +570,12 @@ class WindowToken extends WindowContainer<WindowState> {
      * the same rotation.
      */
     @Nullable
-    SurfaceControl getOrCreateFixedRotationLeash() {
+    SurfaceControl getOrCreateFixedRotationLeash(@NonNull SurfaceControl.Transaction t) {
         if (!mTransitionController.isShellTransitionsEnabled()) return null;
         final int rotation = getRelativeDisplayRotation();
         if (rotation == Surface.ROTATION_0) return mFixedRotationTransformLeash;
         if (mFixedRotationTransformLeash != null) return mFixedRotationTransformLeash;
 
-        final SurfaceControl.Transaction t = getSyncTransaction();
         final SurfaceControl leash = makeSurface().setContainerLayer()
                 .setParent(getParentSurfaceControl())
                 .setName(getSurfaceControl() + " - rotation-leash")
@@ -588,6 +588,15 @@ class WindowToken extends WindowContainer<WindowState> {
         t.setAlpha(getSurfaceControl(), 1.f);
         mFixedRotationTransformLeash = leash;
         updateSurfaceRotation(t, rotation, mFixedRotationTransformLeash);
+        return mFixedRotationTransformLeash;
+    }
+
+    /**
+     * @return the leash which represents this window as if it was non-rotated. Will be null if
+     *         there isn't one.
+     */
+    @Nullable
+    SurfaceControl getFixedRotationLeash() {
         return mFixedRotationTransformLeash;
     }
 
