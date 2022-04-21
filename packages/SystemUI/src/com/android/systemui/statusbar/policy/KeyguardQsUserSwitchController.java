@@ -78,6 +78,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
     private final UiEventLogger mUiEventLogger;
     @VisibleForTesting
     UserAvatarView mUserAvatarView;
+    private View mUserAvatarViewWithBackground;
     UserSwitcherController.UserRecord mCurrentUser;
     private boolean mIsKeyguardShowing;
 
@@ -167,6 +168,8 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         super.onInit();
         if (DEBUG) Log.d(TAG, "onInit");
         mUserAvatarView = mView.findViewById(R.id.kg_multi_user_avatar);
+        mUserAvatarViewWithBackground = mView.findViewById(
+                R.id.kg_multi_user_avatar_with_background);
         mAdapter = new UserSwitcherController.BaseUserAdapter(mUserSwitcherController) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -186,7 +189,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             mUiEventLogger.log(
                     LockscreenGestureLogger.LockscreenUiEvent.LOCKSCREEN_SWITCH_USER_TAP);
 
-            mUserSwitchDialogController.showDialog(mView);
+            mUserSwitchDialogController.showDialog(mUserAvatarViewWithBackground);
         });
 
         mUserAvatarView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
