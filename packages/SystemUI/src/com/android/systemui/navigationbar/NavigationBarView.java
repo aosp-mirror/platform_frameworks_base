@@ -886,8 +886,11 @@ public class NavigationBarView extends FrameLayout {
         }
     }
 
-    void onOverviewProxyConnectionChange(boolean enabled, boolean showSwipeUpUi) {
+    void onOverviewProxyConnectionChange(boolean enabled) {
         mOverviewProxyEnabled = enabled;
+    }
+
+    void setShouldShowSwipeUpUi(boolean showSwipeUpUi) {
         mShowSwipeUpUi = showSwipeUpUi;
         updateStates();
     }

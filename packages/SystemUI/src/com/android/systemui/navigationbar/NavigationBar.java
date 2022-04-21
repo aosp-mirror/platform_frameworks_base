@@ -330,7 +330,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         @Override
         public void onConnectionChanged(boolean isConnected) {
             mView.onOverviewProxyConnectionChange(
-                    mOverviewProxyService.isEnabled(), mOverviewProxyService.shouldShowSwipeUpUI());
+                    mOverviewProxyService.isEnabled());
+            mView.setShouldShowSwipeUpUi(mOverviewProxyService.shouldShowSwipeUpUI());
             updateScreenPinningGestures();
         }
 
@@ -1657,6 +1658,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             }
             if (mView != null) {
                 mView.setNavBarMode(mode);
+                mView.setShouldShowSwipeUpUi(mOverviewProxyService.shouldShowSwipeUpUI());
             }
         }
     };
