@@ -2530,6 +2530,21 @@ public class Vpn {
         }
     }
 
+    @Nullable
+    protected synchronized NetworkCapabilities getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
+            NetworkCapabilities nc) {
+        if (nc == null) return null;
+        return mConnectivityManager.getRedactedNetworkCapabilitiesForPackage(
+                nc, mOwnerUID, mPackage);
+    }
+
+    @Nullable
+    protected synchronized LinkProperties getRedactedLinkPropertiesOfUnderlyingNetwork(
+            LinkProperties lp) {
+        if (lp == null) return null;
+        return mConnectivityManager.getRedactedLinkPropertiesForPackage(lp, mOwnerUID, mPackage);
+    }
+
     /** This class represents the common interface for all VPN runners. */
     @VisibleForTesting
     abstract class VpnRunner extends Thread {
@@ -2563,6 +2578,10 @@ public class Vpn {
 
     interface IkeV2VpnRunnerCallback {
         void onDefaultNetworkChanged(@NonNull Network network);
+
+        void onDefaultNetworkCapabilitiesChanged(@NonNull NetworkCapabilities nc);
+
+        void onDefaultNetworkLinkPropertiesChanged(@NonNull LinkProperties lp);
 
         void onChildOpened(
                 @NonNull Network network, @NonNull ChildSessionConfiguration childConfig);
@@ -2620,6 +2639,8 @@ public class Vpn {
         @Nullable private IpSecTunnelInterface mTunnelIface;
         @Nullable private IkeSession mSession;
         @Nullable private Network mActiveNetwork;
+        @Nullable private NetworkCapabilities mNetworkCapabilities;
+        @Nullable private LinkProperties mLinkProperties;
         private final String mSessionKey;
 
         IkeV2VpnRunner(@NonNull Ikev2VpnProfile profile) {
@@ -2849,6 +2870,16 @@ public class Vpn {
             }
         }
 
+        /** Called when the NetworkCapabilities of underlying network is changed */
+        public void onDefaultNetworkCapabilitiesChanged(@NonNull NetworkCapabilities nc) {
+            mNetworkCapabilities = nc;
+        }
+
+        /** Called when the LinkProperties of underlying network is changed */
+        public void onDefaultNetworkLinkPropertiesChanged(@NonNull LinkProperties lp) {
+            mLinkProperties = lp;
+        }
+
         /** Marks the state as FAILED, and disconnects. */
         private void markFailedAndDisconnect(Exception exception) {
             synchronized (Vpn.this) {
@@ -2879,28 +2910,60 @@ public class Vpn {
                 return;
             }
 
-            if (exception instanceof IkeProtocolException) {
-                final IkeProtocolException ikeException = (IkeProtocolException) exception;
+            synchronized (Vpn.this) {
+                if (exception instanceof IkeProtocolException) {
+                    final IkeProtocolException ikeException = (IkeProtocolException) exception;
 
-                switch (ikeException.getErrorType()) {
-                    case IkeProtocolException.ERROR_TYPE_NO_PROPOSAL_CHOSEN: // Fallthrough
-                    case IkeProtocolException.ERROR_TYPE_INVALID_KE_PAYLOAD: // Fallthrough
-                    case IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED: // Fallthrough
-                    case IkeProtocolException.ERROR_TYPE_SINGLE_PAIR_REQUIRED: // Fallthrough
-                    case IkeProtocolException.ERROR_TYPE_FAILED_CP_REQUIRED: // Fallthrough
-                    case IkeProtocolException.ERROR_TYPE_TS_UNACCEPTABLE:
-                        // All the above failures are configuration errors, and are terminal
-                        markFailedAndDisconnect(exception);
-                        return;
-                    // All other cases possibly recoverable.
+                    switch (ikeException.getErrorType()) {
+                        case IkeProtocolException.ERROR_TYPE_NO_PROPOSAL_CHOSEN: // Fallthrough
+                        case IkeProtocolException.ERROR_TYPE_INVALID_KE_PAYLOAD: // Fallthrough
+                        case IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED: // Fallthrough
+                        case IkeProtocolException.ERROR_TYPE_SINGLE_PAIR_REQUIRED: // Fallthrough
+                        case IkeProtocolException.ERROR_TYPE_FAILED_CP_REQUIRED: // Fallthrough
+                        case IkeProtocolException.ERROR_TYPE_TS_UNACCEPTABLE:
+                            // All the above failures are configuration errors, and are terminal
+                            // TODO(b/230548427): Remove SDK check once VPN related stuff are
+                            //  decoupled from ConnectivityServiceTest.
+                            if (SdkLevel.isAtLeastT()) {
+                                sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_IKE_ERROR,
+                                        VpnManager.ERROR_CLASS_NOT_RECOVERABLE,
+                                        ikeException.getErrorType(),
+                                        getPackage(), mSessionKey, makeVpnProfileStateLocked(),
+                                        mActiveNetwork,
+                                        getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
+                                                this.mNetworkCapabilities),
+                                        getRedactedLinkPropertiesOfUnderlyingNetwork(
+                                                this.mLinkProperties));
+                            }
+                            markFailedAndDisconnect(exception);
+                            return;
+                        // All other cases possibly recoverable.
+                        default:
+                            // All the above failures are configuration errors, and are terminal
+                            // TODO(b/230548427): Remove SDK check once VPN related stuff are
+                            //  decoupled from ConnectivityServiceTest.
+                            if (SdkLevel.isAtLeastT()) {
+                                sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_IKE_ERROR,
+                                        VpnManager.ERROR_CLASS_RECOVERABLE,
+                                        ikeException.getErrorType(),
+                                        getPackage(), mSessionKey, makeVpnProfileStateLocked(),
+                                        mActiveNetwork,
+                                        getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
+                                                this.mNetworkCapabilities),
+                                        getRedactedLinkPropertiesOfUnderlyingNetwork(
+                                                this.mLinkProperties));
+                            }
+                    }
+                } else if (exception instanceof IllegalArgumentException) {
+                    // Failed to build IKE/ChildSessionParams; fatal profile configuration error
+                    markFailedAndDisconnect(exception);
+                    return;
                 }
-            } else if (exception instanceof IllegalArgumentException) {
-                // Failed to build IKE/ChildSessionParams; fatal profile configuration error
-                markFailedAndDisconnect(exception);
-                return;
             }
 
             mActiveNetwork = null;
+            mNetworkCapabilities = null;
+            mLinkProperties = null;
 
             // Close all obsolete state, but keep VPN alive incase a usable network comes up.
             // (Mirrors VpnService behavior)
@@ -2965,6 +3028,8 @@ public class Vpn {
          */
         private void disconnectVpnRunner() {
             mActiveNetwork = null;
+            mNetworkCapabilities = null;
+            mLinkProperties = null;
             mIsRunning = false;
 
             resetIkeState();
