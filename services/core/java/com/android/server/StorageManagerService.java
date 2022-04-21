@@ -3742,6 +3742,16 @@ class StorageManagerService extends IStorageManager.Stub
                 Context.APP_OPS_SERVICE);
         appOps.checkPackage(callingUid, callingPkg);
 
+        try {
+            final PackageManager.Property noAppStorageProp = mContext.getPackageManager()
+                    .getProperty(PackageManager.PROPERTY_NO_APP_DATA_STORAGE, callingPkg);
+            if (noAppStorageProp != null && noAppStorageProp.getBoolean()) {
+                throw new SecurityException(callingPkg + " should not have " + appPath);
+            }
+        } catch (PackageManager.NameNotFoundException ignore) {
+            // Property not found
+        }
+
         File appFile = null;
         try {
             appFile = new File(appPath).getCanonicalFile();
