@@ -4665,7 +4665,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void dumpProfiles(String packageName) {
+        public void dumpProfiles(String packageName, boolean dumpClassesAndMethods) {
             /* Only the shell, root, or the app user should be able to dump profiles. */
             final int callingUid = Binder.getCallingUid();
             final Computer snapshot = snapshotComputer();
@@ -4683,7 +4683,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             synchronized (mInstallLock) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
-                mArtManagerService.dumpProfiles(pkg);
+                mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
         }

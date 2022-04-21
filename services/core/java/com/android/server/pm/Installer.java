@@ -629,12 +629,17 @@ public class Installer extends SystemService {
         }
     }
 
-    public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath)
+    /**
+     * Dumps profiles associated with a package in a human readable format.
+     */
+    public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath,
+                                boolean dumpClassesAndMethods)
             throws InstallerException {
         if (!checkBeforeRemote()) return false;
         BlockGuard.getVmPolicy().onPathAccess(codePath);
         try {
-            return mInstalld.dumpProfiles(uid, packageName, profileName, codePath);
+            return mInstalld.dumpProfiles(uid, packageName, profileName, codePath,
+                    dumpClassesAndMethods);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
