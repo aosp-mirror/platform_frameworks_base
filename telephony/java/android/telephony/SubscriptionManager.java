@@ -483,6 +483,14 @@ public class SubscriptionManager {
     public static final String SUBSCRIPTION_TYPE = SimInfo.COLUMN_SUBSCRIPTION_TYPE;
 
     /**
+     * TelephonyProvider column name for last used TP - message Reference
+     * <P>Type: INTEGER (int)</P> with -1 as default value
+     * TP - Message Reference valid range [0 - 255]
+     * @hide
+     */
+    public static final String TP_MESSAGE_REF = SimInfo.COLUMN_TP_MESSAGE_REF;
+
+    /**
      * TelephonyProvider column name data_enabled_override_rules.
      * It's a list of rules for overriding data enabled settings. The syntax is
      * For example, "mms=nonDefault" indicates enabling data for mms in non-default subscription.

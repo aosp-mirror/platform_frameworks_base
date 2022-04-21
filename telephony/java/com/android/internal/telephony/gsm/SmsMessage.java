@@ -249,7 +249,6 @@ public class SmsMessage extends SmsMessageBase {
                 ENCODING_UNKNOWN, 0, 0);
     }
 
-
     /**
      * Gets an SMS-SUBMIT PDU for a destination address and a message using the specified encoding.
      *
@@ -272,7 +271,7 @@ public class SmsMessage extends SmsMessageBase {
             boolean statusReportRequested, byte[] header, int encoding,
             int languageTable, int languageShiftTable) {
         return getSubmitPdu(scAddress, destinationAddress, message, statusReportRequested,
-            header, encoding, languageTable, languageShiftTable, -1);
+            header, encoding, languageTable, languageShiftTable, -1, 0);
     }
 
     /**
@@ -297,6 +296,32 @@ public class SmsMessage extends SmsMessageBase {
             String destinationAddress, String message,
             boolean statusReportRequested, byte[] header, int encoding,
             int languageTable, int languageShiftTable, int validityPeriod) {
+        return getSubmitPdu(scAddress, destinationAddress, message, statusReportRequested, header,
+                encoding, languageTable, languageShiftTable, validityPeriod, 0);
+    }
+
+    /**
+     * Gets an SMS-SUBMIT PDU for a destination address and a message using the specified encoding.
+     *
+     * @param scAddress Service Centre address. Null means use default.
+     * @param destinationAddress the address of the destination for the message.
+     * @param message string representation of the message payload.
+     * @param statusReportRequested indicates whether a report is reuested for this message.
+     * @param header a byte array containing the data for the User Data Header.
+     * @param encoding encoding defined by constants in
+     *                 com.android.internal.telephony.SmsConstants.ENCODING_*
+     * @param languageTable
+     * @param languageShiftTable
+     * @param validityPeriod Validity Period of the message in Minutes.
+     * @param messageRef TP Message Reference number
+     * @return a <code>SubmitPdu</code> containing the encoded SC address if applicable and the
+     *         encoded message. Returns null on encode error.
+     * @hide
+     */
+    public static SubmitPdu getSubmitPdu(String scAddress,
+            String destinationAddress, String message,
+            boolean statusReportRequested, byte[] header, int encoding,
+            int languageTable, int languageShiftTable, int validityPeriod, int messageRef) {
 
         // Perform null parameter checks.
         if (message == null || destinationAddress == null) {
@@ -350,7 +375,7 @@ public class SmsMessage extends SmsMessageBase {
 
         ByteArrayOutputStream bo = getSubmitPduHead(
                 scAddress, destinationAddress, mtiByte,
-                statusReportRequested, ret);
+                statusReportRequested, ret, messageRef);
 
         // Skip encoding pdu if error occurs when create pdu head and the error will be handled
         // properly later on encodedMessage correctness check.
@@ -496,7 +521,7 @@ public class SmsMessage extends SmsMessageBase {
             String destinationAddress, String message,
             boolean statusReportRequested, int validityPeriod) {
         return getSubmitPdu(scAddress, destinationAddress, message, statusReportRequested,
-                null, ENCODING_UNKNOWN, 0, 0, validityPeriod);
+                null, ENCODING_UNKNOWN, 0, 0, validityPeriod, 0);
     }
 
     /**
@@ -507,12 +532,13 @@ public class SmsMessage extends SmsMessageBase {
      * @param destinationPort the port to deliver the message to at the destination.
      * @param data the data for the message.
      * @param statusReportRequested indicates whether a report is reuested for this message.
+     * @param messageRef TP Message Reference number
      * @return a <code>SubmitPdu</code> containing the encoded SC address if applicable and the
      *         encoded message. Returns null on encode error.
      */
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, int destinationPort, byte[] data,
-            boolean statusReportRequested) {
+            boolean statusReportRequested, int messageRef) {
 
         SmsHeader.PortAddrs portAddrs = new SmsHeader.PortAddrs();
         portAddrs.destPort = destinationPort;
@@ -533,7 +559,7 @@ public class SmsMessage extends SmsMessageBase {
         SubmitPdu ret = new SubmitPdu();
         ByteArrayOutputStream bo = getSubmitPduHead(
                 scAddress, destinationAddress, (byte) 0x41, /* TP-MTI=SMS-SUBMIT, TP-UDHI=true */
-                statusReportRequested, ret);
+                statusReportRequested, ret, messageRef);
         // Skip encoding pdu if error occurs when create pdu head and the error will be handled
         // properly later on encodedMessage correctness check.
         if (bo == null) return ret;
@@ -559,6 +585,24 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
+     * Gets an SMS-SUBMIT PDU for a data message to a destination address &amp; port.
+     *
+     * @param scAddress Service Centre address. Null means use default.
+     * @param destinationAddress the address of the destination for the message.
+     * @param destinationPort the port to deliver the message to at the destination.
+     * @param data the data for the message.
+     * @param statusReportRequested indicates whether a report is reuested for this message.
+     * @return a <code>SubmitPdu</code> containing the encoded SC address if applicable and the
+     *         encoded message. Returns null on encode error.
+     */
+    public static SubmitPdu getSubmitPdu(String scAddress,
+            String destinationAddress, int destinationPort, byte[] data,
+            boolean statusReportRequested) {
+        return getSubmitPdu(scAddress, destinationAddress, destinationPort, data,
+                statusReportRequested, 0);
+    }
+
+    /**
      * Creates the beginning of a SUBMIT PDU.
      *
      * This is the part of the SUBMIT PDU that is common to the two versions of
@@ -576,6 +620,28 @@ public class SmsMessage extends SmsMessageBase {
     private static ByteArrayOutputStream getSubmitPduHead(
             String scAddress, String destinationAddress, byte mtiByte,
             boolean statusReportRequested, SubmitPdu ret) {
+        return getSubmitPduHead(scAddress, destinationAddress, mtiByte, statusReportRequested, ret,
+                0);
+    }
+
+    /**
+     * Creates the beginning of a SUBMIT PDU.
+     *
+     * This is the part of the SUBMIT PDU that is common to the two versions of
+     * {@link #getSubmitPdu}, one of which takes a byte array and the other of which takes a
+     * <code>String</code>.
+     *
+     * @param scAddress Service Centre address. Null means use default.
+     * @param destinationAddress the address of the destination for the message.
+     * @param mtiByte
+     * @param statusReportRequested indicates whether a report is reuested for this message.
+     * @param ret <code>SubmitPdu</code>.
+     * @param messageRef TP Message Reference number
+     * @return a byte array of the beginning of a SUBMIT PDU. Null for invalid destinationAddress.
+     */
+    private static ByteArrayOutputStream getSubmitPduHead(
+            String scAddress, String destinationAddress, byte mtiByte,
+            boolean statusReportRequested, SubmitPdu ret, int messageRef) {
         ByteArrayOutputStream bo = new ByteArrayOutputStream(
                 MAX_USER_DATA_BYTES + 40);
 
@@ -596,7 +662,7 @@ public class SmsMessage extends SmsMessageBase {
         bo.write(mtiByte);
 
         // space for TP-Message-Reference
-        bo.write(0);
+        bo.write(messageRef);
 
         byte[] daBytes;
 
