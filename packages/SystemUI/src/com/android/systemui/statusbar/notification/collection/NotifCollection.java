@@ -138,6 +138,7 @@ public class NotifCollection implements Dumpable {
     private final NotifCollectionLogger mLogger;
     private final Handler mMainHandler;
     private final LogBufferEulogizer mEulogizer;
+    private final DumpManager mDumpManager;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
     private final Collection<NotificationEntry> mReadOnlyNotificationSet =
@@ -163,15 +164,13 @@ public class NotifCollection implements Dumpable {
             @Main Handler mainHandler,
             LogBufferEulogizer logBufferEulogizer,
             DumpManager dumpManager) {
-        Assert.isMainThread();
         mStatusBarService = statusBarService;
         mClock = clock;
         mNotifPipelineFlags = notifPipelineFlags;
         mLogger = logger;
         mMainHandler = mainHandler;
         mEulogizer = logBufferEulogizer;
-
-        dumpManager.registerDumpable(TAG, this);
+        mDumpManager = dumpManager;
     }
 
     /** Initializes the NotifCollection and registers it to receive notification events. */
@@ -181,7 +180,7 @@ public class NotifCollection implements Dumpable {
             throw new RuntimeException("attach() called twice");
         }
         mAttached = true;
-
+        mDumpManager.registerDumpable(TAG, this);
         groupCoalescer.setNotificationHandler(mNotifHandler);
     }
 

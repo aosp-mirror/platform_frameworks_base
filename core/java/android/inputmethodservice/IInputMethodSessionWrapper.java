@@ -41,9 +41,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodSession;
 
-/** @hide */
-// TODO(b/215636776): move IInputMethodSessionWrapper to proper package
-public class IInputMethodSessionWrapper extends IInputMethodSession.Stub
+class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         implements HandlerCaller.Callback {
     private static final String TAG = "InputMethodWrapper";
 
