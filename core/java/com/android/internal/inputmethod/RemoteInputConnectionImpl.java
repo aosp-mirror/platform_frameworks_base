@@ -1065,7 +1065,11 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                     Log.w(TAG, "commitText on inactive InputConnection");
                     return;
                 }
+                // A11yIME's commitText() also triggers finishComposingText() automatically.
+                ic.beginBatchEdit();
+                ic.finishComposingText();
                 ic.commitText(text, newCursorPosition, textAttribute);
+                ic.endBatchEdit();
             });
         }
 
