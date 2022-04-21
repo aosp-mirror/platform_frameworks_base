@@ -27,6 +27,7 @@ import static junit.framework.Assert.assertNull;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -46,6 +47,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
@@ -184,6 +186,8 @@ public class AuthControllerTest extends SysuiTestCase {
 
         when(mDialog1.getRequestId()).thenReturn(REQUEST_ID);
         when(mDialog2.getRequestId()).thenReturn(REQUEST_ID);
+
+        when(mDisplayManager.getStableDisplaySize()).thenReturn(new Point());
 
         when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
 
@@ -663,7 +667,7 @@ public class AuthControllerTest extends SysuiTestCase {
     public void testSubscribesToOrientationChangesWhenShowingDialog() {
         showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
 
-        verify(mDisplayManager).registerDisplayListener(any(), eq(mHandler));
+        verify(mDisplayManager).registerDisplayListener(any(), eq(mHandler), anyLong());
 
         mAuthController.hideAuthenticationDialog(REQUEST_ID);
         verify(mDisplayManager).unregisterDisplayListener(any());
