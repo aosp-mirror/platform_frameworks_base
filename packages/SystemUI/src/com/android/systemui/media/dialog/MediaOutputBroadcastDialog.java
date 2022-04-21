@@ -142,8 +142,11 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
 
         mBroadcastNotify = getDialogView().requireViewById(R.id.broadcast_info);
         mBroadcastNotify.setOnClickListener(v -> {
-            mMediaOutputController.launchLeBroadcastNotifyDialog(null, null,
-                    MediaOutputController.BroadcastNotifyDialog.ACTION_BROADCAST_INFO_ICON);
+            mMediaOutputController.launchLeBroadcastNotifyDialog(
+                    /* view= */ null,
+                    /* broadcastSender= */ null,
+                    MediaOutputController.BroadcastNotifyDialog.ACTION_BROADCAST_INFO_ICON,
+                    /* onClickListener= */ null);
         });
         mBroadcastName = getDialogView().requireViewById(R.id.broadcast_name_summary);
         mBroadcastNameEdit = getDialogView().requireViewById(R.id.broadcast_name_edit);

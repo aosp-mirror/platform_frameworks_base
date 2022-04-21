@@ -2645,12 +2645,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
                     // Cache newImplicitPermissions before modifing permissionsState as for the
                     // shared uids the original and new state are the same object
-                    // TODO(205888750): remove the line for LEGACY_REVIEW once propagated through
-                    // droidfood
                     if (!origState.hasPermissionState(permName)
                             && (pkg.getImplicitPermissions().contains(permName)
-                            || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))
-                            || NOTIFICATION_PERMISSIONS.contains(permName)) {
+                            || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))) {
                         if (pkg.getImplicitPermissions().contains(permName)) {
                             // If permName is an implicit permission, try to auto-grant
                             newImplicitPermissions.add(permName);
@@ -2808,12 +2805,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             }
 
                             // Remove review flag as it is not necessary anymore
-                            if (!NOTIFICATION_PERMISSIONS.contains(perm)) {
+                            // TODO(b/227186603) re-enable check for notification permission once
+                            // droidfood state has been cleared
+                            //if (!NOTIFICATION_PERMISSIONS.contains(perm)) {
                                 if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
                                     flags &= ~FLAG_PERMISSION_REVIEW_REQUIRED;
                                     wasChanged = true;
                                 }
-                            }
+                            //}
 
                             if ((flags & FLAG_PERMISSION_REVOKED_COMPAT) != 0
                                     && !isPermissionSplitFromNonRuntime(permName,

@@ -137,6 +137,8 @@ public class RemoteAnimationAdapterCompat {
                 float displayH = 0;
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change change = info.getChanges().get(i);
+                    // skip changes that we didn't wrap
+                    if (!leashMap.containsKey(change.getLeash())) continue;
                     if (change.getTaskInfo() != null
                             && change.getTaskInfo().getActivityType() == ACTIVITY_TYPE_HOME) {
                         isReturnToHome = change.getMode() == TRANSIT_OPEN
@@ -173,6 +175,8 @@ public class RemoteAnimationAdapterCompat {
                     for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                         final TransitionInfo.Change change = info.getChanges().get(i);
                         final SurfaceControl leash = leashMap.get(change.getLeash());
+                        // skip changes that we didn't wrap
+                        if (leash == null) continue;
                         final int mode = info.getChanges().get(i).getMode();
                         // Only deal with independent layers
                         if (!TransitionInfo.isIndependent(change, info)) continue;

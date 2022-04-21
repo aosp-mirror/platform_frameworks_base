@@ -824,24 +824,34 @@ public final class CameraExtensionCharacteristics {
             if (!isExtensionSupported(mCameraId, extension, mChars)) {
                 throw new IllegalArgumentException("Unsupported extension");
             }
-            Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
-                    initializeExtension(extension);
-            extenders.second.onInit(mCameraId, mChars.getNativeMetadata());
-            extenders.second.init(mCameraId, mChars.getNativeMetadata());
-            CameraMetadataNative captureRequestMeta =
-                    extenders.second.getAvailableCaptureRequestKeys();
+
+            CameraMetadataNative captureRequestMeta = null;
+            if (areAdvancedExtensionsSupported()) {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId);
+                captureRequestMeta = extender.getAvailableCaptureRequestKeys(mCameraId);
+            } else {
+                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                        initializeExtension(extension);
+                extenders.second.onInit(mCameraId, mChars.getNativeMetadata());
+                extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                captureRequestMeta = extenders.second.getAvailableCaptureRequestKeys();
+                extenders.second.onDeInit();
+            }
 
             if (captureRequestMeta != null) {
                 int[] requestKeys = captureRequestMeta.get(
                         CameraCharacteristics.REQUEST_AVAILABLE_REQUEST_KEYS);
                 if (requestKeys == null) {
-                    throw new AssertionError("android.request.availableRequestKeys must be non-null"
-                            + " in the characteristics");
+                    throw new AssertionError(
+                            "android.request.availableRequestKeys must be non-null"
+                                    + " in the characteristics");
                 }
-                CameraCharacteristics requestChars = new CameraCharacteristics(captureRequestMeta);
+                CameraCharacteristics requestChars = new CameraCharacteristics(
+                        captureRequestMeta);
 
                 Object crKey = CaptureRequest.Key.class;
-                Class<CaptureRequest.Key<?>> crKeyTyped = (Class<CaptureRequest.Key<?>>)crKey;
+                Class<CaptureRequest.Key<?>> crKeyTyped = (Class<CaptureRequest.Key<?>>) crKey;
 
                 ret.addAll(requestChars.getAvailableKeyList(CaptureRequest.class, crKeyTyped,
                         requestKeys, /*includeSynthetic*/ false));
@@ -854,7 +864,6 @@ public final class CameraExtensionCharacteristics {
             if (!ret.contains(CaptureRequest.JPEG_ORIENTATION)) {
                 ret.add(CaptureRequest.JPEG_ORIENTATION);
             }
-            extenders.second.onDeInit();
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to query the available capture request keys!");
         } finally {
@@ -894,12 +903,19 @@ public final class CameraExtensionCharacteristics {
                 throw new IllegalArgumentException("Unsupported extension");
             }
 
-            Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
-                    initializeExtension(extension);
-            extenders.second.onInit(mCameraId, mChars.getNativeMetadata());
-            extenders.second.init(mCameraId, mChars.getNativeMetadata());
-            CameraMetadataNative captureResultMeta =
-                    extenders.second.getAvailableCaptureResultKeys();
+            CameraMetadataNative captureResultMeta = null;
+            if (areAdvancedExtensionsSupported()) {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId);
+                captureResultMeta = extender.getAvailableCaptureResultKeys(mCameraId);
+            } else {
+                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                        initializeExtension(extension);
+                extenders.second.onInit(mCameraId, mChars.getNativeMetadata());
+                extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                captureResultMeta = extenders.second.getAvailableCaptureResultKeys();
+                extenders.second.onDeInit();
+            }
 
             if (captureResultMeta != null) {
                 int[] resultKeys = captureResultMeta.get(
@@ -926,7 +942,6 @@ public final class CameraExtensionCharacteristics {
                     ret.add(CaptureResult.SENSOR_TIMESTAMP);
                 }
             }
-            extenders.second.onDeInit();
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to query the available capture result keys!");
         } finally {

@@ -396,8 +396,6 @@ public final class WindowContainerTransaction implements Parcelable {
     /**
      * Sets the container as launch adjacent flag root. Task starting with
      * {@link FLAG_ACTIVITY_LAUNCH_ADJACENT} will be launching to.
-     *
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction setLaunchAdjacentFlagRoot(
@@ -409,8 +407,6 @@ public final class WindowContainerTransaction implements Parcelable {
 
     /**
      * Clears launch adjacent flag root for the display area of passing container.
-     *
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction clearLaunchAdjacentFlagRoot(

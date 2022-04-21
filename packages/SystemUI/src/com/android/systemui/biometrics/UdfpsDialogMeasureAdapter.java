@@ -139,6 +139,9 @@ public class UdfpsDialogMeasureAdapter {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(clampedSpacerHeight, MeasureSpec.EXACTLY));
+            } else if (child.getId() == R.id.description) {
+                //skip description view and compute later
+                continue;
             } else {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
@@ -150,7 +153,25 @@ public class UdfpsDialogMeasureAdapter {
             }
         }
 
+        //re-calculate the height of description
+        View description = mView.findViewById(R.id.description);
+        totalHeight += measureDescription(description, displayHeight, width, totalHeight);
+
         return new AuthDialog.LayoutParams(width, totalHeight);
+    }
+
+    private int measureDescription(View description, int displayHeight, int currWidth,
+                                   int currHeight) {
+        //description view should be measured in AuthBiometricFingerprintView#onMeasureInternal
+        //so we could getMeasuredHeight in onMeasureInternalPortrait directly.
+        int newHeight = description.getMeasuredHeight() + currHeight;
+        int limit = (int) (displayHeight * 0.75);
+        if (newHeight > limit) {
+            description.measure(
+                    MeasureSpec.makeMeasureSpec(currWidth, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(limit - currHeight, MeasureSpec.EXACTLY));
+        }
+        return description.getMeasuredHeight();
     }
 
     @NonNull
