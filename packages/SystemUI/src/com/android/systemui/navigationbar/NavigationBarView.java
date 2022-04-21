@@ -85,6 +85,7 @@ import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
@@ -139,7 +140,7 @@ public class NavigationBarView extends FrameLayout {
     private EdgeBackGestureHandler mEdgeBackGestureHandler;
     private final DeadZone mDeadZone;
     private boolean mDeadZoneConsuming = false;
-    private NavigationBarTransitions mBarTransitions;
+    private final NavigationBarTransitions mBarTransitions;
     @Nullable
     private AutoHideController mAutoHideController;
 
@@ -369,6 +370,7 @@ public class NavigationBarView extends FrameLayout {
         mConfiguration.updateFrom(context.getResources().getConfiguration());
 
         mScreenPinningNotify = new ScreenPinningNotify(mContext);
+        mBarTransitions = new NavigationBarTransitions(this, Dependency.get(CommandQueue.class));
 
         mButtonDispatchers.put(R.id.back, new ButtonDispatcher(R.id.back));
         mButtonDispatchers.put(R.id.home, new ButtonDispatcher(R.id.home));
@@ -416,12 +418,12 @@ public class NavigationBarView extends FrameLayout {
         }
     }
 
-    void setBarTransitions(NavigationBarTransitions navigationBarTransitions) {
-        mBarTransitions = navigationBarTransitions;
-    }
-
     public void setAutoHideController(AutoHideController autoHideController) {
         mAutoHideController = autoHideController;
+    }
+
+    public NavigationBarTransitions getBarTransitions() {
+        return mBarTransitions;
     }
 
     public LightBarTransitionsController getLightTransitionsController() {

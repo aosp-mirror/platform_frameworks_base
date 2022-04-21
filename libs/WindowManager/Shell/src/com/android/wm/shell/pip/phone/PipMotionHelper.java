@@ -33,6 +33,11 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.Looper;
+import android.view.Choreographer;
+
+import androidx.dynamicanimation.animation.AnimationHandler;
+import androidx.dynamicanimation.animation.AnimationHandler.FrameCallbackScheduler;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
@@ -83,6 +88,26 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     /** Coordinator instance for resolving conflicts with other floating content. */
     private FloatingContentCoordinator mFloatingContentCoordinator;
+
+    private ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
+            ThreadLocal.withInitial(() -> {
+                final Looper initialLooper = Looper.myLooper();
+                final FrameCallbackScheduler scheduler = new FrameCallbackScheduler() {
+                    @Override
+                    public void postFrameCallback(@androidx.annotation.NonNull Runnable runnable) {
+                        // TODO(b/222697646): remove getSfInstance usage and use vsyncId for
+                        //  transactions
+                        Choreographer.getSfInstance().postFrameCallback(t -> runnable.run());
+                    }
+
+                    @Override
+                    public boolean isCurrentThread() {
+                        return Looper.myLooper() == initialLooper;
+                    }
+                };
+                AnimationHandler handler = new AnimationHandler(scheduler);
+                return handler;
+            });
 
     /**
      * PhysicsAnimator instance for animating {@link PipBoundsState#getMotionBoundsState()}
@@ -186,8 +211,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     }
 
     public void init() {
+        // Note: Needs to get the shell main thread sf vsync animation handler
         mTemporaryBoundsPhysicsAnimator = PhysicsAnimator.getInstance(
                 mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
+        mTemporaryBoundsPhysicsAnimator.setCustomAnimationHandler(
+                mSfAnimationHandlerThreadLocal.get());
     }
 
     @NonNull
