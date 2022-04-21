@@ -6993,6 +6993,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mEditor.mInputType = type;
     }
 
+    @Override
+    public String[] getAutofillHints() {
+        String[] hints = super.getAutofillHints();
+        if (isAnyPasswordInputType()) {
+            if (!ArrayUtils.contains(hints, AUTOFILL_HINT_PASSWORD_AUTO)) {
+                hints = ArrayUtils.appendElement(String.class, hints,
+                        AUTOFILL_HINT_PASSWORD_AUTO);
+            }
+        }
+        return hints;
+    }
+
     /**
      * @return {@code null} if the key listener should use pre-O (locale-independent). Otherwise
      *         a {@code Locale} object that can be used to customize key various listeners.
