@@ -336,17 +336,6 @@ public class MediaControlPanel {
                 return true;
             }
         });
-        vh.getCancel().setOnClickListener(v -> {
-            if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                closeGuts();
-            }
-        });
-        vh.getSettings().setOnClickListener(v -> {
-            if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                mLogger.logLongPressSettings(mUid, mPackageName, mInstanceId);
-                mActivityStarter.startActivity(SETTINGS_INTENT, true /* dismissShade */);
-            }
-        });
 
         TextView titleText = mMediaViewHolder.getTitleText();
         TextView artistText = mMediaViewHolder.getArtistText();
@@ -389,17 +378,6 @@ public class MediaControlPanel {
             } else {
                 closeGuts();
                 return true;
-            }
-        });
-        mRecommendationViewHolder.getCancel().setOnClickListener(v -> {
-            if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                closeGuts();
-            }
-        });
-        mRecommendationViewHolder.getSettings().setOnClickListener(v -> {
-            if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                mLogger.logLongPressSettings(mUid, mPackageName, mInstanceId);
-                mActivityStarter.startActivity(SETTINGS_INTENT, true /* dismissShade */);
             }
         });
     }
@@ -461,7 +439,7 @@ public class MediaControlPanel {
         mBackgroundExecutor.execute(() -> mSeekBarViewModel.updateController(controller));
 
         bindOutputSwitcherChip(data);
-        bindLongPressMenu(data);
+        bindGutsMenuForPlayer(data);
         bindScrubbingTime(data);
         bindActionButtons(data);
 
@@ -531,24 +509,8 @@ public class MediaControlPanel {
                 });
     }
 
-    private void bindLongPressMenu(MediaData data) {
-        boolean isDismissible = data.isClearable();
-        String dismissText;
-        if (isDismissible) {
-            dismissText = mContext.getString(R.string.controls_media_close_session, data.getApp());
-        } else {
-            dismissText = mContext.getString(R.string.controls_media_active_session);
-        }
-        mMediaViewHolder.getLongPressText().setText(dismissText);
-
-        // Dismiss button
-        mMediaViewHolder.getDismissText().setAlpha(isDismissible ? 1 : DISABLED_ALPHA);
-        mMediaViewHolder.getDismiss().setEnabled(isDismissible);
-        mMediaViewHolder.getDismiss().setOnClickListener(v -> {
-            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
-            logSmartspaceCardReported(SMARTSPACE_CARD_DISMISS_EVENT);
-            mLogger.logLongPressDismiss(mUid, mPackageName, mInstanceId);
-
+    private void bindGutsMenuForPlayer(MediaData data) {
+        Runnable onDismissClickedRunnable = () -> {
             if (mKey != null) {
                 closeGuts();
                 if (!mMediaDataManagerLazy.get().dismissMediaData(mKey,
@@ -561,7 +523,13 @@ public class MediaControlPanel {
                 Log.w(TAG, "Dismiss media with null notification. Token uid="
                         + data.getToken().getUid());
             }
-        });
+        };
+
+        bindGutsMenuCommon(
+                /* isDismissible= */ data.isClearable(),
+                data.getApp(),
+                mMediaViewHolder.getGutsViewHolder(),
+                onDismissClickedRunnable);
     }
 
     private boolean bindSongMetadata(MediaData data) {
@@ -1087,14 +1055,9 @@ public class MediaControlPanel {
         }
 
         mSmartspaceMediaItemsCount = uiComponentIndex;
-        // Set up long press to show guts setting panel.
-        mRecommendationViewHolder.getDismiss().setOnClickListener(v -> {
-            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
 
-            mLogger.logLongPressDismiss(mUid, mPackageName, mInstanceId);
-            logSmartspaceCardReported(
-                    761 // SMARTSPACE_CARD_DISMISS
-            );
+        // Guts
+        Runnable onDismissClickedRunnable = () -> {
             closeGuts();
             mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
                     data.getTargetId(), MediaViewController.GUTS_ANIMATION_DURATION + 100L);
@@ -1114,7 +1077,12 @@ public class MediaControlPanel {
             } else {
                 mBroadcastSender.sendBroadcast(dismissIntent);
             }
-        });
+        };
+        bindGutsMenuCommon(
+                /* isDismissible= */ true,
+                appName.toString(),
+                mRecommendationViewHolder.getGutsViewHolder(),
+                onDismissClickedRunnable);
 
         mController = null;
         if (mMetadataAnimationHandler == null || !mMetadataAnimationHandler.isRunning()) {
@@ -1145,6 +1113,49 @@ public class MediaControlPanel {
                 (title) -> title.setTextColor(textPrimaryColor));
         mRecommendationViewHolder.getMediaSubtitles().forEach(
                 (subtitle) -> subtitle.setTextColor(textSecondaryColor));
+
+        mRecommendationViewHolder.getGutsViewHolder().setColors(colorScheme);
+    }
+
+    private void bindGutsMenuCommon(
+            boolean isDismissible,
+            String appName,
+            GutsViewHolder gutsViewHolder,
+            Runnable onDismissClickedRunnable) {
+        // Text
+        String text;
+        if (isDismissible) {
+            text = mContext.getString(R.string.controls_media_close_session, appName);
+        } else {
+            text = mContext.getString(R.string.controls_media_active_session);
+        }
+        gutsViewHolder.getGutsText().setText(text);
+
+        // Dismiss button
+        gutsViewHolder.getDismissText().setAlpha(isDismissible ? 1 : DISABLED_ALPHA);
+        gutsViewHolder.getDismiss().setEnabled(isDismissible);
+        gutsViewHolder.getDismiss().setOnClickListener(v -> {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
+            logSmartspaceCardReported(SMARTSPACE_CARD_DISMISS_EVENT);
+            mLogger.logLongPressDismiss(mUid, mPackageName, mInstanceId);
+
+            onDismissClickedRunnable.run();
+        });
+
+        // Cancel button
+        gutsViewHolder.getCancel().setOnClickListener(v -> {
+            if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                closeGuts();
+            }
+        });
+
+        // Settings button
+        gutsViewHolder.getSettings().setOnClickListener(v -> {
+            if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                mLogger.logLongPressSettings(mUid, mPackageName, mInstanceId);
+                mActivityStarter.startActivity(SETTINGS_INTENT, /* dismissShade= */true);
+            }
+        });
     }
 
     /**
