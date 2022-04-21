@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dagger;
+package com.android.systemui.dagger.qualifiers;
 
-import com.android.systemui.broadcast.BroadcastDispatcherModule;
-import com.android.systemui.theme.ThemeModule;
-import com.android.systemui.util.leak.LeakModule;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import dagger.Module;
+import android.content.Context;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
+import javax.inject.Qualifier;
 
 /**
- * @deprecated This module is going away. Don't put anything in here.
+ * Used to qualify a context as {@link Context#getApplicationContext}
  */
-@Deprecated
-@Module(includes = {
-        BroadcastDispatcherModule.class,
-        LeakModule.class,
-        NightDisplayListenerModule.class,
-        SharedLibraryModule.class,
-        SettingsLibraryModule.class,
-        ThemeModule.class
-})
-public class DependencyProvider {
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface Application {
 }
