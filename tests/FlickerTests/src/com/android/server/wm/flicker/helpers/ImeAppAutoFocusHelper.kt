@@ -41,6 +41,16 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
         waitIMEShown(device, wmHelper)
     }
 
+    override fun launchViaIntent(
+        wmHelper: WindowManagerStateHelper,
+        expectedWindowName: String,
+        action: String?,
+        stringExtras: Map<String, String>
+    ) {
+        super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras)
+        waitIMEShown(uiDevice, wmHelper)
+    }
+
     override fun open() {
         val expectedPackage = if (rotation.isRotated()) {
             imePackageName
