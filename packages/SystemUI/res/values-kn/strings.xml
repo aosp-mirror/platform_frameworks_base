@@ -882,5 +882,5 @@
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬದಲಿಸಲು, ಇಥರ್ನೆಟ್ ಅನ್ನು ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ವೈ-ಫೈ ಆಫ್ ಇದ್ದಾಗಲೂ ಸಹ, ಸಾಧನದ ಅನುಭವವನ್ನು ಸುಧಾರಿಸಲು, ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಸೇವೆಗಳು ಯಾವಾಗ ಬೇಕಾದರೂ ಸಹ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳಿಗಾಗಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಬಹುದು. ನೀವು ಇದನ್ನು ವೈ-ಫೈ ಸ್ಕ್ಯಾನಿಂಗ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಬದಲಾಯಿಸಬಹುದು. "<annotation id="link">"ಬದಲಿಸಿ"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್ ಆಫ್ ಮಾಡಿ"</string>
-    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ಬಳಕೆದಾರ ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ಬಳಕೆದಾರರನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
 </resources>

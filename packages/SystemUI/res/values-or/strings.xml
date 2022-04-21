@@ -341,8 +341,8 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ଆପଣ ନିଜର ସେସନ୍ ଜାରି ରଖିବାକୁ ଚାହାଁନ୍ତି କି?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ହଁ, ଜାରି ରଖନ୍ତୁ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"ନୂତନ ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରିବେ?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"ଆପଣ ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କଲେ,ତାଙ୍କୁ ସ୍ପେସ୍ ସେଟ୍ ଅପ୍ କରିବାକୁ ପଡ଼ିବ। \n \n ଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପଗୁଡ଼ିକୁ ଅପଡେଟ୍‌ କରିପାରିବେ।"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରିବେ?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"ଆପଣ ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବା ବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ତାଙ୍କ ସ୍ପେସ ସେଟ ଅପ କରିବାକୁ ପଡ଼ିବ।\n\nଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ, ଆପଗୁଡ଼ିକୁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଅପଡେଟ କରିପାରିବେ।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"ଉପଯୋଗକର୍ତ୍ତା ସୀମାରେ ପହଞ୍ଚିଛି"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">କେବଳ <xliff:g id="COUNT">%d</xliff:g> ଉପଯୋଗକର୍ତ୍ତା ହିଁ ତିଆରି କରିହେବ।</item>
