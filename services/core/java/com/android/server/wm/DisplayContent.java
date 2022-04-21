@@ -358,6 +358,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     float mInitialPhysicalXDpi = 0.0f;
     float mInitialPhysicalYDpi = 0.0f;
 
+    private Point mStableDisplaySize;
+
     DisplayCutout mInitialDisplayCutout;
     private final RotationCache<DisplayCutout, WmDisplayCutout> mDisplayCutoutCache
             = new RotationCache<>(this::calculateDisplayCutoutForRotationUncached);
@@ -379,6 +381,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     int mBaseDisplayWidth = 0;
     int mBaseDisplayHeight = 0;
+    DisplayCutout mBaseDisplayCutout;
+    RoundedCorners mBaseRoundedCorners;
     boolean mIsSizeForced = false;
 
     /**
@@ -2078,7 +2082,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     WmDisplayCutout calculateDisplayCutoutForRotation(int rotation) {
-        return mDisplayCutoutCache.getOrCompute(mInitialDisplayCutout, rotation);
+        return mDisplayCutoutCache.getOrCompute(
+                mIsSizeForced ? mBaseDisplayCutout : mInitialDisplayCutout, rotation);
     }
 
     static WmDisplayCutout calculateDisplayCutoutForRotationAndDisplaySizeUncached(
@@ -2101,11 +2106,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private WmDisplayCutout calculateDisplayCutoutForRotationUncached(
             DisplayCutout cutout, int rotation) {
         return calculateDisplayCutoutForRotationAndDisplaySizeUncached(cutout, rotation,
-                mInitialDisplayWidth, mInitialDisplayHeight);
+                mIsSizeForced ? mBaseDisplayWidth : mInitialDisplayWidth,
+                mIsSizeForced ? mBaseDisplayHeight : mInitialDisplayHeight);
     }
 
     RoundedCorners calculateRoundedCornersForRotation(int rotation) {
-        return mRoundedCornerCache.getOrCompute(mInitialRoundedCorners, rotation);
+        return mRoundedCornerCache.getOrCompute(
+                mIsSizeForced ? mBaseRoundedCorners : mInitialRoundedCorners, rotation);
     }
 
     private RoundedCorners calculateRoundedCornersForRotationUncached(
@@ -2118,7 +2125,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return roundedCorners;
         }
 
-        return roundedCorners.rotate(rotation, mInitialDisplayWidth, mInitialDisplayHeight);
+        return roundedCorners.rotate(
+                rotation,
+                mIsSizeForced ? mBaseDisplayWidth : mInitialDisplayWidth,
+                mIsSizeForced ? mBaseDisplayHeight : mInitialDisplayHeight);
     }
 
     PrivacyIndicatorBounds calculatePrivacyIndicatorBoundsForRotation(int rotation) {
@@ -2719,6 +2729,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInitialRoundedCorners = mDisplayInfo.roundedCorners;
         mCurrentPrivacyIndicatorBounds = new PrivacyIndicatorBounds(new Rect[4],
                 mDisplayInfo.rotation);
+        mStableDisplaySize = mWmService.mDisplayManager.getStableDisplaySize();
     }
 
     /**
@@ -2814,6 +2825,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mBaseDisplayDensity = baseDensity;
         mBaseDisplayPhysicalXDpi = baseXDpi;
         mBaseDisplayPhysicalYDpi = baseYDpi;
+        if (mIsSizeForced) {
+            mBaseDisplayCutout = loadDisplayCutout(baseWidth, baseHeight);
+            mBaseRoundedCorners = loadRoundedCorners(baseWidth, baseHeight);
+        }
 
         if (mMaxUiWidth > 0 && mBaseDisplayWidth > mMaxUiWidth) {
             final float ratio = mMaxUiWidth / (float) mBaseDisplayWidth;
@@ -2902,6 +2917,24 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             width = height = 0;
         }
         mWmService.mDisplayWindowSettings.setForcedSize(this, width, height);
+    }
+
+    DisplayCutout loadDisplayCutout(int displayWidth, int displayHeight) {
+        if (mDisplayPolicy == null) {
+            return null;
+        }
+        return DisplayCutout.fromResourcesRectApproximation(
+                mDisplayPolicy.getSystemUiContext().getResources(), mDisplayInfo.uniqueId,
+                mStableDisplaySize.x, mStableDisplaySize.y, displayWidth, displayHeight);
+    }
+
+    RoundedCorners loadRoundedCorners(int displayWidth, int displayHeight) {
+        if (mDisplayPolicy == null) {
+            return null;
+        }
+        return RoundedCorners.fromResources(
+                mDisplayPolicy.getSystemUiContext().getResources(),  mDisplayInfo.uniqueId,
+                mStableDisplaySize.x, mStableDisplaySize.y, displayWidth, displayHeight);
     }
 
     @Override

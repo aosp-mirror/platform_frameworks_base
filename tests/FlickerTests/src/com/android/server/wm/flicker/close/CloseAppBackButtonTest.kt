@@ -98,6 +98,12 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         super.statusBarLayerRotatesScales()
     }
 
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 229762973)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
     companion object {
         /**
          * Creates the test configurations.

@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -32,6 +33,8 @@ import org.junit.runners.Parameterized
 
 /**
  * Test warm launching an app from a notification from the lock screen.
+ *
+ * This test assumes the device doesn't have AOD enabled
  *
  * To run this test: `atest FlickerTests:OpenAppFromLockNotificationWarm`
  */
@@ -96,6 +99,11 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter)
             isEmpty()
         }
     }
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 229735718)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         /**

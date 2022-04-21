@@ -35,7 +35,8 @@ import javax.inject.Inject
 class MediaViewController @Inject constructor(
     private val context: Context,
     private val configurationController: ConfigurationController,
-    private val mediaHostStatesManager: MediaHostStatesManager
+    private val mediaHostStatesManager: MediaHostStatesManager,
+    private val logger: MediaViewLogger
 ) {
 
     /**
@@ -330,6 +331,7 @@ class MediaViewController @Inject constructor(
             // is cheap
             setGutsViewState(result)
             viewStates[cacheKey] = result
+            logger.logMediaSize("measured new viewState", result.width, result.height)
         } else {
             // This is an interpolated state
             val startState = state.copy().also { it.expansion = 0.0f }
@@ -344,6 +346,7 @@ class MediaViewController @Inject constructor(
                     startViewState,
                     endViewState,
                     state.expansion)
+            logger.logMediaSize("interpolated viewState", result.width, result.height)
         }
         if (state.squishFraction < 1f) {
             return squishViewState(result, state.squishFraction)
@@ -371,6 +374,7 @@ class MediaViewController @Inject constructor(
      */
     fun attach(transitionLayout: TransitionLayout, type: TYPE) {
         updateMediaViewControllerType(type)
+        logger.logMediaLocation("attach", currentStartLocation, currentEndLocation)
         this.transitionLayout = transitionLayout
         layoutController.attach(transitionLayout)
         if (currentEndLocation == -1) {
@@ -409,6 +413,7 @@ class MediaViewController @Inject constructor(
         currentEndLocation = endLocation
         currentStartLocation = startLocation
         currentTransitionProgress = transitionProgress
+        logger.logMediaLocation("setCurrentState", startLocation, endLocation)
 
         val shouldAnimate = animateNextStateChange && !applyImmediately
 
@@ -461,6 +466,7 @@ class MediaViewController @Inject constructor(
             result = layoutController.getInterpolatedState(startViewState, endViewState,
                     transitionProgress, tmpState)
         }
+        logger.logMediaSize("setCurrentState", result.width, result.height)
         layoutController.setState(result, applyImmediately, shouldAnimate, animationDuration,
                 animationDelay)
     }
@@ -478,6 +484,7 @@ class MediaViewController @Inject constructor(
             result.height = Math.max(it.measuredHeight, result.height)
             result.width = Math.max(it.measuredWidth, result.width)
         }
+        logger.logMediaSize("update to carousel", result.width, result.height)
         return result
     }
 

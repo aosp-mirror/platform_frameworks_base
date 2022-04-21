@@ -47,6 +47,8 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.ChildSessionCallback;
 import android.net.ipsec.ike.IkeSessionCallback;
+import android.net.ipsec.ike.IkeSessionConfiguration;
+import android.net.ipsec.ike.IkeSessionConnectionInfo;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.os.ParcelUuid;
@@ -80,6 +82,13 @@ public class VcnGatewayConnectionTestBase {
         doReturn(TEST_SUB_GRP).when(TEST_SUB_INFO).getGroupUuid();
     }
 
+    protected static final InetAddress TEST_ADDR = InetAddresses.parseNumericAddress("2001:db8::1");
+    protected static final InetAddress TEST_ADDR_2 =
+            InetAddresses.parseNumericAddress("2001:db8::2");
+    protected static final InetAddress TEST_ADDR_V4 =
+            InetAddresses.parseNumericAddress("192.0.2.1");
+    protected static final InetAddress TEST_ADDR_V4_2 =
+            InetAddresses.parseNumericAddress("192.0.2.2");
     protected static final InetAddress TEST_DNS_ADDR =
             InetAddresses.parseNumericAddress("2001:DB8:0:1::");
     protected static final InetAddress TEST_DNS_ADDR_2 =
@@ -148,6 +157,9 @@ public class VcnGatewayConnectionTestBase {
     @NonNull protected final IpSecService mIpSecSvc;
     @NonNull protected final ConnectivityManager mConnMgr;
 
+    @NonNull protected final IkeSessionConnectionInfo mIkeConnectionInfo;
+    @NonNull protected final IkeSessionConfiguration mIkeSessionConfiguration;
+
     protected VcnIkeSession mMockIkeSession;
     protected VcnGatewayConnection mGatewayConnection;
 
@@ -172,6 +184,10 @@ public class VcnGatewayConnectionTestBase {
         mConnMgr = mock(ConnectivityManager.class);
         VcnTestUtils.setupSystemService(
                 mContext, mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
+
+        mIkeConnectionInfo =
+                new IkeSessionConnectionInfo(TEST_ADDR, TEST_ADDR_2, mock(Network.class));
+        mIkeSessionConfiguration = new IkeSessionConfiguration.Builder(mIkeConnectionInfo).build();
 
         doReturn(mContext).when(mVcnContext).getContext();
         doReturn(mTestLooper.getLooper()).when(mVcnContext).getLooper();

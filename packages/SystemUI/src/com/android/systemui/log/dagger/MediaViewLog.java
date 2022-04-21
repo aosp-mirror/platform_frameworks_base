@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
- package com.android.internal.view;
+package com.android.systemui.log.dagger;
 
- import com.android.internal.view.IInputMethodSession;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import com.android.systemui.log.LogBuffer;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
+import javax.inject.Qualifier;
 
 /**
- * Helper interface for IInputMethod to allow the input method to notify the client when a new
- * session has been created.
+ * A {@link LogBuffer} for {@link com.android.systemui.media.MediaViewLogger}
  */
-oneway interface IInputSessionWithIdCallback {
-    void sessionCreated(IInputMethodSession session, int id);
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface MediaViewLog {
 }

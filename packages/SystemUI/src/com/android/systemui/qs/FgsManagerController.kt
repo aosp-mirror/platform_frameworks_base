@@ -422,6 +422,8 @@ class FgsManagerController @Inject constructor(
 
                 PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE,
                 PowerExemptionManager.REASON_DEVICE_OWNER,
+                PowerExemptionManager.REASON_DISALLOW_APPS_CONTROL,
+                PowerExemptionManager.REASON_DPO_PROTECTED_APP,
                 PowerExemptionManager.REASON_PROFILE_OWNER,
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT,
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI,
