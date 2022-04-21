@@ -136,12 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"確認しました"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"完了するには [確認] をタップしてください"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"顔でロック解除しました。ロック解除アイコンを押して続行します。"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"顔でロック解除しました。押して続行してください。"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"顔を認識しました。押して続行してください。"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"顔を認識しました。ロック解除アイコンを押して続行します。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"認証済み"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN を使用"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"パターンを使用"</string>
@@ -318,12 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"開くには上にスワイプします"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"ロック解除アイコンを押して開きます"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"顔でロック解除しました。ロック解除アイコンを押して開きます。"</string>
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"顔でロック解除しました。押すと開きます。"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"顔を認識しました。押すと開きます。"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"顔を認識しました。ロック解除アイコンを押して開きます。"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"上にスワイプしてもう一度お試しください"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC を使用するには、ロックを解除してください"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"これは組織が所有するデバイスです"</string>
@@ -352,8 +346,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"続行"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"ゲストモード"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"ゲストモード使用中"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"新しいユーザーを追加しますか？"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"新しいユーザーを追加したら、そのユーザーは自分のスペースをセットアップする必要があります。\n\nすべてのユーザーは他のユーザーに代わってアプリを更新できます。"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"新しいユーザーを追加するとゲストモードは終了し、現在のゲスト セッションからすべてのアプリとデータが削除されます。"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"ユーザー数が上限に達しました"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -523,8 +515,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>は会話機能に対応していません"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"着信通知は変更できません。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"このグループの通知はここでは設定できません"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g> のすべての通知"</string>
@@ -928,11 +919,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"タイルを追加"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"タイルを追加しない"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ユーザーの選択"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 個のアプリがアクティブです</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 個のアプリがアクティブです</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"最新情報"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"実行中のアプリ"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"これらのアプリは、使用していない場合でもアクティブのままになるため、バッテリー駆動時間に影響する可能性があります"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"停止中"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完了"</string>

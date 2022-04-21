@@ -136,12 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Ðã xác nhận"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Nhấn vào Xác nhận để hoàn tất"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Đã mở khoá bằng khuôn mặt. Nhấn biểu tượng mở khoá để tiếp tục."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Đã mở khoá bằng khuôn mặt. Hãy nhấn để tiếp tục."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Đã nhận diện khuôn mặt. Hãy nhấn để tiếp tục."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Đã nhận diện khuôn mặt. Nhấn biểu tượng mở khoá để tiếp tục."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Đã xác thực"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Dùng mã PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Dùng hình mở khóa"</string>
@@ -318,12 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Vuốt lên để mở"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Nhấn biểu tượng mở khoá để mở"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Đã mở khoá bằng khuôn mặt. Nhấn biểu tượng mở khoá để mở."</string>
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Đã mở khoá bằng khuôn mặt. Nhấn để mở."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Đã nhận diện khuôn mặt. Nhấn để mở."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Đã nhận diện khuôn mặt. Nhấn biểu tượng mở khoá để mở."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Vuốt lên để thử lại"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Mở khóa để sử dụng NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Thiết bị này thuộc về tổ chức của bạn"</string>
@@ -352,8 +346,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Có, tiếp tục"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Chế độ khách"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Bạn đang ở chế độ khách"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Thêm người dùng mới?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Khi bạn thêm người dùng mới, họ cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Khi thêm người dùng mới, chế độ khách sẽ bị thoát và mọi ứng dụng cũng như dữ liệu trong phiên khách hiện tại sẽ bị xoá."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Đã đạt đến giới hạn người dùng"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -523,8 +515,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ các tính năng trò chuyện"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Không thể sửa đổi các thông báo này."</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Không thể sửa đổi các thông báo cuộc gọi."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Không thể định cấu hình nhóm thông báo này tại đây"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Thông báo đã xử lý qua máy chủ proxy"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Tất cả thông báo của <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -928,11 +919,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Thêm ô"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Không thêm ô"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Chọn người dùng"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other">Ứng dụng <xliff:g id="COUNT_1">%s</xliff:g> đang hoạt động</item>
+      <item quantity="one">Ứng dụng <xliff:g id="COUNT_0">%s</xliff:g> đang hoạt động</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Thông tin mới"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ứng dụng đang hoạt động"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Ngay cả khi bạn không sử dụng, những ứng dụng này vẫn hoạt động và có thể ảnh hưởng đến tuổi thọ pin"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Dừng"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Đã dừng"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Xong"</string>

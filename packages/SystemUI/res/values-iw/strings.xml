@@ -136,12 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"יש אישור"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"יש להקיש על \'אישור\' לסיום התהליך"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"הנעילה בוטלה בזיהוי פנים. להמשך, לוחצים על סמל ביטול הנעילה."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"הנעילה בוטלה באמצעות זיהוי הפנים. יש ללחוץ כדי להמשיך."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"הפנים זוהו. יש ללחוץ כדי להמשיך."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"הפנים זוהו. להמשך יש ללחוץ על סמל ביטול הנעילה."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"מאומת"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"שימוש בקוד אימות"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"שימוש בקו ביטול נעילה"</string>
@@ -322,12 +319,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"צריך להחליק כדי לפתוח"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"לפתיחה, לוחצים על סמל ביטול הנעילה"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"הנעילה בוטלה בזיהוי פנים. פותחים בלחיצה על סמל ביטול הנעילה."</string>
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"הנעילה בוטלה באמצעות זיהוי הפנים. יש ללחוץ כדי לפתוח."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"הפנים זוהו. יש ללחוץ כדי לפתוח."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"הפנים זוהו. יש ללחוץ על סמל ביטול הנעילה כדי לפתוח."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"יש להחליק למעלה כדי לנסות שוב"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏יש לבטל את הנעילה כדי להשתמש ב-NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"המכשיר הזה שייך לארגון שלך"</string>
@@ -356,8 +350,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"כן, להמשיך"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"מצב אורח"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"התחברת במצב אורח"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"להוסיף משתמש חדש?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"כשמוסיפים משתמש חדש, המשתמש הזה צריך להגדיר את השטח שלו.\n\nכל משתמש יכול לעדכן אפליקציות עבור כל המשתמשים האחרים."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"הוספת משתמש חדש תגרום ליציאה ממצב האורח ותמחק את כל האפליקציות והנתונים מהגלישה הנוכחית כאורח."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"הגעת למגבלת המשתמשים שניתן להוסיף"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -529,8 +521,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"בעדיפות גבוהה"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא תומכת בתכונות השיחה"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"לא ניתן לשנות את ההתראות האלה."</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"לא ניתן לשנות את התראות השיחה."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"לא ניתן להגדיר כאן את קבוצת ההתראות הזו"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"‏התראה דרך שרת proxy"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"כל ההתראות של <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
