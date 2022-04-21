@@ -80,7 +80,7 @@
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"No se ha podido desbloquear la tarjeta SIM con el código PIN."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"No se ha podido desbloquear la tarjeta SIM con el código PUK."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Cambiar método de introducción"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"Modo avión"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"Modo Avión"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Debes introducir el patrón después de reiniciar el dispositivo"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Debes introducir el PIN después de reiniciar el dispositivo"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Debes introducir la contraseña después de reiniciar el dispositivo"</string>
