@@ -542,24 +542,44 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             mMenuController.attachPipMenuView();
             // Calculate the snap fraction of the current stack along the old movement bounds
             final PipSnapAlgorithm pipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
-            final Rect postChangeStackBounds = new Rect(mPipBoundsState.getBounds());
-            final float snapFraction = pipSnapAlgorithm.getSnapFraction(postChangeStackBounds,
-                    mPipBoundsAlgorithm.getMovementBounds(postChangeStackBounds),
+            final Rect postChangeBounds = new Rect(mPipBoundsState.getBounds());
+            final float snapFraction = pipSnapAlgorithm.getSnapFraction(postChangeBounds,
+                    mPipBoundsAlgorithm.getMovementBounds(postChangeBounds),
                     mPipBoundsState.getStashedState());
+
+            // Scale PiP on density dpi change, so it appears to be the same size physically.
+            final boolean densityDpiChanged = mPipBoundsState.getDisplayLayout().densityDpi() != 0
+                    && (mPipBoundsState.getDisplayLayout().densityDpi() != layout.densityDpi());
+            if (densityDpiChanged) {
+                final float scale = (float) layout.densityDpi()
+                        / mPipBoundsState.getDisplayLayout().densityDpi();
+                postChangeBounds.set(0, 0,
+                        (int) (postChangeBounds.width() * scale),
+                        (int) (postChangeBounds.height() * scale));
+            }
 
             updateDisplayLayout.run();
 
-            // Calculate the stack bounds in the new orientation based on same fraction along the
+            // Calculate the PiP bounds in the new orientation based on same fraction along the
             // rotated movement bounds.
             final Rect postChangeMovementBounds = mPipBoundsAlgorithm.getMovementBounds(
-                    postChangeStackBounds, false /* adjustForIme */);
-            pipSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
+                    postChangeBounds, false /* adjustForIme */);
+            pipSnapAlgorithm.applySnapFraction(postChangeBounds, postChangeMovementBounds,
                     snapFraction, mPipBoundsState.getStashedState(),
                     mPipBoundsState.getStashOffset(),
                     mPipBoundsState.getDisplayBounds(),
                     mPipBoundsState.getDisplayLayout().stableInsets());
 
-            mTouchHandler.getMotionHelper().movePip(postChangeStackBounds);
+            if (densityDpiChanged) {
+                // Using PipMotionHelper#movePip directly here may cause race condition since
+                // the app content in PiP mode may or may not be updated for the new density dpi.
+                final int duration = mContext.getResources().getInteger(
+                        R.integer.config_pipEnterAnimationDuration);
+                mPipTaskOrganizer.scheduleAnimateResizePip(
+                        postChangeBounds, duration, null /* updateBoundsCallback */);
+            } else {
+                mTouchHandler.getMotionHelper().movePip(postChangeBounds);
+            }
         } else {
             updateDisplayLayout.run();
         }
