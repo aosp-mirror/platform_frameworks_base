@@ -862,22 +862,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 tf.getDisplayContent().setFocusedApp(targetFocus);
                 break;
             }
-            default: {
-                // The other operations may change task order so they are skipped while in lock
-                // task mode. The above operations are still allowed because they don't move
-                // tasks. And it may be necessary such as clearing launch root after entering
-                // lock task mode.
-                if (isInLockTaskMode) {
-                    Slog.w(TAG, "Skip applying hierarchy operation " + hop
-                            + " while in lock task mode");
-                    return effects;
-                }
-            }
-        }
-
-        switch (type) {
             case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT: {
-                effects |= reparentChildrenTasksHierarchyOp(hop, transition, syncId);
+                effects |= reparentChildrenTasksHierarchyOp(hop, transition, syncId,
+                        isInLockTaskMode);
+                break;
+            }
+            case HIERARCHY_OP_TYPE_LAUNCH_TASK: {
+                mService.mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
+                        "launchTask HierarchyOp");
+                final Bundle launchOpts = hop.getLaunchOptions();
+                final int taskId = launchOpts.getInt(
+                        WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
+                launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
+                final SafeActivityOptions safeOptions =
+                        SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid);
+                waitAsyncStart(() -> mService.mTaskSupervisor.startActivityFromRecents(
+                        caller.mPid, caller.mUid, taskId, safeOptions));
                 break;
             }
             case HIERARCHY_OP_TYPE_REORDER:
@@ -885,6 +885,16 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
                 if (wc == null || !wc.isAttached()) {
                     Slog.e(TAG, "Attempt to operate on detached container: " + wc);
+                    break;
+                }
+                // There is no use case to ask the reparent operation in lock-task mode now, so keep
+                // skipping this operation as usual.
+                if (isInLockTaskMode && type == HIERARCHY_OP_TYPE_REPARENT) {
+                    Slog.w(TAG, "Skip applying hierarchy operation " + hop
+                            + " while in lock task mode");
+                    break;
+                }
+                if (isLockTaskModeViolation(wc.getParent(), wc.asTask(), isInLockTaskMode)) {
                     break;
                 }
                 if (syncId >= 0) {
@@ -912,19 +922,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 effects |= sanitizeAndApplyHierarchyOp(wc, hop);
                 break;
             }
-            case HIERARCHY_OP_TYPE_LAUNCH_TASK: {
-                mService.mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
-                        "launchTask HierarchyOp");
-                final Bundle launchOpts = hop.getLaunchOptions();
-                final int taskId = launchOpts.getInt(
-                        WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
-                launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
-                final SafeActivityOptions safeOptions =
-                        SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid);
-                waitAsyncStart(() -> mService.mTaskSupervisor.startActivityFromRecents(
-                        caller.mPid, caller.mUid, taskId, safeOptions));
-                break;
+            default: {
+                // The other operations may change task order so they are skipped while in lock
+                // task mode. The above operations are still allowed because they don't move
+                // tasks. And it may be necessary such as clearing launch root after entering
+                // lock task mode.
+                if (isInLockTaskMode) {
+                    Slog.w(TAG, "Skip applying hierarchy operation " + hop
+                            + " while in lock task mode");
+                    return effects;
+                }
             }
+        }
+
+        switch (type) {
             case HIERARCHY_OP_TYPE_PENDING_INTENT: {
                 String resolvedType = hop.getActivityIntent() != null
                         ? hop.getActivityIntent().resolveTypeIfNeeded(
@@ -1103,8 +1114,25 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
 
+    private boolean isLockTaskModeViolation(WindowContainer parent, Task task,
+            boolean isInLockTaskMode) {
+        if (!isInLockTaskMode || parent == null || task == null) {
+            return false;
+        }
+        final LockTaskController lockTaskController = mService.getLockTaskController();
+        boolean taskViolation = lockTaskController.isLockTaskModeViolation(task);
+        if (!taskViolation && parent.asTask() != null) {
+            taskViolation = lockTaskController.isLockTaskModeViolation(parent.asTask());
+        }
+        if (taskViolation) {
+            Slog.w(TAG, "Can't support the operation since in lock task mode violation. "
+                    + " Task: " + task + " Parent : " + parent);
+        }
+        return taskViolation;
+    }
+
     private int reparentChildrenTasksHierarchyOp(WindowContainerTransaction.HierarchyOp hop,
-            @Nullable Transition transition, int syncId) {
+            @Nullable Transition transition, int syncId, boolean isInLockTaskMode) {
         WindowContainer<?> currentParent = hop.getContainer() != null
                 ? WindowContainer.fromBinder(hop.getContainer()) : null;
         WindowContainer newParent = hop.getNewParent() != null
@@ -1142,6 +1170,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 ? newParent.asTask().getDisplayArea()
                 : newParent.asTaskDisplayArea();
         final WindowContainer finalCurrentParent = currentParent;
+        final WindowContainer finalNewParent = newParent;
         Slog.i(TAG, "reparentChildrenTasksHierarchyOp"
                 + " currentParent=" + currentParent + " newParent=" + newParent + " hop=" + hop);
 
@@ -1163,6 +1192,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             if (!ArrayUtils.contains(hop.getActivityTypes(), task.getActivityType())
                     || !ArrayUtils.contains(hop.getWindowingModes(), task.getWindowingMode())) {
+                return false;
+            }
+            if (isLockTaskModeViolation(finalNewParent, task, isInLockTaskMode)) {
                 return false;
             }
 
