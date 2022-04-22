@@ -506,8 +506,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> não suporta funcionalidades de conversa."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Não é possível modificar estas notificações."</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Não é possível modificar as notificações de chamadas."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Não é possível configurar este grupo de notificações aqui."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notificação de app proxy"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Todas as notificações da app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -894,7 +893,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dados móveis"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Ligado"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Não é efetuada ligação de dados móveis automática"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Sem ligação automática com dados móveis"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Sem ligação"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nenhuma outra rede disponível"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Sem redes disponíveis"</string>

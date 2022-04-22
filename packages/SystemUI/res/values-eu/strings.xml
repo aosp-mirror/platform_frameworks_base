@@ -278,7 +278,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Desaktibatze-ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Aktibatuta lo egiteko garaian"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Lo egiteko garaia amaitzen den arte"</string>
-    <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
+    <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFCa"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Desgaituta dago NFC"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Gaituta dago NFC"</string>
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Pantaila-grabaketa"</string>
@@ -313,7 +313,7 @@
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Irekitzeko, sakatu desblokeatzeko ikonoa"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Aurpegiaren bidez desblokeatu da. Irekitzeko, sakatu desblokeatzeko ikonoa."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Berriro saiatzeko, pasatu hatza gora"</string>
-    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desblokea ezazu NFC erabiltzeko"</string>
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desblokea ezazu NFCa erabiltzeko"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Gailu hau zure erakundearena da"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Gailu hau <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> erakundearena da"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> erakundeak eman du gailu hau"</string>
@@ -424,7 +424,7 @@
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Ados"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ez, eskerrik asko"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Ainguratu da aplikazioa"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Kendu da aplikazioaren aingura"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Kendu zaio aingura aplikazioari"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Deia"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Jo tonua"</string>
@@ -836,7 +836,7 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Parekatu beste gailu batekin"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Saioa ireki nahi baduzu, ireki aplikazioa."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplikazio ezezaguna"</string>
-    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Utzi igortzeari"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Gelditu igorpena"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Nola funtzionatzen dute iragarpenek?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Iragarri"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Bluetooth bidezko gailu bateragarriak dituzten inguruko pertsonek iragartzen ari zaren multimedia-edukia entzun dezakete"</string>
