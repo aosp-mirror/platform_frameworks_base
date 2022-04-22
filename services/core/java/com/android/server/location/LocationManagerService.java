@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.compat.CompatChanges.isChangeEnabled;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
@@ -39,6 +40,7 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -1063,8 +1065,10 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
     @Override
     public void addProviderRequestListener(IProviderRequestListener listener) {
-        for (LocationProviderManager manager : mProviderManagers) {
-            manager.addProviderRequestListener(listener);
+        if (mContext.checkCallingOrSelfPermission(INTERACT_ACROSS_USERS) == PERMISSION_GRANTED) {
+            for (LocationProviderManager manager : mProviderManagers) {
+                manager.addProviderRequestListener(listener);
+            }
         }
     }
 
