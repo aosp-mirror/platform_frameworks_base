@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ክፍለ-ጊዜዎን መቀጠል ይፈልጋሉ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"እንደገና ጀምር"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"አዎ፣ ቀጥል"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"የእንግዳ ሁነታ"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"በእንግዳ ሁኔታ ውስጥ ነዎት"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"አዲስ ተጠቃሚ ይታከል?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"እርስዎ አንድ አዲስ ተጠቃሚ ሲያክሉ ያ ሰው የራሱ ቦታ ማዘጋጀት አለበት።\n\nማንኛውም ተጠቃሚ መተግበሪያዎችን ለሌሎች ተጠቃሚዎች ሁሉ ሊያዘምን ይችላል።"</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"አዲስ ተጠቃሚ ማከል ከእንግዳ ሁነታ ወጥቶ ሁሉንም መተግበሪያዎች እና ውሂብ አሁን ካለው የእንግዳ ክፍለ ጊዜ ይሰርዛል።"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"የተጠቃሚ ገደብ ላይ ተደርሷል"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ተጠቃሚዎች ብቻ ናቸው ሊፈጠሩ የሚችሉት።</item>
@@ -917,11 +922,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ሰቅ አክል"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ሰቅ አታክል"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ተጠቃሚን ይምረጡ"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> መተግበሪያዎች ንቁ ናቸው</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> መተግበሪያዎች ንቁ ናቸው</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"አዲስ መረጃ"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ገቢር መተግበሪያዎች"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"እነዚህን መተግበሪያዎች እየተጠቀሙ ባይሆኑ እንኳ፣ አሁኑም ንቁ ናቸው እናም የባትሪው ጤና ላይ ተፅዕኖ ሊያሳድሩ ይችላሉ"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"መቆሚያ"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ቆሟል"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"ተከናውኗል"</string>

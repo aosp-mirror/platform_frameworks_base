@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপুনি আপোনাৰ ছেশ্বন অব্যাহত ৰাখিব বিচাৰেনে?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"আকৌ আৰম্ভ কৰক"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"হয়, অব্যাহত ৰাখক"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"অতিথি ম’ড"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"আপুনি অতিথি ম’ডত আছে"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"নতুন ব্যৱহাৰকাৰী যোগ কৰিবনে?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ স্থান ছেট আপ কৰা প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে নিজৰ লগতে আন ব্যৱহাৰকাৰীৰো এপ্ আপডে’ট কৰিব পাৰে।"</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"এগৰাকী নতুন ব্যৱহাৰকাৰীক যোগ দিয়াটোৱে অতিথি ম’ডৰ পৰা বাহিৰ কৰিব আৰু বৰ্তমানৰ অতিথিৰ ছেশ্বনটোৰ পৰা আটাইবোৰ এপ্ আৰু ডেটা মচিব।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"অধিকতম ব্যৱহাৰকাৰী সৃষ্টি কৰা হ’ল"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">আপুনি <xliff:g id="COUNT">%d</xliff:g> জনলৈকে ব্যৱহাৰকাৰী যোগ কৰিব পাৰে।</item>
@@ -917,11 +922,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"টাইল যোগ দিয়ক"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"টাইল যোগ নিদিব"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ব্যৱহাৰকাৰী বাছনি কৰক"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> টা এপ্‌ সক্ৰিয় হৈ আছে</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> টা এপ্‌ সক্ৰিয় হৈ আছে</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"নতুন তথ্য"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"সক্ৰিয় এপ্‌"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"আপুনি এই এপ্‌সমূহ ব্যৱহাৰ কৰি নাথাকিলেও, সেইসমূহ এতিয়াও সক্ৰিয় হৈ আছে আৰু সেইসমূহে বেটাৰিৰ জীৱনকাল প্ৰভাৱিত কৰিব পাৰে"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"বন্ধ কৰক"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"বন্ধ হ’ল"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"হ’ল"</string>

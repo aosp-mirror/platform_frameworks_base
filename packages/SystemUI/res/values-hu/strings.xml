@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Folytatja a munkamenetet?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Újrakezdés"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Igen, folytatom"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Vendég mód"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Vendég módban van"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Új felhasználó hozzáadása?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Ha új felhasználót ad hozzá, az illetőnek be kell állítania saját tárterületét.\n\nBármely felhasználó frissítheti az alkalmazásokat valamennyi felhasználó számára."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Új felhasználó felvételével kilép a vendég módból, és az aktuális vendégmunkamenetből származó összes alkalmazás és adat törlődik majd."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Maximális felhasználószám elérve"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Legfeljebb <xliff:g id="COUNT">%d</xliff:g> felhasználót adhat hozzá.</item>
@@ -917,11 +922,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Mozaik hozzáadása"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne legyen hozzáadva"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Felhasználóválasztás"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> alkalmazás aktív</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> alkalmazás aktív</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Új információ"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktív alkalmazások"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Még ha nem is használja ezeket az alkalmazásokat, továbbra is aktívak maradnak, és hatással lehetnek az akkumulátor élettartamára"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Leállítás"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Leállítva"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Kész"</string>

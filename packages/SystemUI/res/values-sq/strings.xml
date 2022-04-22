@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Dëshiron ta vazhdosh sesionin tënd?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Fillo nga e para"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Po, vazhdo"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Modaliteti \"vizitor\""</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Je në modalitetin \"vizitor\""</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Të shtohet përdorues i ri?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Kur shton një përdorues të ri, ai person duhet të konfigurojë hapësirën e vet.\n\nÇdo përdorues mund t\'i përditësojë aplikacionet për të gjithë përdoruesit e tjerë."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Shtimi i një përdoruesi të ri do të të nxjerrë nga modaliteti \"vizitor\" dhe do të fshijë të gjitha aplikacionet dhe të dhënat nga sesioni aktual për vizitorë."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"U arrit kufiri i përdoruesve"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Mund të shtosh deri në <xliff:g id="COUNT">%d</xliff:g> përdorues.</item>
