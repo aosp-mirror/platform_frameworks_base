@@ -765,18 +765,24 @@ public final class Choreographer {
                 startNanos = System.nanoTime();
                 final long jitterNanos = startNanos - frameTimeNanos;
                 if (jitterNanos >= frameIntervalNanos) {
-                    final long skippedFrames = jitterNanos / frameIntervalNanos;
-                    if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
-                        Log.i(TAG, "Skipped " + skippedFrames + " frames!  "
-                                + "The application may be doing too much work on its main thread.");
-                    }
                     final long lastFrameOffset = jitterNanos % frameIntervalNanos;
-                    if (DEBUG_JANK) {
-                        Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f) + " ms "
-                                + "which is more than the frame interval of "
-                                + (frameIntervalNanos * 0.000001f) + " ms!  "
-                                + "Skipping " + skippedFrames + " frames and setting frame "
-                                + "time to " + (lastFrameOffset * 0.000001f) + " ms in the past.");
+                    if (frameIntervalNanos == 0) {
+                        Log.i(TAG, "Vsync data empty due to timeout");
+                    } else {
+                        final long skippedFrames = jitterNanos / frameIntervalNanos;
+                        if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
+                            Log.i(TAG, "Skipped " + skippedFrames + " frames!  "
+                                    + "The application may be doing too much work on its main "
+                                    + "thread.");
+                        }
+                        if (DEBUG_JANK) {
+                            Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f) + " ms "
+                                    + "which is more than the frame interval of "
+                                    + (frameIntervalNanos * 0.000001f) + " ms!  "
+                                    + "Skipping " + skippedFrames + " frames and setting frame "
+                                    + "time to " + (lastFrameOffset * 0.000001f)
+                                    + " ms in the past.");
+                        }
                     }
                     frameTimeNanos = startNanos - lastFrameOffset;
                     DisplayEventReceiver.VsyncEventData latestVsyncEventData =
