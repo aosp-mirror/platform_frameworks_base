@@ -29,6 +29,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
+import com.android.wm.shell.pip.PipAppOpsListener;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
@@ -63,6 +64,7 @@ public abstract class TvPipModule {
             Context context,
             TvPipBoundsState tvPipBoundsState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
+            PipAppOpsListener pipAppOpsListener,
             PipTaskOrganizer pipTaskOrganizer,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
@@ -79,6 +81,7 @@ public abstract class TvPipModule {
                         context,
                         tvPipBoundsState,
                         tvPipBoundsAlgorithm,
+                        pipAppOpsListener,
                         pipTaskOrganizer,
                         pipTransitionController,
                         tvPipMenuController,
@@ -184,5 +187,13 @@ public abstract class TvPipModule {
     @Provides
     static PipParamsChangedForwarder providePipParamsChangedForwarder() {
         return new PipParamsChangedForwarder();
+    }
+
+    @WMSingleton
+    @Provides
+    static PipAppOpsListener providePipAppOpsListener(Context context,
+            PipTaskOrganizer pipTaskOrganizer,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new PipAppOpsListener(context, pipTaskOrganizer::removePip, mainExecutor);
     }
 }
