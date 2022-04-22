@@ -417,9 +417,22 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
 
-    RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel, RemoteAnimationTarget[] apps) {
-        if (ENABLE_SHELL_TRANSITIONS || !isSplitScreenVisible()) return null;
+    RemoteAnimationTarget[] onGoingToRecentsLegacy(RemoteAnimationTarget[] apps) {
+        return reparentSplitTasksForAnimation(apps, true /*splitExpectedToBeVisible*/);
+    }
+
+    RemoteAnimationTarget[] onStartingSplitLegacy(RemoteAnimationTarget[] apps) {
+        return reparentSplitTasksForAnimation(apps, false /*splitExpectedToBeVisible*/);
+    }
+
+    private RemoteAnimationTarget[] reparentSplitTasksForAnimation(RemoteAnimationTarget[] apps,
+            boolean splitExpectedToBeVisible) {
+        if (ENABLE_SHELL_TRANSITIONS) return null;
         // TODO(b/206487881): Integrate this with shell transition.
+        if (splitExpectedToBeVisible && !isSplitScreenVisible()) return null;
+        // Split not visible, but not enough apps to have split, also return null
+        if (!splitExpectedToBeVisible && apps.length < 2) return null;
+
         SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
         if (mSplitTasksContainerLayer != null) {
             // Remove the previous layer before recreating
@@ -446,7 +459,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         transaction.close();
         return new RemoteAnimationTarget[]{mStageCoordinator.getDividerBarLegacyTarget()};
     }
-
     /**
      * Sets drag info to be logged when splitscreen is entered.
      */
@@ -711,11 +723,19 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
-        public RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel,
-                RemoteAnimationTarget[] apps) {
+        public RemoteAnimationTarget[] onGoingToRecentsLegacy(RemoteAnimationTarget[] apps) {
             final RemoteAnimationTarget[][] out = new RemoteAnimationTarget[][]{null};
             executeRemoteCallWithTaskPermission(mController, "onGoingToRecentsLegacy",
-                    (controller) -> out[0] = controller.onGoingToRecentsLegacy(cancel, apps),
+                    (controller) -> out[0] = controller.onGoingToRecentsLegacy(apps),
+                    true /* blocking */);
+            return out[0];
+        }
+
+        @Override
+        public RemoteAnimationTarget[] onStartingSplitLegacy(RemoteAnimationTarget[] apps) {
+            final RemoteAnimationTarget[][] out = new RemoteAnimationTarget[][]{null};
+            executeRemoteCallWithTaskPermission(mController, "onStartingSplitLegacy",
+                    (controller) -> out[0] = controller.onStartingSplitLegacy(apps),
                     true /* blocking */);
             return out[0];
         }
