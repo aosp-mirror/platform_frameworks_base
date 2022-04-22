@@ -128,10 +128,6 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
         if (mAnimatingBetweenAodAndLockscreen && !mPauseAuth) {
             mBgProtection.setAlpha(1f - mInterpolatedDarkAmount);
-
-            mLockScreenFp.setTranslationX(mBurnInOffsetX);
-            mLockScreenFp.setTranslationY(mBurnInOffsetY);
-            mLockScreenFp.setProgress(1f - mInterpolatedDarkAmount);
             mLockScreenFp.setAlpha(1f - mInterpolatedDarkAmount);
         } else if (mInterpolatedDarkAmount == 0f) {
             mBgProtection.setAlpha(mAlpha / 255f);
@@ -140,6 +136,9 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             mBgProtection.setAlpha(0f);
             mLockScreenFp.setAlpha(0f);
         }
+        mLockScreenFp.setTranslationX(mBurnInOffsetX);
+        mLockScreenFp.setTranslationY(mBurnInOffsetY);
+        mLockScreenFp.setProgress(1f - mInterpolatedDarkAmount);
 
         mAodFp.setTranslationX(mBurnInOffsetX);
         mAodFp.setTranslationY(mBurnInOffsetY);
