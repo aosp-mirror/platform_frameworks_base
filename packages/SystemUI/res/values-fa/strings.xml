@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"میانای کاربر سیستم"</string>
+    <string name="app_label" msgid="4811759950673118541">"واسط کاربری سیستم"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"«بهینه‌سازی باتری» روشن شود؟"</string>
     <string name="battery_low_description" msgid="3282977755476423966">"<xliff:g id="PERCENTAGE">%s</xliff:g> از باتری‌تان باقی مانده است. «بهینه‌سازی باتری» زمینه تیره را روشن می‌کند، فعالیت‌های پس‌زمینه را محدود می‌کند، و اعلان‌ها را به‌تأخیر می‌اندازد."</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"«بهینه‌سازی باتری» زمینه «تیره» را روشن می‌کند، فعالیت‌های پس‌زمینه را محدود می‌کند، و اعلان‌ها را به‌تأخیر می‌اندازد."</string>
@@ -454,9 +454,9 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"لرزش"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"‏%s کنترل‌های میزان صدا"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"تماس‌ها و اعلان‌ها زنگ می‌خورند (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <string name="system_ui_tuner" msgid="1471348823289954729">"تنظیم‌کننده میانای کاربری سیستم"</string>
+    <string name="system_ui_tuner" msgid="1471348823289954729">"تنظیم‌کننده واسط کاربری سیستم"</string>
     <string name="status_bar" msgid="4357390266055077437">"نوار وضعیت"</string>
-    <string name="demo_mode" msgid="263484519766901593">"حالت نمایشی میانای کاربر سیستم"</string>
+    <string name="demo_mode" msgid="263484519766901593">"حالت نمایشی واسط کاربری سیستم"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"فعال کردن حالت نمایشی"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"نمایش حالت نمایشی"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"اترنت"</string>
@@ -478,12 +478,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"نقطه اتصال"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"نمایه کاری"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"برای بعضی افراد سرگرم‌کننده است اما نه برای همه"</string>
-    <string name="tuner_warning" msgid="1861736288458481650">"‏«تنظیم‌کننده میانای کاربری سیستم» روش‌های بیشتری برای تنظیم دقیق و سفارشی کردن واسط کاربری Android در اختیار شما قرار می‌دهد. ممکن است این ویژگی‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده جود نداشته باشند. با احتیاط ادامه دهید."</string>
+    <string name="tuner_warning" msgid="1861736288458481650">"‏«تنظیم‌کننده واسط کاربری سیستم» روش‌های بیشتری برای تنظیم دقیق و سفارشی کردن واسط کاربری Android در اختیار شما قرار می‌دهد. ممکن است این ویژگی‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده جود نداشته باشند. با احتیاط ادامه دهید."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"ممکن است این قابلیت‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده وجود نداشته باشد. بااحتیاط ادامه دهید."</string>
     <string name="got_it" msgid="477119182261892069">"متوجه شدم"</string>
-    <string name="tuner_toast" msgid="3812684836514766951">"تبریک می‌گوییم! «تنظیم‌کننده میانای کاربری سیستم» به «تنظیمات» اضافه شد"</string>
+    <string name="tuner_toast" msgid="3812684836514766951">"تبریک! «تنظیم‌کننده واسط کاربری سیستم» به «تنظیمات» اضافه شد"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"حذف از تنظیمات"</string>
-    <string name="remove_from_settings_prompt" msgid="551565437265615426">"«تنظیم‌کننده میانای کاربری سیستم» از تنظیمات حذف شود و همه ویژگی‌های آن متوقف شوند؟"</string>
+    <string name="remove_from_settings_prompt" msgid="551565437265615426">"«تنظیم‌کننده واسط کاربری سیستم» از «تنظیمات» حذف شود و استفاده از همه ویژگی‌های آن متوقف شود؟"</string>
     <string name="enable_bluetooth_title" msgid="866883307336662596">"بلوتوث روشن شود؟"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"برای مرتبط کردن صفحه‌کلید با رایانه لوحی، ابتدا باید بلوتوث را روشن کنید."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"روشن کردن"</string>
@@ -917,11 +917,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"کاشی اضافه شود"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"کاشی اضافه نشود"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"انتخاب کاربر"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> برنامه فعال است</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> برنامه فعال است</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"اطلاعات جدید"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"برنامه‌های فعال"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"حتی اگر از این برنامه‌ها استفاده نمی‌کنید، این برنامه‌ها همچنان فعال هستند و ممکن است بر عمر باتری تأثیر بگذارند"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"متوقف کردن"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"متوقف شده"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"تمام"</string>

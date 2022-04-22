@@ -917,11 +917,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"新增圖塊"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不要新增圖塊"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"選取使用者"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other">已啟用 <xliff:g id="COUNT_1">%s</xliff:g> 個應用程式</item>
+      <item quantity="one">已啟用 <xliff:g id="COUNT_0">%s</xliff:g> 個應用程式</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新資料"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"使用中的應用程式"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"即使您並非正在使用這些應用程式，它們仍然在啟用狀態，而且可能會影響電池壽命"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完成"</string>
