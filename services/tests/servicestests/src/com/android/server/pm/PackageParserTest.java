@@ -603,7 +603,7 @@ public class PackageParserTest {
     public static class CachePackageNameParser extends PackageParser2 {
 
         CachePackageNameParser(@Nullable File cacheDir) {
-            super(null, false, null, null, new Callback() {
+            super(null, null, null, new Callback() {
                 @Override
                 public boolean isChangeEnabled(long changeId, @NonNull ApplicationInfo appInfo) {
                     return true;

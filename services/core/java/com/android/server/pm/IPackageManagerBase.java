@@ -905,12 +905,6 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
-    public final boolean isOnlyCoreApps() {
-        return mService.isOnlyCoreApps();
-    }
-
-    @Override
-    @Deprecated
     public final boolean isPackageAvailable(String packageName, int userId) {
         return snapshot().isPackageAvailable(packageName, userId);
     }
