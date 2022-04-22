@@ -47,9 +47,11 @@ class TaskContainer {
     private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
 
     /** Active TaskFragments in this Task. */
+    @NonNull
     final List<TaskFragmentContainer> mContainers = new ArrayList<>();
 
     /** Active split pairs in this Task. */
+    @NonNull
     final List<SplitContainer> mSplitContainers = new ArrayList<>();
 
     /**

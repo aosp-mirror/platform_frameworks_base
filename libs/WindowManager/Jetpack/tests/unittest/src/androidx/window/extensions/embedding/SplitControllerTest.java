@@ -25,6 +25,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -35,6 +37,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
+import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -44,6 +47,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
 
 /**
  * Test class for {@link SplitController}.
@@ -64,6 +69,8 @@ public class SplitControllerTest {
     private Resources mActivityResources;
     @Mock
     private TaskFragmentInfo mInfo;
+    @Mock
+    private WindowContainerTransaction mTransaction;
     private SplitController mSplitController;
     private SplitPresenter mSplitPresenter;
 
@@ -139,5 +146,76 @@ public class SplitControllerTest {
         assertNotNull(tf);
         assertNotNull(taskContainer);
         assertEquals(TASK_BOUNDS, taskContainer.getTaskBounds());
+    }
+
+    @Test
+    public void testUpdateContainer() {
+        // Make SplitController#launchPlaceholderIfNecessary(TaskFragmentContainer) return true
+        // and verify if shouldContainerBeExpanded() not called.
+        final TaskFragmentContainer tf = mSplitController.newContainer(mActivity, TASK_ID);
+        spyOn(tf);
+        doReturn(mActivity).when(tf).getTopNonFinishingActivity();
+        doReturn(true).when(tf).isEmpty();
+        doReturn(true).when(mSplitController).launchPlaceholderIfNecessary(mActivity);
+        doNothing().when(mSplitPresenter).updateSplitContainer(any(), any(), any());
+
+        mSplitController.updateContainer(mTransaction, tf);
+
+        verify(mSplitController, never()).shouldContainerBeExpanded(any());
+
+        // Verify if tf should be expanded, getTopActiveContainer() won't be called
+        doReturn(null).when(tf).getTopNonFinishingActivity();
+        doReturn(true).when(mSplitController).shouldContainerBeExpanded(tf);
+
+        mSplitController.updateContainer(mTransaction, tf);
+
+        verify(mSplitController, never()).getTopActiveContainer(TASK_ID);
+
+        // Verify if tf is not in split, dismissPlaceholderIfNecessary won't be called.
+        doReturn(false).when(mSplitController).shouldContainerBeExpanded(tf);
+
+        mSplitController.updateContainer(mTransaction, tf);
+
+        verify(mSplitController, never()).dismissPlaceholderIfNecessary(any());
+
+        // Verify if tf is not in the top splitContainer,
+        final SplitContainer splitContainer = mock(SplitContainer.class);
+        doReturn(tf).when(splitContainer).getPrimaryContainer();
+        doReturn(tf).when(splitContainer).getSecondaryContainer();
+        final List<SplitContainer> splitContainers =
+                mSplitController.getTaskContainer(TASK_ID).mSplitContainers;
+        splitContainers.add(splitContainer);
+        // Add a mock SplitContainer on top of splitContainer
+        splitContainers.add(1, mock(SplitContainer.class));
+
+        mSplitController.updateContainer(mTransaction, tf);
+
+        verify(mSplitController, never()).dismissPlaceholderIfNecessary(any());
+
+        // Verify if one or both containers in the top SplitContainer are finished,
+        // dismissPlaceholder() won't be called.
+        splitContainers.remove(1);
+        doReturn(true).when(tf).isFinished();
+
+        mSplitController.updateContainer(mTransaction, tf);
+
+        verify(mSplitController, never()).dismissPlaceholderIfNecessary(any());
+
+        // Verify if placeholder should be dismissed, updateSplitContainer() won't be called.
+        doReturn(false).when(tf).isFinished();
+        doReturn(true).when(mSplitController)
+                .dismissPlaceholderIfNecessary(splitContainer);
+
+        mSplitController.updateContainer(mTransaction, tf);
+
+        verify(mSplitPresenter, never()).updateSplitContainer(any(), any(), any());
+
+        // Verify if the top active split is updated if both of its containers are not finished.
+        doReturn(false).when(mSplitController)
+                        .dismissPlaceholderIfNecessary(splitContainer);
+
+        mSplitController.updateContainer(mTransaction, tf);
+
+        verify(mSplitPresenter).updateSplitContainer(eq(splitContainer), eq(tf), eq(mTransaction));
     }
 }

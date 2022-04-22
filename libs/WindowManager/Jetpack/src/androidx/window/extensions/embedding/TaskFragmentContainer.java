@@ -319,14 +319,15 @@ class TaskFragmentContainer {
     private String toString(boolean includeContainersToFinishOnExit) {
         return "TaskFragmentContainer{"
                 + " token=" + mToken
-                + " info=" + mInfo
                 + " topNonFinishingActivity=" + getTopNonFinishingActivity()
+                + " runningActivityCount=" + getRunningActivityCount()
+                + " isFinished=" + mIsFinished
+                + " lastRequestedBounds=" + mLastRequestedBounds
                 + " pendingAppearedActivities=" + mPendingAppearedActivities
                 + (includeContainersToFinishOnExit ? " containersToFinishOnExit="
                 + containersToFinishOnExitToString() : "")
                 + " activitiesToFinishOnExit=" + mActivitiesToFinishOnExit
-                + " isFinished=" + mIsFinished
-                + " lastRequestedBounds=" + mLastRequestedBounds
+                + " info=" + mInfo
                 + "}";
     }
 

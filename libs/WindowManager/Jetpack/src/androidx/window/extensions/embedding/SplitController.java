@@ -619,14 +619,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
         final List<SplitContainer> splitContainers = mTaskContainers.get(container.getTaskId())
                 .mSplitContainers;
-        if (splitContainers == null
-                || splitContainer != splitContainers.get(splitContainers.size() - 1)) {
+        if (splitContainer != splitContainers.get(splitContainers.size() - 1)) {
             // Skip position update - it isn't the topmost split.
             return;
         }
-        if (splitContainer.getPrimaryContainer().isEmpty()
-                || splitContainer.getSecondaryContainer().isEmpty()) {
-            // Skip position update - one or both containers are empty.
+        if (splitContainer.getPrimaryContainer().isFinished()
+                || splitContainer.getSecondaryContainer().isFinished()) {
+            // Skip position update - one or both containers are finished.
             return;
         }
         if (dismissPlaceholderIfNecessary(splitContainer)) {
@@ -643,7 +642,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private SplitContainer getActiveSplitForContainer(@NonNull TaskFragmentContainer container) {
         final List<SplitContainer> splitContainers = mTaskContainers.get(container.getTaskId())
                 .mSplitContainers;
-        if (splitContainers == null) {
+        if (splitContainers.isEmpty()) {
             return null;
         }
         for (int i = splitContainers.size() - 1; i >= 0; i--) {
@@ -721,7 +720,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return true;
     }
 
-    private boolean dismissPlaceholderIfNecessary(@NonNull SplitContainer splitContainer) {
+    @VisibleForTesting
+    boolean dismissPlaceholderIfNecessary(@NonNull SplitContainer splitContainer) {
         if (!splitContainer.isPlaceholderContainer()) {
             return false;
         }
