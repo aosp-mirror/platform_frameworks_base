@@ -2521,7 +2521,7 @@ public final class InputMethodManager {
     }
 
     /**
-     * Notify IME directly that it is no longer visible.
+     * Notify IMMS that IME insets are no longer visible.
      *
      * @param windowToken the window from which this request originates. If this doesn't match the
      *                    currently served view, the request is ignored.
@@ -2533,7 +2533,13 @@ public final class InputMethodManager {
         synchronized (mH) {
             if (mCurrentInputMethodSession != null && mCurRootView != null
                     && mCurRootView.getWindowToken() == windowToken) {
-                mCurrentInputMethodSession.notifyImeHidden();
+                try {
+                    mService.hideSoftInput(mClient, windowToken, 0 /* flags */,
+                            null /* resultReceiver */,
+                            SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
         }
     }
