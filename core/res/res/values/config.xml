@@ -2966,6 +2966,9 @@
          config_preventImeStartupUnlessTextEditor. -->
     <string-array name="config_nonPreemptibleInputMethods" translatable="false" />
 
+    <!-- Flag indicating that enhanced confirmation mode is enabled. -->
+    <bool name="config_enhancedConfirmationModeEnabled">true</bool>
+
     <!-- The list of classes that should be added to the notification ranking pipeline.
      See {@link com.android.server.notification.NotificationSignalExtractor}
       If you add a new extractor to this list make sure to update
