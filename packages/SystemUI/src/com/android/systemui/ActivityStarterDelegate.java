@@ -24,7 +24,7 @@ import androidx.annotation.Nullable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.util.Optional;
 
@@ -40,10 +40,10 @@ import dagger.Lazy;
 @SysUISingleton
 public class ActivityStarterDelegate implements ActivityStarter {
 
-    private Lazy<Optional<CentralSurfacesInt>> mActualStarterOptionalLazy;
+    private Lazy<Optional<CentralSurfaces>> mActualStarterOptionalLazy;
 
     @Inject
-    public ActivityStarterDelegate(Lazy<Optional<CentralSurfacesInt>> centralSurfacesOptionalLazy) {
+    public ActivityStarterDelegate(Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy) {
         mActualStarterOptionalLazy = centralSurfacesOptionalLazy;
     }
 

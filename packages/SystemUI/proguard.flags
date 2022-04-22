@@ -3,7 +3,7 @@
 
 -keep class com.android.systemui.recents.OverviewProxyRecentsImpl
 -keep class com.android.systemui.statusbar.car.CarStatusBar
--keep class com.android.systemui.statusbar.phone.CentralSurfacesInt
+-keep class com.android.systemui.statusbar.phone.CentralSurfaces
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
 -keep class com.android.systemui.car.CarSystemUIFactory
 -keep class com.android.systemui.SystemUIFactory
