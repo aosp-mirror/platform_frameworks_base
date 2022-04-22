@@ -6172,7 +6172,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void pruneCachedApksInApex(@NonNull List<PackageInfo> apexPackages) {
+        public void pruneCachedApksInApex(@NonNull List<String> apexPackageNames) {
             if (mCacheDir == null) {
                 return;
             }
@@ -6180,9 +6180,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final PackageCacher cacher = new PackageCacher(mCacheDir);
             synchronized (mLock) {
                 final Computer snapshot = snapshot();
-                for (int i = 0, size = apexPackages.size(); i < size; i++) {
+                for (int i = 0, size = apexPackageNames.size(); i < size; i++) {
                     final List<String> apkNames =
-                            mApexManager.getApksInApex(apexPackages.get(i).packageName);
+                            mApexManager.getApksInApex(apexPackageNames.get(i));
                     for (int j = 0, apksInApex = apkNames.size(); j < apksInApex; j++) {
                         final AndroidPackage pkg = snapshot.getPackage(apkNames.get(j));
                         cacher.cleanCachedResult(new File(pkg.getPath()));

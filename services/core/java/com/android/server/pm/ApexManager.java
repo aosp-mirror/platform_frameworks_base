@@ -49,11 +49,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.build.UnboundedSdkLevel;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.component.ParsedApexSystemService;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import com.google.android.collect.Lists;
@@ -360,8 +357,7 @@ public abstract class ApexManager {
      *
      * @return {@code ApeInfo} about the newly installed APEX package.
      */
-    abstract ApexInfo installPackage(File apexFile, PackageParser2 packageParser,
-            ApexPackageInfo apexPackageInfo) throws PackageManagerException;
+    abstract ApexInfo installPackage(File apexFile) throws PackageManagerException;
 
     /**
      * Get a list of apex system services implemented in an apex.
@@ -896,37 +892,13 @@ public abstract class ApexManager {
         }
 
         @Override
-        ApexInfo installPackage(File apexFile, PackageParser2 packageParser,
-                ApexPackageInfo apexPackageInfo)
+        ApexInfo installPackage(File apexFile)
                 throws PackageManagerException {
             try {
-                final int flags = PackageManager.GET_META_DATA
-                        | PackageManager.GET_SIGNING_CERTIFICATES
-                        | PackageManager.GET_SIGNATURES;
-                final ParsedPackage parsedPackage = packageParser.parsePackage(
-                        apexFile, flags, /* useCaches= */ false);
-                final PackageInfo newApexPkg = PackageInfoWithoutStateUtils.generate(parsedPackage,
-                        /* apexInfo= */ null, flags);
-                if (newApexPkg == null) {
-                    throw new PackageManagerException(PackageManager.INSTALL_FAILED_INVALID_APK,
-                            "Failed to generate package info for " + apexFile.getAbsolutePath());
-                }
-                final PackageInfo existingApexPkg = apexPackageInfo.getPackageInfo(
-                        newApexPkg.packageName, MATCH_ACTIVE_PACKAGE);
-                if (existingApexPkg == null) {
-                    Slog.w(TAG, "Attempting to install new APEX package " + newApexPkg.packageName);
-                    throw new PackageManagerException(PackageManager.INSTALL_FAILED_PACKAGE_CHANGED,
-                            "It is forbidden to install new APEX packages");
-                }
-                checkApexSignature(existingApexPkg, newApexPkg);
                 return waitForApexService().installAndActivatePackage(apexFile.getAbsolutePath());
             } catch (RemoteException e) {
                 throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                         "apexservice not available");
-            } catch (PackageManagerException e) {
-                // Catching it in order not to fall back to Exception which rethrows the
-                // PackageManagerException with a common error code.
-                throw e;
             } catch (Exception e) {
                 // TODO(b/187864524): is INSTALL_FAILED_INTERNAL_ERROR is the right error code here?
                 throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
@@ -1159,8 +1131,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        ApexInfo installPackage(File apexFile, PackageParser2 packageParser,
-                ApexPackageInfo apexPackageInfo) {
+        ApexInfo installPackage(File apexFile) {
             throw new UnsupportedOperationException("APEX updates are not supported");
         }
 

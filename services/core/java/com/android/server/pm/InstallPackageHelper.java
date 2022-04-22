@@ -872,8 +872,7 @@ final class InstallPackageHelper {
                                 + " got: " + apexes.length);
             }
             try (PackageParser2 packageParser = mPm.mInjector.getScanningPackageParser()) {
-                ApexInfo apexInfo = mApexManager.installPackage(
-                        apexes[0], packageParser, mPm.mApexPackageInfo);
+                ApexInfo apexInfo = mApexManager.installPackage(apexes[0]);
                 if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
                     ParsedPackage parsedPackage = packageParser.parsePackage(
                             new File(apexInfo.modulePath), 0, /* useCaches= */ false);
