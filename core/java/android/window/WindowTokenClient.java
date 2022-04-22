@@ -91,7 +91,6 @@ public class WindowTokenClient extends IWindowToken.Stub {
             throw new IllegalStateException("Context is already attached.");
         }
         mContextRef = new WeakReference<>(context);
-        mConfiguration.setTo(context.getResources().getConfiguration());
         mShouldDumpConfigForIme = Build.IS_DEBUGGABLE
                 && context instanceof AbstractInputMethodService;
     }
@@ -112,7 +111,8 @@ public class WindowTokenClient extends IWindowToken.Stub {
             if (configuration == null) {
                 return false;
             }
-            onConfigurationChanged(configuration, displayId, false /* shouldReportConfigChange */);
+            mHandler.runWithScissors(() -> onConfigurationChanged(configuration, displayId,
+                    false /* shouldReportConfigChange */), 0 /* timeout */);
             mAttachToWindowContainer = true;
             return true;
         } catch (RemoteException e) {
@@ -137,8 +137,8 @@ public class WindowTokenClient extends IWindowToken.Stub {
             if (configuration == null) {
                 return false;
             }
-            mHandler.post(() -> onConfigurationChanged(configuration, displayId,
-                    false /* shouldReportConfigChange */));
+            mHandler.runWithScissors(() -> onConfigurationChanged(configuration, displayId,
+                    false /* shouldReportConfigChange */), 0 /* timeout */);
             mAttachToWindowContainer = true;
             return true;
         } catch (RemoteException e) {

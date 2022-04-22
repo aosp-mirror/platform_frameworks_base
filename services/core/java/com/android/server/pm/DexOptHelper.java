@@ -432,8 +432,8 @@ final class DexOptHelper {
         // Whoever is calling forceDexOpt wants a compiled package.
         // Don't use profiles since that may cause compilation to be skipped.
         final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
-                new DexoptOptions(packageName,
-                        getDefaultCompilerFilter(),
+                new DexoptOptions(packageName, REASON_CMDLINE,
+                        getDefaultCompilerFilter(), null /* splitName */,
                         DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);

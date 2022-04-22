@@ -16,7 +16,6 @@
 
 package com.android.systemui.media
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -56,13 +55,7 @@ class MediaViewHolder constructor(itemView: View) {
     val scrubbingTotalTimeView: TextView =
         itemView.requireViewById(R.id.media_scrubbing_total_time)
 
-    // Settings screen
-    val longPressText = itemView.requireViewById<TextView>(R.id.remove_text)
-    val cancel = itemView.requireViewById<View>(R.id.cancel)
-    val cancelText = itemView.requireViewById<TextView>(R.id.cancel_text)
-    val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
-    val dismissText = itemView.requireViewById<TextView>(R.id.dismiss_text)
-    val settings = itemView.requireViewById<ImageButton>(R.id.settings)
+    val gutsViewHolder = GutsViewHolder(itemView)
 
     // Action Buttons
     val actionPlayPause = itemView.requireViewById<ImageButton>(R.id.actionPlayPause)
@@ -79,9 +72,9 @@ class MediaViewHolder constructor(itemView: View) {
     init {
         (player.background as IlluminationDrawable).let {
             it.registerLightSource(seamless)
-            it.registerLightSource(cancel)
-            it.registerLightSource(dismiss)
-            it.registerLightSource(settings)
+            it.registerLightSource(gutsViewHolder.cancel)
+            it.registerLightSource(gutsViewHolder.dismiss)
+            it.registerLightSource(gutsViewHolder.settings)
             it.registerLightSource(actionPlayPause)
             it.registerLightSource(actionNext)
             it.registerLightSource(actionPrev)
@@ -122,12 +115,7 @@ class MediaViewHolder constructor(itemView: View) {
     }
 
     fun marquee(start: Boolean, delay: Long) {
-        val longPressTextHandler = longPressText.getHandler()
-        if (longPressTextHandler == null) {
-            Log.d(TAG, "marquee while longPressText.getHandler() is null", Exception())
-            return
-        }
-        longPressTextHandler.postDelayed({ longPressText.setSelected(start) }, delay)
+        gutsViewHolder.marquee(start, delay, TAG)
     }
 
     companion object {
@@ -172,12 +160,7 @@ class MediaViewHolder constructor(itemView: View) {
                 R.id.media_scrubbing_elapsed_time,
                 R.id.media_scrubbing_total_time
         )
-        val gutsIds = setOf(
-                R.id.remove_text,
-                R.id.cancel,
-                R.id.dismiss,
-                R.id.settings
-        )
+
 
         // Buttons used for notification-based actions
         val genericButtonIds = setOf(

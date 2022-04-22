@@ -21,7 +21,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.RectF
-import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -39,6 +38,8 @@ class UdfpsView(
     attrs: AttributeSet?
 ) : FrameLayout(context, attrs), DozeReceiver, UdfpsIlluminator {
 
+    // sensorRect may be bigger than the sensor. True sensor dimensions are defined in
+    // overlayParams.sensorBounds
     private val sensorRect = RectF()
     private var hbmProvider: UdfpsHbmProvider? = null
     private val debugTextPaint = Paint().apply {
@@ -62,8 +63,8 @@ class UdfpsView(
     /** View controller (can be different for enrollment, BiometricPrompt, Keyguard, etc.). */
     var animationViewController: UdfpsAnimationViewController<*>? = null
 
-    /** Properties used to obtain the sensor location. */
-    var sensorProperties: FingerprintSensorPropertiesInternal? = null
+    /** Parameters that affect the position and size of the overlay. Visible for testing. */
+    var overlayParams = UdfpsOverlayParams()
 
     /** Debug message. */
     var debugMessage: String? = null
@@ -94,13 +95,12 @@ class UdfpsView(
 
         val paddingX = animationViewController?.paddingX ?: 0
         val paddingY = animationViewController?.paddingY ?: 0
-        val sensorRadius = sensorProperties?.location?.sensorRadius ?: 0
 
         sensorRect.set(
             paddingX.toFloat(),
             paddingY.toFloat(),
-            (2 * sensorRadius + paddingX).toFloat(),
-            (2 * sensorRadius + paddingY).toFloat()
+            (overlayParams.sensorBounds.width() + paddingX).toFloat(),
+            (overlayParams.sensorBounds.height() + paddingY).toFloat()
         )
         animationViewController?.onSensorRectUpdated(RectF(sensorRect))
     }

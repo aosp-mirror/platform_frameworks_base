@@ -154,6 +154,21 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
         super.appWindowReplacesLauncherAsTopWindow()
     }
 
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesTopWindow() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        super.appWindowBecomesTopWindow()
+    }
+
+    @FlakyTest(bugId = 229738092)
+    @Test
+    fun appWindowBecomesTopWindow_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        super.appWindowBecomesTopWindow()
+    }
+
     companion object {
         /**
          * Creates the test configurations.
