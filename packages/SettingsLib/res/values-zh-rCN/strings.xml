@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"重置"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"移除"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"正在重置访客会话…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"要重置访客会话吗？"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"此操作会开始新的访客会话，并删除当前会话中的所有应用和数据"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"要退出访客模式吗？"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"此操作会删除当前访客会话中的所有应用和数据"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"退出"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"要保存访客活动记录吗？"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"您可以保存当前会话中的活动记录，也可以删除所有应用和数据"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"删除"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"保存"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"退出访客模式"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"重置访客会话"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"退出访客模式"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"系统会在退出时删除所有活动记录"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"您可以在退出时保存或删除您的活动记录"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"请立即重置以删除会话活动记录；或者，您也可以在退出时保存或删除活动记录"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"拍摄照片"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"选择图片"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"选择照片"</string>

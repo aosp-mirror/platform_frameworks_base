@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ସୀମିତ ସୁବିଧା ଥିବା ପ୍ରୋଫାଇଲ୍‌"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"ନୂତନ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବେ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ଅତିରିକ୍ତ ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରି ଆପଣ ଏହି ଡିଭାଇସକୁ ଅନ୍ୟ ଲୋକମାନଙ୍କ ସହିତ ସେୟାର କରିପାରିବେ। ପ୍ରତ୍ୟେକ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ନିଜର ସ୍ପେସ୍ ଅଛି ଯାହାକୁ ସେମାନେ ଆପ, ୱାଲପେପର୍ ଓ ଏପରି ଅନେକ କିଛି ସହିତ କଷ୍ଟମାଇଜ କରିପାରିବେ। ଉପଯୋଗକର୍ତ୍ତା ୱାଇ-ଫାଇ ଭଳି ଡିଭାଇସ ସେଟିଂସକୁ ମଧ୍ୟ ଆଡଜଷ୍ଟ କରିପାରିବେ ଯାହା ସମସ୍ତଙ୍କୁ ପ୍ରଭାବିତ କରିଥାଏ। \n\nଯେତେବେଳେ ଆପଣ ଗୋଟିଏ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବେ, ସେତେବେଳେ ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ନିଜର ସ୍ପେସ୍‌କୁ ସେଟ‌ଅପ କରିବାକୁ ପଡ଼ିବ। \n\nଅନ୍ୟ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପକୁ ଅପଡେଟ କରିପାରିବେ। ଆକ୍ସେସିବିଲିଟୀ ସେଟିଂସ ଏବଂ ସେବାଗୁଡ଼ିକ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ସ୍ଥାନାନ୍ତର ହୋ‌ଇନପାରେ।"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଡ଼ିବାବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ସ୍ଥାନ ସେଟ୍‍ କରିବାକୁ ପଡ଼ିବ।\n\nଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେକୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପ୍‌ଗୁଡ଼ିକୁ ଅପ୍‌ଡେଟ୍‌ କରିପାରିବେ।"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"ଆପଣ ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବା ବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ତାଙ୍କ ସ୍ପେସ ସେଟ ଅପ କରିବାକୁ ପଡ଼ିବ।\n\nଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ, ଆପଗୁଡ଼ିକୁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଅପଡେଟ କରିପାରିବେ।"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ଏବେ ଉପଯୋଗକର୍ତ୍ତା ସେଟଅପ କରିବେ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ସୁନିଶ୍ଚିତ କରନ୍ତୁ ଯେ, ବ୍ୟକ୍ତି ଜଣକ ଡିଭାଇସ୍‌ ଓ ନିଜର ସ୍ଥାନ ସେଟଅପ୍‌ କରିବା ପାଇଁ ଉପଲବ୍ଧ ଅଛନ୍ତି।"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ପ୍ରୋଫାଇଲ୍‌କୁ ଏବେ ସେଟ୍‌ କରିବେ?"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ରିସେଟ୍ କରନ୍ତୁ"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ଅତିଥି ସେସନକୁ ରିସେଟ୍ କରାଯାଉଛି…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ଅତିଥି ସେସନକୁ ରିସେଟ କରିବେ?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ଏହା ଏକ ନୂଆ ଅତିଥି ସେସନ ଆରମ୍ଭ କରିବ ଏବଂ ବର୍ତ୍ତମାନର ସେସନରୁ ସମସ୍ତ ଆପ୍ସ ଏବଂ ଡାଟାକୁ ଡିଲିଟ କରିବ"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ଅତିଥି ମୋଡରୁ ବାହାରି ଯିବେ?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ଏହା ବର୍ତ୍ତମାନର ଅତିଥି ସେସନରୁ ଆପ୍ସ ଏବଂ ଡାଟାକୁ ଡିଲିଟ କରିବ"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ବାହାରି ଯାଆନ୍ତୁ"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ଅତିଥି କାର୍ଯ୍ୟକଳାପ ସେଭ କରିବେ?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ଆପଣ ଏବେର ସେସନରୁ କାର୍ଯ୍ୟକଳାପକୁ ସେଭ କରିପାରିବେ ବା ସବୁ ଆପ୍ସ ଓ ଡାଟାକୁ ଡିଲିଟ କରିପାରିବେ"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ଡିଲିଟ କରନ୍ତୁ"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ସେଭ କରନ୍ତୁ"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"ଅତିଥି ମୋଡରୁ ବାହାରି ଯାଆନ୍ତୁ"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"ଅତିଥି ସେସନକୁ ରିସେଟ କରନ୍ତୁ"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ଅତିଥି ମୋଡରୁ ବାହାରି ଯାଆନ୍ତୁ"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ବାହାରିବା ସମୟରେ ସମସ୍ତ କାର୍ଯ୍ୟକଳାପକୁ ଡିଲିଟ କରାଯିବ"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ବାହାରିବା ସମୟରେ ଆପଣଙ୍କର କାର୍ଯ୍ୟକଳାପକୁ ସେଭ ବା ଡିଲିଟ କରିପାରିବେ"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"ବର୍ତ୍ତମାନ ସେସନ କାର୍ଯ୍ୟକଳାପକୁ ଡିଲିଟ କରିବାକୁ ରିସେଟ କରନ୍ତୁ କିମ୍ବା ବାହାରିବା ସମୟରେ ଆପଣ କାର୍ଯ୍ୟକଳାପକୁ ସେଭ କିମ୍ବା ଡିଲିଟ କରିପାରିବେ"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ଗୋଟିଏ ଫଟୋ ଉଠାନ୍ତୁ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ଏକ ଛବି ବାଛନ୍ତୁ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ଫଟୋ ବାଛନ୍ତୁ"</string>

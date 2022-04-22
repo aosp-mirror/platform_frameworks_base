@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"リセット"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"削除"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ゲストをリセットしています…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ゲスト セッションをリセットしますか？"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"新しいゲスト セッションが開始し、現在のセッションのすべてのアプリとデータが削除されます"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ゲストモードを終了しますか？"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"現在のゲスト セッションからすべてのアプリとデータが削除されます"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"終了"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ゲストのアクティビティを保存しますか？"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"現在のセッションのアクティビティの保存や、すべてのアプリとデータの削除を行えます"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"削除"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"保存"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"ゲストモードを終了"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"ゲスト セッションをリセット"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ゲストを終了"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"終了時にすべてのアクティビティが削除されます"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"終了時にアクティビティを保存、削除できます"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"リセットして今すぐセッションのアクティビティを削除します（終了時にアクティビティを保存、削除することもできます）"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"写真を撮る"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"画像を選択"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"写真を選択"</string>

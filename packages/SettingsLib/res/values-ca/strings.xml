@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Restableix"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Suprimeix"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"S\'està restablint el convidat…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vols restablir la sessió de convidat?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Aquesta acció iniciarà una nova sessió de convidat i suprimirà totes les aplicacions i dades de la sessió actual"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sortir del mode de convidat?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Aquesta acció suprimirà les aplicacions i dades de la sessió de convidat actual"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Surt"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Desar l\'activitat de convidat?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Pots desar l\'activitat de la sessió actual o suprimir totes les apps i dades"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Suprimeix"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Desa"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Surt del mode de convidat"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Restableix la sessió de convidat"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Surt del mode de convidat"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Se suprimirà tota l\'activitat en sortir"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Pots desar o suprimir l\'activitat en sortir"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Restableix per suprimir l\'activitat de la sessió ara. També pots desar o suprimir l\'activitat en sortir."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fes una foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Tria una imatge"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selecciona una foto"</string>

@@ -90,6 +90,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.systemui.Prefs;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 
 import java.util.Optional;
@@ -441,6 +442,13 @@ public class FrameworkServicesModule {
     @Singleton
     static TelephonyManager provideTelephonyManager(Context context) {
         return context.getSystemService(TelephonyManager.class);
+    }
+
+    @Provides
+    @Singleton
+    @TestHarness
+    static boolean provideIsTestHarness() {
+        return ActivityManager.isRunningInUserTestHarness();
     }
 
     @Provides

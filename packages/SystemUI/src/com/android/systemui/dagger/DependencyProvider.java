@@ -27,7 +27,6 @@ import dagger.Module;
  */
 @Deprecated
 @Module(includes = {
-        AndroidInternalsModule.class,
         BroadcastDispatcherModule.class,
         LeakModule.class,
         NightDisplayListenerModule.class,

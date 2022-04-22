@@ -361,9 +361,9 @@ public class Notification implements Parcelable
      * {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK} flag, which requires
      * that you take care of task management as described in the
      * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
-     * Stack</a> document.  In particular, make sure to read the notification section
-     * <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#HandlingNotifications">Handling
-     * Notifications</a> for the correct ways to launch an application from a
+     * Stack</a> document.  In particular, make sure to read the
+     * <a href="{@docRoot}/training/notify-user/navigation">Start
+     * an Activity from a Notification</a> page for the correct ways to launch an application from a
      * notification.
      */
     public PendingIntent contentIntent;
