@@ -19,7 +19,7 @@ import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.phone.CentralSurfacesInt
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
@@ -74,7 +74,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var depthController: NotificationShadeDepthController
     @Mock lateinit var stackscroller: NotificationStackScrollLayout
     @Mock lateinit var expandHelperCallback: ExpandHelper.Callback
-    @Mock lateinit var mCentralSurfaces: CentralSurfacesInt
+    @Mock lateinit var mCentralSurfaces: CentralSurfaces
     @Mock lateinit var qS: QS
     @Mock lateinit var singleShadeOverScroller: SingleShadeLockScreenOverScroller
     @Mock lateinit var splitShadeOverScroller: SplitShadeLockScreenOverScroller

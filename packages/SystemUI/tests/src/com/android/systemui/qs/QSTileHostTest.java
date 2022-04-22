@@ -65,7 +65,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.settings.FakeSettings;
@@ -111,7 +111,7 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private QSTile.State mMockState;
     @Mock
-    private CentralSurfacesInt mCentralSurfaces;
+    private CentralSurfaces mCentralSurfaces;
     @Mock
     private QSLogger mQSLogger;
     @Mock
@@ -436,7 +436,7 @@ public class QSTileHostTest extends SysuiTestCase {
                 QSFactory defaultFactory, Handler mainHandler, Looper bgLooper,
                 PluginManager pluginManager, TunerService tunerService,
                 Provider<AutoTileManager> autoTiles, DumpManager dumpManager,
-                BroadcastDispatcher broadcastDispatcher, CentralSurfacesInt centralSurfaces,
+                BroadcastDispatcher broadcastDispatcher, CentralSurfaces centralSurfaces,
                 QSLogger qsLogger, UiEventLogger uiEventLogger, UserTracker userTracker,
                 SecureSettings secureSettings, CustomTileStatePersister customTileStatePersister,
                 TileServiceRequestController.Builder tileServiceRequestControllerBuilder,

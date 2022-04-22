@@ -62,7 +62,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var globalSettings: GlobalSettings
     @Mock
-    private lateinit var mCentralSurfaces: CentralSurfacesInt
+    private lateinit var mCentralSurfaces: CentralSurfaces
     @Mock
     private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock

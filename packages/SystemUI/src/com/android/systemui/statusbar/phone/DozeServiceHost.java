@@ -97,7 +97,7 @@ public final class DozeServiceHost implements DozeHost {
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private NotificationPanelViewController mNotificationPanel;
     private View mAmbientIndicationContainer;
-    private CentralSurfacesInt mCentralSurfaces;
+    private CentralSurfaces mCentralSurfaces;
     private boolean mAlwaysOnSuppressed;
 
     @Inject
@@ -146,7 +146,7 @@ public final class DozeServiceHost implements DozeHost {
      * Initialize instance with objects only available later during execution.
      */
     public void initialize(
-            CentralSurfacesInt centralSurfaces,
+            CentralSurfaces centralSurfaces,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             NotificationShadeWindowViewController notificationShadeWindowViewController,
             NotificationPanelViewController notificationPanel,

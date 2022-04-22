@@ -115,7 +115,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private NotificationRemoteInputManager mRemoteInputManager;
     @Mock
-    private CentralSurfacesInt mCentralSurfaces;
+    private CentralSurfaces mCentralSurfaces;
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock

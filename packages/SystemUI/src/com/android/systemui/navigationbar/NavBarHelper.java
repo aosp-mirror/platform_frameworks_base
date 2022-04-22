@@ -50,7 +50,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -79,7 +79,7 @@ public final class NavBarHelper implements
         Dumpable {
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
-    private final Lazy<Optional<CentralSurfacesInt>> mCentralSurfacesOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final UserTracker mUserTracker;
     private final SystemActions mSystemActions;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
@@ -113,7 +113,7 @@ public final class NavBarHelper implements
             SystemActions systemActions,
             OverviewProxyService overviewProxyService,
             Lazy<AssistManager> assistManagerLazy,
-            Lazy<Optional<CentralSurfacesInt>> centralSurfacesOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navigationModeController,
             UserTracker userTracker,
             DumpManager dumpManager) {

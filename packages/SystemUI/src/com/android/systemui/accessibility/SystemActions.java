@@ -54,7 +54,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.util.Assert;
 
@@ -180,7 +180,7 @@ public class SystemActions extends CoreStartable {
     private final Optional<Recents> mRecentsOptional;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
-    private final Lazy<Optional<CentralSurfacesInt>> mCentralSurfacesOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final NotificationShadeWindowController mNotificationShadeController;
     private final StatusBarWindowCallback mNotificationShadeCallback;
     private boolean mDismissNotificationShadeActionRegistered;
@@ -188,7 +188,7 @@ public class SystemActions extends CoreStartable {
     @Inject
     public SystemActions(Context context,
             NotificationShadeWindowController notificationShadeController,
-            Lazy<Optional<CentralSurfacesInt>> centralSurfacesOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Optional<Recents> recentsOptional) {
         super(context);
         mRecentsOptional = recentsOptional;
@@ -311,9 +311,9 @@ public class SystemActions extends CoreStartable {
 
         // Saving state in instance variable since this callback is called quite often to avoid
         // binder calls
-        final Optional<CentralSurfacesInt> centralSurfacesOptional =
+        final Optional<CentralSurfaces> centralSurfacesOptional =
                 mCentralSurfacesOptionalLazy.get();
-        if (centralSurfacesOptional.map(CentralSurfacesInt::isPanelExpanded).orElse(false)
+        if (centralSurfacesOptional.map(CentralSurfaces::isPanelExpanded).orElse(false)
                 && !centralSurfacesOptional.get().isKeyguardShowing()) {
             if (!mDismissNotificationShadeActionRegistered) {
                 mA11yManager.registerSystemAction(
@@ -467,7 +467,7 @@ public class SystemActions extends CoreStartable {
     }
 
     private void handleNotifications() {
-        mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfacesInt::animateExpandNotificationsPanel);
+        mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::animateExpandNotificationsPanel);
     }
 
     private void handleQuickSettings() {
