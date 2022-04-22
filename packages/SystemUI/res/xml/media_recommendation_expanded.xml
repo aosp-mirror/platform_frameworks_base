@@ -15,12 +15,109 @@
   ~ limitations under the License
   -->
 <ConstraintSet
-    xmlns:android="http://schemas.android.com/apk/res/android" >
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
 
     <Constraint
         android:id="@+id/sizing_view"
         android:layout_width="match_parent"
         android:layout_height="@dimen/qs_media_session_height_expanded"
+        />
+
+    <Constraint
+        android:id="@+id/media_cover1_container"
+        style="@style/MediaPlayer.Recommendation.AlbumContainer"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/media_title1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/media_cover2_container"
+        android:layout_marginEnd="@dimen/qs_media_rec_album_side_margin"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintVertical_bias="0.4"
+        />
+
+    <Constraint
+        android:id="@+id/media_title1"
+        style="@style/MediaPlayer.Recommendation.Text.Title"
+        app:layout_constraintStart_toStartOf="@+id/media_cover1_container"
+        app:layout_constraintEnd_toEndOf="@+id/media_cover1_container"
+        app:layout_constraintTop_toBottomOf="@+id/media_cover1_container"
+        app:layout_constraintBottom_toTopOf="@+id/media_subtitle1"
+        />
+
+    <Constraint
+        android:id="@+id/media_subtitle1"
+        style="@style/MediaPlayer.Recommendation.Text.Subtitle"
+        app:layout_constraintStart_toStartOf="@+id/media_cover1_container"
+        app:layout_constraintEnd_toEndOf="@+id/media_cover1_container"
+        app:layout_constraintTop_toBottomOf="@+id/media_title1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        />
+
+    <Constraint
+        android:id="@+id/media_cover2_container"
+        style="@style/MediaPlayer.Recommendation.AlbumContainer"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/media_title2"
+        app:layout_constraintStart_toEndOf="@id/media_cover1_container"
+        app:layout_constraintEnd_toStartOf="@id/media_cover3_container"
+        android:layout_marginEnd="@dimen/qs_media_rec_album_side_margin"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintVertical_bias="0.4"
+        />
+
+    <Constraint
+        android:id="@+id/media_title2"
+        style="@style/MediaPlayer.Recommendation.Text.Title"
+        app:layout_constraintStart_toStartOf="@+id/media_cover2_container"
+        app:layout_constraintEnd_toEndOf="@+id/media_cover2_container"
+        app:layout_constraintTop_toBottomOf="@+id/media_cover2_container"
+        app:layout_constraintBottom_toTopOf="@+id/media_subtitle2"
+        />
+
+    <Constraint
+        android:id="@+id/media_subtitle2"
+        style="@style/MediaPlayer.Recommendation.Text.Subtitle"
+        app:layout_constraintStart_toStartOf="@+id/media_cover2_container"
+        app:layout_constraintEnd_toEndOf="@+id/media_cover2_container"
+        app:layout_constraintTop_toBottomOf="@+id/media_title2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        />
+
+    <Constraint
+        android:id="@+id/media_cover3_container"
+        style="@style/MediaPlayer.Recommendation.AlbumContainer"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/media_title3"
+        app:layout_constraintStart_toEndOf="@id/media_cover2_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="@dimen/qs_media_padding"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintVertical_bias="0.4"
+        />
+
+    <Constraint
+        android:id="@+id/media_title3"
+        style="@style/MediaPlayer.Recommendation.Text.Title"
+        app:layout_constraintStart_toStartOf="@+id/media_cover3_container"
+        app:layout_constraintEnd_toEndOf="@+id/media_cover3_container"
+        app:layout_constraintTop_toBottomOf="@+id/media_cover3_container"
+        app:layout_constraintBottom_toTopOf="@+id/media_subtitle3"
+        />
+
+    <Constraint
+        android:id="@+id/media_subtitle3"
+        style="@style/MediaPlayer.Recommendation.Text.Subtitle"
+        app:layout_constraintStart_toStartOf="@+id/media_cover3_container"
+        app:layout_constraintEnd_toEndOf="@+id/media_cover3_container"
+        app:layout_constraintTop_toBottomOf="@+id/media_title3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="@dimen/qs_media_padding"
         />
 
 </ConstraintSet>
