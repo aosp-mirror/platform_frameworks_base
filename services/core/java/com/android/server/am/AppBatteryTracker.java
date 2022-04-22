@@ -1673,6 +1673,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 if (pair != null) {
                     final long[] ts = pair.first;
                     final int restrictedLevel = ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET] > 0
+                            && mTracker.mAppRestrictionController.isAutoRestrictAbusiveAppEnabled()
                             ? RESTRICTION_LEVEL_RESTRICTED_BUCKET
                             : RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
                     if (maxLevel > RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
