@@ -207,6 +207,10 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         testSpec.assertWm {
             this.isAppWindowInvisible(testApp.component)
                     .then()
+                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
+                    .then()
+                    .isAppWindowVisible(FlickerComponentName.SPLASH_SCREEN, isOptional = true)
+                    .then()
                     .isAppWindowVisible(testApp.component)
         }
     }
