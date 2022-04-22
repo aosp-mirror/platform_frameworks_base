@@ -1251,7 +1251,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"ఎల్లప్పుడూ చూపు"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Android OS యొక్క అననుకూల వెర్షన్ కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> రూపొందించబడింది మరియు ఊహించని సమస్యలు తలెత్తవచ్చు. యాప్ యొక్క అప్‌డేట్ చేసిన వెర్షన్ అందుబాటులో ఉండవచ్చు."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"ఎల్లప్పుడూ చూపు"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"అప్‌డేట్ కోసం తనిఖీ చేయి"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"అప్‌డేట్ కోసం చెక్ చేయి"</string>
     <string name="smv_application" msgid="3775183542777792638">"<xliff:g id="APPLICATION">%1$s</xliff:g> యాప్ (<xliff:g id="PROCESS">%2$s</xliff:g> ప్రాసెస్) అది స్వయంగా అమలు చేసే ఖచ్చితమైన మోడ్ విధానాన్ని ఉల్లంఘించింది."</string>
     <string name="smv_process" msgid="1398801497130695446">"ప్రక్రియ <xliff:g id="PROCESS">%1$s</xliff:g> అది స్వయంగా అమలు చేసే ఖచ్చితమైన మోడ్ విధానాన్ని ఉల్లంఘించింది."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"ఫోన్ అప్‌డేట్‌ అవుతోంది…"</string>

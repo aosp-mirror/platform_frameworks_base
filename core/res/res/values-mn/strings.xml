@@ -349,7 +349,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"мэдэгдлийг түгжигдсэн төхөөрөмж дээр бүтэн дэлгэцийн үйл ажиллагаа байдлаар үзүүлэх"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Аппад мэдэгдлийг түгжигдсэн төхөөрөмж дээр бүтэн дэлгэцийн үйл ажиллагаа байдлаар үзүүлэхийг зөвшөөрдөг"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"товчлол суулгах"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Аппликейшн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг нэмж чадна."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Аппликейшн нь хэрэглэгчийн оролцоогүйгээр Үндсэн нүүрний товчлолыг нэмж чадна."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"товчлолыг устгах"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Аппликейшн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг устгаж чадна."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"гарсан дуудлагыг чиглэлийг өөрчлөх"</string>
