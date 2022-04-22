@@ -126,6 +126,31 @@ public class CrossUserPackageVisibilityTests {
                         CROSS_USER_TEST_PACKAGE_NAME, keySet));
     }
 
+    @Test
+    public void testGetSigningKeySet_cannotDetectCrossUserPkg() {
+        final IllegalArgumentException e1 = assertThrows(IllegalArgumentException.class,
+                () -> mIPackageManager.getSigningKeySet(CROSS_USER_TEST_PACKAGE_NAME));
+
+        installPackageForUser(CROSS_USER_TEST_APK_FILE, mOtherUser);
+
+        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class,
+                () -> mIPackageManager.getSigningKeySet(CROSS_USER_TEST_PACKAGE_NAME));
+        assertThat(e1.getMessage()).isEqualTo(e2.getMessage());
+    }
+
+    @Test
+    public void testGetKeySetByAlias_cannotDetectCrossUserPkg() {
+        final String alias = CROSS_USER_TEST_PACKAGE_NAME + ".alias";
+        final IllegalArgumentException e1 = assertThrows(IllegalArgumentException.class,
+                () -> mIPackageManager.getKeySetByAlias(CROSS_USER_TEST_PACKAGE_NAME, alias));
+
+        installPackageForUser(CROSS_USER_TEST_APK_FILE, mOtherUser);
+
+        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class,
+                () -> mIPackageManager.getKeySetByAlias(CROSS_USER_TEST_PACKAGE_NAME, alias));
+        assertThat(e1.getMessage()).isEqualTo(e2.getMessage());
+    }
+
     private static void installPackageForUser(File apk, UserReference user) {
         assertThat(apk.exists()).isTrue();
         final StringBuilder cmd = new StringBuilder("pm install --user ");

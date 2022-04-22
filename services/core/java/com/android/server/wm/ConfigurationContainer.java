@@ -637,12 +637,19 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     void registerConfigurationChangeListener(ConfigurationContainerListener listener) {
+        registerConfigurationChangeListener(listener, true /* shouldDispatchConfig */);
+    }
+
+    void registerConfigurationChangeListener(ConfigurationContainerListener listener,
+            boolean shouldDispatchConfig) {
         if (mChangeListeners.contains(listener)) {
             return;
         }
         mChangeListeners.add(listener);
-        listener.onRequestedOverrideConfigurationChanged(mResolvedOverrideConfiguration);
-        listener.onMergedOverrideConfigurationChanged(mMergedOverrideConfiguration);
+        if (shouldDispatchConfig) {
+            listener.onRequestedOverrideConfigurationChanged(mResolvedOverrideConfiguration);
+            listener.onMergedOverrideConfigurationChanged(mMergedOverrideConfiguration);
+        }
     }
 
     void unregisterConfigurationChangeListener(ConfigurationContainerListener listener) {

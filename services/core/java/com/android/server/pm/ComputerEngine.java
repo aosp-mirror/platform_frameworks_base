@@ -1355,7 +1355,7 @@ public class ComputerEngine implements Computer {
                 PackageStateInternal resolvedSetting =
                         getPackageStateInternal(info.activityInfo.packageName, 0);
                 if (resolveForStart
-                        || !mAppsFilter.shouldFilterApplication(
+                        || !mAppsFilter.shouldFilterApplication(this,
                         filterCallingUid, callingSetting, resolvedSetting, userId)) {
                     continue;
                 }
@@ -1389,7 +1389,7 @@ public class ComputerEngine implements Computer {
                         mSettings.getSettingBase(UserHandle.getAppId(filterCallingUid));
                 PackageStateInternal resolvedSetting =
                         getPackageStateInternal(info.serviceInfo.packageName, 0);
-                if (!mAppsFilter.shouldFilterApplication(
+                if (!mAppsFilter.shouldFilterApplication(this,
                         filterCallingUid, callingSetting, resolvedSetting, userId)) {
                     continue;
                 }
@@ -2736,7 +2736,7 @@ public class ComputerEngine implements Computer {
         }
         int appId = UserHandle.getAppId(callingUid);
         final SettingBase callingPs = mSettings.getSettingBase(appId);
-        return mAppsFilter.shouldFilterApplication(callingUid, callingPs, ps, userId);
+        return mAppsFilter.shouldFilterApplication(this, callingUid, callingPs, ps, userId);
     }
 
     /**
@@ -5244,10 +5244,11 @@ public class ComputerEngine implements Computer {
         if (packageName == null || alias == null) {
             return null;
         }
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
         final AndroidPackage pkg = mPackages.get(packageName);
-        if (pkg == null
-                || shouldFilterApplication(getPackageStateInternal(pkg.getPackageName()),
-                Binder.getCallingUid(), UserHandle.getCallingUserId())) {
+        if (pkg == null || shouldFilterApplicationIncludingUninstalled(
+                getPackageStateInternal(pkg.getPackageName()), callingUid, callingUserId)) {
             Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
@@ -5264,9 +5265,8 @@ public class ComputerEngine implements Computer {
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         final AndroidPackage pkg = mPackages.get(packageName);
-        if (pkg == null
-                || shouldFilterApplication(getPackageStateInternal(pkg.getPackageName()),
-                callingUid, callingUserId)) {
+        if (pkg == null || shouldFilterApplicationIncludingUninstalled(
+                getPackageStateInternal(pkg.getPackageName()), callingUid, callingUserId)) {
             Slog.w(TAG, "KeySet requested for unknown package: " + packageName
                     + ", uid:" + callingUid);
             throw new IllegalArgumentException("Unknown package: " + packageName);
@@ -5338,7 +5338,7 @@ public class ComputerEngine implements Computer {
         if (ps == null) {
             return null;
         }
-        return mAppsFilter.getVisibilityAllowList(ps, userIds, getPackageStates());
+        return mAppsFilter.getVisibilityAllowList(this, ps, userIds, getPackageStates());
     }
 
     @Nullable
@@ -5843,5 +5843,17 @@ public class ComputerEngine implements Computer {
     @Override
     public List<? extends PackageStateInternal> getVolumePackages(@NonNull String volumeUuid) {
         return mSettings.getVolumePackages(volumeUuid);
+    }
+
+    @Override
+    @NonNull
+    public Collection<SharedUserSetting> getAllSharedUsers() {
+        return mSettings.getAllSharedUsers();
+    }
+
+    @Override
+    @NonNull
+    public UserInfo[] getUserInfos() {
+        return mInjector.getUserManagerInternal().getUserInfos();
     }
 }

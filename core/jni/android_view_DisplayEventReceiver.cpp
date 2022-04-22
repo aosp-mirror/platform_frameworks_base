@@ -90,8 +90,9 @@ NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env, jobject rece
                                                        const sp<MessageQueue>& messageQueue,
                                                        jint vsyncSource, jint eventRegistration)
       : DisplayEventDispatcher(messageQueue->getLooper(),
-                               static_cast<ISurfaceComposer::VsyncSource>(vsyncSource),
-                               static_cast<ISurfaceComposer::EventRegistration>(eventRegistration)),
+                               static_cast<gui::ISurfaceComposer::VsyncSource>(vsyncSource),
+                               static_cast<gui::ISurfaceComposer::EventRegistration>(
+                                       eventRegistration)),
         mReceiverWeakGlobal(env->NewGlobalRef(receiverWeak)),
         mMessageQueue(messageQueue) {
     ALOGV("receiver %p ~ Initializing display event receiver.", this);

@@ -24311,7 +24311,7 @@ package android.media.audiofx {
     method public int getWaveForm(byte[]) throws java.lang.IllegalStateException;
     method public void release();
     method public int setCaptureSize(int) throws java.lang.IllegalStateException;
-    method public int setDataCaptureListener(android.media.audiofx.Visualizer.OnDataCaptureListener, int, boolean, boolean);
+    method public int setDataCaptureListener(@Nullable android.media.audiofx.Visualizer.OnDataCaptureListener, int, boolean, boolean);
     method public int setEnabled(boolean) throws java.lang.IllegalStateException;
     method public int setMeasurementMode(int) throws java.lang.IllegalStateException;
     method public int setScalingMode(int) throws java.lang.IllegalStateException;

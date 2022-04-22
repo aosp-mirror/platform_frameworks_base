@@ -95,66 +95,61 @@ class ColorSchemeTransition internal constructor(
 
     val surfaceColor = colorTransitionFactory(
         bgColor,
-        { colorScheme -> colorScheme.accent2[9] }, // A2-800
-        { surfaceColor ->
-            val colorList = ColorStateList.valueOf(surfaceColor)
-            mediaViewHolder.player.backgroundTintList = colorList
-            mediaViewHolder.albumView.foregroundTintList = colorList
-            mediaViewHolder.albumView.backgroundTintList = colorList
-            mediaViewHolder.seamlessIcon.imageTintList = colorList
-            mediaViewHolder.seamlessText.setTextColor(surfaceColor)
-            mediaViewHolder.dismissText.setTextColor(surfaceColor)
-        })
+        ::surfaceFromScheme
+    ) { surfaceColor ->
+        val colorList = ColorStateList.valueOf(surfaceColor)
+        mediaViewHolder.player.backgroundTintList = colorList
+        mediaViewHolder.albumView.foregroundTintList = colorList
+        mediaViewHolder.albumView.backgroundTintList = colorList
+        mediaViewHolder.seamlessIcon.imageTintList = colorList
+        mediaViewHolder.seamlessText.setTextColor(surfaceColor)
+        mediaViewHolder.gutsViewHolder.setSurfaceColor(surfaceColor)
+    }
 
     val accentPrimary = colorTransitionFactory(
         loadDefaultColor(R.attr.textColorPrimary),
-        { colorScheme -> colorScheme.accent1[2] }, // A1-100
-        { accentPrimary ->
-            val accentColorList = ColorStateList.valueOf(accentPrimary)
-            mediaViewHolder.actionPlayPause.backgroundTintList = accentColorList
-            mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
-            mediaViewHolder.settings.imageTintList = accentColorList
-            mediaViewHolder.cancelText.backgroundTintList = accentColorList
-            mediaViewHolder.dismissText.backgroundTintList = accentColorList
-        })
+        ::accentPrimaryFromScheme
+    ) { accentPrimary ->
+        val accentColorList = ColorStateList.valueOf(accentPrimary)
+        mediaViewHolder.actionPlayPause.backgroundTintList = accentColorList
+        mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
+        mediaViewHolder.gutsViewHolder.setAccentPrimaryColor(accentPrimary)
+    }
 
     val textPrimary = colorTransitionFactory(
         loadDefaultColor(R.attr.textColorPrimary),
-        { colorScheme -> colorScheme.neutral1[1] }, // N1-50
-        { textPrimary ->
-            mediaViewHolder.titleText.setTextColor(textPrimary)
-            val textColorList = ColorStateList.valueOf(textPrimary)
-            mediaViewHolder.seekBar.thumb.setTintList(textColorList)
-            mediaViewHolder.seekBar.progressTintList = textColorList
-            mediaViewHolder.longPressText.setTextColor(textColorList)
-            mediaViewHolder.cancelText.setTextColor(textColorList)
-            mediaViewHolder.scrubbingElapsedTimeView.setTextColor(textColorList)
-            mediaViewHolder.scrubbingTotalTimeView.setTextColor(textColorList)
-            for (button in mediaViewHolder.getTransparentActionButtons()) {
-                button.imageTintList = textColorList
-            }
-        })
+        ::textPrimaryFromScheme
+    ) { textPrimary ->
+        mediaViewHolder.titleText.setTextColor(textPrimary)
+        val textColorList = ColorStateList.valueOf(textPrimary)
+        mediaViewHolder.seekBar.thumb.setTintList(textColorList)
+        mediaViewHolder.seekBar.progressTintList = textColorList
+        mediaViewHolder.scrubbingElapsedTimeView.setTextColor(textColorList)
+        mediaViewHolder.scrubbingTotalTimeView.setTextColor(textColorList)
+        for (button in mediaViewHolder.getTransparentActionButtons()) {
+            button.imageTintList = textColorList
+        }
+        mediaViewHolder.gutsViewHolder.setTextPrimaryColor(textPrimary)
+    }
 
     val textPrimaryInverse = colorTransitionFactory(
         loadDefaultColor(R.attr.textColorPrimaryInverse),
-        { colorScheme -> colorScheme.neutral1[10] }, // N1-900
-        { textPrimaryInverse ->
-            mediaViewHolder.actionPlayPause.imageTintList =
-                ColorStateList.valueOf(textPrimaryInverse)
-        })
+        ::textPrimaryInverseFromScheme
+    ) { textPrimaryInverse ->
+        mediaViewHolder.actionPlayPause.imageTintList = ColorStateList.valueOf(textPrimaryInverse)
+    }
 
     val textSecondary = colorTransitionFactory(
         loadDefaultColor(R.attr.textColorSecondary),
-        { colorScheme -> colorScheme.neutral2[3] }, // N2-200
-        { textSecondary -> mediaViewHolder.artistText.setTextColor(textSecondary) })
+        ::textSecondaryFromScheme
+    ) { textSecondary -> mediaViewHolder.artistText.setTextColor(textSecondary) }
 
     val textTertiary = colorTransitionFactory(
         loadDefaultColor(R.attr.textColorTertiary),
-        { colorScheme -> colorScheme.neutral2[5] }, // N2-400
-        { textTertiary ->
-            mediaViewHolder.seekBar.progressBackgroundTintList =
-                ColorStateList.valueOf(textTertiary)
-        })
+        ::textTertiaryFromScheme
+    ) { textTertiary ->
+        mediaViewHolder.seekBar.progressBackgroundTintList = ColorStateList.valueOf(textTertiary)
+    }
 
     val colorTransitions = arrayOf(
         surfaceColor, accentPrimary, textPrimary,
