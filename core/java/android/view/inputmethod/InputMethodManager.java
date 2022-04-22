@@ -543,6 +543,7 @@ public final class InputMethodManager {
     static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
     static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
     static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
+    static final int MSG_ON_SHOW_REQUESTED = 31;
 
     private static boolean isAutofillUIShowing(View servedView) {
         AutofillManager afm = servedView.getContext().getSystemService(AutofillManager.class);
@@ -1114,6 +1115,14 @@ public final class InputMethodManager {
                         mCurrentInputMethodSession.updateCursorAnchorInfo(
                                 CursorAnchorInfo.createForAdditionalParentMatrix(
                                         mCursorAnchorInfo, mVirtualDisplayToScreenMatrix));
+                    }
+                    return;
+                }
+                case MSG_ON_SHOW_REQUESTED: {
+                    synchronized (mH) {
+                        if (mImeInsetsConsumer != null) {
+                            mImeInsetsConsumer.onShowRequested();
+                        }
                     }
                     return;
                 }
@@ -1834,6 +1843,9 @@ public final class InputMethodManager {
                 return false;
             }
 
+            // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
+            // TODO(b/229426865): call WindowInsetsController#show instead.
+            mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
             try {
                 Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags + " reason="
                         + InputMethodDebug.softInputDisplayReasonToString(reason));
@@ -1869,6 +1881,9 @@ public final class InputMethodManager {
                     Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
                     return;
                 }
+                // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
+                // TODO(b/229426865): call WindowInsetsController#show instead.
+                mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
                 mService.showSoftInput(
                         mClient,
                         mCurRootView.getView().getWindowToken(),
@@ -2521,7 +2536,7 @@ public final class InputMethodManager {
     }
 
     /**
-     * Notify IME directly that it is no longer visible.
+     * Notify IMMS that IME insets are no longer visible.
      *
      * @param windowToken the window from which this request originates. If this doesn't match the
      *                    currently served view, the request is ignored.
@@ -2533,7 +2548,13 @@ public final class InputMethodManager {
         synchronized (mH) {
             if (mCurrentInputMethodSession != null && mCurRootView != null
                     && mCurRootView.getWindowToken() == windowToken) {
-                mCurrentInputMethodSession.notifyImeHidden();
+                try {
+                    mService.hideSoftInput(mClient, windowToken, 0 /* flags */,
+                            null /* resultReceiver */,
+                            SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
         }
     }
