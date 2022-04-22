@@ -27,7 +27,6 @@ import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.platform.test.annotations.RootPermissionTest;
 import android.platform.test.rule.UnlockScreenRule;
 import android.view.WindowInsets;
@@ -78,9 +77,6 @@ public final class ImeOpenCloseStressTest {
             instrumentation.runOnMainSync(activity::hideIme);
             waitOnMainUntil(msgPrefix + "IME should be hidden",
                     () -> !activity.isAnimating() && !isImeShown(editText));
-            // b/b/221483132, wait until IMS and IMMS handles IMM#notifyImeHidden.
-            // There is no good signal, so we just wait a second.
-            SystemClock.sleep(1000);
         }
     }
 
