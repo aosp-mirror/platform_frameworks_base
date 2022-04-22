@@ -43,7 +43,7 @@ import com.android.systemui.statusbar.notification.interruption.HeadsUpControlle
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.row.NotifBindPipelineInitializer
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import com.android.systemui.statusbar.phone.CentralSurfacesInt
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -63,7 +63,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class NotificationsControllerImpl @Inject constructor(
-    private val centralSurfaces: Lazy<CentralSurfacesInt>,
+    private val centralSurfaces: Lazy<CentralSurfaces>,
     private val notifPipelineFlags: NotifPipelineFlags,
     private val notificationListener: NotificationListener,
     private val entryManager: NotificationEntryManager,

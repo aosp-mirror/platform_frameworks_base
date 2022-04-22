@@ -101,7 +101,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -145,7 +145,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
     private final Context mContext;
     private final Optional<Pip> mPipOptional;
-    private final Lazy<Optional<CentralSurfacesInt>> mCentralSurfacesOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private SysUiState mSysUiState;
     private final Handler mHandler;
@@ -400,7 +400,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         @Override
         public void toggleNotificationPanel() {
             verifyCallerAndClearCallingIdentityPostMain("toggleNotificationPanel", () ->
-                    mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfacesInt::togglePanel));
+                    mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::togglePanel));
         }
 
 
@@ -555,7 +555,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     @Inject
     public OverviewProxyService(Context context, CommandQueue commandQueue,
             Lazy<NavigationBarController> navBarControllerLazy,
-            Lazy<Optional<CentralSurfacesInt>> centralSurfacesOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
             Optional<Pip> pipOptional,

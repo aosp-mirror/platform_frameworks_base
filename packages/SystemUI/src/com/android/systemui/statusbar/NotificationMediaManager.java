@@ -16,9 +16,9 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
-import static com.android.systemui.statusbar.phone.CentralSurfacesInt.DEBUG_MEDIA_FAKE_ARTWORK;
-import static com.android.systemui.statusbar.phone.CentralSurfacesInt.ENABLE_LOCKSCREEN_WALLPAPER;
-import static com.android.systemui.statusbar.phone.CentralSurfacesInt.SHOW_LOCKSCREEN_MEDIA_ARTWORK;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG_MEDIA_FAKE_ARTWORK;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.ENABLE_LOCKSCREEN_WALLPAPER;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.SHOW_LOCKSCREEN_MEDIA_ARTWORK;
 
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -66,7 +66,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Di
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -132,7 +132,7 @@ public class NotificationMediaManager implements Dumpable {
 
     private final Context mContext;
     private final ArrayList<MediaListener> mMediaListeners;
-    private final Lazy<Optional<CentralSurfacesInt>> mCentralSurfacesOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final MediaArtworkProcessor mMediaArtworkProcessor;
     private final Set<AsyncTask<?, ?, ?>> mProcessArtworkTasks = new ArraySet<>();
 
@@ -177,7 +177,7 @@ public class NotificationMediaManager implements Dumpable {
      */
     public NotificationMediaManager(
             Context context,
-            Lazy<Optional<CentralSurfacesInt>> centralSurfacesOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager notificationEntryManager,
@@ -663,7 +663,7 @@ public class NotificationMediaManager implements Dumpable {
                 mNotificationShadeWindowController.get();
         boolean hideBecauseOccluded =
                 mCentralSurfacesOptionalLazy.get()
-                        .map(CentralSurfacesInt::isOccluded).orElse(false);
+                        .map(CentralSurfaces::isOccluded).orElse(false);
 
         final boolean hasArtwork = artworkDrawable != null;
         mColorExtractor.setHasMediaArtwork(hasMediaArtwork);

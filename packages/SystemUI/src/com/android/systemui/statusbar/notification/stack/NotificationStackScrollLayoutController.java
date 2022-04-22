@@ -109,7 +109,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
@@ -175,7 +175,7 @@ public class NotificationStackScrollLayoutController {
     private final KeyguardBypassController mKeyguardBypassController;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     // TODO: CentralSurfaces should be encapsulated behind a Controller
-    private final CentralSurfacesInt mCentralSurfaces;
+    private final CentralSurfaces mCentralSurfaces;
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final InteractionJankMonitor mJankMonitor;
@@ -637,7 +637,7 @@ public class NotificationStackScrollLayoutController {
             FalsingManager falsingManager,
             @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
-            CentralSurfacesInt centralSurfaces,
+            CentralSurfaces centralSurfaces,
             ScrimController scrimController,
             NotificationGroupManagerLegacy legacyGroupManager,
             GroupExpansionManager groupManager,

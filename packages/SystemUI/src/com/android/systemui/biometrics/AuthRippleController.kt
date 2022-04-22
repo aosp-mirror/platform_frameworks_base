@@ -40,7 +40,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.phone.BiometricUnlockController
-import com.android.systemui.statusbar.phone.CentralSurfacesInt
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -61,7 +61,7 @@ import javax.inject.Provider
  */
 @CentralSurfacesScope
 class AuthRippleController @Inject constructor(
-    private val centralSurfaces: CentralSurfacesInt,
+    private val centralSurfaces: CentralSurfaces,
     private val sysuiContext: Context,
     private val authController: AuthController,
     private val configurationController: ConfigurationController,

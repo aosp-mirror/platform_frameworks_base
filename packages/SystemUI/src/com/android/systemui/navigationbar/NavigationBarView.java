@@ -86,7 +86,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.phone.AutoHideController;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.wm.shell.back.BackAnimation;
@@ -1331,7 +1331,7 @@ public class NavigationBarView extends FrameLayout {
         getContextDisplay().getRealSize(size);
 
         pw.println("NavigationBarView:");
-        pw.println(String.format("      this: " + CentralSurfacesInt.viewInfo(this)
+        pw.println(String.format("      this: " + CentralSurfaces.viewInfo(this)
                         + " " + visibilityToString(getVisibility())));
 
         getWindowVisibleDisplayFrame(r);
