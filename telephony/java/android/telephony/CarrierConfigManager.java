@@ -908,6 +908,9 @@ public class CarrierConfigManager {
      * Combines VoLTE, VT, VoWiFI calling provisioning into one parameter.
      * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead for
      * finer-grained control.
+     * changing carrier_volte_provisioning_required_bool requires changes to
+     * mmtel_requires_provisioning_bundle and vice versa
+     * {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE}
      */
     @Deprecated
     public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
@@ -5437,6 +5440,10 @@ public class CarrierConfigManager {
          * </ul>
          * <p> The values are defined in
          * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech}
+         *
+         * changing mmtel_requires_provisioning_bundle requires changes to
+         * carrier_volte_provisioning_required_bool and vice versa
+         * {@link Ims#KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL}
          */
         public static final String KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE =
                 KEY_PREFIX + "mmtel_requires_provisioning_bundle";
