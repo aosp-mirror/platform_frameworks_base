@@ -23,7 +23,6 @@ import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsState.ITYPE_IME;
 
 import android.annotation.Nullable;
-import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
@@ -104,7 +103,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     /**
-     * Notify {@link InputMethodService} that IME window is hidden.
+     * Notify {@link com.android.server.inputmethod.InputMethodManagerService} that
+     * IME insets are hidden.
      */
     @Override
     void notifyHidden() {
