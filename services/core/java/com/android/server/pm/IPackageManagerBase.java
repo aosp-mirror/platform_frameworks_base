@@ -387,14 +387,6 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
         return snapshot().getComponentEnabledSetting(component, Binder.getCallingUid(), userId);
     }
 
-    @Override
-    @Deprecated
-    public final String getContentCaptureServicePackageName() {
-        return mService.ensureSystemPackageName(snapshot(),
-                mService.getPackageFromComponentString(
-                        R.string.config_defaultContentCaptureService));
-    }
-
     @Nullable
     @Override
     @Deprecated
