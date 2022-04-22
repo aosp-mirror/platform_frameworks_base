@@ -47,7 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -105,11 +105,11 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
     private IThermalEventListener mUsbThermalEventListener;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
-    private final Lazy<Optional<CentralSurfacesInt>> mCentralSurfacesOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
 
     @Inject
     public PowerUI(Context context, BroadcastDispatcher broadcastDispatcher,
-            CommandQueue commandQueue, Lazy<Optional<CentralSurfacesInt>> centralSurfacesOptionalLazy,
+            CommandQueue commandQueue, Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             WarningsUI warningsUI, EnhancedEstimates enhancedEstimates,
             PowerManager powerManager) {
         super(context);
@@ -701,9 +701,9 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
             int status = temp.getStatus();
 
             if (status >= Temperature.THROTTLING_EMERGENCY) {
-                final Optional<CentralSurfacesInt> centralSurfacesOptional =
+                final Optional<CentralSurfaces> centralSurfacesOptional =
                         mCentralSurfacesOptionalLazy.get();
-                if (!centralSurfacesOptional.map(CentralSurfacesInt::isDeviceInVrMode)
+                if (!centralSurfacesOptional.map(CentralSurfaces::isDeviceInVrMode)
                         .orElse(false)) {
                     mWarnings.showHighTemperatureWarning();
                     Slog.d(TAG, "SkinThermalEventListener: notifyThrottling was called "

@@ -60,7 +60,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val powerManager: PowerManager,
     private val handler: Handler = Handler()
 ) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
-    private lateinit var mCentralSurfaces: CentralSurfacesInt
+    private lateinit var mCentralSurfaces: CentralSurfaces
     /**
      * Whether or not [initialize] has been called to provide us with the StatusBar,
      * NotificationPanelViewController, and LightRevealSrim so that we can run the unlocked screen
@@ -122,7 +122,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     }
 
     override fun initialize(
-        centralSurfaces: CentralSurfacesInt,
+        centralSurfaces: CentralSurfaces,
         lightRevealScrim: LightRevealScrim
     ) {
         this.initialized = true

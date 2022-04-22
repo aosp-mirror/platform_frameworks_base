@@ -43,7 +43,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
@@ -66,7 +66,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Mock
-    CentralSurfacesInt mCentralSurfaces;
+    CentralSurfaces mCentralSurfaces;
 
     @Mock
     NotificationShadeWindowController mNotificationShadeWindowController;

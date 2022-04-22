@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.dagger
 
 import com.android.systemui.CoreStartable
-import com.android.systemui.statusbar.phone.CentralSurfacesInt
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.CentralSurfacesImpl
 import dagger.Binds
 import dagger.Module
@@ -29,6 +29,6 @@ interface StartCentralSurfacesModule {
     /** Start the CentralSurfaces   */
     @Binds
     @IntoMap
-    @ClassKey(CentralSurfacesInt::class)
+    @ClassKey(CentralSurfaces::class)
     abstract fun bindsCentralSurfaces(centralSurfaces: CentralSurfacesImpl): CoreStartable
 }

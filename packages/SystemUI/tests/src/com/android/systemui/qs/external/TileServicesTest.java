@@ -48,7 +48,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -97,7 +97,7 @@ public class TileServicesTest extends SysuiTestCase {
     @Mock
     private DumpManager mDumpManager;
     @Mock
-    private CentralSurfacesInt mCentralSurfaces;
+    private CentralSurfaces mCentralSurfaces;
     @Mock
     private QSLogger mQSLogger;
     @Mock

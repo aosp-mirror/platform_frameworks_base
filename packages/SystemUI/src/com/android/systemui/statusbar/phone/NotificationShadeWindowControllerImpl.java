@@ -850,7 +850,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         Set<String> mComponentsForcingTopUi = new HashSet<>();
 
         /**
-         * The status bar state from {@link CentralSurfacesInt}.
+         * The status bar state from {@link CentralSurfaces}.
          */
         int mStatusBarState;
 
