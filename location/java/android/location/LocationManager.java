@@ -2910,7 +2910,8 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
+    @RequiresPermission(allOf = {Manifest.permission.LOCATION_HARDWARE,
+            Manifest.permission.INTERACT_ACROSS_USERS})
     public void addProviderRequestChangedListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull ChangedListener listener) {
