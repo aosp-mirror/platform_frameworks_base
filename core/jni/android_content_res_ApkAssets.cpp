@@ -459,8 +459,12 @@ static jobject NativeGetOverlayableInfo(JNIEnv* env, jclass /*clazz*/, jlong ptr
     return nullptr;
   }
 
-  auto overlayable_name_native = std::string(env->GetStringUTFChars(overlayable_name, NULL));
+  const char* overlayable_name_native = env->GetStringUTFChars(overlayable_name, nullptr);
+  if (overlayable_name_native == nullptr) {
+      return nullptr;
+  }
   auto actor = overlayable_map.find(overlayable_name_native);
+  env->ReleaseStringUTFChars(overlayable_name, overlayable_name_native);
   if (actor == overlayable_map.end()) {
     return nullptr;
   }
