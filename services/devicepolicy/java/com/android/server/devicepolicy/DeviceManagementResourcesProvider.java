@@ -141,11 +141,11 @@ class DeviceManagementResourcesProvider {
             String drawableId, String drawableSource, String drawableStyle,
             ParcelableResource updatableResource) {
         synchronized (mLock) {
-            Map<String, Map<String, ParcelableResource>> drawablesForId =
-                    mUpdatedDrawablesForSource.get(drawableId);
             if (!mUpdatedDrawablesForSource.containsKey(drawableId)) {
                 mUpdatedDrawablesForSource.put(drawableId, new HashMap<>());
             }
+            Map<String, Map<String, ParcelableResource>> drawablesForId =
+                    mUpdatedDrawablesForSource.get(drawableId);
             if (!drawablesForId.containsKey(drawableSource)) {
                 mUpdatedDrawablesForSource.get(drawableId).put(drawableSource, new HashMap<>());
             }

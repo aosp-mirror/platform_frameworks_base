@@ -47,7 +47,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
-    fun testUpTranslationSetToDefaultValue() {
+    fun resetViewStates_defaultHun_yTranslationIsInset() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
 
@@ -57,7 +57,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
-    fun testHeadsUpTranslationChangesBasedOnStackMargin() {
+    fun resetViewStates_stackMargin_changesHunYTranslation() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
         val minHeadsUpTranslation = context.resources
@@ -72,7 +72,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
-    fun resetViewStates_childIsEmptyShadeView_viewIsCenteredVertically() {
+    fun resetViewStates_emptyShadeView_isCenteredVertically() {
         stackScrollAlgorithm.initView(context)
         val emptyShadeView = EmptyShadeView(context, /* attrs= */ null).apply {
             layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)

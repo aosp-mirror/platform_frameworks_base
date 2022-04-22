@@ -1994,8 +1994,23 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runDumpProfiles() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        boolean dumpClassesAndMethods = false;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--dump-classes-and-methods":
+                    dumpClassesAndMethods = true;
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
         String packageName = getNextArg();
-        mInterface.dumpProfiles(packageName);
+        mInterface.dumpProfiles(packageName, dumpClassesAndMethods);
         return 0;
     }
 
@@ -4164,9 +4179,12 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  reconcile-secondary-dex-files TARGET-PACKAGE");
         pw.println("    Reconciles the package secondary dex files with the generated oat files.");
         pw.println("");
-        pw.println("  dump-profiles TARGET-PACKAGE");
+        pw.println("  dump-profiles [--dump-classes-and-methods] TARGET-PACKAGE");
         pw.println("    Dumps method/class profile files to");
-        pw.println("    " + ART_PROFILE_SNAPSHOT_DEBUG_LOCATION + "TARGET-PACKAGE.txt");
+        pw.println("    " + ART_PROFILE_SNAPSHOT_DEBUG_LOCATION
+                + "TARGET-PACKAGE-primary.prof.txt.");
+        pw.println("      --dump-classes-and-methods: passed along to the profman binary to");
+        pw.println("        switch to the format used by 'profman --create-profile-from'.");
         pw.println("");
         pw.println("  snapshot-profile TARGET-PACKAGE [--code-path path]");
         pw.println("    Take a snapshot of the package profiles to");
