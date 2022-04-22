@@ -18,7 +18,9 @@ package android.view;
 
 import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.ImeInsetsSourceConsumerProto.INSETS_SOURCE_CONSUMER;
+import static android.view.ImeInsetsSourceConsumerProto.IS_HIDE_ANIMATION_RUNNING;
 import static android.view.ImeInsetsSourceConsumerProto.IS_REQUESTED_VISIBLE_AWAITING_CONTROL;
+import static android.view.ImeInsetsSourceConsumerProto.IS_SHOW_REQUESTED_DURING_HIDE_ANIMATION;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsState.ITYPE_IME;
 
@@ -43,6 +45,16 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      */
     private boolean mIsRequestedVisibleAwaitingControl;
 
+    private boolean mIsHideAnimationRunning;
+
+    /**
+     * Tracks whether {@link WindowInsetsController#show(int)} or
+     * {@link InputMethodManager#showSoftInput(View, int)} is called during IME hide animation.
+     * If it was called, we should not call {@link InputMethodManager#notifyImeHidden(IBinder)},
+     * because the IME is being shown.
+     */
+    private boolean mIsShowRequestedDuringHideAnimation;
+
     public ImeInsetsSourceConsumer(
             InsetsState state, Supplier<Transaction> transactionSupplier,
             InsetsController controller) {
@@ -63,6 +75,12 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     @Override
+    public void show(boolean fromIme) {
+        super.show(fromIme);
+        onShowRequested();
+    }
+
+    @Override
     public void hide() {
         super.hide();
         mIsRequestedVisibleAwaitingControl = false;
@@ -73,10 +91,20 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         hide();
 
         if (animationFinished) {
-            // remove IME surface as IME has finished hide animation.
-            notifyHidden();
-            removeSurface();
+            // Remove IME surface as IME has finished hide animation, if there is no pending
+            // show request.
+            if (!mIsShowRequestedDuringHideAnimation) {
+                notifyHidden();
+                removeSurface();
+            }
         }
+        // This method is called
+        // (1) before the hide animation starts.
+        // (2) after the hide animation ends.
+        // (3) if the IME is not controllable (animationFinished == true in this case).
+        // We should reset mIsShowRequestedDuringHideAnimation in all cases.
+        mIsHideAnimationRunning = !animationFinished;
+        mIsShowRequestedDuringHideAnimation = false;
     }
 
     /**
@@ -157,7 +185,18 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, INSETS_SOURCE_CONSUMER);
         proto.write(IS_REQUESTED_VISIBLE_AWAITING_CONTROL, mIsRequestedVisibleAwaitingControl);
+        proto.write(IS_HIDE_ANIMATION_RUNNING, mIsHideAnimationRunning);
+        proto.write(IS_SHOW_REQUESTED_DURING_HIDE_ANIMATION, mIsShowRequestedDuringHideAnimation);
         proto.end(token);
+    }
+
+    /**
+     * Called when {@link #show} or {@link InputMethodManager#showSoftInput(View, int)} is called.
+     */
+    public void onShowRequested() {
+        if (mIsHideAnimationRunning) {
+            mIsShowRequestedDuringHideAnimation = true;
+        }
     }
 
     private InputMethodManager getImm() {
