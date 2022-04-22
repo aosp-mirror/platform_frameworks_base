@@ -375,16 +375,20 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun onProgressChangedFromUserWithoutStartTrackingTouch() {
-        // WHEN user starts dragging the seek bar
+    fun onProgressChangedFromUserWithoutStartTrackingTouch_transportUpdated() {
+        whenever(mockController.transportControls).thenReturn(mockTransport)
+        viewModel.updateController(mockController)
         val pos = 42
         val bar = SeekBar(context)
+
+        // WHEN we get an onProgressChanged event without an onStartTrackingTouch event
         with(viewModel.seekBarListener) {
             onProgressChanged(bar, pos, true)
         }
         fakeExecutor.runAllReady()
-        // THEN then elapsed time should not be updated
-        assertThat(viewModel.progress.value!!.elapsedTime).isNull()
+
+        // THEN we immediately update the transport
+        verify(mockTransport).seekTo(pos.toLong())
     }
 
     @Test
