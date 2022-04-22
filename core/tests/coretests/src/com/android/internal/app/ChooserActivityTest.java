@@ -623,7 +623,7 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> stableCopy =
                 createResolvedComponentsForTestWithOtherProfile(2, /* userId= */ 10);
         waitForIdle();
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         onView(first(withText(stableCopy.get(1).getResolveInfoAt(0).activityInfo.name)))
                 .perform(click());
@@ -1437,7 +1437,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 3 targets (2 apps, 1 direct)",
                 activity.getAdapter().getCount(), is(3));
@@ -1513,7 +1513,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 3 targets (2 apps, 1 direct)",
                 activity.getAdapter().getCount(), is(3));
@@ -1595,7 +1595,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 3 targets (2 apps, 1 direct)",
                 wrapper.getAdapter().getCount(), is(3));
@@ -1667,7 +1667,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 4 targets (2 apps, 2 direct)",
                 wrapper.getAdapter().getCount(), is(4));
@@ -1754,7 +1754,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat(
                 String.format("Chooser should have %d targets (%d apps, 1 direct, 15 A-Z)",
@@ -1879,12 +1879,13 @@ public class ChooserActivityTest {
             return true;
         };
 
-        mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
+        final IChooserWrapper activity = (IChooserWrapper)
+                mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
         waitForIdle();
         onView(withTextFromRuntimeResource("resolver_work_tab")).perform(click());
         waitForIdle();
         // wait for the share sheet to expand
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         onView(first(allOf(
                 withText(workResolvedComponentInfos.get(0)
@@ -2143,7 +2144,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 3 targets (2 apps, 1 direct)",
                 activity.getAdapter().getCount(), is(3));
