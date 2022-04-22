@@ -172,7 +172,7 @@ public class PhonePipMenuController implements PipMenuController {
         detachPipMenuView();
     }
 
-    private void attachPipMenuView() {
+    void attachPipMenuView() {
         // In case detach was not called (e.g. PIP unexpectedly closed)
         if (mPipMenuView != null) {
             detachPipMenuView();

@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"மீட்டமை"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"அகற்று"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"கெஸ்ட்டை மீட்டமைக்கிறது…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"கெஸ்ட் அமர்வை ரீசெட் செய்யவா?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"புதிய கெஸ்ட் அமர்வு தொடங்கப்படும், மேலும் தற்போதைய கெஸ்ட் அமர்வின் ஆப்ஸ் மற்றும் தரவு அனைத்தும் நீக்கப்படும்"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"கெஸ்ட் முறையிலிருந்து வெளியேறவா?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"தற்போதைய கெஸ்ட் அமர்வின் ஆப்ஸ் மற்றும் தரவு அனைத்தும் நீக்கப்படும்"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"வெளியேறு"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"கெஸ்ட் செயல்பாடுகளைச் சேமிக்கவா?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"தற்போதைய அமர்வின் செயல்பாடுகளைச் சேமிக்கலாம் அல்லது ஆப்ஸையும் தரவையும் நீக்கலாம்"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"நீக்கு"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"சேமி"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"கெஸ்ட் பயன்முறையிலிருந்து வெளியேறு"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"கெஸ்ட் அமர்வை ரீசெட் செய்"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"கெஸ்ட் பயன்முறையிலிருந்து வெளியேறு"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"வெளியேறியவுடன் அனைத்துச் செயல்பாடுகளும் நீக்கப்படும்"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"வெளியேறும்போது செயல்பாடுகளைச் சேமிக்கலாம் அல்லது நீக்கலாம்"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"அமர்வின் செயல்பாடுகளை இப்போதே நீக்க ரீசெட் செய்யவும் அல்லது வெளியேறும்போது செயல்பாடுகளைச் சேமிக்கலாம் அல்லது நீக்கலாம்"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"படமெடுங்கள்"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"படத்தைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"படத்தைத் தேர்ந்தெடுங்கள்"</string>

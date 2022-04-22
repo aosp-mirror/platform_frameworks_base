@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Шинэчлэх"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Хасах"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Зочныг шинэчилж байна…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Зочны харилцан үйлдлийг шинэчлэх үү?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Энэ нь шинэ зочны харилцан үйлдэл эхлүүлж, одоогийн харилцан үйлдлээс бүх апп болон өгөгдлийг устгана"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Зочны горимоос гарах уу?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Энэ нь одоогийн зочны харилцан үйлдлээс аппууд болон өгөгдлийг устгана"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Гарах"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Зочны үйл ажиллагааг хадгалах уу?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Та одоогийн харилцан үйлдлээс үйл ажиллагаа хадгалах эсвэл бүх апп, өгөгдлийг устгаж болно"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Устгах"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Хадгалах"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Зочны горимоос гарах"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Зочны харилцан үйлдлийг шинэчлэх"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Зочны горимоос гарах"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Бүх үйл ажиллагааг гарах үед устгана"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Та гарахдаа үйл ажиллагаагаа хадгалах эсвэл устгах боломжтой"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Харилцан үйлдлийн үйл ажиллагааг одоо устгахын тулд шинэчлэх эсвэл та гарахдаа үйл ажиллагааг хадгалах, устгах боломжтой"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зураг авах"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Зураг сонгох"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Зураг сонгох"</string>

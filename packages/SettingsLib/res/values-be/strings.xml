@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Скінуць"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Выдаліць"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Ідзе скід гасцявога сеанса…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Скінуць гасцявы сеанс?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Будзе запушчаны новы гасцявы сеанс. Усе праграмы і даныя бягучага сеанса будуць выдалены"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Выйсці з гасцявога рэжыму?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Будуць выдалены праграмы і даныя бягучага гасцявога сеанса"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Выйсці"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Захаваць дзеянні госця?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Можна захаваць даныя пра дзеянні ў бягучым сеансе ці выдаліць праграмы і даныя"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Выдаліць"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Захаваць"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Выйсці з гасцявога рэжыму"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Скінуць гасцявы сеанс"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Выйсці з гасцявога рэжыму"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Падчас выхаду будуць выдалены ўсе звесткі пра дзеянні"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Падчас выхаду можна захаваць ці выдаліць звесткі пра дзеянні"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Скіньце налады, каб выдаліць звесткі пра дзеянні падчас сеанса. Таксама можна захаваць ці выдаліць гэтыя звесткі ў час выхаду"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зрабіць фота"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбраць відарыс"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Выбраць фота"</string>

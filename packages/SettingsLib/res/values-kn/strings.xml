@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ರೀಸೆಟ್ ಮಾಡಿ"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ತೆಗೆದುಹಾಕಿ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ಅತಿಥಿ ಬಳಕೆದಾರರ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ರೀಸೆಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ಅತಿಥಿ ಸೆಷನ್ ಅನ್ನು ರೀಸೆಟ್ ಮಾಡಬೇಕೇ?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ಈ ಪ್ರಕ್ರಿಯೆಯು ಹೊಸ ಅತಿಥಿ ಸೆಶನ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸುತ್ತದೆ ಮತ್ತು ಪ್ರಸ್ತುತ ಸೆಶನ್‌ನಿಂದ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಹಾಗೂ ಡೇಟಾವನ್ನು ಅಳಿಸುತ್ತದೆ"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ಅತಿಥಿ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಬೇಕೆ?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ಈ ಪ್ರಕ್ರಿಯೆಯು ಪ್ರಸ್ತುತ ಅತಿಥಿ ಸೆಷನ್‌ನಿಂದ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸುತ್ತದೆ"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ನಿರ್ಗಮಿಸಿ"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ಅತಿಥಿ ಚಟುವಟಿಕೆಯನ್ನು ಉಳಿಸಬೇಕೆ?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ನೀವು ಪ್ರಸ್ತುತ ಸೆಶನ್‌ನ ಚಟುವಟಿಕೆಯನ್ನು ಉಳಿಸಬಹುದು ಅಥವಾ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಬಹುದು"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ಅಳಿಸಿ"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ಉಳಿಸಿ"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"ಅತಿಥಿ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"ಅತಿಥಿ ಸೆಷನ್ ಅನ್ನು ರೀಸೆಟ್ ಮಾಡಿ"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ಅತಿಥಿ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ನಿರ್ಗಮಿಸುವಾಗ ಎಲ್ಲಾ ಚಟುವಟಿಕೆಯನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ನಿರ್ಗಮಿಸುವಾಗ ನಿಮ್ಮ ಚಟುವಟಿಕೆಯನ್ನು ನೀವು ಉಳಿಸಬಹುದು ಅಥವಾ ಅಳಿಸಬಹುದು"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"ಸೆಶನ್ ಚಟುವಟಿಕೆಯನ್ನು ಈಗ ಅಳಿಸಲು ರೀಸೆಟ್ ಮಾಡಿ ಅಥವಾ ನಿರ್ಗಮಿಸುವಾಗ ನೀವು ಚಟುವಟಿಕೆಯನ್ನು ಉಳಿಸಬಹುದು ಅಥವಾ ಅಳಿಸಬಹುದು"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ಫೋಟೋ ತೆಗೆದುಕೊಳ್ಳಿ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ಚಿತ್ರವನ್ನು ಆರಿಸಿ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ಫೋಟೋ ಆಯ್ಕೆಮಾಡಿ"</string>

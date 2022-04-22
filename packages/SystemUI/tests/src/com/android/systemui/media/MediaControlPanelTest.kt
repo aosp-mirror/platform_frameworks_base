@@ -25,7 +25,6 @@ import org.mockito.Mockito.`when` as whenever
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.GradientDrawable
@@ -35,7 +34,6 @@ import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
-import android.os.Handler
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -111,6 +109,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var broadcastSender: BroadcastSender
 
+    @Mock private lateinit var gutsViewHolder: GutsViewHolder
     @Mock private lateinit var viewHolder: MediaViewHolder
     @Mock private lateinit var view: TransitionLayout
     @Mock private lateinit var seekBarViewModel: SeekBarViewModel
@@ -145,8 +144,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var scrubbingElapsedTimeView: TextView
     private lateinit var scrubbingTotalTimeView: TextView
     private lateinit var actionsTopBarrier: Barrier
-    @Mock private lateinit var longPressText: TextView
-    @Mock private lateinit var handler: Handler
+    @Mock private lateinit var gutsText: TextView
     @Mock private lateinit var mockAnimator: AnimatorSet
     private lateinit var settings: ImageButton
     private lateinit var cancel: View
@@ -228,6 +226,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 }
             }
 
+        initGutsViewHolderMocks()
         initMediaViewHolderMocks()
 
         // Create media session
@@ -272,6 +271,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
         )
     }
 
+    private fun initGutsViewHolderMocks() {
+        settings = ImageButton(context)
+        cancel = View(context)
+        cancelText = TextView(context)
+        dismiss = FrameLayout(context)
+        dismissText = TextView(context)
+        whenever(gutsViewHolder.gutsText).thenReturn(gutsText)
+        whenever(gutsViewHolder.settings).thenReturn(settings)
+        whenever(gutsViewHolder.cancel).thenReturn(cancel)
+        whenever(gutsViewHolder.cancelText).thenReturn(cancelText)
+        whenever(gutsViewHolder.dismiss).thenReturn(dismiss)
+        whenever(gutsViewHolder.dismissText).thenReturn(dismissText)
+    }
+
     /**
      * Initialize elements in media view holder
      */
@@ -292,11 +305,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         seamlessIcon = ImageView(context)
         seamlessText = TextView(context)
         seekBar = SeekBar(context).also { it.id = R.id.media_progress_bar }
-        settings = ImageButton(context)
-        cancel = View(context)
-        cancelText = TextView(context)
-        dismiss = FrameLayout(context)
-        dismissText = TextView(context)
 
         action0 = ImageButton(context).also { it.setId(R.id.action0) }
         action1 = ImageButton(context).also { it.setId(R.id.action1) }
@@ -341,6 +349,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.scrubbingElapsedTimeView).thenReturn(scrubbingElapsedTimeView)
         whenever(viewHolder.scrubbingTotalTimeView).thenReturn(scrubbingTotalTimeView)
 
+        whenever(viewHolder.gutsViewHolder).thenReturn(gutsViewHolder)
+
         // Transition View
         whenever(view.parent).thenReturn(transitionParent)
         whenever(view.rootView).thenReturn(transitionParent)
@@ -362,15 +372,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.getAction(R.id.action3)).thenReturn(action3)
         whenever(viewHolder.action4).thenReturn(action4)
         whenever(viewHolder.getAction(R.id.action4)).thenReturn(action4)
-
-        // Long press menu
-        whenever(viewHolder.longPressText).thenReturn(longPressText)
-        whenever(longPressText.handler).thenReturn(handler)
-        whenever(viewHolder.settings).thenReturn(settings)
-        whenever(viewHolder.cancel).thenReturn(cancel)
-        whenever(viewHolder.cancelText).thenReturn(cancelText)
-        whenever(viewHolder.dismiss).thenReturn(dismiss)
-        whenever(viewHolder.dismissText).thenReturn(dismissText)
 
         whenever(viewHolder.actionsTopBarrier).thenReturn(actionsTopBarrier)
     }
@@ -404,10 +405,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
             listOf(recSubtitle1, recSubtitle2, recSubtitle3)
         )
 
-        // Long press menu
-        whenever(recommendationViewHolder.settings).thenReturn(settings)
-        whenever(recommendationViewHolder.cancel).thenReturn(cancel)
-        whenever(recommendationViewHolder.dismiss).thenReturn(dismiss)
+        whenever(recommendationViewHolder.gutsViewHolder).thenReturn(gutsViewHolder)
 
         val actionIcon = Icon.createWithResource(context, R.drawable.ic_android)
         whenever(smartspaceAction.icon).thenReturn(actionIcon)
@@ -968,8 +966,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(seamless.isEnabled()).isFalse()
     }
 
+    /* ***** Guts tests for the player ***** */
+
     @Test
-    fun longClick_gutsClosed() {
+    fun player_longClickWhenGutsClosed_gutsOpens() {
         player.attachPlayer(viewHolder)
         player.bindPlayer(mediaData, KEY)
         whenever(mediaViewController.isGutsVisible).thenReturn(false)
@@ -983,7 +983,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun longClick_gutsOpen() {
+    fun player_longClickWhenGutsOpen_gutsCloses() {
         player.attachPlayer(viewHolder)
         whenever(mediaViewController.isGutsVisible).thenReturn(true)
 
@@ -996,8 +996,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun cancelButtonClick_animation() {
+    fun player_cancelButtonClick_animation() {
         player.attachPlayer(viewHolder)
+        player.bindPlayer(mediaData, KEY)
 
         cancel.callOnClick()
 
@@ -1005,7 +1006,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun settingsButtonClick() {
+    fun player_settingsButtonClick() {
         player.attachPlayer(viewHolder)
         player.bindPlayer(mediaData, KEY)
 
@@ -1019,7 +1020,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun dismissButtonClick() {
+    fun player_dismissButtonClick() {
         val mediaKey = "key for dismissal"
         player.attachPlayer(viewHolder)
         val state = mediaData.copy(notificationKey = KEY)
@@ -1032,7 +1033,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun dismissButtonDisabled() {
+    fun player_dismissButtonDisabled() {
         val mediaKey = "key for dismissal"
         player.attachPlayer(viewHolder)
         val state = mediaData.copy(isClearable = false, notificationKey = KEY)
@@ -1042,7 +1043,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun dismissButtonClick_notInManager() {
+    fun player_dismissButtonClick_notInManager() {
         val mediaKey = "key for dismissal"
         whenever(mediaDataManager.dismissMediaData(eq(mediaKey), anyLong())).thenReturn(false)
 
@@ -1056,6 +1057,76 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong())
         verify(mediaCarouselController).removePlayer(eq(mediaKey), eq(false), eq(false))
     }
+
+    /* ***** END guts tests for the player ***** */
+
+    /* ***** Guts tests for the recommendations ***** */
+
+    @Test
+    fun recommendations_longClickWhenGutsClosed_gutsOpens() {
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+
+        captor.value.onLongClick(viewHolder.player)
+        verify(mediaViewController).openGuts()
+        verify(logger).logLongPressOpen(anyInt(), eq(PACKAGE), eq(instanceId))
+    }
+
+    @Test
+    fun recommendations_longClickWhenGutsOpen_gutsCloses() {
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+
+        captor.value.onLongClick(viewHolder.player)
+        verify(mediaViewController, never()).openGuts()
+        verify(mediaViewController).closeGuts(false)
+    }
+
+    @Test
+    fun recommendations_cancelButtonClick_animation() {
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+
+        cancel.callOnClick()
+
+        verify(mediaViewController).closeGuts(false)
+    }
+
+    @Test
+    fun recommendations_settingsButtonClick() {
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+
+        settings.callOnClick()
+        verify(logger).logLongPressSettings(anyInt(), eq(PACKAGE), eq(instanceId))
+
+        val captor = ArgumentCaptor.forClass(Intent::class.java)
+        verify(activityStarter).startActivity(captor.capture(), eq(true))
+
+        assertThat(captor.value.action).isEqualTo(ACTION_MEDIA_CONTROLS_SETTINGS)
+    }
+
+    @Test
+    fun recommendations_dismissButtonClick() {
+        val mediaKey = "key for dismissal"
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData.copy(targetId = mediaKey))
+
+        assertThat(dismiss.isEnabled).isEqualTo(true)
+        dismiss.callOnClick()
+        verify(logger).logLongPressDismiss(anyInt(), eq(PACKAGE), eq(instanceId))
+        verify(mediaDataManager).dismissSmartspaceRecommendation(eq(mediaKey), anyLong())
+    }
+
+    /* ***** END guts tests for the recommendations ***** */
 
     @Test
     fun actionPlayPauseClick_isLogged() {

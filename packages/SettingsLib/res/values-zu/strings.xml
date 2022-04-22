@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Setha kabusha"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Susa"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Ukusetha kabusha isimenywa…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Sesha kabusha isikhathi sesihambeli?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Lokhu kuzoqala isikhathi sesihambeli esisha futhi kusule wonke ama-app nedatha kusuka esikhathini samanje"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Phuma kumodi yesihambeli?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Lokhu kuzosula ama-app nedatha kusuka esikhathini sesihambeli samanje"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Phuma"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Londoloza umsebenzi wesihambeli?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ungalondoloza umsebenzi kusuka esikhathini samanje noma usule wonke ama-app nedatha"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Sula"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Londoloza"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Phuma kumodi yesivakashi"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Setha kabusha isikhathi sesihambeli"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Phuma kusivakashi"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Wonke umsebenzi uzosulwa lapho uphuma"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Ungalondoloza noma usule umsebenzi wakho lapho uphuma"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Setha kabusha ukuze usule umsebenzi wesikhathi manje, noma ungalondoloza noma usule umsebenzi lapho uphuma"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Thatha isithombe"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Khetha isithombe"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Khetha isithombe"</string>

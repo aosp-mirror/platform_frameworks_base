@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Endurstilla"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Fjarlægja"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Endurstillir gest…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Endurstilla gestalotu?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Þetta opnar nýja gestalotu og eyðir öllum forritum og gögnum úr núverandi lotu"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Loka gestastillingu?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Þetta eyðir forritum og gögnum úr núverandi gestalotu"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Hætta"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vista aðgerðir úr gestalotu?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Þú getur vistað aðgerðir úr núverandi lotu eða eytt öllum forritum og gögnum"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Eyða"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Vista"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Loka gestastillingu"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Endurstilla gestalotu"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Loka gestastillingu"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Öllum aðgerðum verður eytt þegar lotu er lokað"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Þú getur vistað eða eytt aðgerðum þegar þú lokar"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Endurstilltu til að eyða aðgerðum lotu núna, eða þú getur vistað eða eytt aðgerðum þegar þú lokar"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Taka mynd"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Velja mynd"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Velja mynd"</string>

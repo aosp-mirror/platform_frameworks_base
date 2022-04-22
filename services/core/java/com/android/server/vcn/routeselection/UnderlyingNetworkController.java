@@ -21,7 +21,7 @@ import static android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListen
 import static com.android.server.VcnManagementService.LOCAL_LOG;
 import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.getWifiEntryRssiThreshold;
 import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.getWifiExitRssiThreshold;
-import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.isOpportunistic;
+import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,8 +37,6 @@ import android.net.vcn.VcnUnderlyingNetworkTemplate;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.ParcelUuid;
-import android.os.PersistableBundle;
-import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
@@ -51,7 +49,6 @@ import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.util.LogUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -87,7 +84,7 @@ public class UnderlyingNetworkController {
     @Nullable private UnderlyingNetworkListener mRouteSelectionCallback;
 
     @NonNull private TelephonySubscriptionSnapshot mLastSnapshot;
-    @Nullable private PersistableBundle mCarrierConfig;
+    @Nullable private PersistableBundleWrapper mCarrierConfig;
     private boolean mIsQuitting = false;
 
     @Nullable private UnderlyingNetworkRecord mCurrentRecord;
@@ -124,25 +121,7 @@ public class UnderlyingNetworkController {
                 .getSystemService(TelephonyManager.class)
                 .registerTelephonyCallback(new HandlerExecutor(mHandler), mActiveDataSubIdListener);
 
-        // TODO: Listen for changes in carrier config that affect this.
-        for (int subId : mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup)) {
-            PersistableBundle config =
-                    mVcnContext
-                            .getContext()
-                            .getSystemService(CarrierConfigManager.class)
-                            .getConfigForSubId(subId);
-
-            if (config != null) {
-                mCarrierConfig = config;
-
-                // Attempt to use (any) non-opportunistic subscription. If this subscription is
-                // opportunistic, continue and try to find a non-opportunistic subscription, using
-                // the opportunistic ones as a last resort.
-                if (!isOpportunistic(mLastSnapshot, Collections.singleton(subId))) {
-                    break;
-                }
-            }
-        }
+        mCarrierConfig = mLastSnapshot.getCarrierConfigForSubGrp(mSubscriptionGroup);
 
         registerOrUpdateNetworkRequests();
     }
@@ -333,6 +312,9 @@ public class UnderlyingNetworkController {
 
         final TelephonySubscriptionSnapshot oldSnapshot = mLastSnapshot;
         mLastSnapshot = newSnapshot;
+
+        // Update carrier config
+        mCarrierConfig = mLastSnapshot.getCarrierConfigForSubGrp(mSubscriptionGroup);
 
         // Only trigger re-registration if subIds in this group have changed
         if (oldSnapshot

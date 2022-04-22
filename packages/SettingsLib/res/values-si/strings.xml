@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"යළි සකසන්න"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ඉවත් කරන්න"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"අමුත්තා යළි සකසමින්…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ආගන්තුක සැසිය යළි සකසන්නද?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"මෙය නව ආගන්තුක සැසියක් ආරම්භ කර වත්මන් සැසියෙන් සියලු යෙදුම් සහ දත්ත මකනු ඇත"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ආගන්තුක ප්‍රකාරයෙන් පිටවන්නද?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"මෙය වත්මන් ආගන්තුක සැසියෙන් යෙදුම් සහ දත්ත මකනු ඇත"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"පිටවන්න"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ආගන්තුක ක්‍රියාකාරකම් සුරකින්නද?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ඔබට වත්මන් සැසියෙන් ක්‍රියාකාරකම් සුරැකීමට හෝ සියලු යෙදුම් සහ දත්ත මැකීමට හැකිය"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"මකන්න"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"සුරකින්න"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"ආගන්තුක ප්‍රකාරයෙන් පිටවන්න"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"ආගන්තුක සැසිය යළි සකසන්න"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"අමුත්තා පිටවීම"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"පිටවීමේදී සියලු ක්‍රියාකාරකම් මකනු ඇත"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ඔබට පිටවීමේදී ඔබගේ ක්‍රියාකාරකම් සුරැකීමට හෝ මැකීමට හැකිය"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"දැන් සැසි ක්‍රියාකාරකම් මැකීමට යළි සකසන්න, නැතහොත් ඔබට පිටවීමේදී ක්‍රියාකාරකම් සුරැකීමට හෝ මැකීමට හැකිය"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ඡායාරූපයක් ගන්න"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"රූපයක් තෝරන්න"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ඡායාරූපය තෝරන්න"</string>
