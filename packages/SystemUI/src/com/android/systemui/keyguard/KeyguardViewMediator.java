@@ -2604,6 +2604,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
             finishSurfaceBehindRemoteAnimation(cancelled);
             mSurfaceBehindRemoteAnimationRequested = false;
+
+            // The remote animation is over, so we're not going away anymore.
+            mKeyguardStateController.notifyKeyguardGoingAway(false);
         });
 
         mKeyguardUnlockAnimationControllerLazy.get().notifyFinishedKeyguardExitAnimation(
@@ -2622,6 +2625,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             ActivityTaskManager.getService().keyguardGoingAway(
                     WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS
                             | WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER);
+            mKeyguardStateController.notifyKeyguardGoingAway(true);
         } catch (RemoteException e) {
             mSurfaceBehindRemoteAnimationRequested = false;
             e.printStackTrace();
