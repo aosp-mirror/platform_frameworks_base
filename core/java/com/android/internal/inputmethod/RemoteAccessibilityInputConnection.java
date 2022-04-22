@@ -115,14 +115,6 @@ public final class RemoteAccessibilityInputConnection {
     @AnyThread
     public SurroundingText getSurroundingText(
             @IntRange(from = 0) int beforeLength, @IntRange(from = 0) int afterLength, int flags) {
-        if (beforeLength < 0) {
-            throw new IllegalArgumentException("beforeLength cannot be negative but was "
-                + beforeLength);
-        }
-        if (afterLength < 0) {
-            throw new IllegalArgumentException("afterLength cannot be negative but was "
-                    + afterLength);
-        }
         if (mCancellationGroup.isCanceled()) {
             return null;
         }
