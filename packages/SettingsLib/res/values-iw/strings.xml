@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"איפוס"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"הסרה"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"מתבצע איפוס של הגלישה כאורח…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"לאפס את הגלישה כאורח?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"הפעולה הזו תתחיל גלישה חדשה כאורח ותמחק את כל האפליקציות והנתונים מהסשן הנוכחי"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"לצאת ממצב אורח?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"הפעולה הזו תמחק את האפליקציות והנתונים מהגלישה הנוכחית כאורח"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"יציאה"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"לשמור את פעילות האורח?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"אפשר לשמור את הפעילות מהסשן הנוכחי או למחוק את כל האפליקציות והנתונים"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"מחיקה"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"שמירה"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"יציאה ממצב אורח"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"איפוס הגלישה כאורח"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"יציאה ממצב אורח"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"כל הפעילות תימחק ביציאה"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"אפשר לשמור או למחוק את הפעילות שלך ביציאה"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"ניתן לאפס כדי למחוק את הפעילות מהסשן כעת, או לשמור או למחוק את הפעילות ביציאה"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"צילום תמונה"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"לבחירת תמונה"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"בחירת תמונה"</string>

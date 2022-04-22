@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Prebieha odpájanie..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Prebieha pripájanie…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Pripojené k zariadeniu <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Párovanie..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Páruje sa..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Pripojené k zariadeniu <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (bez telefónu)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Pripojené k zariadeniu <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (bez médií)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Pripojené k <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (bez prístupu k správam)"</string>
@@ -403,9 +403,9 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Zobraziť hlásenia kanála upozornení"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Zobrazovať na obrazovke varovné hlásenie, keď aplikácia zverejní upozornenie bez platného kanála"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Vynútiť povolenie aplikácií na externom úložisku"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožňuje zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožniť zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Vynútiť možnosť zmeny veľkosti aktivít"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Veľkosti všetkých aktivít bude možné zmeniť na niekoľko okien (bez ohľadu na hodnoty manifestu)."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Umožniť veľkosť všetkých aktivít na niekoľko okien (bez ohľadu na hodnoty manifestu)"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Povoliť okná s voľným tvarom"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Povoliť podporu pre experimentálne okná s voľným tvarom"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Heslo pre zálohy v počítači"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetovať"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Odstrániť"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Relácia hosťa sa resetuje…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Chcete resetovať reláciu hosťa?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Týmto sa spustí nová relácia hosťa a odstránia sa všetky aplikácie a údaje z aktuálnej relácie"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Chcete skončiť režim pre hostí?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ukončí sa režim pre hostí a odstránia sa aplikácie a údaje z relácie hosťa"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Ukončiť"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Chcete uložiť aktivitu hosťa?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Aktivitu v aktuálnej relácii uložte alebo odstráňte všetky aplikácie a údaje"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Odstrániť"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Uložiť"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Ukončiť režim pre hostí"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Resetovať reláciu hosťa"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Ukončiť režim pre hostí"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Pri ukončení sa všetka aktivita odstráni"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Aktivitu môžete pri ukončení uložiť alebo odstrániť"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetovaním ihneď odstráňte aktivitu relácie alebo ju uložte či odstráňte pri ukončení relácie"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Odfotiť"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Vybrať obrázok"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Vybrať fotku"</string>

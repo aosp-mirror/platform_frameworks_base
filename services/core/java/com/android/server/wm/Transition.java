@@ -420,7 +420,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         for (int i = mTargets.size() - 1; i >= 0; --i) {
             final WindowContainer target = mTargets.get(i);
             if (target.getParent() != null) {
-                final SurfaceControl targetLeash = getLeashSurface(target);
+                final SurfaceControl targetLeash = getLeashSurface(target, null /* t */);
                 final SurfaceControl origParent = getOrigParentSurface(target);
                 // Ensure surfaceControls are re-parented back into the hierarchy.
                 t.reparent(targetLeash, origParent);
@@ -676,7 +676,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
         // Resolve the animating targets from the participants
         mTargets = calculateTargets(mParticipants, mChanges);
-        final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, mChanges);
+        final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, mChanges,
+                transaction);
         if (mOverrideOptions != null) {
             info.setAnimationOptions(mOverrideOptions);
         }
@@ -1234,8 +1235,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
     }
 
-    /** Gets the leash surface for a window container */
-    private static SurfaceControl getLeashSurface(WindowContainer wc) {
+    /**
+     * Gets the leash surface for a window container.
+     * @param t a transaction to create leashes on when necessary (fixed rotation at token-level).
+     *          If t is null, then this will not create any leashes, just use one if it is there --
+     *          this is relevant for building the finishTransaction since it needs to match the
+     *          start state and not erroneously create a leash of its own.
+     */
+    private static SurfaceControl getLeashSurface(WindowContainer wc,
+            @Nullable SurfaceControl.Transaction t) {
         final DisplayContent asDC = wc.asDisplayContent();
         if (asDC != null) {
             // DisplayContent is the "root", so we use the windowing layer instead to avoid
@@ -1247,7 +1255,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             if (asToken != null) {
                 // WindowTokens can have a fixed-rotation applied to them. In the current
                 // implementation this fact is hidden from the player, so we must create a leash.
-                final SurfaceControl leash = asToken.getOrCreateFixedRotationLeash();
+                final SurfaceControl leash = t != null ? asToken.getOrCreateFixedRotationLeash(t)
+                        : asToken.getFixedRotationLeash();
                 if (leash != null) return leash;
             }
         }
@@ -1276,12 +1285,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      * Construct a TransitionInfo object from a set of targets and changes. Also populates the
      * root surface.
      * @param sortedTargets The targets sorted by z-order from top (index 0) to bottom.
+     * @param startT The start transaction - used to set-up new leashes.
      */
     @VisibleForTesting
     @NonNull
     static TransitionInfo calculateTransitionInfo(@TransitionType int type, int flags,
             ArrayList<WindowContainer> sortedTargets,
-            ArrayMap<WindowContainer, ChangeInfo> changes) {
+            ArrayMap<WindowContainer, ChangeInfo> changes,
+            @Nullable SurfaceControl.Transaction startT) {
         final TransitionInfo out = new TransitionInfo(type, flags);
 
         WindowContainer<?> topApp = null;
@@ -1319,10 +1330,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
         final SurfaceControl rootLeash = leashReference.makeAnimationLeash().setName(
                 "Transition Root: " + leashReference.getName()).build();
-        SurfaceControl.Transaction t = ancestor.mWmService.mTransactionFactory.get();
-        t.setLayer(rootLeash, leashReference.getLastLayer());
-        t.apply();
-        t.close();
+        startT.setLayer(rootLeash, leashReference.getLastLayer());
         out.setRootLeash(rootLeash, ancestor.getBounds().left, ancestor.getBounds().top);
 
         // Convert all the resolved ChangeInfos into TransactionInfo.Change objects in order.
@@ -1332,7 +1340,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final ChangeInfo info = changes.get(target);
             final TransitionInfo.Change change = new TransitionInfo.Change(
                     target.mRemoteToken != null ? target.mRemoteToken.toWindowContainerToken()
-                            : null, getLeashSurface(target));
+                            : null, getLeashSurface(target, startT));
             // TODO(shell-transitions): Use leash for non-organized windows.
             if (info.mParent != null) {
                 change.setParent(info.mParent.mRemoteToken.toWindowContainerToken());

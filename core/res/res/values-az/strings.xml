@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Narahat Etməyin\" rejimi dəyişdirildi"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nəyin blok edildiyini yoxlamaq üçün klikləyin."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Bildiriş ayarlarını nəzərdən keçirin"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13-də quraşdırdığınız tətbiqlər bildiriş göndərmək üçün icazənizi tələb edir. Mövcud tətbiqlər üçün bu icazəni dəyişmək üçün toxunun."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Sonra xatırladın"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Qapadın"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
@@ -2103,7 +2104,7 @@
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # fayl}other{{file_name} + # fayl}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Paylaşmaq üçün tövsiyə edilən bir kimsə yoxdur"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Tətbiq siyahısı"</string>
-    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Bu tətbiqə yazmaq icazəsi verilməyib, lakin, bu USB vasitəsilə səs yaza bilər."</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Tətbiqə qeydə almaq icazəsi verilməsə də, bu USB vasitəsilə səsi qeydə ala bilər."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Əsas səhifə"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Geri"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Son Tətbiqlər"</string>

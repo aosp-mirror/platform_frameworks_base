@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"재설정"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"삭제"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"게스트 재설정 중…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"게스트 세션을 재설정하시겠습니까?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"이렇게 하면 새로운 게스트 세션이 시작되고 기존 세션의 모든 앱과 데이터가 삭제됩니다."</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"게스트 모드를 종료하시겠습니까?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"기존 게스트 세션의 앱과 데이터가 삭제됩니다."</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"종료"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"게스트 활동을 저장하시겠습니까?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"기존 세션의 활동을 저장하거나 모든 앱과 데이터를 삭제할 수 있습니다."</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"삭제"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"저장"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"게스트 모드 종료"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"게스트 세션 재설정"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"게스트 종료"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"종료하면 모든 활동이 삭제됩니다."</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"종료 시 활동을 저장하거나 삭제할 수 있습니다."</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"지금 재설정하여 활동 세션을 삭제하거나 종료 시 활동을 저장 또는 삭제할 수 있습니다."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"사진 찍기"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"이미지 선택"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"사진 선택"</string>

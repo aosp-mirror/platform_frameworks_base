@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Redefinir"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Remover"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Redefinindo visitante…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Redefinir Sessão de visitante?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Essa ação vai iniciar uma nova Sessão de visitante e excluir todos os apps e dados da sessão atual"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sair do modo visitante?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Essa ação vai excluir apps e dados da Sessão de visitante atual"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Sair"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Salvar a atividade do visitante?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Você pode salvar a atividade da sessão atual ou excluir todos os apps e dados"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Excluir"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Salvar"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Sair do modo visitante"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Redefinir Sessão de visitante"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Sair do modo visitante"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Todas as atividades serão excluídas ao sair"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Você pode salvar ou excluir sua atividade ao sair"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Faça uma redefinição para excluir a atividade da sessão agora. Você também pode salvar ou excluir a atividade ao sair"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Tirar uma foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Escolher uma imagem"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selecionar foto"</string>

@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Memutus sambungan..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Menghubungkan…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Terhubung<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Menyandingkan..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Menyambungkan..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Terhubung (tanpa ponsel)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Terhubung (tanpa media)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Terhubung (tanpa akses pesan)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -150,8 +150,8 @@
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SAMBUNGKAN"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Batal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Penyandingan memberi akses ke kontak dan histori panggilan saat terhubung"</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Tidak dapat menyambungkan ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Tidak dapat menyambungkan ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g> karena PIN atau kode sandi salah."</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Tidak dapat menyambungkan dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Tidak dapat menyambungkan dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> karena PIN atau kode sandi salah."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Tidak dapat berkomunikasi dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Penyandingan ditolak oleh <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Komputer"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Reset"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Hapus"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Mereset tamu …"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Reset sesi tamu?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tindakan ini akan memulai sesi tamu baru dan menghapus semua aplikasi serta data dari sesi saat ini"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Keluar dari mode tamu?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tindakan ini akan menghapus aplikasi dan data dari sesi tamu saat ini"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Keluar"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Simpan aktivitas tamu?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Anda bisa menyimpan aktivitas sesi saat ini atau menghapus semua aplikasi &amp; data"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Hapus"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Simpan"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Keluar dari mode tamu"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Reset sesi tamu"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Keluar dari mode tamu"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Semua aktivitas akan dihapus saat Anda keluar"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Anda dapat menyimpan atau menghapus aktivitas saat keluar"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reset untuk menghapus aktivitas sesi sekarang, atau Anda dapat menyimpan atau menghapus aktivitas saat keluar"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Ambil foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Pilih gambar"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Pilih foto"</string>

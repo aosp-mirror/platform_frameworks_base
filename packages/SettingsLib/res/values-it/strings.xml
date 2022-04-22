@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profilo con limitazioni"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Aggiungere un nuovo utente?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. I servizi e le impostazioni di accessibilità non potranno essere trasferiti al nuovo utente."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve impostare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurare l\'utente ora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assicurati che la persona sia disponibile a prendere il dispositivo e configurare il suo spazio"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurare il profilo ora?"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Reimposta"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Rimuovi"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Reimpostazione sessione Ospite in corso…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vuoi reimpostare la sessione Ospite?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Verrà avviata una nuova sessione Ospite e verranno eliminati tutti i dati e le app della sessione corrente"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vuoi uscire da modalità Ospite?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Verranno eliminati i dati e le app della sessione Ospite corrente"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Esci"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vuoi salvare l\'attività Ospite?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puoi salvare l\'attività della sessione corrente o eliminare tutti i dati e app"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Elimina"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Salva"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Esci dalla modalità Ospite"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Reimposta sessione Ospite"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Esci dalla modalità Ospite"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Quando esci verrà eliminata tutta l\'attività"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Quando esci puoi salvare o eliminare la tua attività"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reimposta per eliminare subito l\'attività della sessione oppure puoi salvare o eliminare l\'attività quando esci"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Scatta una foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Scegli un\'immagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleziona la foto"</string>

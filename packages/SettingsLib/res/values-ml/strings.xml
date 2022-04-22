@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"നിയന്ത്രിത പ്രൊഫൈൽ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"പുതിയ ഉപയോക്താവിനെ ചേർക്കണോ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"കൂടുതൽ ഉപയോക്താക്കളെ സൃഷ്‌ടിച്ചുകൊണ്ട് ഈ ഉപകരണം മറ്റുള്ളവരുമായി നിങ്ങൾക്ക് പങ്കിടാം. ആപ്പുകളും വാൾപേപ്പറുകളും മറ്റും ഉപയോഗിച്ച് ഇഷ്‌ടാനുസൃതമാക്കാൻ ഓരോ ഉപയോക്താവിനും സാധിക്കും. വൈഫൈ പോലെ എല്ലാവരെയും ബാധിക്കുന്ന ഉപകരണ ക്രമീകരണവും ഉപയോക്താക്കൾക്ക് ക്രമീകരിക്കാം.\n\nനിങ്ങളൊരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിക്ക് സ്വന്തമായ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\n എല്ലാ ഉപയോക്താക്കൾക്കുമായി ആപ്പുകൾ അപ്‌ഡേറ്റ് ചെയ്യാൻ ഏതൊരു ഉപയോക്താവിനുമാവും. ഉപയോഗസഹായി ക്രമീകരണവും സേവനങ്ങളും പുതിയ ഉപയോക്താവിന് കൈമാറുകയില്ല."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിയ്‌ക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും അപ്ലിക്കേഷനുകൾ അപ്‌ഡേറ്റുചെയ്യാനാവും."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിയ്‌ക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും ആപ്പുകൾ അപ്‌ഡേറ്റ് ചെയ്യാനാവും."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ഉപയോക്താവിനെ ഇപ്പോൾ സജ്ജീകരിക്കണോ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ഉപകരണം എടുത്ത് ഇടം സജ്ജീകരിക്കുന്നതിന് വ്യക്തി ലഭ്യമാണെന്ന് ഉറപ്പാക്കുക"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ഇപ്പോൾ പ്രൊഫൈൽ സജ്ജീകരിക്കണോ?"</string>
@@ -598,6 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"റീസെറ്റ് ചെയ്യുക"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"നീക്കം ചെയ്യുക"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"അതിഥിയെ റീസെറ്റ് ചെയ്യുന്നു…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"അതിഥി സെഷൻ റീസെറ്റ് ചെയ്യണോ?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ഇത് പുതിയൊരു അതിഥി സെഷൻ ആരംഭിക്കുകയും നിലവിലെ സെഷനിൽ നിന്ന് എല്ലാ ആപ്പുകളും ഡാറ്റയും ഇല്ലാതാക്കുകയും ചെയ്യും"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"അതിഥി മോഡിൽ നിന്ന് പുറത്തുകടക്കണോ?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"നിലവിലെ അതിഥി സെഷനിൽ നിന്ന് ആപ്പുകളും ഡാറ്റയും ഇത് ഇല്ലാതാക്കും"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"പുറത്തുകടക്കുക"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"അതിഥി ആക്‌റ്റിവിറ്റി സംരക്ഷിക്കണോ?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"നിലവിലെ സെഷനിൽ നിന്നുള്ള ആക്‌റ്റിവിറ്റി സംരക്ഷിക്കാം അല്ലെങ്കിൽ എല്ലാ ആപ്പുകളും ഡാറ്റയും ഇല്ലാതാക്കാം"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ഇല്ലാതാക്കുക"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"സംരക്ഷിക്കുക"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"അതിഥി മോഡിൽ നിന്ന് പുറത്തുകടക്കുക"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"അതിഥി സെഷൻ റീസെറ്റ് ചെയ്യുക"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"അതിഥി മോഡിൽ നിന്ന് പുറത്തുകടക്കുക"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"പുറത്തുകടക്കുമ്പോൾ എല്ലാ ആക്‌റ്റിവിറ്റിയും ഇല്ലാതാക്കും"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"പുറത്തുകടക്കുമ്പോൾ ആക്‌റ്റിവിറ്റി സംരക്ഷിക്കുകയോ ഇല്ലാതാക്കുകയോ ചെയ്യാം"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"സെഷൻ ആക്‌റ്റിവിറ്റി ഇപ്പോൾ ഇല്ലാതാക്കാൻ റീസെറ്റ് ചെയ്യുക അല്ലെങ്കിൽ പുറത്തുകടക്കുമ്പോൾ ആക്‌റ്റിവിറ്റി സംരക്ഷിക്കുകയോ ഇല്ലാതാക്കുകയോ ചെയ്യാം"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ഒരു ഫോട്ടോ എടുക്കുക"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ഒരു ചിത്രം തിരഞ്ഞെടുക്കുക"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ഫോട്ടോ തിരഞ്ഞെടുക്കുക"</string>

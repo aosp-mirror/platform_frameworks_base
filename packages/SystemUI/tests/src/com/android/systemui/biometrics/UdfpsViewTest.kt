@@ -23,6 +23,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.LayoutInflater
+import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -69,9 +70,8 @@ class UdfpsViewTest : SysuiTestCase() {
             com.android.internal.R.integer.config_udfps_illumination_transition_ms, 0)
         view = LayoutInflater.from(context).inflate(R.layout.udfps_view, null) as UdfpsView
         view.animationViewController = animationViewController
-        view.sensorProperties =
-            SensorLocationInternal(DISPLAY_ID, SENSOR_X, SENSOR_Y, SENSOR_RADIUS)
-                .asFingerprintSensorProperties()
+        val sensorBounds = SensorLocationInternal("", SENSOR_X, SENSOR_Y, SENSOR_RADIUS).rect
+        view.overlayParams = UdfpsOverlayParams(sensorBounds, 1920, 1080, 1f, Surface.ROTATION_0)
         view.setHbmProvider(hbmProvider)
         ViewUtils.attachView(view)
     }

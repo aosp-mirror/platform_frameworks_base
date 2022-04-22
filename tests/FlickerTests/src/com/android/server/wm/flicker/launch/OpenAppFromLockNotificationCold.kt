@@ -74,6 +74,17 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter)
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 203538234)
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 203538234)
+    @Test
+    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
+
     companion object {
         /**
          * Creates the test configurations.

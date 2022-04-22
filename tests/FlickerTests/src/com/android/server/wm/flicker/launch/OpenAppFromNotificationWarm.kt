@@ -20,6 +20,7 @@ import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.WindowInsets
 import android.view.WindowManager
+import androidx.test.filters.FlakyTest
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.launcher3.tapl.LauncherInstrumentation
@@ -29,8 +30,10 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.NotificationAppHelper
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -160,6 +163,21 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter)
         testSpec.assertLayersEnd {
             this.isVisible(testApp.component)
         }
+    }
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowBecomesTopWindow() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        super.appWindowBecomesTopWindow()
+    }
+
+    @FlakyTest(bugId = 229738092)
+    @Test
+    fun appWindowBecomesTopWindow_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        super.appWindowBecomesTopWindow()
     }
 
     companion object {
