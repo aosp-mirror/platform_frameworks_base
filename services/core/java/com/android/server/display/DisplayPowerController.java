@@ -861,7 +861,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     }
                 });
         mBrightnessThrottler.resetThrottlingData(
-                mDisplayDeviceConfig.getBrightnessThrottlingData());
+                mDisplayDeviceConfig.getBrightnessThrottlingData(), mUniqueDisplayId);
     }
 
     private void sendUpdatePowerState() {
@@ -1816,7 +1816,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 () -> {
                     sendUpdatePowerStateLocked();
                     postBrightnessChangeRunnable();
-                });
+                }, mUniqueDisplayId);
     }
 
     private void blockScreenOn() {
