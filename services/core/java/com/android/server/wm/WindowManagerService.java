@@ -1998,15 +1998,15 @@ public class WindowManagerService extends IWindowManager.Stub
      * the device policy cache.
      */
     @Override
-    public void refreshScreenCaptureDisabled(int userId) {
+    public void refreshScreenCaptureDisabled() {
         int callingUid = Binder.getCallingUid();
         if (callingUid != SYSTEM_UID) {
             throw new SecurityException("Only system can call refreshScreenCaptureDisabled.");
         }
 
         synchronized (mGlobalLock) {
-            // Update secure surface for all windows belonging to this user.
-            mRoot.setSecureSurfaceState(userId);
+            // Refresh secure surface for all windows.
+            mRoot.refreshSecureSurfaceState();
         }
     }
 
