@@ -360,6 +360,8 @@ public final class Settings implements Watchable, Snappable {
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_FIRST_INSTALL_TIME = "first-install-time";
 
+    private final Handler mHandler;
+
     private final PackageManagerTracedLock mLock;
 
     @Watched(manual = true)
@@ -583,6 +585,8 @@ public final class Settings implements Watchable, Snappable {
                                          "Settings.mInstallerPackages");
         mKeySetManagerService = new KeySetManagerService(mPackages);
 
+        // Test-only handler working on background thread.
+        mHandler = new Handler(BackgroundThread.getHandler().getLooper());
         mLock = new PackageManagerTracedLock();
         mPackages.putAll(pkgSettings);
         mAppIds = new AppIdSettingMap();
@@ -607,6 +611,7 @@ public final class Settings implements Watchable, Snappable {
     Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,
             LegacyPermissionDataProvider permissionDataProvider,
             @NonNull DomainVerificationManagerInternal domainVerificationManager,
+            @NonNull Handler handler,
             @NonNull PackageManagerTracedLock lock)  {
         mPackages = new WatchedArrayMap<>();
         mPackagesSnapshot  =
@@ -620,6 +625,7 @@ public final class Settings implements Watchable, Snappable {
                                          "Settings.mInstallerPackages");
         mKeySetManagerService = new KeySetManagerService(mPackages);
 
+        mHandler = handler;
         mLock = lock;
         mAppIds = new AppIdSettingMap();
         mPermissions = new LegacyPermissionSettings(lock);
@@ -627,10 +633,8 @@ public final class Settings implements Watchable, Snappable {
                 runtimePermissionsPersistence, new Consumer<Integer>() {
             @Override
             public void accept(Integer userId) {
-                synchronized (mLock) {
-                    mRuntimePermissionsPersistence.writeStateForUserSync(userId,
-                            mPermissionDataProvider, mPackages, mSharedUsers);
-                }
+                mRuntimePermissionsPersistence.writeStateForUser(userId,
+                        mPermissionDataProvider, mPackages, mSharedUsers, mHandler, mLock);
             }
         });
         mPermissionDataProvider = permissionDataProvider;
@@ -679,6 +683,7 @@ public final class Settings implements Watchable, Snappable {
         // needed by the read-only methods.  Note especially that the lock
         // is not required because this clone is meant to support lock-free
         // read-only methods.
+        mHandler = null;
         mLock = null;
         mRuntimePermissionsPersistence = r.mRuntimePermissionsPersistence;
         mSettingsFilename = null;
@@ -5286,8 +5291,8 @@ public final class Settings implements Watchable, Snappable {
 
     public void writePermissionStateForUserLPr(int userId, boolean sync) {
         if (sync) {
-            mRuntimePermissionsPersistence.writeStateForUserSync(userId, mPermissionDataProvider,
-                    mPackages, mSharedUsers);
+            mRuntimePermissionsPersistence.writeStateForUser(userId, mPermissionDataProvider,
+                    mPackages, mSharedUsers, /*handler=*/null, mLock);
         } else {
             mRuntimePermissionsPersistence.writeStateForUserAsync(userId);
         }
@@ -5373,9 +5378,14 @@ public final class Settings implements Watchable, Snappable {
 
         private String mExtendedFingerprint;
 
+        @GuardedBy("mPersistenceLock")
         private final RuntimePermissionsPersistence mPersistence;
+        private final Object mPersistenceLock = new Object();
 
-        private final Handler mHandler = new MyHandler();
+        // Low-priority handlers running on SystemBg thread.
+        private final Handler mAsyncHandler = new MyHandler();
+        private final Handler mPersistenceHandler = new Handler(
+                BackgroundThread.getHandler().getLooper());
 
         private final Object mLock = new Object();
 
@@ -5397,6 +5407,11 @@ public final class Settings implements Watchable, Snappable {
         @GuardedBy("mLock")
         // The mapping keys are user ids.
         private final SparseBooleanArray mPermissionUpgradeNeeded = new SparseBooleanArray();
+
+        @GuardedBy("mLock")
+        // Staging area for states prepared to be written.
+        private final SparseArray<RuntimePermissionsState> mPendingStatesToWrite =
+                new SparseArray<>();
 
         // This is a hack to allow this class to invoke a write using Settings's data structures,
         // to facilitate moving to a finer scoped lock without a significant refactor.
@@ -5462,7 +5477,7 @@ public final class Settings implements Watchable, Snappable {
                 final long currentTimeMillis = SystemClock.uptimeMillis();
 
                 if (mWriteScheduled.get(userId)) {
-                    mHandler.removeMessages(userId);
+                    mAsyncHandler.removeMessages(userId);
 
                     // If enough time passed, write without holding off anymore.
                     final long lastNotWrittenMutationTimeMillis = mLastNotWrittenMutationTimesMillis
@@ -5471,7 +5486,7 @@ public final class Settings implements Watchable, Snappable {
                             - lastNotWrittenMutationTimeMillis;
                     if (timeSinceLastNotWrittenMutationMillis
                             >= MAX_WRITE_PERMISSIONS_DELAY_MILLIS) {
-                        mHandler.obtainMessage(userId).sendToTarget();
+                        mAsyncHandler.obtainMessage(userId).sendToTarget();
                         return;
                     }
 
@@ -5481,67 +5496,110 @@ public final class Settings implements Watchable, Snappable {
                     final long writeDelayMillis = Math.min(WRITE_PERMISSIONS_DELAY_MILLIS,
                             maxDelayMillis);
 
-                    Message message = mHandler.obtainMessage(userId);
-                    mHandler.sendMessageDelayed(message, writeDelayMillis);
+                    Message message = mAsyncHandler.obtainMessage(userId);
+                    mAsyncHandler.sendMessageDelayed(message, writeDelayMillis);
                 } else {
                     mLastNotWrittenMutationTimesMillis.put(userId, currentTimeMillis);
-                    Message message = mHandler.obtainMessage(userId);
-                    mHandler.sendMessageDelayed(message, WRITE_PERMISSIONS_DELAY_MILLIS);
+                    Message message = mAsyncHandler.obtainMessage(userId);
+                    mAsyncHandler.sendMessageDelayed(message, WRITE_PERMISSIONS_DELAY_MILLIS);
                     mWriteScheduled.put(userId, true);
                 }
             }
         }
 
-        public void writeStateForUserSync(int userId, @NonNull LegacyPermissionDataProvider
+        public void writeStateForUser(int userId, @NonNull LegacyPermissionDataProvider
                 legacyPermissionDataProvider,
                 @NonNull WatchedArrayMap<String, ? extends PackageStateInternal> packageStates,
-                @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers) {
+                @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers,
+                @Nullable Handler pmHandler, @NonNull Object pmLock) {
+            final int version;
+            final String fingerprint;
             synchronized (mLock) {
-                mHandler.removeMessages(userId);
+                mAsyncHandler.removeMessages(userId);
                 mWriteScheduled.delete(userId);
 
-                legacyPermissionDataProvider.writeLegacyPermissionStateTEMP();
+                version = mVersions.get(userId, INITIAL_VERSION);
+                fingerprint = mFingerprints.get(userId);
+            }
 
-                int version = mVersions.get(userId, INITIAL_VERSION);
+            Runnable writer = () -> {
+                final RuntimePermissionsState runtimePermissions;
+                synchronized (pmLock) {
+                    legacyPermissionDataProvider.writeLegacyPermissionStateTEMP();
 
-                String fingerprint = mFingerprints.get(userId);
+                    Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions =
+                            new ArrayMap<>();
+                    int packagesSize = packageStates.size();
+                    for (int i = 0; i < packagesSize; i++) {
+                        String packageName = packageStates.keyAt(i);
+                        PackageStateInternal packageState = packageStates.valueAt(i);
+                        if (!packageState.hasSharedUser()) {
+                            List<RuntimePermissionsState.PermissionState> permissions =
+                                    getPermissionsFromPermissionsState(
+                                            packageState.getLegacyPermissionState(), userId);
+                            if (permissions.isEmpty()
+                                    && !packageState.isInstallPermissionsFixed()) {
+                                // Storing an empty state means the package is known to the
+                                // system and its install permissions have been granted and fixed.
+                                // If this is not the case, we should not store anything.
+                                continue;
+                            }
+                            packagePermissions.put(packageName, permissions);
+                        }
+                    }
 
-                Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions =
-                        new ArrayMap<>();
-                int packagesSize = packageStates.size();
-                for (int i = 0; i < packagesSize; i++) {
-                    String packageName = packageStates.keyAt(i);
-                    PackageStateInternal packageState = packageStates.valueAt(i);
-                    if (!packageState.hasSharedUser()) {
+                    Map<String, List<RuntimePermissionsState.PermissionState>>
+                            sharedUserPermissions =
+                            new ArrayMap<>();
+                    final int sharedUsersSize = sharedUsers.size();
+                    for (int i = 0; i < sharedUsersSize; i++) {
+                        String sharedUserName = sharedUsers.keyAt(i);
+                        SharedUserSetting sharedUserSetting = sharedUsers.valueAt(i);
                         List<RuntimePermissionsState.PermissionState> permissions =
                                 getPermissionsFromPermissionsState(
-                                        packageState.getLegacyPermissionState(), userId);
-                        if (permissions.isEmpty() && !packageState.isInstallPermissionsFixed()) {
-                            // Storing an empty state means the package is known to the system and
-                            // its install permissions have been granted and fixed. If this is not
-                            // the case, we should not store anything.
-                            continue;
-                        }
-                        packagePermissions.put(packageName, permissions);
+                                        sharedUserSetting.getLegacyPermissionState(), userId);
+                        sharedUserPermissions.put(sharedUserName, permissions);
                     }
+
+                    runtimePermissions = new RuntimePermissionsState(version,
+                            fingerprint, packagePermissions, sharedUserPermissions);
                 }
-
-                Map<String, List<RuntimePermissionsState.PermissionState>> sharedUserPermissions =
-                        new ArrayMap<>();
-                final int sharedUsersSize = sharedUsers.size();
-                for (int i = 0; i < sharedUsersSize; i++) {
-                    String sharedUserName = sharedUsers.keyAt(i);
-                    SharedUserSetting sharedUserSetting = sharedUsers.valueAt(i);
-                    List<RuntimePermissionsState.PermissionState> permissions =
-                            getPermissionsFromPermissionsState(
-                                    sharedUserSetting.getLegacyPermissionState(), userId);
-                    sharedUserPermissions.put(sharedUserName, permissions);
+                synchronized (mLock) {
+                    mPendingStatesToWrite.put(userId, runtimePermissions);
                 }
+                if (pmHandler != null) {
+                    // Async version.
+                    mPersistenceHandler.post(() -> writePendingStates());
+                } else {
+                    // Sync version.
+                    writePendingStates();
+                }
+            };
 
-                RuntimePermissionsState runtimePermissions = new RuntimePermissionsState(version,
-                        fingerprint, packagePermissions, sharedUserPermissions);
+            if (pmHandler != null) {
+                // Async version, use pmHandler.
+                pmHandler.post(writer);
+            } else {
+                // Sync version, use caller's thread.
+                writer.run();
+            }
+        }
 
-                mPersistence.writeForUser(runtimePermissions, UserHandle.of(userId));
+        private void writePendingStates() {
+            while (true) {
+                final RuntimePermissionsState runtimePermissions;
+                final int userId;
+                synchronized (mLock) {
+                    if (mPendingStatesToWrite.size() == 0) {
+                        break;
+                    }
+                    userId = mPendingStatesToWrite.keyAt(0);
+                    runtimePermissions = mPendingStatesToWrite.valueAt(0);
+                    mPendingStatesToWrite.removeAt(0);
+                }
+                synchronized (mPersistenceLock) {
+                    mPersistence.writeForUser(runtimePermissions, UserHandle.of(userId));
+                }
             }
         }
 
@@ -5563,7 +5621,7 @@ public final class Settings implements Watchable, Snappable {
         private void onUserRemoved(int userId) {
             synchronized (mLock) {
                 // Make sure we do not
-                mHandler.removeMessages(userId);
+                mAsyncHandler.removeMessages(userId);
 
                 mPermissionUpgradeNeeded.delete(userId);
                 mVersions.delete(userId);
@@ -5572,7 +5630,7 @@ public final class Settings implements Watchable, Snappable {
         }
 
         public void deleteUserRuntimePermissionsFile(int userId) {
-            synchronized (mLock) {
+            synchronized (mPersistenceLock) {
                 mPersistence.deleteForUser(UserHandle.of(userId));
             }
         }
@@ -5581,16 +5639,17 @@ public final class Settings implements Watchable, Snappable {
                 @NonNull WatchedArrayMap<String, PackageSetting> packageSettings,
                 @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers,
                 @NonNull File userRuntimePermissionsFile) {
+            final RuntimePermissionsState runtimePermissions;
+            synchronized (mPersistenceLock) {
+                runtimePermissions = mPersistence.readForUser(UserHandle.of(userId));
+            }
+            if (runtimePermissions == null) {
+                readLegacyStateForUserSync(userId, userRuntimePermissionsFile, packageSettings,
+                        sharedUsers);
+                writeStateForUserAsync(userId);
+                return;
+            }
             synchronized (mLock) {
-                RuntimePermissionsState runtimePermissions = mPersistence.readForUser(UserHandle.of(
-                        userId));
-                if (runtimePermissions == null) {
-                    readLegacyStateForUserSync(userId, userRuntimePermissionsFile, packageSettings,
-                            sharedUsers);
-                    writeStateForUserAsync(userId);
-                    return;
-                }
-
                 // If the runtime permissions file exists but the version is not set this is
                 // an upgrade from P->Q. Hence mark it with the special UPGRADE_VERSION.
                 int version = runtimePermissions.getVersion();

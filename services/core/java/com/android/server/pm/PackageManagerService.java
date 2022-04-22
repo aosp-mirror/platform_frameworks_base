@@ -1425,7 +1425,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new Settings(Environment.getDataDirectory(),
                         RuntimePermissionsPersistence.createInstance(),
                         i.getPermissionManagerServiceInternal(),
-                        domainVerificationService, lock),
+                        domainVerificationService, backgroundHandler, lock),
                 (i, pm) -> AppsFilterImpl.create(i,
                         i.getLocalService(PackageManagerInternal.class)),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"),
