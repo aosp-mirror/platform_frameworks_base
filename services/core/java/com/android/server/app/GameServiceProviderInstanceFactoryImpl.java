@@ -35,6 +35,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.server.LocalServices;
 import com.android.server.app.GameServiceConfiguration.GameServiceComponentConfiguration;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
@@ -62,6 +63,7 @@ final class GameServiceProviderInstanceFactoryImpl implements GameServiceProvide
                 activityTaskManager,
                 (WindowManagerService) ServiceManager.getService(Context.WINDOW_SERVICE),
                 LocalServices.getService(WindowManagerInternal.class),
+                LocalServices.getService(ActivityTaskManagerInternal.class),
                 new GameServiceConnector(mContext, configuration),
                 new GameSessionServiceConnector(mContext, configuration),
                 new ScreenshotHelper(mContext));
