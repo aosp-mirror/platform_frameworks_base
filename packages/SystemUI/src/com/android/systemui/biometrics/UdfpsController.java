@@ -813,6 +813,11 @@ public class UdfpsController implements DozeReceiver {
         mOnFingerDown = true;
         if (mAlternateTouchProvider != null) {
             mAlternateTouchProvider.onPointerDown(requestId, x, y, minor, major);
+            mFgExecutor.execute(() -> {
+                if (mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
+                    mKeyguardUpdateMonitor.onUdfpsPointerDown((int) requestId);
+                }
+            });
         } else {
             mFingerprintManager.onPointerDown(requestId, mSensorProps.sensorId, x, y, minor, major);
         }
@@ -838,6 +843,11 @@ public class UdfpsController implements DozeReceiver {
         if (mOnFingerDown) {
             if (mAlternateTouchProvider != null) {
                 mAlternateTouchProvider.onPointerUp(requestId);
+                mFgExecutor.execute(() -> {
+                    if (mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
+                        mKeyguardUpdateMonitor.onUdfpsPointerUp((int) requestId);
+                    }
+                });
             } else {
                 mFingerprintManager.onPointerUp(requestId, mSensorProps.sensorId);
             }
