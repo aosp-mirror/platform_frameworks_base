@@ -195,8 +195,9 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val packageParser: PackageParser2 = mock()
         val keySetManagerService: KeySetManagerService = mock()
         val packageAbiHelper: PackageAbiHelper = mock()
+        val appsFilterSnapshot: AppsFilterSnapshotImpl = mock()
         val appsFilter: AppsFilterImpl = mock {
-            whenever(snapshot()) { this@mock }
+            whenever(snapshot()) { appsFilterSnapshot }
         }
         val dexManager: DexManager = mock()
         val installer: Installer = mock()
@@ -332,6 +333,9 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         // everything visible by default
         whenever(mocks.appsFilter.shouldFilterApplication(any(PackageDataSnapshot::class.java),
                 anyInt(), nullable(), nullable(), anyInt())) { false }
+        whenever(mocks.appsFilterSnapshot.shouldFilterApplication(
+            any(PackageDataSnapshot::class.java),
+            anyInt(), nullable(), nullable(), anyInt())) { false }
 
         val displayManager: DisplayManager = mock()
         whenever(mocks.context.getSystemService(DisplayManager::class.java))
