@@ -544,6 +544,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         + " windowing mode during locked task mode.");
             }
 
+            if (windowingMode == WindowConfiguration.WINDOWING_MODE_PINNED) {
+                // Do not directly put the container into PINNED mode as it may not support it or
+                // the app may not want to enter it. Instead, send a signal to request PIP
+                // mode to the app if they wish to support it below in #applyTaskChanges.
+                return effects;
+            }
+
             final int prevMode = container.getWindowingMode();
             container.setWindowingMode(windowingMode);
             if (prevMode != container.getWindowingMode()) {
@@ -578,6 +585,28 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         Rect enterPipBounds = c.getEnterPipBounds();
         if (enterPipBounds != null) {
             tr.mDisplayContent.mPinnedTaskController.setEnterPipBounds(enterPipBounds);
+        }
+
+        if (c.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_PINNED
+                && !tr.inPinnedWindowingMode()) {
+            final ActivityRecord activity = tr.getTopNonFinishingActivity();
+            if (activity != null) {
+                final boolean lastSupportsEnterPipOnTaskSwitch =
+                        activity.supportsEnterPipOnTaskSwitch;
+                // Temporarily force enable enter PIP on task switch so that PIP is requested
+                // regardless of whether the activity is resumed or paused.
+                activity.supportsEnterPipOnTaskSwitch = true;
+                boolean canEnterPip = activity.checkEnterPictureInPictureState(
+                        "applyTaskChanges", true /* beforeStopping */);
+                if (canEnterPip) {
+                    canEnterPip = mService.mActivityClientController
+                            .requestPictureInPictureMode(activity);
+                }
+                if (!canEnterPip) {
+                    // Restore the flag to its previous state when the activity cannot enter PIP.
+                    activity.supportsEnterPipOnTaskSwitch = lastSupportsEnterPipOnTaskSwitch;
+                }
+            }
         }
 
         return effects;
