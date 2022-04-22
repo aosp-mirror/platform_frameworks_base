@@ -486,15 +486,25 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testClientNotified_whenTaskStackChangesDuringShow() throws Exception {
+        switchTask("other_package");
+        showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
+
+        waitForIdleSync();
+
+        assertNull(mAuthController.mCurrentDialog);
+        assertNull(mAuthController.mReceiver);
+        verify(mDialog1).dismissWithoutCallback(true /* animate */);
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL),
+                eq(null) /* credentialAttestation */);
+    }
+
+    @Test
     public void testClientNotified_whenTaskStackChangesDuringAuthentication() throws Exception {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
 
-        List<ActivityManager.RunningTaskInfo> tasks = new ArrayList<>();
-        ActivityManager.RunningTaskInfo taskInfo = mock(ActivityManager.RunningTaskInfo.class);
-        taskInfo.topActivity = mock(ComponentName.class);
-        when(taskInfo.topActivity.getPackageName()).thenReturn("other_package");
-        tasks.add(taskInfo);
-        when(mActivityTaskManager.getTasks(anyInt())).thenReturn(tasks);
+        switchTask("other_package");
 
         mAuthController.mTaskStackListener.onTaskStackChanged();
         waitForIdleSync();
@@ -568,6 +578,16 @@ public class AuthControllerTest extends SysuiTestCase {
                 "testPackage",
                 0 /* operationId */,
                 BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT);
+    }
+
+    private void switchTask(String packageName) {
+        final List<ActivityManager.RunningTaskInfo> tasks = new ArrayList<>();
+        final ActivityManager.RunningTaskInfo taskInfo =
+                mock(ActivityManager.RunningTaskInfo.class);
+        taskInfo.topActivity = mock(ComponentName.class);
+        when(taskInfo.topActivity.getPackageName()).thenReturn(packageName);
+        tasks.add(taskInfo);
+        when(mActivityTaskManager.getTasks(anyInt())).thenReturn(tasks);
     }
 
     private PromptInfo createTestPromptInfo() {
