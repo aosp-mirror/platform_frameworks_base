@@ -2766,10 +2766,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 // TODO(b/155340867): Investigate if we still need roundedCornerOverlay after
                 // the feature b/155340867 is completed.
-                final DisplayArea<?> da = dc.findAreaForWindowType(type, options,
+                final DisplayArea da = dc.findAreaForWindowType(type, options,
                         callerCanManageAppTokens, false /* roundedCornerOverlay */);
+                // TODO(b/190019118): Avoid to send onConfigurationChanged because it has been done
+                //  in return value of attachWindowContextToDisplayArea.
                 mWindowContextListenerController.registerWindowContainerListener(clientToken, da,
-                        callingUid, type, options, false /* shouDispatchConfigWhenRegistering */);
+                        callingUid, type, options);
                 return da.getConfiguration();
             }
         } finally {
@@ -2865,8 +2867,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 mWindowContextListenerController.registerWindowContainerListener(clientToken, dc,
-                        callingUid, INVALID_WINDOW_TYPE, null /* options */,
-                        false /* shouDispatchConfigWhenRegistering */);
+                        callingUid, INVALID_WINDOW_TYPE, null /* options */);
                 return dc.getConfiguration();
             }
         } finally {
