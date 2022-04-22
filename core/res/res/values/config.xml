@@ -5133,16 +5133,24 @@
      -->
     <color name="config_letterboxBackgroundColor">@android:color/system_neutral2_900</color>
 
-    <!-- Horizonal position of a center of the letterboxed app window.
+    <!-- Horizontal position of a center of the letterboxed app window.
         0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
-        or > 1, it is ignored and central positionis used (0.5). -->
+        or > 1, it is ignored and central position is used (0.5). -->
     <item name="config_letterboxHorizontalPositionMultiplier" format="float" type="dimen">0.5</item>
 
-    <!-- Whether reachability repositioning is allowed for letterboxed fullscreen apps in landscape
-        device orientation. -->
-    <bool name="config_letterboxIsReachabilityEnabled">false</bool>
+    <!-- Vertical position of a center of the letterboxed app window.
+        0 corresponds to the upper side of the screen and 1 to the lower side. If given value < 0
+        or > 1, it is ignored and central position is used (0.5). -->
+    <item name="config_letterboxVerticalPositionMultiplier" format="float" type="dimen">0.5</item>
 
-    <!-- Default horizonal position of the letterboxed app window when reachability is
+    <!-- Whether horizontal reachability repositioning is allowed for letterboxed fullscreen apps.
+    -->
+    <bool name="config_letterboxIsHorizontalReachabilityEnabled">false</bool>
+
+    <!-- Whether vertical reachability repositioning is allowed for letterboxed fullscreen apps. -->
+    <bool name="config_letterboxIsVerticalReachabilityEnabled">false</bool>
+
+    <!-- Default horizontal position of the letterboxed app window when reachability is
         enabled and an app is fullscreen in landscape device orientation. When reachability is
         enabled, the position can change between left, center and right. This config defines the
         default one:
@@ -5150,7 +5158,17 @@
             - Option 1 - Center.
             - Option 2 - Right.
         If given value is outside of this range, the option 1 (center) is assummed. -->
-    <integer name="config_letterboxDefaultPositionForReachability">1</integer>
+    <integer name="config_letterboxDefaultPositionForHorizontalReachability">1</integer>
+
+    <!-- Default vertical position of the letterboxed app window when reachability is
+        enabled and an app is fullscreen in portrait device orientation. When reachability is
+        enabled, the position can change between top, center and bottom. This config defines the
+        default one:
+            - Option 0 - Top.
+            - Option 1 - Center.
+            - Option 2 - Bottom.
+        If given value is outside of this range, the option 1 (center) is assummed. -->
+    <integer name="config_letterboxDefaultPositionForVerticalReachability">1</integer>
 
     <!-- Whether displaying letterbox education is enabled for letterboxed fullscreen apps. -->
     <bool name="config_letterboxIsEducationEnabled">false</bool>

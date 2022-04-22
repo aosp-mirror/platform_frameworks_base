@@ -229,14 +229,22 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // {@link com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio}, is set
         // on some device form factors.
         mAtm.mWindowManager.mLetterboxConfiguration.setFixedOrientationLetterboxAspectRatio(0);
-        // Ensure letterbox position multiplier is not overridden on any device target.
+        // Ensure letterbox horizontal position multiplier is not overridden on any device target.
         // {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier},
         // may be set on some device form factors.
         mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(0.5f);
-        // Ensure letterbox reachability treatment isn't overridden on any device target.
-        // {@link com.android.internal.R.bool.config_letterboxIsReachabilityEnabled},
+        // Ensure letterbox vertical position multiplier is not overridden on any device target.
+        // {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier},
         // may be set on some device form factors.
-        mAtm.mWindowManager.mLetterboxConfiguration.setIsReachabilityEnabled(false);
+        mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.5f);
+        // Ensure letterbox horizontal reachability treatment isn't overridden on any device target.
+        // {@link com.android.internal.R.bool.config_letterboxIsHorizontalReachabilityEnabled},
+        // may be set on some device form factors.
+        mAtm.mWindowManager.mLetterboxConfiguration.setIsHorizontalReachabilityEnabled(false);
+        // Ensure letterbox vertical reachability treatment isn't overridden on any device target.
+        // {@link com.android.internal.R.bool.config_letterboxIsVerticalReachabilityEnabled},
+        // may be set on some device form factors.
+        mAtm.mWindowManager.mLetterboxConfiguration.setIsVerticalReachabilityEnabled(false);
 
         checkDeviceSpecificOverridesNotApplied();
     }
@@ -246,7 +254,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // Revert back to device overrides.
         mAtm.mWindowManager.mLetterboxConfiguration.resetFixedOrientationLetterboxAspectRatio();
         mAtm.mWindowManager.mLetterboxConfiguration.resetLetterboxHorizontalPositionMultiplier();
-        mAtm.mWindowManager.mLetterboxConfiguration.resetIsReachabilityEnabled();
+        mAtm.mWindowManager.mLetterboxConfiguration.resetIsHorizontalReachabilityEnabled();
+        mAtm.mWindowManager.mLetterboxConfiguration.resetIsVerticalReachabilityEnabled();
     }
 
     /**
