@@ -800,6 +800,7 @@ package android.content.pm {
     method public boolean hasRequestForegroundServiceExemption();
     method public boolean isPrivilegedApp();
     method public boolean isSystemApp();
+    method public void setEnableOnBackInvokedCallback(boolean);
     field public static final int PRIVATE_FLAG_PRIVILEGED = 8; // 0x8
     field public int privateFlags;
   }
