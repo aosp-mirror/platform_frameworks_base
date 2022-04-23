@@ -45,6 +45,8 @@ public class PromptInfo implements Parcelable {
     private boolean mReceiveSystemEvents;
     @NonNull private List<Integer> mAllowedSensorIds = new ArrayList<>();
     private boolean mAllowBackgroundAuthentication;
+    private boolean mIgnoreEnrollmentState;
+    private boolean mIsForLegacyFingerprintManager = false;
 
     public PromptInfo() {
 
@@ -66,6 +68,8 @@ public class PromptInfo implements Parcelable {
         mReceiveSystemEvents = in.readBoolean();
         mAllowedSensorIds = in.readArrayList(Integer.class.getClassLoader());
         mAllowBackgroundAuthentication = in.readBoolean();
+        mIgnoreEnrollmentState = in.readBoolean();
+        mIsForLegacyFingerprintManager = in.readBoolean();
     }
 
     public static final Creator<PromptInfo> CREATOR = new Creator<PromptInfo>() {
@@ -102,10 +106,16 @@ public class PromptInfo implements Parcelable {
         dest.writeBoolean(mReceiveSystemEvents);
         dest.writeList(mAllowedSensorIds);
         dest.writeBoolean(mAllowBackgroundAuthentication);
+        dest.writeBoolean(mIgnoreEnrollmentState);
+        dest.writeBoolean(mIsForLegacyFingerprintManager);
     }
 
     public boolean containsTestConfigurations() {
-        if (!mAllowedSensorIds.isEmpty()) {
+        if (mIsForLegacyFingerprintManager
+                && mAllowedSensorIds.size() == 1
+                && !mAllowBackgroundAuthentication) {
+            return false;
+        } else if (!mAllowedSensorIds.isEmpty()) {
             return true;
         } else if (mAllowBackgroundAuthentication) {
             return true;
@@ -185,11 +195,22 @@ public class PromptInfo implements Parcelable {
     }
 
     public void setAllowedSensorIds(@NonNull List<Integer> sensorIds) {
-        mAllowedSensorIds = sensorIds;
+        mAllowedSensorIds.clear();
+        mAllowedSensorIds.addAll(sensorIds);
     }
 
     public void setAllowBackgroundAuthentication(boolean allow) {
         mAllowBackgroundAuthentication = allow;
+    }
+
+    public void setIgnoreEnrollmentState(boolean ignoreEnrollmentState) {
+        mIgnoreEnrollmentState = ignoreEnrollmentState;
+    }
+
+    public void setIsForLegacyFingerprintManager(int sensorId) {
+        mIsForLegacyFingerprintManager = true;
+        mAllowedSensorIds.clear();
+        mAllowedSensorIds.add(sensorId);
     }
 
     // Getters
@@ -260,5 +281,13 @@ public class PromptInfo implements Parcelable {
 
     public boolean isAllowBackgroundAuthentication() {
         return mAllowBackgroundAuthentication;
+    }
+
+    public boolean isIgnoreEnrollmentState() {
+        return mIgnoreEnrollmentState;
+    }
+
+    public boolean isForLegacyFingerprintManager() {
+        return mIsForLegacyFingerprintManager;
     }
 }

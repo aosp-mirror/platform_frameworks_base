@@ -68,7 +68,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"အဆက်အသွယ်ဖြတ်တောက်သည်"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"ချိတ်ဆက်နေသည်"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"တွဲချိတ်ပါ"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"တွဲချိတ်နေသည်…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (ဖုန်းမရှိပါ)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (မီဒီယာ မရှိပါ)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (မက်ဆေ့ဂျ် သုံး၍မရပါ)"</string>

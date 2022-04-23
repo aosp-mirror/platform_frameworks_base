@@ -739,7 +739,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Apague os dados do tablet sem aviso redefinindo a configuração original."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Redefine o dispositivo Android TV para a configuração original e apaga os dados sem aviso."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Apaga os dados sem aviso redefinindo o smartphone para a configuração original."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Limpar dados do usuário"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Remover dados do usuário"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Limpa os dados do usuário neste tablet sem aviso prévio."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Limpa os dados do usuário neste dispositivo Android TV sem aviso prévio."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Limpa os dados do usuário neste smartphone sem aviso prévio."</string>
@@ -2099,7 +2099,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desativar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saiba mais"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"No Android 12, as notificações avançadas substituíram as notificações adaptáveis. Esse recurso exibe ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações avançadas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender chamadas telefônicas e controlar o Não perturbe."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"No Android 12, as notificações avançadas substituíram as notificações adaptáveis. Esse recurso mostra ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações avançadas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender chamadas telefônicas e controlar o Não perturbe."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informação do modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A bateria pode acabar antes da recarga normal"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"A Economia de bateria foi ativada para aumentar a duração da carga"</string>

@@ -739,10 +739,10 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Ciche"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Domyślne"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatycznie"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brak dźwięku i wibracji"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Bez dźwięku i wibracji"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brak dźwięku i wibracji, wyświetla się niżej w sekcji rozmów"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Może włączyć dzwonek lub wibracje w zależności od ustawień telefonu"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Może włączyć dzwonek lub wibracje w zależności od ustawień telefonu. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Może włączać dzwonek lub wibracje w zależności od ustawień telefonu"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Może włączać dzwonek lub wibracje w zależności od ustawień telefonu. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Przyciąga uwagę dzięki pływającym skrótom do treści."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Pozwól systemowi decydować, czy o powiadomieniu powinien informować dźwięk czy wibracja"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stan:&lt;/b&gt; zmieniony na Domyślny"</string>
