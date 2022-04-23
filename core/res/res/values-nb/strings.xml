@@ -1887,7 +1887,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS-forespørsel endret til USSD-forespørsel"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Endret til ny SS-forespørsel"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Varsel om nettfisking"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Arbeidsprofil"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Jobbprofil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Varslet"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Bekreftet"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Vis"</string>
@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ikke forstyrr er endret"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Trykk for å sjekke hva som er blokkert."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Gjennomgå varslingsinnstillingene"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"I Android 13 må apper du installerer, få tillatelse til å sende varsler. Trykk for å endre denne tillatelsen for eksisterende apper."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Påminn meg senere"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Lukk"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
@@ -2274,11 +2275,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> er oversatt."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Meldingen er oversatt fra <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> til <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktivitet i bakgrunnen"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"En app bruker batteri"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"En app er fremdeles aktiv"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> kjører i bakgrunnen. Trykk for å administrere batteribruken."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> kan påvirke batterilevetiden. Trykk for å gjennomgå aktive apper."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Sjekk aktive apper"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Det er ikke mulig å få tilgang til telefonkameraet fra <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

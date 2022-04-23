@@ -2055,7 +2055,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Netrukdymo režimas pakeistas"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Palieskite, kad patikrintumėte, kas blokuojama."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Peržiūrėkite pranešimų nustatymus"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"13 versijos „Android” jūsų įdiegtoms programoms reikia suteikti leidimą siųsti pranešimus. Palieskite, kad pakeistumėte šį leidimą esamoms programoms."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Priminti vėliau"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Atsisakyti"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
@@ -2276,11 +2277,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Pranešimas „<xliff:g id="MESSAGE">%1$s</xliff:g>“ išverstas."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Pranešimas išverstas iš <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> į <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Veikla fone"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Programa eikvoja akumuliatoriaus energiją"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Programa vis dar aktyvi"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"„<xliff:g id="APP">%1$s</xliff:g>“ veikia fone. Palieskite ir tvarkykite akumuliatoriaus energijos vartojimą."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Programa „<xliff:g id="APP">%1$s</xliff:g>“ gali turėti įtakos akumuliatoriaus veikimo laikui. Palieskite ir peržiūrėkite aktyvias programas."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Peržiūrėkite aktyvias programas"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nepavyko pasiekti telefono fotoaparato iš „<xliff:g id="DEVICE">%1$s</xliff:g>“"</string>

@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Le mode Ne pas déranger a été modifié"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Appuyez pour vérifier les contenus bloqués."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Consulter les paramètres de notification"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Sur Android 13, les applis que vous installez ont besoin de votre autorisation pour vous envoyer des notifications. Appuyez pour modifier cette autorisation pour les applis déjà installées."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Plus tard"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Fermer"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Système"</string>

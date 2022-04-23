@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"방해 금지 모드 변경"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"차단된 항목을 확인하려면 탭하세요."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"알림 설정 검토"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13에 설치된 앱에는 알림을 전송하기 위한 권한이 필요합니다. 기존 앱의 알림 전송 권한을 변경하려면 탭하세요."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"나중에 알림"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"닫기"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"시스템"</string>
@@ -2274,11 +2275,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"다음 메시지가 번역되었습니다. <xliff:g id="MESSAGE">%1$s</xliff:g>"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"메시지가 <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>에서 <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>로 번역되었습니다."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"백그라운드 활동"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"배터리 소모가 큰 앱이 있습니다"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"앱이 여전히 활성 상태임"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 실행 중입니다. 배터리 사용량을 관리하려면 탭하세요."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> 앱은 배터리 수명에 영향을 미칠 수 있습니다. 활성 상태인 앱을 확인하려면 탭하세요."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"활성 상태의 앱 확인"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 휴대전화 카메라에 액세스할 수 없습니다."</string>

@@ -149,7 +149,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     final TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onTaskStackChanged() {
-            mHandler.post(AuthController.this::handleTaskStackChanged);
+            mHandler.post(AuthController.this::cancelIfOwnerIsNotInForeground);
         }
     };
 
@@ -200,7 +200,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         }
     };
 
-    private void handleTaskStackChanged() {
+    private void cancelIfOwnerIsNotInForeground() {
         mExecution.assertIsMainThread();
         if (mCurrentDialog != null) {
             try {
@@ -212,7 +212,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                     final String topPackage = runningTasks.get(0).topActivity.getPackageName();
                     if (!topPackage.contentEquals(clientPackage)
                             && !Utils.isSystem(mContext, clientPackage)) {
-                        Log.w(TAG, "Evicting client due to: " + topPackage);
+                        Log.e(TAG, "Evicting client due to: " + topPackage);
                         mCurrentDialog.dismissWithoutCallback(true /* animate */);
                         mCurrentDialog = null;
                         mOrientationListener.disable();
@@ -919,6 +919,10 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         mCurrentDialog = newDialog;
         mCurrentDialog.show(mWindowManager, savedState);
         mOrientationListener.enable();
+
+        if (!promptInfo.isAllowBackgroundAuthentication()) {
+            mHandler.post(this::cancelIfOwnerIsNotInForeground);
+        }
     }
 
     private void onDialogDismissed(@DismissedReason int reason) {

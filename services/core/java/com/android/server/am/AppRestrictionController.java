@@ -1063,6 +1063,13 @@ public final class AppRestrictionController {
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "auto_restricted_bucket_on_bg_restricted";
 
         /**
+         * Whether or not to move the app to restricted standby level automatically
+         * when system detects it's abusive.
+         */
+        static final String KEY_BG_AUTO_RESTRICT_ABUSIVE_APPS =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "auto_restrict_abusive_apps";
+
+        /**
          * The minimal interval in ms before posting a notification again on abusive behaviors
          * of a certain package.
          */
@@ -1107,6 +1114,11 @@ public final class AppRestrictionController {
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "prompt_abusive_apps_to_bg_restricted";
 
         /**
+         * Default value to {@link #mBgAutoRestrictAbusiveApps}.
+         */
+        static final boolean DEFAULT_BG_AUTO_RESTRICT_ABUSIVE_APPS = true;
+
+        /**
          * Default value to {@link #mBgAutoRestrictedBucket}.
          */
         static final boolean DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION = false;
@@ -1137,6 +1149,8 @@ public final class AppRestrictionController {
         final boolean mDefaultBgPromptAbusiveAppToBgRestricted;
 
         volatile boolean mBgAutoRestrictedBucket;
+
+        volatile boolean mBgAutoRestrictAbusiveApps;
 
         volatile boolean mRestrictedBucketEnabled;
 
@@ -1183,6 +1197,9 @@ public final class AppRestrictionController {
                 switch (name) {
                     case KEY_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION:
                         updateBgAutoRestrictedBucketChanged();
+                        break;
+                    case KEY_BG_AUTO_RESTRICT_ABUSIVE_APPS:
+                        updateBgAutoRestrictAbusiveApps();
                         break;
                     case KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL:
                         updateBgAbusiveNotificationMinimalInterval();
@@ -1232,6 +1249,7 @@ public final class AppRestrictionController {
 
         void updateDeviceConfig() {
             updateBgAutoRestrictedBucketChanged();
+            updateBgAutoRestrictAbusiveApps();
             updateBgAbusiveNotificationMinimalInterval();
             updateBgLongFgsNotificationMinimalInterval();
             updateBgPromptFgsWithNotiToBgRestricted();
@@ -1249,6 +1267,13 @@ public final class AppRestrictionController {
             if (oldValue != mBgAutoRestrictedBucket) {
                 dispatchAutoRestrictedBucketFeatureFlagChanged(mBgAutoRestrictedBucket);
             }
+        }
+
+        private void updateBgAutoRestrictAbusiveApps() {
+            mBgAutoRestrictAbusiveApps = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_AUTO_RESTRICT_ABUSIVE_APPS,
+                    DEFAULT_BG_AUTO_RESTRICT_ABUSIVE_APPS);
         }
 
         private void updateBgAbusiveNotificationMinimalInterval() {
@@ -1312,6 +1337,10 @@ public final class AppRestrictionController {
             pw.print(KEY_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION);
             pw.print('=');
             pw.println(mBgAutoRestrictedBucket);
+            pw.print(prefix);
+            pw.print(KEY_BG_AUTO_RESTRICT_ABUSIVE_APPS);
+            pw.print('=');
+            pw.println(mBgAutoRestrictAbusiveApps);
             pw.print(prefix);
             pw.print(KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL);
             pw.print('=');
@@ -1769,6 +1798,14 @@ public final class AppRestrictionController {
      */
     @RestrictionLevel int getRestrictionLevel(String packageName, @UserIdInt int userId) {
         return mRestrictionSettings.getRestrictionLevel(packageName, userId);
+    }
+
+    /**
+     * @return Whether or not to move the app to restricted level automatically
+     * when system detects it's abusive.
+     */
+    boolean isAutoRestrictAbusiveAppEnabled() {
+        return mConstantsObserver.mBgAutoRestrictAbusiveApps;
     }
 
     /**

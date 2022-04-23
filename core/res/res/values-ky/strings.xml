@@ -1320,7 +1320,7 @@
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Жөнөтүү"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Айнуу"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Менин тандоомду эстеп кал"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Муну кийин Тууралоолор &gt; Колдонмолордон өзгөртө аласыз"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Муну кийин Тууралоо &gt; Колдонмолордон өзгөртө аласыз"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Дайыма уруксат берүү"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Эч качан уруксат берилбесин"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"SIM-карта өчүрүлдү"</string>
@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Тынчымды алба\" режими өзгөрдү"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Бөгөттөлгөн нерселерди көрүү үчүн таптаңыз."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Билдирмелердин жөндөөлөрүн карап чыгуу"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 версиясында билдирмелерди жөнөтүү үчүн орноткон колдонмолоруңузга уруксат берүү керек. Учурдагы колдонмолор үчүн бул уруксатты өзгөртүү үчүн таптап коюңуз."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Кийинчерээк эскертүү"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Жабуу"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Тутум"</string>

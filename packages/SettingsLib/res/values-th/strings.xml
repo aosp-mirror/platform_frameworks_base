@@ -594,7 +594,7 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้ใช้ชั่วคราวออก"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"รีเซ็ตผู้เข้าร่วม"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"รีเซ็ตผู้เข้าร่วมไหม"</string>
-    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"นำผู้เข้าร่วมออกไหม"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"นำผู้ใช้ชั่วคราวออกไหม"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"รีเซ็ต"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"นำออก"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"กำลังรีเซ็ตผู้เข้าร่วม…"</string>

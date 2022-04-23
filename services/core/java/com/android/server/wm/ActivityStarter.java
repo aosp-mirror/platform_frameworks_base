@@ -2809,11 +2809,6 @@ class ActivityStarter {
             }
         }
 
-        if (mPreferredWindowingMode != WINDOWING_MODE_UNDEFINED
-                && intentTask.getWindowingMode() != mPreferredWindowingMode) {
-            intentTask.setWindowingMode(mPreferredWindowingMode);
-        }
-
         // Update the target's launch cookie to those specified in the options if set
         if (mStartActivity.mLaunchCookie != null) {
             intentActivity.mLaunchCookie = mStartActivity.mLaunchCookie;

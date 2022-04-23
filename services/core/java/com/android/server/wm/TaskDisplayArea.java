@@ -977,6 +977,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                     candidateTask.reparent(this, onTop);
                 }
             }
+            // Update windowing mode if necessary, e.g. launch into a different windowing mode.
+            if (windowingMode != WINDOWING_MODE_UNDEFINED && candidateTask.isRootTask()
+                    && candidateTask.getWindowingMode() != windowingMode) {
+                candidateTask.setWindowingMode(windowingMode);
+            }
             return candidateTask.getRootTask();
         }
         return new Task.Builder(mAtmService)

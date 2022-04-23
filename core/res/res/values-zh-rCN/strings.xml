@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"“勿扰”设置有变更"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"点按即可查看屏蔽内容。"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"查看通知设置"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"在 Android 13 中，您安装的应用需要您授予相应权限才能发送通知。点按即可为现有应用更改此权限。"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"稍后提醒我"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"关闭"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"系统"</string>

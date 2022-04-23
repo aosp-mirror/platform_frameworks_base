@@ -543,8 +543,9 @@ final class DeletePackageHelper {
         synchronized (mPm.mLock) {
             if (outInfo != null) {
                 outInfo.mUid = ps.getAppId();
-                outInfo.mBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(ps,
-                        allUserHandles, mPm.mSettings.getPackagesLocked());
+                outInfo.mBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
+                        mPm.snapshotComputer(), ps, allUserHandles,
+                        mPm.mSettings.getPackagesLocked());
             }
         }
 
