@@ -1807,7 +1807,10 @@ public class LocationManager {
      * @return list of provider names
      *
      * @throws IllegalArgumentException if criteria is null
+     *
+     * @deprecated Criteria based APIs are deprecated, prefer to select a provider explicitly.
      */
+    @Deprecated
     public @NonNull List<String> getProviders(@NonNull Criteria criteria, boolean enabledOnly) {
         Preconditions.checkArgument(criteria != null, "invalid null criteria");
 
@@ -1839,7 +1842,10 @@ public class LocationManager {
      * @return name of the provider that best matches the criteria, or null if none match
      *
      * @throws IllegalArgumentException if criteria is null
+     *
+     * @deprecated Criteria based APIs are deprecated, prefer to select a provider explicitly.
      */
+    @Deprecated
     public @Nullable String getBestProvider(@NonNull Criteria criteria, boolean enabledOnly) {
         Preconditions.checkArgument(criteria != null, "invalid null criteria");
 
