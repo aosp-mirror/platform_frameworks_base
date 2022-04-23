@@ -136,12 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmé"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Touchez Confirmer pour terminer"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Déverrouillé avec le visage. Appuyez Déverrouiller pour cont."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Déverrouillé avec le visage. Appuyez pour continuer."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Visage reconnu. Appuyez pour continuer."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Visage reconnu. Appuyez sur Déverrouiller pour continuer."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authentifié"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Utiliser un NIP"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utiliser un schéma"</string>
@@ -318,12 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Balayez l\'écran vers le haut pour ouvrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Appuyez sur l\'icône Déverrouiller pour ouvrir"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Déverrouillé avec le visage. Appuyez Déverrouiller pour ouvrir"</string>
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Déverrouillé avec le visage. Appuyez pour ouvrir."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Visage reconnu. Appuyez pour ouvrir."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Visage reconnu. Appuyez sur Déverrouiller pour ouvrir."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Balayez l\'écran vers le haut pour réessayer"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Déverrouillez l\'écran pour utiliser la CCP"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Cet appareil appartient à votre organisation"</string>
@@ -352,8 +346,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Oui, continuer"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Mode Invité"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Vous êtes en mode Invité"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Ajouter un utilisateur?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Lorsque vous ajoutez un utilisateur, celui-ci doit configurer son espace.\n\nTout utilisateur peut mettre à jour les applications pour tous les autres utilisateurs."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"L\'ajout d\'un nouvel utilisateur aura pour effet de quitter le mode Invité ainsi que de supprimer toutes les applications et données de la session d\'invité en cours."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite d\'utilisateurs atteinte"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -523,8 +515,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaire"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne prend pas en charge les fonctionnalités de conversation"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ces notifications ne peuvent pas être modifiées"</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Les notifications d\'appel ne peuvent pas être modifiées."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ce groupe de notifications ne peut pas être configuré ici"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notification par mandataire"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Toutes les notifications de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

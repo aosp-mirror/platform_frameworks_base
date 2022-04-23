@@ -346,8 +346,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continuar"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Modo de Invitado"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Estás en el modo de invitado"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"¿Agregar usuario nuevo?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Cuando agregas un nuevo usuario, esa persona debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de los usuarios."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Si agregas un usuario nuevo, se desactivará el modo de invitado y se borrarán todas las apps y los datos de la sesión de invitado actual."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Alcanzaste el límite de usuarios"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">

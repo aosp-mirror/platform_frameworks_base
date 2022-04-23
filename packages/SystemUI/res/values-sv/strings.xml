@@ -346,8 +346,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, fortsätt"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Gästläge"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Du är i gästläge"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Lägga till ny användare?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"När du lägger till en ny användare måste den personen konfigurera sitt utrymme.\n\nAlla användare kan uppdatera appar för samtliga användares räkning."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Om du lägger till en ny användare avslutas gästläget och alla appar och all data från den aktuella gästsessionen raderas."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Användargränsen har nåtts"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">

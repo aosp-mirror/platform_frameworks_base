@@ -348,8 +348,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Da, continuați"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Modul pentru invitați"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Folosiți modul pentru invitați"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Adăugați un utilizator nou?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Când adăugați un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOrice utilizator poate actualiza aplicațiile pentru toți ceilalți utilizatori."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Dacă adăugați un utilizator nou, veți ieși din modul pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea pentru invitați actuală."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Ați atins limita de utilizatori"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -927,11 +925,14 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Adăugați un card"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nu adăugați un card"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Alegeți utilizatorul"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aplicații sunt active</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> de aplicații sunt active</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplicație este activă</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Informații noi"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplicații active"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Chiar dacă nu folosiți aceste aplicații, ele sunt active și pot influența autonomia bateriei"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Opriți"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Oprită"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gata"</string>
