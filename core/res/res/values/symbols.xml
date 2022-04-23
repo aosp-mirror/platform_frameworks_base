@@ -4774,6 +4774,7 @@
   <java-symbol type="bool" name="config_bg_current_drain_high_threshold_by_bg_location" />
   <java-symbol type="drawable" name="ic_swap_horiz" />
   <java-symbol type="bool" name="config_notificationForceUserSetOnUpgrade" />
+  <java-symbol type="array" name="config_deviceStatesAvailableForAppRequests" />
 
   <!-- For app language picker -->
   <java-symbol type="string" name="system_locale_title" />
