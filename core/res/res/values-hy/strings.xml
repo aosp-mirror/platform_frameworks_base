@@ -1927,7 +1927,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Մանրամասն"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Չեղարկել դադարեցումը"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"Միացնե՞լ հավելվածները"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Միացրեք աշխատանքային հավելվածներն ու ծանուցումները"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Ձեզ հասանելի կդառնան ձեր աշխատանքային հավելվածներն ու ծանուցումները"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Միացնել"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"«Չանհանգստացնել» ռեժիմի կարգավորումները փոխվել են"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Հպեք՝ տեսնելու, թե ինչ է արգելափակվել:"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Ստուգեք ծանուցումների կարգավորումները"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13-ում ձեր տեղադրած հավելվածներին անհրաժեշտ է տրամադրել ծանուցումներ ուղարկելու թույլտվություն։ Հպեք և փոխեք այս թույլտվությունն արդեն տեղադրված հավելվածների համար։"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Հիշեցնել ավելի ուշ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Փակել"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Համակարգ"</string>

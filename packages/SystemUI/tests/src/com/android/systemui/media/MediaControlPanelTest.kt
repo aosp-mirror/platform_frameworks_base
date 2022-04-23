@@ -1401,22 +1401,23 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val subtitle1 = "Subtitle1"
         val subtitle2 = "Subtitle2"
         val subtitle3 = "Subtitle3"
+        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
 
         val data = smartspaceData.copy(
             recommendations = listOf(
                 SmartspaceAction.Builder("id1", title1)
                     .setSubtitle(subtitle1)
-                    .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
+                    .setIcon(icon)
                     .setExtras(Bundle.EMPTY)
                     .build(),
                 SmartspaceAction.Builder("id2", title2)
                     .setSubtitle(subtitle2)
-                    .setIcon(Icon.createWithResource(context, R.drawable.ic_alarm))
+                    .setIcon(icon)
                     .setExtras(Bundle.EMPTY)
                     .build(),
                 SmartspaceAction.Builder("id3", title3)
                     .setSubtitle(subtitle3)
-                    .setIcon(Icon.createWithResource(context, R.drawable.ic_3g_mobiledata))
+                    .setIcon(icon)
                     .setExtras(Bundle.EMPTY)
                     .build()
             )
@@ -1447,6 +1448,135 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindRecommendation(data)
 
         assertThat(recSubtitle1.text).isEqualTo("")
+    }
+
+    @Test
+    fun bindRecommendation_someHaveTitles_allTitleViewsShown() {
+        useRealConstraintSets()
+        player.attachRecommendation(recommendationViewHolder)
+
+        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", "")
+                    .setSubtitle("fake subtitle")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "title2")
+                    .setSubtitle("fake subtitle")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id3", "")
+                    .setSubtitle("fake subtitle")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build()
+            )
+        )
+        player.bindRecommendation(data)
+
+        assertThat(expandedSet.getVisibility(recTitle1.id)).isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(expandedSet.getVisibility(recTitle2.id)).isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(expandedSet.getVisibility(recTitle3.id)).isEqualTo(ConstraintSet.VISIBLE)
+    }
+
+    @Test
+    fun bindRecommendation_someHaveSubtitles_allSubtitleViewsShown() {
+        useRealConstraintSets()
+        player.attachRecommendation(recommendationViewHolder)
+
+        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", "")
+                    .setSubtitle("")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "title2")
+                    .setSubtitle("")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id3", "title3")
+                    .setSubtitle("subtitle3")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build()
+            )
+        )
+        player.bindRecommendation(data)
+
+        assertThat(expandedSet.getVisibility(recSubtitle1.id)).isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(expandedSet.getVisibility(recSubtitle2.id)).isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(expandedSet.getVisibility(recSubtitle3.id)).isEqualTo(ConstraintSet.VISIBLE)
+    }
+
+    @Test
+    fun bindRecommendation_noneHaveSubtitles_subtitleViewsGone() {
+        useRealConstraintSets()
+        player.attachRecommendation(recommendationViewHolder)
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", "title1")
+                    .setSubtitle("")
+                    .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "title2")
+                    .setSubtitle("")
+                    .setIcon(Icon.createWithResource(context, R.drawable.ic_alarm))
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id3", "title3")
+                    .setSubtitle("")
+                    .setIcon(Icon.createWithResource(context, R.drawable.ic_3g_mobiledata))
+                    .setExtras(Bundle.EMPTY)
+                    .build()
+            )
+        )
+
+        player.bindRecommendation(data)
+
+        assertThat(expandedSet.getVisibility(recSubtitle1.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(expandedSet.getVisibility(recSubtitle2.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(expandedSet.getVisibility(recSubtitle3.id)).isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun bindRecommendation_noneHaveTitles_titleAndSubtitleViewsGone() {
+        useRealConstraintSets()
+        player.attachRecommendation(recommendationViewHolder)
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", "")
+                    .setSubtitle("subtitle1")
+                    .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "")
+                    .setSubtitle("subtitle2")
+                    .setIcon(Icon.createWithResource(context, R.drawable.ic_alarm))
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id3", "")
+                    .setSubtitle("subtitle3")
+                    .setIcon(Icon.createWithResource(context, R.drawable.ic_3g_mobiledata))
+                    .setExtras(Bundle.EMPTY)
+                    .build()
+            )
+        )
+
+        player.bindRecommendation(data)
+
+        assertThat(expandedSet.getVisibility(recTitle1.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(expandedSet.getVisibility(recTitle2.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(expandedSet.getVisibility(recTitle3.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(expandedSet.getVisibility(recSubtitle1.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(expandedSet.getVisibility(recSubtitle2.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(expandedSet.getVisibility(recSubtitle3.id)).isEqualTo(ConstraintSet.GONE)
     }
 
     private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =

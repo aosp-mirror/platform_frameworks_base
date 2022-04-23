@@ -165,11 +165,10 @@ public abstract class WindowProviderService extends Service implements WindowPro
         }
     }
 
-    // Suppress the lint because ths is overridden from Context.
     @SuppressLint("OnNameExpected")
     @Override
-    @Nullable
-    public Object getSystemService(@NonNull String name) {
+    // Suppress the lint because ths is overridden from Context.
+    public @Nullable Object getSystemService(@NonNull String name) {
         if (WINDOW_SERVICE.equals(name)) {
             return mWindowManager;
         }

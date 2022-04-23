@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.IActivityTaskManager;
+
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.KeyguardStateController.Callback;
 
@@ -232,6 +234,12 @@ public interface KeyguardStateController extends CallbackController<Callback> {
          * Triggered when the device was just unlocked and the lock screen is being dismissed.
          */
         default void onKeyguardFadingAwayChanged() {}
+
+        /**
+         * We've called {@link IActivityTaskManager#keyguardGoingAway}, which initiates the unlock
+         * sequence.
+         */
+        default void onKeyguardGoingAwayChanged() {}
 
         /**
          * Triggered when the keyguard dismiss amount has changed, via either a swipe gesture or an

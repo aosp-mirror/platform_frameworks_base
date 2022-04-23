@@ -4992,8 +4992,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(12345 /* some UID in user 0 */);
         // Make personal apps look suspended
         dpms.getUserData(UserHandle.USER_SYSTEM).mAppsSuspended = true;
-
-        clearInvocations(getServices().iwindowManager);
+        // Screen capture
+        dpm.setScreenCaptureDisabled(admin1, true);
 
         dpm.wipeData(0);
         verify(getServices().userManagerInternal).removeUserEvenWhenDisallowed(CALLER_USER_HANDLE);
@@ -5003,6 +5003,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, false, UserHandle.SYSTEM);
         verify(getServices().userManager).setUserRestriction(
                 UserManager.DISALLOW_ADD_USER, false, UserHandle.SYSTEM);
+
+        clearInvocations(getServices().iwindowManager);
 
         // Some device-wide policies are getting cleaned-up after the user is removed.
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
@@ -5020,9 +5022,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED),
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
-        // Refresh strong auth timeout and screen capture
+        // Refresh strong auth timeout
         verify(getServices().lockSettingsInternal).refreshStrongAuthTimeout(UserHandle.USER_SYSTEM);
-        verify(getServices().iwindowManager).refreshScreenCaptureDisabled(UserHandle.USER_SYSTEM);
+        // Refresh screen capture
+        verify(getServices().iwindowManager).refreshScreenCaptureDisabled();
         // Unsuspend personal apps
         verify(getServices().packageManagerInternal)
                 .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, UserHandle.USER_SYSTEM);

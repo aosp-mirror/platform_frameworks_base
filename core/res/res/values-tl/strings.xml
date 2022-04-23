@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Binago ang Huwag Istorbohin"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"I-tap para tingnan kung ano ang naka-block."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Suriin ang mga setting ng notification"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Sa Android 13, kakailanganin ng mga app na na-install mo ng pahintulot para magpadala ng mga notification. I-tap para baguhin ang pahintulot na ito para sa mga kasalukuyang app."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ipaalala mamaya"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"I-dismiss"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>

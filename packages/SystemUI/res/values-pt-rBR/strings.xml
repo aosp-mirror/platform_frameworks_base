@@ -917,11 +917,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Adicionar bloco"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Não adicionar bloco"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Selecionar usuário"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> app está ativo</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apps estão ativos</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nova informação"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apps ativos"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Mesmo que você não esteja usando esses apps, eles ainda ficam ativos e podem afetar a duração da bateria"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Parar"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Parado"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Concluído"</string>

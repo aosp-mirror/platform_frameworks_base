@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„არ შემაწუხოთ“ რეჟიმი შეცვლილია"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"შეეხეთ იმის სანახავად, თუ რა არის დაბლოკილი."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"შეტყობინების პარამეტრების შემოწმება"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13-ზე შეტყობინებების გასაგზავნად საჭიროა თქვენ მიერ დაინსტალირებული აპებისთვის ნებართვის მინიჭება. არსებული აპებისთვის ამ ნებართვის შესაცვლელად შეეხეთ."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"შემახსენე მოგვიან."</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"უარყოფა"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"სისტემა"</string>

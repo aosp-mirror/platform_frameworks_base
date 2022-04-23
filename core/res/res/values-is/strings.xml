@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„Ónáðið ekki“ var breytt"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ýttu til að skoða hvað lokað hefur verið á."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Yfirfara tilkynningastillingar"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Í Android 13 þurfa forrit sem þú setur upp heimild frá þér til að senda tilkynningar. Ýttu til að breyta þessari heimild fyrir forrit sem fyrir eru."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Minna mig á seinna"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Hunsa"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Kerfi"</string>
@@ -2274,11 +2275,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> var þýtt."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Skilaboð þýdd úr <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> á <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Bakgrunnsvirkni"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Forrit notar mikið af rafhlöðunni"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Forrit er enn virkt"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> keyrir í bakgrunni. Ýttu til að stjórna rafhlöðunotkun."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> gæti haft áhrif á rafhlöðuendingu. Ýttu til að skoða virk forrit."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Skoða virk forrit"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ekki er hægt að opna myndavél símans úr <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

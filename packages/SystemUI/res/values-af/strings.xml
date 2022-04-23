@@ -917,11 +917,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Voeg teël by"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Moenie teël byvoeg nie"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Kies gebruiker"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> programme is aktief</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> program is aktief</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nuwe inligting"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiewe programme"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Hierdie programme is steeds aktief en beïnvloed dalk batterylewe, selfs al gebruik jy hulle nie"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stop"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Gestop"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Klaar"</string>

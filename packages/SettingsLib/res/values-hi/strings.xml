@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"डिस्‍कनेक्‍ट हो रहा है..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"कनेक्ट हो रहा है..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> से जुड़ गया"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"युग्‍मित कर रहा है…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"जोड़ा जा रहा है…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"जुड़ गया (फ़ोन के ऑडियो को छोड़कर)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"जुड़ गया (मीडिया ऑडियो को छोड़कर)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"जुड़ गया (मैसेज का ऐक्सेस नहीं)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>

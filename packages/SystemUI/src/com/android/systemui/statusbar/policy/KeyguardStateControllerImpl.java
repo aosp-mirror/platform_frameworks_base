@@ -323,6 +323,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
             Trace.traceCounter(Trace.TRACE_TAG_APP, "keyguardGoingAway",
                     keyguardGoingAway ? 1 : 0);
             mKeyguardGoingAway = keyguardGoingAway;
+            new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardGoingAwayChanged);
         }
     }
 

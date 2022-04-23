@@ -136,12 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Потврдено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Допрете „Потврди“ за да се заврши"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Отклучено со лице. Притиснете ја иконата за отклучување за да продолжите."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Отклучено со лице. Притиснете за да продолжите."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Лицето е препознаено. Притиснете за да продолжите."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лицето е препознаено. Притиснете ја иконата за отклучување за да продолжите."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Проверена"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Користи PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Користи шема"</string>
@@ -248,7 +245,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Осветленост"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инверзија на боите"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Корекција на боите"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Поставки на корисникот"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Кориснички поставки"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Затвори"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Поврзано"</string>
@@ -318,12 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Повлечете за да отворите"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Притиснете ја иконата за отклучување за да отворите"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Отклучено со лице. Притиснете ја иконата за отклучување за да отворите."</string>
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Отклучено со лице. Притиснете за да отворите."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Лицето е препознаено. Притиснете за да отворите."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Лицето е препознаено. Притиснете ја иконата за отклучување за да отворите."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Повлечете нагоре за да се обидете повторно"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Отклучете за да користите NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Уредов е во сопственост на организацијата"</string>
@@ -518,8 +512,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритетно"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддржува функции за разговор"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Овие известувања не може да се изменат"</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Известувањата за повици не може да се изменат."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Оваа група известувања не може да се конфигурира тука"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Известување преку прокси"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Сите известувања од <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -906,7 +899,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мобилен интернет"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Поврзано"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Мобилниот интернет не може автоматски да се поврзе"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Мобилниот интернет не може да се поврзе автоматски"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Нема интернет-врска"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Нема други достапни мрежи"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Нема достапни мрежи"</string>

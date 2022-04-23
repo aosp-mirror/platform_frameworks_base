@@ -35,7 +35,7 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zariadeniu <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> pristupovať k zariadeniu <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTejto aplikácii nebolo udelené povolenie na nahrávanie, môže však snímať zvuk cez toto zariadenie USB."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Povoliť apl. <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zar. <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Otvoriť <xliff:g id="APPLICATION">%1$s</xliff:g> na spravovanie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Otvoriť aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g> na spravovanie zariadenia <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Tejto aplikácii nebolo udelené povolenie na nahrávanie, ale môže nahrávať zvuk cez toto zariadenie USB. Ak budete s týmto zariadením používať aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g>, nemusíte počuť hovory, upozornenia ani budíky."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ak budete s týmto zariadením používať aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g>, nemusíte počuť hovory, upozornenia ani budíky."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zariadeniu <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
@@ -425,7 +425,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikácia je pripnutá"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidiel Späť a Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidiel Späť a Domov."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Táto možnosť ponechá položku v zobrazení, dokým ju neodopnete. Odpojíte ju potiahnutím nahor a pridržaním."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Táto možnosť ponechá položku v zobrazení, dokým ju neodopnete potiahnutím nahor a pridržaním."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidla Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidla Domov."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Môže mať prístup k osobným údajom (napríklad kontaktom a obsahu správ)."</string>
@@ -929,11 +929,15 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Pridať kartu"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nepridať kartu"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Vyberte používateľa"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aplikácie sú aktívne</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> apps are active</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplikácií je aktívnych</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplikácia je aktívna</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nové informácie"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktívne aplikácie"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Aj keď tieto aplikácie nepoužívate, stále sú aktívne a môžu ovplyvňovať výdrž batérie"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Ukončiť"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zastavená"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Hotovo"</string>

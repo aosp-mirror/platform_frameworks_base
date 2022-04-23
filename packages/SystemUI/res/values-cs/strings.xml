@@ -425,7 +425,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikace je připnutá"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítek Zpět a Přehled."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítek Zpět a Plocha."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Díky připnutí bude vidět, dokud ji neodepnete. Odepnout ji můžete přejetím nahoru a podržením."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Díky připnutí bude aplikace vidět, dokud ji neodepnete. Odepnout ji můžete přejetím prstem nahoru a podržením."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítka Přehled."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítka Plocha."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Může mít přístup k soukromým datům (například kontaktům a obsahu e-mailů)."</string>
@@ -929,11 +929,15 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Přidat dlaždici"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nepřidávat dlaždici"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Zvolte uživatele"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aplikace jsou aktivní</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> aplikace je aktivních</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplikací je aktivních</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplikace je aktivní</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nové informace"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivní aplikace"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"I když tyto aplikace nepoužíváte, jsou stále aktivní a mohou mít vliv na výdrž baterie"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Konec"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zastaveno"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Hotovo"</string>

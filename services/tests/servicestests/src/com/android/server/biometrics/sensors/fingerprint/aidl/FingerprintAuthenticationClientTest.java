@@ -31,7 +31,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
+import android.content.ComponentName;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.PointerContext;
@@ -66,6 +70,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 @Presubmit
@@ -110,6 +115,10 @@ public class FingerprintAuthenticationClientTest {
     private ClientMonitorCallback mCallback;
     @Mock
     private Sensor.HalSessionCallback mHalSessionCallback;
+    @Mock
+    private ActivityTaskManager mActivityTaskManager;
+    @Mock
+    private ICancellationSignal mCancellationSignal;
     @Mock
     private Probe mLuxProbe;
     @Captor
@@ -288,11 +297,36 @@ public class FingerprintAuthenticationClientTest {
         verify(mSideFpsController).hide(anyInt());
     }
 
+    @Test
+    public void cancelsAuthWhenNotInForeground() throws Exception {
+        final ActivityManager.RunningTaskInfo topTask = new ActivityManager.RunningTaskInfo();
+        topTask.topActivity = new ComponentName("other", "thing");
+        when(mActivityTaskManager.getTasks(anyInt())).thenReturn(List.of(topTask));
+        when(mHal.authenticateWithContext(anyLong(), any())).thenReturn(mCancellationSignal);
+
+        final FingerprintAuthenticationClient client = createClientWithoutBackgroundAuth();
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */, 2 /* deviceId */),
+                true /* authenticated */, new ArrayList<>());
+
+        verify(mCancellationSignal).cancel();
+    }
+
     private FingerprintAuthenticationClient createClient() throws RemoteException {
-        return createClient(100);
+        return createClient(100 /* version */, true /* allowBackgroundAuthentication */);
+    }
+
+    private FingerprintAuthenticationClient createClientWithoutBackgroundAuth()
+            throws RemoteException {
+        return createClient(100 /* version */, false /* allowBackgroundAuthentication */);
     }
 
     private FingerprintAuthenticationClient createClient(int version) throws RemoteException {
+        return createClient(version, true /* allowBackgroundAuthentication */);
+    }
+
+    private FingerprintAuthenticationClient createClient(int version,
+            boolean allowBackgroundAuthentication) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
@@ -302,7 +336,11 @@ public class FingerprintAuthenticationClientTest {
         9 /* sensorId */, mBiometricLogger, mBiometricContext,
         true /* isStrongBiometric */,
         null /* taskStackListener */, mLockoutCache,
-        mUdfpsOverlayController, mSideFpsController,
-        true /* allowBackgroundAuthentication */, mSensorProps);
+        mUdfpsOverlayController, mSideFpsController, allowBackgroundAuthentication, mSensorProps) {
+            @Override
+            protected ActivityTaskManager getActivityTaskManager() {
+                return mActivityTaskManager;
+            }
+        };
     }
 }

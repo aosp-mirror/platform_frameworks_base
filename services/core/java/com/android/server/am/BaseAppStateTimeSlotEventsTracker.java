@@ -301,6 +301,7 @@ abstract class BaseAppStateTimeSlotEventsTracker
                 @RestrictionLevel int maxLevel) {
             synchronized (mLock) {
                 final int level = mExcessiveEventPkgs.get(packageName, uid) == null
+                        || !mTracker.mAppRestrictionController.isAutoRestrictAbusiveAppEnabled()
                         ? RESTRICTION_LEVEL_ADAPTIVE_BUCKET
                         : RESTRICTION_LEVEL_RESTRICTED_BUCKET;
                 if (maxLevel > RESTRICTION_LEVEL_RESTRICTED_BUCKET) {

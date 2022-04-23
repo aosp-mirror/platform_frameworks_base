@@ -1926,7 +1926,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> अहिले उपलब्ध छैन। यो <xliff:g id="APP_NAME_1">%2$s</xliff:g> द्वारा व्यवस्थित छ।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"थप जान्नुहोस्"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"एपको पज हटाउनुहोस्"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"कामसम्बन्धी एपहरू सक्षम पार्ने हो?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"कामसम्बन्धी एपहरू अन गर्ने हो?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"कामसम्बन्धी एप चलाउने र सूचना प्राप्त गर्ने सुविधा अन गर्नुहोस्"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"अन गर्नुहोस्"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"एप उपलब्ध छैन"</string>
@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"बाधा नपुर्‍याउनुहोस् मोड परिवर्तन भएको छ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"रोक लगाइएका कुराहरू जाँच गर्न ट्याप गर्नुहोस्‌।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"सूचनाका सेटिङको समीक्षा गर्नुहोस्"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android १३ मा तपाईंले अनुमति दिनुभएका खण्डमा मात्र तपाईंले इन्स्टल गर्नुभएका एपले सूचना पठाउन सक्छन्। यसअघि इन्स्टल गरिसकिएका एपका हकमा यो अनुमति परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"मलाई पछि स्मरण गराइयोस्"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"हटाउनुहोस्"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"प्रणाली"</string>
@@ -2274,11 +2275,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> अनुवाद गरिएको छ।"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"म्यासेज <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> भाषाबाट <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> भाषामा अनुवाद गरिएको छ।"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ब्याकग्राउन्डमा गरिएको क्रियाकलाप"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"कुनै एपले ब्याट्री खपत गरिरहेको छ"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"कुनै एप अझै पनि चलिरहेको छ"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> ब्याकग्राउन्डमा चलिरहेको छ। कुन एपले कति ब्याट्री खपत गर्छ भन्ने कुरा व्यवस्थापन गर्न ट्याप गर्नुहोस्।"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ले ब्याट्रीको आयु घटाउन सक्छ। सक्रिय एपहरू हेर्न ट्याप गर्नुहोस्।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"कुन कुन एप सक्रिय छ भन्ने कुरा जाँच्नुहोस्"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मार्फत फोनको क्यामेरा प्रयोग गर्न मिल्दैन"</string>
