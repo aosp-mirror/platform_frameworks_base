@@ -506,8 +506,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритетно"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддржува функции за разговор"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Овие известувања не може да се изменат"</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Известувањата за повици не може да се изменат."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Оваа група известувања не може да се конфигурира тука"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Известување преку прокси"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Сите известувања од <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

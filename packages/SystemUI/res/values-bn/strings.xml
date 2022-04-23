@@ -506,8 +506,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্রাধিকার"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এ কথোপকথন ফিচার কাজ করে না"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই বিজ্ঞপ্তিগুলি পরিবর্তন করা যাবে না।"</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"কল বিজ্ঞপ্তি পরিবর্তন করা যাবে না।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"এই সমস্ত বিজ্ঞপ্তিকে এখানে কনফিগার করা যাবে না"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"প্রক্সি করা বিজ্ঞপ্তি"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g> সংক্রান্ত সমস্ত বিজ্ঞপ্তি"</string>

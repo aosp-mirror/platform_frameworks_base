@@ -423,7 +423,7 @@
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"यो एप अनपिन गर्न माथितिर स्वाइप गरी स्क्रिनमा टच एण्ड होल्ड गर्नुहोस्"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"बुझेँ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"धन्यवाद पर्दैन"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"एप पिन गरियो"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"पिन गरिएको एप"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"एप अनपिन गरियो"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"कल"</string>
     <string name="stream_system" msgid="7663148785370565134">"प्रणाली"</string>
@@ -506,8 +506,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा वार्तालापसम्बन्धी सुविधा प्रयोग गर्न मिल्दैन"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"यी सूचनाहरू परिमार्जन गर्न मिल्दैन।"</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"कलसम्बन्धी सूचनाहरू परिमार्जन गर्न मिल्दैन।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"यहाँबाट सूचनाहरूको यो समूह कन्फिगर गर्न सकिँदैन"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रोक्सीमार्फत आउने सूचना"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g> सम्बन्धी सबै सूचनाहरू"</string>

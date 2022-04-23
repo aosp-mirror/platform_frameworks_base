@@ -506,8 +506,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱은 대화 기능을 지원하지 않습니다."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"이 알림은 수정할 수 없습니다."</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"전화 알림은 수정할 수 없습니다."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"이 알림 그룹은 여기에서 설정할 수 없습니다."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"프록시를 통한 알림"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"모든 <xliff:g id="APP_NAME">%1$s</xliff:g> 알림"</string>
