@@ -320,4 +320,19 @@ public class BatteryUsageStatsStore {
             mFileSizes.remove(file);
         }
     }
+
+    public void removeAllSnapshots() {
+        lockSnapshotDirectory();
+        try {
+            for (File file : mStoreDir.listFiles()) {
+                if (file.getName().endsWith(SNAPSHOT_FILE_EXTENSION)) {
+                    if (!file.delete()) {
+                        Slog.e(TAG, "Cannot delete battery usage stats " + file);
+                    }
+                }
+            }
+        } finally {
+            unlockSnapshotDirectory();
+        }
+    }
 }
