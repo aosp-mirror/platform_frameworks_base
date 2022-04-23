@@ -834,7 +834,7 @@
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"FAX（自宅）"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"ポケベル"</string>
     <string name="phoneTypeOther" msgid="6918196243648754715">"その他"</string>
-    <string name="phoneTypeCallback" msgid="3455781500844157767">"かけ直す"</string>
+    <string name="phoneTypeCallback" msgid="3455781500844157767">"コールバック"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"クルマ"</string>
     <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"会社代表番号"</string>
     <string name="phoneTypeIsdn" msgid="2496238954533998512">"ISDN"</string>
@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"サイレント モードが変わりました"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"タップしてブロック対象をご確認ください。"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"通知設定の確認"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 では、インストールするアプリに、通知を送信する権限を付与する必要があります。既存のアプリのこの権限を変更するには、タップしてください。"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"後で"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"閉じる"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"システム"</string>

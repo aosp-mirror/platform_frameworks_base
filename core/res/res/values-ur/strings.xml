@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ڈسٹرب نہ کریں\' تبدیل ہو گيا ہے"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"مسدود کی گئی چیزوں کو چیک کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"اطلاع کی ترتیبات کا جائزہ لیں"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"‏Android 13 میں، اطلاعات بھیجنے کے لیے آپ کے انسٹال کردہ ایپس کو آپ کی اجازت درکار ہوتی ہے۔ موجودہ ایپس کے لیے اس اجازت کو تبدیل کرنے کی خاطر تھپتھپائیں۔"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"بعد میں یاد دلائیں"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"برخاست کریں"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"سسٹم"</string>
@@ -2274,11 +2275,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> کا ترجمہ کیا گیا۔"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"پیغام کا ترجمہ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> سے<xliff:g id="TO_LANGUAGE">%2$s</xliff:g> میں کیا گیا۔"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"پس منظر کی سرگرمی"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"ایپ کی بیٹری ختم ہو رہی ہے"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ایک ایپ اب بھی فعال ہے"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> پس منظر میں چل رہی ہے۔ بیٹری کے استعمال کا نظم کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ایپ بیٹری لائف کو متاثر کر سکتی ہے۔ فعال ایپس کا جائزہ لینے کے لیے تھپتھپائیں۔"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"فعال ایپس چیک کریں"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"آپ کے <xliff:g id="DEVICE">%1$s</xliff:g> سے فون کے کیمرا تک رسائی حاصل نہیں کی جا سکتی"</string>

@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"व्यत्यय आणू नका बदलले आहे"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"काय ब्लॉक केले आहे हे तपासण्यासाठी टॅप करा."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"सूचना सेटिंग्जचे पुनरावलोकन करा"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 मध्ये, तुम्ही इंस्टॉल केलेल्या अ‍ॅप्सना सूचना पाठवण्यासाठी तुमच्या परवानगीची आवश्यकता असते. सध्याच्या अ‍ॅप्ससाठी ही परवानगी बदलण्याकरिता टॅप करा."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"मला आठवण करून द्या"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"डिसमिस करा"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"सिस्टम"</string>
