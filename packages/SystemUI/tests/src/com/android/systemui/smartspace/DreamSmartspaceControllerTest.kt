@@ -26,7 +26,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dreams.smartspace.DreamsSmartspaceController
+import com.android.systemui.dreams.smartspace.DreamSmartspaceController
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.smartspace.dagger.SmartspaceViewComponent
@@ -97,7 +97,7 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
      */
     @Test
     fun testConnectOnListen() {
-        val controller = DreamsSmartspaceController(context,
+        val controller = DreamSmartspaceController(context,
         smartspaceManager, execution, uiExecutor, viewComponentFactory, precondition,
                 Optional.of(targetFilter), Optional.of(plugin))
 
@@ -158,7 +158,7 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
      */
     @Test
     fun testConnectOnViewCreate() {
-        val controller = DreamsSmartspaceController(context,
+        val controller = DreamSmartspaceController(context,
                 smartspaceManager, execution, uiExecutor, viewComponentFactory, precondition,
                 Optional.of(targetFilter),
                 Optional.of(plugin))
