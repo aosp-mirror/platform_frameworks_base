@@ -36,8 +36,8 @@
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Ungependa kuruhusu <xliff:g id="APPLICATION">%1$s</xliff:g> ifikie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nProgramu hii haijapewa ruhusa ya kurekodi lakini inaweza kurekodi sauti kupitia kifaa hiki cha USB."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Ungependa kuruhusu <xliff:g id="APPLICATION">%1$s</xliff:g> ifikie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Ungependa kufungua <xliff:g id="APPLICATION">%1$s</xliff:g> ishughulikie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Programu hii haijapewa ruhusa ya kurekodi lakini inaweza kurekodi sauti kupitia kifaa hiki cha USB. Ukitumia <xliff:g id="APPLICATION">%1$s</xliff:g> kwenye kifaa hiki kunaweza kuzuia kusikia simu, arifa na kengele."</string>
-    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ukitumia <xliff:g id="APPLICATION">%1$s</xliff:g> kwenye kifaa hiki kunaweza kuzuia kusikia simu, arifa na kengele."</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Programu hii haijapewa ruhusa ya kurekodi lakini inaweza kurekodi sauti kupitia kifaa hiki cha USB. Ukitumia <xliff:g id="APPLICATION">%1$s</xliff:g> kwenye kifaa hiki huenda usisikie simu, arifa na kengele."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ukitumia <xliff:g id="APPLICATION">%1$s</xliff:g> kwenye kifaa hiki huenda usisikie simu, arifa na kengele."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Ungependa kuruhusu <xliff:g id="APPLICATION">%1$s</xliff:g> ifikie <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Ungependa kufungua <xliff:g id="APPLICATION">%1$s</xliff:g> ili itumie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Ungependa kufungua <xliff:g id="APPLICATION">%1$s</xliff:g> ishughulikie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nProgramu hii haijapewa ruhusa ya kurekodi lakini inaweza kurekodi sauti kupitia kifaa hiki cha USB."</string>
@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Je, unataka kuendelea na kipindi chako?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Anza upya"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ndiyo, endelea"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Matumizi ya wageni"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Unatumia hali ya wageni"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Ungependa kuongeza mtumiaji?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Mtumiaji mpya utakayemwongeza atahitaji kuongeza akaunti yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Kuongeza mtumiaji mpya kutaondoa matumizi ya wageni yaliyopo na kufuta programu na data kutoka kwenye kipindi cha mgeni cha sasa."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Umefikia kima cha juu cha watumiaji"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Unaruhusiwa kuongeza hadi watumiaji <xliff:g id="COUNT">%d</xliff:g>.</item>

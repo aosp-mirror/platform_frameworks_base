@@ -598,7 +598,7 @@ public final class SuspendPackageHelper {
             final String pkgName = pkgList[i];
             final int uid = uidList[i];
             SparseArray<int[]> allowList = mInjector.getAppsFilter().getVisibilityAllowList(
-                    snapshot.getPackageStateInternal(pkgName, SYSTEM_UID),
+                    snapshot, snapshot.getPackageStateInternal(pkgName, SYSTEM_UID),
                     userIds, snapshot.getPackageStates());
             if (allowList == null) {
                 allowList = new SparseArray<>(0);

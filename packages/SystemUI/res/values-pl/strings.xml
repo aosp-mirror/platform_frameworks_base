@@ -136,12 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potwierdzono"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Aby zakończyć, kliknij Potwierdź"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Odblokowano skanem twarzy. Aby kontynuować, kliknij ikonę odblokowywania."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odblokowano rozpoznawaniem twarzy. Kliknij, aby kontynuować."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Twarz rozpoznana. Kliknij, aby kontynuować."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Twarz rozpoznana. Aby kontynuować, kliknij ikonę odblokowywania."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Uwierzytelniono"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Użyj kodu PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Użyj wzoru"</string>
@@ -322,12 +319,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Przesuń w górę, by otworzyć"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Aby otworzyć, kliknij ikonę odblokowywania"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Odblokowano skanem twarzy. Aby otworzyć, kliknij ikonę odblokowywania."</string>
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Odblokowano rozpoznawaniem twarzy. Naciśnij, by otworzyć."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Twarz rozpoznana. Naciśnij, by otworzyć."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Twarz rozpoznana. Aby otworzyć, kliknij ikonę odblokowywania."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Przesuń w górę, by spróbować ponownie"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Odblokuj, by użyć komunikacji NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"To urządzenie należy do Twojej organizacji"</string>
@@ -354,6 +348,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Chcesz kontynuować sesję?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Rozpocznij nową"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Tak, kontynuuj"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Tryb gościa"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Jesteś w trybie gościa"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Dodać nowego użytkownika?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Gdy dodasz nowego użytkownika, musi on skonfigurować swój profil.\n\nKażdy użytkownik może aktualizować aplikacje wszystkich innych użytkowników."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Dodanie nowego użytkownika spowoduje zamknięcie trybu gościa. Wszystkie aplikacje i dane z obecnej sesji gościa zostaną usunięte."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Osiągnięto limit użytkowników"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="few">Możesz dodać maksymalnie <xliff:g id="COUNT">%d</xliff:g> użytkowników.</item>
@@ -434,7 +433,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ekran będzie widoczny, dopóki go nie odepniesz. Przesuń palcem w górę i przytrzymaj, by odpiąć."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, kliknij i przytrzymaj Przegląd."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, naciśnij i przytrzymaj Ekran główny."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dostępne mogą być dane osobiste (np. kontakty czy treść e-maili)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dostępne mogą być dane prywatne (np. kontakty czy treść e-maili)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Przypięta aplikacja może otwierać inne aplikacje."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Aby odpiąć tę aplikację, naciśnij i przytrzymaj przyciski Wstecz oraz Przegląd"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Aby odpiąć tę aplikację, naciśnij i przytrzymaj przyciski Wstecz oraz Ekran główny"</string>
@@ -524,8 +523,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorytetowe"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje funkcji rozmów"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tych powiadomień nie można zmodyfikować."</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Powiadomień o połączeniach nie można modyfikować."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tej grupy powiadomień nie można tu skonfigurować"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Powiadomienie w zastępstwie"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Wszystkie powiadomienia z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -936,11 +934,15 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj kafelek"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nie dodawaj kafelka"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Wybierz użytkownika"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aplikacje są aktywne</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> aplikacji jest aktywnych</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplikacji jest aktywne</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplikacja jest aktywna</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nowa informacja"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktywne aplikacje"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Nawet jeśli nie korzystasz z tych aplikacji, są one wciąż aktywne i mogą mieć wpływ na żywotność baterii"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zatrzymaj"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zatrzymano"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gotowe"</string>

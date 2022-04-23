@@ -23,6 +23,7 @@ import android.os.PersistableBundle
 import android.util.ArrayMap
 import android.util.SparseArray
 import com.android.server.pm.pkg.PackageStateInternal
+import com.android.server.pm.snapshot.PackageDataSnapshot
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
 import com.android.server.testutils.nullable
@@ -389,6 +390,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
 
     private fun mockAllowList(pkgSetting: PackageStateInternal, list: SparseArray<IntArray>?) {
         whenever(rule.mocks().appsFilter.getVisibilityAllowList(
+                any(PackageDataSnapshot::class.java),
             argThat { it?.packageName == pkgSetting.packageName }, any(IntArray::class.java),
             any() as ArrayMap<String, out PackageStateInternal>
         ))

@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
-import static com.android.server.wm.WindowManagerService.H.WINDOW_STATE_BLAST_SYNC_TIMEOUT;
+import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import android.annotation.NonNull;
 import android.os.Trace;
@@ -173,7 +173,7 @@ class BLASTSyncEngine {
                 }
             };
             merged.addTransactionCommittedListener((r) -> { r.run(); }, callback::run);
-            mWm.mH.postDelayed(callback, WINDOW_STATE_BLAST_SYNC_TIMEOUT);
+            mWm.mH.postDelayed(callback, BLAST_TIMEOUT_DURATION);
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
             mListener.onTransactionReady(mSyncId, merged);
@@ -261,7 +261,7 @@ class BLASTSyncEngine {
     }
 
     int startSyncSet(TransactionReadyListener listener) {
-        return startSyncSet(listener, WindowState.BLAST_TIMEOUT_DURATION, "");
+        return startSyncSet(listener, BLAST_TIMEOUT_DURATION, "");
     }
 
     int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name) {
@@ -271,7 +271,7 @@ class BLASTSyncEngine {
     }
 
     void startSyncSet(SyncGroup s) {
-        startSyncSet(s, WindowState.BLAST_TIMEOUT_DURATION);
+        startSyncSet(s, BLAST_TIMEOUT_DURATION);
     }
 
     void startSyncSet(SyncGroup s, long timeoutMs) {

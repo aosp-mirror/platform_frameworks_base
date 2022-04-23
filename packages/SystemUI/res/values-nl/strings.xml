@@ -35,7 +35,7 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> toegang geven tot <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> toegang geven tot <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nDeze app heeft geen opnamerechten gekregen, maar zou audio kunnen vastleggen via dit USB-apparaat."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> toegang geven tot <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> openen om <xliff:g id="USB_DEVICE">%2$s</xliff:g> te verwerken?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> openen om te werken met <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Deze app heeft geen opnamerechten gekregen, maar zou audio kunnen vastleggen via dit USB-apparaat. Als je <xliff:g id="APPLICATION">%1$s</xliff:g> gebruikt met dit apparaat, hoor je misschien geen gesprekken, meldingen en wekkers."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Als je <xliff:g id="APPLICATION">%1$s</xliff:g> gebruikt met dit apparaat, hoor je misschien geen gesprekken, meldingen en wekkers."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> toegang geven tot <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Wil je doorgaan met je sessie?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Opnieuw starten"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, doorgaan"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Gastmodus"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Je gebruikt de gastmodus"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Nieuwe gebruiker toevoegen?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Als je een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Als je een nieuwe gebruiker toevoegt, wordt de gastmodus afgesloten en worden alle apps en gegevens van de huidige gastsessie verwijderd."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Gebruikerslimiet bereikt"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Je kunt maximaal <xliff:g id="COUNT">%d</xliff:g> gebruikers toevoegen.</item>
@@ -917,11 +922,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Tegel toevoegen"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Tegel niet toevoegen"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Gebruiker selecteren"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apps zijn actief</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> app is actief</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nieuwe informatie"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Actieve apps"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Ook als je deze apps niet gebruikt, zijn ze actief en kunnen ze de batterijduur beïnvloeden"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stoppen"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Gestopt"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Klaar"</string>

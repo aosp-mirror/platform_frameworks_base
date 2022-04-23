@@ -36,7 +36,7 @@
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Benarkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nApl ini belum diberikan kebenaran merakam tetapi dapat merakam audio melalui peranti USB ini."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Benarkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Buka <xliff:g id="APPLICATION">%1$s</xliff:g> untuk mengendalikan <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Apl ini belum diberikan kebenaran merakam tetapi dapat merakam audio melalui peranti USB ini. Tindakan menggunakan <xliff:g id="APPLICATION">%1$s</xliff:g> dengan peranti ini mungkin menghalang anda daripada mendengar panggilan, pemberitahuan dan penggera."</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Apl ini belum diberi kebenaran merakam tetapi dapat merakam audio melalui peranti USB ini. Tindakan menggunakan <xliff:g id="APPLICATION">%1$s</xliff:g> dengan peranti ini mungkin menghalang anda daripada mendengar panggilan, pemberitahuan dan penggera."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Tindakan menggunakan <xliff:g id="APPLICATION">%1$s</xliff:g> dengan peranti ini mungkin menghalang anda daripada mendengar panggilan, pemberitahuan dan penggera."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Benarkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Buka <xliff:g id="APPLICATION">%1$s</xliff:g> untuk mengendalikan <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Adakah anda ingin meneruskan sesi anda?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Mulakan semula"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ya, teruskan"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Mod tetamu"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Anda dalam mod tetamu"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Tambah pengguna baharu?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Apabila anda menambah pengguna baharu, orang itu perlu menyediakan ruang mereka.\n\nMana-mana pengguna boleh mengemas kini apl untuk semua pengguna lain."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Tindakan menambahkan pengguna baharu akan menyebabkan anda keluar daripada mod tetamu dan memadamkan semua apl dan data daripada sesi tetamu semasa."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Had pengguna dicapai"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Anda boleh menambah sehingga <xliff:g id="COUNT">%d</xliff:g> pengguna.</item>

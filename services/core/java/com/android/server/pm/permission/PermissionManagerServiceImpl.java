@@ -195,11 +195,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     /** All storage permissions */
     private static final List<String> STORAGE_PERMISSIONS = new ArrayList<>();
-
-    private static final Set<String> READ_MEDIA_AURAL_PERMISSIONS = new ArraySet<>();
-
-    private static final Set<String> READ_MEDIA_VISUAL_PERMISSIONS = new ArraySet<>();
-
     /** All nearby devices permissions */
     private static final List<String> NEARBY_DEVICES_PERMISSIONS = new ArrayList<>();
 
@@ -227,10 +222,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 Manifest.permission.INTERACT_ACROSS_USERS_FULL);
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        READ_MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
-        READ_MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
-        READ_MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
-        READ_MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
+        STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_ADVERTISE);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
@@ -2075,10 +2070,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 PermissionInfo permInfo = getPermissionInfo(
                         newPackage.getRequestedPermissions().get(i),
                         newPackage.getPackageName(), 0);
-                boolean isStorageOrMedia = STORAGE_PERMISSIONS.contains(permInfo.name)
-                        || READ_MEDIA_AURAL_PERMISSIONS.contains(permInfo.name)
-                        || READ_MEDIA_VISUAL_PERMISSIONS.contains(permInfo.name);
-                if (permInfo == null || !isStorageOrMedia) {
+                if (permInfo == null || !STORAGE_PERMISSIONS.contains(permInfo.name)) {
                     continue;
                 }
 
@@ -3152,9 +3144,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 }
                 if (bp.isRuntime()) {
 
-                    if (!(newPerm.equals(Manifest.permission.ACTIVITY_RECOGNITION)
-                            || READ_MEDIA_AURAL_PERMISSIONS.contains(newPerm)
-                            || READ_MEDIA_VISUAL_PERMISSIONS.contains(newPerm))) {
+                    if (!newPerm.equals(Manifest.permission.ACTIVITY_RECOGNITION)) {
                         ps.updatePermissionFlags(bp,
                                 FLAG_PERMISSION_REVOKE_WHEN_REQUESTED,
                                 FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);

@@ -1430,7 +1430,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new Settings(Environment.getDataDirectory(),
                         RuntimePermissionsPersistence.createInstance(),
                         i.getPermissionManagerServiceInternal(),
-                        domainVerificationService, lock),
+                        domainVerificationService, backgroundHandler, lock),
                 (i, pm) -> AppsFilterImpl.create(i,
                         i.getLocalService(PackageManagerInternal.class)),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"),
@@ -2992,7 +2992,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         if (ArrayUtils.isEmpty(userIds) && ArrayUtils.isEmpty(instantUserIds)) {
             return;
         }
-        SparseArray<int[]> broadcastAllowList = mAppsFilter.getVisibilityAllowList(
+        SparseArray<int[]> broadcastAllowList = mAppsFilter.getVisibilityAllowList(snapshot,
                 snapshot.getPackageStateInternal(packageName, Process.SYSTEM_UID),
                 userIds, snapshot.getPackageStates());
         mHandler.post(() -> mBroadcastHelper.sendPackageAddedForNewUsers(
@@ -4013,7 +4013,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 .getUriFor(Secure.INSTANT_APPS_ENABLED), false, co, UserHandle.USER_ALL);
         co.onChange(true);
 
-        mAppsFilter.onSystemReady();
+        mAppsFilter.onSystemReady(LocalServices.getService(PackageManagerInternal.class));
 
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being
         // disabled after already being started.
@@ -4226,7 +4226,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         synchronized (mLock) {
             scheduleWritePackageRestrictions(userId);
             scheduleWritePackageListLocked(userId);
-            mAppsFilter.onUserCreated(userId);
+            mAppsFilter.onUserCreated(snapshotComputer(), userId);
         }
     }
 
@@ -5751,7 +5751,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     targetPackageState = snapshotComputer().getPackageStateInternal(targetPackage);
                     mSettings.addInstallerPackageNames(targetPackageState.getInstallSource());
                 }
-                mAppsFilter.addPackage(targetPackageState);
+                mAppsFilter.addPackage(snapshotComputer(), targetPackageState);
                 scheduleWriteSettings();
             }
         }

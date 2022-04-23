@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vil du fortsætte din session?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Start forfra"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, fortsæt"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Gæstetilstand"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Gæstetilstand er aktiveret"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Vil du tilføje en ny bruger?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Når du tilføjer en ny bruger, skal personen konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle de andre brugere."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Hvis du tilføjer en ny bruger, deaktiveres gæstetilstanden, og alle apps og data slettes fra den aktuelle gæstesession."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Grænsen for antal brugere er nået"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Du kan tilføje op til <xliff:g id="COUNT">%d</xliff:g> bruger.</item>

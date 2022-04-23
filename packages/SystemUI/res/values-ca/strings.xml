@@ -136,12 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmat"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Toca Confirma per completar"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"S\'ha desbloquejat amb la cara. Prem la icona per continuar."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"S\'ha desbloquejat amb la cara. Prem per continuar."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"S\'ha reconegut la cara. Prem per continuar."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"S\'ha reconegut la cara. Prem la icona per continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticat"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Utilitza el PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utilitza el patró"</string>
@@ -318,12 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Llisca cap amunt per obrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Prem la icona de desbloqueig per obrir"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"S\'ha desbloquejat amb la cara. Prem la icona per obrir."</string>
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"S\'ha desbloquejat amb la cara. Prem per obrir."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"S\'ha reconegut la cara. Prem per obrir."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"S\'ha reconegut la cara. Prem la icona per obrir."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Llisca cap a dalt per tornar-ho a provar"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloqueja per utilitzar l\'NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Aquest dispositiu pertany a la teva organització"</string>
@@ -350,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vols continuar amb la sessió?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Torna a començar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continua"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Mode de convidat"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Estàs en mode de convidat"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Vols afegir un usuari nou?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Quan s\'afegeix un usuari nou, aquest usuari ha de configurar-se l\'espai.\n\nQualsevol usuari pot actualitzar les aplicacions de la resta d\'usuaris."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"En afegir un usuari nou, se sortirà del mode de convidat i se suprimiran totes les aplicacions i dades de la sessió de convidat actual."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"S\'ha assolit el límit d\'usuaris"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Pots afegir fins a <xliff:g id="COUNT">%d</xliff:g> usuaris.</item>
@@ -518,8 +517,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritat"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet les funcions de converses"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Aquestes notificacions no es poden modificar."</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Les notificacions de trucades no es poden modificar."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Aquest grup de notificacions no es pot configurar aquí"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notificació mitjançant aplicació intermediària"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Totes les notificacions de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -531,7 +529,7 @@
     <string name="feedback_prompt" msgid="3656728972307896379">"Fes saber els teus suggeriments al desenvolupador. La informació ha estat correcta?"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"S\'han obert els controls de notificació per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"S\'han tancat els controls de notificació per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"Més opcions"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"Més opcions de configuració"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Personalitza"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Mostra com a bombolla"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Suprimeix les bombolles"</string>

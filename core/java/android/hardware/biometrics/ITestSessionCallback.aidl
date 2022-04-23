@@ -19,7 +19,7 @@ package android.hardware.biometrics;
  * ITestSession callback for FingerprintManager and BiometricManager.
  * @hide
  */
-interface ITestSessionCallback {
+oneway interface ITestSessionCallback {
     void onCleanupStarted(int userId);
     void onCleanupFinished(int userId);
 }
