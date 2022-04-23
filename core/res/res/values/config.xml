@@ -5778,4 +5778,7 @@
     <string name="safety_protection_display_text"></string>
 
     <!-- End safety protection resources to be overlaid -->
+
+    <!-- List of the labels of requestable device state config values -->
+    <string-array name="config_deviceStatesAvailableForAppRequests"/>
 </resources>
