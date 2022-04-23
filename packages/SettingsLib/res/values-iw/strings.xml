@@ -594,7 +594,7 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"הסרת אורח"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"איפוס הגלישה כאורח"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"לאפס את הגלישה כאורח?"</string>
-    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"להסיר את האורח/ת?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"להסיר את האורח?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"איפוס"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"הסרה"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"מתבצע איפוס של הגלישה כאורח…"</string>

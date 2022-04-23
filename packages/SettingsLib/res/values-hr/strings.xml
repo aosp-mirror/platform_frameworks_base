@@ -365,11 +365,11 @@
     <string name="show_touches" msgid="8437666942161289025">"Prikaži dodire"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Prikaži vizualne povratne informacije za dodire"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Prikaži ažur. površine"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Površina prozora bljeska pri ažuriranju."</string>
-    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Pokaži ažuriranja prikaza"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Površina prozora bljeska pri ažuriranju"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Prikaži ažuriranja prikaza"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Bljeskanje prikaza u prozorima pri crtanju"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Prikaži ažuriranja hardverskih slojeva"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Hardverski slojevi bljeskaju zeleno pri ažuriranju."</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Hardverski slojevi bljeskaju zeleno pri ažuriranju"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Rješavanje GPU preklapanja"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Onemogući dijeljenje mem."</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Uvijek koristi GPU za slaganje zaslona"</string>
@@ -378,7 +378,7 @@
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Onemogući USB audiousmj."</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Onemogući aut. usmjeravanje na USB audioperiferiju"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Prikaži okvir prikaza"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Prikazuju se obrubi, margine itd. isječaka."</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Prikazuju se obrubi, margine itd. isječaka"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Nametni zdesna ulijevo"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Nametni smjer zdesna ulijevo za sve zemlje/jezike"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Dopusti zamućenja na razini prozora"</string>
@@ -594,7 +594,7 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Uklanjanje gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Poništi gostujuću sesiju"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Poništiti gostujuću sesiju?"</string>
-    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Ukloniti gosta?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Želite li ukloniti gosta?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Poništi"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Ukloni"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Poništavanje gostujuće sesije…"</string>
