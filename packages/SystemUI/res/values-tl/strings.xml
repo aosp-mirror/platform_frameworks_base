@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Gusto mo bang ipagpatuloy ang iyong session?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Magsimulang muli"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Oo, magpatuloy"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Guest mode"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Naka-guest mode ka"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Magdagdag ng bagong user?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nAng sinumang user ay maaaring mag-update ng mga app para sa lahat ng iba pang user."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Kapag nagdagdag ka ng bagong user, aalis sa guest mode at made-delete ang lahat ng app at data mula sa kasalukuyang session ng bisita."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Naabot na ang limitasyon sa user"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Maaari kang magdagdag ng hanggang <xliff:g id="COUNT">%d</xliff:g> user.</item>
@@ -917,11 +922,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Idagdag ang tile"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Huwag idagdag"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Pumili ng user"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> app ang aktibo</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> na app ang aktibo</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Bagong impormasyon"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Mga aktibong app"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Kahit na hindi mo ginagamit ang mga app na ito, aktibo pa rin ang mga ito at posibleng maapektuhan ng mga ito ang tagal ng baterya"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Ihinto"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Inihinto"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Tapos na"</string>

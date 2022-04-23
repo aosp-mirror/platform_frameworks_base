@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vuoi continuare la sessione?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Ricomincia"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sì, continua"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Modalità Ospite"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Sei in modalità Ospite"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Aggiungere un nuovo utente?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Il nuovo utente, una volta aggiunto, deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Se aggiungi un nuovo utente, la modalità Ospite viene disattivata e vengono eliminati tutti i dati e le app della sessione Ospite corrente."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite di utenti raggiunto"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Puoi aggiungere fino a <xliff:g id="COUNT">%d</xliff:g> utenti.</item>
@@ -423,7 +428,7 @@
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Panoramica."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Home."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"I dati personali potrebbero essere accessibili (ad esempio i contatti e i contenuti delle email)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"L\'app bloccata su schermo potrebbe aprire altre app."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"L\'app bloccata sullo schermo potrebbe aprire altre app."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Per sbloccare questa app, tocca e tieni premuti i pulsanti Indietro e Panoramica"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Per sbloccare questa app, tocca e tieni premuti i pulsanti Indietro e Home"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Per sbloccare questa app, scorri verso l\'alto e tieni premuto"</string>
@@ -917,11 +922,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Aggiungi riquadro"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Non aggiungerlo"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleziona utente"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other">Ci sono <xliff:g id="COUNT_1">%s</xliff:g> app attive</item>
+      <item quantity="one">C\'è <xliff:g id="COUNT_0">%s</xliff:g> app attiva</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nuove informazioni"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"App attive"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Queste app sono ancora attive anche se non le stai usando e potrebbero incidere sulla durata della batteria"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Interrompi"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Interrotta"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Fine"</string>

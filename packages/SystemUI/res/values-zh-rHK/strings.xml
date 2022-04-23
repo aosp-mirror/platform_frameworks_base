@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"您要繼續您的工作階段嗎？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新開始"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"是的，請繼續"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"訪客模式"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"您正在使用訪客模式"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"新增使用者？"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"新增的使用者需要自行設定個人空間。\n\n任何使用者均可為所有其他使用者更新應用程式。"</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"新增使用者後，系統就會結束訪客模式，並刪除目前訪客工作階段中的所有應用程式和資料。"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"已達到使用者上限"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">您可以加入多達 <xliff:g id="COUNT">%d</xliff:g> 個使用者。</item>
@@ -917,11 +922,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"新增圖塊"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不要新增圖塊"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"選取使用者"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other">已啟用 <xliff:g id="COUNT_1">%s</xliff:g> 個應用程式</item>
+      <item quantity="one">已啟用 <xliff:g id="COUNT_0">%s</xliff:g> 個應用程式</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新資料"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"使用中的應用程式"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"即使您並非正在使用這些應用程式，它們仍然在啟用狀態，而且可能會影響電池壽命"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完成"</string>

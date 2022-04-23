@@ -30,6 +30,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.pm.resolution.ComponentResolver
+import com.android.server.pm.snapshot.PackageDataSnapshot
 import com.android.server.pm.test.override.PackageManagerComponentLabelIconOverrideTest.Companion.Params.AppType
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.mock
@@ -361,8 +362,8 @@ class PackageManagerComponentLabelIconOverrideTest {
             whenever(this.isCallerRecents(anyInt())) { false }
         }
         val mockAppsFilter: AppsFilterImpl = mockThrowOnUnmocked {
-            whenever(this.shouldFilterApplication(anyInt(), any<PackageSetting>(),
-                    any<PackageSetting>(), anyInt())) { false }
+            whenever(this.shouldFilterApplication(any<PackageDataSnapshot>(), anyInt(), 
+                    any<PackageSetting>(), any<PackageSetting>(), anyInt())) { false }
             whenever(this.snapshot()) { this@mockThrowOnUnmocked }
             whenever(registerObserver(any())).thenCallRealMethod()
         }

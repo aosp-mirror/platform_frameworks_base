@@ -36,7 +36,7 @@
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_DEVICE">%2$s</xliff:g> अ‍ॅक्सेस करण्याची अनुमती द्यायची का?\nया अ‍ॅपला रेकॉर्ड करण्याची परवानगी दिलेली नाही पण या USB डिव्हाइसद्वारे ऑडिओ कॅप्चर केला जाऊ शकतो."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_DEVICE">%2$s</xliff:g> अ‍ॅक्सेस करण्याची अनुमती द्यायची आहे का?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> हाताळण्यासाठी <xliff:g id="APPLICATION">%1$s</xliff:g> उघडायचे आहे का?"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"या अ‍ॅपला रेकॉर्ड करण्याची परवानगी दिलेली नाही पण या USB डिव्हाइसद्वारे ऑडिओ कॅप्चर केला जाऊ शकतो. <xliff:g id="APPLICATION">%1$s</xliff:g> चा वापर या डिव्हाइससह केल्याने कॉल, सूचना आणि अलार्मचा आवाज कदाचित ऐकू येणार नाही."</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"या अ‍ॅपला रेकॉर्ड करण्याची परवानगी दिलेली नाही, पण या USB डिव्हाइसद्वारे ऑडिओ कॅप्चर केला जाऊ शकतो. <xliff:g id="APPLICATION">%1$s</xliff:g> चा वापर या डिव्हाइससह केल्याने कॉल, सूचना आणि अलार्मचा आवाज कदाचित ऐकू येणार नाही."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"<xliff:g id="APPLICATION">%1$s</xliff:g> चा वापर या डिव्हाइससह केल्याने कॉल, सूचना आणि अलार्मचा आवाज कदाचित ऐकू येणार नाही."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> अ‍ॅक्सेस करण्याची अनुमती द्यायची का?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> हाताळण्यासाठी <xliff:g id="APPLICATION">%1$s</xliff:g> उघडायचे का?"</string>
@@ -136,12 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"निश्चित केले"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"पूर्ण करण्यासाठी खात्री करा वर टॅप करा"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"चेहऱ्याने अनलॉक केले. सुरू ठेवण्यासाठी अनलॉक करा आयकन दाबा."</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"चेहऱ्याने अनलॉक केले आहे. पुढे सुरू ठेवण्यासाठी दाबा."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"चेहरा ओळखला आहे. पुढे सुरू ठेवण्यासाठी दाबा."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"चेहरा ओळखला आहे. पुढे सुरू ठेवण्यासाठी अनलॉक करा आयकन दाबा."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ऑथेंटिकेशन केलेले"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"पिन वापरा"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"पॅटर्न वापरा"</string>
@@ -318,12 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"उघडण्यासाठी वर स्वाइप करा"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"उघडण्यासाठी अनलॉक करा आयकन दाबा"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"चेहऱ्याने अनलॉक केले. उघडण्यासाठी अनलॉक करा आयकन दाबा."</string>
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"चेहऱ्याने अनलॉक केले आहे. उघडण्यासाठी दाबा."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"चेहरा ओळखला आहे. उघडण्यासाठी दाबा."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"चेहरा ओळखला आहे. उघडण्यासाठी अनलॉक करा आयकन दाबा."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"पुन्हा प्रयत्न करण्यासाठी वर स्‍वाइप करा"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC वापरण्यासाठी स्क्रीन अनलॉक करा"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"हे डिव्हाइस तुमच्या संस्थेचे आहे"</string>
@@ -350,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"तुम्ही तुमचे सत्र सुरू ठेवू इच्छिता?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"येथून सुरू करा"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"होय, सुरू ठेवा"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"अतिथी मोड"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"तुम्ही अतिथी मोडमध्ये आहात"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"नवीन वापरकर्ता जोडायचा?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"तुम्ही एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीने त्यांचे स्थान सेट करणे आवश्यक असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"नवीन वापरकर्ता जोडल्याने अतिथी मोडमधून बाहेर पडेल आणि सध्याच्या अतिथी सत्रातील सर्व अ‍ॅप्स व डेटा हटवला जाईल."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"वापरकर्ता मर्यादा गाठली"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">तुम्ही <xliff:g id="COUNT">%d</xliff:g> वापरकर्त्यांपर्यंत जोडू शकता.</item>
@@ -518,8 +517,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राधान्य"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे संभाषण वैशिष्ट्यांना सपोर्ट करत नाही"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"कॉलशी संबंधित सूचनांमध्ये फेरबदल केला जाऊ शकत नाही."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉंफिगर केला जाऊ शकत नाही"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी केलेल्या सूचना"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"सर्व <xliff:g id="APP_NAME">%1$s</xliff:g> वरील सूचना"</string>

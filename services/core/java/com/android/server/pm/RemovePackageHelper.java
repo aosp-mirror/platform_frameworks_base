@@ -274,8 +274,9 @@ final class RemovePackageHelper {
             synchronized (mPm.mLock) {
                 mPm.mDomainVerificationManager.clearPackage(deletedPs.getPackageName());
                 mPm.mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
-                mPm.mAppsFilter.removePackage(mPm.snapshotComputer()
-                                .getPackageStateInternal(packageName), false /* isReplace */);
+                final Computer snapshot = mPm.snapshotComputer();
+                mPm.mAppsFilter.removePackage(snapshot,
+                        snapshot.getPackageStateInternal(packageName), false /* isReplace */);
                 removedAppId = mPm.mSettings.removePackageLPw(packageName);
                 if (outInfo != null) {
                     outInfo.mRemovedAppId = removedAppId;

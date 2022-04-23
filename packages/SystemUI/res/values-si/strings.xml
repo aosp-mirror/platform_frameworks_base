@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ඔබගේ සැසිය දිගටම කරගෙන යෑමට ඔබට අවශ්‍යද?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"යළි මුල සිට අරඹන්න"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ඔව්, දිගටම කරගෙන යන්න"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"ආගන්තුක ප්‍රකාරය"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"ඔබ ආගන්තුක ප්‍රකාරයේ සිටී"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"අලුත් පරිශීලකයෙක් එක් කරන්නද?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"ඔබ අලුත් පරිශීලකයෙක් එකතු කරන විට, එම පුද්ගලයා ඔහුගේ වැඩ කරන ඉඩ සකසා ගත යුතුය.\n\nසියළුම අනෙක් පරිශීලකයින් සඳහා ඕනෑම පරිශීලකයෙකුට යාවත්කාලීන කළ හැක."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"නව පරිශීලකයෙකු එක් කිරීම ආගන්තුක මාදිලියෙන් පිටවී වත්මන් ආගන්තුක සැසියෙන් සියලුම යෙදුම් සහ දත්ත මකනු ඇත."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"පරිශීලක සීමාවට ළඟා විය"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">ඔබට පරිශීලකයින් <xliff:g id="COUNT">%d</xliff:g>ක් දක්වා එක් කළ හැකිය.</item>

@@ -346,6 +346,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Желите ли да наставите сесију?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Почни из почетка"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Да, настави"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Режим госта"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Користите режим госта"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Додајете новог корисника?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Када додате новог корисника, та особа треба да подеси свој простор.\n\nСваки корисник може да ажурира апликације за све остале кориснике."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Додавањем новог корисника изаћи ћете из режима госта и избрисаћете све апликације и податке из актуелне сесије госта."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Достигнут максимални број корисника"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Можете да додате највише <xliff:g id="COUNT">%d</xliff:g> корисника.</item>
@@ -923,11 +928,14 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Додај плочицу"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не додај плочицу"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Изаберите корисника"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> апликација је активна</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> апликације су активне</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> апликација је активно</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Нове информације"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Активне апликације"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Чак и ако не користите ове апликације, оне су и даље активне и могу да утичу на трајање батерије"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Заустави"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Заустављено"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Готово"</string>

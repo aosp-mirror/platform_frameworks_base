@@ -249,7 +249,7 @@ interface IWindowManager
      * Set whether screen capture is disabled for all windows of a specific user from
      * the device policy cache.
      */
-    void refreshScreenCaptureDisabled(int userId);
+    void refreshScreenCaptureDisabled();
 
     // These can only be called with the SET_ORIENTATION permission.
     /**

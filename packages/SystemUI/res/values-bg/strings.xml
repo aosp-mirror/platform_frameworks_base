@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Искате ли да продължите сесията си?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Започване отначало"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Да, продължавам"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Режим на гост"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Вие сте в режим на гост"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Да се добави ли нов потребител?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Когато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"С добавянето на нов потребител ще излезете от режима на гост и ще изтриете всички приложения и данни от текущата сесия като гост."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Достигнахте огранич. за потребители"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Можете да добавите до <xliff:g id="COUNT">%d</xliff:g> потребители.</item>
@@ -917,11 +922,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Добавяне на панел"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Отмяна на добавянето"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Избор на потребител"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> приложения са активни</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> приложение е активно</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Нова информация"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Активни приложения"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Дори и да не използвате тези приложения, те са активни и може да окажат влияние върху живота на батерията"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Спиране"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Спряно"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Готово"</string>
