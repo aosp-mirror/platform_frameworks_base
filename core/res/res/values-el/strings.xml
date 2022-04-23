@@ -1912,8 +1912,8 @@
     <string name="importance_from_user" msgid="2782756722448800447">"Μπορείτε να ρυθμίσετε τη βαρύτητα αυτών των ειδοποιήσεων."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Αυτό είναι σημαντικό λόγω των ατόμων που συμμετέχουν."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Προσαρμοσμένη ειδοποίηση εφαρμογής"</string>
-    <string name="user_creation_account_exists" msgid="2239146360099708035">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν τον λογαριασμό);"</string>
-    <string name="user_creation_adding" msgid="7305185499667958364">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
+    <string name="user_creation_account_exists" msgid="2239146360099708035">"Επιτρέπετε στο <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν τον λογαριασμό);"</string>
+    <string name="user_creation_adding" msgid="7305185499667958364">"Επιτρέπετε στο <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Προσθήκη εποπτευόμενου χρήστη"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Προσθήκη γλώσσας"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Προτίμηση περιοχής"</string>
@@ -2037,7 +2037,7 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ΑΠΕΓΚΑΤΑΣΤΑΣΗ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ΑΝΟΙΓΜΑ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Εντοπίστηκε επιβλαβής εφαρμογή"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Να επιτρέπεται στην εφαρμογή <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> η πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής;"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Να επιτρέπεται στο <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> η πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής;"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Να επιτρέπεται η πρόσβαση για μία φορά"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Να μην επιτραπεί"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Τα αρχεία καταγραφής συσκευής καταγράφουν ό,τι συμβαίνει στη συσκευή σας. Οι εφαρμογές μπορούν να χρησιμοποιούν αυτά τα αρχεία καταγραφής για να εντοπίζουν και να διορθώνουν ζητήματα.\n\nΟρισμένα αρχεία καταγραφής ενδέχεται να περιέχουν ευαίσθητες πληροφορίες. Ως εκ τούτου, επιτρέψτε την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής μόνο στις εφαρμογές που εμπιστεύεστε. \n\nΕάν δεν επιτρέψετε σε αυτήν την εφαρμογή την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής, η εφαρμογή εξακολουθεί να έχει πρόσβαση στα δικά της αρχεία καταγραφής. Ο κατασκευαστής της συσκευής σας ενδέχεται να εξακολουθεί να έχει πρόσβαση σε ορισμένα αρχεία καταγραφής ή ορισμένες πληροφορίες στη συσκευή σας. Μάθετε περισσότερα"</string>

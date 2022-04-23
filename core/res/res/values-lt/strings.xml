@@ -2276,11 +2276,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Pranešimas „<xliff:g id="MESSAGE">%1$s</xliff:g>“ išverstas."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Pranešimas išverstas iš <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> į <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Veikla fone"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Programa eikvoja akumuliatoriaus energiją"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Programa vis dar aktyvi"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"„<xliff:g id="APP">%1$s</xliff:g>“ veikia fone. Palieskite ir tvarkykite akumuliatoriaus energijos vartojimą."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Programa „<xliff:g id="APP">%1$s</xliff:g>“ gali turėti įtakos akumuliatoriaus veikimo laikui. Palieskite ir peržiūrėkite aktyvias programas."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Peržiūrėkite aktyvias programas"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nepavyko pasiekti telefono fotoaparato iš „<xliff:g id="DEVICE">%1$s</xliff:g>“"</string>

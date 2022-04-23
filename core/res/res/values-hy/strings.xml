@@ -1927,7 +1927,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Մանրամասն"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Չեղարկել դադարեցումը"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"Միացնե՞լ հավելվածները"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Միացրեք աշխատանքային հավելվածներն ու ծանուցումները"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Ձեզ հասանելի կդառնան ձեր աշխատանքային հավելվածներն ու ծանուցումները"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Միացնել"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>

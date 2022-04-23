@@ -2276,11 +2276,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Przetłumaczono wiadomość: <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Wiadomość przetłumaczono z języka: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> na język: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktywność w tle"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Aplikacja zużywa baterię"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Aplikacja jest wciąż aktywna"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> działa w tle. Kliknij, by zarządzać wykorzystaniem baterii."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> może mieć wpływ na czas pracy na baterii. Kliknij, aby sprawdzić aktywne aplikacje."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Sprawdź aktywne aplikacje"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nie można korzystać z aparatu telefonu na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

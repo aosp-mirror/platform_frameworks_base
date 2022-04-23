@@ -1320,7 +1320,7 @@
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Жөнөтүү"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Айнуу"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Менин тандоомду эстеп кал"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Муну кийин Тууралоолор &gt; Колдонмолордон өзгөртө аласыз"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Муну кийин Тууралоо &gt; Колдонмолордон өзгөртө аласыз"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Дайыма уруксат берүү"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Эч качан уруксат берилбесин"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"SIM-карта өчүрүлдү"</string>
