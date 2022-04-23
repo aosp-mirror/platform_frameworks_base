@@ -551,7 +551,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final int mSdkVersion;
     final Context mContext;
     final boolean mFactoryTest;
-    private final boolean mOnlyCore;
     final DisplayMetrics mMetrics;
     private final int mDefParseFlags;
     private final String[] mSeparateProcesses;
@@ -1402,7 +1401,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     public static Pair<PackageManagerService, IPackageManager> main(Context context,
             Installer installer, @NonNull DomainVerificationService domainVerificationService,
-            boolean factoryTest, boolean onlyCore) {
+            boolean factoryTest) {
         // Self-check for initial settings.
         PackageManagerServiceCompilerMapping.checkProperties();
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
@@ -1422,12 +1421,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> PermissionManagerService.create(context,
                         i.getSystemConfig().getAvailableFeatures()),
                 (i, pm) -> new UserManagerService(context, pm,
-                        new UserDataPreparer(installer, installLock, context, onlyCore),
-                        lock),
+                        new UserDataPreparer(installer, installLock, context), lock),
                 (i, pm) -> new Settings(Environment.getDataDirectory(),
                         RuntimePermissionsPersistence.createInstance(),
                         i.getPermissionManagerServiceInternal(),
-                        domainVerificationService, lock),
+                        domainVerificationService, backgroundHandler, lock),
                 (i, pm) -> AppsFilterImpl.create(i,
                         i.getLocalService(PackageManagerInternal.class)),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"),
@@ -1445,14 +1443,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new DefaultAppProvider(() -> context.getSystemService(RoleManager.class),
                         () -> LocalServices.getService(UserManagerInternal.class)),
                 (i, pm) -> new DisplayMetrics(),
-                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, pm.mOnlyCore,
-                        i.getDisplayMetrics(), pm.mCacheDir,
+                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, i.getDisplayMetrics(),
+                        pm.mCacheDir,
                         pm.mPackageParserCallback) /* scanningCachingPackageParserProducer */,
-                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, pm.mOnlyCore,
-                        i.getDisplayMetrics(), null,
+                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, i.getDisplayMetrics(), null,
                         pm.mPackageParserCallback) /* scanningPackageParserProducer */,
-                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, false, i.getDisplayMetrics(),
-                        null, pm.mPackageParserCallback) /* preparingPackageParserProducer */,
+                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, i.getDisplayMetrics(), null,
+                        pm.mPackageParserCallback) /* preparingPackageParserProducer */,
                 // Prepare a supplier of package parser for the staging manager to parse apex file
                 // during the staging installation.
                 (i, pm) -> new PackageInstallerService(
@@ -1480,7 +1477,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
         }
 
-        PackageManagerService m = new PackageManagerService(injector, onlyCore, factoryTest,
+        PackageManagerService m = new PackageManagerService(injector, factoryTest,
                 PackagePartitions.FINGERPRINT, Build.IS_ENG, Build.IS_USERDEBUG,
                 Build.VERSION.SDK_INT, Build.VERSION.INCREMENTAL);
         t.traceEnd(); // "create package manager"
@@ -1630,7 +1627,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mMetrics = testParams.Metrics;
         mModuleInfoProvider = testParams.moduleInfoProvider;
         mMoveCallbacks = testParams.moveCallbacks;
-        mOnlyCore = testParams.onlyCore;
         mOverlayConfig = testParams.overlayConfig;
         mPackageDexOptimizer = testParams.packageDexOptimizer;
         mPackageParserCallback = testParams.packageParserCallback;
@@ -1694,9 +1690,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         invalidatePackageInfoCache();
     }
 
-    public PackageManagerService(PackageManagerServiceInjector injector, boolean onlyCore,
-            boolean factoryTest, final String buildFingerprint, final boolean isEngBuild,
-            final boolean isUserDebugBuild, final int sdkVersion, final String incrementalVersion) {
+    public PackageManagerService(PackageManagerServiceInjector injector, boolean factoryTest,
+            final String buildFingerprint, final boolean isEngBuild, final boolean isUserDebugBuild,
+            final int sdkVersion, final String incrementalVersion) {
         mIsEngBuild = isEngBuild;
         mIsUserDebugBuild = isUserDebugBuild;
         mSdkVersion = sdkVersion;
@@ -1718,7 +1714,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         mContext = injector.getContext();
         mFactoryTest = factoryTest;
-        mOnlyCore = onlyCore;
         mMetrics = injector.getDisplayMetrics();
         mInstaller = injector.getInstaller();
         mEnableFreeCacheV2 = SystemProperties.getBoolean("fw.free_cache_v2", true);
@@ -1918,7 +1913,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mPermissionManager.readLegacyPermissionsTEMP(mSettings.mPermissions);
             mPermissionManager.readLegacyPermissionStateTEMP();
 
-            if (!mOnlyCore && mFirstBoot) {
+            if (mFirstBoot) {
                 DexOptHelper.requestCopyPreoptedFiles();
             }
 
@@ -2069,21 +2064,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     StorageManager.UUID_PRIVATE_INTERNAL, mIsUpgrade);
             ver.sdkVersion = mSdkVersion;
 
-            // If this is the first boot or an update from pre-M, and it is a normal
-            // boot, then we need to initialize the default preferred apps across
-            // all defined users.
-            if (!mOnlyCore && (mPromoteSystemApps || mFirstBoot)) {
+            // If this is the first boot or an update from pre-M, then we need to initialize the
+            // default preferred apps across all defined users.
+            if (mPromoteSystemApps || mFirstBoot) {
                 for (UserInfo user : mInjector.getUserManagerInternal().getUsers(true)) {
                     mSettings.applyDefaultPreferredAppsLPw(user.id);
                 }
             }
 
-            // If this is first boot after an OTA, and a normal boot, then
-            // we need to clear code cache directories.
+            // If this is first boot after an OTA, then we need to clear code cache directories.
             // Note that we do *not* clear the application profiles. These remain valid
             // across OTAs and are used to drive profile verification (post OTA) and
             // profile compilation (without waiting to collect a fresh set of profiles).
-            if (mIsUpgrade && !mOnlyCore) {
+            if (mIsUpgrade) {
                 Slog.i(TAG, "Build fingerprint changed; clearing code caches");
                 for (int i = 0; i < packageSettings.size(); i++) {
                     final PackageSetting ps = packageSettings.valueAt(i);
@@ -2103,7 +2096,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             // Legacy existing (installed before Q) non-system apps to hide
             // their icons in launcher.
-            if (!mOnlyCore && mIsPreQUpgrade) {
+            if (mIsPreQUpgrade) {
                 Slog.i(TAG, "Allowlisting all existing apps to hide their icons");
                 int size = packageSettings.size();
                 for (int i = 0; i < size; i++) {
@@ -2129,33 +2122,25 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
 
-            if (!mOnlyCore) {
-                mRequiredVerifierPackage = getRequiredButNotReallyRequiredVerifierLPr(computer);
-                mRequiredInstallerPackage = getRequiredInstallerLPr(computer);
-                mRequiredUninstallerPackage = getRequiredUninstallerLPr(computer);
-                ComponentName intentFilterVerifierComponent =
-                        getIntentFilterVerifierComponentNameLPr(computer);
-                ComponentName domainVerificationAgent =
-                        getDomainVerificationAgentComponentNameLPr(computer);
+            mRequiredVerifierPackage = getRequiredButNotReallyRequiredVerifierLPr(computer);
+            mRequiredInstallerPackage = getRequiredInstallerLPr(computer);
+            mRequiredUninstallerPackage = getRequiredUninstallerLPr(computer);
+            ComponentName intentFilterVerifierComponent =
+                    getIntentFilterVerifierComponentNameLPr(computer);
+            ComponentName domainVerificationAgent =
+                    getDomainVerificationAgentComponentNameLPr(computer);
 
-                DomainVerificationProxy domainVerificationProxy = DomainVerificationProxy.makeProxy(
-                        intentFilterVerifierComponent, domainVerificationAgent, mContext,
-                        mDomainVerificationManager, mDomainVerificationManager.getCollector(),
-                        mDomainVerificationConnection);
+            DomainVerificationProxy domainVerificationProxy = DomainVerificationProxy.makeProxy(
+                    intentFilterVerifierComponent, domainVerificationAgent, mContext,
+                    mDomainVerificationManager, mDomainVerificationManager.getCollector(),
+                    mDomainVerificationConnection);
 
-                mDomainVerificationManager.setProxy(domainVerificationProxy);
+            mDomainVerificationManager.setProxy(domainVerificationProxy);
 
-                mServicesExtensionPackageName = getRequiredServicesExtensionPackageLPr(computer);
-                mSharedSystemSharedLibraryPackageName = getRequiredSharedLibrary(computer,
-                        PackageManager.SYSTEM_SHARED_LIBRARY_SHARED,
-                        SharedLibraryInfo.VERSION_UNDEFINED);
-            } else {
-                mRequiredVerifierPackage = null;
-                mRequiredInstallerPackage = null;
-                mRequiredUninstallerPackage = null;
-                mServicesExtensionPackageName = null;
-                mSharedSystemSharedLibraryPackageName = null;
-            }
+            mServicesExtensionPackageName = getRequiredServicesExtensionPackageLPr(computer);
+            mSharedSystemSharedLibraryPackageName = getRequiredSharedLibrary(computer,
+                    PackageManager.SYSTEM_SHARED_LIBRARY_SHARED,
+                    SharedLibraryInfo.VERSION_UNDEFINED);
 
             // PermissionController hosts default permission granting and role management, so it's a
             // critical part of the core system.
@@ -2269,11 +2254,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     public boolean isFirstBoot() {
         // allow instant applications
         return mFirstBoot;
-    }
-
-    public boolean isOnlyCoreApps() {
-        // allow instant applications
-        return mOnlyCore;
     }
 
     public boolean isDeviceUpgrading() {

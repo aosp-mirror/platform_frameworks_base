@@ -65,8 +65,8 @@ public class PackageParser2 implements AutoCloseable {
     public static PackageParser2 forParsingFileWithDefaults() {
         IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
-        return new PackageParser2(null /* separateProcesses */, false /* onlyCoreApps */,
-                null /* displayMetrics */, null /* cacheDir */, new Callback() {
+        return new PackageParser2(null /* separateProcesses */, null /* displayMetrics */,
+                null /* cacheDir */, new Callback() {
             @Override
             public boolean isChangeEnabled(long changeId, @NonNull ApplicationInfo appInfo) {
                 try {
@@ -108,13 +108,8 @@ public class PackageParser2 implements AutoCloseable {
 
     private ParsingPackageUtils parsingUtils;
 
-    /**
-     * @param onlyCoreApps Flag indicating this parser should only consider apps with
-     *                     {@code coreApp} manifest attribute to be valid apps. This is useful when
-     *                     creating a minimalist boot environment.
-     */
-    public PackageParser2(String[] separateProcesses, boolean onlyCoreApps,
-            DisplayMetrics displayMetrics, @Nullable File cacheDir, @NonNull Callback callback) {
+    public PackageParser2(String[] separateProcesses, DisplayMetrics displayMetrics,
+            @Nullable File cacheDir, @NonNull Callback callback) {
         if (displayMetrics == null) {
             displayMetrics = new DisplayMetrics();
             displayMetrics.setToDefaults();
@@ -127,8 +122,8 @@ public class PackageParser2 implements AutoCloseable {
 
         mCacher = cacheDir == null ? null : new PackageCacher(cacheDir);
 
-        parsingUtils = new ParsingPackageUtils(onlyCoreApps, separateProcesses, displayMetrics,
-                splitPermissions, callback);
+        parsingUtils = new ParsingPackageUtils(separateProcesses, displayMetrics, splitPermissions,
+                callback);
 
         ParseInput.Callback enforcementCallback = (changeId, packageName, targetSdkVersion) -> {
             ApplicationInfo appInfo = mSharedAppInfo.get();

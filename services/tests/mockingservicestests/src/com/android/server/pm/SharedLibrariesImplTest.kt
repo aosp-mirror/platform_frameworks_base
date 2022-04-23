@@ -104,7 +104,6 @@ class SharedLibrariesImplTest {
         stageScanExistingPackages()
 
         mPms = spy(PackageManagerService(mMockSystem.mocks().injector,
-            false /*coreOnly*/,
             false /*factoryTest*/,
             MockSystem.DEFAULT_VERSION_INFO.fingerprint,
             false /*isEngBuild*/,

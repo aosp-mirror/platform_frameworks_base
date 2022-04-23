@@ -24,8 +24,18 @@
 
 namespace android {
 
-// Converstion to/from Java IBinder Object and C++ IBinder instance.
+/**
+ * Conversion to Java IBinder Object from C++ IBinder instance.
+ *
+ * WARNING: this function returns global and local references. This can be
+ * figured out using GetObjectRefType. Though, when this function is called
+ * from within a Java context, the local ref will automatically be cleaned
+ * up. If this is called outside of a Java frame,
+ * PushObjectFrame/PopObjectFrame can simulate this automatic cleanup. The
+ * platform provides ScopedLocalFrame as an RAII object for this.
+ */
 extern jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val);
+/** Conversion from Java IBinder Object to C++ IBinder instance. */
 extern sp<IBinder> ibinderForJavaObject(JNIEnv* env, jobject obj);
 
 extern jobject newParcelFileDescriptor(JNIEnv* env, jobject fileDesc);

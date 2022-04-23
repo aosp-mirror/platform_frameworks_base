@@ -151,13 +151,21 @@ class SeekBarViewModel @Inject constructor(
     }
 
     /**
-     * Event indicating that the user has moved the seek bar but hasn't yet finished the gesture.
+     * Event indicating that the user has moved the seek bar.
+     *
      * @param position Current location in the track.
      */
     @AnyThread
     fun onSeekProgress(position: Long) = bgExecutor.execute {
         if (scrubbing) {
+            // The user hasn't yet finished their touch gesture, so only update the data for visual
+            // feedback and don't update [controller] yet.
             _data = _data.copy(elapsedTime = position.toInt())
+        } else {
+            // The seek progress came from an a11y action and we should immediately update to the
+            // new position. (a11y actions to change the seekbar position don't trigger
+            // SeekBar.OnSeekBarChangeListener.onStartTrackingTouch or onStopTrackingTouch.)
+            onSeek(position)
         }
     }
 

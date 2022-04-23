@@ -497,8 +497,6 @@ public final class Font {
         private static native long nBuild(
                 long builderPtr, @NonNull ByteBuffer buffer, @NonNull String filePath,
                 @NonNull String localeList, int weight, boolean italic, int ttcIndex);
-        @CriticalNative
-        private static native long nGetReleaseNativeFont();
 
         @FastNative
         private static native long nClone(long fontPtr, long builderPtr, int weight,

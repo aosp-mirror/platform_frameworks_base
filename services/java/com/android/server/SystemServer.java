@@ -1218,7 +1218,7 @@ public final class SystemServer implements Dumpable {
             Watchdog.getInstance().pauseWatchingCurrentThread("packagemanagermain");
             Pair<PackageManagerService, IPackageManager> pmsPair = PackageManagerService.main(
                     mSystemContext, installer, domainVerificationService,
-                    mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, /* onlyCore= */ false);
+                    mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF);
             mPackageManagerService = pmsPair.first;
             iPackageManager = pmsPair.second;
         } finally {

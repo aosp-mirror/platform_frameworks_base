@@ -846,13 +846,6 @@ public abstract class PackageManagerInternal {
     public abstract int[] getPermissionGids(String permissionName, int userId);
 
     /**
-     * Return if device is currently in a "core" boot environment, typically
-     * used to support full-disk encryption. Only apps marked with
-     * {@code coreApp} attribute are available.
-     */
-    public abstract boolean isOnlyCoreApps();
-
-    /**
      * Make a best-effort attempt to provide the requested free disk space by
      * deleting cached files.
      *

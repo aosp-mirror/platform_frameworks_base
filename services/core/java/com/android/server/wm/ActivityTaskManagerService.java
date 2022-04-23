@@ -3331,7 +3331,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             userId = activity.mUserId;
         }
-        return DevicePolicyCache.getInstance().isScreenCaptureAllowed(userId, false);
+        return DevicePolicyCache.getInstance().isScreenCaptureAllowed(userId);
     }
 
     private void onLocalVoiceInteractionStartedLocked(IBinder activity,

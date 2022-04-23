@@ -90,6 +90,7 @@ import java.util.Set;
 public class UserManager {
 
     private static final String TAG = "UserManager";
+
     @UnsupportedAppUsage
     private final IUserManager mService;
     /** Holding the Application context (not constructor param context). */
@@ -1565,6 +1566,27 @@ public class UserManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}
 
+    /**
+     * Property used to override whether the device uses headless system user mode.
+     *
+     * <p>Only used on non-user builds.
+     *
+     * <p><b>NOTE: </b>setting this variable directly won't properly change the headless system user
+     * mode behavior and might put the device in a bad state; the system user mode should be changed
+     * using {@code cmd user set-system-user-mode-emulation} instead.
+     *
+     * @hide
+     */
+    public static final String DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY =
+            "persist.debug.user_mode_emulation";
+
+    /** @hide */
+    public static final String SYSTEM_USER_MODE_EMULATION_DEFAULT = "default";
+    /** @hide */
+    public static final String SYSTEM_USER_MODE_EMULATION_FULL = "full";
+    /** @hide */
+    public static final String SYSTEM_USER_MODE_EMULATION_HEADLESS = "headless";
+
     private static final String ACTION_CREATE_USER = "android.os.action.CREATE_USER";
 
     /**
@@ -2022,7 +2044,28 @@ public class UserManager {
      * @return whether the device is running in a headless system user mode.
      */
     public static boolean isHeadlessSystemUserMode() {
-        return RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER;
+        final boolean realMode = RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER;
+        if (!Build.isDebuggable()) {
+            return realMode;
+        }
+
+        final String emulatedMode = SystemProperties.get(DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY);
+        switch (emulatedMode) {
+            case SYSTEM_USER_MODE_EMULATION_FULL:
+                Log.d(TAG, "isHeadlessSystemUserMode(): emulating as false");
+                return false;
+            case SYSTEM_USER_MODE_EMULATION_HEADLESS:
+                Log.d(TAG, "isHeadlessSystemUserMode(): emulating as true");
+                return true;
+            case SYSTEM_USER_MODE_EMULATION_DEFAULT:
+            case "": // property not set
+                return realMode;
+            default:
+                Log.wtf(TAG, "isHeadlessSystemUserMode(): invalid value of property "
+                        + DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY + " (" + emulatedMode + "); using"
+                                + " default value (headless=" + realMode + ")");
+                return realMode;
+        }
     }
 
     /**

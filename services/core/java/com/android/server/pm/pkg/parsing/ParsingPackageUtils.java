@@ -23,7 +23,6 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFES
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_RESOURCES_ARSC_COMPRESSED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 import static android.os.Build.VERSION_CODES.DONUT;
@@ -283,7 +282,7 @@ public class ParsingPackageUtils {
             boolean collectCertificates) {
         ParseResult<ParsingPackage> result;
 
-        ParsingPackageUtils parser = new ParsingPackageUtils(false, null /*separateProcesses*/,
+        ParsingPackageUtils parser = new ParsingPackageUtils(null /*separateProcesses*/,
                 null /*displayMetrics*/, splitPermissions, new Callback() {
             @Override
             public boolean hasFeature(String feature) {
@@ -324,18 +323,15 @@ public class ParsingPackageUtils {
         return input.success(pkg);
     }
 
-    private boolean mOnlyCoreApps;
     private String[] mSeparateProcesses;
     private DisplayMetrics mDisplayMetrics;
     @NonNull
     private List<PermissionManager.SplitPermissionInfo> mSplitPermissionInfos;
     private Callback mCallback;
 
-    public ParsingPackageUtils(boolean onlyCoreApps, String[] separateProcesses,
-            DisplayMetrics displayMetrics,
+    public ParsingPackageUtils(String[] separateProcesses, DisplayMetrics displayMetrics,
             @NonNull List<PermissionManager.SplitPermissionInfo> splitPermissions,
             @NonNull Callback callback) {
-        mOnlyCoreApps = onlyCoreApps;
         mSeparateProcesses = separateProcesses;
         mDisplayMetrics = displayMetrics;
         mSplitPermissionInfos = splitPermissions;
@@ -400,11 +396,6 @@ public class ParsingPackageUtils {
         }
 
         final PackageLite lite = liteResult.getResult();
-        if (mOnlyCoreApps && !lite.isCoreApp()) {
-            return input.error(INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED,
-                    "Not a coreApp: " + packageDir);
-        }
-
         // Build the split dependency tree.
         SparseArray<int[]> splitDependencies = null;
         final SplitAssetLoader assetLoader;
@@ -472,11 +463,6 @@ public class ParsingPackageUtils {
         }
 
         final PackageLite lite = liteResult.getResult();
-        if (mOnlyCoreApps && !lite.isCoreApp()) {
-            return input.error(INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED,
-                    "Not a coreApp: " + apkFile);
-        }
-
         final SplitAssetLoader assetLoader = new DefaultSplitAssetLoader(lite, flags);
         try {
             final ParseResult<ParsingPackage> result = parseBaseApk(input,

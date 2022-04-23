@@ -54,6 +54,21 @@ public final class LocalManagerRegistry {
     }
 
     /**
+     * Returns a manager from the registry, or throws {@link ManagerNotFoundException} if not found.
+     *
+     * @hide
+     */
+    @NonNull
+    public static <T> T getManagerOrThrow(@NonNull Class<T> managerClass)
+            throws ManagerNotFoundException {
+        T manager = getManager(managerClass);
+        if (manager == null) {
+            throw new ManagerNotFoundException(managerClass);
+        }
+        return manager;
+    }
+
+    /**
      * Adds a manager to the registry.
      *
      * @param managerClass the class that the manager implements
@@ -68,6 +83,17 @@ public final class LocalManagerRegistry {
                 throw new IllegalStateException(managerClass.getName() + " is already registered");
             }
             sManagers.put(managerClass, manager);
+        }
+    }
+
+    /**
+     * Exception thrown when no local manager published for given class.
+     *
+     * @hide
+     */
+    public static class ManagerNotFoundException extends Exception {
+        public <T> ManagerNotFoundException(@NonNull Class<T> managerClass) {
+            super("Local manager " + managerClass.getName() + " does not exist or is not ready");
         }
     }
 }

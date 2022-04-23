@@ -620,7 +620,6 @@ interface IPackageManager {
     VerifierDeviceIdentity getVerifierDeviceIdentity();
 
     boolean isFirstBoot();
-    boolean isOnlyCoreApps();
     boolean isDeviceUpgrading();
 
     /** Reflects current DeviceStorageMonitorService state */

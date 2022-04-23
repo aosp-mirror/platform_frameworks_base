@@ -111,6 +111,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
@@ -194,6 +195,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_RESTRICTED_PROFILE_PARENT_ID = "restrictedProfileParentId";
     private static final String ATTR_SEED_ACCOUNT_NAME = "seedAccountName";
     private static final String ATTR_SEED_ACCOUNT_TYPE = "seedAccountType";
+
     private static final String TAG_GUEST_RESTRICTIONS = "guestRestrictions";
     private static final String TAG_USERS = "users";
     private static final String TAG_USER = "user";
@@ -213,6 +215,7 @@ public class UserManagerService extends IUserManager.Stub {
             "lastRequestQuietModeEnabledCall";
     private static final String TAG_IGNORE_PREPARE_STORAGE_ERRORS =
             "ignorePrepareStorageErrors";
+
     private static final String ATTR_KEY = "key";
     private static final String ATTR_VALUE_TYPE = "type";
     private static final String ATTR_MULTIPLE = "m";
@@ -721,6 +724,7 @@ public class UserManagerService extends IUserManager.Stub {
         mLockPatternUtils = new LockPatternUtils(mContext);
         mUserStates.put(UserHandle.USER_SYSTEM, UserState.STATE_BOOTING);
         mUser0Allocations = DBG_ALLOCATION ? new AtomicInteger() : null;
+        emulateSystemUserModeIfNeeded();
     }
 
     void systemReady() {
@@ -2927,6 +2931,87 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    /**
+     * Checks whether the device is really headless system user mode, ignoring system user mode
+     * emulation.
+     */
+    private boolean isReallyHeadlessSystemUserMode() {
+        return RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER;
+    }
+
+    /**
+     * Called on boot to change the system user mode (for example, from headless to full or
+     * vice versa) for development purposes.
+     */
+    private void emulateSystemUserModeIfNeeded() {
+        if (!Build.isDebuggable()) {
+            return;
+        }
+
+        final String emulatedValue = SystemProperties
+                .get(UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY);
+        if (TextUtils.isEmpty(emulatedValue)) {
+            return;
+        }
+
+        final boolean newHeadlessSystemUserMode;
+        switch (emulatedValue) {
+            case UserManager.SYSTEM_USER_MODE_EMULATION_FULL:
+                newHeadlessSystemUserMode = false;
+                break;
+            case UserManager.SYSTEM_USER_MODE_EMULATION_HEADLESS:
+                newHeadlessSystemUserMode = true;
+                break;
+            case UserManager.SYSTEM_USER_MODE_EMULATION_DEFAULT:
+                newHeadlessSystemUserMode = isReallyHeadlessSystemUserMode();
+                break;
+            default:
+                Slogf.wtf(LOG_TAG, "emulateSystemUserModeIfNeeded(): ignoring invalid valued of "
+                        + "property %s: %s", UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY,
+                        emulatedValue);
+                return;
+        }
+
+        // Update system user type
+        synchronized (mPackagesLock) {
+            synchronized (mUsersLock) {
+                final UserData systemUserData = mUsers.get(UserHandle.USER_SYSTEM);
+                if (systemUserData == null) {
+                    Slogf.wtf(LOG_TAG, "emulateSystemUserModeIfNeeded(): no system user data");
+                    return;
+                }
+                final int oldFlags = systemUserData.info.flags;
+                final int newFlags;
+                final String newUserType;
+                if (newHeadlessSystemUserMode) {
+                    newUserType = UserManager.USER_TYPE_SYSTEM_HEADLESS;
+                    newFlags = oldFlags & ~UserInfo.FLAG_FULL;
+                } else {
+                    newUserType = UserManager.USER_TYPE_FULL_SYSTEM;
+                    newFlags = oldFlags | UserInfo.FLAG_FULL;
+                }
+
+                if (systemUserData.info.userType.equals(newUserType)) {
+                    Slogf.d(LOG_TAG, "emulateSystemUserModeIfNeeded(): system user type is already "
+                            + "%s, returning", newUserType);
+                    return;
+                }
+                Slogf.i(LOG_TAG, "Persisting emulated system user data: type changed from %s to "
+                        + "%s, flags changed from %s to %s",
+                        systemUserData.info.userType, newUserType,
+                        UserInfo.flagsToString(oldFlags), UserInfo.flagsToString(newFlags));
+                systemUserData.info.userType = newUserType;
+                systemUserData.info.flags = newFlags;
+                writeUserLP(systemUserData);
+            }
+        }
+
+        // TODO(b/203885212): need to update the system user packages; the "easiest way" woulbe
+        // be setting "persist.pm.mock-upgrade", but that would require granting a new selinux
+        // permission. Another options would be providing an internal API, or setting a
+        // debug.xxx property - either way, we'll do that in a follow-up CL
+    }
+
     @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
     private void readUserListLP() {
         if (!mUserListFile.exists()) {
@@ -3293,8 +3378,9 @@ public class UserManagerService extends IUserManager.Stub {
         int flags = UserInfo.FLAG_SYSTEM | UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN
                 | UserInfo.FLAG_PRIMARY;
         // Create the system user
-        String systemUserType = UserManager.isHeadlessSystemUserMode() ?
-                UserManager.USER_TYPE_SYSTEM_HEADLESS : UserManager.USER_TYPE_FULL_SYSTEM;
+        String systemUserType = UserManager.isHeadlessSystemUserMode()
+                ? UserManager.USER_TYPE_SYSTEM_HEADLESS
+                : UserManager.USER_TYPE_FULL_SYSTEM;
         flags |= mUserTypes.get(systemUserType).getDefaultUserInfoFlags();
         UserInfo system = new UserInfo(UserHandle.USER_SYSTEM, null, null, flags, systemUserType);
         UserData userData = putUserInfo(system);
@@ -5514,6 +5600,13 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println("    --mode MODE: shows what errors would be if device used mode MODE");
             pw.println("      (where MODE is the allowlist mode integer as defined by "
                     + "config_userTypePackageWhitelistMode)");
+            pw.println();
+            pw.println("  set-system-user-mode-emulation [headless | full | default]");
+            pw.println("    Changes whether the system user is headless or full.");
+            pw.println("    WARNING: this command is meant just for development and debugging "
+                    + "purposes.");
+            pw.println("             It should NEVER be used on automated tests.");
+            pw.println();
         }
 
         @Override
@@ -5528,6 +5621,8 @@ public class UserManagerService extends IUserManager.Stub {
                         return runList();
                     case "report-system-user-package-whitelist-problems":
                         return runReportPackageAllowlistProblems();
+                    case "set-system-user-mode-emulation":
+                        return runSetSystemUserModeEmulation();
                     default:
                         return handleDefaultCommands(cmd);
                 }
@@ -5657,6 +5752,82 @@ public class UserManagerService extends IUserManager.Stub {
             return 0;
         }
 
+
+        private int runSetSystemUserModeEmulation() {
+            if (!confirmBuildIsDebuggable() || !confirmIsCalledByRoot()) {
+                return -1;
+            }
+
+            final PrintWriter pw = getOutPrintWriter();
+            final String mode = getNextArgRequired();
+            final boolean isHeadlessSystemUserModeCurrently = UserManager
+                    .isHeadlessSystemUserMode();
+            final boolean changed;
+
+            switch (mode) {
+                case UserManager.SYSTEM_USER_MODE_EMULATION_FULL:
+                    changed = isHeadlessSystemUserModeCurrently;
+                    break;
+                case UserManager.SYSTEM_USER_MODE_EMULATION_HEADLESS:
+                    changed = !isHeadlessSystemUserModeCurrently;
+                    break;
+                case UserManager.SYSTEM_USER_MODE_EMULATION_DEFAULT:
+                    changed = true; // Always update when resetting to default
+                    break;
+                default:
+                    pw.printf("Invalid arg: %s\n", mode);
+                    return -1;
+            }
+
+            if (!changed) {
+                pw.printf("No change needed, system user is already %s\n",
+                        isHeadlessSystemUserModeCurrently ? "headless" : "full");
+                return 0;
+            }
+
+            Slogf.d(LOG_TAG, "Updating system property %s to %s",
+                    UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY, mode);
+
+            // TODO(b/203885212): temp try/catch until the selinux permission is granted
+            try {
+                SystemProperties.set(UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY, mode);
+                pw.println("System user mode changed - please reboot (or restart Android runtime) "
+                        + "to continue");
+                pw.println("NOTICE: after restart, some apps might be uninstalled (and their data "
+                        + "will be lost)");
+            } catch (RuntimeException e) {
+                pw.printf("Failed to set property %s (%s). You might need to run "
+                        + "'adb shell setenforce 0' and try again.\n",
+                        UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY, e);
+            }
+            return 0;
+        }
+
+        /**
+         * Confirms if the build is debuggable
+         *
+         * <p>It logs an error when it isn't.
+         */
+        private boolean confirmBuildIsDebuggable() {
+            if (Build.isDebuggable()) {
+                return true;
+            }
+            getErrPrintWriter().println("Command not available on user builds");
+            return false;
+        }
+
+        /**
+         * Confirms if the command is called when {@code adb} is rooted.
+         *
+         * <p>It logs an error when it isn't.
+         */
+        private boolean confirmIsCalledByRoot() {
+            if (Binder.getCallingUid() == Process.ROOT_UID) {
+                return true;
+            }
+            getErrPrintWriter().println("Command only available on root user");
+            return false;
+        }
     } // class Shell
 
     @Override
@@ -5741,7 +5912,11 @@ public class UserManagerService extends IUserManager.Stub {
                 com.android.internal.R.bool.config_guestUserEphemeral));
         pw.println("  Force ephemeral users: " + mForceEphemeralUsers);
         pw.println("  Is split-system user: " + UserManager.isSplitSystemUser());
-        pw.println("  Is headless-system mode: " + UserManager.isHeadlessSystemUserMode());
+        final boolean isHeadlessSystemUserMode = UserManager.isHeadlessSystemUserMode();
+        pw.println("  Is headless-system mode: " + isHeadlessSystemUserMode);
+        if (isHeadlessSystemUserMode != isReallyHeadlessSystemUserMode()) {
+            pw.println("  (emulated by 'cmd user set-system-user-mode-emulation')");
+        }
         pw.println("  User version: " + mUserVersion);
         pw.println("  Owner name: " + getOwnerName());
         if (DBG_ALLOCATION) {

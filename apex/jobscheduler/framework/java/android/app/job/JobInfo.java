@@ -18,6 +18,7 @@ package android.app.job;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
@@ -1332,6 +1333,7 @@ public class JobInfo implements Parcelable {
                 builder.addCapability(NET_CAPABILITY_INTERNET);
                 builder.addCapability(NET_CAPABILITY_VALIDATED);
                 builder.removeCapability(NET_CAPABILITY_NOT_VPN);
+                builder.removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
 
                 if (networkType == NETWORK_TYPE_ANY) {
                     // No other capabilities

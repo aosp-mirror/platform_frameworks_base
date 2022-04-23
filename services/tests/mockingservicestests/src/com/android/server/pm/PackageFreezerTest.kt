@@ -53,7 +53,6 @@ class PackageFreezerTest {
                 rule.system().dataAppDirectory)
         }
         var pms = PackageManagerService(rule.mocks().injector,
-            false /*coreOnly*/,
             false /*factoryTest*/,
             MockSystem.DEFAULT_VERSION_INFO.fingerprint,
             false /*isEngBuild*/,

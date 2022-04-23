@@ -81,7 +81,6 @@ final class InitAppsHelper {
     /* Track of the number of system apps */
     private int mSystemPackagesCount;
     private final boolean mIsDeviceUpgrading;
-    private final boolean mIsOnlyCoreApps;
     private final List<ScanPartition> mSystemPartitions;
 
     /**
@@ -108,7 +107,6 @@ final class InitAppsHelper {
         mSystemPartitions = systemPartitions;
         mDirsToScanAsSystem = getSystemScanPartitions();
         mIsDeviceUpgrading = mPm.isDeviceUpgrading();
-        mIsOnlyCoreApps = mPm.isOnlyCoreApps();
         // Set flag to monitor and not change apk file paths when scanning install directories.
         int scanFlags = SCAN_BOOTING | SCAN_INITIAL;
         if (mIsDeviceUpgrading || mPm.isFirstBoot()) {
@@ -229,12 +227,10 @@ final class InitAppsHelper {
                         pkg -> consumer.accept(pkg, pkg.isSystem(),
                                 apkInApexPreInstalledPaths.get(pkg.getPackageName()))));
 
-        if (!mIsOnlyCoreApps) {
-            // do this first before mucking with mPackages for the "expecting better" case
-            updateStubSystemAppsList(mStubSystemApps);
-            mInstallPackageHelper.prepareSystemPackageCleanUp(packageSettings,
-                    mPossiblyDeletedUpdatedSystemApps, mExpectingBetter, userIds);
-        }
+        // do this first before mucking with mPackages for the "expecting better" case
+        updateStubSystemAppsList(mStubSystemApps);
+        mInstallPackageHelper.prepareSystemPackageCleanUp(packageSettings,
+                mPossiblyDeletedUpdatedSystemApps, mExpectingBetter, userIds);
 
         logSystemAppsScanningTime(startTime);
         return overlayConfig;
@@ -268,23 +264,18 @@ final class InitAppsHelper {
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     public void initNonSystemApps(PackageParser2 packageParser, @NonNull int[] userIds,
             long startTime) {
-        if (!mIsOnlyCoreApps) {
-            EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
-                    SystemClock.uptimeMillis());
-            scanDirTracedLI(mPm.getAppInstallDir(), /* frameworkSplits= */ null, 0,
-                    mScanFlags | SCAN_REQUIRE_KNOWN,
-                    packageParser, mExecutorService);
-        }
+        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
+                SystemClock.uptimeMillis());
+        scanDirTracedLI(mPm.getAppInstallDir(), /* frameworkSplits= */ null, 0,
+                mScanFlags | SCAN_REQUIRE_KNOWN, packageParser, mExecutorService);
 
         List<Runnable> unfinishedTasks = mExecutorService.shutdownNow();
         if (!unfinishedTasks.isEmpty()) {
             throw new IllegalStateException("Not all tasks finished before calling close: "
                     + unfinishedTasks);
         }
-        if (!mIsOnlyCoreApps) {
-            fixSystemPackages(userIds);
-            logNonSystemAppScanningTime(startTime);
-        }
+        fixSystemPackages(userIds);
+        logNonSystemAppScanningTime(startTime);
         mExpectingBetter.clear();
         mPm.mSettings.pruneRenamedPackagesLPw();
     }

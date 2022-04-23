@@ -91,6 +91,10 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
                 if (!volume.isMountedWritable()) {
                     continue;
                 }
+                // gsid only supports vfat external storage.
+                if (!"vfat".equalsIgnoreCase(volume.fsType)) {
+                    continue;
+                }
                 DiskInfo disk = volume.getDisk();
                 long mega = disk.size >> 20;
                 Slog.i(TAG, volume.getPath() + ": " + mega + " MB");

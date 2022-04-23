@@ -352,12 +352,6 @@ class ApexPackageInfo {
                 results.add(new ApexManager.ScanResult(
                         ai, parseResult.parsedPackage, parseResult.parsedPackage.getPackageName()));
             } else if (throwable instanceof PackageManagerException) {
-                final PackageManagerException e = (PackageManagerException) throwable;
-                // Skip parsing non-coreApp apex file if system is in minimal boot state.
-                if (e.error == PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED) {
-                    Slog.w(TAG, "Scan apex failed, not a coreApp:" + ai.modulePath);
-                    continue;
-                }
                 throw new IllegalStateException("Unable to parse: " + ai.modulePath, throwable);
             } else {
                 throw new IllegalStateException("Unexpected exception occurred while parsing "
