@@ -1345,7 +1345,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 if (mAppliedAutoBrightness && !autoBrightnessAdjustmentChanged) {
                     slowChange = true; // slowly adapt to auto-brightness
                 }
-                updateScreenBrightnessSetting = true;
+                updateScreenBrightnessSetting = mCurrentScreenBrightnessSetting != brightnessState;
                 mAppliedAutoBrightness = true;
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_AUTOMATIC);
             } else {
@@ -1415,7 +1415,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // before applying the low power or dim transformations so that the slider
             // accurately represents the full possible range, even if they range changes what
             // it means in absolute terms.
-            putScreenBrightnessSetting(brightnessState, /* updateCurrent */ true);
+            updateScreenBrightnessSetting(brightnessState);
         }
 
         // Apply dimming by at least some minimum amount when user activity
@@ -2288,17 +2288,18 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         return clampScreenBrightnessForVr(brightnessFloat);
     }
 
-    void putScreenBrightnessSetting(float brightnessValue) {
-        putScreenBrightnessSetting(brightnessValue, false);
+    void setBrightness(float brightnessValue) {
+        // Update the setting, which will eventually call back into DPC to have us actually update
+        // the display with the new value.
+        mBrightnessSetting.setBrightness(brightnessValue);
     }
 
-    private void putScreenBrightnessSetting(float brightnessValue, boolean updateCurrent) {
-        if (!isValidBrightnessValue(brightnessValue)) {
+    private void updateScreenBrightnessSetting(float brightnessValue) {
+        if (!isValidBrightnessValue(brightnessValue)
+                || brightnessValue == mCurrentScreenBrightnessSetting) {
             return;
         }
-        if (updateCurrent) {
-            setCurrentScreenBrightness(brightnessValue);
-        }
+        setCurrentScreenBrightness(brightnessValue);
         mBrightnessSetting.setBrightness(brightnessValue);
     }
 
