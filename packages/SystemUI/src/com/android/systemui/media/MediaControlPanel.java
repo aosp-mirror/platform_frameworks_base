@@ -991,6 +991,9 @@ public class MediaControlPanel {
         List<ViewGroup> mediaCoverContainers = mRecommendationViewHolder.getMediaCoverContainers();
         int mediaRecommendationNum = Math.min(mediaRecommendationList.size(),
                 MEDIA_RECOMMENDATION_MAX_NUM);
+
+        boolean hasTitle = false;
+        boolean hasSubtitle = false;
         int uiComponentIndex = 0;
         for (int itemIndex = 0;
                 itemIndex < mediaRecommendationNum && uiComponentIndex < mediaRecommendationNum;
@@ -1036,25 +1039,32 @@ public class MediaControlPanel {
 
             // Set up title
             CharSequence title = recommendation.getTitle();
+            hasTitle |= !TextUtils.isEmpty(title);
             TextView titleView =
                     mRecommendationViewHolder.getMediaTitles().get(uiComponentIndex);
             titleView.setText(title);
-            // TODO(b/223603970): If none of them have titles, should we then hide the views?
 
             // Set up subtitle
-            CharSequence subtitle = recommendation.getSubtitle();
-            TextView subtitleView =
-                    mRecommendationViewHolder.getMediaSubtitles().get(uiComponentIndex);
             // It would look awkward to show a subtitle if we don't have a title.
             boolean shouldShowSubtitleText = !TextUtils.isEmpty(title);
-            CharSequence subtitleText = shouldShowSubtitleText ? subtitle : "";
-            subtitleView.setText(subtitleText);
-            // TODO(b/223603970): If none of them have subtitles, should we then hide the views?
+            CharSequence subtitle = shouldShowSubtitleText ? recommendation.getSubtitle() : "";
+            hasSubtitle |= !TextUtils.isEmpty(subtitle);
+            TextView subtitleView =
+                    mRecommendationViewHolder.getMediaSubtitles().get(uiComponentIndex);
+            subtitleView.setText(subtitle);
 
             uiComponentIndex++;
         }
-
         mSmartspaceMediaItemsCount = uiComponentIndex;
+
+        // If there's no subtitles and/or titles for any of the albums, hide those views.
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        final boolean titlesVisible = hasTitle;
+        final boolean subtitlesVisible = hasSubtitle;
+        mRecommendationViewHolder.getMediaTitles().forEach((titleView) ->
+                setVisibleAndAlpha(expandedSet, titleView.getId(), titlesVisible));
+        mRecommendationViewHolder.getMediaSubtitles().forEach((subtitleView) ->
+                setVisibleAndAlpha(expandedSet, subtitleView.getId(), subtitlesVisible));
 
         // Guts
         Runnable onDismissClickedRunnable = () -> {

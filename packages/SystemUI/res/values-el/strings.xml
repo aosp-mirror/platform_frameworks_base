@@ -33,8 +33,8 @@
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Όχι, ευχαριστώ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Αυτόματη περιστροφή οθόνης"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
-    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> να έχει πρόσβαση στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;\nΔεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο."</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> η πρόσβαση στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
+    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Να επιτρέπεται στο <xliff:g id="APPLICATION">%1$s</xliff:g> να έχει πρόσβαση στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;\nΔεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Να επιτρέπεται στο <xliff:g id="APPLICATION">%1$s</xliff:g> η πρόσβαση στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Άνοιγμα <xliff:g id="APPLICATION">%1$s</xliff:g> για διαχείριση συσκευής <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Δεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο. Η χρήση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> με αυτήν τη συσκευή μπορεί να σας εμποδίσει να ακούσετε κλήσεις, ειδοποιήσεις και ξυπνητήρια."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Η χρήση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> με αυτήν τη συσκευή μπορεί να σας εμποδίσει να ακούσετε κλήσεις, ειδοποιήσεις και ξυπνητήρια."</string>
@@ -344,6 +344,11 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Θέλετε να συνεχίσετε την περίοδο σύνδεσής σας;"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Έναρξη από την αρχή"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ναι, συνέχεια"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Λειτουργία επισκέπτη"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"Βρίσκεστε σε λειτουργία επισκέπτη"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Προσθήκη νέου χρήστη;"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει τον χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Με την προσθήκη νέου χρήστη θα γίνει έξοδος από τη λειτουργία επισκέπτη και θα διαγραφούν όλες οι εφαρμογές και τα δεδομένα από την τρέχουσα περίοδο σύνδεσης επισκέπτη."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Συμπληρώθηκε το όριο χρηστών"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Μπορείτε να προσθέσετε έως <xliff:g id="COUNT">%d</xliff:g> χρήστες.</item>
@@ -714,10 +719,10 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Δεν θα έχετε πρόσβαση σε δεδομένα ή στο διαδίκτυο μέσω της εταιρείας κινητής τηλεφωνίας <xliff:g id="CARRIER">%s</xliff:g>. Θα έχετε πρόσβαση στο διαδίκτυο μόνο μέσω Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"η εταιρεία κινητής τηλεφωνίας"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Επειδή μια εφαρμογή αποκρύπτει ένα αίτημα άδειας, δεν είναι δυνατή η επαλήθευση της απάντησής σας από τις Ρυθμίσεις."</string>
-    <string name="slice_permission_title" msgid="3262615140094151017">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APP_0">%1$s</xliff:g> να εμφανίζει τμήματα της εφαρμογής <xliff:g id="APP_2">%2$s</xliff:g>;"</string>
+    <string name="slice_permission_title" msgid="3262615140094151017">"Να επιτρέπεται στο <xliff:g id="APP_0">%1$s</xliff:g> να εμφανίζει τμήματα της εφαρμογής <xliff:g id="APP_2">%2$s</xliff:g>;"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Μπορεί να διαβάζει πληροφορίες από την εφαρμογή <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- Μπορεί να εκτελεί ενέργειες εντός της εφαρμογής <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="slice_permission_checkbox" msgid="4242888137592298523">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να εμφανίζει τμήματα από οποιαδήποτε εφαρμογή"</string>
+    <string name="slice_permission_checkbox" msgid="4242888137592298523">"Να επιτρέπεται στο <xliff:g id="APP">%1$s</xliff:g> να εμφανίζει τμήματα από οποιαδήποτε εφαρμογή"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Επιτρέπεται"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Δεν επιτρέπεται"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Πατήστε για προγραμματισμό της Εξοικονόμησης μπαταρίας"</string>
@@ -917,11 +922,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Προσθήκη πλακιδίου"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Χωρίς προσθ. πλακιδ."</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Επιλογή χρήστη"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> εφαρμογές είναι ενεργές</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> εφαρμογή είναι ενεργή</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Νέες πληροφορίες"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ενεργές εφαρμογές"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Ακόμη και αν δεν χρησιμοποιείτε αυτές τις εφαρμογές, εξακολουθούν να είναι ενεργές και ενδέχεται να επηρεάζουν τη διάρκεια ζωής της μπαταρίας"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Διακοπή"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Διακόπηκε"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Τέλος"</string>

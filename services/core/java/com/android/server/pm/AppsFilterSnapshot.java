@@ -25,6 +25,7 @@ import android.util.SparseArray;
 import com.android.internal.util.function.QuadFunction;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.snapshot.PackageDataSnapshot;
 
 import java.io.PrintWriter;
 
@@ -40,27 +41,30 @@ public interface AppsFilterSnapshot {
      * If the setting is visible to all UIDs, null is returned. If an app is not visible to any
      * applications, the int array will be empty.
      *
+     * @param snapshot         the snapshot of the computer that contains all package information
      * @param users            the set of users that should be evaluated for this calculation
      * @param existingSettings the set of all package settings that currently exist on device
      * @return a SparseArray mapping userIds to a sorted int array of appIds that may view the
      * provided setting or null if the app is visible to all and no allow list should be
      * applied.
      */
-    SparseArray<int[]> getVisibilityAllowList(PackageStateInternal setting, int[] users,
+    SparseArray<int[]> getVisibilityAllowList(PackageDataSnapshot snapshot,
+            PackageStateInternal setting, int[] users,
             ArrayMap<String, ? extends PackageStateInternal> existingSettings);
 
     /**
      * Returns true if the calling package should not be able to see the target package, false if no
      * filtering should be done.
      *
+     * @param snapshot         the snapshot of the computer that contains all package information
      * @param callingUid       the uid of the caller attempting to access a package
      * @param callingSetting   the setting attempting to access a package or null if it could not be
      *                         found
      * @param targetPkgSetting the package being accessed
      * @param userId           the user in which this access is being attempted
      */
-    boolean shouldFilterApplication(int callingUid, @Nullable Object callingSetting,
-            PackageStateInternal targetPkgSetting, int userId);
+    boolean shouldFilterApplication(PackageDataSnapshot snapshot, int callingUid,
+            @Nullable Object callingSetting, PackageStateInternal targetPkgSetting, int userId);
 
     /**
      * Returns whether the querying package is allowed to see the target package.
