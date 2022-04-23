@@ -114,7 +114,7 @@
     <string name="screenrecord_stop_label" msgid="72699670052087989">"ఆపివేయి"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"పాజ్ చేయి"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"కొనసాగించండి"</string>
-    <string name="screenrecord_cancel_label" msgid="7850926573274483294">"రద్దు చేయి"</string>
+    <string name="screenrecord_cancel_label" msgid="7850926573274483294">"రద్దు చేయండి"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"షేర్ చేయి"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"స్క్రీన్ రికార్డ్ రద్దు చేయబడింది"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"స్క్రీన్ రికార్డింగ్ సేవ్ చేయబడింది"</string>
@@ -147,7 +147,7 @@
     <string name="phone_label" msgid="5715229948920451352">"ఫోన్‌ను తెరువు"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"వాయిస్ అసిస్టెంట్‌ను తెరువు"</string>
     <string name="camera_label" msgid="8253821920931143699">"కెమెరాను తెరవండి"</string>
-    <string name="cancel" msgid="1089011503403416730">"రద్దు చేయి"</string>
+    <string name="cancel" msgid="1089011503403416730">"రద్దు చేయండి"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"నిర్ధారించు"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"మళ్లీ ప్రయత్నించు"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ప్రామాణీకరణను రద్దు చేయడానికి నొక్కండి"</string>
