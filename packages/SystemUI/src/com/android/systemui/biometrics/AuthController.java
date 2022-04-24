@@ -118,7 +118,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     private class BiometricTaskStackListener extends TaskStackListener {
         @Override
         public void onTaskStackChanged() {
-            mHandler.post(AuthController.this::handleTaskStackChanged);
+            mHandler.post(AuthController.this::cancelIfOwnerIsNotInForeground);
         }
     }
 
@@ -181,7 +181,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
     };
 
-    private void handleTaskStackChanged() {
+    private void cancelIfOwnerIsNotInForeground() {
         if (mCurrentDialog != null) {
             try {
                 final String clientPackage = mCurrentDialog.getOpPackageName();
@@ -192,7 +192,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     final String topPackage = runningTasks.get(0).topActivity.getPackageName();
                     if (!topPackage.contentEquals(clientPackage)
                             && !Utils.isSystem(mContext, clientPackage)) {
-                        Log.w(TAG, "Evicting client due to: " + topPackage);
+                        Log.e(TAG, "Evicting client due to: " + topPackage);
                         mCurrentDialog.dismissWithoutCallback(true /* animate */);
                         mCurrentDialog = null;
                         mOrientationListener.disable();
@@ -721,6 +721,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mCurrentDialog = newDialog;
         mCurrentDialog.show(mWindowManager, savedState);
         mOrientationListener.enable();
+
+        if (!promptInfo.isAllowBackgroundAuthentication()) {
+            mHandler.post(this::cancelIfOwnerIsNotInForeground);
+        }
     }
 
     private void onDialogDismissed(@DismissedReason int reason) {

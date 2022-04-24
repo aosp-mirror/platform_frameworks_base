@@ -94,7 +94,7 @@
     <item msgid="3825367753087348007">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="8868109554557331312">"सिस्टम से चुने जाने का उपयोग करें (डिफ़ॉल्ट)"</item>
+    <item msgid="8868109554557331312">"सिस्टम से चुने जाने का इस्तेमाल करें (डिफ़ॉल्ट)"</item>
     <item msgid="9024885861221697796">"SBC"</item>
     <item msgid="4688890470703790013">"AAC"</item>
     <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ऑडियो"</item>
@@ -109,7 +109,7 @@
     <item msgid="8887519571067543785">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="2284090879080331090">"सिस्टम से चुने जाने का उपयोग करें (डिफ़ॉल्ट)"</item>
+    <item msgid="2284090879080331090">"सिस्टम से चुने जाने का इस्तेमाल करें (डिफ़ॉल्ट)"</item>
     <item msgid="1872276250541651186">"44.1 kHz"</item>
     <item msgid="8736780630001704004">"48.0 kHz"</item>
     <item msgid="7698585706868856888">"88.2 kHz"</item>
@@ -122,7 +122,7 @@
     <item msgid="1212577207279552119">"32 बिट/नमूना"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="9196208128729063711">"सिस्टम से चुने जाने का उपयोग करें (डिफ़ॉल्ट)"</item>
+    <item msgid="9196208128729063711">"सिस्टम से चुने जाने का इस्तेमाल करें (डिफ़ॉल्ट)"</item>
     <item msgid="1084497364516370912">"16 बिट/नमूना"</item>
     <item msgid="2077889391457961734">"24 बिट/नमूना"</item>
     <item msgid="3836844909491316925">"32 बिट/नमूना"</item>

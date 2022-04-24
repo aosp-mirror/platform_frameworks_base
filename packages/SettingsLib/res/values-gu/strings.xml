@@ -157,7 +157,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"કોઈ ડિફૉલ્ટ સેટ કરેલા નથી"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ટેક્સ્ટ ટૂ સ્પીચ સેટિંગ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"ટેક્સ્ટ ટુ સ્પીચ આઉટપુટ"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"વાણી દર"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"સ્પીચ રેટ"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ટેક્સ્ટ બોલાયેલ છે તે ઝડપ"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"પિચ"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"સિન્થેસાઇઝ કરેલ વાણીના ટોન પર અસર કરે છે"</string>

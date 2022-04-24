@@ -547,9 +547,9 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"ניתן להגביל את הגישה לאפליקציות ולתוכן מהחשבון שלך"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"משתמש"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"פרופיל מוגבל"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"האם להוסיף משתמש חדש?"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"להוסיף משתמש חדש?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"‏ניתן לשתף מכשיר זה עם אנשים אחרים על ידי יצירת משתמשים נוספים. לכל משתמש מרחב משלו, שאותו אפשר להתאים אישית בעזרת אפליקציות, טפט ופריטים נוספים. המשתמשים יכולים גם להתאים הגדרות של המכשיר כגון Wi‑Fi, שמשפיעות על כולם.\n\nכשמוסיפים משתמש חדש, על משתמש זה להגדיר את המרחב שלו.\n\nכל אחד מהמשתמשים יכול לעדכן אפליקציות לכל שאר המשתמשים. ייתכן שהגדרות ושירותים של נגישות לא יועברו למשתמש החדש."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"בעת הוספת משתמש חדש, על משתמש זה להגדיר את השטח שלו.\n\nכל משתמש יכול לעדכן אפליקציות עבור כל המשתמשים האחרים."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"כשמוסיפים משתמש חדש, המשתמש הזה צריך להגדיר את המרחב שלו.\n\nכל משתמש יכול לעדכן אפליקציות עבור כל המשתמשים האחרים."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"האם להגדיר משתמש עכשיו?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"כדאי לוודא שהמשתמש זמין ויכול לקחת את המכשיר ולהגדיר את המרחב שלו"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"האם להגדיר פרופיל עכשיו?"</string>
@@ -567,7 +567,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"לא ניתן היה ליצור משתמש חדש"</string>
     <string name="user_nickname" msgid="262624187455825083">"כינוי"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"הוספת אורח"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"הסרת אורח/ת"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"הסרת אורח"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"איפוס הגלישה כאורח"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"אורח"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"לאפס את הגלישה כאורח?"</string>

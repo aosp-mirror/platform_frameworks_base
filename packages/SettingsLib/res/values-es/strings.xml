@@ -68,7 +68,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Desconectando…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Estableciendo conexión…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Conectado<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Vinculando…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Emparejando…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Conectado a <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (sin audio de teléfono)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Conectado (sin audio multimedia) a <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Conectado a <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (sin acceso a mensajes)"</string>
@@ -547,7 +547,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restringido"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"¿Añadir nuevo usuario?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puedes compartir este dispositivo si creas más usuarios. Cada uno tendrá su propio espacio y podrá personalizarlo con aplicaciones, un fondo de pantalla y mucho más. Los usuarios también pueden ajustar opciones del dispositivo, como la conexión Wi‑Fi, que afectan a todos los usuarios.\n\nCuando añadas un usuario, tendrá que configurar su espacio.\n\nCualquier usuario puede actualizar aplicaciones de todos los usuarios. Es posible que no se transfieran los servicios y opciones de accesibilidad al nuevo usuario."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Al añadir un usuario nuevo, este debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Al añadir un usuario nuevo, debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"¿Configurar usuario ahora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Asegúrate de que la persona está disponible en este momento para usar el dispositivo y configurar su espacio."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"¿Quieres configurar un perfil ahora?"</string>

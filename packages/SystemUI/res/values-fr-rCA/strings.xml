@@ -661,9 +661,9 @@
     <string name="quick_settings" msgid="6211774484997470203">"Paramètres rapides"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barre d\'état"</string>
     <string name="overview" msgid="3522318590458536816">"Aperçu"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Mode de démonstration de l\'interface système"</string>
-    <string name="enable_demo_mode" msgid="3180345364745966431">"Activer le mode Démonstration"</string>
-    <string name="show_demo_mode" msgid="3677956462273059726">"Afficher le mode Démonstration"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Mode Démo de l\'interface système"</string>
+    <string name="enable_demo_mode" msgid="3180345364745966431">"Activer le mode Démo"</string>
+    <string name="show_demo_mode" msgid="3677956462273059726">"Afficher le mode Démo"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarme"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
