@@ -65,7 +65,7 @@
     <string name="uninstalling" msgid="8709566347688966845">"Deinstaliranje..."</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Deinstaliranje aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Deinstaliranje je završeno."</string>
-    <string name="uninstall_done_app" msgid="4588850984473605768">"Deinstaliran je paket <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"Deinstalirana je aplikacija <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Deinstaliranje nije uspjelo."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Paket <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nije uspješno deinstaliran."</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Nije moguće deinstalirati aktivnu aplikaciju administratora uređaja"</string>
