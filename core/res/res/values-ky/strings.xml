@@ -305,12 +305,17 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"жылнаамаңызды пайдалануу"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS билдирүүлөрдү жиберүү жана көрсөтүү"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Файлдар жана документтер"</string>
+    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"түзмөгүңүздөгү файлдары жана документтерди колдонуу"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Музыка жана башка аудио"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"түзмөгүңүздөгү аудио файлдарга мүмкүнчүлүк алуу"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Сүрөттөр жана видеолор"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"түзмөгүңүздөгү сүрөттөр менен видеолорго мүмкүнчүлүк алуу"</string>
+    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
+    <skip />
+    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"аудио жаздыруу"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Кыймыл-аракет"</string>
@@ -350,7 +355,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"билдирмелерди кулпуланган түзмөктүн толук экранында көрсөтүү"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Колдонмого билдирмелерди кулпуланган түзмөктүн толук экранында көрсөтүүгө уруксат берет"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Ыкчам баскыч түзүү"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Колдонмого үй экранга колдонуучунун катышуусусуз тез чакырма кошууга мүмкүнчүлүк берет."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Колдонмо башкы экранга ыкчам баскычтарды өз алдынча кошо алат"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"тез чакыргычтарды жок кылуу"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Колдонмого колдонуучунун катышуусусуз үй экранынын тез чакырмаларын жок кылуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"чыгыш чалууларды кайра багыттоо"</string>
@@ -2053,7 +2058,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Тынчымды алба\" режими өзгөрдү"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Бөгөттөлгөн нерселерди көрүү үчүн таптаңыз."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Билдирмелердин жөндөөлөрүн карап чыгуу"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 версиясында билдирмелерди жөнөтүү үчүн орноткон колдонмолоруңузга уруксат берүү керек. Учурдагы колдонмолор үчүн бул уруксатты өзгөртүү үчүн таптап коюңуз."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Кийинчерээк эскертүү"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Жабуу"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Тутум"</string>
@@ -2103,7 +2109,7 @@
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # файл}other{{file_name} + # файл}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Бөлүшкөнгө эч ким сунушталган жок"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Колдонмолордун тизмеси"</string>
-    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Бул колдонмонун жаздырууга уруксаты жок, бирок бул USB түзмөгү аркылуу аудиону жаздыра алат."</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Бул колдонмого жаздырууга уруксат берилген эмес, бирок ушул USB түзмөгү аркылуу үндөрдү жаза алат."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Башкы бет"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Артка"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Акыркы колдонмолор"</string>

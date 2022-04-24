@@ -305,12 +305,17 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"तपाईंको पात्रोमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"फाइल र डकुमेन्टहरू"</string>
+    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"आफ्नो डिभाइसमा भएका फाइल र डकुमेन्टहरू प्रयोग गर्नुहोस्"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"सङ्गीत तथा अन्य अडियो"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"तपाईंको डिभाइसमा भएका अडियो फाइलहरू प्रयोग गर्ने"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"फोटो तथा भिडियोहरू"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"तपाईंको डिभाइसमा भएका फोटो तथा भिडियो फाइलहरू प्रयोग गर्ने"</string>
+    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
+    <skip />
+    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"माइक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"शारीरिक क्रियाकलाप"</string>
@@ -350,7 +355,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"लक गरिएको डिभाइसमा स्क्रिनभरि देखिने सूचनाहरू देखाइयोस्"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"यो अनुमति दिइएमा एपले लक गरिएको डिभाइसमा स्क्रिनभरि देखिने सूचनाहरू देखाउन सक्छ"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"सर्टकट इन्स्टल गर्ने"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा थप्नको लागि अनुमति दिन्छ।"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा हाल्ने अनुमति दिन्छ।"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"सर्टकटहरूको स्थापन रद्द गर्नुहोस्"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा हटाउनको लागि अनुमति दिन्छ।"</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"बहिर्गमन कलहरूलाई अर्को मार्ग दिनुहोस्"</string>
@@ -2053,7 +2058,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"बाधा नपुर्‍याउनुहोस् मोड परिवर्तन भएको छ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"रोक लगाइएका कुराहरू जाँच गर्न ट्याप गर्नुहोस्‌।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"सूचनाका सेटिङको समीक्षा गर्नुहोस्"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android १३ मा तपाईंले अनुमति दिनुभएका खण्डमा मात्र तपाईंले इन्स्टल गर्नुभएका एपले सूचना पठाउन सक्छन्। यसअघि इन्स्टल गरिसकिएका एपका हकमा यो अनुमति परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"मलाई पछि स्मरण गराइयोस्"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"हटाउनुहोस्"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"प्रणाली"</string>
