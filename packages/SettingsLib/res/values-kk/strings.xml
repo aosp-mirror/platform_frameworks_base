@@ -465,7 +465,7 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Зарядталды"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Әкімші басқарады"</string>
     <string name="disabled" msgid="8017887509554714950">"Өшірілген"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Рұқсат етілген"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Рұқсат берілген"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Рұқсат етілмеген"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Белгісіз қолданбаларды орнату"</string>
     <string name="home" msgid="973834627243661438">"Параметрлер негізгі беті"</string>
