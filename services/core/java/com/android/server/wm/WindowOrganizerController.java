@@ -30,6 +30,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_CHILDREN;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
@@ -768,6 +769,29 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 break;
             }
+            case HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT: {
+                final TaskFragment tf = mLaunchTaskFragments.get(hop.getContainer());
+                if (tf == null || !tf.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on detached container: " + tf);
+                    break;
+                }
+                final ActivityRecord curFocus = tf.getDisplayContent().mFocusedApp;
+                if (curFocus != null && curFocus.getTaskFragment() == tf) {
+                    Slog.d(TAG, "The requested TaskFragment already has the focus.");
+                    break;
+                }
+                if (curFocus != null && curFocus.getTask() != tf.getTask()) {
+                    Slog.d(TAG, "The Task of the requested TaskFragment doesn't have focus.");
+                    break;
+                }
+                final ActivityRecord targetFocus = tf.getTopResumedActivity();
+                if (targetFocus == null) {
+                    Slog.d(TAG, "There is no resumed activity in the requested TaskFragment.");
+                    break;
+                }
+                tf.getDisplayContent().setFocusedApp(targetFocus);
+                break;
+            }
             default: {
                 // The other operations may change task order so they are skipped while in lock
                 // task mode. The above operations are still allowed because they don't move
@@ -1311,6 +1335,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
                 case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
                 case HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS:
+                case HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT:
                     // We are allowing organizer to start/reparent activity to a TaskFragment it
                     // created, or set two TaskFragments adjacent to each other. Nothing to check
                     // here because the TaskFragment may not be created yet, but will be created in
