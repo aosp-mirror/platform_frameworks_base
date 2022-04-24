@@ -365,20 +365,28 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"የእርስዎ ድርጅት የዚህ መሣሪያ ባለቤት ነው፣ እና የአውታረ መረብ ትራፊክን ሊከታተል ይችላል"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> የዚህ መሣሪያ ባለቤት ነው፣ እና የአውታረ መረብ ትራፊክን ሊከታተል ይችላል"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ይህ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> የሚቀርብ ነው"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ይህ መሣሪያ የድርጅትዎ ሲሆን ከ<xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ይህ መሳሪያ ንብረትነቱ የ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ሲሆን ከ<xliff:g id="VPN_APP">%2$s</xliff:g> ጋር ተገናኝቷል"</string>
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (4137564460025113168) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (2169227918166358741) -->
+    <skip />
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ይህ መሣሪያ የድርጅትዎ ነው"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ይህ መሳሪያ ንብረትነቱ የ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ነው"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"ይህ መሣሪያ የድርጅትዎ ሲሆን ከቪፒኤን ጋር ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ይህ መሳሪያ ንብረትነቱ የ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ሲሆን ከቪፒኤን ጋር ተገናኝቷል"</string>
+    <!-- no translation found for quick_settings_disclosure_management_vpns (929181757984262902) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (3312645578322079185) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"የእርስዎ ድርጅት በእርስዎ የሥራ መገለጫ ያለን የአውታረ መረብ ትራፊክን ሊቆጣጠር ይችል ይሆናል"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> በእርስዎ የሥራ መገለጫ ውስጥ የአውታረ መረብ ትራፊክ ላይ ክትትል ሊያደርግ ይችላል"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"የስራ መገለጫ አውታረ መረብ እንቅስቃሴ ለአይቲ አስተዳዳሪዎ ይታያል"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"አውታረ መረብ ክትትል የሚደረግበት ሊሆን ይችላል"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ይህ መሳሪያ ከቪፒኤን ጋር ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"የእርስዎ የሥራ መገለጫ ከ<xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል።"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"የእርስዎ የግል መገለጫ ከ<xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ይህ መሳሪያ ከ<xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (3586175303518266301) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (153393105176944100) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (451254750289172191) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (6191822916936028208) -->
+    <skip />
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ይህ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> የሚቀርብ ነው"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"የመሣሪያ አስተዳደር"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -394,10 +402,14 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"የእውቅና ማረጋገጫ ሰጪ ባለሥልጣን በዚህ መሣሪያ ላይ ተጭኗል። የእርስዎ ደኅንነቱ የተጠበቀ አውታረ መረብ ትራፊክ ክትትል ሊደረግበት እና ሊሻሻል ይችላል።"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"የእርስዎ አስተዳዳሪ የአውታረ መረብ ምዝግብ ማስታወሻ መያዝን አብርተዋል፣ ይህም በመሣሪያዎ ላይ ያለውን ትራፊክ ይከታተላል።"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"የእርስዎ አስተዳዳሪ በስራ መገለጫዎ ውስጥ፣ ግን በግል መገለጫዎ ላይ ሳይሆን፣ ትራፊክን የሚቆጣጠር የአውታረ መረብ ምዝግብ ማስታወሻ አብርተዋል።"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችሉት <xliff:g id="VPN_APP_0">%1$s</xliff:g> እና <xliff:g id="VPN_APP_1">%2$s</xliff:g> ጋር ተገናኝተዋል።"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"የእርስዎ የሥራ መገለጫ የእርስዎን ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል።"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"የእርስዎ የግል መገለጫ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል።"</string>
+    <!-- no translation found for monitoring_description_named_vpn (7502657784155456414) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (6726394451199620634) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_named_vpn (7254359257263069766) -->
+    <skip />
+    <!-- no translation found for monitoring_description_personal_profile_named_vpn (5083909710727365452) -->
+    <skip />
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"የቪፒኤን ቅንብሮችን ይክፈቱ"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ይህ መሣሪያ በእርስዎ ወላጅ የሚተዳደር ነው። ወላጅዎ የሚጠቀሙባቸውን መተግበሪያዎች፣ አካባቢዎን እና የማያ ገጽ ጊዜዎን የመሳሰሉ መረጃዎችን ማየት እና ማስተዳደር ይችላል።"</string>
@@ -843,6 +855,10 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"የስርጭት ስም"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"የይለፍ ቃል"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"አስቀምጥ"</string>
+    <!-- no translation found for media_output_broadcast_starting (8130153654166235557) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_start_failed (3670835946856129775) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"የግንብ ቁጥር"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"የገንባ ቁጥር ወደ ቅንጥብ ሰሌዳ ተቀድቷል።"</string>
     <string name="basic_status" msgid="2315371112182658176">"ውይይት ይክፈቱ"</string>
@@ -911,11 +927,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ሰቅ አክል"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ሰቅ አታክል"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ተጠቃሚን ይምረጡ"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> መተግበሪያዎች ንቁ ናቸው</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> መተግበሪያዎች ንቁ ናቸው</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"አዲስ መረጃ"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ገቢር መተግበሪያዎች"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"እነዚህን መተግበሪያዎች እየተጠቀሙ ባይሆኑ እንኳ፣ አሁኑም ንቁ ናቸው እናም የባትሪው ጤና ላይ ተፅዕኖ ሊያሳድሩ ይችላሉ"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"መቆሚያ"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ቆሟል"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"ተከናውኗል"</string>
