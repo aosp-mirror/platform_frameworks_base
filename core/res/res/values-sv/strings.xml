@@ -348,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Tillåter att appen expanderar eller komprimerar statusfältet."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"visa aviseringar som aktiviteter i helskärm på en låst enhet"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Tillåter att appen visar aviseringar som aktiviteter i helskärm på en låst enhet"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"installera genvägar"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Installera genvägar"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Tillåter att en app lägger till genvägar på startskärmen utan åtgärd från användaren."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"avinstallera genvägar"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Tillåter att appen tar bort genvägar på startskärmen utan åtgärd från användaren."</string>

@@ -349,7 +349,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"билдирмелерди кулпуланган түзмөктүн толук экранында көрсөтүү"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Колдонмого билдирмелерди кулпуланган түзмөктүн толук экранында көрсөтүүгө уруксат берет"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Ыкчам баскыч түзүү"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Колдонмого үй экранга колдонуучунун катышуусусуз тез чакырма кошууга мүмкүнчүлүк берет."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Колдонмо башкы экранга ыкчам баскычтарды өз алдынча кошо алат"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"тез чакыргычтарды жок кылуу"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Колдонмого колдонуучунун катышуусусуз үй экранынын тез чакырмаларын жок кылуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"чыгыш чалууларды кайра багыттоо"</string>

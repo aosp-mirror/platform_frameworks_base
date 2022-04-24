@@ -348,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"অ্যাপ্লিকেশনটিকে স্ট্যাটাস বার প্রসারিত বা সঙ্কুচিত করতে দেয়৷"</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"লক করা ডিভাইসে ফুল স্ক্রিন অ্যাক্টিভিটি হিসাবে বিজ্ঞপ্তি দেখায়"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"এই অ্যাপকে লক করা ডিভাইসে ফুল স্ক্রিন অ্যাক্টিভিটি হিসাবে বিজ্ঞপ্তি দেখানোর অনুমতি দেয়"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"শর্টকাটগুলি ইনস্টল করে"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"শর্টকাট ইনস্টল করা"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"একটি অ্যাপ্লিকেশানকে ব্যবহারকারীর হস্তক্ষেপ ছাড়াই হোমস্ক্রীণে শর্টকাটগুলি যোগ করার অনুমতি দেয়৷"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"শর্টকাটগুলি আনইনস্টল করে"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"অ্যাপ্লিকেশানটিকে ব্যবহারকারীর হস্তক্ষেপ ছাড়াই হোমস্ক্রীণের শর্টকাটগুলি সরানোর অনুমতি দেয়৷"</string>

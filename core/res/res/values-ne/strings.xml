@@ -349,7 +349,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"लक गरिएको डिभाइसमा स्क्रिनभरि देखिने सूचनाहरू देखाइयोस्"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"यो अनुमति दिइएमा एपले लक गरिएको डिभाइसमा स्क्रिनभरि देखिने सूचनाहरू देखाउन सक्छ"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"सर्टकट इन्स्टल गर्ने"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा थप्नको लागि अनुमति दिन्छ।"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा हाल्ने अनुमति दिन्छ।"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"सर्टकटहरूको स्थापन रद्द गर्नुहोस्"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा हटाउनको लागि अनुमति दिन्छ।"</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"बहिर्गमन कलहरूलाई अर्को मार्ग दिनुहोस्"</string>

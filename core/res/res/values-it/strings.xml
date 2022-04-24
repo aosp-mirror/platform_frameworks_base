@@ -348,8 +348,8 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Consente all\'applicazione di espandere o comprimere la barra di stato."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Visualizzazione di notifiche sotto forma di attività in modalità a schermo intero su un dispositivo bloccato"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Consente all\'app di visualizzare le notifiche sotto forma di attività in modalità a schermo intero su un dispositivo bloccato"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"aggiunta di scorciatoie"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Consente a un\'applicazione di aggiungere scorciatoie alla schermata Home automaticamente."</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Aggiunta di scorciatoie"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Consente a un\'applicazione di aggiungere scorciatoie alla schermata Home automaticamente"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"eliminazione di scorciatoie"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Consente all\'applicazione di rimuovere le scorciatoie della schermata Home automaticamente."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"reindirizzamento chiamate in uscita"</string>
