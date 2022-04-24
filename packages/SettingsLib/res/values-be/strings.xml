@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Адключэнне..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Злучэнне..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Спарванне..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Спалучэнне..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без званкоў)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без аўдыя)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без паведамленняў)"</string>
