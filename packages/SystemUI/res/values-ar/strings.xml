@@ -33,7 +33,7 @@
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟\nلم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"هل تريد السماح لتطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" بالوصول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"هل تريد فتح تطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" لإدارة <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"‏لم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا. قد يحول استخدام التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> على هذا الجهاز دون سماع المكالمات والإشعارات والمنبّهات."</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"‏لم يتم منح هذا التطبيق الإذن بتسجيل الصوت، ولكن يمكنه التقاط الصوت من خلال جهاز USB هذا. إنّ استخدام التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> مع هذا الجهاز قد يحول دون سماع المكالمات والإشعارات والمنبّهات."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"قد يحول استخدام التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> على هذا الجهاز دون سماع المكالمات والإشعارات والمنبّهات."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>؟"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"هل تريد فتح <xliff:g id="APPLICATION">%1$s</xliff:g> للتعامل مع <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
@@ -132,7 +132,7 @@
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"استخدام نقش"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"استخدام كلمة المرور"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"رقم تعريف شخصي خاطئ"</string>
-    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"نقش غير صحيح"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"النقش غير صحيح."</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"كلمة مرور غير صحيحة"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"تم إجراء عدد كبير جدًا من المحاولات غير الصحيحة.\nأعد المحاولة خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"يُرجى إعادة المحاولة. المحاولة <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> من <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>"</string>
@@ -507,7 +507,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"تلقائية"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"تلقائي"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"بدون صوت أو اهتزاز"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في موضع أسفل في قسم المحادثات"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في موضع أسفل في قسم المحادثات."</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف. تظهر المحادثات من <xliff:g id="APP_NAME">%1$s</xliff:g> كفقاعات تلقائيًا."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"السماح للنظام بتحديد ما إذا يجب اهتزاز الجهاز أو إصدار رنين عند تلقّي هذا الإشعار"</string>

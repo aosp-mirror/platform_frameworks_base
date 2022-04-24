@@ -33,7 +33,7 @@
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Izinkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nAplikasi ini belum diberi izin merekam, tetapi dapat merekam audio melalui perangkat USB ini."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Izinkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Buka <xliff:g id="APPLICATION">%1$s</xliff:g> untuk menangani <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Aplikasi ini tidak diberi izin merekam, tetapi dapat merekam audio melalui perangkat USB ini. Menggunakan <xliff:g id="APPLICATION">%1$s</xliff:g> dengan perangkat ini dapat mencegah Anda mendengar panggilan, notifikasi, dan alarm."</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Aplikasi ini tidak diberi izin merekam, tetapi dapat merekam audio melalui perangkat USB ini. Menggunakan <xliff:g id="APPLICATION">%1$s</xliff:g> dengan perangkat ini mungkin dapat mencegah Anda mendengar panggilan, notifikasi, dan alarm."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Menggunakan <xliff:g id="APPLICATION">%1$s</xliff:g> dengan perangkat ini dapat mencegah Anda mendengar panggilan, notifikasi, dan alarm."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Izinkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Buka <xliff:g id="APPLICATION">%1$s</xliff:g> untuk menangani <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
@@ -505,8 +505,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Diberi Peringkat Lebih Rendah"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, mengganggu fitur Jangan Ganggu"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon, mengganggu fitur Jangan Ganggu"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, mengganggu mode Jangan Ganggu"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon, mengganggu mode Jangan Ganggu"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung fitur percakapan"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Notifikasi ini tidak dapat diubah."</string>
