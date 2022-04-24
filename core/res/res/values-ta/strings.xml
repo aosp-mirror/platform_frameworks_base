@@ -305,12 +305,17 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"கேலெண்டரை அணுகலாம்"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ஃபைல்கள் &amp; ஆவணங்கள்"</string>
+    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"சாதனத்திலுள்ள ஃபைல்களையும் ஆவணங்களையும் அணுகும்"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"இசை &amp; பிற ஆடியோ"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"உங்கள் சாதனத்திலுள்ள ஆடியோ ஃபைல்களை அணுகும்"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"படங்கள் &amp; வீடியோக்கள்"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"உங்கள் சாதனத்திலுள்ள படங்களையும் வீடியோ ஃபைல்களையும் அணுகும்"</string>
+    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
+    <skip />
+    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"மைக்ரோஃபோன்"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ஒலிப் பதிவு செய்யலாம்"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"உடல் செயல்பாடுகள்"</string>

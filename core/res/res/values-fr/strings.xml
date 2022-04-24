@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"octet(s)"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"Ko"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"ko"</string>
     <string name="megabyteShort" msgid="6649361267635823443">"Mo"</string>
     <string name="gigabyteShort" msgid="7515809460261287991">"Go"</string>
     <string name="terabyteShort" msgid="1822367128583886496">"To"</string>
@@ -244,7 +244,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"Éteindre"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Marche/Arrêt"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Redémarrer"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Urgences"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Urgence"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Rapport de bug"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Fermer la session"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Capture d\'écran"</string>
@@ -305,12 +305,17 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accéder à votre agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envoyer et consulter des SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fichiers et documents"</string>
+    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"accéder aux fichiers et documents sur votre appareil"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musique et autres contenus audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"accès aux fichiers audio sur votre appareil"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Photos et vidéos"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"accès aux fichiers image et vidéo sur votre appareil"</string>
+    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
+    <skip />
+    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
@@ -912,7 +917,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Appuyez sur \"Menu\" pour déverrouiller le téléphone ou appeler un numéro d\'urgence"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Appuyez sur \"Menu\" pour déverrouiller le téléphone."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Dessinez un schéma pour déverrouiller le téléphone"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Urgences"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Urgence"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Retour à l\'appel"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Combinaison correcte !"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Veuillez réessayer."</string>

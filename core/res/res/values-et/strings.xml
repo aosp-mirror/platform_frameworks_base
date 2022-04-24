@@ -305,12 +305,17 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"juurdepääs kalendrile"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"saata ja vaadata SMS-sõnumeid"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Failid ja dokumendid"</string>
+    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"juurdepääs teie seadmes olevatele failidele ja dokumentidele"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muusika ja muud helifailid"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"pääseda juurde teie seadmes olevatele helifailidele"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotod ja videod"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"pääseda juurde teie seadmes olevatele pildi- ja videofailidele"</string>
+    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
+    <skip />
+    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"heli salvestamine"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Füüsiline tegevus"</string>
