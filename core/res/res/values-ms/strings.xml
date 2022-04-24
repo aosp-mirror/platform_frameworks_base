@@ -297,7 +297,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistem Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Beralih ke profil peribadi"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Beralih ke profil kerja"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kenalan"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"mengakses kenalan anda"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokasi"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"mengakses lokasi peranti ini"</string>
@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Jangan Ganggu telah berubah"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ketik untuk menyemak item yang disekat."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Semak tetapan pemberitahuan"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Dalam Android 13, apl yang anda pasang memerlukan kebenaran anda untuk menghantar pemberitahuan. Ketik untuk menukar kebenaran ini bagi apl sedia ada."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ingatkan saya nanti"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Ketepikan"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>

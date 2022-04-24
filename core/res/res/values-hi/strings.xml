@@ -1926,7 +1926,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"फ़िलहाल <xliff:g id="APP_NAME_0">%1$s</xliff:g> उपलब्ध नहीं है. इसे <xliff:g id="APP_NAME_1">%2$s</xliff:g> के ज़रिए प्रबंधित किया जाता है."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ज़्यादा जानें"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ऐप्लिकेशन पर लगी रोक हटाएं"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन चालू करना चाहते हैं?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन चालू करने हैं?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"अपने ऑफ़िस के काम से जुड़े ऐप्लिकेशन और सूचनाओं का ऐक्सेस पाएं"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"चालू करें"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ऐप्लिकेशन उपलब्ध नहीं है"</string>
@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"परेशान न करें की सुविधा बदल गई है"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"टैप करके देखें कि किन चीज़ों पर रोक लगाई गई है."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"सूचना सेटिंग देखें"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 में जो ऐप्लिकेशन इंस्टॉल किए जाएंगे, उन्हें आपको सूचनाएं भेजने के लिए अनुमति लेनी होगी. पहले से इंस्टॉल किए गए ऐप्लिकेशन को दी गई अनुमति बदलने के लिए टैप करें."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"बाद में याद दिलाएं"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"बंद करें"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"सिस्टम"</string>
@@ -2274,11 +2275,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> का अनुवाद किया गया."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"मैसेज का <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> से <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> में अनुवाद किया गया."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"बैकग्राउंड में हो रही गतिविधि"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"कोई ऐप्लिकेशन, तेज़ी से बैटरी खर्च कर रहा है"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"कोई ऐप्लिकेशन अब भी चालू है"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> बैकग्राउंड में चल रहा है. \'बैटरी खर्च को मैनेज करें\' पर टैप करें."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> से, आपके डिवाइस की बैटरी लाइफ़ पर असर पड़ सकता है. चालू ऐप्लिकेशन देखने के लिए टैप करें."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"चालू ऐप्लिकेशन देखें"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से फ़ोन के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>

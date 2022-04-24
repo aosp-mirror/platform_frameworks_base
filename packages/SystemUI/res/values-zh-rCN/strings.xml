@@ -346,8 +346,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"是，继续"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"访客模式"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"您当前处于访客模式"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"要添加新用户吗？"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"当您添加新用户时，该用户必须设置自己的空间。\n\n任何用户均可为其他所有用户更新应用。"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"如果添加新用户，系统将退出访客模式并删除当前访客会话中的所有应用和数据。"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"已达到用户数上限"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">

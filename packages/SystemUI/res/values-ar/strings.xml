@@ -354,8 +354,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"نعم، متابعة"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"وضع الضيف"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"أنت تستخدِم وضع الضيف."</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"هل تريد إضافة مستخدم جديد؟"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"عند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nويُمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"ستؤدي إضافة مُستخدِم جديد إلى الخروج من وضع الضيف وحذف كل التطبيقات والبيانات من جلسة الضيف الحالية."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"تم الوصول إلى أقصى عدد للمستخدمين"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">

@@ -46,6 +46,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.transition.TransitionManager;
 import android.util.Pair;
@@ -634,9 +635,10 @@ public class ActivityOptions extends ComponentOptions {
             mAnimationStartedListener = new IRemoteCallback.Stub() {
                 @Override
                 public void sendResult(Bundle data) throws RemoteException {
+                    final long elapsedRealtime = SystemClock.elapsedRealtime();
                     handler.post(new Runnable() {
                         @Override public void run() {
-                            listener.onAnimationStarted();
+                            listener.onAnimationStarted(elapsedRealtime);
                         }
                     });
                 }
@@ -645,13 +647,15 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
-     * Callback for use with {@link ActivityOptions#makeThumbnailScaleUpAnimation}
-     * to find out when the given animation has started running.
+     * Callback for finding out when the given animation has started running.
      * @hide
      */
     @TestApi
     public interface OnAnimationStartedListener {
-        void onAnimationStarted();
+        /**
+         * @param elapsedRealTime {@link SystemClock#elapsedRealTime} when animation started.
+         */
+        void onAnimationStarted(long elapsedRealTime);
     }
 
     private void setOnAnimationFinishedListener(final Handler handler,
@@ -660,10 +664,11 @@ public class ActivityOptions extends ComponentOptions {
             mAnimationFinishedListener = new IRemoteCallback.Stub() {
                 @Override
                 public void sendResult(Bundle data) throws RemoteException {
+                    final long elapsedRealtime = SystemClock.elapsedRealtime();
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            listener.onAnimationFinished();
+                            listener.onAnimationFinished(elapsedRealtime);
                         }
                     });
                 }
@@ -672,13 +677,15 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
-     * Callback for use with {@link ActivityOptions#makeThumbnailAspectScaleDownAnimation}
-     * to find out when the given animation has drawn its last frame.
+     * Callback for finding out when the given animation has drawn its last frame.
      * @hide
      */
     @TestApi
     public interface OnAnimationFinishedListener {
-        void onAnimationFinished();
+        /**
+         * @param elapsedRealTime {@link SystemClock#elapsedRealTime} when animation finished.
+         */
+        void onAnimationFinished(long elapsedRealTime);
     }
 
     /**

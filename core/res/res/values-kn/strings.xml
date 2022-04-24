@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಬದಲಾಗಿದೆ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ಏನನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ಪರೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 ನಲ್ಲಿ, ನೀವು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡುವ ಆ್ಯಪ್‌ಗಳಿಗೆ, ಅಧಿಸೂಚನೆಗಳನ್ನು ಕಳುಹಿಸಲು ನಿಮ್ಮ ಅನುಮತಿಯ ಅಗತ್ಯವಿದೆ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಆ್ಯಪ್‌ಗಳ ಅನುಮತಿಗಳನ್ನು ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ನಂತರ ರಿಮೈಂಡ್ ಮಾಡಿ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ವಜಾಗೊಳಿಸಿ"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ಸಿಸ್ಟಂ"</string>

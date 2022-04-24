@@ -298,6 +298,9 @@ public class UserManagerService extends IUserManager.Stub {
     private PackageManagerInternal mPmInternal;
     private DevicePolicyManagerInternal mDevicePolicyManagerInternal;
 
+    /** Indicates that this is the 1st boot after the system user mode was changed by emulation. */
+    private boolean mUpdatingSystemUserMode;
+
     /**
      * Internal non-parcelable wrapper for UserInfo that is not exposed to other system apps.
      */
@@ -2949,7 +2952,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         final String emulatedValue = SystemProperties
-                .get(UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY);
+                .get(UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY);
         if (TextUtils.isEmpty(emulatedValue)) {
             return;
         }
@@ -2967,7 +2970,7 @@ public class UserManagerService extends IUserManager.Stub {
                 break;
             default:
                 Slogf.wtf(LOG_TAG, "emulateSystemUserModeIfNeeded(): ignoring invalid valued of "
-                        + "property %s: %s", UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY,
+                        + "property %s: %s", UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY,
                         emulatedValue);
                 return;
         }
@@ -3006,10 +3009,8 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
 
-        // TODO(b/203885212): need to update the system user packages; the "easiest way" woulbe
-        // be setting "persist.pm.mock-upgrade", but that would require granting a new selinux
-        // permission. Another options would be providing an internal API, or setting a
-        // debug.xxx property - either way, we'll do that in a follow-up CL
+        // Update emulated mode, which will used to triger an update on user packages
+        mUpdatingSystemUserMode = true;
     }
 
     @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
@@ -4356,7 +4357,7 @@ public class UserManagerService extends IUserManager.Stub {
     boolean installWhitelistedSystemPackages(boolean isFirstBoot, boolean isUpgrade,
             @Nullable ArraySet<String> existingPackages) {
         return mSystemPackageInstaller.installWhitelistedSystemPackages(
-                isFirstBoot, isUpgrade, existingPackages);
+                isFirstBoot || mUpdatingSystemUserMode, isUpgrade, existingPackages);
     }
 
     @Override
@@ -5759,6 +5760,15 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             final PrintWriter pw = getOutPrintWriter();
+
+            // The headless system user cannot be locked; in theory, we could just make this check
+            // when going full -> headless, but it doesn't hurt to check on both (and it makes the
+            // code simpler)
+            if (mLockPatternUtils.isSecure(UserHandle.USER_SYSTEM)) {
+                pw.println("Cannot change system user mode when it has a credential");
+                return -1;
+            }
+
             final String mode = getNextArgRequired();
             final boolean isHeadlessSystemUserModeCurrently = UserManager
                     .isHeadlessSystemUserMode();
@@ -5786,20 +5796,13 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             Slogf.d(LOG_TAG, "Updating system property %s to %s",
-                    UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY, mode);
+                    UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY, mode);
 
-            // TODO(b/203885212): temp try/catch until the selinux permission is granted
-            try {
-                SystemProperties.set(UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY, mode);
-                pw.println("System user mode changed - please reboot (or restart Android runtime) "
-                        + "to continue");
-                pw.println("NOTICE: after restart, some apps might be uninstalled (and their data "
-                        + "will be lost)");
-            } catch (RuntimeException e) {
-                pw.printf("Failed to set property %s (%s). You might need to run "
-                        + "'adb shell setenforce 0' and try again.\n",
-                        UserManager.DEV_HEADLESS_SYSTEM_USER_MODE_PROPERTY, e);
-            }
+            SystemProperties.set(UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY, mode);
+            pw.println("System user mode changed - please reboot (or restart Android runtime) "
+                    + "to continue");
+            pw.println("NOTICE: after restart, some apps might be uninstalled (and their data "
+                    + "will be lost)");
             return 0;
         }
 
@@ -5916,6 +5919,9 @@ public class UserManagerService extends IUserManager.Stub {
         pw.println("  Is headless-system mode: " + isHeadlessSystemUserMode);
         if (isHeadlessSystemUserMode != isReallyHeadlessSystemUserMode()) {
             pw.println("  (emulated by 'cmd user set-system-user-mode-emulation')");
+            if (mUpdatingSystemUserMode) {
+                pw.println("  (and being updated after boot)");
+            }
         }
         pw.println("  User version: " + mUserVersion);
         pw.println("  Owner name: " + getOwnerName());

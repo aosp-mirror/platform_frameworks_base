@@ -136,12 +136,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"কনফার্ম করা হয়েছে"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"সম্পূর্ণ করতে \'কনফার্ম করুন\' বোতামে ট্যাপ করুন"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"ফেসের সাহায্যে আনলক করা হয়েছে। চালিয়ে যাওয়ার জন্য আনলক আইকনে প্রেস করুন।"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_1 (439152621640507113) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_2 (8586608186457385108) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face_alt_3 (2192670471930606539) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ফেসের সাহায্যে আনলক করা হয়েছে। চালিয়ে যেতে প্রেস করুন।"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ফেস শনাক্ত করা হয়েছে। চালিয়ে যেতে প্রেস করুন।"</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ফেস শনাক্ত করা হয়েছে। চালিয়ে যেতে আনলক আইকন প্রেস করুন।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"প্রমাণীকৃত"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"পিন ব্যবহার করুন"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"প্যাটার্ন ব্যবহার করুন"</string>
@@ -318,12 +315,9 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"খোলার জন্য উপরে সোয়াইপ করুন"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"খোলার জন্য আনলক আইকন প্রেস করুন"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"ফেসের সাহায্যে আনলক করা হয়েছে। খোলার জন্য আনলক আইকন প্রেস করুন।"</string>
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_1 (5715461103913071474) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_2 (8310787946357120406) -->
-    <skip />
-    <!-- no translation found for keyguard_face_successful_unlock_press_alt_3 (7219030481255573962) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"ফেসের সাহায্যে আনলক করা হয়েছে। খোলার জন্য প্রেস করুন।"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"ফেস শনাক্ত করা হয়েছে। খোলার জন্য প্রেস করুন।"</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"ফেস শনাক্ত করা হয়েছে। খোলার জন্য আনলক আইকন প্রেস করুন।"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"আবার চেষ্টা করতে উপরের দিকে সোয়াইপ করুন"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ব্যবহার করতে আনলক করুন"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের"</string>
@@ -352,8 +346,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"হ্যাঁ, চালিয়ে যান"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"অতিথি মোড"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"আপনি \'অতিথি মোড\' ব্যবহার করছেন"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"নতুন ব্যবহারকারীকে যোগ করবেন?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট-আপ করে নিতে হবে৷\n\nযেকোনও ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ আপডেট করতে পারবেন৷"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"নতুন ব্যবহারকারী যোগ করার মাধ্যমে \'অতিথি মোড\' ছেড়ে বেরিয়ে আসতে পারবেন এবং বর্তমান অতিথি সেশন থেকে সব অ্যাপ ও ডেটা মুছে যাবে।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"আর কোনও প্রোফাইল যোগ করা যাবে না"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -523,8 +515,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্রাধিকার"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এ কথোপকথন ফিচার কাজ করে না"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই বিজ্ঞপ্তিগুলি পরিবর্তন করা যাবে না।"</string>
-    <!-- no translation found for notification_unblockable_call_desc (5907328164696532169) -->
-    <skip />
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"কল বিজ্ঞপ্তি পরিবর্তন করা যাবে না।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"এই সমস্ত বিজ্ঞপ্তিকে এখানে কনফিগার করা যাবে না"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"প্রক্সি করা বিজ্ঞপ্তি"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g> সংক্রান্ত সমস্ত বিজ্ঞপ্তি"</string>

@@ -2053,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Kipengele cha Usinisumbue kimebadilishwa"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Gusa ili uangalie kipengee ambacho kimezuiwa."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Kagua mipangilio ya arifa"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Kwenye Android toleo la 13, programu ambazo unasakinisha zitahitaji ruhusa yako ili zikutumie arifa. Gusa ili ubadilishe ruhusa hii kwa programu zilizopo."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Nikumbushe baadaye"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Ondoa"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Mfumo"</string>
@@ -2274,11 +2275,9 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Imetafsiriwa."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Ujumbe umetafsiriwa kwa <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> kutoka <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Shughuli za Chinichini"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Programu inamaliza chaji ya betri haraka"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Programu bado inatumika"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> inatumika chinichini. Gusa ili udhibiti matumizi ya betri."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> inaweza kuathiri muda wa matumizi ya betri. Gusa ili ukague programu zinazotumika."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Angalia programu zinazotumika"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Haiwezi kufikia kamera ya simu kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>

@@ -17514,7 +17514,7 @@ public final class Settings {
              * Whether charging sounds are enabled.
              * @hide
              */
-            public static final String CHARGING_SOUNDS_ENABLED = "charging_sounds_enabled";
+            public static final String CHARGING_SOUNDS_ENABLED = "wear_charging_sounds_enabled";
         }
     }
 
