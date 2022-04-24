@@ -208,6 +208,16 @@ public class LogModule {
         return factory.create("MediaView", 100);
     }
 
+    /**
+     * Provides a buffer for media playback state changes
+     */
+    @Provides
+    @SysUISingleton
+    @MediaTimeoutListenerLog
+    public static LogBuffer providesMediaTimeoutListenerLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaTimeout", 100);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
