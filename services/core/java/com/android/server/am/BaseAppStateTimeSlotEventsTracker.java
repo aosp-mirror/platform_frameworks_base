@@ -133,6 +133,15 @@ abstract class BaseAppStateTimeSlotEventsTracker
         mTmpPkgs.clear();
     }
 
+    @GuardedBy("mLock")
+    int getTotalEventsLocked(int uid, long now) {
+        final U events = getUidEventsLocked(uid);
+        if (events == null) {
+            return 0;
+        }
+        return events.getTotalEvents(now, SimpleAppStateTimeslotEvents.DEFAULT_INDEX);
+    }
+
     private void trimEvents() {
         final long now = SystemClock.elapsedRealtime();
         trim(Math.max(0, now - mInjector.getPolicy().getMaxTrackingDuration()));
