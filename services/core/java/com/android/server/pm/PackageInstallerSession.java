@@ -2145,7 +2145,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mUserActionRequired = wasUserActionIntentSent;
         }
         if (wasUserActionIntentSent) {
+            // Commit was keeping session marked as active until now; release
+            // that extra refcount so session appears idle.
+            deactivate();
             return;
+        } else if (mUserActionRequired) {
+            // If user action is required, control comes back here when the user allows
+            // the installation. At this point, the session is marked active once again,
+            // since installation is in progress.
+            activate();
         }
 
         if (params.isStaged) {
@@ -2415,10 +2423,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
 
         sendOnUserActionRequired(mContext, target, sessionId, intent);
-
-        // Commit was keeping session marked as active until now; release
-        // that extra refcount so session appears idle.
-        closeInternal(false);
     }
 
     @WorkerThread
@@ -3479,10 +3483,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     public void open() throws IOException {
-        if (mActiveCount.getAndIncrement() == 0) {
-            mCallback.onSessionActiveChanged(this, true);
-        }
-
+        activate();
         boolean wasPrepared;
         synchronized (mLock) {
             wasPrepared = mPrepared;
@@ -3504,21 +3505,31 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private void activate() {
+        if (mActiveCount.getAndIncrement() == 0) {
+            mCallback.onSessionActiveChanged(this, true);
+        }
+    }
+
     @Override
     public void close() {
         closeInternal(true);
     }
 
     private void closeInternal(boolean checkCaller) {
-        int activeCount;
         synchronized (mLock) {
             if (checkCaller) {
                 assertCallerIsOwnerOrRoot();
             }
+        }
+        deactivate();
+    }
 
+    private void deactivate() {
+        int activeCount;
+        synchronized (mLock) {
             activeCount = mActiveCount.decrementAndGet();
         }
-
         if (activeCount == 0) {
             mCallback.onSessionActiveChanged(this, false);
         }
