@@ -2853,11 +2853,11 @@ public class CarrierConfigManager {
      * <p>
      * 4 threshold integers must be within the boundaries [-140 dB, -44 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-140, threshold1]"</LI>
-     *     <LI>"POOR: (threshold1, threshold2]"</LI>
-     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
-     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, -44]"</LI>
+     *     <LI>"NONE: [-140, threshold1)"</LI>
+     *     <LI>"POOR: [threshold1, threshold2)"</LI>
+     *     <LI>"MODERATE: [threshold2, threshold3)"</LI>
+     *     <LI>"GOOD:  [threshold3, threshold4)"</LI>
+     *     <LI>"EXCELLENT:  [threshold4, -44]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
@@ -2873,11 +2873,11 @@ public class CarrierConfigManager {
      * <p>
      * 4 threshold integers must be within the boundaries [-43 dB, 20 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-43, threshold1]"</LI>
-     *     <LI>"POOR: (threshold1, threshold2]"</LI>
-     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
-     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, 20]"</LI>
+     *     <LI>"NONE: [-43, threshold1)"</LI>
+     *     <LI>"POOR: [threshold1, threshold2)"</LI>
+     *     <LI>"MODERATE: [threshold2, threshold3)"</LI>
+     *     <LI>"GOOD:  [threshold3, threshold4)"</LI>
+     *     <LI>"EXCELLENT:  [threshold4, 20]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
@@ -2894,11 +2894,11 @@ public class CarrierConfigManager {
      * <p>
      * 4 threshold integers must be within the boundaries [-23 dB, 40 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-23, threshold1]"</LI>
-     *     <LI>"POOR: (threshold1, threshold2]"</LI>
-     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
-     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, 40]"</LI>
+     *     <LI>"NONE: [-23, threshold1)"</LI>
+     *     <LI>"POOR: [threshold1, threshold2)"</LI>
+     *     <LI>"MODERATE: [threshold2, threshold3)"</LI>
+     *     <LI>"GOOD:  [threshold3, threshold4)"</LI>
+     *     <LI>"EXCELLENT:  [threshold4, 40]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or

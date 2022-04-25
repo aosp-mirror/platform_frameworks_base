@@ -28,6 +28,7 @@ import android.hardware.security.keymint.Tag;
 import android.os.Build;
 import android.os.RemoteException;
 import android.security.GenerateRkpKey;
+import android.security.IGenerateRkpKeyService;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore2;
 import android.security.KeyStoreException;
@@ -624,7 +625,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
              * GenerateRkpKey.notifyEmpty() will delay for a while before returning.
              */
             result = generateKeyPairHelper();
-            if (result.rkpStatus == KeyStoreException.RKP_SUCCESS) {
+            if (result.rkpStatus == KeyStoreException.RKP_SUCCESS && result.keyPair != null) {
                 return result.keyPair;
             }
         }
@@ -706,27 +707,12 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             success = true;
             KeyPair kp = new KeyPair(publicKey, publicKey.getPrivateKey());
             return new GenerateKeyPairHelperResult(0, kp);
-        } catch (android.security.KeyStoreException e) {
+        } catch (KeyStoreException e) {
             switch (e.getErrorCode()) {
                 case KeymasterDefs.KM_ERROR_HARDWARE_TYPE_UNAVAILABLE:
                     throw new StrongBoxUnavailableException("Failed to generated key pair.", e);
                 case ResponseCode.OUT_OF_KEYS:
-                    GenerateRkpKey keyGen = new GenerateRkpKey(ActivityThread
-                            .currentApplication());
-                    try {
-                        //TODO: When detailed error information is available from the remote
-                        //provisioner, propagate it up.
-                        keyGen.notifyEmpty(securityLevel);
-                    } catch (RemoteException f) {
-                        KeyStoreException ksException = new KeyStoreException(
-                                ResponseCode.OUT_OF_KEYS,
-                                "Remote exception: " + f.getMessage(),
-                                KeyStoreException.RKP_TEMPORARILY_UNAVAILABLE);
-                        throw new ProviderException("Failed to talk to RemoteProvisioner",
-                                ksException);
-                    }
-                    return new GenerateKeyPairHelperResult(
-                            KeyStoreException.RKP_TEMPORARILY_UNAVAILABLE, null);
+                    throw makeOutOfKeysException(e, securityLevel);
                 default:
                     ProviderException p = new ProviderException("Failed to generate key pair.", e);
                     if ((mSpec.getPurposes() & KeyProperties.PURPOSE_WRAP_KEY) != 0) {
@@ -750,6 +736,52 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 }
             }
         }
+    }
+
+    // In case keystore reports OUT_OF_KEYS, call this handler in an attempt to remotely provision
+    // some keys.
+    private ProviderException makeOutOfKeysException(KeyStoreException e, int securityLevel) {
+        GenerateRkpKey keyGen = new GenerateRkpKey(ActivityThread
+                .currentApplication());
+        KeyStoreException ksException;
+        try {
+            final int keyGenStatus = keyGen.notifyEmpty(securityLevel);
+            // Default stance: temporary error. This is a hint to the caller to try again with
+            // exponential back-off.
+            int rkpStatus;
+            switch (keyGenStatus) {
+                case IGenerateRkpKeyService.Status.NO_NETWORK_CONNECTIVITY:
+                    rkpStatus = KeyStoreException.RKP_FETCHING_PENDING_CONNECTIVITY;
+                    break;
+                case IGenerateRkpKeyService.Status.DEVICE_NOT_REGISTERED:
+                    rkpStatus = KeyStoreException.RKP_SERVER_REFUSED_ISSUANCE;
+                    break;
+                case IGenerateRkpKeyService.Status.OK:
+                    // This will actually retry once immediately, so on "OK" go ahead and return
+                    // "temporarily unavailable". @see generateKeyPair
+                case IGenerateRkpKeyService.Status.NETWORK_COMMUNICATION_ERROR:
+                case IGenerateRkpKeyService.Status.HTTP_CLIENT_ERROR:
+                case IGenerateRkpKeyService.Status.HTTP_SERVER_ERROR:
+                case IGenerateRkpKeyService.Status.HTTP_UNKNOWN_ERROR:
+                case IGenerateRkpKeyService.Status.INTERNAL_ERROR:
+                default:
+                    // These errors really should never happen. The best we can do is assume they
+                    // are transient and hint to the caller to retry with back-off.
+                    rkpStatus = KeyStoreException.RKP_TEMPORARILY_UNAVAILABLE;
+                    break;
+            }
+            ksException = new KeyStoreException(
+                    ResponseCode.OUT_OF_KEYS,
+                    "Out of RKP keys due to IGenerateRkpKeyService status: " + keyGenStatus,
+                    rkpStatus);
+        } catch (RemoteException f) {
+            ksException = new KeyStoreException(
+                    ResponseCode.OUT_OF_KEYS,
+                    "Remote exception: " + f.getMessage(),
+                    KeyStoreException.RKP_TEMPORARILY_UNAVAILABLE);
+        }
+        ksException.initCause(e);
+        return new ProviderException("Failed to talk to RemoteProvisioner", ksException);
     }
 
     private void addAttestationParameters(@NonNull List<KeyParameter> params)
