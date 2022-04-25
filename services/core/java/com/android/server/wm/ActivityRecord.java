@@ -5527,8 +5527,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /** @return {@code true} if this activity should be made visible. */
-    private boolean shouldBeVisible(boolean behindFullscreenActivity, boolean ignoringKeyguard) {
-        updateVisibilityIgnoringKeyguard(behindFullscreenActivity);
+    private boolean shouldBeVisible(boolean behindOccludedContainer, boolean ignoringKeyguard) {
+        updateVisibilityIgnoringKeyguard(behindOccludedContainer);
 
         if (ignoringKeyguard) {
             return visibleIgnoringKeyguard;
@@ -5586,20 +5586,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return differentUidOverlayActivity != null;
     }
 
-    void updateVisibilityIgnoringKeyguard(boolean behindFullscreenActivity) {
-        visibleIgnoringKeyguard = (!behindFullscreenActivity || mLaunchTaskBehind)
+    void updateVisibilityIgnoringKeyguard(boolean behindOccludedContainer) {
+        visibleIgnoringKeyguard = (!behindOccludedContainer || mLaunchTaskBehind)
                 && showToCurrentUser();
     }
 
     boolean shouldBeVisible() {
-        final Task rootTask = getRootTask();
-        if (rootTask == null) {
+        final Task task = getTask();
+        if (task == null) {
             return false;
         }
 
-        final boolean behindFullscreenActivity = !rootTask.shouldBeVisible(null /* starting */)
-                || rootTask.getOccludingActivityAbove(this) != null;
-        return shouldBeVisible(behindFullscreenActivity, false /* ignoringKeyguard */);
+        final boolean behindOccludedContainer = !task.shouldBeVisible(null /* starting */)
+                || task.getOccludingActivityAbove(this) != null;
+        return shouldBeVisible(behindOccludedContainer, false /* ignoringKeyguard */);
     }
 
     void makeVisibleIfNeeded(ActivityRecord starting, boolean reportToClient) {

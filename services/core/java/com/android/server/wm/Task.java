@@ -5053,21 +5053,9 @@ class Task extends TaskFragment {
             positionChildAtTop(rTask);
         }
         Task task = null;
-        if (!newTask && isOrhasTask) {
-            // Starting activity cannot be occluding activity, otherwise starting window could be
-            // remove immediately without transferring to starting activity.
-            final ActivityRecord occludingActivity = getOccludingActivityAbove(r);
-            if (occludingActivity != null) {
-                // Here it is!  Now, if this is not yet visible (occluded by another task) to the
-                // user, then just add it without starting; it will get started when the user
-                // navigates back to it.
-                ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Adding activity %s to task %s "
-                                + "callers: %s", r, task,
-                        new RuntimeException("here").fillInStackTrace());
-                rTask.positionChildAtTop(r);
-                ActivityOptions.abort(options);
-                return;
-            }
+        if (!newTask && isOrhasTask && !r.shouldBeVisible()) {
+            ActivityOptions.abort(options);
+            return;
         }
 
         // Place a new activity at top of root task, so it is next to interact with the user.
@@ -5697,9 +5685,7 @@ class Task extends TaskFragment {
             return false;
         }
 
-        // See if there is an occluding activity on-top of this one.
-        final ActivityRecord occludingActivity = getOccludingActivityAbove(r);
-        if (occludingActivity != null) return false;
+        if (!r.shouldBeVisible()) return false;
 
         if (r.finishing) Slog.e(TAG, "willActivityBeVisible: Returning false,"
                 + " would have returned true for r=" + r);
