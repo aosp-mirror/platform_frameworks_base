@@ -71,7 +71,6 @@
 
 using android::base::ParseUint;
 using android::base::StringPrintf;
-using android::os::BlockUntrustedTouchesMode;
 using android::os::InputEventInjectionResult;
 using android::os::InputEventInjectionSync;
 
@@ -108,7 +107,6 @@ static struct {
     jmethodID notifySensorEvent;
     jmethodID notifySensorAccuracy;
     jmethodID notifyVibratorState;
-    jmethodID notifyUntrustedTouch;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
     jmethodID interceptMotionBeforeQueueingNonInteractive;
@@ -330,7 +328,6 @@ public:
     void notifySensorAccuracy(int32_t deviceId, InputDeviceSensorType sensorType,
                               InputDeviceSensorAccuracy accuracy) override;
     void notifyVibratorState(int32_t deviceId, bool isOn) override;
-    void notifyUntrustedTouch(const std::string& obscuringPackage) override;
     bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) override;
     void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) override;
     void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags) override;
@@ -896,17 +893,6 @@ void NativeInputManager::notifyInputChannelBroken(const sp<IBinder>& token) {
                 tokenObj);
         checkAndClearExceptionFromCallback(env, "notifyInputChannelBroken");
     }
-}
-
-void NativeInputManager::notifyUntrustedTouch(const std::string& obscuringPackage) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-    ALOGD("notifyUntrustedTouch - obscuringPackage=%s", obscuringPackage.c_str());
-#endif
-    ATRACE_CALL();
-    JNIEnv* env = jniEnv();
-    jstring jPackage = env->NewStringUTF(obscuringPackage.c_str());
-    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyUntrustedTouch, jPackage);
-    checkAndClearExceptionFromCallback(env, "notifyUntrustedTouch");
 }
 
 void NativeInputManager::notifyFocusChanged(const sp<IBinder>& oldToken,
@@ -1712,13 +1698,6 @@ static void nativeSetMaximumObscuringOpacityForTouch(JNIEnv* env, jobject native
     im->getInputManager()->getDispatcher().setMaximumObscuringOpacityForTouch(opacity);
 }
 
-static void nativeSetBlockUntrustedTouchesMode(JNIEnv* env, jobject nativeImplObj, jint mode) {
-    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-
-    im->getInputManager()->getDispatcher().setBlockUntrustedTouchesMode(
-            static_cast<BlockUntrustedTouchesMode>(mode));
-}
-
 static jint nativeInjectInputEvent(JNIEnv* env, jobject nativeImplObj, jobject inputEventObj,
                                    jint injectorPid, jint injectorUid, jint syncMode,
                                    jint timeoutMillis, jint policyFlags) {
@@ -2357,7 +2336,6 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setInTouchMode", "(ZIIZ)Z", (void*)nativeSetInTouchMode},
         {"setMaximumObscuringOpacityForTouch", "(F)V",
          (void*)nativeSetMaximumObscuringOpacityForTouch},
-        {"setBlockUntrustedTouchesMode", "(I)V", (void*)nativeSetBlockUntrustedTouchesMode},
         {"injectInputEvent", "(Landroid/view/InputEvent;IIIII)I", (void*)nativeInjectInputEvent},
         {"verifyInputEvent", "(Landroid/view/InputEvent;)Landroid/view/VerifiedInputEvent;",
          (void*)nativeVerifyInputEvent},
@@ -2475,9 +2453,6 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifySensorAccuracy, clazz, "notifySensorAccuracy", "(III)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyVibratorState, clazz, "notifyVibratorState", "(IZ)V");
-
-    GET_METHOD_ID(gServiceClassInfo.notifyUntrustedTouch, clazz, "notifyUntrustedTouch",
-                  "(Ljava/lang/String;)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyNoFocusedWindowAnr, clazz, "notifyNoFocusedWindowAnr",
                   "(Landroid/view/InputApplicationHandle;)V");

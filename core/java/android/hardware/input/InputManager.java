@@ -36,7 +36,6 @@ import android.hardware.lights.LightState;
 import android.hardware.lights.LightsManager;
 import android.hardware.lights.LightsRequest;
 import android.os.Binder;
-import android.os.BlockUntrustedTouchesMode;
 import android.os.Build;
 import android.os.CombinedVibration;
 import android.os.Handler;
@@ -67,7 +66,6 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.util.ArrayUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -86,13 +84,6 @@ public final class InputManager {
     private static final int MSG_DEVICE_ADDED = 1;
     private static final int MSG_DEVICE_REMOVED = 2;
     private static final int MSG_DEVICE_CHANGED = 3;
-
-    /** @hide */
-    public static final int[] BLOCK_UNTRUSTED_TOUCHES_MODES = {
-            BlockUntrustedTouchesMode.DISABLED,
-            BlockUntrustedTouchesMode.PERMISSIVE,
-            BlockUntrustedTouchesMode.BLOCK
-    };
 
     private static InputManager sInstance;
 
@@ -198,14 +189,6 @@ public final class InputManager {
      * @hide
      */
     public static final float DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH = .8f;
-
-    /**
-     * Default mode of the block untrusted touches mode feature.
-     * @hide
-     */
-    @BlockUntrustedTouchesMode
-    public static final int DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE =
-            BlockUntrustedTouchesMode.BLOCK;
 
     /**
      * Prevent touches from being consumed by apps if these touches passed through a non-trusted
@@ -1012,50 +995,6 @@ public final class InputManager {
         Context context = ActivityThread.currentApplication();
         Settings.Global.putFloat(context.getContentResolver(),
                 Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH, opacity);
-    }
-
-    /**
-     * Returns the current mode of the block untrusted touches feature, one of:
-     * <ul>
-     *     <li>{@link BlockUntrustedTouchesMode#DISABLED}
-     *     <li>{@link BlockUntrustedTouchesMode#PERMISSIVE}
-     *     <li>{@link BlockUntrustedTouchesMode#BLOCK}
-     * </ul>
-     *
-     * @hide
-     */
-    @TestApi
-    @BlockUntrustedTouchesMode
-    public int getBlockUntrustedTouchesMode(@NonNull Context context) {
-        int mode = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.BLOCK_UNTRUSTED_TOUCHES_MODE, DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE);
-        if (!ArrayUtils.contains(BLOCK_UNTRUSTED_TOUCHES_MODES, mode)) {
-            Log.w(TAG, "Unknown block untrusted touches feature mode " + mode + ", using "
-                    + "default " + DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE);
-            return DEFAULT_BLOCK_UNTRUSTED_TOUCHES_MODE;
-        }
-        return mode;
-    }
-
-    /**
-     * Sets the mode of the block untrusted touches feature to one of:
-     * <ul>
-     *     <li>{@link BlockUntrustedTouchesMode#DISABLED}
-     *     <li>{@link BlockUntrustedTouchesMode#PERMISSIVE}
-     *     <li>{@link BlockUntrustedTouchesMode#BLOCK}
-     * </ul>
-     *
-     * @hide
-     */
-    @TestApi
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void setBlockUntrustedTouchesMode(@NonNull Context context,
-            @BlockUntrustedTouchesMode int mode) {
-        if (!ArrayUtils.contains(BLOCK_UNTRUSTED_TOUCHES_MODES, mode)) {
-            throw new IllegalArgumentException("Invalid feature mode " + mode);
-        }
-        Settings.Global.putInt(context.getContentResolver(),
-                Settings.Global.BLOCK_UNTRUSTED_TOUCHES_MODE, mode);
     }
 
     /**
