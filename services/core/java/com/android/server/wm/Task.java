@@ -1175,7 +1175,7 @@ class Task extends TaskFragment {
         // Call this again after super onParentChanged in-case the surface wasn't created yet
         // (happens when the task is first inserted into the hierarchy). It's a no-op if it
         // already ran fully within super.onParentChanged
-        updateTaskOrganizerState(false /* forceUpdate */);
+        updateTaskOrganizerState();
 
         // TODO(b/168037178): The check for null display content and setting it to null doesn't
         //                    really make sense here...
@@ -1951,7 +1951,7 @@ class Task extends TaskFragment {
         }
 
         saveLaunchingStateIfNeeded();
-        final boolean taskOrgChanged = updateTaskOrganizerState(false /* forceUpdate */);
+        final boolean taskOrgChanged = updateTaskOrganizerState();
         if (taskOrgChanged) {
             updateSurfacePosition(getSyncTransaction());
             if (!isOrganized()) {
@@ -4269,21 +4269,18 @@ class Task extends TaskFragment {
         return true;
     }
 
-    boolean updateTaskOrganizerState(boolean forceUpdate) {
-        return updateTaskOrganizerState(forceUpdate, false /* skipTaskAppeared */);
+    boolean updateTaskOrganizerState() {
+        return updateTaskOrganizerState(false /* skipTaskAppeared */);
     }
 
     /**
      * Called when the task state changes (ie. from windowing mode change) an the task organizer
      * state should also be updated.
      *
-     * @param forceUpdate Updates the task organizer to the one currently specified in the task
-     *                    org controller for the task's windowing mode, ignoring the cached
-     *                    windowing mode checks.
      * @param skipTaskAppeared Skips calling taskAppeared for the new organizer if it has changed
      * @return {@code true} if task organizer changed.
      */
-    boolean updateTaskOrganizerState(boolean forceUpdate, boolean skipTaskAppeared) {
+    boolean updateTaskOrganizerState(boolean skipTaskAppeared) {
         if (getSurfaceControl() == null) {
             // Can't call onTaskAppeared without a surfacecontrol, so defer this until next one
             // is created.
@@ -4295,7 +4292,10 @@ class Task extends TaskFragment {
 
         final TaskOrganizerController controller = mWmService.mAtmService.mTaskOrganizerController;
         final ITaskOrganizer organizer = controller.getTaskOrganizer();
-        if (!forceUpdate && mTaskOrganizer == organizer) {
+        // Do not change to different organizer if the task is created by organizer because only
+        // the creator knows how to manage it.
+        if (mCreatedByOrganizer && mTaskOrganizer != null && organizer != null
+                && mTaskOrganizer != organizer) {
             return false;
         }
         return setTaskOrganizer(organizer, skipTaskAppeared);
