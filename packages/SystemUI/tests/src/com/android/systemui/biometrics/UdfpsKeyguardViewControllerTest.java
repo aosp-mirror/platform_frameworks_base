@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -483,8 +484,11 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     }
 
     private void updateStatusBarExpansion(float fraction, boolean expanded) {
+        PanelExpansionChangeEvent event =
+                new PanelExpansionChangeEvent(
+                        fraction, expanded, /* tracking= */ false, /* dragDownPxAmount= */ 0f);
         for (PanelExpansionListener listener : mExpansionListeners) {
-            listener.onPanelExpansionChanged(fraction, expanded, /* tracking= */ false);
+            listener.onPanelExpansionChanged(event);
         }
     }
 
