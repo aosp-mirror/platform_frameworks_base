@@ -33,6 +33,7 @@ int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
 int register_android_graphics_Graphics(JNIEnv* env);
 int register_android_graphics_ImageDecoder(JNIEnv*);
 int register_android_graphics_MaskFilter(JNIEnv* env);
+int register_android_graphics_NinePatch(JNIEnv*);
 int register_android_graphics_PathEffect(JNIEnv* env);
 int register_android_graphics_Shader(JNIEnv* env);
 int register_android_graphics_Typeface(JNIEnv* env);
@@ -74,6 +75,7 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_ImageDecoder),
         REG_JNI(register_android_graphics_MaskFilter),
         REG_JNI(register_android_graphics_Matrix),
+        REG_JNI(register_android_graphics_NinePatch),
         REG_JNI(register_android_graphics_Paint),
         REG_JNI(register_android_graphics_Path),
         REG_JNI(register_android_graphics_PathEffect),
