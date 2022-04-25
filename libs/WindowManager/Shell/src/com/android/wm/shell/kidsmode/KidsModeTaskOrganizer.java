@@ -225,6 +225,10 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     @VisibleForTesting
     void enable() {
+        // Needed since many Kids apps aren't optimised to support both orientations and it will be
+        // hard for kids to understand the app compat mode.
+        // TODO(229961548): Remove ignoreOrientationRequest exception for Kids Mode once possible.
+        setIsIgnoreOrientationRequestDisabled(true);
         final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(DEFAULT_DISPLAY);
         if (displayLayout != null) {
             mDisplayWidth = displayLayout.width();
@@ -245,6 +249,7 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     @VisibleForTesting
     void disable() {
+        setIsIgnoreOrientationRequestDisabled(false);
         mDisplayInsetsController.removeInsetsChangedListener(DEFAULT_DISPLAY,
                 mOnInsetsChangedListener);
         mDisplayController.removeDisplayWindowListener(mOnDisplaysChangedListener);
