@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScrimController
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -340,7 +341,9 @@ class NotificationShadeDepthController @Inject constructor(
     /**
      * Update blurs when pulling down the shade
      */
-    override fun onPanelExpansionChanged(rawFraction: Float, expanded: Boolean, tracking: Boolean) {
+    override fun onPanelExpansionChanged(event: PanelExpansionChangeEvent) {
+        val rawFraction = event.fraction
+        val tracking = event.tracking
         val timestamp = SystemClock.elapsedRealtimeNanos()
         val expansion = MathUtils.saturate(
                 (rawFraction - panelPullDownMinFraction) / (1f - panelPullDownMinFraction))
