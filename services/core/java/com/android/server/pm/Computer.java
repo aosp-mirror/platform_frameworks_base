@@ -314,6 +314,8 @@ public interface Computer extends PackageDataSnapshot {
 
     boolean isPackageAvailable(String packageName, @UserIdInt int userId);
 
+    boolean isApexPackage(String packageName);
+
     @NonNull
     String[] currentToCanonicalPackageNames(@NonNull String[] names);
 

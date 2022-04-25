@@ -374,10 +374,8 @@ public abstract class ApexManager {
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
-     * @param packageName a {@link String} containing a package name, or {@code null}. If set, only
-     *                    information about that specific package will be dumped.
      */
-    abstract void dump(PrintWriter pw, @Nullable String packageName);
+    abstract void dump(PrintWriter pw);
 
     @IntDef(
             flag = true,
@@ -946,7 +944,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        void dump(PrintWriter pw, @Nullable String packageName) {
+        void dump(PrintWriter pw) {
             final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
             try {
                 ipw.println();
@@ -1174,7 +1172,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        void dump(PrintWriter pw, String packageName) {
+        void dump(PrintWriter pw) {
             // No-op
         }
     }
