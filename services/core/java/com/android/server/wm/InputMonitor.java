@@ -24,7 +24,6 @@ import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -82,7 +81,6 @@ final class InputMonitor {
     private boolean mUpdateInputWindowsPending;
     private boolean mUpdateInputWindowsImmediately;
 
-    private boolean mDisableWallpaperTouchEvents;
     private final Region mTmpRegion = new Region();
     private final UpdateInputForAllWindowsConsumer mUpdateInputForAllWindowsConsumer;
 
@@ -272,7 +270,7 @@ final class InputMonitor {
 
         final boolean hasWallpaper = mDisplayContent.mWallpaperController.isWallpaperTarget(w)
                 && !mService.mPolicy.isKeyguardShowing()
-                && !mDisableWallpaperTouchEvents;
+                && w.mAttrs.areWallpaperTouchEventsEnabled();
         inputWindowHandle.setHasWallpaper(hasWallpaper);
 
         // Surface insets are hardcoded to be the same in all directions
@@ -513,7 +511,6 @@ final class InputMonitor {
             mAddWallpaperInputConsumerHandle = mWallpaperInputConsumer != null;
             mAddRecentsAnimationInputConsumerHandle = mRecentsAnimationInputConsumer != null;
 
-            mDisableWallpaperTouchEvents = false;
             mInDrag = inDrag;
 
             resetInputConsumers(mInputTransaction);
@@ -563,8 +560,6 @@ final class InputMonitor {
                 return;
             }
 
-            final int privateFlags = w.mAttrs.privateFlags;
-
             // This only works for legacy transitions.
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
@@ -599,10 +594,6 @@ final class InputMonitor {
                     mWallpaperInputConsumer.show(mInputTransaction, w);
                     mAddWallpaperInputConsumerHandle = false;
                 }
-            }
-
-            if ((privateFlags & PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS) != 0) {
-                mDisableWallpaperTouchEvents = true;
             }
 
             // If there's a drag in progress and 'child' is a potential drop target,
