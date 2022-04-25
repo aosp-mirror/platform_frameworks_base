@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -43,34 +44,52 @@ public class DropboxRateLimiterTest {
     @Test
     public void testMultipleProcesses() {
         // The first 5 entries should not be rate limited.
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process"));
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process"));
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process"));
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process"));
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process"));
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
         // Different processes and tags should not get rate limited either.
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process2"));
-        assertFalse(mRateLimiter.shouldRateLimit("tag2", "process"));
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process2").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag2", "process").shouldRateLimit());
         // The 6th entry of the same process should be rate limited.
-        assertTrue(mRateLimiter.shouldRateLimit("tag", "process"));
+        assertTrue(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
     }
 
     @Test
     public void testBufferClearing() throws Exception {
         // The first 5 entries should not be rate limited.
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process"));
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process"));
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process"));
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process"));
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process"));
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
         // The 6th entry of the same process should be rate limited.
-        assertTrue(mRateLimiter.shouldRateLimit("tag", "process"));
+        assertTrue(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
 
         // After 11 seconds there should be nothing left in the buffer and the same type of entry
         // should not get rate limited anymore.
         mClock.setOffsetMillis(11000);
 
-        assertFalse(mRateLimiter.shouldRateLimit("tag", "process"));
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+    }
+
+    @Test
+    public void testRecentlyDroppedCount() throws Exception {
+        assertEquals(0,
+                mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
+        assertEquals(0,
+                mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
+        assertEquals(0,
+                mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
+        assertEquals(0,
+                mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
+        assertEquals(0,
+                mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
+        assertEquals(1,
+                mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
+        assertEquals(2,
+                mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
     }
 
     private static class TestClock implements DropboxRateLimiter.Clock {
