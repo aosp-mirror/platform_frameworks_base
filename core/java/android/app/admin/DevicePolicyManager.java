@@ -3322,8 +3322,8 @@ public class DevicePolicyManager {
      * Activity action: Starts the device policy management role holder updater.
      *
      * <p>The activity must handle the device policy management role holder update and set the
-     * intent result to either {@link Activity#RESULT_OK} if the update was successful or not
-     * necessary, {@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if
+     * intent result. This can include {@link Activity#RESULT_OK} if the update was successful,
+     * {@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if
      * it encounters a problem that may be solved by relaunching it again, {@link
      * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED} if role holder
      * provisioning is disabled, or {@link
@@ -3376,7 +3376,8 @@ public class DevicePolicyManager {
 
     /**
      * An {@code int} extra which contains the result code of the last attempt to update
-     * the device policy management role holder.
+     * the device policy management role holder via {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER}.
      *
      * <p>This extra is provided to the device policy management role holder via either {@link
      * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
@@ -3394,6 +3395,8 @@ public class DevicePolicyManager {
      *    encounters a problem that may be solved by relaunching it again.
      *    <li>{@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if
      *    it encounters a problem that will not be solved by relaunching it again.
+     *    <li>Any other value returned by {@link
+     *    #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER}
      * </ul>
      *
      * @hide
