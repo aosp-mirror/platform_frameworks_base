@@ -13059,9 +13059,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (callerPackage == null) {
                 return false;
             }
+
+            CallerIdentity caller = new CallerIdentity(callerUid, null, null);
             if (isUserAffiliatedWithDevice(UserHandle.getUserId(callerUid))
                     && (isActiveProfileOwner(callerUid)
-                        || isActiveDeviceOwner(callerUid))) {
+                        || isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller))) {
                 // device owner or a profile owner affiliated with the device owner
                 return true;
             }
