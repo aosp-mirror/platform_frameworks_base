@@ -287,7 +287,10 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
      */
     @Override
     byte[] getTrackerInfoForStatsd(int uid) {
-        final ImmutableBatteryUsage temp = mUidBatteryUsageInWindow.get(uid);
+        final ImmutableBatteryUsage temp;
+        synchronized (mLock) {
+            temp = mUidBatteryUsageInWindow.get(uid);
+        }
         if (temp == null) {
             return null;
         }
