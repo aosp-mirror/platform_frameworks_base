@@ -18,6 +18,8 @@ package com.android.systemui.media;
 
 import static android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS;
 
+import static com.android.systemui.media.SmartspaceMediaDataKt.NUM_REQUIRED_RECOMMENDATIONS;
+
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
@@ -102,7 +104,6 @@ public class MediaControlPanel {
             + ".android.apps.gsa.staticplugins.opa.smartspace.ExportedSmartspaceTrampolineActivity";
     private static final String EXTRAS_SMARTSPACE_INTENT =
             "com.google.android.apps.gsa.smartspace.extra.SMARTSPACE_INTENT";
-    private static final int MEDIA_RECOMMENDATION_MAX_NUM = 3;
     private static final String KEY_SMARTSPACE_ARTIST_NAME = "artist_name";
     private static final String KEY_SMARTSPACE_OPEN_IN_FOREGROUND = "KEY_OPEN_IN_FOREGROUND";
     private static final String KEY_SMARTSPACE_APP_NAME = "KEY_SMARTSPACE_APP_NAME";
@@ -949,16 +950,14 @@ public class MediaControlPanel {
             return;
         }
 
+        if (!data.isValid()) {
+            Log.e(TAG, "Received an invalid recommendation list; returning");
+            return;
+        }
+
         mSmartspaceId = SmallHash.hash(data.getTargetId());
         mPackageName = data.getPackageName();
         mInstanceId = data.getInstanceId();
-        TransitionLayout recommendationCard = mRecommendationViewHolder.getRecommendations();
-
-        List<SmartspaceAction> mediaRecommendationList = data.getRecommendations();
-        if (mediaRecommendationList == null || mediaRecommendationList.isEmpty()) {
-            Log.w(TAG, "Empty media recommendations");
-            return;
-        }
 
         // Set up recommendation card's header.
         ApplicationInfo applicationInfo;
@@ -994,6 +993,7 @@ public class MediaControlPanel {
         }
 
         // Set up media rec card's tap action if applicable.
+        TransitionLayout recommendationCard = mRecommendationViewHolder.getRecommendations();
         setSmartspaceRecItemOnClickListener(recommendationCard, data.getCardAction(),
                 /* interactedSubcardRank */ -1);
         // Set up media rec card's accessibility label.
@@ -1002,29 +1002,20 @@ public class MediaControlPanel {
 
         List<ImageView> mediaCoverItems = mRecommendationViewHolder.getMediaCoverItems();
         List<ViewGroup> mediaCoverContainers = mRecommendationViewHolder.getMediaCoverContainers();
-        int mediaRecommendationNum = Math.min(mediaRecommendationList.size(),
-                MEDIA_RECOMMENDATION_MAX_NUM);
+        List<SmartspaceAction> recommendations = data.getValidRecommendations();
 
         boolean hasTitle = false;
         boolean hasSubtitle = false;
-        int uiComponentIndex = 0;
-        for (int itemIndex = 0;
-                itemIndex < mediaRecommendationNum && uiComponentIndex < mediaRecommendationNum;
-                itemIndex++) {
-            SmartspaceAction recommendation = mediaRecommendationList.get(itemIndex);
-            if (recommendation.getIcon() == null) {
-                Log.w(TAG, "No media cover is provided. Skipping this item...");
-                continue;
-            }
+        for (int itemIndex = 0; itemIndex < NUM_REQUIRED_RECOMMENDATIONS; itemIndex++) {
+            SmartspaceAction recommendation = recommendations.get(itemIndex);
 
             // Set up media item cover.
-            ImageView mediaCoverImageView = mediaCoverItems.get(uiComponentIndex);
+            ImageView mediaCoverImageView = mediaCoverItems.get(itemIndex);
             mediaCoverImageView.setImageIcon(recommendation.getIcon());
 
             // Set up the media item's click listener if applicable.
-            ViewGroup mediaCoverContainer = mediaCoverContainers.get(uiComponentIndex);
-            setSmartspaceRecItemOnClickListener(mediaCoverContainer, recommendation,
-                    uiComponentIndex);
+            ViewGroup mediaCoverContainer = mediaCoverContainers.get(itemIndex);
+            setSmartspaceRecItemOnClickListener(mediaCoverContainer, recommendation, itemIndex);
             // Bubble up the long-click event to the card.
             mediaCoverContainer.setOnLongClickListener(v -> {
                 View parent = (View) v.getParent();
@@ -1053,8 +1044,7 @@ public class MediaControlPanel {
             // Set up title
             CharSequence title = recommendation.getTitle();
             hasTitle |= !TextUtils.isEmpty(title);
-            TextView titleView =
-                    mRecommendationViewHolder.getMediaTitles().get(uiComponentIndex);
+            TextView titleView = mRecommendationViewHolder.getMediaTitles().get(itemIndex);
             titleView.setText(title);
 
             // Set up subtitle
@@ -1062,13 +1052,10 @@ public class MediaControlPanel {
             boolean shouldShowSubtitleText = !TextUtils.isEmpty(title);
             CharSequence subtitle = shouldShowSubtitleText ? recommendation.getSubtitle() : "";
             hasSubtitle |= !TextUtils.isEmpty(subtitle);
-            TextView subtitleView =
-                    mRecommendationViewHolder.getMediaSubtitles().get(uiComponentIndex);
+            TextView subtitleView = mRecommendationViewHolder.getMediaSubtitles().get(itemIndex);
             subtitleView.setText(subtitle);
-
-            uiComponentIndex++;
         }
-        mSmartspaceMediaItemsCount = uiComponentIndex;
+        mSmartspaceMediaItemsCount = NUM_REQUIRED_RECOMMENDATIONS;
 
         // If there's no subtitles and/or titles for any of the albums, hide those views.
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();

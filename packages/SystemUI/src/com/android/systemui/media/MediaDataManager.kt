@@ -105,7 +105,6 @@ private val LOADING = MediaData(
 internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData(
     targetId = "INVALID",
     isActive = false,
-    isValid = false,
     packageName = "INVALID",
     cardAction = null,
     recommendations = emptyList(),
@@ -534,7 +533,7 @@ class MediaDataManager(
      * connection session.
      */
     fun dismissSmartspaceRecommendation(key: String, delay: Long) {
-        if (smartspaceMediaData.targetId != key || !smartspaceMediaData.isValid) {
+        if (smartspaceMediaData.targetId != key || !smartspaceMediaData.isValid()) {
             // If this doesn't match, or we've already invalidated the data, no action needed
             return
         }
@@ -1222,7 +1221,6 @@ class MediaDataManager(
             return SmartspaceMediaData(
                 targetId = target.smartspaceTargetId,
                 isActive = isActive,
-                isValid = true,
                 packageName = it,
                 cardAction = target.baseAction,
                 recommendations = target.iconGrid,
