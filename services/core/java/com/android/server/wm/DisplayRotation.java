@@ -1683,7 +1683,7 @@ public class DisplayRotation {
                 mSensorRotation = (listener == null || !listener.mEnabled)
                         ? -2 /* disabled */ : dr.mLastSensorRotation;
                 final DisplayContent dc = dr.mDisplayContent;
-                mIgnoreOrientationRequest = dc.mIgnoreOrientationRequest;
+                mIgnoreOrientationRequest = dc.getIgnoreOrientationRequest();
                 final TaskDisplayArea requestingTda = dc.getOrientationRequestingTaskDisplayArea();
                 mNonDefaultRequestingTaskDisplayArea = requestingTda == null
                         ? "none" : requestingTda != dc.getDefaultTaskDisplayArea()
