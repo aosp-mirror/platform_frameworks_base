@@ -8662,13 +8662,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean isDeviceOwnerUserId(int userId) {
-        synchronized (getLockObject()) {
-            return mOwners.hasDeviceOwner()
-                    && mOwners.getDeviceOwnerUserId() == userId;
-        }
-    }
-
     private boolean isDeviceOwnerPackage(String packageName, int userId) {
         synchronized (getLockObject()) {
             return mOwners.hasDeviceOwner()
@@ -18401,7 +18394,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void updateNetworkPreferenceForUser(int userId,
             List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs) {
-        if (!isManagedProfile(userId) && !isDeviceOwnerUserId(userId)) {
+        if (!isManagedProfile(userId)) {
             return;
         }
         List<ProfileNetworkPreference> preferences = new ArrayList<>();
