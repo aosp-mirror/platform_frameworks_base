@@ -352,6 +352,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private FalsingManagerFake mFalsingManager = new FalsingManagerFake();
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private Handler mMainHandler;
+    private final PanelExpansionStateManager mPanelExpansionStateManager =
+            new PanelExpansionStateManager();
 
     @Before
     public void setup() {
@@ -516,7 +518,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mLargeScreenShadeHeaderController,
                 mScreenOffAnimationController,
                 mLockscreenGestureLogger,
-                new PanelExpansionStateManager(),
+                mPanelExpansionStateManager,
                 mNotificationRemoteInputManager,
                 mSysUIUnfoldComponent,
                 mControlsComponent,
@@ -987,12 +989,33 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testQsToBeImmediatelyExpandedInSplitShade() {
+    public void testQsToBeImmediatelyExpandedWhenOpeningPanelInSplitShade() {
         enableSplitShade(/* enabled= */ true);
+        // set panel state to CLOSED
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 0,
+                /* expanded= */ false, /* tracking= */ false, /* dragDownPxAmount= */ 0);
+        assertThat(mNotificationPanelViewController.mQsExpandImmediate).isFalse();
 
-        mNotificationPanelViewController.onTrackingStarted();
+        // change panel state to OPENING
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 0.5f,
+                /* expanded= */ true, /* tracking= */ true, /* dragDownPxAmount= */ 100);
 
         assertThat(mNotificationPanelViewController.mQsExpandImmediate).isTrue();
+    }
+
+    @Test
+    public void testQsNotToBeImmediatelyExpandedWhenGoingFromUnlockedToLocked() {
+        enableSplitShade(/* enabled= */ true);
+        // set panel state to CLOSED
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 0,
+                /* expanded= */ false, /* tracking= */ false, /* dragDownPxAmount= */ 0);
+
+        // go to lockscreen, which also sets fraction to 1.0f and makes shade "expanded"
+        mStatusBarStateController.setState(KEYGUARD);
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
+                /* expanded= */ true, /* tracking= */ true, /* dragDownPxAmount= */ 0);
+
+        assertThat(mNotificationPanelViewController.mQsExpandImmediate).isFalse();
     }
 
     @Test
