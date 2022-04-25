@@ -3031,6 +3031,12 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
+    "873160948": {
+      "message": "Activity=%s reparent to taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
+    },
     "873914452": {
       "message": "goodToGo()",
       "level": "DEBUG",
