@@ -16,6 +16,8 @@
 
 package com.android.server.vcn.routeselection;
 
+import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.LinkProperties;
@@ -23,7 +25,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
 import android.os.ParcelUuid;
-import android.os.PersistableBundle;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
@@ -68,7 +69,7 @@ public class UnderlyingNetworkRecord {
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
-            PersistableBundle carrierConfig) {
+            PersistableBundleWrapper carrierConfig) {
         // Never changes after the underlying network record is created.
         if (mPriorityClass == PRIORITY_CLASS_INVALID) {
             mPriorityClass =
@@ -113,7 +114,7 @@ public class UnderlyingNetworkRecord {
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
-            PersistableBundle carrierConfig) {
+            PersistableBundleWrapper carrierConfig) {
         return (left, right) -> {
             final int leftIndex =
                     left.getOrCalculatePriorityClass(
@@ -167,7 +168,7 @@ public class UnderlyingNetworkRecord {
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
-            PersistableBundle carrierConfig) {
+            PersistableBundleWrapper carrierConfig) {
         pw.println("UnderlyingNetworkRecord:");
         pw.increaseIndent();
 

@@ -61,6 +61,7 @@ import android.net.ipsec.ike.ChildSessionParams;
 import android.net.ipsec.ike.IkeSession;
 import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.ipsec.ike.IkeSessionConfiguration;
+import android.net.ipsec.ike.IkeSessionConnectionInfo;
 import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.ipsec.ike.exceptions.IkeException;
@@ -509,6 +510,42 @@ public class VcnGatewayConnection extends StateMachine {
         }
     }
 
+    /**
+     * Sent when an IKE session connection information has changed.
+     *
+     * <p>This signal is always fired before EVENT_SETUP_COMPLETED and EVENT_MIGRATION_COMPLETED.
+     *
+     * <p>Only relevant in the Connecting and Connected state.
+     *
+     * @param arg1 The session token for the IKE Session whose connection information has changed,
+     *     used to prevent out-of-date signals from propagating.
+     * @param obj @NonNull An EventIkeConnectionInfoChangedInfo instance with relevant data.
+     */
+    private static final int EVENT_IKE_CONNECTION_INFO_CHANGED = 12;
+
+    private static class EventIkeConnectionInfoChangedInfo implements EventInfo {
+        @NonNull public final IkeSessionConnectionInfo ikeConnectionInfo;
+
+        EventIkeConnectionInfoChangedInfo(@NonNull IkeSessionConnectionInfo ikeConnectionInfo) {
+            this.ikeConnectionInfo = ikeConnectionInfo;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(ikeConnectionInfo);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            if (!(other instanceof EventIkeConnectionInfoChangedInfo)) {
+                return false;
+            }
+
+            final EventIkeConnectionInfoChangedInfo rhs = (EventIkeConnectionInfoChangedInfo) other;
+            return Objects.equals(ikeConnectionInfo, rhs.ikeConnectionInfo);
+        }
+    }
+
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     @NonNull
     final DisconnectedState mDisconnectedState = new DisconnectedState();
@@ -622,6 +659,14 @@ public class VcnGatewayConnection extends StateMachine {
      * <p>Set in any states, always @NonNull in all states except Disconnected, null otherwise.
      */
     private UnderlyingNetworkRecord mUnderlying;
+
+    /**
+     * The current IKE Session connection information
+     *
+     * <p>Set in Connected and Migrating states, always @NonNull in Connected, Migrating
+     * states, @Nullable otherwise.
+     */
+    private IkeSessionConnectionInfo mIkeConnectionInfo;
 
     /**
      * The active IKE session.
@@ -1197,6 +1242,14 @@ public class VcnGatewayConnection extends StateMachine {
                 exceptionMessage);
     }
 
+    private void ikeConnectionInfoChanged(
+            int token, @NonNull IkeSessionConnectionInfo ikeConnectionInfo) {
+        sendMessageAndAcquireWakeLock(
+                EVENT_IKE_CONNECTION_INFO_CHANGED,
+                token,
+                new EventIkeConnectionInfoChangedInfo(ikeConnectionInfo));
+    }
+
     private void sessionClosed(int token, @Nullable Exception exception) {
         if (exception != null) {
             notifyStatusCallbackForSessionClosed(exception);
@@ -1313,7 +1366,8 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_TEARDOWN_TIMEOUT_EXPIRED: // Fallthrough
                 case EVENT_SUBSCRIPTIONS_CHANGED: // Fallthrough
                 case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED: // Fallthrough
-                case EVENT_MIGRATION_COMPLETED:
+                case EVENT_MIGRATION_COMPLETED: // Fallthrough
+                case EVENT_IKE_CONNECTION_INFO_CHANGED:
                     logUnexpectedEvent(msg.what);
                     break;
                 default:
@@ -1592,6 +1646,7 @@ public class VcnGatewayConnection extends StateMachine {
                     transitionTo(mDisconnectingState);
                     break;
                 case EVENT_SETUP_COMPLETED: // fallthrough
+                case EVENT_IKE_CONNECTION_INFO_CHANGED: // fallthrough
                 case EVENT_TRANSFORM_CREATED:
                     // Child setup complete; move to ConnectedState for NetworkAgent registration
                     deferMessage(msg);
@@ -1614,12 +1669,17 @@ public class VcnGatewayConnection extends StateMachine {
         protected void updateNetworkAgent(
                 @NonNull IpSecTunnelInterface tunnelIface,
                 @NonNull VcnNetworkAgent agent,
-                @NonNull VcnChildSessionConfiguration childConfig) {
+                @NonNull VcnChildSessionConfiguration childConfig,
+                @NonNull IkeSessionConnectionInfo ikeConnectionInfo) {
             final NetworkCapabilities caps =
                     buildNetworkCapabilities(mConnectionConfig, mUnderlying, mIsMobileDataEnabled);
             final LinkProperties lp =
                     buildConnectedLinkProperties(
-                            mConnectionConfig, tunnelIface, childConfig, mUnderlying);
+                            mConnectionConfig,
+                            tunnelIface,
+                            childConfig,
+                            mUnderlying,
+                            ikeConnectionInfo);
 
             agent.sendNetworkCapabilities(caps);
             agent.sendLinkProperties(lp);
@@ -1630,12 +1690,17 @@ public class VcnGatewayConnection extends StateMachine {
 
         protected VcnNetworkAgent buildNetworkAgent(
                 @NonNull IpSecTunnelInterface tunnelIface,
-                @NonNull VcnChildSessionConfiguration childConfig) {
+                @NonNull VcnChildSessionConfiguration childConfig,
+                @NonNull IkeSessionConnectionInfo ikeConnectionInfo) {
             final NetworkCapabilities caps =
                     buildNetworkCapabilities(mConnectionConfig, mUnderlying, mIsMobileDataEnabled);
             final LinkProperties lp =
                     buildConnectedLinkProperties(
-                            mConnectionConfig, tunnelIface, childConfig, mUnderlying);
+                            mConnectionConfig,
+                            tunnelIface,
+                            childConfig,
+                            mUnderlying,
+                            ikeConnectionInfo);
             final NetworkAgentConfig nac =
                     new NetworkAgentConfig.Builder()
                             .setLegacyType(ConnectivityManager.TYPE_MOBILE)
@@ -1838,7 +1903,11 @@ public class VcnGatewayConnection extends StateMachine {
                     mChildConfig = ((EventSetupCompletedInfo) msg.obj).childSessionConfig;
 
                     setupInterfaceAndNetworkAgent(
-                            mCurrentToken, mTunnelIface, mChildConfig, oldChildConfig);
+                            mCurrentToken,
+                            mTunnelIface,
+                            mChildConfig,
+                            oldChildConfig,
+                            mIkeConnectionInfo);
                     break;
                 case EVENT_DISCONNECT_REQUESTED:
                     handleDisconnectRequested((EventDisconnectRequestedInfo) msg.obj);
@@ -1851,6 +1920,10 @@ public class VcnGatewayConnection extends StateMachine {
                             (EventMigrationCompletedInfo) msg.obj;
 
                     handleMigrationCompleted(migrationCompletedInfo);
+                    break;
+                case EVENT_IKE_CONNECTION_INFO_CHANGED:
+                    mIkeConnectionInfo =
+                            ((EventIkeConnectionInfoChangedInfo) msg.obj).ikeConnectionInfo;
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1875,7 +1948,7 @@ public class VcnGatewayConnection extends StateMachine {
                     migrationCompletedInfo.outTransform,
                     IpSecManager.DIRECTION_OUT);
 
-            updateNetworkAgent(mTunnelIface, mNetworkAgent, mChildConfig);
+            updateNetworkAgent(mTunnelIface, mNetworkAgent, mChildConfig, mIkeConnectionInfo);
 
             // Trigger re-validation after migration events.
             mConnectivityManager.reportNetworkConnectivity(
@@ -1906,7 +1979,8 @@ public class VcnGatewayConnection extends StateMachine {
                 // Network not yet set up, or child not yet connected.
                 if (mNetworkAgent != null && mChildConfig != null) {
                     // If only network properties changed and agent is active, update properties
-                    updateNetworkAgent(mTunnelIface, mNetworkAgent, mChildConfig);
+                    updateNetworkAgent(
+                            mTunnelIface, mNetworkAgent, mChildConfig, mIkeConnectionInfo);
                 }
             }
         }
@@ -1915,13 +1989,14 @@ public class VcnGatewayConnection extends StateMachine {
                 int token,
                 @NonNull IpSecTunnelInterface tunnelIface,
                 @NonNull VcnChildSessionConfiguration childConfig,
-                @NonNull VcnChildSessionConfiguration oldChildConfig) {
+                @NonNull VcnChildSessionConfiguration oldChildConfig,
+                @NonNull IkeSessionConnectionInfo ikeConnectionInfo) {
             setupInterface(token, tunnelIface, childConfig, oldChildConfig);
 
             if (mNetworkAgent == null) {
-                mNetworkAgent = buildNetworkAgent(tunnelIface, childConfig);
+                mNetworkAgent = buildNetworkAgent(tunnelIface, childConfig, ikeConnectionInfo);
             } else {
-                updateNetworkAgent(tunnelIface, mNetworkAgent, childConfig);
+                updateNetworkAgent(tunnelIface, mNetworkAgent, childConfig, ikeConnectionInfo);
 
                 // mNetworkAgent not null, so the VCN Network has already been established. Clear
                 // the failed attempt counter and safe mode alarm since this transition is complete.
@@ -2098,7 +2173,8 @@ public class VcnGatewayConnection extends StateMachine {
             @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig,
             @NonNull IpSecTunnelInterface tunnelIface,
             @NonNull VcnChildSessionConfiguration childConfig,
-            @Nullable UnderlyingNetworkRecord underlying) {
+            @Nullable UnderlyingNetworkRecord underlying,
+            @NonNull IkeSessionConnectionInfo ikeConnectionInfo) {
         final IkeTunnelConnectionParams ikeTunnelParams =
                 gatewayConnectionConfig.getTunnelConnectionParams();
         final LinkProperties lp = new LinkProperties();
@@ -2139,7 +2215,8 @@ public class VcnGatewayConnection extends StateMachine {
                 MtuUtils.getMtu(
                         ikeTunnelParams.getTunnelModeChildSessionParams().getSaProposals(),
                         gatewayConnectionConfig.getMaxMtu(),
-                        underlyingMtu));
+                        underlyingMtu,
+                        ikeConnectionInfo.getLocalAddress() instanceof Inet4Address));
 
         return lp;
     }
@@ -2154,7 +2231,7 @@ public class VcnGatewayConnection extends StateMachine {
         @Override
         public void onOpened(@NonNull IkeSessionConfiguration ikeSessionConfig) {
             logDbg("IkeOpened for token " + mToken);
-            // Nothing to do here.
+            ikeConnectionInfoChanged(mToken, ikeSessionConfig.getIkeSessionConnectionInfo());
         }
 
         @Override
@@ -2173,6 +2250,13 @@ public class VcnGatewayConnection extends StateMachine {
         public void onError(@NonNull IkeProtocolException exception) {
             logInfo("IkeError for token " + mToken, exception);
             // Non-fatal, log and continue.
+        }
+
+        @Override
+        public void onIkeSessionConnectionInfoChanged(
+                @NonNull IkeSessionConnectionInfo connectionInfo) {
+            logDbg("onIkeSessionConnectionInfoChanged for token " + mToken);
+            ikeConnectionInfoChanged(mToken, connectionInfo);
         }
     }
 
@@ -2347,6 +2431,11 @@ public class VcnGatewayConnection extends StateMachine {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     void setUnderlyingNetwork(@Nullable UnderlyingNetworkRecord record) {
         mUnderlying = record;
+    }
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    IkeSessionConnectionInfo getIkeConnectionInfo() {
+        return mIkeConnectionInfo;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)

@@ -17,6 +17,14 @@
   ],
   "presubmit": [
     {
+      "name": "ManagedProvisioningTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
       "name": "FrameworksUiServicesTests",
       "options": [
         {
