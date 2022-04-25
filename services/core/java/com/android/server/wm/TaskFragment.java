@@ -2302,11 +2302,32 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return mTaskFragmentOrganizer != null;
     }
 
+    /** Whether the Task should be visible. */
+    boolean isTaskVisibleRequested() {
+        final Task task = getTask();
+        return task != null && task.isVisibleRequested();
+    }
+
     boolean isReadyToTransit() {
+        // We only wait when this is organized to give the organizer a chance to update.
+        if (!isOrganizedTaskFragment()) {
+            return true;
+        }
         // We don't want to start the transition if the organized TaskFragment is empty, unless
         // it is requested to be removed.
-        return !isOrganizedTaskFragment() || getTopNonFinishingActivity() != null
-                || mIsRemovalRequested;
+        if (getTopNonFinishingActivity() != null || mIsRemovalRequested) {
+            return true;
+        }
+        // Organizer shouldn't change embedded TaskFragment in PiP.
+        if (isEmbeddedTaskFragmentInPip()) {
+            return true;
+        }
+        // The TaskFragment becomes empty because the last running activity enters PiP when the Task
+        // is minimized.
+        if (mClearedTaskFragmentForPip && !isTaskVisibleRequested()) {
+            return true;
+        }
+        return false;
     }
 
     /** Clear {@link #mLastPausedActivity} for all {@link TaskFragment} children */
@@ -2424,8 +2445,19 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mIsRemovalRequested = false;
         resetAdjacentTaskFragment();
         cleanUp();
+        final boolean shouldExecuteAppTransition =
+                mClearedTaskFragmentForPip && isTaskVisibleRequested();
         super.removeImmediately();
         sendTaskFragmentVanished();
+        if (shouldExecuteAppTransition && mDisplayContent != null) {
+            // When the Task is still visible, and the TaskFragment is removed because the last
+            // running activity is reparenting to PiP, it is possible that no activity is getting
+            // paused or resumed (having an embedded activity in split), thus we need to relayout
+            // and execute it explicitly.
+            mAtmService.addWindowLayoutReasons(
+                    ActivityTaskManagerService.LAYOUT_REASON_VISIBILITY_CHANGED);
+            mDisplayContent.executeAppTransition();
+        }
     }
 
     /** Called on remove to cleanup. */

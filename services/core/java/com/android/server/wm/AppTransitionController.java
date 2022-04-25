@@ -562,9 +562,6 @@ public class AppTransitionController {
                 leafTask = null;
                 break;
             }
-            // The activity may be a child of embedded Task, but we want to find the owner Task.
-            // As a result, find the organized TaskFragment first.
-            final TaskFragment organizedTaskFragment = r.getOrganizedTaskFragment();
             // There are also cases where the Task contains non-embedded activity, such as launching
             // split TaskFragments from a non-embedded activity.
             // The hierarchy may looks like this:
@@ -575,10 +572,9 @@ public class AppTransitionController {
             //    - TaskFragment
             //       - Activity
             // We also want to have the organizer handle the transition for such case.
-            final Task task = organizedTaskFragment != null
-                    ? organizedTaskFragment.getTask()
-                    : r.getTask();
-            if (task == null) {
+            final Task task = r.getTask();
+            // We don't support embedding in PiP, leave the animation to the PipTaskOrganizer.
+            if (task == null || task.inPinnedWindowingMode()) {
                 leafTask = null;
                 break;
             }
