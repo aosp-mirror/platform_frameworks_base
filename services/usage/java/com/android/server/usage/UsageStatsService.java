@@ -626,6 +626,10 @@ public class UsageStatsService extends SystemService implements
         mAppStandby.initializeDefaultsForSystemApps(userId);
     }
 
+    private boolean isInstantApp(String packageName, int userId) {
+        return mPackageManagerInternal.isPackageEphemeral(userId, packageName);
+    }
+
     private boolean shouldObfuscateInstantAppsForCaller(int callingUid, int userId) {
         return !mPackageManagerInternal.canAccessInstantApps(callingUid, userId);
     }
@@ -1013,8 +1017,7 @@ public class UsageStatsService extends SystemService implements
                 uid = 0;
         }
 
-        if (event.mPackage != null
-                && mPackageManagerInternal.isPackageEphemeral(userId, event.mPackage)) {
+        if (event.mPackage != null && isInstantApp(event.mPackage, userId)) {
             event.mFlags |= Event.FLAG_IS_PACKAGE_INSTANT_APP;
         }
 
@@ -1346,7 +1349,7 @@ public class UsageStatsService extends SystemService implements
             if (obfuscateInstantApps) {
                 for (int i = list.size() - 1; i >= 0; i--) {
                     final UsageStats stats = list.get(i);
-                    if (mPackageManagerInternal.isPackageEphemeral(userId, stats.mPackageName)) {
+                    if (isInstantApp(stats.mPackageName, userId)) {
                         list.set(i, stats.getObfuscatedForInstantApp());
                     }
                 }
@@ -2343,16 +2346,18 @@ public class UsageStatsService extends SystemService implements
                             "Don't have permission to query app standby bucket");
                 }
             }
-            if (packageUid < 0) {
+
+            final boolean isInstantApp = isInstantApp(packageName, userId);
+            final boolean cannotAccessInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
+                    userId);
+            if (packageUid < 0 || (isInstantApp && cannotAccessInstantApps)) {
                 throw new IllegalArgumentException(
                         "Cannot get standby bucket for non existent package (" + packageName + ")");
             }
-            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
-                    userId);
             final long token = Binder.clearCallingIdentity();
             try {
                 return mAppStandby.getAppStandbyBucket(packageName, userId,
-                        SystemClock.elapsedRealtime(), obfuscateInstantApps);
+                        SystemClock.elapsedRealtime(), false /* obfuscateInstantApps */);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2389,12 +2394,19 @@ public class UsageStatsService extends SystemService implements
                 throw new SecurityException(
                         "Don't have permission to query app standby bucket");
             }
+            final boolean cannotAccessInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
+                    userId);
             final long token = Binder.clearCallingIdentity();
             try {
                 final List<AppStandbyInfo> standbyBucketList =
                         mAppStandby.getAppStandbyBuckets(userId);
-                return (standbyBucketList == null) ? ParceledListSlice.emptyList()
-                        : new ParceledListSlice<>(standbyBucketList);
+                if (standbyBucketList == null) {
+                    return ParceledListSlice.emptyList();
+                }
+                final int targetUserId = userId;
+                standbyBucketList.removeIf(
+                        i -> cannotAccessInstantApps && isInstantApp(i.mPackageName, targetUserId));
+                return new ParceledListSlice<>(standbyBucketList);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2434,17 +2446,18 @@ public class UsageStatsService extends SystemService implements
                             "Don't have permission to query min app standby bucket");
                 }
             }
-            if (packageUid < 0) {
+            final boolean isInstantApp = isInstantApp(packageName, userId);
+            final boolean cannotAccessInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
+                    userId);
+            if (packageUid < 0 || (isInstantApp && cannotAccessInstantApps)) {
                 throw new IllegalArgumentException(
                         "Cannot get min standby bucket for non existent package ("
                                 + packageName + ")");
             }
-            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
-                    userId);
             final long token = Binder.clearCallingIdentity();
             try {
-                return mAppStandby.getAppMinStandbyBucket(
-                        packageName, UserHandle.getAppId(packageUid), userId, obfuscateInstantApps);
+                return mAppStandby.getAppMinStandbyBucket(packageName,
+                        UserHandle.getAppId(packageUid), userId, false /* obfuscateInstantApps */);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
