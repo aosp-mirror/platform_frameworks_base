@@ -323,6 +323,9 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      */
     @Override
     public int compareTo(MediaDevice another) {
+        if (another == null) {
+            return -1;
+        }
         // Check Bluetooth device is have same connection state
         if (isConnected() ^ another.isConnected()) {
             if (isConnected()) {
