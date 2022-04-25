@@ -2452,20 +2452,29 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Obsoleted snapshot.
             return false;
         }
-        final Rect taskBounds = task.getBounds();
-        final Point taskSize = snapshot.getTaskSize();
-        // Task size has changed? e.g. foldable device.
-        if (Math.abs(((float) taskSize.x / Math.max(taskSize.y, 1))
-                - ((float) taskBounds.width() / Math.max(taskBounds.height(), 1))) > 0.01f) {
-            return false;
-        }
         final int rotation = mDisplayContent.rotationForActivityInDifferentOrientation(this);
+        final int currentRotation = task.getWindowConfiguration().getRotation();
         final int targetRotation = rotation != ROTATION_UNDEFINED
                 // The display may rotate according to the orientation of this activity.
                 ? rotation
                 // The activity won't change display orientation.
-                : task.getWindowConfiguration().getRotation();
-        return snapshot.getRotation() == targetRotation;
+                : currentRotation;
+        if (snapshot.getRotation() != targetRotation) {
+            return false;
+        }
+        final Rect taskBounds = task.getBounds();
+        int w = taskBounds.width();
+        int h = taskBounds.height();
+        final Point taskSize = snapshot.getTaskSize();
+        if ((Math.abs(currentRotation - targetRotation) % 2) == 1) {
+            // Flip the size if the activity will show in 90 degree difference.
+            final int t = w;
+            w = h;
+            h = t;
+        }
+        // Task size might be changed with the same rotation such as on a foldable device.
+        return Math.abs(((float) taskSize.x / Math.max(taskSize.y, 1))
+                - ((float) w / Math.max(h, 1))) <= 0.01f;
     }
 
     /**
