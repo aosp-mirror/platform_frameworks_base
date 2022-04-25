@@ -41,6 +41,7 @@ import androidx.annotation.LayoutRes
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -83,7 +84,8 @@ class UdfpsControllerOverlay(
     @ShowReason val requestReason: Int,
     private val controllerCallback: IUdfpsOverlayControllerCallback,
     private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
-    private val activityLaunchAnimator: ActivityLaunchAnimator
+    private val activityLaunchAnimator: ActivityLaunchAnimator,
+    private val broadcastSender: BroadcastSender
 ) {
     /** The view, when [isShowing], or null. */
     var overlayView: UdfpsView? = null
@@ -102,8 +104,8 @@ class UdfpsControllerOverlay(
         fitInsetsTypes = 0
         gravity = android.view.Gravity.TOP or android.view.Gravity.LEFT
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-        flags =
-            (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS or WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
+        flags = (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS
+            or WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
         privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
         // Avoid announcing window title.
         accessibilityTitle = " "
@@ -221,6 +223,7 @@ class UdfpsControllerOverlay(
                     statusBarStateController,
                     panelExpansionStateManager,
                     dialogManager,
+                    broadcastSender,
                     dumpManager
                 )
             }
