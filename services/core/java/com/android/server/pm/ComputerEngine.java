@@ -2691,8 +2691,10 @@ public class ComputerEngine implements Computer {
         }
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         final boolean callerIsInstantApp = instantAppPkgName != null;
-        if (ps == null
-                || (filterUninstall && !ps.getUserStateOrDefault(userId).isInstalled())) {
+        // Don't treat hiddenUntilInstalled as an uninstalled state, phone app needs to access
+        // these hidden application details to customize carrier apps.
+        if (ps == null || (filterUninstall && !ps.isHiddenUntilInstalled()
+                && !ps.getUserStateOrDefault(userId).isInstalled())) {
             // If caller is instant app and ps is null, pretend the application exists,
             // but, needs to be filtered
             return (callerIsInstantApp || filterUninstall);
@@ -5175,7 +5177,7 @@ public class ComputerEngine implements Computer {
         enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
                 false /* checkShell */, "get enabled");
         try {
-            if (shouldFilterApplication(
+            if (shouldFilterApplicationIncludingUninstalled(
                     mSettings.getPackage(packageName), callingUid, userId)) {
                 throw new PackageManager.NameNotFoundException(packageName);
             }
@@ -5204,7 +5206,7 @@ public class ComputerEngine implements Computer {
         try {
             if (shouldFilterApplication(
                     mSettings.getPackage(component.getPackageName()), callingUid,
-                    component, TYPE_UNKNOWN, userId)) {
+                    component, TYPE_UNKNOWN, userId, true /* filterUninstall */)) {
                 throw new PackageManager.NameNotFoundException(component.getPackageName());
             }
             return mSettings.getComponentEnabledSetting(component, userId);

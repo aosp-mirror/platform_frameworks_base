@@ -3653,26 +3653,25 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         snapshot.getPackagesForUid(callingUid), packageName);
                 final PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
                 // Limit who can change which apps
-                if (!isCallerTargetApp) {
+                if (!isCallerTargetApp && !allowedByPermission) {
                     // Don't allow apps that don't have permission to modify other apps
-                    if (!allowedByPermission
-                            || snapshot.shouldFilterApplication(pkgSetting, callingUid, userId)) {
-                        throw new SecurityException("Attempt to change component state; "
-                                + "pid=" + Binder.getCallingPid()
-                                + ", uid=" + callingUid
-                                + (!setting.isComponent() ? ", package=" + packageName
-                                        : ", component=" + setting.getComponentName()));
-                    }
-                    // Don't allow changing protected packages.
-                    if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
-                        throw new SecurityException(
-                                "Cannot disable a protected package: " + packageName);
-                    }
+                    throw new SecurityException("Attempt to change component state; "
+                            + "pid=" + Binder.getCallingPid()
+                            + ", uid=" + callingUid
+                            + (!setting.isComponent() ? ", package=" + packageName
+                            : ", component=" + setting.getComponentName()));
                 }
-                if (pkgSetting == null) {
+                if (pkgSetting == null || snapshot.shouldFilterApplicationIncludingUninstalled(
+                        pkgSetting, callingUid, userId)) {
                     throw new IllegalArgumentException(setting.isComponent()
                             ? "Unknown component: " + setting.getComponentName()
                             : "Unknown package: " + packageName);
+                }
+                // Don't allow changing protected packages.
+                if (!isCallerTargetApp
+                        && mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+                    throw new SecurityException(
+                            "Cannot disable a protected package: " + packageName);
                 }
                 if (callingUid == Process.SHELL_UID
                         && (pkgSetting.getFlags() & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
