@@ -2648,7 +2648,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     }
 
     /** If it's running, finishes the RemoteAnimation on the surface behind the keyguard. */
-    public void finishSurfaceBehindRemoteAnimation(boolean cancelled) {
+    void finishSurfaceBehindRemoteAnimation(boolean cancelled) {
         if (!mSurfaceBehindRemoteAnimationRunning) {
             return;
         }
