@@ -508,6 +508,12 @@ static const JNINativeMethod gImageDecoderMethods[] = {
 };
 
 int register_android_graphics_ImageDecoder(JNIEnv* env) {
+    int robolectricApiLevel = GetRobolectricApiLevel(env);
+    if (robolectricApiLevel < 28) {
+        // Skip ImageDecoder registration for SDK < 28. ImageDecoder doesn't
+        // exist, and this JNI registration references the ImageDecoder ctor.
+        return JNI_OK;
+    }
     gImageDecoder_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ImageDecoder"));
     gImageDecoder_constructorMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "<init>", "(JIIZZ)V");
     gImageDecoder_postProcessMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "postProcessAndRelease", "(Landroid/graphics/Canvas;)I");

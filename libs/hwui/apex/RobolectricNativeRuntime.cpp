@@ -28,8 +28,10 @@ using namespace std;
 
 int register_android_graphics_Bitmap(JNIEnv*);
 int register_android_graphics_BitmapFactory(JNIEnv*);
+int register_android_graphics_ByteBufferStreamAdaptor(JNIEnv* env);
 int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
 int register_android_graphics_Graphics(JNIEnv* env);
+int register_android_graphics_ImageDecoder(JNIEnv*);
 int register_android_graphics_MaskFilter(JNIEnv* env);
 int register_android_graphics_PathEffect(JNIEnv* env);
 int register_android_graphics_Shader(JNIEnv* env);
@@ -62,12 +64,14 @@ struct RegJNIRec {
 static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_Bitmap),
         REG_JNI(register_android_graphics_BitmapFactory),
+        REG_JNI(register_android_graphics_ByteBufferStreamAdaptor),
         REG_JNI(register_android_graphics_Canvas),
         REG_JNI(register_android_graphics_ColorFilter),
         REG_JNI(register_android_graphics_ColorSpace),
         REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor),
         REG_JNI(register_android_graphics_FontFamily),
         REG_JNI(register_android_graphics_Graphics),
+        REG_JNI(register_android_graphics_ImageDecoder),
         REG_JNI(register_android_graphics_MaskFilter),
         REG_JNI(register_android_graphics_Matrix),
         REG_JNI(register_android_graphics_Paint),
