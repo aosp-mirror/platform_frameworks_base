@@ -535,6 +535,13 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
+    fun bindAlbumView_testHardwareAfterAttach() {
+        player.attachPlayer(viewHolder)
+
+        verify(albumView).setLayerType(View.LAYER_TYPE_HARDWARE, null)
+    }
+
+    @Test
     fun bindAlbumView_setAfterExecutors() {
         val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
