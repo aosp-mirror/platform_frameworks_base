@@ -12066,8 +12066,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>In multiple-screen scenarios, if the surface spans multiple screens,
      * the coordinate space of the surface also spans multiple screens.
      *
-     * <p>After the method returns, the argument array contains the x- and
-     * y-coordinates of the view relative to the view's left and top edges,
+     * <p>After the method returns, the argument array contains the x and y
+     * coordinates of the view relative to the view's left and top edges,
      * respectively.
      *
      * @param location A two-element integer array in which the view coordinates
@@ -18743,18 +18743,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * If some part of this view is not clipped by any of its parents, then
-     * return that area in r in global (root) coordinates. To convert r to local
-     * coordinates (without taking possible View rotations into account), offset
-     * it by -globalOffset (e.g. r.offset(-globalOffset.x, -globalOffset.y)).
-     * If the view is completely clipped or translated out, return false.
+     * Sets {@code r} to the coordinates of the non-clipped area of this view in
+     * the coordinate space of the view's root view. Sets {@code globalOffset}
+     * to the offset of the view's x and y coordinates from the coordinate space
+     * origin, which is the top left corner of the root view irrespective of
+     * screen decorations and system UI elements.
      *
-     * @param r If true is returned, r holds the global coordinates of the
-     *        visible portion of this view.
-     * @param globalOffset If true is returned, globalOffset holds the dx,dy
-     *        between this view and its root. globalOffet may be null.
-     * @return true if r is non-empty (i.e. part of the view is visible at the
-     *         root level.
+     * <p>To convert {@code r} to coordinates relative to the top left corner of
+     * this view (without taking view rotations into account), offset {@code r}
+     * by the inverse values of
+     * {@code globalOffset}&mdash;{@code r.offset(-globalOffset.x,
+     * -globalOffset.y)}&mdash;which is equivalent to calling
+     * {@link #getLocalVisibleRect(Rect) getLocalVisibleRect(Rect)}.
+     *
+     * <p><b>Note:</b> Do not use this method to determine the size of a window
+     * in multi-window mode; use
+     * {@link WindowManager#getCurrentWindowMetrics()}.
+     *
+     * @param r If the method returns true, contains the coordinates of the
+     *      visible portion of this view in the coordinate space of the view's
+     *      root view. If the method returns false, the contents of {@code r}
+     *      are undefined.
+     * @param globalOffset If the method returns true, contains the offset of
+     *      the x and y coordinates of this view from the top left corner of the
+     *      view's root view. If the method returns false, the contents of
+     *      {@code globalOffset} are undefined. The argument can be null (see
+     *      {@link #getGlobalVisibleRect(Rect) getGlobalVisibleRect(Rect)}.
+     * @return true if at least part of the view is visible within the root
+     *      view; false if the view is completely clipped or translated out of
+     *      the visible area of the root view.
+     *
+     * @see #getLocalVisibleRect(Rect)
      */
     public boolean getGlobalVisibleRect(Rect r, Point globalOffset) {
         int width = mRight - mLeft;
@@ -18769,10 +18788,48 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return false;
     }
 
+    /**
+     * Sets {@code r} to the coordinates of the non-clipped area of this view in
+     * the coordinate space of the view's root view.
+     *
+     * <p>See {@link #getGlobalVisibleRect(Rect, Point)
+     * getGlobalVisibleRect(Rect, Point)} for more information.
+     *
+     * @param r If the method returns true, contains the coordinates of the
+     *      visible portion of this view in the coordinate space of the view's
+     *      root view. If the method returns false, the contents of {@code r}
+     *      are undefined.
+     * @return true if at least part of the view is visible within the root
+     *      view; otherwise false.
+     */
     public final boolean getGlobalVisibleRect(Rect r) {
         return getGlobalVisibleRect(r, null);
     }
 
+    /**
+     * Sets {@code r} to the coordinates of the non-clipped area of this view
+     * relative to the top left corner of the view.
+     *
+     * <p>If the view is clipped on the left or top, the left and top
+     * coordinates are offset from 0 by the clipped amount. For example, if the
+     * view is off screen 50px on the left and 30px at the top, the left and top
+     * coordinates are 50 and 30 respectively.
+     *
+     * <p>If the view is clipped on the right or bottom, the right and bottom
+     * coordinates are reduced by the clipped amount. For example, if the view
+     * is off screen 40px on the right and 20px at the bottom, the right
+     * coordinate is the view width - 40, and the bottom coordinate is the view
+     * height - 20.
+     *
+     * @param r If the method returns true, contains the coordinates of the
+     *      visible portion of this view relative to the top left corner of the
+     *      view. If the method returns false, the contents of {@code r} are
+     *      undefined.
+     * @return true if at least part of the view is visible; false if the view
+     *      is completely clipped or translated out of the visible area.
+     *
+     * @see #getGlobalVisibleRect(Rect, Point)
+     */
     public final boolean getLocalVisibleRect(Rect r) {
         final Point offset = mAttachInfo != null ? mAttachInfo.mPoint : new Point();
         if (getGlobalVisibleRect(r, offset)) {
@@ -25606,8 +25663,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * multiple-screen environment, the coordinate space includes only the
      * screen on which the app is running.
      *
-     * <p>After the method returns, the argument array contains the x- and
-     * y-coordinates of the view relative to the view's left and top edges,
+     * <p>After the method returns, the argument array contains the x and y
+     * coordinates of the view relative to the view's left and top edges,
      * respectively.
      *
      * @param outLocation A two-element integer array in which the view
@@ -25637,8 +25694,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * restricted to a single screen, the coordinate space includes only the
      * screen on which the app is running.
      *
-     * <p>After the method returns, the argument array contains the x- and
-     * y-coordinates of the view relative to the view's left and top edges,
+     * <p>After the method returns, the argument array contains the x and y
+     * coordinates of the view relative to the view's left and top edges,
      * respectively.
      *
      * @param outLocation A two-element integer array in which the view
