@@ -49,6 +49,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.pm.PackageManager.SIGNATURE_NO_MATCH;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
@@ -14506,8 +14507,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return false;
             }
 
-            int match = mContext.getPackageManager().checkSignatures(
-                    ii.targetPackage, ii.packageName);
+            int match = SIGNATURE_NO_MATCH;
+            try {
+                match = AppGlobals.getPackageManager().checkSignatures(
+                        ii.targetPackage, ii.packageName, userId);
+            } catch (RemoteException e) {
+            }
             if (match < 0 && match != PackageManager.SIGNATURE_FIRST_NOT_SIGNED) {
                 if (Build.IS_DEBUGGABLE && (callingUid == Process.ROOT_UID)
                         && (flags & INSTR_FLAG_ALWAYS_CHECK_SIGNATURE) == 0) {

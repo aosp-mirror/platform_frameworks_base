@@ -230,8 +230,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
-    public final int checkSignatures(@NonNull String pkg1, @NonNull String pkg2) {
-        return snapshot().checkSignatures(pkg1, pkg2);
+    public final int checkSignatures(@NonNull String pkg1, @NonNull String pkg2, int userId) {
+        return snapshot().checkSignatures(pkg1, pkg2, userId);
     }
 
     @Override

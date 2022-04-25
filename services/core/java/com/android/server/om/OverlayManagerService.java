@@ -1255,7 +1255,7 @@ public final class OverlayManagerService extends SystemService {
             // to be installed for different users: ignore userId for now.
             try {
                 return mPackageManager.checkSignatures(
-                        packageName1, packageName2) == SIGNATURE_MATCH;
+                        packageName1, packageName2, userId) == SIGNATURE_MATCH;
             } catch (RemoteException e) {
                 // Intentionally left blank
             }
