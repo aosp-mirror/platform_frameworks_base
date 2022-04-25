@@ -322,6 +322,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
+import android.window.ITaskFragmentOrganizer;
 import android.window.RemoteTransition;
 import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreen;
@@ -634,6 +635,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Only set if this instance is a launch-into-pip Activity, points to the
     // host Activity the launch-into-pip Activity is originated from.
     private ActivityRecord mLaunchIntoPipHostActivity;
+
+    /**
+     * Sets to the previous {@link ITaskFragmentOrganizer} of the {@link TaskFragment} that the
+     * activity is embedded in before it is reparented to a new Task due to picture-in-picture.
+     */
+    @Nullable
+    ITaskFragmentOrganizer mLastTaskFragmentOrganizerBeforePip;
 
     boolean firstWindowDrawn;
     /** Whether the visible window(s) of this activity is drawn. */
@@ -1531,7 +1539,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         updateAnimatingActivityRegistry();
 
-        if (task == mLastParentBeforePip) {
+        if (task == mLastParentBeforePip && task != null) {
+            // Notify the TaskFragmentOrganizer that the activity is reparented back from pip.
+            mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController
+                    .onActivityReparentToTask(this);
             // Activity's reparented back from pip, clear the links once established
             clearLastParentBeforePip();
         }
@@ -1654,6 +1665,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 : launchIntoPipHostActivity.getTask();
         mLastParentBeforePip.mChildPipActivity = this;
         mLaunchIntoPipHostActivity = launchIntoPipHostActivity;
+        final TaskFragment organizedTf = launchIntoPipHostActivity == null
+                ? getOrganizedTaskFragment()
+                : launchIntoPipHostActivity.getOrganizedTaskFragment();
+        mLastTaskFragmentOrganizerBeforePip = organizedTf != null
+                ? organizedTf.getTaskFragmentOrganizer()
+                : null;
     }
 
     private void clearLastParentBeforePip() {
@@ -1662,6 +1679,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mLastParentBeforePip = null;
         }
         mLaunchIntoPipHostActivity = null;
+        mLastTaskFragmentOrganizerBeforePip = null;
     }
 
     @Nullable Task getLastParentBeforePip() {
