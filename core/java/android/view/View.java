@@ -12063,6 +12063,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Gets the coordinates of this view in the coordinate space of the
      * {@link Surface} that contains the view.
      *
+     * <p>In multiple-screen scenarios, if the surface spans multiple screens,
+     * the coordinate space of the surface also spans multiple screens.
+     *
      * <p>After the method returns, the argument array contains the x- and
      * y-coordinates of the view relative to the view's left and top edges,
      * respectively.
@@ -25585,19 +25588,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the global coordinates of this view. The coordinates are in the
-     * coordinate space of the device screen, irrespective of system decorations
-     * and whether the system is in multi-window mode.
+     * Gets the coordinates of this view in the coordinate space of the device
+     * screen, irrespective of system decorations and whether the system is in
+     * multi-window mode.
      *
-     * <p>In multi-window mode, the global coordinate space encompasses the
-     * entire device screen, ignoring the bounds of the app window. For
-     * example, if the view is in the bottom portion of a horizontal split
-     * screen, the top edge of the screen&mdash;not the top edge of the
-     * window&mdash;is the origin from which the y-coordinate is calculated.
+     * <p>In multi-window mode, the coordinate space encompasses the entire
+     * device screen, ignoring the bounds of the app window. For example, if the
+     * view is in the bottom portion of a horizontal split screen, the top edge
+     * of the screen&mdash;not the top edge of the window&mdash;is the origin
+     * from which the y-coordinate is calculated.
      *
-     * <p><b>Note:</b> In multiple-screen scenarios, the global coordinate space
-     * is restricted to the screen on which the view is displayed. The
-     * coordinate space does not span multiple screens.
+     * <p>In multiple-screen scenarios, the coordinate space can span screens.
+     * For example, if the app is spanning both screens of a dual-screen device
+     * and the view is located on the right-hand screen, the x-coordinate is
+     * calculated from the left edge of the left-hand screen to the left edge of
+     * the view. When the app is restricted to a single screen in a
+     * multiple-screen environment, the coordinate space includes only the
+     * screen on which the app is running.
      *
      * <p>After the method returns, the argument array contains the x- and
      * y-coordinates of the view relative to the view's left and top edges,
@@ -25624,6 +25631,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>In multi-window mode, the origin of the coordinate space is the
      * top left corner of the window that contains the view. In full screen
      * mode, the origin is the top left corner of the device screen.
+     *
+     * <p>In multiple-screen scenarios, if the app spans multiple screens, the
+     * coordinate space also spans multiple screens. But if the app is
+     * restricted to a single screen, the coordinate space includes only the
+     * screen on which the app is running.
      *
      * <p>After the method returns, the argument array contains the x- and
      * y-coordinates of the view relative to the view's left and top edges,
