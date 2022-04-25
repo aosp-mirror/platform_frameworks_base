@@ -8705,7 +8705,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
 
         // Check if we should rate limit and abort early if needed.
-        if (mDropboxRateLimiter.shouldRateLimit(eventType, processName)) return;
+        final DropboxRateLimiter.RateLimitResult rateLimitResult =
+                mDropboxRateLimiter.shouldRateLimit(eventType, processName);
+        if (rateLimitResult.shouldRateLimit()) return;
 
         final StringBuilder sb = new StringBuilder(1024);
         appendDropBoxProcessHeaders(process, processName, sb);
@@ -8754,6 +8756,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         millisSinceOldestPendingRead).append("\n");
             }
         }
+        sb.append("Dropped-Count: ").append(
+                rateLimitResult.droppedCountSinceRateLimitActivated()).append("\n");
         sb.append("\n");
 
         // Do the rest in a worker thread to avoid blocking the caller on I/O
