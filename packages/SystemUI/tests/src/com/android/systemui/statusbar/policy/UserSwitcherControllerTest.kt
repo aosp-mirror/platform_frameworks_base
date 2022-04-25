@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy
 
 import android.app.IActivityManager
 import android.app.admin.DevicePolicyManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -52,6 +53,10 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView
 import com.android.systemui.telephony.TelephonyListenerManager
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
@@ -63,10 +68,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.any
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.eq
@@ -528,5 +531,21 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         ).thenReturn(0)
         setupController()
         assertFalse(userSwitcherController.canCreateSupervisedUser())
+    }
+
+    @Test
+    fun addUserSwitchCallback() {
+        val broadcastReceiverCaptor = argumentCaptor<BroadcastReceiver>()
+        verify(broadcastDispatcher).registerReceiver(
+                capture(broadcastReceiverCaptor),
+                any(),
+                nullable(), nullable(), anyInt(), nullable())
+
+        val cb = mock(UserSwitcherController.UserSwitchCallback::class.java)
+        userSwitcherController.addUserSwitchCallback(cb)
+
+        val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, guestId)
+        broadcastReceiverCaptor.value.onReceive(context, intent)
+        verify(cb).onUserSwitched()
     }
 }
