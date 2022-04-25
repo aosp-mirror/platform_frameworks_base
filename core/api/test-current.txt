@@ -116,8 +116,8 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
     method public long getTotalRam();
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidProcessCapabilities(int);
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidProcessState(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessCapabilities(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessState(int);
     method public void holdLock(android.os.IBinder, int);
     method public static boolean isHighEndGfx();
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
