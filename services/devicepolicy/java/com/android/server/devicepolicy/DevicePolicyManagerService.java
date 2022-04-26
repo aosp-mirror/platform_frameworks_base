@@ -18282,16 +18282,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     preferenceBuilder.setPreference(
                             PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK);
                 }
+                preferenceBuilder.setIncludedUids(
+                        preferentialNetworkServiceConfig.getIncludedUids());
+                preferenceBuilder.setExcludedUids(
+                        preferentialNetworkServiceConfig.getExcludedUids());
+                preferenceBuilder.setPreferenceEnterpriseId(
+                        preferentialNetworkServiceConfig.getNetworkId());
             } else {
                 preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_DEFAULT);
             }
-            preferenceBuilder.setIncludedUids(preferentialNetworkServiceConfig.getIncludedUids());
-            preferenceBuilder.setExcludedUids(preferentialNetworkServiceConfig.getExcludedUids());
-            preferenceBuilder.setPreferenceEnterpriseId(
-                    preferentialNetworkServiceConfig.getNetworkId());
+
 
             preferences.add(preferenceBuilder.build());
         }
+        Slogf.d(LOG_TAG, "updateNetworkPreferenceForUser to " + preferences);
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.getConnectivityManager().setProfileNetworkPreferences(
                         UserHandle.of(userId), preferences,
