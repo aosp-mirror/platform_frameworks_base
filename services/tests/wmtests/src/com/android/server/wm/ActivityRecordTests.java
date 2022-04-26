@@ -1896,10 +1896,13 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         final Task task = activity.getTask();
         final Rect taskBounds = task.getBounds();
+        final int currentRotation = mDisplayContent.getRotation();
+        final int w = taskBounds.width();
+        final int h = taskBounds.height();
         final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
                 .setTopActivityComponent(activity.mActivityComponent)
-                .setRotation(activity.getWindowConfiguration().getRotation())
-                .setTaskSize(taskBounds.width(), taskBounds.height())
+                .setRotation(currentRotation)
+                .setTaskSize(w, h)
                 .build();
 
         assertTrue(activity.isSnapshotCompatible(snapshot));
@@ -1909,6 +1912,18 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.getWindowConfiguration().setBounds(taskBounds);
 
         assertFalse(activity.isSnapshotCompatible(snapshot));
+
+        // Flipped size should be accepted if the activity will show with 90 degree rotation.
+        final int targetRotation = currentRotation + 1;
+        doReturn(targetRotation).when(mDisplayContent)
+                .rotationForActivityInDifferentOrientation(any());
+        final TaskSnapshot rotatedSnapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
+                .setTopActivityComponent(activity.mActivityComponent)
+                .setRotation(targetRotation)
+                .setTaskSize(h, w)
+                .build();
+        task.getWindowConfiguration().getBounds().set(0, 0, w, h);
+        assertTrue(activity.isSnapshotCompatible(rotatedSnapshot));
     }
 
     @Test

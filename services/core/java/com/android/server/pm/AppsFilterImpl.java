@@ -189,6 +189,8 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
 
     private final Object mCacheLock = new Object();
 
+    private final boolean mIsSnapshot;
+
     /**
      * This structure maps uid -> uid and indicates whether access from the first should be
      * filtered to the second. It's essentially a cache of the
@@ -322,6 +324,7 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
                 mProtectedBroadcasts, mProtectedBroadcasts, "AppsFilter.mProtectedBroadcasts");
 
         mSnapshot = makeCache();
+        mIsSnapshot = false;
     }
 
     /**
@@ -360,6 +363,7 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
         mBackgroundExecutor = null;
         mSnapshot = new SnapshotCache.Sealed<>();
         mSystemReady = orig.mSystemReady;
+        mIsSnapshot = true;
     }
 
     /**
@@ -1136,6 +1140,7 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
             }
         }
         mQueriesViaComponentRequireRecompute = false;
+        onChanged();
     }
 
     /**
@@ -1405,6 +1410,7 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
         }
     }
 
+    @SuppressWarnings("GuardedBy")
     private boolean shouldFilterApplicationInternal(PackageDataSnapshot snapshot, int callingUid,
             Object callingSetting, PackageStateInternal targetPkgSetting, int targetUserId) {
         if (DEBUG_TRACING) {
@@ -1563,16 +1569,53 @@ public class AppsFilterImpl implements AppsFilterSnapshot, Watchable, Snappable 
                 if (DEBUG_TRACING) {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mQueriesViaComponent");
                 }
-                if (mQueriesViaComponentRequireRecompute) {
-                    recomputeComponentVisibility(snapshot.getPackageStates());
-                    onChanged();
-                }
-                synchronized (mLock) {
-                    if (mQueriesViaComponent.contains(callingAppId, targetAppId)) {
-                        if (DEBUG_LOGGING) {
-                            log(callingSetting, targetPkgSetting, "queries component");
+                if (!mQueriesViaComponentRequireRecompute) {
+                    synchronized (mLock) {
+                        if (mQueriesViaComponent.contains(callingAppId, targetAppId)) {
+                            if (DEBUG_LOGGING) {
+                                log(callingSetting, targetPkgSetting, "queries component");
+                            }
+                            return false;
                         }
-                        return false;
+                    }
+                } else { // mQueriesViaComponent is stale
+                    if (!mIsSnapshot) {
+                        // Only recompute mQueriesViaComponent if not in snapshot
+                        recomputeComponentVisibility(snapshot.getPackageStates());
+                        synchronized (mLock) {
+                            if (mQueriesViaComponent.contains(callingAppId, targetAppId)) {
+                                if (DEBUG_LOGGING) {
+                                    log(callingSetting, targetPkgSetting, "queries component");
+                                }
+                                return false;
+                            }
+                        }
+                    } else {
+                        // Do no recompute or use mQueriesViaComponent if it's stale in snapshot
+                        // Since we know we are in the snapshot, no need to acquire mLock because
+                        // mProtectedBroadcasts will not change
+                        if (callingPkgSetting != null) {
+                            if (callingPkgSetting.getPkg() != null
+                                    && canQueryViaComponents(callingPkgSetting.getPkg(), targetPkg,
+                                    mProtectedBroadcasts)) {
+                                if (DEBUG_LOGGING) {
+                                    log(callingSetting, targetPkgSetting, "queries component");
+                                }
+                                return false;
+                            }
+                        } else {
+                            for (int i = callingSharedPkgSettings.size() - 1; i >= 0; i--) {
+                                final AndroidPackage pkg =
+                                        callingSharedPkgSettings.valueAt(i).getPkg();
+                                if (pkg != null && canQueryViaComponents(pkg, targetPkg,
+                                        mProtectedBroadcasts)) {
+                                    if (DEBUG_LOGGING) {
+                                        log(callingSetting, targetPkgSetting, "queries component");
+                                    }
+                                    return false;
+                                }
+                            }
+                        }
                     }
                 }
             } finally {

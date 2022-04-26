@@ -35,6 +35,7 @@ import android.app.IProcessObserver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ServiceInfo.ForegroundServiceType;
+import android.os.AppBackgroundRestrictionsInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerExemptionManager.ReasonCode;
@@ -49,6 +50,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -516,6 +518,12 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
                 foregroundServiceTypeToIndex(FOREGROUND_SERVICE_TYPE_NONE));
     }
 
+    @Override
+    long getTotalDurations(int uid, long now) {
+        return getTotalDurations(uid, now,
+                foregroundServiceTypeToIndex(FOREGROUND_SERVICE_TYPE_NONE));
+    }
+
     boolean hasForegroundServices(String packageName, int uid) {
         synchronized (mLock) {
             final PackageDurations pkg = mPkgEvents.get(uid, packageName);
@@ -559,6 +567,21 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
             }
         }
         return false;
+    }
+
+    @Override
+    byte[] getTrackerInfoForStatsd(int uid) {
+        final long fgsDurations = getTotalDurations(uid, SystemClock.elapsedRealtime());
+        if (fgsDurations == 0L) {
+            // Not interested
+            return null;
+        }
+        final ProtoOutputStream proto = new ProtoOutputStream();
+        proto.write(AppBackgroundRestrictionsInfo.FgsTrackerInfo.FGS_NOTIFICATION_VISIBLE,
+                hasForegroundServiceNotifications(uid));
+        proto.write(AppBackgroundRestrictionsInfo.FgsTrackerInfo.FGS_DURATION, fgsDurations);
+        proto.flush();
+        return proto.getBytes();
     }
 
     @Override
