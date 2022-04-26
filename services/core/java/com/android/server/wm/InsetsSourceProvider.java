@@ -123,7 +123,7 @@ abstract class InsetsSourceProvider {
         mDisplayContent = displayContent;
         mStateController = stateController;
         mFakeControl = new InsetsSourceControl(
-                source.getType(), null /* leash */, new Point(), Insets.NONE);
+                source.getType(), null /* leash */, new Point(), InsetsSourceControl.INVALID_HINTS);
         mControllable = InsetsPolicy.isInsetsTypeControllable(source.getType());
     }
 
