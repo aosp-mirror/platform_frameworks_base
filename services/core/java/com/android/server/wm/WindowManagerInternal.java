@@ -23,11 +23,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Pair;
 import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -449,6 +451,17 @@ public abstract class WindowManagerInternal {
      * @param outBounds The frame to populate.
      */
     public abstract void getWindowFrame(IBinder token, Rect outBounds);
+
+    /**
+     * Get the transformation matrix and MagnificationSpec given its token.
+     *
+     * @param token The token.
+     * @return The pair of the transformation matrix and magnification spec.
+     */
+    // TODO (b/231663133): Long term solution for tracking window when the
+    //                     FLAG_RETRIEVE_INTERACTIVE_WINDOWS is unset.
+    public abstract Pair<Matrix, MagnificationSpec>
+            getWindowTransformationMatrixAndMagnificationSpec(IBinder token);
 
     /**
      * Opens the global actions dialog.
