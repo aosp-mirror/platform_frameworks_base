@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.admin.DevicePolicyManager;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
@@ -575,6 +576,16 @@ public class CameraServiceProxy extends SystemService
             }
 
             updateActivityCount(cameraState);
+        }
+
+        @Override
+        public boolean isCameraDisabled() {
+            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            if (dpm == null) {
+                Slog.e(TAG, "Failed to get the device policy manager service");
+                return false;
+            }
+            return dpm.getCameraDisabled(null);
         }
     };
 
