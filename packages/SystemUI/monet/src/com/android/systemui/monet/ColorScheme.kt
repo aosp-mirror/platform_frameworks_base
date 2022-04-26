@@ -225,8 +225,13 @@ class ColorScheme(
     constructor(@ColorInt seed: Int, darkTheme: Boolean):
             this(seed, darkTheme, Style.TONAL_SPOT)
 
-    constructor(wallpaperColors: WallpaperColors, darkTheme: Boolean):
-            this(getSeedColor(wallpaperColors), darkTheme)
+    @JvmOverloads
+    constructor(
+        wallpaperColors: WallpaperColors,
+        darkTheme: Boolean,
+        style: Style = Style.TONAL_SPOT
+    ):
+            this(getSeedColor(wallpaperColors), darkTheme, style)
 
     val allAccentColors: List<Int>
         get() {
