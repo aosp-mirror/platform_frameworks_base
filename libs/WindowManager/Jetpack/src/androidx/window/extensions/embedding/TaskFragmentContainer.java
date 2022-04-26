@@ -21,7 +21,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.ActivityThread;
 import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -133,9 +132,8 @@ class TaskFragmentContainer {
         if (mInfo == null) {
             return allActivities;
         }
-        ActivityThread activityThread = ActivityThread.currentActivityThread();
         for (IBinder token : mInfo.getActivities()) {
-            Activity activity = activityThread.getActivity(token);
+            Activity activity = mController.getActivity(token);
             if (activity != null && !activity.isFinishing() && !allActivities.contains(activity)) {
                 allActivities.add(activity);
             }
