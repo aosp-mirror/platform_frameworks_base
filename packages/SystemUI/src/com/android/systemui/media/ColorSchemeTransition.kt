@@ -22,6 +22,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
 import com.android.internal.R
 import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
@@ -38,7 +39,7 @@ interface ColorTransition {
 
 /** A generic implementation of [ColorTransition] so that we can define a factory method. */
 open class GenericColorTransition(
-   private val applyTheme: (ColorScheme?) -> Unit
+    private val applyTheme: (ColorScheme?) -> Unit
 ) : ColorTransition {
     override fun updateColorScheme(scheme: ColorScheme?) = applyTheme(scheme)
 }
@@ -130,8 +131,19 @@ class ColorSchemeTransition internal constructor(
     ) { accentPrimary ->
         val accentColorList = ColorStateList.valueOf(accentPrimary)
         mediaViewHolder.actionPlayPause.backgroundTintList = accentColorList
-        mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
         mediaViewHolder.gutsViewHolder.setAccentPrimaryColor(accentPrimary)
+        mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
+    }
+
+    val accentSecondary = animatingColorTransitionFactory(
+        loadDefaultColor(R.attr.textColorPrimary),
+        ::accentSecondaryFromScheme
+    ) { accentSecondary ->
+        val colorList = ColorStateList.valueOf(accentSecondary)
+        (mediaViewHolder.seamlessButton.background as? RippleDrawable)?.let {
+            it.setColor(colorList)
+            it.effectColor = colorList
+        }
     }
 
     val textPrimary = animatingColorTransitionFactory(
@@ -203,6 +215,7 @@ class ColorSchemeTransition internal constructor(
     val colorTransitions = arrayOf(
         surfaceColor,
         accentPrimary,
+        accentSecondary,
         textPrimary,
         textPrimaryInverse,
         textSecondary,

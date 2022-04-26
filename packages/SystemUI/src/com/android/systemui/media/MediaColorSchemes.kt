@@ -24,6 +24,9 @@ internal fun surfaceFromScheme(scheme: ColorScheme) = scheme.accent2[9] // A2-80
 /** Returns the primary accent color for media controls based on the scheme. */
 internal fun accentPrimaryFromScheme(scheme: ColorScheme) = scheme.accent1[2] // A1-100
 
+/** Returns the secondary accent color for media controls based on the scheme. */
+internal fun accentSecondaryFromScheme(scheme: ColorScheme) = scheme.accent1[3] // A1-200
+
 /** Returns the primary text color for media controls based on the scheme. */
 internal fun textPrimaryFromScheme(scheme: ColorScheme) = scheme.neutral1[1] // N1-50
 
