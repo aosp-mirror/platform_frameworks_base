@@ -32,7 +32,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.util.Log;
 import android.util.MathUtils;
@@ -63,6 +62,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.PrintWriter;
@@ -194,6 +194,7 @@ public abstract class PanelViewController {
     private final PanelExpansionStateManager mPanelExpansionStateManager;
     private final TouchHandler mTouchHandler;
     private final InteractionJankMonitor mInteractionJankMonitor;
+    protected final SystemClock mSystemClock;
 
     protected abstract void onExpandingFinished();
 
@@ -237,7 +238,8 @@ public abstract class PanelViewController {
             PanelExpansionStateManager panelExpansionStateManager,
             AmbientState ambientState,
             InteractionJankMonitor interactionJankMonitor,
-            KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            SystemClock systemClock) {
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -297,6 +299,7 @@ public abstract class PanelViewController {
         mVibrateOnOpening = mResources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mInteractionJankMonitor = interactionJankMonitor;
+        mSystemClock = systemClock;
     }
 
     protected void loadDimens() {
@@ -1228,7 +1231,7 @@ public abstract class PanelViewController {
                     mCentralSurfaces.userActivity();
                     mAnimatingOnDown = mHeightAnimator != null && !mIsSpringBackAnimation;
                     mMinExpandHeight = 0.0f;
-                    mDownTime = SystemClock.uptimeMillis();
+                    mDownTime = mSystemClock.uptimeMillis();
                     if (mAnimatingOnDown && mClosing && !mHintAnimationRunning) {
                         cancelHeightAnimator();
                         mTouchSlopExceeded = true;
@@ -1341,7 +1344,7 @@ public abstract class PanelViewController {
                     mHasLayoutedSinceDown = false;
                     mUpdateFlingOnLayout = false;
                     mMotionAborted = false;
-                    mDownTime = SystemClock.uptimeMillis();
+                    mDownTime = mSystemClock.uptimeMillis();
                     mTouchAboveFalsingThreshold = false;
                     mCollapsedAndHeadsUpOnDown =
                             isFullyCollapsed() && mHeadsUpManager.hasPinnedHeadsUp();
