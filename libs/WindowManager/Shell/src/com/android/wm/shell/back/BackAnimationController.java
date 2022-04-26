@@ -211,7 +211,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         } else if (action == MotionEvent.ACTION_MOVE) {
             onMove(event, swipeEdge);
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Finishing gesture with event: %s", event);
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW,
+                    "Finishing gesture with event action: %d", action);
             onGestureFinished();
         }
     }
