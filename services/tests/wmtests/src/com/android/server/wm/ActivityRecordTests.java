@@ -3139,7 +3139,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
 
         InsetsSource imeSource = new InsetsSource(ITYPE_IME);
-        app.getInsetsState().addSource(imeSource);
+        app.mAboveInsetsState.addSource(imeSource);
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.updateImeInputAndControlTarget(app);
 
@@ -3156,10 +3156,12 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Simulate app re-start input or turning screen off/on then unlocked by un-secure
         // keyguard to back to the app, expect IME insets is not frozen
         mDisplayContent.updateImeInputAndControlTarget(app);
+        app.mActivityRecord.commitVisibility(true, false);
         assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+
+        imeSource.setVisible(true);
         imeSource.setFrame(new Rect(100, 400, 500, 500));
-        app.getInsetsState().addSource(imeSource);
-        app.getInsetsState().setSourceVisible(ITYPE_IME, true);
+        app.mAboveInsetsState.addSource(imeSource);
 
         // Verify when IME is visible and the app can receive the right IME insets from policy.
         makeWindowVisibleAndDrawn(app, mImeWindow);
