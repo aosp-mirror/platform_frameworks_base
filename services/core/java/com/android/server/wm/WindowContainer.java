@@ -620,6 +620,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
         onSurfaceShown(getSyncTransaction());
         updateSurfacePositionNonOrganized();
+        if (mLastMagnificationSpec != null) {
+            applyMagnificationSpec(getSyncTransaction(), mLastMagnificationSpec);
+        }
     }
 
     /**
