@@ -12,6 +12,7 @@ namespace android {
 
 extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteConnection(JNIEnv* env);
+extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv* env);
 
 #define REG_JNI(name) \
     { name }
@@ -22,6 +23,7 @@ struct RegJNIRec {
 static const RegJNIRec sqliteJNI[] = {
         REG_JNI(register_android_database_CursorWindow),
         REG_JNI(register_android_database_SQLiteConnection),
+        REG_JNI(register_com_android_internal_util_VirtualRefBasePtr),
 };
 
 JNIEnv* AndroidRuntime::getJNIEnv() {

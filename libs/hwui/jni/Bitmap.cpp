@@ -219,10 +219,10 @@ jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
                              bitmap->height(), density, isPremultiplied, ninePatchChunk,
                              ninePatchInsets, fromMalloc);
     } else {
-        obj = env->NewObject(
-                gBitmap_class, gBitmap_constructorMethodID, reinterpret_cast<jlong>(bitmapWrapper),
-                bitmap->width(), bitmap->height(), density,
-                /* mutable= */ false, isPremultiplied, ninePatchChunk, ninePatchInsets);
+        obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
+                             reinterpret_cast<jlong>(bitmapWrapper), bitmap->width(),
+                             bitmap->height(), density, isMutable, isPremultiplied, ninePatchChunk,
+                             ninePatchInsets);
     }
 
     if (env->ExceptionCheck() != 0) {

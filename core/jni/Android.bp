@@ -401,6 +401,7 @@ cc_library_shared {
           "android_database_SQLiteGlobal.cpp",
           "android_database_SQLiteDebug.cpp",
           "android_util_Log.cpp",
+	  "com_android_internal_util_VirtualRefBasePtr.cpp",
           "RobolectricNativeRuntime.cpp",
         ],
         static_libs: [
