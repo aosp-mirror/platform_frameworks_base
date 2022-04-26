@@ -264,7 +264,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             mWindowContext = null;
         }
         mAutoHideController.setNavigationBar(null);
-        mLightBarTransitionsController.destroy(mContext);
+        mLightBarTransitionsController.destroy();
         mLightBarController.setNavigationBar(null);
         mPipOptional.ifPresent(this::removePipExclusionBoundsChangeListener);
         mInitialized = false;

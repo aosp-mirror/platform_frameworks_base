@@ -49,7 +49,7 @@ public class DropboxRateLimiter {
     }
 
     /** Determines whether dropbox entries of a specific tag and process should be rate limited. */
-    public boolean shouldRateLimit(String eventType, String processName) {
+    public RateLimitResult shouldRateLimit(String eventType, String processName) {
         // Rate-limit how often we're willing to do the heavy lifting to collect and record logs.
         final long now = mClock.uptimeMillis();
         synchronized (mErrorClusterRecords) {
@@ -60,16 +60,32 @@ public class DropboxRateLimiter {
             if (errRecord == null) {
                 errRecord = new ErrorRecord(now, 1);
                 mErrorClusterRecords.put(errorKey(eventType, processName), errRecord);
-            } else if (now - errRecord.getStartTime() > RATE_LIMIT_BUFFER_DURATION) {
+                return new RateLimitResult(false, 0);
+            }
+
+            if (now - errRecord.getStartTime() > RATE_LIMIT_BUFFER_DURATION) {
                 errRecord.setStartTime(now);
                 errRecord.setCount(1);
-            } else {
-                errRecord.incrementCount();
-                if (errRecord.getCount() > RATE_LIMIT_ALLOWED_ENTRIES) return true;
+                return new RateLimitResult(false, recentlyDroppedCount(errRecord));
+            }
+
+            errRecord.incrementCount();
+            if (errRecord.getCount() > RATE_LIMIT_ALLOWED_ENTRIES) {
+                return new RateLimitResult(true, recentlyDroppedCount(errRecord));
             }
         }
-        return false;
+        return new RateLimitResult(false, 0);
     }
+
+    /**
+     * Returns the number of entries of a certain type and process that have recenlty been
+     * dropped. Resets every RATE_LIMIT_BUFFER_DURATION if events are still actively created or
+     * RATE_LIMIT_BUFFER_EXPIRY if not. */
+    private int recentlyDroppedCount(ErrorRecord errRecord) {
+        if (errRecord == null || errRecord.getCount() < RATE_LIMIT_ALLOWED_ENTRIES) return 0;
+        return errRecord.getCount() - RATE_LIMIT_ALLOWED_ENTRIES;
+    }
+
 
     private void maybeRemoveExpiredRecords(long now) {
         if (now - mLastMapCleanUp <= RATE_LIMIT_BUFFER_EXPIRY) return;
@@ -85,6 +101,27 @@ public class DropboxRateLimiter {
 
     String errorKey(String eventType, String processName) {
         return eventType + processName;
+    }
+
+    /** Holds information on whether we should rate limit and how many events have been dropped. */
+    public class RateLimitResult {
+        boolean mShouldRateLimit;
+        int mDroppedCountSinceRateLimitActivated;
+
+        public RateLimitResult(boolean shouldRateLimit, int droppedCountSinceRateLimitActivated) {
+            mShouldRateLimit = shouldRateLimit;
+            mDroppedCountSinceRateLimitActivated = droppedCountSinceRateLimitActivated;
+        }
+
+        /** Whether to rate limit. */
+        public boolean shouldRateLimit() {
+            return mShouldRateLimit;
+        }
+
+        /** The number of dropped events since rate limit was activated. */
+        public int droppedCountSinceRateLimitActivated() {
+            return mDroppedCountSinceRateLimitActivated;
+        }
     }
 
     private class ErrorRecord {

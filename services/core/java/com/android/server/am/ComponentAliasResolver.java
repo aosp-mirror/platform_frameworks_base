@@ -104,7 +104,10 @@ public class ComponentAliasResolver {
 
     private static final String OPT_IN_PROPERTY = "com.android.EXPERIMENTAL_COMPONENT_ALIAS_OPT_IN";
 
-    private static final String ALIAS_FILTER_ACTION = "android.intent.action.EXPERIMENTAL_IS_ALIAS";
+    private static final String ALIAS_FILTER_ACTION =
+            "com.android.intent.action.EXPERIMENTAL_IS_ALIAS";
+    private static final String ALIAS_FILTER_ACTION_ALT =
+            "android.intent.action.EXPERIMENTAL_IS_ALIAS";
     private static final String META_DATA_ALIAS_TARGET = "alias_target";
 
     private static final int PACKAGE_QUERY_FLAGS =
@@ -223,8 +226,16 @@ public class ComponentAliasResolver {
     @GuardedBy("mLock")
     private void loadFromMetadataLocked() {
         if (DEBUG) Slog.d(TAG, "Scanning service aliases...");
-        Intent i = new Intent(ALIAS_FILTER_ACTION);
 
+        // PM.queryInetntXxx() doesn't support "OR" queries, so we search for
+        // both the com.android... action and android... action on by one.
+        // It's okay if a single component handles both actions because the resulting aliases
+        // will be stored in a map and duplicates will naturally be removed.
+        loadFromMetadataLockedInner(new Intent(ALIAS_FILTER_ACTION_ALT));
+        loadFromMetadataLockedInner(new Intent(ALIAS_FILTER_ACTION));
+    }
+
+    private void loadFromMetadataLockedInner(Intent i) {
         final List<ResolveInfo> services = mContext.getPackageManager().queryIntentServicesAsUser(
                 i, PACKAGE_QUERY_FLAGS, UserHandle.USER_SYSTEM);
 
