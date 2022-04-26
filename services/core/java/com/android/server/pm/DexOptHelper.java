@@ -442,16 +442,35 @@ final class DexOptHelper {
         }
     }
 
-    public boolean performDexOptMode(String packageName,
+    public boolean performDexOptMode(@NonNull Computer snapshot, String packageName,
             boolean checkProfiles, String targetCompilerFilter, boolean force,
             boolean bootComplete, String splitName) {
-        PackageManagerServiceUtils.enforceSystemOrRootOrShell("performDexOptMode");
+        if (!PackageManagerServiceUtils.isSystemOrRootOrShell()
+                && !isCallerInstallerForPackage(snapshot, packageName)) {
+            throw new SecurityException("performDexOptMode");
+        }
 
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0)
                 | (force ? DexoptOptions.DEXOPT_FORCE : 0)
                 | (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
         return performDexOpt(new DexoptOptions(packageName, REASON_CMDLINE,
                 targetCompilerFilter, splitName, flags));
+    }
+
+    private boolean isCallerInstallerForPackage(@NonNull Computer snapshot, String packageName) {
+        final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+        if (packageState == null) {
+            return false;
+        }
+        final InstallSource installSource = packageState.getInstallSource();
+
+        final PackageStateInternal installerPackageState =
+                snapshot.getPackageStateInternal(installSource.installerPackageName);
+        if (installerPackageState == null) {
+            return false;
+        }
+        final AndroidPackage installerPkg = installerPackageState.getPkg();
+        return installerPkg.getUid() == Binder.getCallingUid();
     }
 
     public boolean performDexOptSecondary(String packageName, String compilerFilter,
