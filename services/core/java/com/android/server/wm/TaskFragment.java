@@ -519,15 +519,20 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return false;
     }
 
+    boolean isAllowedToEmbedActivity(@NonNull ActivityRecord a) {
+        return isAllowedToEmbedActivity(a, mTaskFragmentOrganizerUid);
+    }
+
     /**
      * Checks if the organized task fragment is allowed to have the specified activity, which is
      * allowed if an activity allows embedding in untrusted mode, or if the trusted mode can be
      * enabled.
      * @see #isAllowedToEmbedActivityInTrustedMode(ActivityRecord)
+     * @param uid   uid of the TaskFragment organizer.
      */
-    boolean isAllowedToEmbedActivity(@NonNull ActivityRecord a) {
+    boolean isAllowedToEmbedActivity(@NonNull ActivityRecord a, int uid) {
         return isAllowedToEmbedActivityInUntrustedMode(a)
-                || isAllowedToEmbedActivityInTrustedMode(a);
+                || isAllowedToEmbedActivityInTrustedMode(a, uid);
     }
 
     /**
@@ -544,20 +549,25 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 == FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
     }
 
+    boolean isAllowedToEmbedActivityInTrustedMode(@NonNull ActivityRecord a) {
+        return isAllowedToEmbedActivityInTrustedMode(a, mTaskFragmentOrganizerUid);
+    }
+
     /**
      * Checks if the organized task fragment is allowed to embed activity in fully trusted mode,
      * which means that all transactions are allowed. This is supported in the following cases:
      * <li>the activity belongs to the same app as the organizer host;</li>
      * <li>the activity has declared the organizer host as trusted explicitly via known
      * certificate.</li>
+     * @param uid   uid of the TaskFragment organizer.
      */
-    boolean isAllowedToEmbedActivityInTrustedMode(@NonNull ActivityRecord a) {
-        if (UserHandle.getAppId(mTaskFragmentOrganizerUid) == SYSTEM_UID) {
+    boolean isAllowedToEmbedActivityInTrustedMode(@NonNull ActivityRecord a, int uid) {
+        if (UserHandle.getAppId(uid) == SYSTEM_UID) {
             // The system is trusted to embed other apps securely and for all users.
             return true;
         }
 
-        if (mTaskFragmentOrganizerUid == a.getUid()) {
+        if (uid == a.getUid()) {
             // Activities from the same UID can be embedded freely by the host.
             return true;
         }
@@ -570,7 +580,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
 
         AndroidPackage hostPackage = mAtmService.getPackageManagerInternalLocked()
-                .getPackage(mTaskFragmentOrganizerUid);
+                .getPackage(uid);
 
         return hostPackage != null && hostPackage.getSigningDetails().hasAncestorOrSelfWithDigest(
                 knownActivityEmbeddingCerts);
@@ -581,7 +591,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * @see #isAllowedToEmbedActivityInTrustedMode(ActivityRecord)
      */
     boolean isAllowedToBeEmbeddedInTrustedMode() {
-        return forAllActivities(this::isAllowedToEmbedActivityInTrustedMode);
+        final Predicate<ActivityRecord> callback = this::isAllowedToEmbedActivityInTrustedMode;
+        return forAllActivities(callback);
     }
 
     /**
@@ -2302,11 +2313,32 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return mTaskFragmentOrganizer != null;
     }
 
+    /** Whether the Task should be visible. */
+    boolean isTaskVisibleRequested() {
+        final Task task = getTask();
+        return task != null && task.isVisibleRequested();
+    }
+
     boolean isReadyToTransit() {
+        // We only wait when this is organized to give the organizer a chance to update.
+        if (!isOrganizedTaskFragment()) {
+            return true;
+        }
         // We don't want to start the transition if the organized TaskFragment is empty, unless
         // it is requested to be removed.
-        return !isOrganizedTaskFragment() || getTopNonFinishingActivity() != null
-                || mIsRemovalRequested;
+        if (getTopNonFinishingActivity() != null || mIsRemovalRequested) {
+            return true;
+        }
+        // Organizer shouldn't change embedded TaskFragment in PiP.
+        if (isEmbeddedTaskFragmentInPip()) {
+            return true;
+        }
+        // The TaskFragment becomes empty because the last running activity enters PiP when the Task
+        // is minimized.
+        if (mClearedTaskFragmentForPip && !isTaskVisibleRequested()) {
+            return true;
+        }
+        return false;
     }
 
     /** Clear {@link #mLastPausedActivity} for all {@link TaskFragment} children */
@@ -2424,8 +2456,19 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mIsRemovalRequested = false;
         resetAdjacentTaskFragment();
         cleanUp();
+        final boolean shouldExecuteAppTransition =
+                mClearedTaskFragmentForPip && isTaskVisibleRequested();
         super.removeImmediately();
         sendTaskFragmentVanished();
+        if (shouldExecuteAppTransition && mDisplayContent != null) {
+            // When the Task is still visible, and the TaskFragment is removed because the last
+            // running activity is reparenting to PiP, it is possible that no activity is getting
+            // paused or resumed (having an embedded activity in split), thus we need to relayout
+            // and execute it explicitly.
+            mAtmService.addWindowLayoutReasons(
+                    ActivityTaskManagerService.LAYOUT_REASON_VISIBILITY_CHANGED);
+            mDisplayContent.executeAppTransition();
+        }
     }
 
     /** Called on remove to cleanup. */

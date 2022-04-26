@@ -88,7 +88,6 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @NonNull protected abstract UserNeedsBadgingCache getUserNeedsBadging();
     @NonNull protected abstract InstantAppRegistry getInstantAppRegistry();
     @NonNull protected abstract ApexManager getApexManager();
-    @NonNull protected abstract ApexPackageInfo getApexPackageInfo();
     @NonNull protected abstract DexManager getDexManager();
 
     @Override
@@ -633,7 +632,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Override
     @Deprecated
     public final boolean isApexPackage(String packageName) {
-        return getApexPackageInfo().isApexPackage(packageName);
+        return snapshot().isApexPackage(packageName);
     }
 
     @Override

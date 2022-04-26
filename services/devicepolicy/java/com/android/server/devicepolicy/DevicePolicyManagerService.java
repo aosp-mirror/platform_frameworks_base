@@ -8515,6 +8515,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private boolean isDeviceOwnerUserId(int userId) {
+        synchronized (getLockObject()) {
+            return mOwners.hasDeviceOwner()
+                    && mOwners.getDeviceOwnerUserId() == userId;
+        }
+    }
+
     private boolean isDeviceOwnerPackage(String packageName, int userId) {
         synchronized (getLockObject()) {
             return mOwners.hasDeviceOwner()
@@ -18260,7 +18267,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void updateNetworkPreferenceForUser(int userId,
             List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs) {
-        if (!isManagedProfile(userId)) {
+        if (!isManagedProfile(userId) && !isDeviceOwnerUserId(userId)) {
             return;
         }
         List<ProfileNetworkPreference> preferences = new ArrayList<>();
@@ -18275,16 +18282,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     preferenceBuilder.setPreference(
                             PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK);
                 }
+                preferenceBuilder.setIncludedUids(
+                        preferentialNetworkServiceConfig.getIncludedUids());
+                preferenceBuilder.setExcludedUids(
+                        preferentialNetworkServiceConfig.getExcludedUids());
+                preferenceBuilder.setPreferenceEnterpriseId(
+                        preferentialNetworkServiceConfig.getNetworkId());
             } else {
                 preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_DEFAULT);
             }
-            preferenceBuilder.setIncludedUids(preferentialNetworkServiceConfig.getIncludedUids());
-            preferenceBuilder.setExcludedUids(preferentialNetworkServiceConfig.getExcludedUids());
-            preferenceBuilder.setPreferenceEnterpriseId(
-                    preferentialNetworkServiceConfig.getNetworkId());
+
 
             preferences.add(preferenceBuilder.build());
         }
+        Slogf.d(LOG_TAG, "updateNetworkPreferenceForUser to " + preferences);
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.getConnectivityManager().setProfileNetworkPreferences(
                         UserHandle.of(userId), preferences,

@@ -90,6 +90,7 @@ import com.android.systemui.util.settings.SecureSettings;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -165,6 +166,8 @@ public class UserSwitcherController implements Dumpable {
     private View mView;
     private String mCreateSupervisedUserPackage;
     private GlobalSettings mGlobalSettings;
+    private List<UserSwitchCallback> mUserSwitchCallbacks =
+            Collections.synchronizedList(new ArrayList<>());
 
     @Inject
     public UserSwitcherController(Context context,
@@ -230,7 +233,8 @@ public class UserSwitcherController implements Dumpable {
         filter.addAction(Intent.ACTION_USER_STOPPED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         mBroadcastDispatcher.registerReceiver(
-                mReceiver, filter, null /* handler */, UserHandle.SYSTEM);
+                mReceiver, filter, null /* executor */,
+                UserHandle.SYSTEM, Context.RECEIVER_EXPORTED, null /* permission */);
 
         mSimpleUserSwitcher = shouldUseSimpleUserSwitcher();
 
@@ -673,6 +677,7 @@ public class UserSwitcherController implements Dumpable {
                         i--;
                     }
                 }
+                notifyUserSwitchCallbacks();
                 notifyAdapters();
 
                 // Disconnect from the old secondary user's service
@@ -1134,6 +1139,33 @@ public class UserSwitcherController implements Dumpable {
         mActivityStarter.startActivity(intent, true);
     }
 
+    /**
+     *  Add a subscriber to when user switches.
+     */
+    public void addUserSwitchCallback(UserSwitchCallback callback) {
+        mUserSwitchCallbacks.add(callback);
+    }
+
+    /**
+     *  Remove a subscriber to when user switches.
+     */
+    public void removeUserSwitchCallback(UserSwitchCallback callback) {
+        mUserSwitchCallbacks.remove(callback);
+    }
+
+    /**
+     *  Notify user switch callbacks that user has switched.
+     */
+    private void notifyUserSwitchCallbacks() {
+        List<UserSwitchCallback> temp;
+        synchronized (mUserSwitchCallbacks) {
+            temp = new ArrayList<>(mUserSwitchCallbacks);
+        }
+        for (UserSwitchCallback callback : temp) {
+            callback.onUserSwitched();
+        }
+    }
+
     public static final class UserRecord {
         public final UserInfo info;
         public final Bitmap picture;
@@ -1382,5 +1414,15 @@ public class UserSwitcherController implements Dumpable {
                         mUserTracker.getUserHandle());
             }
         }
+    }
+
+    /**
+     * Callback to for when this controller receives the intent to switch users.
+     */
+    public interface UserSwitchCallback {
+        /**
+         * Called when user has switched.
+         */
+        void onUserSwitched();
     }
 }

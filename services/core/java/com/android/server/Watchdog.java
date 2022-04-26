@@ -863,6 +863,7 @@ public class Watchdog {
         if (halfWatchdog) {
             dropboxTag = "pre_watchdog";
             CriticalEventLog.getInstance().logHalfWatchdog(subject);
+            FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_PRE_WATCHDOG_OCCURRED);
         } else {
             dropboxTag = "watchdog";
             CriticalEventLog.getInstance().logWatchdog(subject, errorId);

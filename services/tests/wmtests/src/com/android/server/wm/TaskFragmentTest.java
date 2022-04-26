@@ -19,17 +19,22 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 
 import android.content.res.Configuration;
@@ -61,6 +66,7 @@ import org.mockito.MockitoAnnotations;
 public class TaskFragmentTest extends WindowTestsBase {
 
     private TaskFragmentOrganizer mOrganizer;
+    private ITaskFragmentOrganizer mIOrganizer;
     private TaskFragment mTaskFragment;
     private SurfaceControl mLeash;
     @Mock
@@ -70,10 +76,10 @@ public class TaskFragmentTest extends WindowTestsBase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mOrganizer = new TaskFragmentOrganizer(Runnable::run);
-        final ITaskFragmentOrganizer iOrganizer =
-                ITaskFragmentOrganizer.Stub.asInterface(mOrganizer.getOrganizerToken().asBinder());
+        mIOrganizer = ITaskFragmentOrganizer.Stub.asInterface(mOrganizer.getOrganizerToken()
+                .asBinder());
         mAtm.mWindowOrganizerController.mTaskFragmentOrganizerController
-                .registerOrganizer(iOrganizer);
+                .registerOrganizer(mIOrganizer);
         mTaskFragment = new TaskFragmentBuilder(mAtm)
                 .setCreateParentTask()
                 .setOrganizer(mOrganizer)
@@ -239,6 +245,8 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertEquals(taskBounds, taskFragment.getBounds());
         assertEquals(taskBounds, activity.getBounds());
         assertEquals(Configuration.EMPTY, taskFragment.getRequestedOverrideConfiguration());
+        // Because the whole Task is entering PiP, no need to record for future reparent.
+        assertNull(activity.mLastTaskFragmentOrganizerBeforePip);
     }
 
     @Test
@@ -257,6 +265,9 @@ public class TaskFragmentTest extends WindowTestsBase {
                 .createActivityCount(1)
                 .build();
         final ActivityRecord activity0 = taskFragment0.getTopMostActivity();
+        final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
+        activity0.setVisibility(true /* visible */, false /* deferHidingClient */);
+        activity1.setVisibility(true /* visible */, false /* deferHidingClient */);
         spyOn(mAtm.mTaskFragmentOrganizerController);
 
         // Move activity to pinned.
@@ -269,8 +280,76 @@ public class TaskFragmentTest extends WindowTestsBase {
         final TaskFragmentInfo info = taskFragment0.getTaskFragmentInfo();
         assertTrue(info.isTaskFragmentClearedForPip());
         assertTrue(info.isEmpty());
+
+        // Notify organizer because the Task is still visible.
+        assertTrue(task.isVisibleRequested());
         verify(mAtm.mTaskFragmentOrganizerController)
                 .dispatchPendingInfoChangedEvent(taskFragment0);
+        // Make sure the organizer is recorded so that it can be reused when the activity is
+        // reparented back on exiting PiP.
+        assertEquals(mIOrganizer, activity0.mLastTaskFragmentOrganizerBeforePip);
+    }
+
+    @Test
+    public void testEmbeddedActivityExitPip_notifyOrganizer() {
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(new Binder())
+                .createActivityCount(1)
+                .build();
+        new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(new Binder())
+                .createActivityCount(1)
+                .build();
+        final ActivityRecord activity = taskFragment.getTopMostActivity();
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
+                null /* launchIntoPipHostActivity */, "test");
+        spyOn(mAtm.mTaskFragmentOrganizerController);
+        assertEquals(mIOrganizer, activity.mLastTaskFragmentOrganizerBeforePip);
+
+        // Move the activity back to its original Task.
+        activity.reparent(task, POSITION_TOP);
+
+        // Notify the organizer about the reparent.
+        verify(mAtm.mTaskFragmentOrganizerController).onActivityReparentToTask(activity);
+        assertNull(activity.mLastTaskFragmentOrganizerBeforePip);
+    }
+
+    @Test
+    public void testIsReadyToTransit() {
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setCreateParentTask()
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(new Binder())
+                .build();
+        final Task task = taskFragment.getTask();
+
+        // Not ready when it is empty.
+        assertFalse(taskFragment.isReadyToTransit());
+
+        // Ready when it is not empty.
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        doNothing().when(activity).setDropInputMode(anyInt());
+        activity.reparent(taskFragment, WindowContainer.POSITION_TOP);
+        assertTrue(taskFragment.isReadyToTransit());
+
+        // Ready when the Task is in PiP.
+        taskFragment.removeChild(activity);
+        task.setWindowingMode(WINDOWING_MODE_PINNED);
+        assertTrue(taskFragment.isReadyToTransit());
+
+        // Ready when the TaskFragment is empty because of PiP, and the Task is invisible.
+        task.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        taskFragment.mClearedTaskFragmentForPip = true;
+        assertTrue(taskFragment.isReadyToTransit());
+
+        // Not ready if the task is still visible when the TaskFragment becomes empty.
+        doReturn(true).when(task).isVisibleRequested();
+        assertFalse(taskFragment.isReadyToTransit());
     }
 
     @Test

@@ -224,6 +224,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
@@ -1399,7 +1400,9 @@ public class CentralSurfaces extends CoreStartable implements
         }
     }
 
-    private void onPanelExpansionChanged(float fraction, boolean expanded, boolean tracking) {
+    private void onPanelExpansionChanged(PanelExpansionChangeEvent event) {
+        float fraction = event.getFraction();
+        boolean tracking = event.getTracking();
         dispatchPanelExpansionForKeyguardDismiss(fraction, tracking);
 
         if (fraction == 0 || fraction == 1) {
@@ -4505,9 +4508,12 @@ public class CentralSurfaces extends CoreStartable implements
      * @return UserHandle
      */
     private UserHandle getActivityUserHandle(Intent intent) {
-        if (intent.getComponent() != null
-                && mContext.getPackageName().equals(intent.getComponent().getPackageName())) {
-            return new UserHandle(UserHandle.myUserId());
+        String[] packages = mContext.getResources().getStringArray(R.array.system_ui_packages);
+        for (String pkg : packages) {
+            if (intent.getComponent() == null) break;
+            if (pkg.equals(intent.getComponent().getPackageName())) {
+                return new UserHandle(UserHandle.myUserId());
+            }
         }
         return UserHandle.CURRENT;
     }
