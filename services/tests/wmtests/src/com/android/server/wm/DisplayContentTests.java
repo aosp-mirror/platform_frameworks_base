@@ -2193,7 +2193,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(windowingMode, windowConfig.getWindowingMode());
 
         // test misc display overrides
-        assertEquals(ignoreOrientationRequests, testDisplayContent.mIgnoreOrientationRequest);
+        assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
                 mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);
@@ -2234,7 +2234,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(windowingMode, windowConfig.getWindowingMode());
 
         // test misc display overrides
-        assertEquals(ignoreOrientationRequests, testDisplayContent.mIgnoreOrientationRequest);
+        assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
                 mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);

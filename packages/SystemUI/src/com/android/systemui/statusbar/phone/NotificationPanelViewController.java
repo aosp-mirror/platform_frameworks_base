@@ -2816,12 +2816,12 @@ public class NotificationPanelViewController extends PanelViewController {
             return false;
         }
         View header = mKeyguardShowing || mQs == null ? mKeyguardStatusBar : mQs.getHeader();
-
+        int frameTop = mKeyguardShowing || mQs == null ? 0 : mQsFrame.getTop();
         mQsInterceptRegion.set(
                 /* left= */ (int) mQsFrame.getX(),
-                /* top= */ header.getTop(),
+                /* top= */ header.getTop() + frameTop,
                 /* right= */ (int) mQsFrame.getX() + mQsFrame.getWidth(),
-                /* bottom= */ header.getBottom());
+                /* bottom= */ header.getBottom() + frameTop);
         // Also allow QS to intercept if the touch is near the notch.
         mStatusBarTouchableRegionManager.updateRegionForNotch(mQsInterceptRegion);
         final boolean onHeader = mQsInterceptRegion.contains((int) x, (int) y);

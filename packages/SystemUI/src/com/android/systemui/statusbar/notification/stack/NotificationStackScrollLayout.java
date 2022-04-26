@@ -85,8 +85,8 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.FakeShadowView;
+import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
@@ -3615,7 +3615,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.INPUT)
     protected boolean isInsideQsHeader(MotionEvent ev) {
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);
-        return mQsHeaderBound.contains((int) ev.getX(), (int) ev.getY());
+        return mQsHeaderBound.contains((int) ev.getRawX(), (int) ev.getRawY());
     }
 
     @ShadeViewRefactor(RefactorComponent.INPUT)
