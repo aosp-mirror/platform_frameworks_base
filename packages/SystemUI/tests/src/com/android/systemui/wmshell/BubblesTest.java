@@ -1010,7 +1010,7 @@ public class BubblesTest extends SysuiTestCase {
         assertBubbleNotificationSuppressedFromShade(mBubbleEntry);
 
         // Should notify delegate that shade state changed
-        verify(mBubbleController).onBubbleNotificationSuppressionChanged(
+        verify(mBubbleController).onBubbleMetadataFlagChanged(
                 mBubbleData.getBubbleInStackWithKey(mRow.getKey()));
     }
 
@@ -1027,7 +1027,7 @@ public class BubblesTest extends SysuiTestCase {
         assertBubbleNotificationSuppressedFromShade(mBubbleEntry);
 
         // Should notify delegate that shade state changed
-        verify(mBubbleController).onBubbleNotificationSuppressionChanged(
+        verify(mBubbleController).onBubbleMetadataFlagChanged(
                 mBubbleData.getBubbleInStackWithKey(mRow.getKey()));
     }
 

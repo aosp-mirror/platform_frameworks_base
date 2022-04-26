@@ -159,7 +159,7 @@ public class BubbleData {
     private Listener mListener;
 
     @Nullable
-    private Bubbles.SuppressionChangedListener mSuppressionListener;
+    private Bubbles.BubbleMetadataFlagListener mBubbleMetadataFlagListener;
     private Bubbles.PendingIntentCanceledListener mCancelledListener;
 
     /**
@@ -190,9 +190,8 @@ public class BubbleData {
         mMaxOverflowBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_overflow);
     }
 
-    public void setSuppressionChangedListener(
-            Bubbles.SuppressionChangedListener listener) {
-        mSuppressionListener = listener;
+    public void setSuppressionChangedListener(Bubbles.BubbleMetadataFlagListener listener) {
+        mBubbleMetadataFlagListener = listener;
     }
 
     public void setPendingIntentCancelledListener(
@@ -311,7 +310,7 @@ public class BubbleData {
                 bubbleToReturn = mPendingBubbles.get(key);
             } else if (entry != null) {
                 // New bubble
-                bubbleToReturn = new Bubble(entry, mSuppressionListener, mCancelledListener,
+                bubbleToReturn = new Bubble(entry, mBubbleMetadataFlagListener, mCancelledListener,
                         mMainExecutor);
             } else {
                 // Persisted bubble being promoted

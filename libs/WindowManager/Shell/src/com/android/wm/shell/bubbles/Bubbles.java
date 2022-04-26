@@ -263,10 +263,10 @@ public interface Bubbles {
         void onBubbleExpandChanged(boolean isExpanding, String key);
     }
 
-    /** Listener to be notified when the flags for notification or bubble suppression changes.*/
-    interface SuppressionChangedListener {
-        /** Called when the notification suppression state of a bubble changes. */
-        void onBubbleNotificationSuppressionChange(Bubble bubble);
+    /** Listener to be notified when the flags on BubbleMetadata have changed. */
+    interface BubbleMetadataFlagListener {
+        /** Called when the flags on BubbleMetadata have changed for the provided bubble. */
+        void onBubbleMetadataFlagChanged(Bubble bubble);
     }
 
     /** Listener to be notified when a pending intent has been canceled for a bubble. */

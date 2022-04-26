@@ -323,7 +323,7 @@ public class BubbleController {
 
     public void initialize() {
         mBubbleData.setListener(mBubbleDataListener);
-        mBubbleData.setSuppressionChangedListener(this::onBubbleNotificationSuppressionChanged);
+        mBubbleData.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
 
         mBubbleData.setPendingIntentCancelledListener(bubble -> {
             if (bubble.getBubbleIntent() == null) {
@@ -554,11 +554,10 @@ public class BubbleController {
     }
 
     @VisibleForTesting
-    public void onBubbleNotificationSuppressionChanged(Bubble bubble) {
+    public void onBubbleMetadataFlagChanged(Bubble bubble) {
         // Make sure NoMan knows suppression state so that anyone querying it can tell.
         try {
-            mBarService.onBubbleNotificationSuppressionChanged(bubble.getKey(),
-                    !bubble.showInShade(), bubble.isSuppressed());
+            mBarService.onBubbleMetadataFlagChanged(bubble.getKey(), bubble.getFlags());
         } catch (RemoteException e) {
             // Bad things have happened
         }

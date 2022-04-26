@@ -115,7 +115,7 @@ public class BubbleDataTest extends ShellTestCase {
     private ArgumentCaptor<BubbleData.Update> mUpdateCaptor;
 
     @Mock
-    private Bubbles.SuppressionChangedListener mSuppressionListener;
+    private Bubbles.BubbleMetadataFlagListener mBubbleMetadataFlagListener;
 
     @Mock
     private Bubbles.PendingIntentCanceledListener mPendingIntentCanceledListener;
@@ -136,30 +136,47 @@ public class BubbleDataTest extends ShellTestCase {
                 mock(NotificationListenerService.Ranking.class);
         when(ranking.isTextChanged()).thenReturn(true);
         mEntryInterruptive = createBubbleEntry(1, "interruptive", "package.d", ranking);
-        mBubbleInterruptive = new Bubble(mEntryInterruptive, mSuppressionListener, null,
+        mBubbleInterruptive = new Bubble(mEntryInterruptive, mBubbleMetadataFlagListener, null,
                 mMainExecutor);
 
         mEntryDismissed = createBubbleEntry(1, "dismissed", "package.d", null);
-        mBubbleDismissed = new Bubble(mEntryDismissed, mSuppressionListener, null,
+        mBubbleDismissed = new Bubble(mEntryDismissed, mBubbleMetadataFlagListener, null,
                 mMainExecutor);
 
         mEntryLocusId = createBubbleEntry(1, "keyLocus", "package.e", null,
                 new LocusId("locusId1"));
-        mBubbleLocusId = new Bubble(mEntryLocusId, mSuppressionListener, null, mMainExecutor);
+        mBubbleLocusId = new Bubble(mEntryLocusId,
+                mBubbleMetadataFlagListener,
+                null /* pendingIntentCanceledListener */,
+                mMainExecutor);
 
-        mBubbleA1 = new Bubble(mEntryA1, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleA1 = new Bubble(mEntryA1,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
-        mBubbleA2 = new Bubble(mEntryA2, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleA2 = new Bubble(mEntryA2,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
-        mBubbleA3 = new Bubble(mEntryA3, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleA3 = new Bubble(mEntryA3,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
-        mBubbleB1 = new Bubble(mEntryB1, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleB1 = new Bubble(mEntryB1,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
-        mBubbleB2 = new Bubble(mEntryB2, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleB2 = new Bubble(mEntryB2,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
-        mBubbleB3 = new Bubble(mEntryB3, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleB3 = new Bubble(mEntryB3,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
-        mBubbleC1 = new Bubble(mEntryC1, mSuppressionListener, mPendingIntentCanceledListener,
+        mBubbleC1 = new Bubble(mEntryC1,
+                mBubbleMetadataFlagListener,
+                mPendingIntentCanceledListener,
                 mMainExecutor);
         mPositioner = new TestableBubblePositioner(mContext,
                 mock(WindowManager.class));
