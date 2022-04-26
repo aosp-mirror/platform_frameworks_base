@@ -11752,6 +11752,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && (info.mHandwritingArea == null || !isAutoHandwritingEnabled())) {
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
+                info.mPositionUpdateListener = null;
                 info.mPositionChangedUpdate = null;
             }
         } else {
