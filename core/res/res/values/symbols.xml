@@ -2656,6 +2656,11 @@
   <java-symbol type="string" name="face_acquired_roll_too_extreme" />
   <java-symbol type="string" name="face_acquired_obscured" />
   <java-symbol type="string" name="face_acquired_sensor_dirty" />
+  <java-symbol type="string" name="face_acquired_dark_glasses_detected" />
+  <java-symbol type="string" name="face_acquired_mouth_covering_detected" />
+  <java-symbol type="string" name="face_acquired_recalibrate_alt" />
+  <java-symbol type="string" name="face_acquired_dark_glasses_detected_alt" />
+  <java-symbol type="string" name="face_acquired_mouth_covering_detected_alt" />
   <java-symbol type="array" name="face_acquired_vendor" />
   <java-symbol type="string" name="face_name_template" />
   <java-symbol type="string" name="face_app_setting_name" />
