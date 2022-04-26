@@ -1901,6 +1901,11 @@ public class Notification implements Parcelable
 
             /**
              * Construct a new builder for {@link Action} object.
+             * <p>As of Android {@link android.os.Build.VERSION_CODES#N},
+             * action button icons will not be displayed on action buttons, but are still required
+             * and are available to
+             * {@link android.service.notification.NotificationListenerService notification listeners},
+             * which may display them in other contexts, for example on a wearable device.
              * @param icon icon to show for this action
              * @param title the title of the action
              * @param intent the {@link PendingIntent} to fire when users trigger this action
@@ -1922,6 +1927,12 @@ public class Notification implements Parcelable
              * <p>How an Action is displayed, including whether the {@code icon}, {@code text}, or
              * both are displayed or required, depends on where and how the action is used, and the
              * {@link Style} applied to the Notification.
+             *
+             * <p>As of Android {@link android.os.Build.VERSION_CODES#N}, action button icons
+             * will not be displayed on action buttons, but are still required and are available
+             * to {@link android.service.notification.NotificationListenerService notification
+             * listeners}, which may display them in other contexts, for example on a wearable
+             * device.
              *
              * <p>When the {@code title} is a {@link android.text.Spanned}, any colors set by a
              * {@link ForegroundColorSpan} or {@link TextAppearanceSpan} may be removed or displayed
@@ -4918,6 +4929,12 @@ public class Notification implements Parcelable
          * while processing broadcast receivers or services in response to notification action
          * clicks. To launch an activity in those cases, provide a {@link PendingIntent} to the
          * activity itself.
+         * <p>
+         * As of Android {@link android.os.Build.VERSION_CODES#N},
+         * action button icons will not be displayed on action buttons, but are still required
+         * and are available to
+         * {@link android.service.notification.NotificationListenerService notification listeners},
+         * which may display them in other contexts, for example on a wearable device.
          *
          * @param icon Resource ID of a drawable that represents the action.
          * @param title Text describing the action.
