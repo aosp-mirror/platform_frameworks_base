@@ -222,6 +222,19 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
     }
 
+    @Override
+    public void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
+            @NonNull IBinder activityToken) {
+        // If the activity belongs to the current app process, we treat it as a new activity launch.
+        final Activity activity = ActivityThread.currentActivityThread().getActivity(activityToken);
+        if (activity != null) {
+            onActivityCreated(activity);
+            updateCallbackIfNecessary();
+            return;
+        }
+        // TODO: handle for activity in other process.
+    }
+
     /** Called on receiving {@link #onTaskFragmentVanished(TaskFragmentInfo)} for cleanup. */
     private void cleanupTaskFragment(@NonNull IBinder taskFragmentToken) {
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {

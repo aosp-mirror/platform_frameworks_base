@@ -2435,6 +2435,21 @@ public final class AppRestrictionController {
         }
 
         void postLongRunningFgsIfNecessary(String packageName, int uid) {
+            // Log the event in statsd.
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO,
+                    uid,
+                    mBgController.getRestrictionLevel(uid),
+                    AppBackgroundRestrictionsInfo.THRESHOLD_UNKNOWN,
+                    AppBackgroundRestrictionsInfo.FGS_TRACKER,
+                    mInjector.getAppFGSTracker().getTrackerInfoForStatsd(uid),
+                    null, // BatteryTrackerInfo
+                    null, // BroadcastEventsTrackerInfo
+                    null, // BindServiceEventsTrackerInfo
+                    getExemptionReasonForStatsd(
+                            mBgController.getBackgroundRestrictionExemptionReason(uid)),
+                    AppBackgroundRestrictionsInfo.UNKNOWN, // OptimizationLevel
+                    AppBackgroundRestrictionsInfo.SDK_UNKNOWN, // TargetSdk
+                    ActivityManager.isLowRamDeviceStatic());
             PendingIntent pendingIntent;
             if (!mBgController.mConstantsObserver.mBgPromptFgsWithNotiOnLongRunning
                     && mBgController.hasForegroundServiceNotifications(packageName, uid)) {

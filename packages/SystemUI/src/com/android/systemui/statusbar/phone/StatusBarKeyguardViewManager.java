@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -353,7 +354,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     @Override
-    public void onPanelExpansionChanged(float fraction, boolean expanded, boolean tracking) {
+    public void onPanelExpansionChanged(PanelExpansionChangeEvent event) {
+        float fraction = event.getFraction();
+        boolean tracking = event.getTracking();
         // Avoid having the shade and the bouncer open at the same time over a dream.
         final boolean hideBouncerOverDream =
                 mDreamOverlayStateController.isOverlayActive()

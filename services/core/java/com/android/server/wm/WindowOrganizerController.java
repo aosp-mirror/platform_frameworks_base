@@ -705,7 +705,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT: {
                 final IBinder fragmentToken = hop.getNewParent();
-                final ActivityRecord activity = ActivityRecord.forTokenLocked(hop.getContainer());
+                final IBinder activityToken = hop.getContainer();
+                ActivityRecord activity = ActivityRecord.forTokenLocked(activityToken);
+                if (activity == null) {
+                    // The token may be a temporary token if the activity doesn't belong to
+                    // the organizer process.
+                    activity = mTaskFragmentOrganizerController
+                            .getReparentActivityFromTemporaryToken(organizer, activityToken);
+                }
                 final TaskFragment parent = mLaunchTaskFragments.get(fragmentToken);
                 if (parent == null || activity == null) {
                     final Throwable exception = new IllegalArgumentException(
