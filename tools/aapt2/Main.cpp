@@ -24,11 +24,11 @@
 #include <iostream>
 #include <vector>
 
+#include "Diagnostics.h"
 #include "android-base/stringprintf.h"
 #include "android-base/utf8.h"
 #include "androidfw/StringPiece.h"
-
-#include "Diagnostics.h"
+#include "cmd/ApkInfo.h"
 #include "cmd/Command.h"
 #include "cmd/Compile.h"
 #include "cmd/Convert.h"
@@ -72,6 +72,7 @@ class MainCommand : public Command {
     AddOptionalSubcommand(util::make_unique<OptimizeCommand>());
     AddOptionalSubcommand(util::make_unique<ConvertCommand>());
     AddOptionalSubcommand(util::make_unique<VersionCommand>());
+    AddOptionalSubcommand(util::make_unique<ApkInfoCommand>(diagnostics));
   }
 
   int Action(const std::vector<std::string>& args) override {

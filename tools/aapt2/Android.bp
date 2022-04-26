@@ -24,6 +24,7 @@ package {
 }
 
 toolSources = [
+    "cmd/ApkInfo.cpp",
     "cmd/Command.cpp",
     "cmd/Compile.cpp",
     "cmd/Convert.cpp",
