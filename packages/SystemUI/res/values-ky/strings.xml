@@ -496,8 +496,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автоматтык"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Үнү чыкпайт жана дирилдебейт"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Үнү чыкпайт же дирилдебейт жана сүйлөшүүлөр тизмесинин ылдый жагында көрүнөт"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн. <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосундагы жазышуулар демейки жөндөө боюнча калкып чыкма билдирмелер түрүндө көрүнөт."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефондун параметрлерине жараша шыңгырап же дирилдеши мүмкүн"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефондун параметрлерине жараша шыңгырап же дирилдеши мүмкүн. <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосундагы жазышуулар демейки жөндөө боюнча калкып чыкма билдирмелер түрүндө көрүнөт."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Билдирменин үнүн чыгартууну же басууну тутумга тапшырыңыз"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Абалы:&lt;/b&gt; Демейкиге өзгөрдү"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Абалы:&lt;/b&gt; Үнсүз абалга төмөндөдү"</string>

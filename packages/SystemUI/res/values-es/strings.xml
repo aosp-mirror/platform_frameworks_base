@@ -337,8 +337,8 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"¿Quitar invitado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán todas las aplicaciones y datos de esta sesión."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Quitar"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Hola de nuevo, invitado"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres continuar con la sesión?"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Hola de nuevo, invitado!"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres continuar con tu sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continuar"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"¿Añadir nuevo usuario?"</string>
@@ -410,7 +410,7 @@
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Desbloqueado por TrustAgent"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Ajustes de sonido"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Transcripción instantánea"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Subtitular automáticamente"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Cerrar las recomendaciones de subtítulos"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Superposición de subtítulos"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activar"</string>

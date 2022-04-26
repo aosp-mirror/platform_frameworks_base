@@ -495,7 +495,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Կանխադրված"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Ավտոմատ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Առանց ձայնի կամ թրթռոցի"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Հայտնվում է զրույցների ցանկի ներքևում, առանց ձայնի և թրթռոցի"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Առանց ձայնի և թրթռոցի, հայտնվում է զրույցների ցանկի ներքևում"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Կարող է զնգալ կամ թրթռալ (հեռախոսի կարգավորումներից կախված)"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Կարող է զնգալ կամ թրթռալ (հեռախոսի կարգավորումներից կախված)։ <xliff:g id="APP_NAME">%1$s</xliff:g>-ի զրույցներն ըստ կանխադրման հայտնվում են ամպիկների տեսքով։"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Թող համակարգն ավտոմատ որոշի՝ արդյոք այս ծանուցումը ձայնով, թե թրթռոցով է պետք մատուցել"</string>

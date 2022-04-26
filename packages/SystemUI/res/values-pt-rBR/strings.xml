@@ -32,7 +32,7 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Permitir que o app <xliff:g id="APPLICATION">%1$s</xliff:g> acesse <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acesse <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsse app não tem permissão de gravação, mas pode capturar áudio pelo dispositivo USB."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Permitir que o app <xliff:g id="APPLICATION">%1$s</xliff:g> acesse este dispositivo: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Abrir o app <xliff:g id="APPLICATION">%1$s</xliff:g> para lidar com este dispositivo: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para controlar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Esse app não tem permissão de gravação, mas pode capturar áudio pelo dispositivo USB. O uso do app <xliff:g id="APPLICATION">%1$s</xliff:g> com esse dispositivo pode impedir que você ouça chamadas, notificações e alarmes."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"O uso do app <xliff:g id="APPLICATION">%1$s</xliff:g> com esse dispositivo pode impedir que você ouça chamadas, notificações e alarmes."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Permitir que o app <xliff:g id="APPLICATION">%1$s</xliff:g> acesse <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
@@ -505,8 +505,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; classificada com menor prioridade"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Aparece na parte superior das notificações de conversa e como uma foto do perfil na tela de bloqueio"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Aparece na parte superior das notificações de conversa, como uma foto do perfil na tela de bloqueio e como um balão"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Aparece na parte superior das notificações de conversa e como uma foto do perfil na tela de bloqueio. Interrompe o Não perturbe"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Aparece na parte superior das notificações de conversa, como uma foto do perfil na tela de bloqueio e como um balão. Interrompe o Não perturbe"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Aparecem na parte superior das notificações de conversa e como uma foto do perfil na tela de bloqueio. Interrompem o Não perturbe."</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Aparecem na parte superior das notificações de conversa, como uma foto do perfil na tela de bloqueio e como um balão. Interrompem o Não perturbe."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritárias"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não é compatível com recursos de conversa"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Não é possível modificar essas notificações."</string>
