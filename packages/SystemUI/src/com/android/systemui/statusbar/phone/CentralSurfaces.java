@@ -110,6 +110,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
+import android.window.SplashScreen;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -4099,6 +4100,7 @@ public class CentralSurfaces extends CoreStartable implements
         } else {
             options = ActivityOptions.makeBasic();
         }
+        options.setSplashScreenStyle(SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR);
         return options;
     }
 
