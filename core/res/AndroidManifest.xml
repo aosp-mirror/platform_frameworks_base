@@ -100,6 +100,7 @@
     <protected-broadcast android:name="android.intent.action.OVERLAY_PRIORITY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_UNSUSPENDED" />
+    <protected-broadcast android:name="android.app.action.MANAGED_PROFILE_PROVISIONED" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED" />
@@ -703,7 +704,7 @@
     <protected-broadcast android:name="android.scheduling.action.REBOOT_READY" />
     <protected-broadcast android:name="android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED" />
     <protected-broadcast android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
-    <protected-broadcast android:name="android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER" />
+    <protected-broadcast android:name="android.app.action.SHOW_NEW_USER_DISCLAIMER" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->

@@ -242,12 +242,14 @@ interface IVoiceInteractionManagerService {
      * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
      * @param callback Use this to report {@link HotwordDetectionService} status.
+     * @param detectorType Indicate which detector is used.
      */
     void updateState(
             in Identity originatorIdentity,
             in PersistableBundle options,
             in SharedMemory sharedMemory,
-            in IHotwordRecognitionStatusCallback callback);
+            in IHotwordRecognitionStatusCallback callback,
+                        int detectorType);
 
     /**
      * Requests to shutdown hotword detection service.

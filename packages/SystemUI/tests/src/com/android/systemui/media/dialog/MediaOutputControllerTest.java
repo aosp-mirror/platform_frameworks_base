@@ -201,7 +201,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
         assertThat(devices.containsAll(mMediaDevices)).isTrue();
         assertThat(devices.size()).isEqualTo(mMediaDevices.size());
-        verify(mCb).onRouteChanged();
+        verify(mCb).onDeviceListChanged();
     }
 
     @Test

@@ -24,13 +24,17 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Засталося <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Не ўдалося выканаць зарадку праз USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Выкарыстоўвайце зараднае прыстасаванне з камплекта прылады"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Уключыць рэжым эканоміі зараду?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Уключыць рэжым энергазберажэння?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Інфармацыя пра рэжым эканоміі зараду"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Уключыць"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Уключыць рэжым эканоміі зараду"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Аўтаматычны паварот экрана"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Дазволіць праграме <xliff:g id="APPLICATION">%1$s</xliff:g> доступ да прылады <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Даць праграме \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ да прылады \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?\nУ гэтай праграмы няма дазволу на запіс, аднак яна зможа запісваць аўдыя праз гэту прыладу USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Дазволіць праграме \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ да прылады \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Адкрыць праграму \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" для працы з прыладай \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"У гэтай праграмы няма дазволу на запіс, аднак яна зможа запісваць аўдыя праз гэту USB-прыладу. Выкарыстоўваючы праграму \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" з гэтай прыладай, вы можаце не пачуць гукі выклікаў, апавяшчэнняў і будзільнікаў."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Выкарыстоўваючы праграму \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" з гэтай прыладай, вы можаце не пачуць гукі выклікаў, апавяшчэнняў і будзільнікаў."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Дазволіць праграме <xliff:g id="APPLICATION">%1$s</xliff:g> доступ да прылады <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Адкрыць праграму <xliff:g id="APPLICATION">%1$s</xliff:g> для працы з прыладай <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Адкрыць праграму \"<xliff:g id="APPLICATION">%1$s</xliff:g>\", каб выкарыстоўваць прыладу \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?\nУ гэтай праграмы няма дазволу на запіс, аднак яна зможа запісваць аўдыя праз гэту USB-прыладу."</string>
@@ -413,7 +417,7 @@
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Налады гуку"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Аўтаматычныя субцітры"</string>
-    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Падказка \"Схавайце цітры\""</string>
+    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Закрыць падказку пра субцітры"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Накладанне субцітраў"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"уключыць"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"адключыць"</string>

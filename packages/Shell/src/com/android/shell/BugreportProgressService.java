@@ -157,6 +157,7 @@ public class BugreportProgressService extends Service {
 
     static final String EXTRA_BUGREPORT = "android.intent.extra.BUGREPORT";
     static final String EXTRA_BUGREPORT_TYPE = "android.intent.extra.BUGREPORT_TYPE";
+    static final String EXTRA_BUGREPORT_NONCE = "android.intent.extra.BUGREPORT_NONCE";
     static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
     static final String EXTRA_ID = "android.intent.extra.ID";
     static final String EXTRA_NAME = "android.intent.extra.NAME";
@@ -415,7 +416,7 @@ public class BugreportProgressService extends Service {
             final String bugreportFilePath = mInfo.bugreportFile.getAbsolutePath();
             if (mInfo.type == BugreportParams.BUGREPORT_MODE_REMOTE) {
                 sendRemoteBugreportFinishedBroadcast(mContext, bugreportFilePath,
-                        mInfo.bugreportFile);
+                        mInfo.bugreportFile, mInfo.nonce);
             } else {
                 cleanupOldFiles(MIN_KEEP_COUNT, MIN_KEEP_AGE, mBugreportsDir);
                 final Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
@@ -428,7 +429,7 @@ public class BugreportProgressService extends Service {
     }
 
     private static void sendRemoteBugreportFinishedBroadcast(Context context,
-            String bugreportFileName, File bugreportFile) {
+            String bugreportFileName, File bugreportFile, long nonce) {
         cleanupOldFiles(REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE,
                 bugreportFile.getParentFile());
         final Intent intent = new Intent(DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH);
@@ -439,6 +440,7 @@ public class BugreportProgressService extends Service {
         }
         intent.setDataAndType(bugreportUri, BUGREPORT_MIMETYPE);
         intent.putExtra(DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_HASH, bugreportHash);
+        intent.putExtra(DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_NONCE, nonce);
         intent.putExtra(EXTRA_BUGREPORT, bugreportFileName);
         context.sendBroadcastAsUser(intent, UserHandle.SYSTEM,
                 android.Manifest.permission.DUMP);
@@ -613,11 +615,12 @@ public class BugreportProgressService extends Service {
         String shareDescription = intent.getStringExtra(EXTRA_DESCRIPTION);
         int bugreportType = intent.getIntExtra(EXTRA_BUGREPORT_TYPE,
                 BugreportParams.BUGREPORT_MODE_INTERACTIVE);
+        long nonce = intent.getLongExtra(EXTRA_BUGREPORT_NONCE, 0);
         String baseName = getBugreportBaseName(bugreportType);
         String name = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
 
         BugreportInfo info = new BugreportInfo(mContext, baseName, name,
-                shareTitle, shareDescription, bugreportType, mBugreportsDir);
+                shareTitle, shareDescription, bugreportType, mBugreportsDir, nonce);
         synchronized (mLock) {
             if (info.bugreportFile.exists()) {
                 Log.e(TAG, "Failed to start bugreport generation, the requested bugreport file "
@@ -1915,6 +1918,11 @@ public class BugreportProgressService extends Service {
          */
         final int type;
 
+        /**
+         * Nonce of the bugreport
+         */
+        final long nonce;
+
         private final Object mLock = new Object();
 
         /**
@@ -1922,12 +1930,13 @@ public class BugreportProgressService extends Service {
          */
         BugreportInfo(Context context, String baseName, String name,
                 @Nullable String shareTitle, @Nullable String shareDescription,
-                @BugreportParams.BugreportMode int type, File bugreportsDir) {
+                @BugreportParams.BugreportMode int type, File bugreportsDir, long nonce) {
             this.context = context;
             this.name = this.initialName = name;
             this.shareTitle = shareTitle == null ? "" : shareTitle;
             this.shareDescription = shareDescription == null ? "" : shareDescription;
             this.type = type;
+            this.nonce = nonce;
             this.baseName = baseName;
             this.bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
         }
@@ -2167,6 +2176,7 @@ public class BugreportProgressService extends Service {
             screenshotCounter = in.readInt();
             shareDescription = in.readString();
             type = in.readInt();
+            nonce = in.readLong();
         }
 
         @Override
@@ -2195,6 +2205,7 @@ public class BugreportProgressService extends Service {
             dest.writeInt(screenshotCounter);
             dest.writeString(shareDescription);
             dest.writeInt(type);
+            dest.writeLong(nonce);
         }
 
         @Override

@@ -339,7 +339,7 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos del sensor de huellas dactilares"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Capturará los gestos que se hacen en el sensor de huellas dactilares del dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Tomar captura de pantalla"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puede tomar una captura de la pantalla."</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puede tomar capturas de pantalla."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite que la aplicación inhabilite la barra de estado o que agregue y elimine íconos del sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"aparecer en la barra de estado"</string>
@@ -603,7 +603,7 @@
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Se inhabilitó temporalmente el sensor."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"No se puede usar el sensor de huellas dactilares. Consulta a un proveedor de reparaciones."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar huella digital"</string>
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar huella dactilar"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar bloqueo de huella dactilar o pantalla"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utiliza tu huella dactilar para continuar"</string>
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Usa tu huella dactilar o bloqueo de pantalla para continuar"</string>

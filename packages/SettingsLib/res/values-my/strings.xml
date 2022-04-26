@@ -197,7 +197,7 @@
     <string name="choose_profile" msgid="343803890897657450">"ပရိုဖိုင်ကို ရွေးရန်"</string>
     <string name="category_personal" msgid="6236798763159385225">"ကိုယ်ရေး"</string>
     <string name="category_work" msgid="4014193632325996115">"အလုပ်"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"ဆော့ဖ်ဝဲရေးသူအတွက် ရွေးစရာများ"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"ဆော့ဝဲလ်ရေးသူ ရွေးစရာများ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ဆော့ဖ်ဝဲရေးသူအတွက် ရွေးစရာများကို ဖွင့်ပါ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"အပလီကေးရှင်းတိုးတက်မှုအတွက် ရွေးချယ်မှုကိုသတ်မှတ်သည်"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ဤအသုံးပြုသူအတွက် ဆော့ဖ်ဝဲရေးသူ ရွေးစရာများ မရနိုင်ပါ"</string>
@@ -237,7 +237,7 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ချွတ်ယွင်းမှု အစီရင်ခံရန် ဖြတ်လမ်း"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ချွတ်ယွင်းမှု အစီရင်ခံစာကို တင်ရန် ပါဝါမီနူးမှ ခလုတ်ကို ပြပါ"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"ဖွင့်လျက်သား"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"ဖွင့်ထားခြင်း"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"အားသွင်းနေချိန် ဖန်သားပြင် ပိတ်သွားမည် မဟုတ်ပါ"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ဘလူးတုသ် HCI snoop မှတ်တမ်းကို ဖွင့်ခြင်း"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ဘလူးတုသ် အတွဲများ သိမ်းယူပါ။ (ဤဆက်တင်ကို ပြောင်းပြီးသည့်အခါ ဘလူးတုသ် ဖွင့်/ပိတ် လုပ်ပါ)"</string>
@@ -283,7 +283,7 @@
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"ချိတ်ဆက်၍ မရပါ"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ဘက်ထရီ အသုံးပြုမှုကို လျှော့ကျစေပြီး ကွန်ရက်စွမ်းဆောင်ရည်ကို ပိုမိုကောင်းမွန်စေသည်"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ဘက်ထရီအသုံးပြုမှု လျှော့ချပြီး ကွန်ရက်စွမ်းဆောင်ရည် ပိုမိုကောင်းမွန်သည်"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ဤမုဒ်ကို ဖွင့်ထားသည့်အခါ MAC ကျပန်းပြုလုပ်ထားသည့် ကွန်ရက်သို့ ချိတ်ဆက်လိုက်သည့်အခါတိုင်း ဤစက်၏ MAC လိပ်စာ ပြောင်းသွားပါမည်။"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"အခမဲ့ မဟုတ်ပါ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"အခမဲ့"</string>
@@ -349,7 +349,7 @@
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ခြေရာခံခြင်းဖွင့်ပါ။"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB အသံလမ်းကြောင်း ပိတ်ခြင်း"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB အသံစက်ပစ္စည်းများသို့ အလိုအလျောက် ချိတ်ဆက်ခြင်းကို ပိတ်ရန်"</string>
-    <string name="debug_layout" msgid="1659216803043339741">"ဖွဲ့စည်းပုံဘောင်များ ပြခြင်း"</string>
+    <string name="debug_layout" msgid="1659216803043339741">"ပြကွက်၏ဘောင်များ ပြခြင်း"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ဖြတ်ပိုင်းအနားသတ်များ၊ အနားများ စသဖြင့် ပြပါ။"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL အပြင်အဆင်အတိုင်း ဖြစ်စေခြင်း"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ဘာသာစကားအားလုံးအတွက် RTL အပြင်အဆင်အတိုင်း ဖြစ်စေသည်"</string>
@@ -378,7 +378,7 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"တိကျစွာ သတ်မှတ်ထားသည့်တန်ဖိုးများရှိသော်လည်း၊ ပြင်ပသိုလှောင်ခန်းများသို့ မည်သည့်အက်ပ်ကိုမဆို ဝင်ရောက်ခွင့်ပြုပါ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"လုပ်ဆောင်ချက်များ အရွယ်ပြောင်းနိုင်ခြင်း"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"သတ်မှတ်တန်ဖိုး မည်သို့ပင်ရှိစေ ဝင်းဒိုးများ၏ လုပ်ဆောင်မှုအားလုံးကို အရွယ်အစားပြင်သည်။"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"အခမဲ့ပုံစံ ဝင်းဒိုးကို ဖွင့်ပါ"</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"ရွှေ့နိုင်ပြင်နိုင်သော ဝင်းဒိုးများ ဖွင့်ရန်"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ပုံစံမျိုးစုံဝင်းဒိုးများ စမ်းသပ်မှုအတွက် အထောက်အပံ့ကို ဖွင့်ပါ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ဒက်စ်တော့ အရန်စကားဝှက်"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ဒက်စ်တော့ အရန်သိမ်းဆည်းခြင်းအားလုံးကို လောလောဆယ် ကာကွယ်မထားပါ"</string>

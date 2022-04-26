@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
@@ -59,6 +60,7 @@ public class UsbPermissionActivity extends AlertActivity
     private int mUid;
     private boolean mPermissionGranted;
     private UsbDisconnectedReceiver mDisconnectedReceiver;
+    private UsbAudioWarningDialogMessage mUsbAudioPermissionMessageHandler;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -73,7 +75,9 @@ public class UsbPermissionActivity extends AlertActivity
         mUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
         mPackageName = intent.getStringExtra(UsbManager.EXTRA_PACKAGE);
         boolean canBeDefault = intent.getBooleanExtra(UsbManager.EXTRA_CAN_BE_DEFAULT, false);
-
+        mUsbAudioPermissionMessageHandler = new UsbAudioWarningDialogMessage(
+                getApplicationContext(), getIntent(),
+                UsbAudioWarningDialogMessage.TYPE_PERMISSION);
         PackageManager packageManager = getPackageManager();
         ApplicationInfo aInfo;
         try {
@@ -91,8 +95,8 @@ public class UsbPermissionActivity extends AlertActivity
         if (mDevice == null) {
             // Accessory Case
 
-            ap.mMessage = getString(R.string.usb_accessory_permission_prompt, appName,
-                    mAccessory.getDescription());
+            final int messageId = mUsbAudioPermissionMessageHandler.getUsbAccessoryPromptId();
+            ap.mMessage = getString(messageId, appName, mAccessory.getDescription());
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mAccessory);
         } else {
             boolean hasRecordPermission =
@@ -103,10 +107,11 @@ public class UsbPermissionActivity extends AlertActivity
             boolean isAudioCaptureDevice = mDevice.getHasAudioCapture();
             useRecordWarning = isAudioCaptureDevice && !hasRecordPermission;
 
-            int strID = useRecordWarning
-                    ? R.string.usb_device_permission_prompt_warn
-                    : R.string.usb_device_permission_prompt;
-            ap.mMessage = getString(strID, appName, mDevice.getProductName());
+            final int messageId =  mUsbAudioPermissionMessageHandler.getMessageId();
+            final int titleId = mUsbAudioPermissionMessageHandler.getPromptTitleId();
+            ap.mTitle = getString(titleId, appName, mDevice.getProductName());
+            ap.mMessage = (messageId != Resources.ID_NULL) ? getString(messageId, appName,
+                    mDevice.getProductName()) : null;
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mDevice);
 
         }

@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"திரையைத் தானாகச் சுழற்று"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐ அணுக, <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐப் பயன்படுத்த <xliff:g id="APPLICATION">%1$s</xliff:g>ஐ அனுமதிக்கவா?\nஇந்த ஆப்ஸிற்கு ரெக்கார்டு செய்வதற்கான அனுமதி வழங்கப்படவில்லை, எனினும் இந்த USB சாதனம் மூலம் ஆடியோவைப் பதிவுசெய்யும்."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> சாதனத்தை அணுக <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> சாதனத்தைக் கையாள <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸைத் திறக்கவா?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"இந்த ஆப்ஸில் ரெக்கார்டு செய்வதற்கு அனுமதி இல்லை, எனினும் இந்த USB சாதனம் மூலம் ஆடியோவைப் பதிவுசெய்யலாம். இந்தச் சாதனத்தில் <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸைப் பயன்படுத்தினால் அழைப்புகள், அறிவிப்புகள், அலாரங்கள் ஆகியவற்றின் ஒலி கேட்பது தடுக்கப்படக்கூடும்."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"இந்தச் சாதனத்தில் <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸைப் பயன்படுத்தினால் அழைப்புகள், அறிவிப்புகள், அலாரங்கள் ஆகியவற்றின் ஒலி கேட்பது தடுக்கப்படக்கூடும்."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ஐ அணுக, <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐக் கையாள, <xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாட்டைத் திறக்கவா?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐக் கையாள <xliff:g id="APPLICATION">%1$s</xliff:g>ஐத் திறக்கவா?\nஇந்த ஆப்ஸிற்கு ரெக்கார்டு செய்வதற்கான அனுமதி வழங்கப்படவில்லை, எனினும் இந்த USB சாதனம் மூலம் ஆடியோவைப் பதிவுசெய்ய முடியும்."</string>
@@ -81,7 +85,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ஸ்க்ரீன் ரெக்கார்டிங் செயலாக்கப்படுகிறது"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"திரை ரெக்கார்டிங் அமர்விற்கான தொடர் அறிவிப்பு"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ரெக்கார்டிங்கைத் தொடங்கவா?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ரெக்கார்டு செய்யும்போது, உங்கள் திரையில் தோன்றக்கூடிய அல்லது சாதனத்தில் பிளே ஆகக்கூடிய ஏதேனும் அதிமுக்கியத் தகவலை Android சிஸ்டம் படமெடுக்க முடியும். கடவுச்சொற்கள், பேமெண்ட் தகவல், படங்கள், மெசேஜ்கள், ஆடியோ ஆகியவை இதில் அடங்கும்."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"ரெக்கார்டு செய்யும்போது, உங்கள் திரையில் தோன்றக்கூடிய அல்லது சாதனத்தில் பிளே ஆகக்கூடிய பாதுகாக்கப்பட வேண்டிய தகவலை Android சிஸ்டம் படமெடுக்க முடியும். கடவுச்சொற்கள், பேமெண்ட் தகவல், படங்கள், மெசேஜ்கள், ஆடியோ ஆகியவை இதில் அடங்கும்."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ஆடியோவை ரெக்கார்டு செய்"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"சாதன ஆடியோ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"இசை, அழைப்புகள், ரிங்டோன்கள் போன்ற உங்கள் சாதனத்திலிருந்து வரும் ஒலி"</string>
@@ -349,7 +353,7 @@
     <string name="user_remove_user_remove" msgid="8387386066949061256">"அகற்று"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> உங்கள் திரையில் தெரியும் தகவல்கள், ரெக்கார்டு செய்யும்போதோ அனுப்பும்போதோ உங்கள் சாதனத்திலிருந்து பிளே ஆகும் அனைத்து தகவல்கள் ஆகியவற்றுக்கான அணுகலைக் கொண்டிருக்கும். கடவுச்சொற்கள், பேமெண்ட் தொடர்பான தகவல்கள், படங்கள், மெசேஜ்கள், நீங்கள் பிளே செய்யும் ஆடியோ போன்ற அனைத்துத் தகவல்களும் இதில் அடங்கும்."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"இந்தச் செயல்பாட்டை வழங்கும் சேவையானது உங்கள் திரையில் தெரியும் தகவல்கள், ரெக்கார்டு செய்யும்போதோ அனுப்பும்போதோ உங்கள் சாதனத்திலிருந்து பிளே ஆகும் அனைத்துத் தகவல்கள் ஆகியவற்றுக்கான அணுகலைக் கொண்டிருக்கும். கடவுச்சொற்கள், பேமெண்ட் தொடர்பான தகவல்கள், படங்கள், மெசேஜ்கள், நீங்கள் பிளே செய்யும் ஆடியோ போன்ற அனைத்துத் தகவல்களும் இதில் அடங்கும்."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ரெக்கார்டிங் செய்யவோ அனுப்புவதற்கோ தொடங்கிவிட்டீர்களா?"</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ரெக்கார்டிங் செய்யவோ அனுப்புவோ தொடங்கவா?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> மூலம் ரெக்கார்டிங் செய்யவோ அனுப்புவதற்கோ தொடங்கிவீட்டீர்களா?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"நிர்வகி"</string>
@@ -413,10 +417,10 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"முடக்கும்"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"ஆப்ஸ் பின் செய்யப்பட்டது"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"பொருத்தியதை அகற்றும் வரை இதைக் காட்சியில் வைக்கும். அகற்ற, முந்தையது மற்றும் மேலோட்டப் பார்வையைத் தொட்டுப் பிடிக்கவும்."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"இதற்கான பின்னை அகற்றும் வரை, இந்தப் பயன்முறை செயல்பாட்டிலேயே இருக்கும். அகற்றுவதற்கு, முந்தையது மற்றும் முகப்புப் பொத்தான்களைத் தொட்டுப் பிடிக்கவும்."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"இதற்கான பின்னை அகற்றும் வரை, இந்தப் பயன்முறை செயல்பாட்டிலேயே இருக்கும். அகற்றுவதற்கு, முந்தையது மற்றும் முகப்பு பட்டன்களைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"பின் செய்திருப்பதை அகற்றும் வரை இதைச் செயல்பாட்டில் வைத்திருக்கும். அதை அகற்றுவதற்கு மேல்நோக்கி ஸ்வைப் செய்து பிடித்திருக்கவும்."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"பொருத்தியதை அகற்றும் வரை இதைக் காட்சியில் வைக்கும். அகற்ற, மேலோட்டப் பார்வையைத் தொட்டுப் பிடிக்கவும்."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"இதற்கான பின்னை அகற்றும் வரை, இந்தப் பயன்முறை செயல்பாட்டிலேயே இருக்கும். அகற்றுவதற்கு, முகப்புப் பொத்தானைத் தொட்டுப் பிடிக்கவும்."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"இதற்கான பின்னை அகற்றும் வரை, இந்தப் பயன்முறை செயல்பாட்டிலேயே இருக்கும். அகற்றுவதற்கு, முகப்புப் பட்டனைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"தனிப்பட்ட தரவு அணுகப்படக்கூடும் (தொடர்புகள், மின்னஞ்சலின் உள்ளடக்கம் போன்றவை)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"பின் செய்யப்பட்டிருக்கும் ஆப்ஸ் பிற ஆப்ஸைத் திறக்கக்கூடும்."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"இந்த ஆப்ஸைப் பின்னிலிருந்து அகற்ற, \'பின்செல்\' மற்றும் \'மேலோட்டப் பார்வை\' பட்டன்களைத் தொட்டுப் பிடித்திருக்கவும்"</string>
@@ -820,7 +824,7 @@
     <string name="select_conversation_title" msgid="6716364118095089519">"உரையாடல் விட்ஜெட்டுகள்"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ஓர் உரையாடலை உங்கள் முகப்புத் திரையில் சேர்க்க அந்த உரையாடலைத் தட்டுங்கள்"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"உங்கள் சமீபத்திய உரையாடல்கள் இங்கே காட்டப்படும்"</string>
-    <string name="priority_conversations" msgid="3967482288896653039">"முன்னுரிமை அளிக்கப்பட்ட உரையாடல்கள்"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"முக்கிய உரையாடல்கள்"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"சமீபத்திய உரையாடல்கள்"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> நாட்களுக்கு முன்பு"</string>
     <string name="one_week_timestamp" msgid="4925600765473875590">"1 வாரத்திற்கு முன்பு"</string>

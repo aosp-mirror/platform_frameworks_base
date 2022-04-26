@@ -185,8 +185,13 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
         initializeActivityRecognizersTags();
 
-        // If this device does not have telephony, restrict the phone call ops
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+        // If this device does not have telephony or microphone features, the TelecomService will
+        // not be started (which sets phone call ops to allow only its package). Therefore, phone
+        // call ops need to be restricted here.
+        PackageManager pm = mContext.getPackageManager();
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+                && !pm.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)
+                && !pm.hasSystemFeature(PackageManager.FEATURE_CONNECTION_SERVICE)) {
             AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
             appOps.setUserRestrictionForUser(AppOpsManager.OP_PHONE_CALL_MICROPHONE, true, mToken,
                     null, UserHandle.USER_ALL);

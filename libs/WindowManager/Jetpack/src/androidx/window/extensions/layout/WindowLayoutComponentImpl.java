@@ -18,22 +18,24 @@ package androidx.window.extensions.layout;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static androidx.window.common.DisplayFeature.COMMON_STATE_FLAT;
-import static androidx.window.common.DisplayFeature.COMMON_STATE_HALF_OPENED;
+import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_FLAT;
+import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
 import static androidx.window.util.ExtensionHelper.rotateRectToDisplayRotation;
 import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.window.common.DeviceStateManagerPostureProducer;
-import androidx.window.common.DisplayFeature;
-import androidx.window.common.ResourceConfigDisplayFeatureProducer;
-import androidx.window.common.SettingsDevicePostureProducer;
+import androidx.window.common.CommonFoldingFeature;
+import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
+import androidx.window.common.EmptyLifecycleCallbacksAdapter;
 import androidx.window.common.SettingsDisplayFeatureProducer;
 import androidx.window.util.DataProducer;
 import androidx.window.util.PriorityDataProducer;
@@ -56,36 +58,27 @@ import java.util.function.Consumer;
  */
 public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private static final String TAG = "SampleExtension";
-    private static WindowLayoutComponent sInstance;
 
     private final Map<Activity, Consumer<WindowLayoutInfo>> mWindowLayoutChangeListeners =
             new HashMap<>();
 
-    private final SettingsDevicePostureProducer mSettingsDevicePostureProducer;
-    private final DataProducer<Integer> mDevicePostureProducer;
-
     private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
-    private final DataProducer<List<DisplayFeature>> mDisplayFeatureProducer;
+    private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
 
     public WindowLayoutComponentImpl(Context context) {
-        mSettingsDevicePostureProducer = new SettingsDevicePostureProducer(context);
-        mDevicePostureProducer = new PriorityDataProducer<>(List.of(
-                mSettingsDevicePostureProducer,
-                new DeviceStateManagerPostureProducer(context)
-        ));
-
+        ((Application) context.getApplicationContext())
+                .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
         mSettingsDisplayFeatureProducer = new SettingsDisplayFeatureProducer(context);
-        mDisplayFeatureProducer = new PriorityDataProducer<>(List.of(
+        mFoldingFeatureProducer = new PriorityDataProducer<>(List.of(
                 mSettingsDisplayFeatureProducer,
-                new ResourceConfigDisplayFeatureProducer(context)
+                new DeviceStateManagerFoldingFeatureProducer(context)
         ));
-
-        mDevicePostureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
-        mDisplayFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
+        mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }
 
     /**
      * Adds a listener interested in receiving updates to {@link WindowLayoutInfo}
+     *
      * @param activity hosting a {@link android.view.Window}
      * @param consumer interested in receiving updates to {@link WindowLayoutInfo}
      */
@@ -97,6 +90,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     /**
      * Removes a listener no longer interested in receiving updates.
+     *
      * @param consumer no longer interested in receiving updates to {@link WindowLayoutInfo}
      */
     public void removeWindowLayoutInfoListener(
@@ -118,43 +112,34 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         return mWindowLayoutChangeListeners.keySet();
     }
 
+    @NonNull
+    private Boolean isListeningForLayoutChanges(IBinder token) {
+        for (Activity activity: getActivitiesListeningForLayoutChanges()) {
+            if (token.equals(activity.getWindow().getAttributes().token)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected boolean hasListeners() {
         return !mWindowLayoutChangeListeners.isEmpty();
     }
 
     /**
-     * Calculate the {@link DisplayFeature.State} from the feature or the device posture producer.
-     * If the given {@link DisplayFeature.State} is not valid then {@code null} will be returned.
-     * The {@link FoldingFeature} should be ignored in the case of an invalid
-     * {@link DisplayFeature.State}.
-     *
-     * @param feature a {@link DisplayFeature} to provide the feature state if present.
-     * @return {@link DisplayFeature.State} of the hinge if present or the state from the posture
-     * produce if present.
-     */
-    @Nullable
-    private Integer getFeatureState(DisplayFeature feature) {
-        Integer featureState = feature.getState();
-        Optional<Integer> posture = mDevicePostureProducer.getData();
-        Integer state = featureState == null ? posture.orElse(null) : featureState;
-        return convertToExtensionState(state);
-    }
-
-    /**
      * A convenience method to translate from the common feature state to the extensions feature
-     * state.  More specifically, translates from {@link DisplayFeature.State} to
+     * state.  More specifically, translates from {@link CommonFoldingFeature.State} to
      * {@link FoldingFeature.STATE_FLAT} or {@link FoldingFeature.STATE_HALF_OPENED}. If it is not
      * possible to translate, then we will return a {@code null} value.
      *
-     * @param state if it matches a value in {@link DisplayFeature.State}, {@code null} otherwise.
-     * @return a {@link FoldingFeature.STATE_FLAT} or {@link FoldingFeature.STATE_HALF_OPENED} if
-     * the given state matches a value in {@link DisplayFeature.State} and {@code null} otherwise.
+     * @param state if it matches a value in {@link CommonFoldingFeature.State}, {@code null}
+     *              otherwise. @return a {@link FoldingFeature.STATE_FLAT} or
+     *              {@link FoldingFeature.STATE_HALF_OPENED} if the given state matches a value in
+     *              {@link CommonFoldingFeature.State} and {@code null} otherwise.
      */
     @Nullable
-    private Integer convertToExtensionState(@Nullable Integer state) {
-        if (state == null) { // The null check avoids a NullPointerException.
-            return null;
-        } else if (state == COMMON_STATE_FLAT) {
+    private Integer convertToExtensionState(int state) {
+        if (state == COMMON_STATE_FLAT) {
             return FoldingFeature.STATE_FLAT;
         } else if (state == COMMON_STATE_HALF_OPENED) {
             return FoldingFeature.STATE_HALF_OPENED;
@@ -172,33 +157,30 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     @NonNull
     private WindowLayoutInfo getWindowLayoutInfo(@NonNull Activity activity) {
-        List<androidx.window.extensions.layout.DisplayFeature> displayFeatures =
-                getDisplayFeatures(activity);
+        List<DisplayFeature> displayFeatures = getDisplayFeatures(activity);
         return new WindowLayoutInfo(displayFeatures);
     }
 
     /**
-     * Translate from the {@link DisplayFeature} to
-     * {@link androidx.window.extensions.layout.DisplayFeature} for a given {@link Activity}. If a
-     * {@link DisplayFeature} is not valid then it will be omitted.
+     * Translate from the {@link CommonFoldingFeature} to
+     * {@link DisplayFeature} for a given {@link Activity}. If a
+     * {@link CommonFoldingFeature} is not valid then it will be omitted.
      *
      * For a {@link FoldingFeature} the bounds are localized into the {@link Activity} window
-     * coordinate space and the state is calculated either from {@link DisplayFeature#getState()} or
-     * {@link #mDisplayFeatureProducer}. The state from {@link #mDisplayFeatureProducer} may not be
-     * valid since {@link #mDisplayFeatureProducer} is a general state controller. If the state is
-     * not valid, the {@link FoldingFeature} is omitted from the {@link List} of
-     * {@link androidx.window.extensions.layout.DisplayFeature}. If the bounds are not valid,
-     * constructing a {@link FoldingFeature} will throw an {@link IllegalArgumentException} since
-     * this can cause negative UI effects down stream.
+     * coordinate space and the state is calculated from {@link CommonFoldingFeature#getState()}.
+     * The state from {@link #mFoldingFeatureProducer} may not be valid since
+     * {@link #mFoldingFeatureProducer} is a general state controller. If the state is not valid,
+     * the {@link FoldingFeature} is omitted from the {@link List} of {@link DisplayFeature}. If
+     * the bounds are not valid, constructing a {@link FoldingFeature} will throw an
+     * {@link IllegalArgumentException} since this can cause negative UI effects down stream.
      *
      * @param activity a proxy for the {@link android.view.Window} that contains the
-     * {@link androidx.window.extensions.layout.DisplayFeature}.
-     * @return a {@link List} of valid {@link androidx.window.extensions.layout.DisplayFeature} that
+     * {@link DisplayFeature}.
+     * @return a {@link List} of valid {@link DisplayFeature} that
      * are within the {@link android.view.Window} of the {@link Activity}
      */
-    private List<androidx.window.extensions.layout.DisplayFeature> getDisplayFeatures(
-            @NonNull Activity activity) {
-        List<androidx.window.extensions.layout.DisplayFeature> features = new ArrayList<>();
+    private List<DisplayFeature> getDisplayFeatures(@NonNull Activity activity) {
+        List<DisplayFeature> features = new ArrayList<>();
         int displayId = activity.getDisplay().getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
             Log.w(TAG, "This sample doesn't support display features on secondary displays");
@@ -211,11 +193,10 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             return features;
         }
 
-        Optional<List<DisplayFeature>> storedFeatures = mDisplayFeatureProducer.getData();
+        Optional<List<CommonFoldingFeature>> storedFeatures = mFoldingFeatureProducer.getData();
         if (storedFeatures.isPresent()) {
-
-            for (DisplayFeature baseFeature : storedFeatures.get()) {
-                Integer state = getFeatureState(baseFeature);
+            for (CommonFoldingFeature baseFeature : storedFeatures.get()) {
+                Integer state = convertToExtensionState(baseFeature.getState());
                 if (state == null) {
                     continue;
                 }
@@ -223,8 +204,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 rotateRectToDisplayRotation(displayId, featureRect);
                 transformToWindowSpaceRect(activity, featureRect);
 
-                features.add(new FoldingFeature(featureRect, baseFeature.getType(),
-                        getFeatureState(baseFeature)));
+                features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
             }
         }
         return features;
@@ -232,13 +212,31 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     private void updateRegistrations() {
         if (hasListeners()) {
-            mSettingsDevicePostureProducer.registerObserversIfNeeded();
             mSettingsDisplayFeatureProducer.registerObserversIfNeeded();
         } else {
-            mSettingsDevicePostureProducer.unregisterObserversIfNeeded();
             mSettingsDisplayFeatureProducer.unregisterObserversIfNeeded();
         }
-
         onDisplayFeaturesChanged();
+    }
+
+    private final class NotifyOnConfigurationChanged extends EmptyLifecycleCallbacksAdapter {
+        @Override
+        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+            super.onActivityCreated(activity, savedInstanceState);
+            onDisplayFeaturesChangedIfListening(activity);
+        }
+
+        @Override
+        public void onActivityConfigurationChanged(Activity activity) {
+            super.onActivityConfigurationChanged(activity);
+            onDisplayFeaturesChangedIfListening(activity);
+        }
+
+        private void onDisplayFeaturesChangedIfListening(Activity activity) {
+            IBinder token = activity.getWindow().getAttributes().token;
+            if (token == null || isListeningForLayoutChanges(token)) {
+                onDisplayFeaturesChanged();
+            }
+        }
     }
 }

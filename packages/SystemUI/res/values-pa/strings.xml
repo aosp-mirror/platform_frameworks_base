@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ਸਕ੍ਰੀਨ ਸਵੈ-ਘੁਮਾਓ"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"ਕੀ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ਤੱਕ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"ਕੀ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?\nਇਸ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਪਰ ਇਹ USB ਡੀਵਾਈਸ ਰਾਹੀਂ ਆਡੀਓ ਕੈਪਚਰ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"ਕੀ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"ਕੀ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ਨੂੰ ਵਰਤਣ ਲਈ <xliff:g id="APPLICATION">%1$s</xliff:g> ਖੋਲ੍ਹਣੀ ਹੈ?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"ਇਸ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਪਰ ਇਹ USB ਡੀਵਾਈਸ ਰਾਹੀਂ ਆਡੀਓ ਕੈਪਚਰ ਕਰ ਸਕਦੀ ਹੈ। ਸ਼ਾਇਦ ਇਸ ਡੀਵਾਈਸ ਨਾਲ <xliff:g id="APPLICATION">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਨ \'ਤੇ ਕਾਲਾਂ, ਸੂਚਨਾਵਾਂ ਅਤੇ ਅਲਾਰਮਾਂ ਦੀ ਅਵਾਜ਼ ਸੁਣਾਈ ਨਾ ਦੇਵੇ।"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"ਸ਼ਾਇਦ ਇਸ ਡੀਵਾਈਸ ਨਾਲ <xliff:g id="APPLICATION">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਨ \'ਤੇ ਕਾਲਾਂ, ਸੂਚਨਾਵਾਂ ਅਤੇ ਅਲਾਰਮਾਂ ਦੀ ਅਵਾਜ਼ ਸੁਣਾਈ ਨਾ ਦੇਵੇ।"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"ਕੀ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ਤੱਕ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"ਕੀ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ਨੂੰ ਵਰਤਣ ਲਈ <xliff:g id="APPLICATION">%1$s</xliff:g> ਖੋਲ੍ਹਣੀ ਹੈ?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ਨੂੰ ਸੰਭਾਲਣ ਲਈ <xliff:g id="APPLICATION">%1$s</xliff:g> ਖੋਲ੍ਹੋ?\nਇਸ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਪਰ ਇਹ USB ਡੀਵਾਈਸ ਰਾਹੀਂ ਆਡੀਓ ਕੈਪਚਰ ਕਰ ਸਕਦੀ ਹੈ।"</string>
@@ -766,7 +770,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ਮਨਪਸੰਦ ਵਿੱਚੋਂ ਹਟਾਓ"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> ਸਥਾਨ \'ਤੇ ਲਿਜਾਓ"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ਕੰਟਰੋਲ"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ਪਹੁੰਚ ਕਰਨ ਲਈ ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਤੋਂ ਕੰਟਰੋਲ ਚੁਣੋ"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਤੋਂ ਪਹੁੰਚ ਕਰਨ ਲਈ ਕੰਟਰੋਲ ਚੁਣੋ"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ਕੰਟਰੋਲਾਂ ਨੂੰ ਮੁੜ-ਵਿਵਸਥਿਤ ਕਰਨ ਲਈ ਫੜ੍ਹ ਕੇ ਘਸੀਟੋ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ਸਾਰੇ ਕੰਟਰੋਲ ਹਟਾਏ ਗਏ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ਤਬਦੀਲੀਆਂ ਨੂੰ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>

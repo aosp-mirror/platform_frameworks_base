@@ -50,7 +50,7 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
     private ConfigurationListener mConfigurationListener = new ConfigurationListener() {
         @Override
         public void onConfigChanged(Configuration newConfig) {
-            mView.onConfigChanged();
+            mView.onConfigChanged(newConfig);
         }
 
         @Override

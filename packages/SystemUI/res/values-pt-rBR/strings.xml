@@ -24,20 +24,24 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> restantes"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Não é possível carregar via USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Usar o carregador que acompanha o dispositivo"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Ativar \"Economia de bateria\"?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Ativar a Economia de bateria?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Sobre a Economia de bateria"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Ativar"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Ativar a Economia de bateria"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Giro automático da tela"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Permitir que o app <xliff:g id="APPLICATION">%1$s</xliff:g> acesse <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acesse <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsse app não tem permissão de gravação, mas pode capturar áudio pelo dispositivo USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Permitir que o app <xliff:g id="APPLICATION">%1$s</xliff:g> acesse este dispositivo: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Abrir o app <xliff:g id="APPLICATION">%1$s</xliff:g> para lidar com este dispositivo: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Esse app não tem permissão de gravação, mas pode capturar áudio pelo dispositivo USB. O uso do app <xliff:g id="APPLICATION">%1$s</xliff:g> com esse dispositivo pode impedir que você ouça chamadas, notificações e alarmes."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"O uso do app <xliff:g id="APPLICATION">%1$s</xliff:g> com esse dispositivo pode impedir que você ouça chamadas, notificações e alarmes."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Permitir que o app <xliff:g id="APPLICATION">%1$s</xliff:g> acesse <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Abrir o app <xliff:g id="APPLICATION">%1$s</xliff:g> para lidar com o <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Abrir o app <xliff:g id="APPLICATION">%1$s</xliff:g> para usar o <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsse app não tem permissão de gravação, mas pode capturar áudio pelo dispositivo USB."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Abrir o app <xliff:g id="APPLICATION">%1$s</xliff:g> para lidar com o <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Nenhum apl. instalado funciona com o USB. Saiba mais sobre o acessório em <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"Acessório USB"</string>
-    <string name="label_view" msgid="6815442985276363364">"Visualizar"</string>
+    <string name="label_view" msgid="6815442985276363364">"Ver"</string>
     <string name="always_use_device" msgid="210535878779644679">"Sempre abrir o app <xliff:g id="APPLICATION">%1$s</xliff:g> quando <xliff:g id="USB_DEVICE">%2$s</xliff:g> for conectado"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Sempre abrir o app <xliff:g id="APPLICATION">%1$s</xliff:g> quando <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> for conectado"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Permitir a depuração USB?"</string>
@@ -616,7 +620,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ícone à esquerda"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícone à direita"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantenha pressionado e arraste para adicionar blocos"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantenha pressionado e arraste para reorganizar os blocos"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantenha o bloco pressionado e arraste para reorganizar"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arraste aqui para remover"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"É preciso haver pelo menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> blocos"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>

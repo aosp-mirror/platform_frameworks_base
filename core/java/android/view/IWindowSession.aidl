@@ -306,7 +306,7 @@ interface IWindowSession {
     */
     void grantInputChannel(int displayId, in SurfaceControl surface, in IWindow window,
             in IBinder hostInputToken, int flags, int privateFlags, int type,
-            out InputChannel outInputChannel);
+            in IBinder focusGrantToken, out InputChannel outInputChannel);
 
     /**
      * Update the flags on an input channel associated with a particular surface.

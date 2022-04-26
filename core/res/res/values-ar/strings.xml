@@ -349,7 +349,7 @@
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"تنفيذ إيماءات"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"يمكن النقر والتمرير بسرعة والتصغير أو التكبير بإصبعين وتنفيذ إيماءات أخرى."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"إيماءات بصمات الإصبع:"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على جهاز استشعار بصمة الإصبع في الجهاز."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات من أداة استشعار بصمة الإصبع في الجهاز."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"أخذ لقطة شاشة"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"يمكن أخذ لقطة شاشة."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"إيقاف شريط الحالة أو تعديله"</string>
@@ -1550,7 +1550,7 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"للسماح لتطبيق ما بطلب حذف الحِزم."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"طلب تجاهل تحسينات البطارية"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"للسماح للتطبيق بطلب الإذن لتجاهل تحسينات البطارية في هذا التطبيق."</string>
-    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"طلب البحث في كل الحِزم"</string>
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"البحث في كل الحِزم"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"يسمح هذا الإذن للتطبيق بعرض كل الحِزم المثبّتة."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"اضغط مرتين للتحكم في التكبير أو التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"تعذرت إضافة أداة."</string>

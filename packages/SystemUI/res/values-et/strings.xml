@@ -31,10 +31,14 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Kuva automaatne pööramine"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Kas lubada rakendusele <xliff:g id="APPLICATION">%1$s</xliff:g> juurdepääs seadmele <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Kas lubada rakendusel <xliff:g id="APPLICATION">%1$s</xliff:g> seadmele <xliff:g id="USB_DEVICE">%2$s</xliff:g> juurde pääseda?\nSellele rakendusele pole antud salvestamise luba, kuid see saab heli jäädvustada selle USB-seadme kaudu."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Kas lubada rakendusele <xliff:g id="APPLICATION">%1$s</xliff:g> juurdepääs seadmele <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Kas avada <xliff:g id="APPLICATION">%1$s</xliff:g> seadme <xliff:g id="USB_DEVICE">%2$s</xliff:g> kasutamiseks?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Sellele rakendusele pole antud salvestamise luba, kuid see saab heli jäädvustada selle USB-seadme kaudu. Rakenduse <xliff:g id="APPLICATION">%1$s</xliff:g> kasutamine selle seadmega võib takistada kõnede, märguannete ja äratuste kuulmist."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Rakenduse <xliff:g id="APPLICATION">%1$s</xliff:g> kasutamine selle seadmega võib takistada kõnede, märguannete ja äratuste kuulmist."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Kas lubada rakendusele <xliff:g id="APPLICATION">%1$s</xliff:g> juurdepääs seadmele <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Kas avada rakendus <xliff:g id="APPLICATION">%1$s</xliff:g> seadme <xliff:g id="USB_DEVICE">%2$s</xliff:g> kasutamiseks?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Kas avada <xliff:g id="APPLICATION">%1$s</xliff:g> seadme <xliff:g id="USB_DEVICE">%2$s</xliff:g> kasutamiseks?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Kas avada <xliff:g id="APPLICATION">%1$s</xliff:g>, et käsitseda seadet <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nSellele rakendusele pole antud salvestamise luba, kuid see saab heli jäädvustada selle USB-seadme kaudu."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Kas avada rakendus <xliff:g id="APPLICATION">%1$s</xliff:g> seadme <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> kasutamiseks?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Kas avada <xliff:g id="APPLICATION">%1$s</xliff:g> seadme <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> kasutamiseks?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Inst. rak. ei tööta selle USB-seadmega. Lisateavet lisaseadme kohta vt siit: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB-lisaseade"</string>
     <string name="label_view" msgid="6815442985276363364">"Kuva"</string>

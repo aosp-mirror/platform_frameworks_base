@@ -1344,7 +1344,7 @@
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Cancel"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Remember my choice"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"You can change this later in Settings &gt; Apps"</string>
-    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Always Allow*"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Always allow"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Never Allow"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"SIM card removed"</string>
     <string name="sim_removed_message" msgid="9051174064474904617">"The mobile network will be unavailable until you restart with a valid SIM card inserted."</string>

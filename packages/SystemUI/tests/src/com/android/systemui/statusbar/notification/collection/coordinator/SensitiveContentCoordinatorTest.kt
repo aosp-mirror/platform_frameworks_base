@@ -19,8 +19,11 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import android.os.UserHandle
 import android.service.notification.StatusBarNotification
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.DynamicPrivacyController
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -28,9 +31,12 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import org.junit.Test
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 
@@ -40,9 +46,13 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     val dynamicPrivacyController: DynamicPrivacyController = mock()
     val lockscreenUserManager: NotificationLockscreenUserManager = mock()
     val pipeline: NotifPipeline = mock()
+    val keyguardUpdateMonitor: KeyguardUpdateMonitor = mock()
+    val statusBarStateController: StatusBarStateController = mock()
+    val keyguardStateController: KeyguardStateController = mock()
 
     val coordinator: SensitiveContentCoordinator = SensitiveContentCoordinatorModule
-            .provideCoordinator(dynamicPrivacyController, lockscreenUserManager)
+            .provideCoordinator(dynamicPrivacyController, lockscreenUserManager,
+            keyguardUpdateMonitor, statusBarStateController, keyguardStateController)
 
     @Test
     fun onDynamicPrivacyChanged_invokeInvalidationListener() {
@@ -188,6 +198,28 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(true, true)
+    }
+
+    @Test
+    fun onBeforeRenderList_deviceDynamicallyUnlocked_deviceBiometricBypassingLockScreen() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener = withArgCaptor<OnBeforeRenderListListener> {
+            verify(pipeline).addOnBeforeRenderListListener(capture())
+        }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(true)
+        whenever(statusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD)
+        whenever(keyguardUpdateMonitor.getUserUnlockedWithBiometricAndIsBypassing(any()))
+                .thenReturn(true)
+
+        val entry = fakeNotification(2, true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!, never()).setSensitive(any(), any())
     }
 
     private fun fakeNotification(notifUserId: Int, needsRedaction: Boolean): ListEntry {

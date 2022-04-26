@@ -151,7 +151,7 @@ class ActivityLaunchAnimator(
         if (packageName != null && animationAdapter != null) {
             try {
                 ActivityTaskManager.getService().registerRemoteAnimationForNextActivityStart(
-                    packageName, animationAdapter)
+                    packageName, animationAdapter, null /* launchCookie */)
             } catch (e: RemoteException) {
                 Log.w(TAG, "Unable to register the remote animation", e)
             }

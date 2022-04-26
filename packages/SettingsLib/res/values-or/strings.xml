@@ -177,8 +177,8 @@
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> ନେଟ୍‌ୱର୍କ ସଂଯୋଜନା ଆବଶ୍ୟକ କରେ"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> ସପୋର୍ଟ କରୁ ନାହିଁ"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"ଯାଞ୍ଚ କରାଯାଉଛି…"</string>
-    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> ପାଇଁ ସେଟିଙ୍ଗ"</string>
-    <string name="tts_engine_settings_button" msgid="477155276199968948">"ଇଞ୍ଜିନ୍‌ ସେଟିଙ୍ଗ ଆରମ୍ଭ କରନ୍ତୁ"</string>
+    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> ପାଇଁ ସେଟିଂସ"</string>
+    <string name="tts_engine_settings_button" msgid="477155276199968948">"ଇଞ୍ଜିନ୍‌ ସେଟିଂସ ଲଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"ନିଜ ପସନ୍ଦର ଇଞ୍ଜିନ୍‌"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"ସାଧାରଣ"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"ସ୍ପୀଚ୍‌ର ପିଚ୍‌ ରିସେଟ୍‌ କରନ୍ତୁ"</string>
@@ -201,9 +201,9 @@
     <string name="development_settings_enable" msgid="4285094651288242183">"ଡେଭଲପର୍‌ ବିକଳ୍ପଗୁଡ଼ିକ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ଆପ୍‌ର ବିକାଶ ପାଇଁ ବିକଳ୍ପମାନ ସେଟ୍‌ କରନ୍ତୁ"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଡେଭଲପରଙ୍କ ବିକଳ୍ପସମୂହ ଉପଲବ୍ଧ ନୁହେଁ"</string>
-    <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN ସେଟିଙ୍ଗ ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଉପଲବ୍ଧ ନୁହେଁ"</string>
-    <string name="tethering_settings_not_available" msgid="266821736434699780">"ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଟିଥରିଙ୍ଗ ସେଟିଙ୍ଗ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <string name="apn_settings_not_available" msgid="1147111671403342300">"ଆକ୍ସେସ୍‌ ପଏଣ୍ଟ ନାମର ସେଟିଙ୍ଗ ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN ସେଟିଂସ ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଟିଥରିଂ ସେଟିଂସ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="apn_settings_not_available" msgid="1147111671403342300">"ଆକ୍ସେସ ପଏଣ୍ଟ ନାମର ସେଟିଂସ ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB ଡିବଗିଂ"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB ସଂଯୁକ୍ତ ହେବାବେଳେ ଡିବଗ୍‌ ମୋଡ୍‌"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ଡିବଗିଂ ଅଧିକାରକୁ ବାତିଲ୍ କରନ୍ତୁ"</string>
@@ -305,8 +305,8 @@
     <string name="adbwifi_warning_title" msgid="727104571653031865">"ୱାୟାରଲେସ୍ ଡିବଗିଂ ପାଇଁ ଅନୁମତି ଦେବେ?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"ୱାୟାରଲେସ୍ ଡିବଗିଂ କେବଳ ଉନ୍ନତି ପାଇଁ ଉଦ୍ଦିଷ୍ଟ ଅଟେ। ଆପଣଙ୍କ କମ୍ପ୍ୟୁଟର ଏବଂ ଡିଭାଇସ୍ ମଧ୍ୟରେ ଡାଟା କପି କରିବାକୁ, ବିନା ବିଜ୍ଞପ୍ତିରେ ଆପଣଙ୍କ ଡିଭାଇସରେ ଆପ୍ସ ଇନଷ୍ଟଲ୍ କରିବାକୁ ଏବଂ ଲଗ୍ ଡାଟା ପଢ଼ିବା ପାଇଁ ଏହାକୁ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"ଅଧିକୃତ ସମସ୍ତ କମ୍ପ୍ୟୁଟରରୁ USB ଡିବଗ୍‌ କରିବା ଆକ୍ସେସ୍‌ ପ୍ରତ୍ୟାହାର କରିବେ କି?"</string>
-    <string name="dev_settings_warning_title" msgid="8251234890169074553">"ଡେଭଲପମେଣ୍ଟ ସେଟିଙ୍ଗ ଅନୁମତି ଦେବେ?"</string>
-    <string name="dev_settings_warning_message" msgid="37741686486073668">"ଏହି ସେଟିଙ୍ଗଗୁଡ଼ିକ କେବଳ ବିକାଶ ବ୍ୟବହାର ପାଇଁ ଉଦ୍ଦିଷ୍ଟ। ସେଗୁଡ଼ିକ କାରଣରୁ ଆପଣଙ୍କ ଡିଭାଇସ୍‌ ଓ ଆପ୍ଲିକେଶନ୍‍‍ଗୁଡ଼ିକ ଠିକ୍‌ ଭାବେ କାମ ନକରିପାରେ।"</string>
+    <string name="dev_settings_warning_title" msgid="8251234890169074553">"ଡେଭଲପମେଣ୍ଟ ସେଟିଂସକୁ ଅନୁମତି ଦେବେ?"</string>
+    <string name="dev_settings_warning_message" msgid="37741686486073668">"ଏହି ସେଟିଂସ କେବଳ ବିକାଶର ବ୍ୟବହାର ପାଇଁ ଉଦ୍ଦିଷ୍ଟ। ସେଗୁଡ଼ିକ କାରଣରୁ ଆପଣଙ୍କ ଡିଭାଇସ ଓ ଆପ୍ଲିକେସନଗୁଡ଼ିକ ଖରାପ ହୋଇଯାଇପାରେ କିମ୍ବା ଠିକ୍‌ ଭାବେ କାମ ନକରିପାରେ।"</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB ଜରିଆରେ ଆପ୍‌ଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT ମାଧ୍ୟମରେ ଇନଷ୍ଟଲ ହୋଇଥିବା ଆପ୍‌ଗୁଡ଼ିକ କ୍ଷତିକାରକ କି ନୁହେଁ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"(କେବଳ MAC ଠିକଣା ଥାଇ) ନାମ ବିନା ବ୍ଲୁଟୂଥ ଡିଭାଇସଗୁଡ଼ିକ ପ୍ରଦର୍ଶିତ ହେବ"</string>
@@ -401,7 +401,7 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"ନିଷ୍କ୍ରିୟ। ଟୋଗଲ୍‌ କରିବାକୁ ଟାପ୍‌ କରନ୍ତୁ।"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"ସକ୍ରିୟ। ବଦଳାଇବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ଆପ୍ ଷ୍ଟାଣ୍ଡବାଏ ଅବସ୍ଥା:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="transcode_settings_title" msgid="2581975870429850549">"ମିଡିଆ ଟ୍ରାନ୍ସକୋଡିଂ ସେଟିଂସ୍"</string>
+    <string name="transcode_settings_title" msgid="2581975870429850549">"ମିଡିଆ ଟ୍ରାନ୍ସକୋଡିଂ ସେଟିଂସ"</string>
     <string name="transcode_user_control" msgid="6176368544817731314">"ଟ୍ରାନ୍ସକୋଡିଂ ଡିଫଲ୍ଟଗୁଡ଼ିକୁ ଓଭରରାଇଡ୍ କରନ୍ତୁ"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"ଟ୍ରାନ୍ସକୋଡିଂକୁ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="transcode_default" msgid="3784803084573509491">"ଧରିନିଅନ୍ତୁ ଆପଗୁଡ଼ିକ ଆଧୁନିକ ଫର୍ମାଟଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ"</string>
@@ -468,7 +468,7 @@
     <string name="external_source_trusted" msgid="1146522036773132905">"ଅନୁମତି ଦିଆଯାଇଛି"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"ଅନୁମତି ନାହିଁ"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"ଅଜଣା ଆପ୍‌ ଇନଷ୍ଟଲ୍‌ କରନ୍ତୁ"</string>
-    <string name="home" msgid="973834627243661438">"ସେଟିଂସ୍ ହୋମ୍‌"</string>
+    <string name="home" msgid="973834627243661438">"ସେଟିଂସ ହୋମ"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
     <item msgid="8894873528875953317">"50%"</item>
@@ -488,7 +488,7 @@
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"ପାସ୍‌ୱର୍ଡ ଆବଶ୍ୟକ"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"ସକ୍ରିୟ ଇନପୁଟ୍‌-ପଦ୍ଧତିଗୁଡ଼ିକ"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"ସିଷ୍ଟମ୍‌ ଭାଷା ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> ପାଇଁ ସେଟିଙ୍ଗ ଖୋଲିବାରେ ବିଫଳ"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> ପାଇଁ ସେଟିଂସ ଖୋଲିବାରେ ବିଫଳ"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"ଏହି ଇନ୍‌ପୁଟ୍‌ ପଦ୍ଧତି, ପାସ୍‌ୱର୍ଡ ଓ କ୍ରେଡିଟ୍‌ କାର୍ଡ ନମ୍ୱର୍‌ ଭଳି ବ୍ୟକ୍ତିଗତ ଡାଟା ସମେତ ଆପଣ ଟାଇପ୍‌ କରିଥିବା ସମସ୍ତ ଅକ୍ଷର ସଂଗହ କରିପାରେ।ଏହା, <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ଆପ୍‌ରୁ ଆସିଛି| ଏହି ଇନ୍‌ପୁଟ୍‌ ପଦ୍ଧତି ବ୍ୟବହାର କରିବେ?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"ଧ୍ୟାନଦିଅନ୍ତୁ: ରିବୁଟ୍‌ କରିବା ପରେ, ଆପଣଙ୍କ ଫୋନ୍‌ ଅନଲକ୍‌ ନହେବା ପର୍ଯ୍ୟନ୍ତ ଏହି ଆପ୍‌ ଆରମ୍ଭ ହୋଇପାରିବ ନାହିଁ"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS ପଞ୍ଜିକରଣ ସ୍ଥିତି"</string>
@@ -546,7 +546,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ଉପଯୋଗକର୍ତ୍ତା"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ସୀମିତ ସୁବିଧା ଥିବା ପ୍ରୋଫାଇଲ୍‌"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"ନୂତନ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବେ?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"ଅତିରିକ୍ତ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରି ଆପଣ ଏହି ଡିଭାଇସ୍‌କୁ ଅନ୍ୟ ଲୋକମାନଙ୍କ ସହିତ ସେୟାର୍ କରିପାରିବେ। ପ୍ରତ୍ୟେକ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ନିଜର ସ୍ପେସ୍ ଅଛି ଯାହାକୁ ସେମାନେ ଆପ୍, ୱାଲପେପର୍ ଓ ଏପରି ଅନେକ କିଛି ସହିତ କଷ୍ଟମାଇଜ୍ କରିପାରିବେ। ଉପଯୋଗକର୍ତ୍ତା ୱାଇ-ଫାଇ ଭଳି ଡିଭାଇସ୍ ସେଟିଂସକୁ ମଧ୍ୟ ଆଡଜଷ୍ଟ କରିପାରିବେ ଯାହା ସମସ୍ତଙ୍କୁ ପ୍ରଭାବିତ କରିଥାଏ। \n\nଯେତେବେଳେ ଆପଣ ଗୋଟିଏ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବେ, ସେତେବେଳେ ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ନିଜର ସ୍ପେସ୍‌କୁ ସେଟ‌ଅପ୍ କରିବାକୁ ପଡ଼ିବ। \n\nଅନ୍ୟ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପ୍‌କୁ ଅପଡେଟ୍ କରିପାରିବେ। ଆକ୍ସେସିବିଲିଟୀ ସେଟିଂସ୍ ଏବଂ ସେବା ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ସ୍ଥାନାନ୍ତର ହୋ‌ଇନପାରେ।"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"ଅତିରିକ୍ତ ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରି ଆପଣ ଏହି ଡିଭାଇସକୁ ଅନ୍ୟ ଲୋକମାନଙ୍କ ସହିତ ସେୟାର କରିପାରିବେ। ପ୍ରତ୍ୟେକ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ନିଜର ସ୍ପେସ୍ ଅଛି ଯାହାକୁ ସେମାନେ ଆପ, ୱାଲପେପର୍ ଓ ଏପରି ଅନେକ କିଛି ସହିତ କଷ୍ଟମାଇଜ କରିପାରିବେ। ଉପଯୋଗକର୍ତ୍ତା ୱାଇ-ଫାଇ ଭଳି ଡିଭାଇସ ସେଟିଂସକୁ ମଧ୍ୟ ଆଡଜଷ୍ଟ କରିପାରିବେ ଯାହା ସମସ୍ତଙ୍କୁ ପ୍ରଭାବିତ କରିଥାଏ। \n\nଯେତେବେଳେ ଆପଣ ଗୋଟିଏ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବେ, ସେତେବେଳେ ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ନିଜର ସ୍ପେସ୍‌କୁ ସେଟ‌ଅପ କରିବାକୁ ପଡ଼ିବ। \n\nଅନ୍ୟ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପକୁ ଅପଡେଟ କରିପାରିବେ। ଆକ୍ସେସିବିଲିଟୀ ସେଟିଂସ ଏବଂ ସେବାଗୁଡ଼ିକ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ସ୍ଥାନାନ୍ତର ହୋ‌ଇନପାରେ।"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଡ଼ିବାବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ସ୍ଥାନ ସେଟ୍‍ କରିବାକୁ ପଡ଼ିବ।\n\nଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେକୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପ୍‌ଗୁଡ଼ିକୁ ଅପ୍‌ଡେଟ୍‌ କରିପାରିବେ।"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ଏବେ ଉପଯୋଗକର୍ତ୍ତା ସେଟଅପ କରିବେ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ସୁନିଶ୍ଚିତ କରନ୍ତୁ ଯେ, ବ୍ୟକ୍ତି ଜଣକ ଡିଭାଇସ୍‌ ଓ ନିଜର ସ୍ଥାନ ସେଟଅପ୍‌ କରିବା ପାଇଁ ଉପଲବ୍ଧ ଅଛନ୍ତି।"</string>

@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -48,7 +50,6 @@ public abstract class BaseClientMonitor extends LoggableMonitor
      * Interface that ClientMonitor holders should use to receive callbacks.
      */
     public interface Callback {
-
         /**
          * Invoked when the ClientMonitor operation has been started (e.g. reached the head of
          * the queue and becomes the current operation).
@@ -203,7 +204,8 @@ public abstract class BaseClientMonitor extends LoggableMonitor
     }
 
     /** Signals this operation has completed its lifecycle and should no longer be used. */
-    void destroy() {
+    @VisibleForTesting(visibility = Visibility.PACKAGE)
+    public void destroy() {
         mAlreadyDone = true;
         if (mToken != null) {
             try {

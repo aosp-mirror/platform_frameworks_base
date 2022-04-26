@@ -256,6 +256,7 @@ public class SettingsBackupTest {
                     Settings.Global.DROPBOX_RESERVE_PERCENT,
                     Settings.Global.DROPBOX_TAG_PREFIX,
                     Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
+                    Settings.Global.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
                     Settings.Global.EMULATE_DISPLAY_CUTOUT,
                     Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
                     Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,

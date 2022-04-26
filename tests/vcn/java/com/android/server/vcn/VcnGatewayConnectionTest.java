@@ -16,6 +16,7 @@
 
 package com.android.server.vcn;
 
+import static android.net.IpSecManager.IpSecTunnelInterface;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
@@ -24,6 +25,8 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
+import static com.android.server.vcn.VcnGatewayConnection.DUMMY_ADDR;
+import static com.android.server.vcn.VcnGatewayConnection.VcnChildSessionConfiguration;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
 import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 
@@ -36,8 +39,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.net.IpSecManager;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -59,8 +65,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -70,6 +79,8 @@ import java.util.UUID;
 public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
     private static final int TEST_UID = Process.myUid() + 1;
 
+    private static final String LOOPBACK_IFACE = "lo";
+
     private static final ParcelUuid TEST_PARCEL_UUID = new ParcelUuid(UUID.randomUUID());
     private static final int TEST_SIM_SLOT_INDEX = 1;
     private static final int TEST_SUBSCRIPTION_ID_1 = 2;
@@ -77,6 +88,12 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
     private static final int TEST_SUBSCRIPTION_ID_2 = 3;
     private static final SubscriptionInfo TEST_SUBINFO_2 = mock(SubscriptionInfo.class);
     private static final Map<Integer, ParcelUuid> TEST_SUBID_TO_GROUP_MAP;
+    private static final String TEST_TCP_BUFFER_SIZES = "1,2,3,4,5,6";
+    private static final int TEST_MTU = 1300;
+    private static final int TEST_MTU_DELTA = 64;
+    private static final List<LinkAddress> TEST_INTERNAL_ADDRESSES =
+            Arrays.asList(new LinkAddress(DUMMY_ADDR, 16));
+    private static final List<InetAddress> TEST_DNS_ADDRESSES = Arrays.asList(DUMMY_ADDR);
 
     private static final int TEST_UPSTREAM_BANDWIDTH = 1234;
     private static final int TEST_DOWNSTREAM_BANDWIDTH = 2345;
@@ -163,6 +180,59 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
     @Test
     public void testBuildNetworkCapabilitiesMobileDataDisabled() throws Exception {
         verifyBuildNetworkCapabilitiesCommon(TRANSPORT_CELLULAR, false /* isMobileDataEnabled */);
+    }
+
+    @Test
+    public void testBuildLinkProperties() throws Exception {
+        final IpSecTunnelInterface tunnelIface =
+                mContext.getSystemService(IpSecManager.class)
+                        .createIpSecTunnelInterface(
+                                DUMMY_ADDR, DUMMY_ADDR, TEST_UNDERLYING_NETWORK_RECORD_1.network);
+
+        final LinkProperties underlyingLp = new LinkProperties();
+        underlyingLp.setInterfaceName(LOOPBACK_IFACE);
+        underlyingLp.setTcpBufferSizes(TEST_TCP_BUFFER_SIZES);
+        doReturn(TEST_MTU).when(mDeps).getUnderlyingIfaceMtu(LOOPBACK_IFACE);
+
+        final VcnChildSessionConfiguration childSessionConfig =
+                mock(VcnChildSessionConfiguration.class);
+        doReturn(TEST_INTERNAL_ADDRESSES).when(childSessionConfig).getInternalAddresses();
+        doReturn(TEST_DNS_ADDRESSES).when(childSessionConfig).getInternalDnsServers();
+
+        UnderlyingNetworkRecord record =
+                new UnderlyingNetworkRecord(
+                        mock(Network.class, CALLS_REAL_METHODS),
+                        new NetworkCapabilities.Builder().build(),
+                        underlyingLp,
+                        false);
+
+        final LinkProperties vcnLp1 =
+                mGatewayConnection.buildConnectedLinkProperties(
+                        VcnGatewayConnectionConfigTest.buildTestConfig(),
+                        tunnelIface,
+                        childSessionConfig,
+                        record);
+
+        verify(mDeps).getUnderlyingIfaceMtu(LOOPBACK_IFACE);
+
+        // Instead of having to recalculate the final MTU (after accounting for IPsec overhead),
+        // calculate another set of Link Properties with a lower MTU, and calculate the delta.
+        doReturn(TEST_MTU - TEST_MTU_DELTA).when(mDeps).getUnderlyingIfaceMtu(LOOPBACK_IFACE);
+
+        final LinkProperties vcnLp2 =
+                mGatewayConnection.buildConnectedLinkProperties(
+                        VcnGatewayConnectionConfigTest.buildTestConfig(),
+                        tunnelIface,
+                        childSessionConfig,
+                        record);
+
+        verify(mDeps, times(2)).getUnderlyingIfaceMtu(LOOPBACK_IFACE);
+
+        assertEquals(tunnelIface.getInterfaceName(), vcnLp1.getInterfaceName());
+        assertEquals(TEST_INTERNAL_ADDRESSES, vcnLp1.getLinkAddresses());
+        assertEquals(TEST_DNS_ADDRESSES, vcnLp1.getDnsServers());
+        assertEquals(TEST_TCP_BUFFER_SIZES, vcnLp1.getTcpBufferSizes());
+        assertEquals(TEST_MTU_DELTA, vcnLp1.getMtu() - vcnLp2.getMtu());
     }
 
     @Test

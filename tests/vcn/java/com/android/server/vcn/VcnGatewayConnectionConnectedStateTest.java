@@ -307,7 +307,10 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         ncCaptor.capture(),
                         lpCaptor.capture(),
                         any(),
-                        argThat(nac -> nac.getLegacyType() == ConnectivityManager.TYPE_MOBILE),
+                        // Subtype integer/name and extras do not have getters; cannot be tested.
+                        argThat(nac -> nac.getLegacyType() == ConnectivityManager.TYPE_MOBILE
+                                && nac.getLegacyTypeName().equals(
+                                        VcnGatewayConnection.NETWORK_INFO_NETWORK_TYPE_STRING)),
                         any(),
                         any(),
                         any());

@@ -187,7 +187,7 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         bgExecutor.runAllReady()
         fgExecutor.runAllReady()
         verify(mediaListener).onMediaDataLoaded(eq(KEY), eq(null), eq(mediaData1), eq(true),
-                eq(0))
+                eq(0), eq(false))
     }
 
     @Test
@@ -210,7 +210,7 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         fgExecutor.runAllReady()
         // THEN the event is not filtered
         verify(mediaListener).onMediaDataLoaded(eq(KEY), eq(null), eq(mediaData1), eq(true),
-                eq(0))
+                eq(0), eq(false))
     }
 
     @Test
@@ -240,7 +240,7 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         fgExecutor.runAllReady()
         // THEN the event is not filtered
         verify(mediaListener).onMediaDataLoaded(eq(KEY), eq(null), eq(mediaData1), eq(true),
-                eq(0))
+                eq(0), eq(false))
     }
 
     @Test
@@ -256,14 +256,14 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         fgExecutor.runAllReady()
         // THEN the event is not filtered
         verify(mediaListener).onMediaDataLoaded(eq(KEY), eq(null), eq(mediaData1), eq(true),
-                eq(0))
+                eq(0), eq(false))
         // WHEN a loaded event is received that matches the local session
         filter.onMediaDataLoaded(KEY, null, mediaData2)
         bgExecutor.runAllReady()
         fgExecutor.runAllReady()
         // THEN the event is filtered
         verify(mediaListener, never()).onMediaDataLoaded(
-            eq(KEY), eq(null), eq(mediaData2), anyBoolean(), anyInt())
+            eq(KEY), eq(null), eq(mediaData2), anyBoolean(), anyInt(), anyBoolean())
     }
 
     @Test
@@ -280,7 +280,7 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         // THEN the event is not filtered because there isn't a notification for the remote
         // session.
         verify(mediaListener).onMediaDataLoaded(eq(KEY), eq(null), eq(mediaData1), eq(true),
-                eq(0))
+                eq(0), eq(false))
     }
 
     @Test
@@ -298,14 +298,15 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         fgExecutor.runAllReady()
         // THEN the event is not filtered
         verify(mediaListener).onMediaDataLoaded(eq(key1), eq(null), eq(mediaData1), eq(true),
-                eq(0))
+                eq(0), eq(false))
         // WHEN a loaded event is received that matches the local session
         filter.onMediaDataLoaded(key2, null, mediaData2)
         bgExecutor.runAllReady()
         fgExecutor.runAllReady()
         // THEN the event is filtered
         verify(mediaListener, never())
-            .onMediaDataLoaded(eq(key2), eq(null), eq(mediaData2), anyBoolean(), anyInt())
+            .onMediaDataLoaded(eq(key2), eq(null), eq(mediaData2), anyBoolean(),
+                    anyInt(), anyBoolean())
         // AND there should be a removed event for key2
         verify(mediaListener).onMediaDataRemoved(eq(key2))
     }
@@ -325,14 +326,14 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         fgExecutor.runAllReady()
         // THEN the event is not filtered
         verify(mediaListener).onMediaDataLoaded(eq(key1), eq(null), eq(mediaData1), eq(true),
-                eq(0))
+                eq(0), eq(false))
         // WHEN a loaded event is received that matches the remote session
         filter.onMediaDataLoaded(key2, null, mediaData2)
         bgExecutor.runAllReady()
         fgExecutor.runAllReady()
         // THEN the event is not filtered
         verify(mediaListener).onMediaDataLoaded(eq(key2), eq(null), eq(mediaData2), eq(true),
-                eq(0))
+                eq(0), eq(false))
     }
 
     @Test
@@ -349,14 +350,14 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         fgExecutor.runAllReady()
         // THEN the event is not filtered
         verify(mediaListener).onMediaDataLoaded(eq(KEY), eq(null), eq(mediaData1), eq(true),
-                eq(0))
+                eq(0), eq(false))
         // WHEN a loaded event is received that matches the local session
         filter.onMediaDataLoaded(KEY, null, mediaData2)
         bgExecutor.runAllReady()
         fgExecutor.runAllReady()
         // THEN the event is not filtered
         verify(mediaListener).onMediaDataLoaded(eq(KEY), eq(null), eq(mediaData2), eq(true),
-                eq(0))
+                eq(0), eq(false))
     }
 
     @Test
@@ -375,7 +376,7 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         fgExecutor.runAllReady()
         // THEN the event is not filtered
         verify(mediaListener).onMediaDataLoaded(eq(KEY), eq(null), eq(mediaData1), eq(true),
-                eq(0))
+                eq(0), eq(false))
     }
 
     @Test
@@ -398,7 +399,7 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         fgExecutor.runAllReady()
         // THEN the key migration event is fired
         verify(mediaListener).onMediaDataLoaded(eq(key2), eq(key1), eq(mediaData2), eq(true),
-                eq(0))
+                eq(0), eq(false))
     }
 
     @Test
@@ -428,13 +429,14 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         fgExecutor.runAllReady()
         // THEN the key migration event is filtered
         verify(mediaListener, never())
-            .onMediaDataLoaded(eq(key2), eq(null), eq(mediaData2), anyBoolean(), anyInt())
+            .onMediaDataLoaded(eq(key2), eq(null), eq(mediaData2), anyBoolean(),
+                    anyInt(), anyBoolean())
         // WHEN a loaded event is received that matches the remote session
         filter.onMediaDataLoaded(key2, null, mediaData1)
         bgExecutor.runAllReady()
         fgExecutor.runAllReady()
         // THEN the key migration event is fired
         verify(mediaListener).onMediaDataLoaded(eq(key2), eq(null), eq(mediaData1), eq(true),
-                eq(0))
+                eq(0), eq(false))
     }
 }

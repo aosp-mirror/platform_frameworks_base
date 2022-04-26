@@ -78,7 +78,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID pozivaoca podrazumevano nije ograničen. Sledeći poziv: Nije ograničen."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Usluga nije dobavljena."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ne možete da promenite podešavanje ID-a korisnika."</string>
-    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nema usluge prenosa podataka preko mobilnog operatera"</string>
+    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nema usluge mobilnih podataka"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hitni pozivi nisu dostupni"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Nema glasovne usluge"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"Nema glasovne usluge ni hitnih poziva"</string>
@@ -221,7 +221,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"Uključi bežični signal"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Isključi bežični signal"</string>
     <string name="screen_lock" msgid="2072642720826409809">"Zaključaj ekran"</string>
-    <string name="power_off" msgid="4111692782492232778">"Isključi"</string>
+    <string name="power_off" msgid="4111692782492232778">"Ugasi"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Zvono je isključeno"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Vibracija zvona"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"Zvono je uključeno"</string>
@@ -245,7 +245,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Opcije Android TV-a"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Opcije telefona"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Zaključaj ekran"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"Isključi"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"Ugasi"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Napajanje"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Restartuj"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Hitan poziv"</string>
@@ -2183,7 +2183,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Obaveštenja"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Brza podešavanja"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dijalog napajanja"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zaključani ekran"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zaključavanje ekrana"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Snimak ekrana"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Prečica za pristupačnost na ekranu"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Alatka za biranje prečica za pristupačnost na ekranu"</string>

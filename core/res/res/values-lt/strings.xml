@@ -539,9 +539,9 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Leidžiama programai peržiūrėti „Bluetooth“ konfigūraciją planšetiniame kompiuteryje ir užmegzti bei priimti ryšius iš susietų įrenginių."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Programai leidžiama peržiūrėti „Bluetooth“ konfigūraciją „Android TV“ įrenginyje ir užmegzti bei priimti ryšius iš susietų įrenginių."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Leidžiama programai peržiūrėti „Bluetooth“ konfigūraciją telefone ir užmegzti bei priimti ryšius iš susietų įrenginių."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"„Bluetooth“ įr. netoliese aptikimas ir susiejimas"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"aptikti „Bluetooth“ įr. netoliese ir susieti"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Leidžiama programai aptikti ir susieti „Bluetooth“ įrenginius netoliese"</string>
-    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"prisijungimas prie susietų „Bluetooth“ įrenginių"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"prisijungti prie susietų „Bluetooth“ įrenginių"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Leidžiama programai prisijungti prie susietų „Bluetooth“ įrenginių"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"reklamuoti netoliese es. „Bluetooth“ įrenginiuose"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Programai leidžiama reklamuoti netoliese esančiuose „Bluetooth“ įrenginiuose"</string>

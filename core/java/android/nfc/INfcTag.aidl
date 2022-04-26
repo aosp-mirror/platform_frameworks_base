@@ -45,4 +45,7 @@ interface INfcTag
     boolean canMakeReadOnly(int ndefType);
     int getMaxTransceiveLength(int technology);
     boolean getExtendedLengthApdusSupported();
+
+    void setTagUpToDate(long cookie);
+    boolean isTagUpToDate(long cookie);
 }

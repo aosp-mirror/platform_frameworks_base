@@ -259,7 +259,7 @@
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"సంపూర్ణ వాల్యూమ్‌‍ను డిజేబుల్ చేయి"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorscheను ఎనేబుల్ చేయి"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"బ్లూటూత్ AVRCP వెర్షన్"</string>
-    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"బ్లూటూత్ AVRCP సంస్కరణను ఎంచుకోండి"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"బ్లూటూత్ AVRCP వెర్షన్‌ను ఎంచుకోండి"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"బ్లూటూత్ MAP వెర్షన్‌"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"బ్లూటూత్ MAP వెర్షన్‌ను ఎంచుకోండి"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"బ్లూటూత్ ఆడియో కోడెక్"</string>
@@ -412,11 +412,11 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"వెబ్ వీక్షణ అమలు"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"వెబ్ వీక్షణ అమలుని సెట్ చేయండి"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ఈ ఎంపిక ఇప్పుడు లేదు. మళ్లీ ప్రయత్నించండి."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ఫైల్ గుప్తీకరణకు మార్చు"</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ఫైల్ ఎన్‌క్రిప్షన్‌కు మార్చు"</string>
     <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"మార్చండి…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ఫైల్ ఇప్పటికే గుప్తీకరించబడింది"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"ఫైల్ ఆధారిత గుప్తీకరణకు మార్చడం"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"డేటా భాగాన్ని ఫైల్ ఆధారిత గుప్తీకరణకు మార్చండి.\n !!హెచ్చరిక!! దీని వలన మీ డేటా మొత్తం తీసివేయబడుతుంది.\n ఈ లక్షణం ఆల్ఫా, కనుక సరిగ్గా పని చేయకపోవచ్చు.\n కొనసాగించడానికి \'తొలగించి, మార్చు...\' నొక్కండి."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ఫైల్ ఇప్పటికే ఎన్‌క్రిప్ట్ చేయబడింది"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"ఫైల్ ఆధారిత ఎన్‌క్రిప్షన్‌కు మార్చడం"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"డేటా భాగాన్ని ఫైల్ ఆధారిత ఎన్‌క్రిప్షన్‌కు మార్చండి.\n !!హెచ్చరిక!! దీని వలన మీ డేటా మొత్తం తీసివేయబడుతుంది.\n ఈ లక్షణం ఆల్ఫా, కనుక సరిగ్గా పని చేయకపోవచ్చు.\n కొనసాగించడానికి \'తొలగించి, మార్చు...\' నొక్కండి."</string>
     <string name="button_convert_fbe" msgid="1159861795137727671">"తొలగించి, మార్చు…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"చిత్రం రంగు మోడ్"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB ఉపయోగిస్తుంది"</string>
@@ -546,7 +546,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"యూజర్"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"పరిమితం చేయబడిన ప్రొఫైల్"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"కొత్త వినియోగదారుని జోడించాలా?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"అదనపు యూజర్‌లను సృష్టించడం ద్వారా మీరు ఈ దేవైజ్‌ను ఇతరులతో షేర్ చేయవచ్చు. ప్రతి యూజర్‌కు‌ వారికంటూ ప్రత్యేక స్థలం ఉంటుంది, వారు ఆ స్థలాన్ని యాప్‌లు, వాల్‌పేపర్ మొదలైనవాటితో అనుకూలీకరించవచ్చు. యూజర్‌లు ప్రతి ఒక్కరిపై ప్రభావం చూపే Wi‑Fi వంటి పరికర సెట్టింగ్‌లను కూడా సర్దుబాటు చేయవచ్చు.\n\nమీరు కొత్త యూజర్ ను జోడించినప్పుడు, ఆ వ్యక్తి వారికంటూ స్వంత స్థలం సెట్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగిలిన అందరు యూజర్‌ల కోసం యాప్‌లను అప్‌డేట్ చేయవచ్చు. యాక్సెస్ సామర్ధ్యం సెట్టింగ్‌లు మరియు సేవలు కొత్త యూజర్‌కి బదిలీ కాకపోవచ్చు."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"అదనపు యూజర్‌లను క్రియేట్ చేయడం ద్వారా మీరు ఈ దేవైజ్‌ను ఇతరులతో షేర్ చేయవచ్చు. ప్రతి యూజర్‌కు‌ వారికంటూ ప్రత్యేక స్థలం ఉంటుంది, వారు ఆ స్థలాన్ని యాప్‌లు, వాల్‌పేపర్ మొదలైనవాటితో అనుకూలీకరించవచ్చు. యూజర్‌లు ప్రతి ఒక్కరిపై ప్రభావం చూపే Wi‑Fi వంటి పరికర సెట్టింగ్‌లను కూడా సర్దుబాటు చేయవచ్చు.\n\nమీరు కొత్త యూజర్ ను జోడించినప్పుడు, ఆ వ్యక్తి వారికంటూ స్వంత స్థలం సెట్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగిలిన అందరు యూజర్‌ల కోసం యాప్‌లను అప్‌డేట్ చేయవచ్చు. యాక్సెసిబిలిటీ సెట్టింగ్‌లు మరియు సేవలు కొత్త యూజర్‌కి బదిలీ కాకపోవచ్చు."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"మీరు కొత్త వినియోగదారుని జోడించినప్పుడు, ఆ వ్యక్తి తన స్థలాన్ని సెటప్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగతా అందరు వినియోగదారుల కోసం యాప్‌లను అప్‌డేట్‌ చేయగలరు."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"యూజర్‌ను ఇప్పుడే సెటప్ చేయాలా?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"పరికరాన్ని తీసుకోవడానికి వ్యక్తి అందుబాటులో ఉన్నారని నిర్ధారించుకొని, ఆపై వారికి నిల్వ స్థలాన్ని సెటప్ చేయండి"</string>
@@ -558,7 +558,7 @@
     <string name="user_new_profile_name" msgid="2405500423304678841">"కొత్త ప్రొఫైల్"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"వినియోగదారు సమాచారం"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"ప్రొఫైల్ సమాచారం"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"మీరు పరిమితం చేయబడిన ప్రొఫైల్‌ను సృష్టించడానికి ముందు, మీ యాప్‌లు మరియు వ్యక్తిగత డేటాను రక్షించడానికి స్క్రీన్ లాక్‌ను సెటప్ చేయాల్సి ఉంటుంది."</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"మీరు పరిమితం చేయబడిన ప్రొఫైల్‌ను క్రియేట్ చేయడానికి ముందు, మీ యాప్‌లు మరియు వ్యక్తిగత డేటాను రక్షించడానికి స్క్రీన్ లాక్‌ను సెటప్ చేయాల్సి ఉంటుంది."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"లాక్‌ను సెట్ చేయి"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>కు స్విచ్ చేయి"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"కొత్త యూజర్‌ను క్రియేట్ చేస్తోంది…"</string>

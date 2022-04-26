@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"অটো-রোটেট স্ক্রিন"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> কে <xliff:g id="USB_DEVICE">%2$s</xliff:g> অ্যাক্সেস করতে দেবেন?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> অ্যাক্সেস করতে <xliff:g id="APPLICATION">%1$s</xliff:g>-কে কি অনুমতি দেবেন?\nএই অ্যাপকে রেকর্ড করার অনুমতি দেওয়া হয়নি কিন্তু USB ডিভাইসের মাধ্যমে সেটি অডিও রেকর্ড করতে পারে।"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> অ্যাক্সেস করতে <xliff:g id="APPLICATION">%1$s</xliff:g> অ্যাপকে অনুমতি দিতে চান?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ব্যবহার করার জন্য <xliff:g id="APPLICATION">%1$s</xliff:g> চালু করতে চান?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"এই অ্যাপকে রেকর্ড করার অনুমতি দেওয়া হয়নি কিন্তু USB ডিভাইসের সাহায্যে সেটি অডিও রেকর্ড করতে পারে। <xliff:g id="APPLICATION">%1$s</xliff:g> অ্যাপের ব্যবহার এই ডিভাইসের সাথে করার ফলে হতে পারে কল, বিজ্ঞপ্তি এবং অ্যালার্মের আওয়াজ শোনা যাবে না।"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"<xliff:g id="APPLICATION">%1$s</xliff:g> অ্যাপের ব্যবহার এই ডিভাইসের সাথে করার ফলে হতে পারে কল, বিজ্ঞপ্তি এবং অ্যালার্মের আওয়াজ শোনা যাবে না।"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> কে <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> অ্যাক্সেস করতে দেবেন?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ব্যবহার করার জন্য <xliff:g id="APPLICATION">%1$s</xliff:g> চালু করবেন?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> অ্যাক্সেস করার জন্য <xliff:g id="APPLICATION">%1$s</xliff:g> খুলবেন?\nএই অ্যাপকে রেকর্ড করার অনুমতি দেওয়া হয়নি কিন্তু USB ডিভাইসের মাধ্যমে সেটি অডিও রেকর্ড করতে পারে।"</string>
@@ -877,6 +881,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"সবকটি দেখুন"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"নেটওয়ার্ক বদলাতে ইথারনেট ডিসকানেক্ট করুন"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ডিভাইস সংক্রান্ত অভিজ্ঞতা আরও ভাল করতে, অ্যাপ ও পরিষেবা যেকোনও সময় আপনার ওয়াই-ফাই নেটওয়ার্ক স্ক্যান করতে পারবে, এমনকি ডিভাইসের ওয়াই-ফাই বন্ধ করা থাকলেও। ওয়াই-ফাই স্ক্যানিং সেটিংস থেকে আপনি এটি পরিবর্তন করতে পারবেন। "<annotation id="link">"পরিবর্তন করুন"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"\'বিমান\' মোড বন্ধ করুন"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"\'বিমান মোড\' বন্ধ করুন"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ব্যবহারকারী বেছে নিন"</string>
 </resources>

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
@@ -186,6 +187,14 @@ public interface NotificationShadeWindowController extends RemoteInputController
      * @param opaque if the scrim is opaque
      */
     default void setLightRevealScrimOpaque(boolean opaque) {}
+
+    /**
+     * Defer any application of window {@link WindowManager.LayoutParams} until {@code scope} is
+     * fully applied.
+     */
+    default void batchApplyWindowLayoutParams(@NonNull Runnable scope) {
+        scope.run();
+    }
 
     /**
      * Custom listener to pipe data back to plugins about whether or not the status bar would be

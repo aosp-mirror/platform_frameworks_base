@@ -36,16 +36,16 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ప్రత్యామ్నాయ డిస్‌ప్లేలో యాప్ పని చేయకపోవచ్చు."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ప్రత్యామ్నాయ డిస్‌ప్లేల్లో ప్రారంభానికి యాప్ మద్దతు లేదు."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"విభజన స్క్రీన్ విభాగిని"</string>
-    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ఎడమవైపు పూర్తి స్క్రీన్"</string>
+    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ఎడమవైపు ఫుల్-స్క్రీన్‌"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"ఎడమవైపు 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"ఎడమవైపు 50%"</string>
     <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"ఎడమవైపు 30%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"కుడివైపు పూర్తి స్క్రీన్"</string>
-    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"ఎగువ పూర్తి స్క్రీన్"</string>
+    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"కుడివైపు ఫుల్-స్క్రీన్‌"</string>
+    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"ఎగువ ఫుల్-స్క్రీన్‌"</string>
     <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"ఎగువ 70%"</string>
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ఎగువ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ఎగువ 30%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"దిగువ పూర్తి స్క్రీన్"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"దిగువ ఫుల్-స్క్రీన్‌"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"వన్-హ్యాండెడ్ మోడ్‌ను ఉపయోగించడం"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"నిష్క్రమించడానికి, స్క్రీన్ కింది భాగం నుండి పైకి స్వైప్ చేయండి లేదా యాప్ పైన ఎక్కడైనా ట్యాప్ చేయండి"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"వన్-హ్యాండెడ్ మోడ్‌ను ప్రారంభిస్తుంది"</string>

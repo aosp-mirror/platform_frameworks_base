@@ -537,7 +537,7 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"საშუალებას აძლევს აპს, აღმოაჩინოს ახლომახლო Bluetooth მოწყობილობები დასაწყვილებლად"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"დაწყვილებულ Bluetooth მოწყობილობებთან დაკავშირება"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"საშუალებას აძლევს აპს, დაუკავშირდეს დაწყვილებულ Bluetooth მოწყობილობებს"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"ახლ. Bluetooth მოწყობილობებზე რეკლამის განთავსება"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"ახლ. Bluetooth მოწყობილობებზე მონაცემების მაუწყებლობა"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"საშუალებას აძლევს აპს, რეკლამა განათავსოს ახლომახლო Bluetooth მოწყობილობებზე"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"შედარებითი პოზიციის დადგენა ახლომახლო ულტრაფართო სიხშირის მოწყობილობების შესახებ"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ნებას რთავს აპს, დაადგინოს შედარებითი პოზიცია ახლომახლო ულტრაფართო სიხშირის მოწყობილობების შესახებ"</string>

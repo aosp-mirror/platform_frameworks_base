@@ -22,6 +22,7 @@ import android.testing.TestableLooper
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardViewController
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
@@ -31,7 +32,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
@@ -80,7 +80,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock
     private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock
-    private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
+    private lateinit var keyguardViewController: KeyguardViewController
     @Mock
     private lateinit var configurationController: ConfigurationController
     @Mock
@@ -110,7 +110,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 notificationLockscreenUserManager,
                 configurationController,
                 wakefulnessLifecycle,
-                statusBarKeyguardViewManager)
+                keyguardViewController)
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
         setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN)

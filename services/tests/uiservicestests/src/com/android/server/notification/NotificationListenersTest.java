@@ -24,10 +24,17 @@ import static com.android.server.notification.NotificationManagerService.Notific
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
@@ -37,8 +44,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.pm.VersionedPackage;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.NotificationListenerService;
+import android.testing.TestableContext;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
@@ -69,6 +78,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
     NotificationManagerService mNm;
     @Mock
     private INotificationManager mINm;
+    private TestableContext mContext = spy(getContext());
 
     NotificationManagerService.NotificationListeners mListeners;
 
@@ -80,6 +90,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         getContext().setMockPackageManager(mPm);
+        doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
         mListeners = spy(mNm.new NotificationListeners(
                 mContext, new Object(), mock(ManagedServices.UserProfiles.class), miPm));
@@ -355,4 +366,12 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 .getDisallowedPackages()).isEmpty();
     }
 
+    @Test
+    public void testBroadcastUsers() {
+        int userId = 0;
+        mListeners.setPackageOrComponentEnabled(mCn1.flattenToString(), userId, true, false, true);
+
+        verify(mContext).sendBroadcastAsUser(
+                any(), eq(UserHandle.of(userId)), nullable(String.class));
+    }
 }

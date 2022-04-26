@@ -18,11 +18,15 @@ package androidx.window.common;
 
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 
+import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_UNKNOWN;
+import static androidx.window.common.CommonFoldingFeature.parseListFromString;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 
@@ -30,6 +34,7 @@ import androidx.window.util.BaseDataProducer;
 
 import com.android.internal.R;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -37,10 +42,13 @@ import java.util.Optional;
  * by mapping the state returned from {@link DeviceStateManager} to values provided in the resources
  * config at {@link R.array#config_device_state_postures}.
  */
-public final class DeviceStateManagerPostureProducer extends BaseDataProducer<Integer> {
-    private static final String TAG = "ConfigDevicePostureProducer";
+public final class DeviceStateManagerFoldingFeatureProducer extends
+        BaseDataProducer<List<CommonFoldingFeature>> {
+    private static final String TAG =
+            DeviceStateManagerFoldingFeatureProducer.class.getSimpleName();
     private static final boolean DEBUG = false;
 
+    private final Context mContext;
     private final SparseIntArray mDeviceStateToPostureMap = new SparseIntArray();
 
     private int mCurrentDeviceState = INVALID_DEVICE_STATE;
@@ -50,7 +58,8 @@ public final class DeviceStateManagerPostureProducer extends BaseDataProducer<In
         notifyDataChanged();
     };
 
-    public DeviceStateManagerPostureProducer(@NonNull Context context) {
+    public DeviceStateManagerFoldingFeatureProducer(@NonNull Context context) {
+        mContext = context;
         String[] deviceStatePosturePairs = context.getResources()
                 .getStringArray(R.array.config_device_state_postures);
         for (String deviceStatePosturePair : deviceStatePosturePairs) {
@@ -86,8 +95,17 @@ public final class DeviceStateManagerPostureProducer extends BaseDataProducer<In
 
     @Override
     @Nullable
-    public Optional<Integer> getData() {
-        final int posture = mDeviceStateToPostureMap.get(mCurrentDeviceState, -1);
-        return posture != -1 ? Optional.of(posture) : Optional.empty();
+    public Optional<List<CommonFoldingFeature>> getData() {
+        final int globalHingeState = globalHingeState();
+        String displayFeaturesString = mContext.getResources().getString(
+                R.string.config_display_features);
+        if (TextUtils.isEmpty(displayFeaturesString)) {
+            return Optional.empty();
+        }
+        return Optional.of(parseListFromString(displayFeaturesString, globalHingeState));
+    }
+
+    private int globalHingeState() {
+        return mDeviceStateToPostureMap.get(mCurrentDeviceState, COMMON_STATE_UNKNOWN);
     }
 }

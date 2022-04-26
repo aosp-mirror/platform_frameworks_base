@@ -99,8 +99,12 @@ public interface SplashScreen {
      * <p>
      * To reset to the default theme, set this the themeId to {@link Resources#ID_NULL}.
      * <p>
-     * <b>Note:</b> The theme name must be stable across versions, otherwise it won't be found
-     * after your application is updated.
+     * <b>Note:</b> Internally, the theme name is resolved and persisted. This means that the theme
+     * name must be stable across versions, otherwise it won't be found after your application is
+     * updated.
+     *
+     * @param themeId The ID of the splashscreen theme to be used in place of the one defined in
+     *                the manifest.
      */
     void setSplashScreenTheme(@StyleRes int themeId);
 
