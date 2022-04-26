@@ -7,10 +7,8 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-java_plugin {
-    name: "view-inspector-annotation-processor",
-
-    processor_class: "android.processor.view.inspector.PlatformInspectableProcessor",
+java_library_host {
+    name: "libview-inspector-annotation-processor",
 
     srcs: ["src/java/**/*.java"],
     java_resource_dirs: ["src/resources"],
@@ -23,6 +21,16 @@ java_plugin {
     use_tools_jar: true,
 }
 
+java_plugin {
+    name: "view-inspector-annotation-processor",
+
+    processor_class: "android.processor.view.inspector.PlatformInspectableProcessor",
+
+    static_libs: [
+        "libview-inspector-annotation-processor",
+    ],
+}
+
 java_test_host {
     name: "view-inspector-annotation-processor-test",
 
@@ -32,7 +40,7 @@ java_test_host {
     static_libs: [
         "junit",
         "guava",
-        "view-inspector-annotation-processor"
+        "libview-inspector-annotation-processor",
     ],
 
     test_suites: ["general-tests"],
