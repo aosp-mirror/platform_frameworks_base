@@ -67,7 +67,7 @@ class PrivacyDialog(
             attributes.receiveInsetsIgnoringZOrder = true
             setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
         }
-
+        setTitle(R.string.ongoing_privacy_dialog_a11y_title)
         setContentView(R.layout.privacy_dialog)
         rootView = requireViewById<ViewGroup>(R.id.root)
 
