@@ -216,11 +216,12 @@ public final class GameServiceProviderInstanceImplTest {
                 mRunningTaskInfos);
 
 
+        final UserHandle userHandle = new UserHandle(USER_ID);
         mGameServiceProviderInstance = new GameServiceProviderInstanceImpl(
-                new UserHandle(USER_ID),
+                userHandle,
                 ConcurrentUtils.DIRECT_EXECUTOR,
                 mMockContext,
-                mFakeGameClassifier,
+                new GameTaskInfoProvider(userHandle, mMockActivityTaskManager, mFakeGameClassifier),
                 mMockActivityManager,
                 mMockActivityManagerInternal,
                 mMockActivityTaskManager,
@@ -788,6 +789,36 @@ public final class GameServiceProviderInstanceImplTest {
     }
 
     @Test
+    public void gameTaskFocusedWithCreateAfterRemoved_gameSessionRecreated() throws Exception {
+        mGameServiceProviderInstance.start();
+
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        stopTask(10);
+
+        assertThat(gameSession10.mIsDestroyed).isTrue();
+
+        // If the game task is restored via the Recents UI, the task will be running again but
+        // we would not expect any call to TaskStackListener#onTaskCreated.
+        addRunningTaskInfo(10, GAME_A_MAIN_ACTIVITY);
+
+        // We now receive a task focused event for the task. This will occur if the game task is
+        // restored via the Recents UI.
+        dispatchTaskFocused(10, /*focused=*/ true);
+        mFakeGameService.requestCreateGameSession(10);
+
+        // Verify that a new pending game session is created for the game's taskId.
+        assertNotNull(mFakeGameSessionService.removePendingFutureForTaskId(10));
+    }
+
+    @Test
     public void gameTaskRemoved_removesTaskOverlay() throws Exception {
         mGameServiceProviderInstance.start();
 
@@ -1144,13 +1175,18 @@ public final class GameServiceProviderInstanceImplTest {
     }
 
     private void startTask(int taskId, ComponentName componentName) {
+        addRunningTaskInfo(taskId, componentName);
+
+        dispatchTaskCreated(taskId, componentName);
+    }
+
+    private void addRunningTaskInfo(int taskId, ComponentName componentName) {
         RunningTaskInfo runningTaskInfo = new RunningTaskInfo();
         runningTaskInfo.taskId = taskId;
+        runningTaskInfo.baseActivity = componentName;
         runningTaskInfo.displayId = 1;
         runningTaskInfo.configuration.windowConfiguration.setBounds(new Rect(0, 0, 500, 800));
         mRunningTaskInfos.add(runningTaskInfo);
-
-        dispatchTaskCreated(taskId, componentName);
     }
 
     private void stopTask(int taskId) {
