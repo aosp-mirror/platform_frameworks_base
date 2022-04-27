@@ -1438,7 +1438,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
         final WindowConfiguration requestedWindowConfig = requestedConfig.windowConfiguration;
         final WindowConfiguration parentWindowConfig = parentConfig.windowConfiguration;
-        if (!parentWindowConfig.getBounds().contains(requestedWindowConfig.getBounds())) {
+        if (!requestedWindowConfig.getBounds().isEmpty()
+                && !parentWindowConfig.getBounds().contains(requestedWindowConfig.getBounds())) {
             String msg = "Permission Denial: " + func + " from pid="
                     + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
                     + " trying to apply bounds outside of parent for non-trusted host,"
@@ -1447,6 +1448,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             throw new SecurityException(msg);
         }
         if (requestedWindowConfig.getAppBounds() != null
+                && !requestedWindowConfig.getAppBounds().isEmpty()
                 && parentWindowConfig.getAppBounds() != null
                 && !parentWindowConfig.getAppBounds().contains(
                         requestedWindowConfig.getAppBounds())) {
