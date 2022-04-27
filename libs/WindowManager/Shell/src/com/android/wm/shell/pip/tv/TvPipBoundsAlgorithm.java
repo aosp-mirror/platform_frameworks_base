@@ -29,7 +29,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.Size;
 import android.view.Gravity;
@@ -66,7 +65,7 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             @NonNull PipSnapAlgorithm pipSnapAlgorithm) {
         super(context, tvPipBoundsState, pipSnapAlgorithm);
         this.mTvPipBoundsState = tvPipBoundsState;
-        this.mKeepClearAlgorithm = new TvPipKeepClearAlgorithm(SystemClock::uptimeMillis);
+        this.mKeepClearAlgorithm = new TvPipKeepClearAlgorithm();
         reloadResources(context);
     }
 
@@ -80,7 +79,6 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
                 res.getDimensionPixelSize(R.dimen.pip_keep_clear_area_padding));
         mKeepClearAlgorithm.setMaxRestrictedDistanceFraction(
                 res.getFraction(R.fraction.config_pipMaxRestrictedMoveDistance, 1, 1));
-        mKeepClearAlgorithm.setStashDuration(res.getInteger(R.integer.config_pipStashDuration));
     }
 
     @Override
@@ -104,7 +102,7 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             updateGravityOnExpandToggled(Gravity.NO_GRAVITY, true);
         }
         mTvPipBoundsState.setTvPipExpanded(isPipExpanded);
-        return getTvPipBounds().getBounds();
+        return getTvPipPlacement().getBounds();
     }
 
     /** Returns the current bounds adjusted to the new aspect ratio, if valid. */
@@ -114,13 +112,14 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: getAdjustedDestinationBounds: %f", TAG, newAspectRatio);
         }
-        return getTvPipBounds().getBounds();
+        return getTvPipPlacement().getBounds();
     }
 
     /**
      * Calculates the PiP bounds.
      */
-    public Placement getTvPipBounds() {
+    @NonNull
+    public Placement getTvPipPlacement() {
         final Size pipSize = getPipSize();
         final Rect displayBounds = mTvPipBoundsState.getDisplayBounds();
         final Size screenSize = new Size(displayBounds.width(), displayBounds.height());
@@ -406,9 +405,5 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
                        "%s: updateExpandedPipSize(): expanded size, width: %d, height: %d",
                     TAG, expandedSize.getWidth(), expandedSize.getHeight());
         }
-    }
-
-    void keepUnstashedForCurrentKeepClearAreas() {
-        mKeepClearAlgorithm.keepUnstashedForCurrentKeepClearAreas();
     }
 }
