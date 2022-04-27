@@ -68,12 +68,16 @@ import javax.inject.Inject;
 /** Quick settings tile: Internet **/
 public class InternetTile extends QSTileImpl<SignalState> {
     private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
+    private static final int LAST_STATE_UNKNOWN = -1;
+    private static final int LAST_STATE_CELLULAR = 0;
+    private static final int LAST_STATE_WIFI = 1;
+    private static final int LAST_STATE_ETHERNET = 2;
 
     protected final NetworkController mController;
     private final AccessPointController mAccessPointController;
     private final DataUsageController mDataController;
     // The last updated tile state, 0: mobile, 1: wifi, 2: ethernet.
-    private int mLastTileState = -1;
+    private int mLastTileState = LAST_STATE_UNKNOWN;
 
     protected final InternetSignalCallback mSignalCallback = new InternetSignalCallback();
     private final InternetDialogFactory mInternetDialogFactory;
@@ -365,7 +369,11 @@ public class InternetTile extends QSTileImpl<SignalState> {
             mWifiInfo.mNoDefaultNetwork = noDefaultNetwork;
             mWifiInfo.mNoValidatedNetwork = noValidatedNetwork;
             mWifiInfo.mNoNetworksAvailable = noNetworksAvailable;
-            refreshState(mWifiInfo);
+            if (mLastTileState == LAST_STATE_WIFI) {
+                refreshState(mWifiInfo);
+            } else {
+                refreshState(mCellularInfo);
+            }
         }
 
         @Override
@@ -381,23 +389,23 @@ public class InternetTile extends QSTileImpl<SignalState> {
     @Override
     protected void handleUpdateState(SignalState state, Object arg) {
         if (arg instanceof CellularCallbackInfo) {
-            mLastTileState = 0;
+            mLastTileState = LAST_STATE_CELLULAR;
             handleUpdateCellularState(state, arg);
         } else if (arg instanceof WifiCallbackInfo) {
-            mLastTileState = 1;
+            mLastTileState = LAST_STATE_WIFI;
             handleUpdateWifiState(state, arg);
         } else if (arg instanceof EthernetCallbackInfo) {
-            mLastTileState = 2;
+            mLastTileState = LAST_STATE_ETHERNET;
             handleUpdateEthernetState(state, arg);
         } else {
             // handleUpdateState will be triggered when user expands the QuickSetting panel with
             // arg = null, in this case the last updated CellularCallbackInfo or WifiCallbackInfo
             // should be used to refresh the tile.
-            if (mLastTileState == 0) {
+            if (mLastTileState == LAST_STATE_CELLULAR) {
                 handleUpdateCellularState(state, mSignalCallback.mCellularInfo);
-            } else if (mLastTileState == 1) {
+            } else if (mLastTileState == LAST_STATE_WIFI) {
                 handleUpdateWifiState(state, mSignalCallback.mWifiInfo);
-            } else if (mLastTileState == 2) {
+            } else if (mLastTileState == LAST_STATE_ETHERNET) {
                 handleUpdateEthernetState(state, mSignalCallback.mEthernetInfo);
             }
         }
