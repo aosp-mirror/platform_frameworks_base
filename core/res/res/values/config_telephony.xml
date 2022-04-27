@@ -109,4 +109,12 @@
     <!-- Telephony qualified networks service class name to bind to by default. -->
     <string name="config_qualified_networks_service_class" translatable="false"></string>
     <java-symbol type="string" name="config_qualified_networks_service_class" />
+
+    <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
+         will not perform handover if the target transport is out of service, or VoPS not
+         supported. The network will be torn down on the source transport, and will be
+         re-established on the target transport when condition is allowed for bringing up a
+         new network. -->
+    <bool name="config_enhanced_iwlan_handover_check">true</bool>
+    <java-symbol type="bool" name="config_enhanced_iwlan_handover_check" />
 </resources>
