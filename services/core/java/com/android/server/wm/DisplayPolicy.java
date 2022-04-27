@@ -138,8 +138,8 @@ import android.window.ClientWindowFrames;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.ForceShowNavBarSettingsObserver;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
-import com.android.internal.policy.KidsModeSettingsObserver;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.protolog.common.ProtoLog;
@@ -378,7 +378,7 @@ public class DisplayPolicy {
 
     private final WindowManagerInternal.AppTransitionListener mAppTransitionListener;
 
-    private final KidsModeSettingsObserver mKidsModeSettingsObserver;
+    private final ForceShowNavBarSettingsObserver mForceShowNavBarSettingsObserver;
     private boolean mForceShowNavigationBarEnabled;
 
     private class PolicyHandler extends Handler {
@@ -653,17 +653,17 @@ public class DisplayPolicy {
         });
         mHandler.post(mGestureNavigationSettingsObserver::register);
 
-        mKidsModeSettingsObserver = new KidsModeSettingsObserver(
+        mForceShowNavBarSettingsObserver = new ForceShowNavBarSettingsObserver(
                 mHandler, mContext);
-        mKidsModeSettingsObserver.setOnChangeRunnable(() -> {
+        mForceShowNavBarSettingsObserver.setOnChangeRunnable(() -> {
             synchronized (mLock) {
                 mForceShowNavigationBarEnabled =
-                        mKidsModeSettingsObserver.isEnabled();
+                        mForceShowNavBarSettingsObserver.isEnabled();
                 updateSystemBarAttributes();
             }
         });
-        mForceShowNavigationBarEnabled = mKidsModeSettingsObserver.isEnabled();
-        mHandler.post(mKidsModeSettingsObserver::register);
+        mForceShowNavigationBarEnabled = mForceShowNavBarSettingsObserver.isEnabled();
+        mHandler.post(mForceShowNavBarSettingsObserver::register);
     }
 
     /**
@@ -2861,7 +2861,7 @@ public class DisplayPolicy {
     void release() {
         mDisplayContent.mTransitionController.unregisterLegacyListener(mAppTransitionListener);
         mHandler.post(mGestureNavigationSettingsObserver::unregister);
-        mHandler.post(mKidsModeSettingsObserver::unregister);
+        mHandler.post(mForceShowNavBarSettingsObserver::unregister);
         mImmersiveModeConfirmation.release();
     }
 
