@@ -589,9 +589,7 @@ class KeyguardController {
                     mTopTurnScreenOnActivity = top;
                 }
 
-                final boolean isKeyguardSecure = controller.mWindowManager.isKeyguardSecure(
-                        controller.mService.getCurrentUserId());
-                if (top.mDismissKeyguardIfInsecure && mKeyguardShowing && !isKeyguardSecure) {
+                if (top.mDismissKeyguard && mKeyguardShowing) {
                     mKeyguardGoingAway = true;
                 } else if (top.canShowWhenLocked()) {
                     mTopOccludesActivity = top;
