@@ -10291,6 +10291,9 @@ public class AppOpsManager {
 
         // system alert window is disable on low ram phones starting from Q
         final PackageManager pm = context.getPackageManager();
+        if (null == pm) {
+            return AppOpsManager.MODE_DEFAULT;
+        }
         // TVs are constantly plugged in and has less concern for memory/power
         if (ActivityManager.isLowRamDeviceStatic()
                 && !pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK, 0)) {
