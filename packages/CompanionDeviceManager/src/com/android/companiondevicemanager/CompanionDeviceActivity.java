@@ -122,7 +122,10 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
     // Progress indicator is only shown while we are looking for the first suitable device for a
     // multiple device association.
-    private ProgressBar mProgressIndicator;
+    private ProgressBar mMultipleDeviceSpinner;
+    // Progress indicator is only shown while we are looking for the first suitable device for a
+    // single device association.
+    private ProgressBar mSingleDeviceSpinner;
 
     // Present for self-managed association requests and "single-device" regular association
     // regular.
@@ -255,7 +258,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         setContentView(R.layout.activity_confirmation);
 
         mMultipleDeviceList = findViewById(R.id.multiple_device_list);
-        mAssociationConfirmationDialog = findViewById(R.id.activity_confirmation);
+        mAssociationConfirmationDialog = findViewById(R.id.association_confirmation);
         mVendorHeader = findViewById(R.id.vendor_header);
 
         mTitle = findViewById(R.id.title);
@@ -269,7 +272,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         mDeviceListRecyclerView = findViewById(R.id.device_list);
 
-        mProgressIndicator = findViewById(R.id.spinner);
+        mMultipleDeviceSpinner = findViewById(R.id.spinner_multiple_device);
+        mSingleDeviceSpinner = findViewById(R.id.spinner_single_device);
         mDeviceAdapter = new DeviceListAdapter(this, this::onListItemClick);
 
         mPermissionListRecyclerView = findViewById(R.id.permission_list);
@@ -468,8 +472,10 @@ public class CompanionDeviceActivity extends FragmentActivity implements
                 deviceFilterPairs -> updateSingleDeviceUi(
                         deviceFilterPairs, deviceProfile, appLabel));
 
+        mSingleDeviceSpinner.setVisibility(View.VISIBLE);
         mPermissionListRecyclerView.setVisibility(View.GONE);
         mDeviceListRecyclerView.setVisibility(View.GONE);
+        mAssociationConfirmationDialog.setVisibility(View.GONE);
     }
 
     private void updateSingleDeviceUi(List<DeviceFilterPair<?>> deviceFilterPairs,
@@ -499,6 +505,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mTitle.setText(title);
         mSummary.setText(summary);
         mProfileIcon.setImageDrawable(profileIcon);
+        mSingleDeviceSpinner.setVisibility(View.GONE);
+        mAssociationConfirmationDialog.setVisibility(View.VISIBLE);
     }
 
     private void initUiForMultipleDevices(CharSequence appLabel) {
@@ -535,7 +543,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
                 deviceFilterPairs -> {
                     // Dismiss the progress bar once there's one device found for multiple devices.
                     if (deviceFilterPairs.size() >= 1) {
-                        mProgressIndicator.setVisibility(View.GONE);
+                        mMultipleDeviceSpinner.setVisibility(View.GONE);
                     }
 
                     mDeviceAdapter.setDevices(deviceFilterPairs);
@@ -546,7 +554,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mButtonNotAllow.setVisibility(View.GONE);
         mButtonNotAllowMultipleDevices.setVisibility(View.VISIBLE);
         mMultipleDeviceList.setVisibility(View.VISIBLE);
-        mProgressIndicator.setVisibility(View.VISIBLE);
+        mMultipleDeviceSpinner.setVisibility(View.VISIBLE);
     }
 
     private void onListItemClick(int position) {

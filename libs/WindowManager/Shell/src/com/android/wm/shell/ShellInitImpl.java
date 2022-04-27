@@ -35,6 +35,7 @@ import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 
 import java.util.Optional;
 
@@ -56,6 +57,7 @@ public class ShellInitImpl {
     private final Optional<PipTouchHandler> mPipTouchHandlerOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final Optional<FullscreenUnfoldController> mFullscreenUnfoldController;
+    private final Optional<UnfoldTransitionHandler> mUnfoldTransitionHandler;
     private final Optional<FreeformTaskListener> mFreeformTaskListenerOptional;
     private final ShellExecutor mMainExecutor;
     private final Transitions mTransitions;
@@ -77,6 +79,7 @@ public class ShellInitImpl {
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Optional<FullscreenUnfoldController> fullscreenUnfoldTransitionController,
+            Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformTaskListener> freeformTaskListenerOptional,
             Optional<RecentTasksController> recentTasks,
             Transitions transitions,
@@ -94,6 +97,7 @@ public class ShellInitImpl {
         mFullscreenTaskListener = fullscreenTaskListener;
         mPipTouchHandlerOptional = pipTouchHandlerOptional;
         mFullscreenUnfoldController = fullscreenUnfoldTransitionController;
+        mUnfoldTransitionHandler = unfoldTransitionHandler;
         mFreeformTaskListenerOptional = freeformTaskListenerOptional;
         mRecentTasks = recentTasks;
         mTransitions = transitions;
@@ -126,6 +130,7 @@ public class ShellInitImpl {
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitions.register(mShellTaskOrganizer);
+            mUnfoldTransitionHandler.ifPresent(UnfoldTransitionHandler::init);
         }
 
         // TODO(b/181599115): This should really be the pip controller, but until we can provide the

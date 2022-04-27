@@ -87,6 +87,26 @@ class BroadcastDispatcherLogger @Inject constructor(
         })
     }
 
+    fun logTagForRemoval(user: Int, receiver: BroadcastReceiver) {
+        val receiverString = receiver.toString()
+        log(DEBUG, {
+            int1 = user
+            str1 = receiverString
+        }, {
+            "Receiver $str1 tagged for removal from user $int1"
+        })
+    }
+
+    fun logClearedAfterRemoval(user: Int, receiver: BroadcastReceiver) {
+        val receiverString = receiver.toString()
+        log(DEBUG, {
+            int1 = user
+            str1 = receiverString
+        }, {
+            "Receiver $str1 has been completely removed for user $int1"
+        })
+    }
+
     fun logReceiverUnregistered(user: Int, receiver: BroadcastReceiver) {
         val receiverString = receiver.toString()
         log(INFO, {

@@ -193,6 +193,16 @@ public class NtpTrustedTime implements TrustedTime {
             }
             final Network network = connectivityManager.getActiveNetwork();
             final NetworkInfo ni = connectivityManager.getNetworkInfo(network);
+
+            // This connectivity check is to avoid performing a DNS lookup for the time server on a
+            // unconnected network. There are races to obtain time in Android when connectivity
+            // changes, which means that forceRefresh() can be called by various components before
+            // the network is actually available. This led in the past to DNS lookup failures being
+            // cached (~2 seconds) thereby preventing the device successfully making an NTP request
+            // when connectivity had actually been established.
+            // A side effect of check is that tests that run a fake NTP server on the device itself
+            // will only be able to use it if the active network is connected, even though loopback
+            // addresses are actually reachable.
             if (ni == null || !ni.isConnected()) {
                 if (LOGD) Log.d(TAG, "forceRefresh: no connectivity");
                 return false;

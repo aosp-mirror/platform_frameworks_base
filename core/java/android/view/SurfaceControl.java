@@ -221,6 +221,8 @@ public final class SurfaceControl implements Parcelable {
             @DataSpace.NamedDataSpace int dataSpace);
     private static native void nativeSetDamageRegion(long transactionObj, long nativeObject,
             Region region);
+    private static native void nativeSetDimmingEnabled(long transactionObj, long nativeObject,
+            boolean dimmingEnabled);
 
     private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
 
@@ -3834,6 +3836,27 @@ public final class SurfaceControl implements Parcelable {
         public @NonNull Transaction setDamageRegion(@NonNull SurfaceControl sc,
                 @Nullable Region region) {
             nativeSetDamageRegion(mNativeObject, sc.mNativeObject, region);
+            return this;
+        }
+
+        /**
+         * Set if the layer can be dimmed.
+         *
+         * <p>Dimming is to adjust brightness of the layer.
+         * Default value is {@code true}, which means the layer can be dimmed.
+         * Disabling dimming means the brightness of the layer can not be changed, i.e.,
+         * keep the white point for the layer same as the display brightness.</p>
+         *
+         * @param sc The SurfaceControl on which to enable or disable dimming.
+         * @param dimmingEnabled The dimming flag.
+         * @return this.
+         *
+         * @hide
+         */
+        public @NonNull Transaction setDimmingEnabled(@NonNull SurfaceControl sc,
+                boolean dimmingEnabled) {
+            checkPreconditions(sc);
+            nativeSetDimmingEnabled(mNativeObject, sc.mNativeObject, dimmingEnabled);
             return this;
         }
 

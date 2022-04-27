@@ -37,7 +37,6 @@ import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -251,7 +250,7 @@ public interface Bubbles {
     void onConfigChanged(Configuration newConfig);
 
     /** Description of current bubble state. */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+    void dump(PrintWriter pw, String[] args);
 
     /** Listener to find out about stack expansion / collapse events. */
     interface BubbleExpandListener {

@@ -58,6 +58,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.Utils;
+import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.accessibility.floatingmenu.AnnotationLinkSpan;
@@ -136,6 +137,7 @@ public class InternetDialog extends SystemUIDialog implements
     private Drawable mBackgroundOff = null;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private boolean mCanConfigMobileData;
+    private boolean mCanChangeWifiState;
 
     // Wi-Fi entries
     private int mWifiNetworkHeight;
@@ -180,6 +182,7 @@ public class InternetDialog extends SystemUIDialog implements
         mWifiManager = mInternetDialogController.getWifiManager();
         mCanConfigMobileData = canConfigMobileData;
         mCanConfigWifi = canConfigWifi;
+        mCanChangeWifiState = WifiEnterpriseRestrictionUtils.isChangeWifiStateAllowed(context);
         mKeyguard = keyguardStateController;
 
         mUiEventLogger = uiEventLogger;
@@ -449,6 +452,14 @@ public class InternetDialog extends SystemUIDialog implements
         }
         mTurnWifiOnLayout.setBackground(
                 (isDeviceLocked && mConnectedWifiEntry != null) ? mBackgroundOn : null);
+
+        if (!mCanChangeWifiState && mWiFiToggle.isEnabled()) {
+            mWiFiToggle.setEnabled(false);
+            mWifiToggleTitleText.setEnabled(false);
+            final TextView summaryText = mDialogView.requireViewById(R.id.wifi_toggle_summary);
+            summaryText.setEnabled(false);
+            summaryText.setVisibility(View.VISIBLE);
+        }
     }
 
     @MainThread

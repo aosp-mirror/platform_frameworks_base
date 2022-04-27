@@ -324,12 +324,12 @@ public class PackageDexOptimizer {
             String compilerFilter = getRealCompilerFilter(pkg, options.getCompilerFilter());
             // If the app is used by other apps, we must not use the existing profile because it
             // may contain user data, unless the profile is newly created on install.
-            final boolean resetProfile = isProfileGuidedCompilerFilter(compilerFilter)
+            final boolean useCloudProfile = isProfileGuidedCompilerFilter(compilerFilter)
                     && isUsedByOtherApps
                     && options.getCompilationReason() != PackageManagerService.REASON_INSTALL;
 
             String dexMetadataPath = null;
-            if (options.isDexoptInstallWithDexMetadata() || resetProfile) {
+            if (options.isDexoptInstallWithDexMetadata() || useCloudProfile) {
                 File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(new File(path));
                 dexMetadataPath = dexMetadataFile == null
                         ? null : dexMetadataFile.getAbsolutePath();
@@ -339,65 +339,87 @@ public class PackageDexOptimizer {
             // PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA which will be a no-op with respect to
             // profiles.
             int profileAnalysisResult = PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
-            if (resetProfile) {
-                if (!resetProfile(pkg, profileName, path, dexMetadataPath)) {
-                    // Fall back to use the shared filter.
-                    compilerFilter =
-                            PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
-                                    PackageManagerService.REASON_SHARED);
-                }
-            } else if (options.isCheckForProfileUpdates()) {
+            if (options.isCheckForProfileUpdates()) {
                 profileAnalysisResult =
                         analyseProfiles(pkg, sharedGid, profileName, compilerFilter);
             }
+            String cloudProfileName = null;
+            try {
+                if (useCloudProfile) {
+                    cloudProfileName = "cloud-" + profileName;
+                    if (prepareCloudProfile(pkg, cloudProfileName, path, dexMetadataPath)) {
+                        profileName = cloudProfileName;
+                    } else {
+                        // Fall back to use the shared filter.
+                        compilerFilter =
+                                PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                                        PackageManagerService.REASON_SHARED);
+                        profileName = null;
+                    }
 
-            // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct
-            // flags.
-            final int dexoptFlags = getDexFlags(pkg, pkgSetting, compilerFilter, resetProfile,
-                    options);
+                    // We still run `analyseProfiles` even if `useCloudProfile` is true because it
+                    // merges profiles into the reference profile, which a system API
+                    // `ArtManager.snapshotRuntimeProfile` takes snapshots from. However, we don't
+                    // want the result to affect the decision of whether dexopt is needed.
+                    profileAnalysisResult = PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
+                }
 
-            for (String dexCodeIsa : dexCodeInstructionSets) {
-                int newResult = dexOptPath(pkg, pkgSetting, path, dexCodeIsa, compilerFilter,
-                        profileAnalysisResult, classLoaderContexts[i], dexoptFlags, sharedGid,
-                        packageStats, options.isDowngrade(), profileName, dexMetadataPath,
-                        options.getCompilationReason());
-                // OTAPreopt doesn't have stats so don't report in that case.
-                if (packageStats != null) {
-                    Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
+                // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct
+                // flags.
+                final int dexoptFlags = getDexFlags(pkg, pkgSetting, compilerFilter,
+                        useCloudProfile, options);
+
+                for (String dexCodeIsa : dexCodeInstructionSets) {
+                    int newResult = dexOptPath(pkg, pkgSetting, path, dexCodeIsa, compilerFilter,
+                            profileAnalysisResult, classLoaderContexts[i], dexoptFlags, sharedGid,
+                            packageStats, options.isDowngrade(), profileName, dexMetadataPath,
+                            options.getCompilationReason());
+                    // OTAPreopt doesn't have stats so don't report in that case.
+                    if (packageStats != null) {
+                        Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
+                        try {
+                            long sessionId = sRandom.nextLong();
+                            ArtStatsLogUtils.writeStatsLog(
+                                    mArtStatsLogger,
+                                    sessionId,
+                                    compilerFilter,
+                                    pkg.getUid(),
+                                    packageStats.getCompileTime(path),
+                                    dexMetadataPath,
+                                    options.getCompilationReason(),
+                                    newResult,
+                                    ArtStatsLogUtils.getApkType(path, pkg.getBaseApkPath(),
+                                            pkg.getSplitCodePaths()),
+                                    dexCodeIsa,
+                                    path);
+                        } finally {
+                            Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
+                        }
+                    }
+
+                    // Should stop the operation immediately.
+                    if (newResult == DEX_OPT_CANCELLED) {
+                        // Even for the cancellation, return failed if has failed.
+                        if (result == DEX_OPT_FAILED) {
+                            return result;
+                        }
+                        return newResult;
+                    }
+                    // The end result is:
+                    //  - FAILED if any path failed,
+                    //  - PERFORMED if at least one path needed compilation,
+                    //  - SKIPPED when all paths are up to date
+                    if ((result != DEX_OPT_FAILED) && (newResult != DEX_OPT_SKIPPED)) {
+                        result = newResult;
+                    }
+                }
+            } finally {
+                if (cloudProfileName != null) {
                     try {
-                        long sessionId = sRandom.nextLong();
-                        ArtStatsLogUtils.writeStatsLog(
-                                mArtStatsLogger,
-                                sessionId,
-                                compilerFilter,
-                                pkg.getUid(),
-                                packageStats.getCompileTime(path),
-                                dexMetadataPath,
-                                options.getCompilationReason(),
-                                newResult,
-                                ArtStatsLogUtils.getApkType(path, pkg.getBaseApkPath(),
-                                        pkg.getSplitCodePaths()),
-                                dexCodeIsa,
-                                path);
-                    } finally {
-                        Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
+                        mInstaller.deleteReferenceProfile(pkg.getPackageName(), cloudProfileName);
+                    } catch (InstallerException e) {
+                        Slog.w(TAG, "Failed to cleanup cloud profile", e);
                     }
-                }
-
-                // Should stop the operation immediately.
-                if (newResult == DEX_OPT_CANCELLED) {
-                    // Even for the cancellation, return failed if has failed.
-                    if (result == DEX_OPT_FAILED) {
-                        return result;
-                    }
-                    return newResult;
-                }
-                // The end result is:
-                //  - FAILED if any path failed,
-                //  - PERFORMED if at least one path needed compilation,
-                //  - SKIPPED when all paths are up to date
-                if ((result != DEX_OPT_FAILED) && (newResult != DEX_OPT_SKIPPED)) {
-                    result = newResult;
                 }
             }
         }
@@ -405,22 +427,25 @@ public class PackageDexOptimizer {
     }
 
     /**
-     * Resets the profiles of the dex file at {@code path} belonging to the package {@code pkg} to
-     * the initial state as if the package is newly installed. Returns true on success, or false
-     * otherwise.
+     * Creates a profile with the name {@code profileName} from the dex metadata file at {@code
+     * dexMetadataPath} for the dex file at {@code path} belonging to the package {@code pkg}.
+     *
+     * @return true on success, or false otherwise.
      */
     @GuardedBy("mInstallLock")
-    private boolean resetProfile(AndroidPackage pkg, String profileName, String path,
+    private boolean prepareCloudProfile(AndroidPackage pkg, String profileName, String path,
             @Nullable String dexMetadataPath) {
         if (dexMetadataPath != null) {
             try {
-                mInstaller.clearAppProfiles(pkg.getPackageName(), profileName);
+                // Make sure we don't keep any existing contents.
+                mInstaller.deleteReferenceProfile(pkg.getPackageName(), profileName);
+
                 final int appId = UserHandle.getAppId(pkg.getUid());
-                mInstaller.prepareAppProfile(pkg.getPackageName(), UserHandle.USER_NULL,
-                        appId, profileName, path, dexMetadataPath);
+                mInstaller.prepareAppProfile(pkg.getPackageName(), UserHandle.USER_NULL, appId,
+                        profileName, path, dexMetadataPath);
                 return true;
             } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to reset profile", e);
+                Slog.w(TAG, "Failed to prepare cloud profile", e);
                 return false;
             }
         } else {
@@ -835,16 +860,16 @@ public class PackageDexOptimizer {
     private int getDexFlags(ApplicationInfo info, String compilerFilter, DexoptOptions options) {
         return getDexFlags((info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0,
                 info.getHiddenApiEnforcementPolicy(), info.splitDependencies,
-                info.requestsIsolatedSplitLoading(), compilerFilter, false /* resetProfile */,
+                info.requestsIsolatedSplitLoading(), compilerFilter, false /* useCloudProfile */,
                 options);
     }
 
     private int getDexFlags(AndroidPackage pkg, @NonNull PackageStateInternal pkgSetting,
-            String compilerFilter, boolean resetProfile, DexoptOptions options) {
+            String compilerFilter, boolean useCloudProfile, DexoptOptions options) {
         return getDexFlags(pkg.isDebuggable(),
                 AndroidPackageUtils.getHiddenApiEnforcementPolicy(pkg, pkgSetting),
                 pkg.getSplitDependencies(), pkg.isIsolatedSplitLoading(), compilerFilter,
-                resetProfile, options);
+                useCloudProfile, options);
     }
 
     /**
@@ -853,15 +878,15 @@ public class PackageDexOptimizer {
      */
     private int getDexFlags(boolean debuggable, int hiddenApiEnforcementPolicy,
             SparseArray<int[]> splitDependencies, boolean requestsIsolatedSplitLoading,
-            String compilerFilter, boolean resetProfile, DexoptOptions options) {
+            String compilerFilter, boolean useCloudProfile, DexoptOptions options) {
         // Profile guide compiled oat files should not be public unles they are based
         // on profiles from dex metadata archives.
         // The flag isDexoptInstallWithDexMetadata applies only on installs when we know that
         // the user does not have an existing profile.
-        // The flag resetProfile applies only when the existing profile is already reset.
+        // The flag useCloudProfile applies only when the cloud profile should be used.
         boolean isProfileGuidedFilter = isProfileGuidedCompilerFilter(compilerFilter);
         boolean isPublic = !isProfileGuidedFilter || options.isDexoptInstallWithDexMetadata()
-                || resetProfile;
+                || useCloudProfile;
         int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
         // Some apps are executed with restrictions on hidden API usage. If this app is one
         // of them, pass a flag to dexopt to enable the same restrictions during compilation.

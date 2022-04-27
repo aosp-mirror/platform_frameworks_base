@@ -56,6 +56,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
@@ -64,12 +65,13 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     private int mCurrentUser = UserHandle.myUserId();
 
     Display mDisplay;
-    DisplayLayout mDisplayLayout;
     OneHandedAccessibilityUtil mOneHandedAccessibilityUtil;
     OneHandedController mSpiedOneHandedController;
     OneHandedTimeoutHandler mSpiedTimeoutHandler;
     OneHandedState mSpiedTransitionState;
 
+    @Mock
+    DisplayLayout mDisplayLayout;
     @Mock
     DisplayController mMockDisplayController;
     @Mock
@@ -105,7 +107,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mDisplay = mContext.getDisplay();
-        mDisplayLayout = new DisplayLayout(mContext, mDisplay);
+        mDisplayLayout = Mockito.mock(DisplayLayout.class);
         mSpiedTimeoutHandler = spy(new OneHandedTimeoutHandler(mMockShellMainExecutor));
         mSpiedTransitionState = spy(new OneHandedState());
 
@@ -124,7 +126,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mMockSettingsUitl.getShortcutEnabled(any(), anyInt())).thenReturn(false);
 
         when(mMockDisplayAreaOrganizer.getLastDisplayBounds()).thenReturn(
-                new Rect(0, 0, mDisplayLayout.width(), mDisplayLayout.height()));
+                new Rect(0, 0, 1080, 2400));
         when(mMockDisplayAreaOrganizer.getDisplayLayout()).thenReturn(mDisplayLayout);
 
         mOneHandedAccessibilityUtil = new OneHandedAccessibilityUtil(mContext);
@@ -302,10 +304,9 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
     @Test
     public void testRotation90CanNotStartOneHanded() {
-        final DisplayLayout landscapeDisplayLayout = new DisplayLayout(mDisplayLayout);
-        landscapeDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_90);
+        mDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_90);
         mSpiedTransitionState.setState(STATE_NONE);
-        when(mMockDisplayAreaOrganizer.getDisplayLayout()).thenReturn(landscapeDisplayLayout);
+        when(mDisplayLayout.isLandscape()).thenReturn(true);
         mSpiedOneHandedController.setOneHandedEnabled(true);
         mSpiedOneHandedController.setLockedDisabled(false /* locked */, false /* enabled */);
         mSpiedOneHandedController.startOneHanded();
@@ -315,11 +316,10 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
     @Test
     public void testRotation180CanStartOneHanded() {
-        final DisplayLayout testDisplayLayout = new DisplayLayout(mDisplayLayout);
-        testDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_180);
+        mDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_180);
         mSpiedTransitionState.setState(STATE_NONE);
         when(mMockDisplayAreaOrganizer.isReady()).thenReturn(true);
-        when(mMockDisplayAreaOrganizer.getDisplayLayout()).thenReturn(testDisplayLayout);
+        when(mDisplayLayout.isLandscape()).thenReturn(false);
         mSpiedOneHandedController.setOneHandedEnabled(true);
         mSpiedOneHandedController.setLockedDisabled(false /* locked */, false /* enabled */);
         mSpiedOneHandedController.startOneHanded();
@@ -329,10 +329,9 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
     @Test
     public void testRotation270CanNotStartOneHanded() {
-        final DisplayLayout testDisplayLayout = new DisplayLayout(mDisplayLayout);
-        testDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_270);
+        mDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_270);
         mSpiedTransitionState.setState(STATE_NONE);
-        when(mMockDisplayAreaOrganizer.getDisplayLayout()).thenReturn(testDisplayLayout);
+        when(mDisplayLayout.isLandscape()).thenReturn(true);
         mSpiedOneHandedController.setOneHandedEnabled(true);
         mSpiedOneHandedController.setLockedDisabled(false /* locked */, false /* enabled */);
         mSpiedOneHandedController.startOneHanded();

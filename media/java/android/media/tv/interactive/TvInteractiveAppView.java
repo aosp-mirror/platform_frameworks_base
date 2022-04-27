@@ -97,6 +97,13 @@ public class TvInteractiveAppView extends ViewGroup {
      */
     public static final String BI_INTERACTIVE_APP_KEY_HTTP_USER_AGENT = "http_user_agent";
 
+    /**
+     * The name of the method where the error happened, if applicable. For example, if there is an
+     * error during signing, the request name is "onRequestSigning".
+     * @see #notifyError(String, Bundle)
+     */
+    public static final String ERROR_KEY_METHOD_NAME = "method_name";
+
     private final TvInteractiveAppManager mTvInteractiveAppManager;
     private final Handler mHandler = new Handler();
     private final Object mCallbackLock = new Object();
@@ -587,6 +594,26 @@ public class TvInteractiveAppView extends ViewGroup {
         }
         if (mSession != null) {
             mSession.sendSigningResult(signingId, result);
+        }
+    }
+
+    /**
+     * Notifies the corresponding {@link TvInteractiveAppService} when there is an error.
+     *
+     * @param errMsg the message of the error.
+     * @param params additional parameters of the error. For example, the signingId of {@link
+     *     TvInteractiveAppCallback#onRequestSigning(String, String, String, String, byte[])} can be
+     *     included to identify the related signing request, and the method name "onRequestSigning"
+     *     can also be added to the params.
+     *
+     * @see #ERROR_KEY_METHOD_NAME
+     */
+    public void notifyError(@NonNull String errMsg, @NonNull Bundle params) {
+        if (DEBUG) {
+            Log.d(TAG, "notifyError msg=" + errMsg + "; params=" + params);
+        }
+        if (mSession != null) {
+            mSession.notifyError(errMsg, params);
         }
     }
 

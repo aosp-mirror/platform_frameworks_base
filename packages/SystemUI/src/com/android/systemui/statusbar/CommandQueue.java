@@ -323,7 +323,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void onBiometricError(@Modality int modality, int error, int vendorCode) {
         }
 
-        default void hideAuthenticationDialog() {
+        default void hideAuthenticationDialog(long requestId) {
         }
 
         /**
@@ -999,9 +999,11 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void hideAuthenticationDialog() {
+    public void hideAuthenticationDialog(long requestId) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_BIOMETRIC_HIDE).sendToTarget();
+            final SomeArgs args = SomeArgs.obtain();
+            args.argl1 = requestId;
+            mHandler.obtainMessage(MSG_BIOMETRIC_HIDE, args).sendToTarget();
         }
     }
 
@@ -1508,11 +1510,14 @@ public class CommandQueue extends IStatusBar.Stub implements
                     someArgs.recycle();
                     break;
                 }
-                case MSG_BIOMETRIC_HIDE:
+                case MSG_BIOMETRIC_HIDE: {
+                    final SomeArgs someArgs = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).hideAuthenticationDialog();
+                        mCallbacks.get(i).hideAuthenticationDialog(someArgs.argl1 /* requestId */);
                     }
+                    someArgs.recycle();
                     break;
+                }
                 case MSG_SET_BIOMETRICS_LISTENER:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).setBiometicContextListener(

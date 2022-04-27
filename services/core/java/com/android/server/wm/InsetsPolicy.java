@@ -289,6 +289,23 @@ class InsetsPolicy {
         return adjustVisibilityForTransientTypes(originalState);
     }
 
+    /**
+     * @param type the internal type of the insets.
+     * @return {@code true} if the given type is controllable, {@code false} otherwise.
+     */
+    static boolean isInsetsTypeControllable(@InternalInsetsType int type) {
+        switch (type) {
+            case ITYPE_STATUS_BAR:
+            case ITYPE_NAVIGATION_BAR:
+            case ITYPE_IME:
+            case ITYPE_CLIMATE_BAR:
+            case ITYPE_EXTRA_NAVIGATION_BAR:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private static @InternalInsetsType int getInsetsTypeForLayoutParams(
             WindowManager.LayoutParams attrs) {
         @WindowManager.LayoutParams.WindowType int type = attrs.type;
@@ -533,7 +550,7 @@ class InsetsPolicy {
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName);
+                    focusedWin.mAttrs.packageName, focusedWin.getRequestedVisibilities());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {
@@ -590,7 +607,7 @@ class InsetsPolicy {
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName);
+                    focusedWin.mAttrs.packageName, focusedWin.getRequestedVisibilities());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {

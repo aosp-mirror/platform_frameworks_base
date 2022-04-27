@@ -21,6 +21,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -30,6 +31,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -78,10 +80,16 @@ public class DreamOverlayNotificationCountProvider
 
     @Inject
     public DreamOverlayNotificationCountProvider(
-            NotificationListener notificationListener) {
+            NotificationListener notificationListener,
+            @Background Executor bgExecutor) {
         notificationListener.addNotificationHandler(mNotificationHandler);
-        Arrays.stream(notificationListener.getActiveNotifications())
-                .forEach(sbn -> mNotificationKeys.add(sbn.getKey()));
+
+        bgExecutor.execute(() -> {
+                    Arrays.stream(notificationListener.getActiveNotifications())
+                            .forEach(sbn -> mNotificationKeys.add(sbn.getKey()));
+                    reportNotificationCountChanged();
+                }
+        );
     }
 
     @Override

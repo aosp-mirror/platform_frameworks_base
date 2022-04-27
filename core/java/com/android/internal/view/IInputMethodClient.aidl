@@ -30,6 +30,7 @@ oneway interface IInputMethodClient {
     void setActive(boolean active, boolean fullscreen, boolean reportToImeController);
     void scheduleStartInputIfNecessary(boolean fullscreen);
     void reportFullscreenMode(boolean fullscreen);
+    void updateVirtualDisplayToScreenMatrix(int bindSequence, in float[] matrixValues);
     void setImeTraceEnabled(boolean enabled);
     void throwExceptionFromSystem(String message);
 }

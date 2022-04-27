@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -294,7 +293,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("VisualStabilityManager state:");
         pw.print("  mIsTemporaryReorderingAllowed="); pw.println(mIsTemporaryReorderingAllowed);
         pw.print("  mTemporaryReorderingStart="); pw.println(mTemporaryReorderingStart);

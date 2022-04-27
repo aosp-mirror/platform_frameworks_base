@@ -19,7 +19,6 @@ package com.android.systemui.media
 import android.media.session.MediaController
 import android.media.session.PlaybackState
 import android.os.SystemProperties
-import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -27,9 +26,6 @@ import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-
-private const val DEBUG = true
-private const val TAG = "MediaTimeout"
 
 @VisibleForTesting
 val PAUSED_MEDIA_TIMEOUT = SystemProperties
@@ -45,7 +41,8 @@ val RESUME_MEDIA_TIMEOUT = SystemProperties
 @SysUISingleton
 class MediaTimeoutListener @Inject constructor(
     private val mediaControllerFactory: MediaControllerFactory,
-    @Main private val mainExecutor: DelayableExecutor
+    @Main private val mainExecutor: DelayableExecutor,
+    private val logger: MediaTimeoutLogger
 ) : MediaDataManager.Listener {
 
     private val mediaListeners: MutableMap<String, PlaybackStateListener> = mutableMapOf()
@@ -63,7 +60,8 @@ class MediaTimeoutListener @Inject constructor(
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
-        receivedSmartspaceCardLatency: Int
+        receivedSmartspaceCardLatency: Int,
+        isSsReactivated: Boolean
     ) {
         var reusedListener: PlaybackStateListener? = null
 
@@ -74,9 +72,7 @@ class MediaTimeoutListener @Inject constructor(
             }
 
             // If listener was destroyed previously, we'll need to re-register it
-            if (DEBUG) {
-                Log.d(TAG, "Reusing destroyed listener $key")
-            }
+            logger.logReuseListener(key)
             reusedListener = it
         }
 
@@ -85,16 +81,12 @@ class MediaTimeoutListener @Inject constructor(
         val migrating = oldKey != null && key != oldKey
         if (migrating) {
             reusedListener = mediaListeners.remove(oldKey)
-            if (reusedListener != null) {
-                if (DEBUG) Log.d(TAG, "migrating key $oldKey to $key, for resumption")
-            } else {
-                Log.w(TAG, "Old key $oldKey for player $key doesn't exist. Continuing...")
-            }
+            logger.logMigrateListener(oldKey, key, reusedListener != null)
         }
 
         reusedListener?.let {
             val wasPlaying = it.playing ?: false
-            if (DEBUG) Log.d(TAG, "updating listener for $key, was playing? $wasPlaying")
+            logger.logUpdateListener(key, wasPlaying)
             it.mediaData = data
             it.key = key
             mediaListeners[key] = it
@@ -104,7 +96,7 @@ class MediaTimeoutListener @Inject constructor(
                 // until we're done.
                 mainExecutor.execute {
                     if (mediaListeners[key]?.playing == true) {
-                        if (DEBUG) Log.d(TAG, "deliver delayed playback state for $key")
+                        logger.logDelayedUpdate(key)
                         timeoutCallback.invoke(key, false /* timedOut */)
                     }
                 }
@@ -168,10 +160,7 @@ class MediaTimeoutListener @Inject constructor(
         }
 
         override fun onSessionDestroyed() {
-            if (DEBUG) {
-                Log.d(TAG, "Session destroyed for $key")
-            }
-
+            logger.logSessionDestroyed(key)
             if (resumption == true) {
                 // Some apps create a session when MBS is queried. We should unregister the
                 // controller since it will no longer be valid, but don't cancel the timeout
@@ -184,9 +173,7 @@ class MediaTimeoutListener @Inject constructor(
         }
 
         private fun processState(state: PlaybackState?, dispatchEvents: Boolean) {
-            if (DEBUG) {
-                Log.v(TAG, "processState $key: $state")
-            }
+            logger.logPlaybackState(key, state)
 
             val isPlaying = state != null && isPlayingState(state.state)
             val resumptionChanged = resumption != mediaData.resumption
@@ -197,12 +184,10 @@ class MediaTimeoutListener @Inject constructor(
             resumption = mediaData.resumption
 
             if (!isPlaying) {
-                if (DEBUG) {
-                    Log.v(TAG, "schedule timeout for $key playing $isPlaying, $resumption")
-                }
+                logger.logScheduleTimeout(key, isPlaying, resumption!!)
                 if (cancellation != null && !resumptionChanged) {
                     // if the media changed resume state, we'll need to adjust the timeout length
-                    if (DEBUG) Log.d(TAG, "cancellation already exists, continuing.")
+                    logger.logCancelIgnored(key)
                     return
                 }
                 expireMediaTimeout(key, "PLAYBACK STATE CHANGED - $state, $resumption")
@@ -213,9 +198,7 @@ class MediaTimeoutListener @Inject constructor(
                 }
                 cancellation = mainExecutor.executeDelayed({
                     cancellation = null
-                    if (DEBUG) {
-                        Log.v(TAG, "Execute timeout for $key")
-                    }
+                    logger.logTimeout(key)
                     timedOut = true
                     // this event is async, so it's safe even when `dispatchEvents` is false
                     timeoutCallback(key, timedOut)
@@ -231,9 +214,7 @@ class MediaTimeoutListener @Inject constructor(
 
         private fun expireMediaTimeout(mediaKey: String, reason: String) {
             cancellation?.apply {
-                if (DEBUG) {
-                    Log.v(TAG, "media timeout cancelled for  $mediaKey, reason: $reason")
-                }
+                logger.logTimeoutCancelled(mediaKey, reason)
                 run()
             }
             cancellation = null

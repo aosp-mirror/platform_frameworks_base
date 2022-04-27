@@ -35,6 +35,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
 
 import java.util.Optional;
@@ -59,6 +60,7 @@ public class TestableBubbleController extends BubbleController {
             BubblePositioner positioner,
             DisplayController displayController,
             Optional<OneHandedController> oneHandedOptional,
+            DragAndDropController dragAndDropController,
             ShellExecutor shellMainExecutor,
             Handler shellMainHandler,
             TaskViewTransitions taskViewTransitions,
@@ -66,8 +68,8 @@ public class TestableBubbleController extends BubbleController {
         super(context, data, Runnable::run, floatingContentCoordinator, dataRepository,
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
                 bubbleLogger, taskStackListener, shellTaskOrganizer, positioner, displayController,
-                oneHandedOptional, shellMainExecutor, shellMainHandler, taskViewTransitions,
-                syncQueue);
+                oneHandedOptional, dragAndDropController, shellMainExecutor, shellMainHandler,
+                taskViewTransitions, syncQueue);
         setInflateSynchronously(true);
         initialize();
     }

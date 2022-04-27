@@ -144,6 +144,5 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
         for (OnMainSwitchChangeListener listener : mSwitchChangeListeners) {
             mMainSwitchBar.addOnSwitchChangeListener(listener);
         }
-        mSwitchChangeListeners.clear();
     }
 }
