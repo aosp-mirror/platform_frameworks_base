@@ -170,6 +170,7 @@ private:
     status_t doFft(uint8_t *fft, uint8_t *waveform);
     void periodicCapture();
     uint32_t initCaptureSize();
+    void initSampleRate();
 
     Mutex mCaptureLock;
     uint32_t mCaptureRate = CAPTURE_RATE_DEF;
