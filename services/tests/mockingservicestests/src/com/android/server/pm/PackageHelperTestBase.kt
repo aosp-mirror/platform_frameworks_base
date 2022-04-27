@@ -20,10 +20,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.UserHandle
 import android.os.UserManager
-import android.util.ArrayMap
-import android.util.SparseArray
 import com.android.server.pm.pkg.PackageStateInternal
-import com.android.server.pm.snapshot.PackageDataSnapshot
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
@@ -31,10 +28,10 @@ import com.android.server.testutils.whenever
 import org.junit.Before
 import org.junit.Rule
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.argThat
 import org.mockito.Mockito.spy
 import org.mockito.MockitoAnnotations
 
@@ -105,6 +102,7 @@ open class PackageHelperTestBase {
         whenever(rule.mocks().userManagerService.hasUserRestriction(
                 eq(UserManager.DISALLOW_UNINSTALL_APPS), eq(TEST_USER_ID))).thenReturn(true)
         mockKnownPackages(pms)
+        mockUnifiedSeparatedBroadcastList()
     }
 
     private fun mockKnownPackages(pms: PackageManagerService) {
@@ -142,15 +140,25 @@ open class PackageHelperTestBase {
         return pms
     }
 
-    protected fun allowList(vararg uids: Int) = SparseArray<IntArray>().apply {
-        this.put(TEST_USER_ID, uids)
+    protected fun mockUnifiedSeparatedBroadcastList() {
+        whenever(broadcastHelper.getBroadcastParams(any(Computer::class.java),
+                any() as Array<String>, any(IntArray::class.java), anyInt()
+        )).thenReturn(ArrayList<BroadcastParams>().apply {
+            this.add(BroadcastParams(packagesToChange[0], uidsToChange[0], IntArray(0),
+                    TEST_USER_ID).apply {
+                this.addPackage(packagesToChange[1], uidsToChange[1])
+            })
+        })
     }
 
-    protected fun mockAllowList(pkgSetting: PackageStateInternal, list: SparseArray<IntArray>?) {
-        whenever(rule.mocks().appsFilter.getVisibilityAllowList(
-                any(PackageDataSnapshot::class.java),
-                argThat { it?.packageName == pkgSetting.packageName }, any(IntArray::class.java),
-                any() as ArrayMap<String, out PackageStateInternal>
-        )).thenReturn(list)
+    protected fun mockDividedSeparatedBroadcastList(allowlist1: IntArray?, allowlist2: IntArray?) {
+        whenever(broadcastHelper.getBroadcastParams(any(Computer::class.java),
+                any() as Array<String>, any(IntArray::class.java), anyInt()
+        )).thenReturn(ArrayList<BroadcastParams>().apply {
+            this.add(BroadcastParams(packagesToChange[0], uidsToChange[0],
+                    allowlist1 ?: IntArray(0), TEST_USER_ID))
+            this.add(BroadcastParams(packagesToChange[1], uidsToChange[1],
+                    allowlist2 ?: IntArray(0), TEST_USER_ID))
+        })
     }
 }
