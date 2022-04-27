@@ -4547,9 +4547,12 @@ public class CentralSurfaces extends CoreStartable implements
      * @return UserHandle
      */
     private UserHandle getActivityUserHandle(Intent intent) {
-        if (intent.getComponent() != null
-                && mContext.getPackageName().equals(intent.getComponent().getPackageName())) {
-            return new UserHandle(UserHandle.myUserId());
+        String[] packages = mContext.getResources().getStringArray(R.array.system_ui_packages);
+        for (String pkg : packages) {
+            if (intent.getComponent() == null) break;
+            if (pkg.equals(intent.getComponent().getPackageName())) {
+                return new UserHandle(UserHandle.myUserId());
+            }
         }
         return UserHandle.CURRENT;
     }
