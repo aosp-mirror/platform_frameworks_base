@@ -84,7 +84,7 @@ public class Scribe {
     private static final String XML_ATTR_USER_ID = "userId";
     private static final String XML_ATTR_VERSION = "version";
     private static final String XML_ATTR_LAST_RECLAMATION_TIME = "lastReclamationTime";
-    private static final String XML_ATTR_REMAINING_CONSUMABLE_NARCS = "remainingConsumableNarcs";
+    private static final String XML_ATTR_REMAINING_CONSUMABLE_CAKES = "remainingConsumableCakes";
     private static final String XML_ATTR_CONSUMPTION_LIMIT = "consumptionLimit";
 
     /** Version of the file schema. */
@@ -100,7 +100,7 @@ public class Scribe {
     @GuardedBy("mIrs.getLock()")
     private long mSatiatedConsumptionLimit;
     @GuardedBy("mIrs.getLock()")
-    private long mRemainingConsumableNarcs;
+    private long mRemainingConsumableCakes;
     @GuardedBy("mIrs.getLock()")
     private final SparseArrayMap<String, Ledger> mLedgers = new SparseArrayMap<>();
 
@@ -122,10 +122,10 @@ public class Scribe {
     }
 
     @GuardedBy("mIrs.getLock()")
-    void adjustRemainingConsumableNarcsLocked(long delta) {
+    void adjustRemainingConsumableCakesLocked(long delta) {
         if (delta != 0) {
             // No point doing any work if the change is 0.
-            mRemainingConsumableNarcs += delta;
+            mRemainingConsumableCakes += delta;
             postWrite();
         }
     }
@@ -168,7 +168,7 @@ public class Scribe {
      * call it for normal operation.
      */
     @GuardedBy("mIrs.getLock()")
-    long getNarcsInCirculationForLoggingLocked() {
+    long getCakesInCirculationForLoggingLocked() {
         long sum = 0;
         for (int uIdx = mLedgers.numMaps() - 1; uIdx >= 0; --uIdx) {
             for (int pIdx = mLedgers.numElementsForKeyAt(uIdx) - 1; pIdx >= 0; --pIdx) {
@@ -178,10 +178,10 @@ public class Scribe {
         return sum;
     }
 
-    /** Returns the total amount of narcs that remain to be consumed. */
+    /** Returns the total amount of cakes that remain to be consumed. */
     @GuardedBy("mIrs.getLock()")
-    long getRemainingConsumableNarcsLocked() {
-        return mRemainingConsumableNarcs;
+    long getRemainingConsumableCakesLocked() {
+        return mRemainingConsumableCakes;
     }
 
     @GuardedBy("mIrs.getLock()")
@@ -189,11 +189,11 @@ public class Scribe {
         mLedgers.clear();
         if (!recordExists()) {
             mSatiatedConsumptionLimit = mIrs.getInitialSatiatedConsumptionLimitLocked();
-            mRemainingConsumableNarcs = mIrs.getConsumptionLimitLocked();
+            mRemainingConsumableCakes = mIrs.getConsumptionLimitLocked();
             return;
         }
         mSatiatedConsumptionLimit = 0;
-        mRemainingConsumableNarcs = 0;
+        mRemainingConsumableCakes = 0;
 
         final SparseArray<ArraySet<String>> installedPackagesPerUser = new SparseArray<>();
         final List<PackageInfo> installedPackages = mIrs.getInstalledPackages();
@@ -254,8 +254,8 @@ public class Scribe {
                                 parser.getAttributeLong(null, XML_ATTR_CONSUMPTION_LIMIT,
                                         mIrs.getInitialSatiatedConsumptionLimitLocked());
                         final long consumptionLimit = mIrs.getConsumptionLimitLocked();
-                        mRemainingConsumableNarcs = Math.min(consumptionLimit,
-                                parser.getAttributeLong(null, XML_ATTR_REMAINING_CONSUMABLE_NARCS,
+                        mRemainingConsumableCakes = Math.min(consumptionLimit,
+                                parser.getAttributeLong(null, XML_ATTR_REMAINING_CONSUMABLE_CAKES,
                                         consumptionLimit));
                         break;
                     case XML_TAG_USER:
@@ -285,11 +285,11 @@ public class Scribe {
 
     @GuardedBy("mIrs.getLock()")
     void setConsumptionLimitLocked(long limit) {
-        if (mRemainingConsumableNarcs > limit) {
-            mRemainingConsumableNarcs = limit;
+        if (mRemainingConsumableCakes > limit) {
+            mRemainingConsumableCakes = limit;
         } else if (limit > mSatiatedConsumptionLimit) {
-            final long diff = mSatiatedConsumptionLimit - mRemainingConsumableNarcs;
-            mRemainingConsumableNarcs = (limit - diff);
+            final long diff = mSatiatedConsumptionLimit - mRemainingConsumableCakes;
+            mRemainingConsumableCakes = (limit - diff);
         }
         mSatiatedConsumptionLimit = limit;
         postWrite();
@@ -306,7 +306,7 @@ public class Scribe {
         TareHandlerThread.getHandler().removeCallbacks(mCleanRunnable);
         TareHandlerThread.getHandler().removeCallbacks(mWriteRunnable);
         mLedgers.clear();
-        mRemainingConsumableNarcs = 0;
+        mRemainingConsumableCakes = 0;
         mSatiatedConsumptionLimit = 0;
         mLastReclamationTime = 0;
     }
@@ -491,8 +491,8 @@ public class Scribe {
                 out.startTag(null, XML_TAG_HIGH_LEVEL_STATE);
                 out.attributeLong(null, XML_ATTR_LAST_RECLAMATION_TIME, mLastReclamationTime);
                 out.attributeLong(null, XML_ATTR_CONSUMPTION_LIMIT, mSatiatedConsumptionLimit);
-                out.attributeLong(null, XML_ATTR_REMAINING_CONSUMABLE_NARCS,
-                        mRemainingConsumableNarcs);
+                out.attributeLong(null, XML_ATTR_REMAINING_CONSUMABLE_CAKES,
+                        mRemainingConsumableCakes);
                 out.endTag(null, XML_TAG_HIGH_LEVEL_STATE);
 
                 for (int uIdx = mLedgers.numMaps() - 1; uIdx >= 0; --uIdx) {

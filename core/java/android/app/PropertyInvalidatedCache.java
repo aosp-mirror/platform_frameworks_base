@@ -313,6 +313,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * one of the permitted values above.  The API is a string that is a legal Java simple
      * identifier.  The api is modified to conform to the system property style guide by
      * replacing every upper case letter with an underscore and the lower case equivalent.
+     * (An initial upper case letter is not prefixed with an underscore).
      * There is no requirement that the apiName be the name of an actual API.
      *
      * Be aware that SystemProperties has a maximum length which is private to the
@@ -326,7 +327,7 @@ public class PropertyInvalidatedCache<Query, Result> {
             @NonNull String apiName) {
         char[] api = apiName.toCharArray();
         int upper = 0;
-        for (int i = 0; i < api.length; i++) {
+        for (int i = 1; i < api.length; i++) {
             if (Character.isUpperCase(api[i])) {
                 upper++;
             }
@@ -336,7 +337,9 @@ public class PropertyInvalidatedCache<Query, Result> {
         for (int i = 0; i < api.length; i++) {
             if (Character.isJavaIdentifierPart(api[i])) {
                 if (Character.isUpperCase(api[i])) {
-                    suffix[j++] = '_';
+                    if (i > 0) {
+                        suffix[j++] = '_';
+                    }
                     suffix[j++] = Character.toLowerCase(api[i]);
                 } else {
                     suffix[j++] = api[i];
@@ -1286,10 +1289,20 @@ public class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
-     * Return the name of the cache, to be used in debug messages.
+     * Return the name of the cache, to be used in debug messages.  This is exposed
+     * primarily for testing.
+     * @hide
      */
-    private final @NonNull String cacheName() {
+    public final @NonNull String cacheName() {
         return mCacheName;
+    }
+
+    /**
+     * Return the property used by the cache.  This is primarily for test purposes.
+     * @hide
+     */
+    public final @NonNull String propertyName() {
+        return mPropertyName;
     }
 
     /**

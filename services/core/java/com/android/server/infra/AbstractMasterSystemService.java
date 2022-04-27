@@ -948,7 +948,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                     pw.println(": ");
                     final List<S> services = mServicesCacheList.valueAt(i);
                     for (int j = 0; j < services.size(); j++) {
-                        S service = services.get(i);
+                        S service = services.get(j);
                         synchronized (service.mLock) {
                             service.dumpLocked(prefix2, pw);
                         }

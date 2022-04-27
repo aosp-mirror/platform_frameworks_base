@@ -395,8 +395,9 @@ public abstract class WallpaperService extends Service {
         final BaseIWindow mWindow = new BaseIWindow() {
             @Override
             public void resized(ClientWindowFrames frames, boolean reportDraw,
-                    MergedConfiguration mergedConfiguration, boolean forceLayout,
-                    boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, int resizeMode) {
+                    MergedConfiguration mergedConfiguration, InsetsState insetsState,
+                    boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
+                    int syncSeqId, int resizeMode) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0,
                         mergedConfiguration);
@@ -1631,6 +1632,7 @@ public abstract class WallpaperService extends Service {
             float finalXOffsetStep = xOffsetStep;
             float finalXOffset = xOffset;
             mHandler.post(() -> {
+                Trace.beginSection("WallpaperService#processLocalColors");
                 resetWindowPages();
                 int xPage = xCurrentPage;
                 EngineWindowPage current;
@@ -1661,6 +1663,7 @@ public abstract class WallpaperService extends Service {
                 }
                 current = mWindowPages[xPage];
                 updatePage(current, xPage, xPages, finalXOffsetStep);
+                Trace.endSection();
             });
         }
 
@@ -1682,13 +1685,12 @@ public abstract class WallpaperService extends Service {
 
         void updatePage(EngineWindowPage currentPage, int pageIndx, int numPages,
                 float xOffsetStep) {
-            // to save creating a runnable, check twice
-            long current = System.currentTimeMillis();
+            // in case the clock is zero, we start with negative time
+            long current = SystemClock.elapsedRealtime() - DEFAULT_UPDATE_SCREENSHOT_DURATION;
             long lapsed = current - currentPage.getLastUpdateTime();
             // Always update the page when the last update time is <= 0
             // This is important especially when the device first boots
-            if (lapsed < DEFAULT_UPDATE_SCREENSHOT_DURATION
-                    && currentPage.getLastUpdateTime() > 0) {
+            if (lapsed < DEFAULT_UPDATE_SCREENSHOT_DURATION) {
                 return;
             }
             Surface surface = mSurfaceHolder.getSurface();
@@ -1733,6 +1735,7 @@ public abstract class WallpaperService extends Service {
         private void updatePageColors(EngineWindowPage page, int pageIndx, int numPages,
                 float xOffsetStep) {
             if (page.getBitmap() == null) return;
+            Trace.beginSection("WallpaperService#updatePageColors");
             if (DEBUG) {
                 Log.d(TAG, "updatePageColorsLocked for page " + pageIndx + " with areas "
                         + page.getAreas().size() + " and bitmap size of "
@@ -1778,6 +1781,7 @@ public abstract class WallpaperService extends Service {
                     }
                 }
             }
+            Trace.endSection();
         }
 
         private RectF generateSubRect(RectF in, int pageInx, int numPages) {

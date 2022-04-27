@@ -122,7 +122,10 @@ public class CachingIconView extends ImageView {
     public Runnable setImageIconAsync(@Nullable final Icon icon) {
         resetCache();
         Drawable drawable = loadSizeRestrictedIcon(icon);
-        return () -> setImageDrawable(drawable);
+        if (drawable != null) {
+            return () -> setImageDrawable(drawable);
+        }
+        return super.setImageIconAsync(icon);
     }
 
     @Override

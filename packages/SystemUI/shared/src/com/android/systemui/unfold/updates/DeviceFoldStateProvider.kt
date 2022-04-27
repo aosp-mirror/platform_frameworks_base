@@ -57,6 +57,15 @@ constructor(
     private val foldStateListener = FoldStateListener(context)
     private val timeoutRunnable = TimeoutRunnable()
 
+    /**
+     * Time after which [FOLD_UPDATE_FINISH_HALF_OPEN] is emitted following a
+     * [FOLD_UPDATE_START_CLOSING] or [FOLD_UPDATE_START_OPENING] event, if an end state is not
+     * reached.
+     */
+    private val halfOpenedTimeoutMillis: Int =
+        context.resources.getInteger(
+            com.android.internal.R.integer.config_unfoldTransitionHalfFoldedTimeout)
+
     private var isFolded = false
     private var isUnfoldHandled = true
 
@@ -81,10 +90,12 @@ constructor(
         outputListeners.remove(listener)
     }
 
-    override val isFullyOpened: Boolean
-        get() = !isFolded && lastFoldUpdate == FOLD_UPDATE_FINISH_FULL_OPEN
+    override val isFinishedOpening: Boolean
+        get() = !isFolded &&
+            (lastFoldUpdate == FOLD_UPDATE_FINISH_FULL_OPEN ||
+                lastFoldUpdate == FOLD_UPDATE_FINISH_HALF_OPEN)
 
-    private val isTransitionInProgess: Boolean
+    private val isTransitionInProgress: Boolean
         get() =
             lastFoldUpdate == FOLD_UPDATE_START_OPENING ||
                 lastFoldUpdate == FOLD_UPDATE_START_CLOSING
@@ -104,7 +115,7 @@ constructor(
             notifyFoldUpdate(FOLD_UPDATE_START_CLOSING)
         }
 
-        if (isTransitionInProgess) {
+        if (isTransitionInProgress) {
             if (isFullyOpened) {
                 notifyFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN)
                 cancelTimeout()
@@ -126,12 +137,7 @@ constructor(
      */
     private fun getClosingThreshold(): Int? {
         val activityType =
-            activityManager
-                .getRunningTasks(/* maxNum= */ 1)
-                ?.getOrNull(0)
-                ?.configuration
-                ?.windowConfiguration
-                ?.activityType
+            activityManager.getRunningTasks(/* maxNum= */ 1)?.getOrNull(0)?.topActivityType
                 ?: return null
 
         if (DEBUG) {
@@ -173,10 +179,10 @@ constructor(
     }
 
     private fun rescheduleAbortAnimationTimeout() {
-        if (isTransitionInProgess) {
+        if (isTransitionInProgress) {
             cancelTimeout()
         }
-        handler.postDelayed(timeoutRunnable, HALF_OPENED_TIMEOUT_MILLIS)
+        handler.postDelayed(timeoutRunnable, halfOpenedTimeoutMillis.toLong())
     }
 
     private fun cancelTimeout() {
@@ -226,12 +232,6 @@ private fun stateToString(@FoldUpdate update: Int): String {
 
 private const val TAG = "DeviceFoldProvider"
 private const val DEBUG = false
-
-/**
- * Time after which [FOLD_UPDATE_FINISH_HALF_OPEN] is emitted following a
- * [FOLD_UPDATE_START_CLOSING] or [FOLD_UPDATE_START_OPENING] event, if an end state is not reached.
- */
-@VisibleForTesting const val HALF_OPENED_TIMEOUT_MILLIS = 600L
 
 /** Threshold after which we consider the device fully unfolded. */
 @VisibleForTesting const val FULLY_OPEN_THRESHOLD_DEGREES = 15f

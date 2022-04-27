@@ -72,6 +72,8 @@ class PowerSaveModeModifier extends Modifier {
 
     // TODO: migrate to relying on PowerSaveState and ServiceType.TARE
     private final class PowerSaveModeTracker extends BroadcastReceiver {
+        private boolean mIsSetup = false;
+
         private final PowerManager mPowerManager;
         private volatile boolean mPowerSaveModeEnabled;
 
@@ -80,16 +82,27 @@ class PowerSaveModeModifier extends Modifier {
         }
 
         public void startTracking(@NonNull Context context) {
+            if (mIsSetup) {
+                return;
+            }
+
             final IntentFilter filter = new IntentFilter();
             filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             context.registerReceiver(this, filter);
 
             // Initialise tracker state.
             mPowerSaveModeEnabled = mPowerManager.isPowerSaveMode();
+
+            mIsSetup = true;
         }
 
         public void stopTracking(@NonNull Context context) {
+            if (!mIsSetup) {
+                return;
+            }
+
             context.unregisterReceiver(this);
+            mIsSetup = false;
         }
 
         @Override

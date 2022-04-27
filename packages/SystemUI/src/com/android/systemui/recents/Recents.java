@@ -24,7 +24,6 @@ import android.provider.Settings;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.statusbar.CommandQueue;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -129,7 +128,7 @@ public class Recents extends CoreStartable implements CommandQueue.Callbacks {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         mImpl.dump(pw);
     }
 }

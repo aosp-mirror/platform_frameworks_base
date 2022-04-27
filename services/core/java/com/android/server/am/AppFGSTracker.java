@@ -35,6 +35,7 @@ import android.app.IProcessObserver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ServiceInfo.ForegroundServiceType;
+import android.os.AppBackgroundRestrictionsInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerExemptionManager.ReasonCode;
@@ -49,11 +50,14 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.SomeArgs;
 import com.android.server.am.AppFGSTracker.AppFGSPolicy;
 import com.android.server.am.AppFGSTracker.PackageDurations;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.BaseAppStateEventsTracker.BaseAppStateEventsPolicy;
 import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
 import com.android.server.am.BaseAppStateTracker.Injector;
@@ -111,9 +115,14 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
 
     @Override
     public void onForegroundServiceNotificationUpdated(String packageName, int uid,
-            int foregroundId) {
-        mHandler.obtainMessage(MyHandler.MSG_FOREGROUND_SERVICES_NOTIFICATION_UPDATED,
-                uid, foregroundId, packageName).sendToTarget();
+            int foregroundId, boolean canceling) {
+        final SomeArgs args = SomeArgs.obtain();
+        args.argi1 = uid;
+        args.argi2 = foregroundId;
+        args.arg1 = packageName;
+        args.arg2 = canceling ? Boolean.TRUE : Boolean.FALSE;
+        mHandler.obtainMessage(MyHandler.MSG_FOREGROUND_SERVICES_NOTIFICATION_UPDATED, args)
+                .sendToTarget();
     }
 
     private static class MyHandler extends Handler {
@@ -148,8 +157,10 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
                             (String) msg.obj, msg.arg1, msg.arg2);
                     break;
                 case MSG_FOREGROUND_SERVICES_NOTIFICATION_UPDATED:
+                    final SomeArgs args = (SomeArgs) msg.obj;
                     mTracker.handleForegroundServiceNotificationUpdated(
-                            (String) msg.obj, msg.arg1, msg.arg2);
+                            (String) args.arg1, args.argi1, args.argi2, (Boolean) args.arg2);
+                    args.recycle();
                     break;
                 case MSG_CHECK_LONG_RUNNING_FGS:
                     mTracker.checkLongRunningFgs();
@@ -173,6 +184,11 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
         super(context, controller, injector, outerContext);
         mHandler = new MyHandler(this);
         mInjector.setPolicy(new AppFGSPolicy(mInjector, this));
+    }
+
+    @Override
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_FGS;
     }
 
     @Override
@@ -235,18 +251,18 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
     }
 
     private void handleForegroundServiceNotificationUpdated(String packageName, int uid,
-            int notificationId) {
+            int notificationId, boolean canceling) {
         synchronized (mLock) {
             SparseBooleanArray notificationIDs = mFGSNotificationIDs.get(uid, packageName);
-            if (notificationId > 0) {
+            if (!canceling) {
                 if (notificationIDs == null) {
                     notificationIDs = new SparseBooleanArray();
                     mFGSNotificationIDs.put(uid, packageName, notificationIDs);
                 }
                 notificationIDs.put(notificationId, false);
-            } else if (notificationId < 0) {
+            } else {
                 if (notificationIDs != null) {
-                    final int indexOfKey = notificationIDs.indexOfKey(-notificationId);
+                    final int indexOfKey = notificationIDs.indexOfKey(notificationId);
                     if (indexOfKey >= 0) {
                         final boolean wasVisible = notificationIDs.valueAt(indexOfKey);
                         notificationIDs.removeAt(indexOfKey);
@@ -502,6 +518,12 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
                 foregroundServiceTypeToIndex(FOREGROUND_SERVICE_TYPE_NONE));
     }
 
+    @Override
+    long getTotalDurations(int uid, long now) {
+        return getTotalDurations(uid, now,
+                foregroundServiceTypeToIndex(FOREGROUND_SERVICE_TYPE_NONE));
+    }
+
     boolean hasForegroundServices(String packageName, int uid) {
         synchronized (mLock) {
             final PackageDurations pkg = mPkgEvents.get(uid, packageName);
@@ -545,6 +567,21 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
             }
         }
         return false;
+    }
+
+    @Override
+    byte[] getTrackerInfoForStatsd(int uid) {
+        final long fgsDurations = getTotalDurations(uid, SystemClock.elapsedRealtime());
+        if (fgsDurations == 0L) {
+            // Not interested
+            return null;
+        }
+        final ProtoOutputStream proto = new ProtoOutputStream();
+        proto.write(AppBackgroundRestrictionsInfo.FgsTrackerInfo.FGS_NOTIFICATION_VISIBLE,
+                hasForegroundServiceNotifications(uid));
+        proto.write(AppBackgroundRestrictionsInfo.FgsTrackerInfo.FGS_DURATION, fgsDurations);
+        proto.flush();
+        return proto.getBytes();
     }
 
     @Override

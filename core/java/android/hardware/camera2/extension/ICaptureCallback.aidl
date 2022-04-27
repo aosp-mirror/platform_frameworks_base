@@ -16,6 +16,7 @@
 package android.hardware.camera2.extension;
 
 import android.hardware.camera2.extension.Request;
+import android.hardware.camera2.impl.CameraMetadataNative;
 
 /** @hide */
 interface ICaptureCallback
@@ -25,4 +26,5 @@ interface ICaptureCallback
     void onCaptureFailed(int captureSequenceId);
     void onCaptureSequenceCompleted(int captureSequenceId);
     void onCaptureSequenceAborted(int captureSequenceId);
+    void onCaptureCompleted(long shutterTimestamp, int requestId, in CameraMetadataNative results);
 }

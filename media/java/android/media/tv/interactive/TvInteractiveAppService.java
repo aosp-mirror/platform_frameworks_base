@@ -39,6 +39,7 @@ import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
+import android.media.tv.interactive.TvInteractiveAppView.TvInteractiveAppCallback;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -463,6 +464,20 @@ public abstract class TvInteractiveAppService extends Service {
          * @see #requestSigning(String, String, String, byte[])
          */
         public void onSigningResult(@NonNull String signingId, @NonNull byte[] result) {
+        }
+
+        /**
+         * Called when the application sends information of an error.
+         *
+         * @param errMsg the message of the error.
+         * @param params additional parameters of the error. For example, the signingId of {@link
+         *     TvInteractiveAppCallback#onRequestSigning(String, String, String, String, byte[])}
+         *     can be included to identify the related signing request, and the method name
+         *     "onRequestSigning" can also be added to the params.
+         *
+         * @see TvInteractiveAppView#ERROR_KEY_METHOD_NAME
+         */
+        public void onError(@NonNull String errMsg, @NonNull Bundle params) {
         }
 
         /**
@@ -1004,6 +1019,10 @@ public abstract class TvInteractiveAppService extends Service {
             onSigningResult(signingId, result);
         }
 
+        void notifyError(String errMsg, Bundle params) {
+            onError(errMsg, params);
+        }
+
         void release() {
             onRelease();
             if (mSurface != null) {
@@ -1474,6 +1493,11 @@ public abstract class TvInteractiveAppService extends Service {
         @Override
         public void sendSigningResult(@NonNull String signingId, @NonNull byte[] result) {
             mSessionImpl.sendSigningResult(signingId, result);
+        }
+
+        @Override
+        public void notifyError(@NonNull String errMsg, @NonNull Bundle params) {
+            mSessionImpl.notifyError(errMsg, params);
         }
 
         @Override

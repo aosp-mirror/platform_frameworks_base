@@ -1875,7 +1875,7 @@ public final class ActiveServices {
                             if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
                                 resetFgsRestrictionLocked(r);
                                 setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
-                                        r.appInfo.uid, r.intent.getIntent(), r, r.userId,false);
+                                        r.appInfo.uid, r.intent.getIntent(), r, r.userId, false);
                                 final String temp = "startForegroundDelayMs:" + delayMs;
                                 if (r.mInfoAllowStartForeground != null) {
                                     r.mInfoAllowStartForeground += "; " + temp;
@@ -1888,12 +1888,8 @@ public final class ActiveServices {
                     } else if (r.mStartForegroundCount >= 1) {
                         // The second or later time startForeground() is called after service is
                         // started. Check for app state again.
-                        final long delayMs = SystemClock.elapsedRealtime() -
-                                r.mLastSetFgsRestrictionTime;
-                        if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
-                            setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
-                                    r.appInfo.uid, r.intent.getIntent(), r, r.userId,false);
-                        }
+                        setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
+                                r.appInfo.uid, r.intent.getIntent(), r, r.userId, false);
                     }
                     // If the foreground service is not started from TOP process, do not allow it to
                     // have while-in-use location/camera/microphone access.
@@ -2892,6 +2888,12 @@ public final class ActiveServices {
 
             if ((flags & Context.BIND_NOT_APP_COMPONENT_USAGE) != 0) {
                 s.isNotAppComponentUsage = true;
+            }
+
+            if (s.app != null && s.app.mState != null
+                    && s.app.mState.getCurProcState() <= PROCESS_STATE_TOP
+                    && (flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0) {
+                s.lastTopAlmostPerceptibleBindRequestUptimeMs = SystemClock.uptimeMillis();
             }
 
             if (s.app != null) {
@@ -4797,6 +4799,10 @@ public final class ActiveServices {
             // And do the same for bg activity starts ability.
             if ((c.flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
                 s.updateIsAllowedBgActivityStartsByBinding();
+            }
+            // And for almost perceptible exceptions.
+            if ((c.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0) {
+                psr.updateHasTopStartedAlmostPerceptibleServices();
             }
             if (s.app != null) {
                 updateServiceClientActivitiesLocked(s.app.mServices, c, true);

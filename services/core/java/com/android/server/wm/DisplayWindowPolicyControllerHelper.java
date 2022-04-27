@@ -75,6 +75,19 @@ class DisplayWindowPolicyControllerHelper {
     }
 
     /**
+     * @see DisplayWindowPolicyController#canActivityBeLaunched(ActivityInfo, int, int, boolean)
+     */
+    public boolean canActivityBeLaunched(ActivityInfo activityInfo,
+            @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
+            boolean isNewTask) {
+        if (mDisplayWindowPolicyController == null) {
+            return true;
+        }
+        return mDisplayWindowPolicyController.canActivityBeLaunched(activityInfo, windowingMode,
+            launchingFromDisplayId, isNewTask);
+    }
+
+    /**
      * @see DisplayWindowPolicyController#keepActivityOnWindowFlagsChanged(ActivityInfo, int, int)
      */
     boolean keepActivityOnWindowFlagsChanged(ActivityInfo aInfo, int flagChanges,

@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import org.mockito.Mockito.`when` as whenever
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -54,7 +55,6 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -281,6 +281,28 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         val expectedTranslation = LOCKSCREEN_TOP - QS_TOP
         assertThat(mediaHiearchyManager.getGuidedTransformationTranslationY())
                 .isEqualTo(expectedTranslation)
+    }
+
+    @Test
+    fun isCurrentlyInGuidedTransformation_hostsVisible_returnsTrue() {
+        goToLockscreen()
+        enterGuidedTransformation()
+        whenever(lockHost.visible).thenReturn(true)
+        whenever(qsHost.visible).thenReturn(true)
+        whenever(qqsHost.visible).thenReturn(true)
+
+        assertThat(mediaHiearchyManager.isCurrentlyInGuidedTransformation()).isTrue()
+    }
+
+    @Test
+    fun isCurrentlyInGuidedTransformation_hostNotVisible_returnsTrue() {
+        goToLockscreen()
+        enterGuidedTransformation()
+        whenever(lockHost.visible).thenReturn(false)
+        whenever(qsHost.visible).thenReturn(true)
+        whenever(qqsHost.visible).thenReturn(true)
+
+        assertThat(mediaHiearchyManager.isCurrentlyInGuidedTransformation()).isFalse()
     }
 
     private fun enableSplitShade() {

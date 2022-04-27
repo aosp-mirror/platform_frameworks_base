@@ -25,10 +25,9 @@ import android.accessibilityservice.MagnificationConfig;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputBinding;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodSession;
-import com.android.internal.view.IInputSessionWithIdCallback;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 
 /**
  * Top-level interface to an accessibility service component.
@@ -69,14 +68,14 @@ import com.android.internal.view.IInputSessionWithIdCallback;
 
     void onSystemActionsChanged();
 
-    void createImeSession(IInputSessionWithIdCallback callback);
+    void createImeSession(in IAccessibilityInputMethodSessionCallback callback);
 
-    void setImeSessionEnabled(IInputMethodSession session, boolean enabled);
+    void setImeSessionEnabled(in IAccessibilityInputMethodSession session, boolean enabled);
 
-    void bindInput(in InputBinding binding);
+    void bindInput();
 
     void unbindInput();
 
-    void startInput(in IBinder startInputToken, in IInputContext inputContext,
-                in EditorInfo editorInfo, boolean restarting);
+    void startInput(in IRemoteAccessibilityInputConnection connection, in EditorInfo editorInfo,
+            boolean restarting);
 }

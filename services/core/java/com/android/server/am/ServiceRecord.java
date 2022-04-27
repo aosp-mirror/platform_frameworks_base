@@ -24,6 +24,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.IApplicationThread;
 import android.app.Notification;
@@ -140,6 +141,12 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     long destroyTime;       // time at which destory was initiated.
     int pendingConnectionGroup;        // To be filled in to ProcessRecord once it connects
     int pendingConnectionImportance;   // To be filled in to ProcessRecord once it connects
+
+    /**
+     * The last time (in uptime timebase) a bind request was made with BIND_ALMOST_PERCEPTIBLE for
+     * this service while on TOP.
+     */
+    long lastTopAlmostPerceptibleBindRequestUptimeMs;
 
     // any current binding to this service has BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS flag?
     private boolean mIsAllowedBgActivityStartsByBinding;
@@ -713,6 +720,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
     }
 
+    @NonNull
     ArrayMap<IBinder, ArrayList<ConnectionRecord>> getConnections() {
         return connections;
     }
@@ -1104,7 +1112,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         foregroundNoti = localForegroundNoti; // save it for amending next time
 
                         signalForegroundServiceNotification(packageName, appInfo.uid,
-                                localForegroundId);
+                                localForegroundId, false /* canceling */);
 
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Error showing notification for service", e);
@@ -1139,17 +1147,18 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 } catch (RuntimeException e) {
                     Slog.w(TAG, "Error canceling notification for service", e);
                 }
-                signalForegroundServiceNotification(packageName, appInfo.uid, -localForegroundId);
+                signalForegroundServiceNotification(packageName, appInfo.uid, localForegroundId,
+                        true /* canceling */);
             }
         });
     }
 
     private void signalForegroundServiceNotification(String packageName, int uid,
-            int foregroundId) {
+            int foregroundId, boolean canceling) {
         synchronized (ams) {
             for (int i = ams.mForegroundServiceStateListeners.size() - 1; i >= 0; i--) {
                 ams.mForegroundServiceStateListeners.get(i).onForegroundServiceNotificationUpdated(
-                        packageName, appInfo.uid, foregroundId);
+                        packageName, appInfo.uid, foregroundId, canceling);
             }
         }
     }
