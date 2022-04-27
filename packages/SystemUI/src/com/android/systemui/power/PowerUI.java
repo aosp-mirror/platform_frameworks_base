@@ -397,16 +397,12 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
 
         final boolean playSound = currentSnapshot.getBucket() != lastSnapshot.getBucket()
                 || lastSnapshot.getPlugged();
-        final long timeRemainingMillis = currentSnapshot.getTimeRemainingMillis();
 
         if (shouldShowHybridWarning(currentSnapshot)) {
             mWarnings.showLowBatteryWarning(playSound);
             // mark if we've already shown a warning this cycle. This will prevent the notification
             // trigger from spamming users by only showing low/critical warnings once per cycle
-            if ((timeRemainingMillis != NO_ESTIMATE_AVAILABLE
-                    && timeRemainingMillis <= currentSnapshot.getSevereThresholdMillis())
-                    || currentSnapshot.getBatteryLevel()
-                    <= currentSnapshot.getSevereLevelThreshold()) {
+            if (currentSnapshot.getBatteryLevel() <= currentSnapshot.getSevereLevelThreshold()) {
                 mSevereWarningShownThisChargeCycle = true;
                 mLowWarningShownThisChargeCycle = true;
                 if (DEBUG) {
@@ -461,7 +457,8 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
     @VisibleForTesting
     boolean shouldDismissHybridWarning(BatteryStateSnapshot snapshot) {
         return snapshot.getPlugged()
-                || snapshot.getTimeRemainingMillis() > snapshot.getLowThresholdMillis();
+                || snapshot.getBatteryLevel()
+                > snapshot.getLowLevelThreshold();
     }
 
     protected void maybeShowBatteryWarning(
