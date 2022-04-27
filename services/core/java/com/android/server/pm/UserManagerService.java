@@ -2037,6 +2037,12 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mGuestRestrictions) {
             mGuestRestrictions.clear();
             mGuestRestrictions.putAll(restrictions);
+            UserInfo guest = findCurrentGuestUser();
+            if (guest != null) {
+                synchronized (mRestrictionsLock) {
+                    updateUserRestrictionsInternalLR(mGuestRestrictions, guest.id);
+                }
+            }
         }
         synchronized (mPackagesLock) {
             writeUserListLP();
