@@ -2086,6 +2086,9 @@ public final class AppRestrictionController {
         int curLevel;
         int prevReason;
         final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
+        if (trackerInfo == null) {
+            trackerInfo = mEmptyTrackerInfo;
+        }
         synchronized (mSettingsLock) {
             curLevel = getRestrictionLevel(uid, pkgName);
             if (curLevel == level) {
@@ -2138,14 +2141,21 @@ public final class AppRestrictionController {
                         // It's currently active, enqueue it.
                         final int localReason = reason;
                         final int localSubReason = subReason;
-                        mActiveUids.add(uid, pkgName, () -> appStandbyInternal.restrictApp(
-                                pkgName, UserHandle.getUserId(uid), localReason, localSubReason));
+                        final TrackerInfo localTrackerInfo = trackerInfo;
+                        mActiveUids.add(uid, pkgName, () -> {
+                            appStandbyInternal.restrictApp(pkgName, UserHandle.getUserId(uid),
+                                    localReason, localSubReason);
+                            logAppBackgroundRestrictionInfo(pkgName, uid, curLevel, level,
+                                    localTrackerInfo, localReason);
+                        });
                         doIt = false;
                     }
                 }
                 if (doIt) {
                     appStandbyInternal.restrictApp(pkgName, UserHandle.getUserId(uid),
                             reason, subReason);
+                    logAppBackgroundRestrictionInfo(pkgName, uid, curLevel, level, trackerInfo,
+                            reason);
                 }
             }
         } else if (curLevel >= RESTRICTION_LEVEL_RESTRICTED_BUCKET
@@ -2160,11 +2170,14 @@ public final class AppRestrictionController {
             appStandbyInternal.maybeUnrestrictApp(pkgName, UserHandle.getUserId(uid),
                     prevReason & REASON_MAIN_MASK, prevReason & REASON_SUB_MASK,
                     reason, subReason);
+            logAppBackgroundRestrictionInfo(pkgName, uid, curLevel, level, trackerInfo,
+                    reason);
         }
+    }
 
-        if (trackerInfo == null) {
-            trackerInfo = mEmptyTrackerInfo;
-        }
+    private void logAppBackgroundRestrictionInfo(String pkgName, int uid,
+            @RestrictionLevel int prevLevel, @RestrictionLevel int level,
+            @NonNull TrackerInfo trackerInfo, int reason) {
         FrameworkStatsLog.write(FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO, uid,
                 getRestrictionLevelStatsd(level),
                 getThresholdStatsd(reason),
@@ -2176,7 +2189,8 @@ public final class AppRestrictionController {
                 getExemptionReasonStatsd(uid, level),
                 getOptimizationLevelStatsd(level),
                 getTargetSdkStatsd(pkgName),
-                ActivityManager.isLowRamDeviceStatic());
+                ActivityManager.isLowRamDeviceStatic(),
+                getRestrictionLevelStatsd(prevLevel));
     }
 
     private void handleBackgroundRestrictionChanged(int uid, String pkgName, boolean restricted) {
@@ -2449,7 +2463,8 @@ public final class AppRestrictionController {
                             mBgController.getBackgroundRestrictionExemptionReason(uid)),
                     AppBackgroundRestrictionsInfo.UNKNOWN, // OptimizationLevel
                     AppBackgroundRestrictionsInfo.SDK_UNKNOWN, // TargetSdk
-                    ActivityManager.isLowRamDeviceStatic());
+                    ActivityManager.isLowRamDeviceStatic(),
+                    mBgController.getRestrictionLevel(uid));
             PendingIntent pendingIntent;
             if (!mBgController.mConstantsObserver.mBgPromptFgsWithNotiOnLongRunning
                     && mBgController.hasForegroundServiceNotifications(packageName, uid)) {

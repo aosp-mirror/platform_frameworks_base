@@ -73,12 +73,17 @@ message AppBackgroundRestrictionsInfo {
     optional FgsTrackerInfo fgs_tracker_info = 5;
 
     message BatteryTrackerInfo {
-        // total battery usage within last 24h (percentage)
+        // total battery usage within last 24h (1/10000th)
         optional int32 battery_24h = 1;
-        // background battery usage (percentage)
+        // background battery usage (1/10000th)
         optional int32 battery_usage_background = 2;
-        // FGS battery usage (percentage)
+        // FGS battery usage (1/10000th)
         optional int32 battery_usage_fgs = 3;
+        // Foreground battery usage (1/10000th)
+        optional int32 battery_usage_foreground = 4;
+        // Cached battery usage (1/10000th)
+        optional int32 battery_usage_cached = 5;
+
     }
     optional BatteryTrackerInfo battery_tracker_info = 6;
 
@@ -197,5 +202,8 @@ message AppBackgroundRestrictionsInfo {
 
     // indicates if the current device is a low ram device.
     optional bool low_mem_device = 12;
+
+    // indicates previous background restriction level.
+    optional RestrictionLevel previous_restriction_level = 13;
 }
 
