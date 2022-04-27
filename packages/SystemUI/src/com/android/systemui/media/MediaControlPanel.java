@@ -30,10 +30,12 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.drawable.TransitionDrawable;
@@ -159,6 +161,7 @@ public class MediaControlPanel {
     private MetadataAnimationHandler mMetadataAnimationHandler;
     private ColorSchemeTransition mColorSchemeTransition;
     private Drawable mPrevArtwork = null;
+    private boolean mIsArtworkBound = false;
     private int mArtworkBoundId = 0;
     private int mArtworkNextBindRequestId = 0;
 
@@ -586,6 +589,9 @@ public class MediaControlPanel {
 
     private void bindArtworkAndColors(MediaData data, boolean updateBackground) {
         final int reqId = mArtworkNextBindRequestId++;
+        if (updateBackground) {
+            mIsArtworkBound = false;
+        }
 
         // Capture width & height from views in foreground for artwork scaling in background
         int width = mMediaViewHolder.getPlayer().getWidth();
@@ -597,15 +603,18 @@ public class MediaControlPanel {
             // Album art
             ColorScheme mutableColorScheme = null;
             Drawable artwork;
+            boolean isArtworkBound;
             Icon artworkIcon = data.getArtwork();
             if (artworkIcon != null) {
                 WallpaperColors wallpaperColors = WallpaperColors
                         .fromBitmap(artworkIcon.getBitmap());
                 mutableColorScheme = new ColorScheme(wallpaperColors, true);
                 artwork = getScaledBackground(artworkIcon, width, height);
+                isArtworkBound = true;
             } else {
                 // If there's no artwork, use colors from the app icon
-                artwork = null;
+                artwork = new ColorDrawable(Color.TRANSPARENT);
+                isArtworkBound = false;
                 try {
                     Drawable icon = mContext.getPackageManager()
                             .getApplicationIcon(data.getPackageName());
@@ -625,16 +634,20 @@ public class MediaControlPanel {
                 ImageView albumView = mMediaViewHolder.getAlbumView();
                 albumView.setPadding(0, 0, 0, 0);
                 albumView.setClipToOutline(true);
-                if (updateBackground) {
-                    if (mPrevArtwork == null || artwork == null) {
+                if (updateBackground || (!mIsArtworkBound && isArtworkBound)) {
+                    if (mPrevArtwork == null) {
                         albumView.setImageDrawable(artwork);
                     } else {
+                        // Since we throw away the last transition, this'll pop if you backgrounds
+                        // are cycled too fast (or the correct background arrives very soon after
+                        // the metadata changes).
                         TransitionDrawable transitionDrawable = new TransitionDrawable(
-                                new Drawable[] { mPrevArtwork, artwork });
+                                new Drawable[]{mPrevArtwork, artwork});
                         albumView.setImageDrawable(transitionDrawable);
-                        transitionDrawable.startTransition(333);
+                        transitionDrawable.startTransition(isArtworkBound ? 333 : 80);
                     }
                     mPrevArtwork = artwork;
+                    mIsArtworkBound = isArtworkBound;
                 }
 
                 // Transition Colors to current color scheme
