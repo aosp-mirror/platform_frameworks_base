@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import androidx.test.filters.FlakyTest
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -35,7 +35,6 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-@FlakyTest(bugId = 217777115)
 class PipKeyboardTestShellTransit(testSpec: FlickerTestParameter) : PipKeyboardTest(testSpec) {
 
     @Before
@@ -43,7 +42,7 @@ class PipKeyboardTestShellTransit(testSpec: FlickerTestParameter) : PipKeyboardT
         Assume.assumeTrue(isShellTransitionsEnabled)
     }
 
-    @FlakyTest(bugId = 214452854)
+    @Presubmit
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 }
