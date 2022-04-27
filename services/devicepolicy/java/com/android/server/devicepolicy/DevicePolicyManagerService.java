@@ -8517,13 +8517,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean isDeviceOwnerUserId(int userId) {
-        synchronized (getLockObject()) {
-            return mOwners.hasDeviceOwner()
-                    && mOwners.getDeviceOwnerUserId() == userId;
-        }
-    }
-
     private boolean isDeviceOwnerPackage(String packageName, int userId) {
         synchronized (getLockObject()) {
             return mOwners.hasDeviceOwner()
@@ -14656,6 +14649,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new SecurityException(
                     "Only the system can mark a profile owner of organization-owned device.");
         }
+        // Only a test admin can be unmarked as a profile owner on an organization-owned device.
+        synchronized (getLockObject()) {
+            if (!isProfileOwnerOnOrganizationOwnedDevice && !isAdminTestOnlyLocked(who, userId)) {
+                throw new SecurityException("Only a test admin can be unmarked as a "
+                        + "profile owner of organization-owned device.");
+            }
+        }
 
         if (isAdb(caller)) {
             if (hasIncompatibleAccountsOrNonAdbNoLock(caller, userId, who)) {
@@ -18268,7 +18268,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void updateNetworkPreferenceForUser(int userId,
             List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs) {
-        if (!isManagedProfile(userId) && !isDeviceOwnerUserId(userId)) {
+        if (!isManagedProfile(userId)) {
             return;
         }
         List<ProfileNetworkPreference> preferences = new ArrayList<>();
@@ -18283,16 +18283,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     preferenceBuilder.setPreference(
                             PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK);
                 }
+                preferenceBuilder.setIncludedUids(
+                        preferentialNetworkServiceConfig.getIncludedUids());
+                preferenceBuilder.setExcludedUids(
+                        preferentialNetworkServiceConfig.getExcludedUids());
+                preferenceBuilder.setPreferenceEnterpriseId(
+                        preferentialNetworkServiceConfig.getNetworkId());
             } else {
                 preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_DEFAULT);
             }
-            preferenceBuilder.setIncludedUids(preferentialNetworkServiceConfig.getIncludedUids());
-            preferenceBuilder.setExcludedUids(preferentialNetworkServiceConfig.getExcludedUids());
-            preferenceBuilder.setPreferenceEnterpriseId(
-                    preferentialNetworkServiceConfig.getNetworkId());
+
 
             preferences.add(preferenceBuilder.build());
         }
+        Slogf.d(LOG_TAG, "updateNetworkPreferenceForUser to " + preferences);
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.getConnectivityManager().setProfileNetworkPreferences(
                         UserHandle.of(userId), preferences,

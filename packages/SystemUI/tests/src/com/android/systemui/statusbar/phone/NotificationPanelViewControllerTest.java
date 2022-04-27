@@ -56,6 +56,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityManager;
@@ -99,6 +100,7 @@ import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -334,6 +336,12 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     @Mock
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock
+    private QS mQs;
+    @Mock
+    private View mQsHeader;
+    @Mock
+    private ViewParent mViewParent;
     private NotificationPanelViewController.PanelEventsEmitter mPanelEventsEmitter;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
@@ -454,6 +462,9 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
         }).when(mNotificationShadeWindowController).batchApplyWindowLayoutParams(any());
+
+        when(mView.getParent()).thenReturn(mViewParent);
+        when(mQs.getHeader()).thenReturn(mQsHeader);
 
         mMainHandler = new Handler(Looper.getMainLooper());
         mPanelEventsEmitter = new NotificationPanelViewController.PanelEventsEmitter();
@@ -982,6 +993,50 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mNotificationPanelViewController.onTrackingStarted();
 
         assertThat(mNotificationPanelViewController.mQsExpandImmediate).isTrue();
+    }
+
+    @Test
+    public void interceptTouchEvent_withinQs_shadeExpanded_startsQsTracking() {
+        mNotificationPanelViewController.mQs = mQs;
+        when(mQsFrame.getX()).thenReturn(0f);
+        when(mQsFrame.getWidth()).thenReturn(1000);
+        when(mQsHeader.getTop()).thenReturn(0);
+        when(mQsHeader.getBottom()).thenReturn(1000);
+        PanelViewController.TouchHandler touchHandler =
+                mNotificationPanelViewController.createTouchHandler();
+
+        mNotificationPanelViewController.setExpandedFraction(1f);
+        touchHandler.onInterceptTouchEvent(
+                createMotionEvent(/* x= */ 0, /* y= */ 0, MotionEvent.ACTION_DOWN));
+        touchHandler.onInterceptTouchEvent(
+                createMotionEvent(/* x= */ 0, /* y= */ 500, MotionEvent.ACTION_MOVE));
+
+        assertThat(mNotificationPanelViewController.isQsTracking()).isTrue();
+    }
+
+    @Test
+    public void interceptTouchEvent_withinQs_shadeExpanded_inSplitShade_doesNotStartQsTracking() {
+        enableSplitShade(true);
+        mNotificationPanelViewController.mQs = mQs;
+        when(mQsFrame.getX()).thenReturn(0f);
+        when(mQsFrame.getWidth()).thenReturn(1000);
+        when(mQsHeader.getTop()).thenReturn(0);
+        when(mQsHeader.getBottom()).thenReturn(1000);
+        PanelViewController.TouchHandler touchHandler =
+                mNotificationPanelViewController.createTouchHandler();
+
+        mNotificationPanelViewController.setExpandedFraction(1f);
+        touchHandler.onInterceptTouchEvent(
+                createMotionEvent(/* x= */ 0, /* y= */ 0, MotionEvent.ACTION_DOWN));
+        touchHandler.onInterceptTouchEvent(
+                createMotionEvent(/* x= */ 0, /* y= */ 500, MotionEvent.ACTION_MOVE));
+
+        assertThat(mNotificationPanelViewController.isQsTracking()).isFalse();
+    }
+
+    private static MotionEvent createMotionEvent(int x, int y, int action) {
+        return MotionEvent.obtain(
+                /* downTime= */ 0, /* eventTime= */ 0, action, x, y, /* metaState= */ 0);
     }
 
     private void triggerPositionClockAndNotifications() {

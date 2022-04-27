@@ -3747,13 +3747,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void registerWindowContainerListener(WindowContainerListener listener) {
+        registerWindowContainerListener(listener, true /* shouldPropConfig */);
+    }
+
+    void registerWindowContainerListener(WindowContainerListener listener,
+            boolean shouldDispatchConfig) {
         if (mListeners.contains(listener)) {
             return;
         }
         mListeners.add(listener);
         // Also register to ConfigurationChangeListener to receive configuration changes.
-        registerConfigurationChangeListener(listener);
-        listener.onDisplayChanged(getDisplayContent());
+        registerConfigurationChangeListener(listener, shouldDispatchConfig);
+        if (shouldDispatchConfig) {
+            listener.onDisplayChanged(getDisplayContent());
+        }
     }
 
     void unregisterWindowContainerListener(WindowContainerListener listener) {
