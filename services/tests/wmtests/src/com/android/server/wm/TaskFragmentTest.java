@@ -403,4 +403,29 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertFalse(activity0.hasOverlayOverUntrustedModeEmbedded());
         assertFalse(activity1.hasOverlayOverUntrustedModeEmbedded());
     }
+
+    @Test
+    public void testIsAllowedToBeEmbeddedInTrustedMode() {
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setCreateParentTask()
+                .createActivityCount(2)
+                .build();
+        final ActivityRecord activity0 = taskFragment.getBottomMostActivity();
+        final ActivityRecord activity1 = taskFragment.getTopMostActivity();
+
+        // Allowed if all children activities are allowed.
+        doReturn(true).when(taskFragment).isAllowedToEmbedActivityInTrustedMode(activity0);
+        doReturn(true).when(taskFragment).isAllowedToEmbedActivityInTrustedMode(activity1);
+
+        assertTrue(taskFragment.isAllowedToBeEmbeddedInTrustedMode());
+
+        // Disallowed if any child activity is not allowed.
+        doReturn(false).when(taskFragment).isAllowedToEmbedActivityInTrustedMode(activity0);
+
+        assertFalse(taskFragment.isAllowedToBeEmbeddedInTrustedMode());
+
+        doReturn(false).when(taskFragment).isAllowedToEmbedActivityInTrustedMode(activity1);
+
+        assertFalse(taskFragment.isAllowedToBeEmbeddedInTrustedMode());
+    }
 }
