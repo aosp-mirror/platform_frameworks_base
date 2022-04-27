@@ -1233,6 +1233,11 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.initQRCodeScanner(mQRCodeScannerController);
     }
 
+    @VisibleForTesting
+    void setMaxDisplayedNotifications(int maxAllowed) {
+        mMaxAllowedKeyguardNotifications = maxAllowed;
+    }
+
     private void updateMaxDisplayedNotifications(boolean recompute) {
         if (recompute) {
             mMaxAllowedKeyguardNotifications = Math.max(computeMaxKeyguardNotifications(), 1);
@@ -1463,7 +1468,11 @@ public class NotificationPanelViewController extends PanelViewController {
     /**
      * @return the maximum keyguard notifications that can fit on the screen
      */
-    private int computeMaxKeyguardNotifications() {
+    @VisibleForTesting
+    int computeMaxKeyguardNotifications() {
+        if (mAmbientState.getFractionToShade() > 0 || mAmbientState.getDozeAmount() > 0) {
+            return mMaxAllowedKeyguardNotifications;
+        }
         float topPadding = mNotificationStackScrollLayoutController.getTopPadding();
         float shelfIntrinsicHeight =
                 mNotificationShelfController.getVisibility() == View.GONE
