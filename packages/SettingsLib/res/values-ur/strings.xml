@@ -255,12 +255,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"‏Wi-Fi سے جوڑا بنانے کا کوڈ"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"جوڑا بنانے میں ناکام"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"یقینی بنائیں کہ آلہ اسی نیٹ ورک سے منسلک ہے۔"</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"‏QR کوڈ اسکین کر کے Wi-Fi پر آلہ کا جوڑا بنائیں"</string>
-    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"آلہ کا جوڑا بنایا جا رہا ہے…"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"‏QR کوڈ اسکین کر کے Wi-Fi پر آلے سے جوڑا بنائیں"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"آلے سے جوڑا بنایا جا رہا ہے…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"‏آلہ کا جوڑا بنانے میں ناکام۔ یا تو QR کوڈ غلط تھا، یا آلہ اسی نیٹ ورک سے منسلک نہیں ہے۔"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏IP پتہ اور پورٹ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"‏QR کوڈ اسکین کریں"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"‏QR کوڈ اسکین کر کے Wi-Fi پر آلہ کا جوڑا بنائیں"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"‏QR کوڈ اسکین کر کے Wi-Fi پر آلے سے جوڑا بنائیں"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏براہ کرم ایک Wi-Fi نیٹ ورک سے منسلک ہوں"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb، ڈیبگ، dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"بگ رپورٹ کا شارٹ کٹ"</string>
