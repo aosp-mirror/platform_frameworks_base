@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"octet(s)"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"Ko"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"ko"</string>
     <string name="megabyteShort" msgid="6649361267635823443">"Mo"</string>
     <string name="gigabyteShort" msgid="7515809460261287991">"Go"</string>
     <string name="terabyteShort" msgid="1822367128583886496">"To"</string>
@@ -246,7 +246,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"Éteindre"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Marche/Arrêt"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Redémarrer"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Urgences"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Urgence"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Rapport de bug"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Fermer la session"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Capture d\'écran"</string>

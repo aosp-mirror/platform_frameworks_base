@@ -354,7 +354,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Дозволяє програмі розгортати чи згортати рядок стану."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Показувати сповіщення як активності на весь екран заблокованого пристрою"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Додаток зможе показувати сповіщення як активності на весь екран заблокованого пристрою"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"створення ярликів"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Створювати ярлики"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Дозволяє програмі самостійно додавати ярлики на головний екран."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"видаляти ярлики"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Дозволяє програмі самостійно вилучати ярлики з головного екрана."</string>
