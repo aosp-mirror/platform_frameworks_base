@@ -487,7 +487,7 @@ public class UserManagerService extends IUserManager.Stub {
     private final ArrayList<UserRestrictionsListener> mUserRestrictionsListeners =
             new ArrayList<>();
 
-    @GuardedBy("mUserRemovedListeners")
+    @GuardedBy("mUserLifecycleListeners")
     private final ArrayList<UserLifecycleListener> mUserLifecycleListeners = new ArrayList<>();
 
     private final LockPatternUtils mLockPatternUtils;
