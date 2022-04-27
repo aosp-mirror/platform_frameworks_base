@@ -640,7 +640,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     @Override
     int getOrientation(int candidate) {
         mLastOrientationSource = null;
-        if (mIgnoreOrientationRequest) {
+        if (getIgnoreOrientationRequest()) {
             return SCREEN_ORIENTATION_UNSET;
         }
         if (!canSpecifyOrientation()) {
@@ -824,9 +824,19 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     }
 
     void setBackgroundColor(@ColorInt int colorInt) {
+        setBackgroundColor(colorInt, false /* restore */);
+    }
+
+    void setBackgroundColor(@ColorInt int colorInt, boolean restore) {
         mBackgroundColor = colorInt;
         Color color = Color.valueOf(colorInt);
-        mColorLayerCounter++;
+
+        // We don't want to increment the mColorLayerCounter if we are restoring the background
+        // color after a surface migration because in that case the mColorLayerCounter already
+        // accounts for setting that background color.
+        if (!restore) {
+            mColorLayerCounter++;
+        }
 
         // Only apply the background color if the TDA is actually attached and has a valid surface
         // to set the background color on. We still want to keep track of the background color state
@@ -855,7 +865,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         super.migrateToNewSurfaceControl(t);
 
         if (mColorLayerCounter > 0) {
-            setBackgroundColor(mBackgroundColor);
+            setBackgroundColor(mBackgroundColor, true /* restore */);
         }
 
         if (mSplitScreenDividerAnchor == null) {
@@ -966,6 +976,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 } else {
                     candidateTask.reparent(this, onTop);
                 }
+            }
+            // Update windowing mode if necessary, e.g. launch into a different windowing mode.
+            if (windowingMode != WINDOWING_MODE_UNDEFINED && candidateTask.isRootTask()
+                    && candidateTask.getWindowingMode() != windowingMode) {
+                candidateTask.setWindowingMode(windowingMode);
             }
             return candidateTask.getRootTask();
         }
@@ -1115,9 +1130,9 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0
                 && mLaunchAdjacentFlagRootTask != null) {
             // If the adjacent launch is coming from the same root, launch to adjacent root instead.
-            if (sourceTask != null
-                    && sourceTask.getRootTask().mTaskId == mLaunchAdjacentFlagRootTask.mTaskId
-                    && mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment() != null) {
+            if (sourceTask != null && mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment() != null
+                    && (sourceTask == mLaunchAdjacentFlagRootTask
+                    || sourceTask.isDescendantOf(mLaunchAdjacentFlagRootTask))) {
                 return mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment().asTask();
             } else {
                 return mLaunchAdjacentFlagRootTask;
@@ -1131,18 +1146,22 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                         ? launchRootTask.getAdjacentTaskFragment() : null;
                 final Task adjacentRootTask =
                         adjacentTaskFragment != null ? adjacentTaskFragment.asTask() : null;
-                if (sourceTask != null && sourceTask.getRootTask() == adjacentRootTask) {
+                if (sourceTask != null && adjacentRootTask != null
+                        && (sourceTask == adjacentRootTask
+                        || sourceTask.isDescendantOf(adjacentRootTask))) {
                     return adjacentRootTask;
                 } else {
                     return launchRootTask;
                 }
             }
         }
-        // For better split UX, If task launch by the source task which root task is created by
-        // organizer, it should also launch in that root too.
-        if (sourceTask != null && sourceTask.getRootTask().mCreatedByOrganizer) {
-            return sourceTask.getRootTask();
+
+        // For a better split UX, If a task is launching from a created-by-organizer task, it should
+        // be launched into the same created-by-organizer task as well.
+        if (sourceTask != null) {
+            return sourceTask.getCreatedByOrganizerTask();
         }
+
         return null;
     }
 
@@ -1898,7 +1917,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Only allow to specify orientation if this TDA is not set to ignore orientation request,
         // and it is the last focused one on this logical display that can request orientation
         // request.
-        return !mIgnoreOrientationRequest
+        return !getIgnoreOrientationRequest()
                 && mDisplayContent.getOrientationRequestingTaskDisplayArea() == this;
     }
 

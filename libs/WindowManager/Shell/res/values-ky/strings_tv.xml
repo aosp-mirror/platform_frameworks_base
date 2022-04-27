@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"PIP\'ти жылдыруу"</string>
     <string name="pip_expand" msgid="7605396312689038178">"PIP\'ти жайып көрсөтүү"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"PIP\'ти жыйыштыруу"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Башкаруу элементтерин ачуу үчүн "<annotation icon="home_icon">" БАШКЫ БЕТ "</annotation>" баскычын эки жолу басыңыз"</string>
 </resources>

@@ -16,6 +16,7 @@
 
 package com.android.systemui.unfold
 
+import android.app.ActivityManager
 import android.content.ContentResolver
 import android.content.Context
 import android.hardware.SensorManager
@@ -51,6 +52,7 @@ internal interface UnfoldSharedComponent {
             @BindsInstance config: UnfoldTransitionConfig,
             @BindsInstance screenStatusProvider: ScreenStatusProvider,
             @BindsInstance deviceStateManager: DeviceStateManager,
+            @BindsInstance activityManager: ActivityManager,
             @BindsInstance sensorManager: SensorManager,
             @BindsInstance @Main handler: Handler,
             @BindsInstance @Main executor: Executor,

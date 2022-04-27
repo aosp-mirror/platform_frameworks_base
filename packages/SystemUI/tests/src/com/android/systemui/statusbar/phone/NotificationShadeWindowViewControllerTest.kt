@@ -24,11 +24,13 @@ import com.android.keyguard.LockIconViewController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.lowlightclock.LowLightClockController
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
@@ -71,6 +73,10 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var mNotificationShadeWindowController: NotificationShadeWindowController
     @Mock
+    private lateinit var mKeyguardUnlockAnimationController: KeyguardUnlockAnimationController
+    @Mock
+    private lateinit var mAmbientState: AmbientState
+    @Mock
     private lateinit var stackScrollLayoutController: NotificationStackScrollLayoutController
     @Mock
     private lateinit var mStatusBarKeyguardViewManager: StatusBarKeyguardViewManager
@@ -109,7 +115,9 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             mLockIconViewController,
             Optional.of(mLowLightClockController),
             mCentralSurfaces,
-            mNotificationShadeWindowController
+            mNotificationShadeWindowController,
+            mKeyguardUnlockAnimationController,
+            mAmbientState
         )
         mController.setupExpandedStatusBar()
 

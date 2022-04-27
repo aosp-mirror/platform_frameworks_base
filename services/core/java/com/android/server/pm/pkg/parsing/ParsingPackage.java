@@ -302,6 +302,8 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setMinSdkVersion(int minSdkVersion);
 
+    ParsingPackage setMaxSdkVersion(int maxSdkVersion);
+
     ParsingPackage setNetworkSecurityConfigRes(int networkSecurityConfigRes);
 
     ParsingPackage setNonLocalizedLabel(CharSequence nonLocalizedLabel);

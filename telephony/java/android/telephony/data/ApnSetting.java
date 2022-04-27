@@ -24,6 +24,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.hardware.radio.V1_5.ApnTypes;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
@@ -549,7 +550,6 @@ public class ApnSetting implements Parcelable {
      * Returns the profile id to which the APN saved in modem.
      *
      * @return the profile id of the APN
-     * @hide
      */
     public int getProfileId() {
         return mProfileId;
@@ -558,8 +558,7 @@ public class ApnSetting implements Parcelable {
     /**
      * Returns if the APN setting is persistent on the modem.
      *
-     * @return is the APN setting to be set in modem
-     * @hide
+     * @return {@code true} if the APN setting is persistent on the modem.
      */
     public boolean isPersistent() {
         return mPersistent;
@@ -1103,8 +1102,10 @@ public class ApnSetting implements Parcelable {
         sb.append(", ").append(MVNO_TYPE_INT_MAP.get(mMvnoType));
         sb.append(", ").append(mMvnoMatchData);
         sb.append(", ").append(mPermanentFailed);
-        sb.append(", ").append(mNetworkTypeBitmask);
-        sb.append(", ").append(mLingeringNetworkTypeBitmask);
+        sb.append(", ").append(TelephonyManager.convertNetworkTypeBitmaskToString(
+                mNetworkTypeBitmask));
+        sb.append(", ").append(TelephonyManager.convertNetworkTypeBitmaskToString(
+                mLingeringNetworkTypeBitmask));
         sb.append(", ").append(mApnSetId);
         sb.append(", ").append(mCarrierId);
         sb.append(", ").append(mSkip464Xlat);
@@ -1575,7 +1576,9 @@ public class ApnSetting implements Parcelable {
      * @hide
      */
     public boolean canSupportLingeringNetworkType(@NetworkType int networkType) {
-        if (networkType == 0) {
+        // For backwards compatibility, if this field is not set, we just use the existing
+        // network type bitmask.
+        if (mLingeringNetworkTypeBitmask == 0) {
             return canSupportNetworkType(networkType);
         }
         // Do a special checking for GSM. In reality, GSM is a voice only network type and can never
@@ -2181,6 +2184,14 @@ public class ApnSetting implements Parcelable {
                     | TYPE_FOTA | TYPE_IMS | TYPE_CBS | TYPE_IA | TYPE_EMERGENCY | TYPE_MCX
                     | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE)) == 0
                 || TextUtils.isEmpty(mApnName) || TextUtils.isEmpty(mEntryName)) {
+                return null;
+            }
+            if ((mApnTypeBitmask & TYPE_MMS) != 0 && !TextUtils.isEmpty(mMmsProxyAddress)
+                    && mMmsProxyAddress.startsWith("http")) {
+                if (Build.IS_DEBUGGABLE) {
+                    throw new IllegalArgumentException("mms proxy(" +  mMmsProxyAddress
+                            + ") should be a hostname, not a url");
+                }
                 return null;
             }
             return new ApnSetting(this);

@@ -967,16 +967,16 @@ public class WifiNl80211Manager {
      *
      * @param ifaceName Name of the interface.
      */
-    public int getMaxNumScanSsids(@NonNull String ifaceName) {
+    public int getMaxSsidsPerScan(@NonNull String ifaceName) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
             Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
             return 0;
         }
         try {
-            return scannerImpl.getMaxNumScanSsids();
+            return scannerImpl.getMaxSsidsPerScan();
         } catch (RemoteException e1) {
-            Log.e(TAG, "Failed to getMaxNumScanSsids");
+            Log.e(TAG, "Failed to getMaxSsidsPerScan");
         }
         return 0;
     }

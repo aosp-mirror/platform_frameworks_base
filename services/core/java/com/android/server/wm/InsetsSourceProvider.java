@@ -16,11 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_INSETS;
 import static com.android.server.wm.InsetsSourceProviderProto.CAPTURED_LEASH;
@@ -84,6 +80,7 @@ abstract class InsetsSourceProvider {
     private TriConsumer<DisplayFrames, WindowContainer, Rect> mImeFrameProvider;
     private final Rect mImeOverrideFrame = new Rect();
     private boolean mIsLeashReadyForDispatching;
+    private final Rect mSourceFrame = new Rect();
     private final Rect mLastSourceFrame = new Rect();
 
     private final Consumer<Transaction> mSetLeashPositionConsumer = t -> {
@@ -126,19 +123,8 @@ abstract class InsetsSourceProvider {
         mDisplayContent = displayContent;
         mStateController = stateController;
         mFakeControl = new InsetsSourceControl(
-                source.getType(), null /* leash */, new Point(), Insets.NONE);
-
-        switch (source.getType()) {
-            case ITYPE_STATUS_BAR:
-            case ITYPE_NAVIGATION_BAR:
-            case ITYPE_IME:
-            case ITYPE_CLIMATE_BAR:
-            case ITYPE_EXTRA_NAVIGATION_BAR:
-                mControllable = true;
-                break;
-            default:
-                mControllable = false;
-        }
+                source.getType(), null /* leash */, new Point(), InsetsSourceControl.INVALID_HINTS);
+        mControllable = InsetsPolicy.isInsetsTypeControllable(source.getType());
     }
 
     InsetsSource getSource() {
@@ -183,8 +169,8 @@ abstract class InsetsSourceProvider {
         mImeFrameProvider = imeFrameProvider;
         if (windowContainer == null) {
             setServerVisible(false);
-            mSource.setFrame(new Rect());
             mSource.setVisibleFrame(null);
+            mSourceFrame.setEmpty();
         } else {
             mWindowContainer.getProvidedInsetsSources().put(mSource.getType(), mSource);
             if (mControllable) {
@@ -208,7 +194,7 @@ abstract class InsetsSourceProvider {
      * The source frame can affect the layout of other windows, so this should be called once the
      * window container gets laid out.
      */
-    void updateSourceFrame() {
+    void updateSourceFrame(Rect frame) {
         if (mWindowContainer == null) {
             return;
         }
@@ -230,39 +216,25 @@ abstract class InsetsSourceProvider {
             return;
         }
 
-        if (win.mGivenInsetsPending) {
-            // If the given insets are pending, they are not reliable for now. The source frame
-            // should be updated after the new given insets are sent to window manager.
-            return;
-        }
-
-        // Make sure we set the valid source frame only when server visible is true, because the
-        // frame may not yet determined that server side doesn't think the window is ready to
-        // visible. (i.e. No surface, pending insets that were given during layout, etc..)
-        if (mServerVisible) {
-            mTmpRect.set(win.getFrame());
-            if (mFrameProvider != null) {
-                mFrameProvider.accept(mWindowContainer.getDisplayContent().mDisplayFrames,
-                        mWindowContainer, mTmpRect);
-            } else {
-                mTmpRect.inset(win.mGivenContentInsets);
-            }
+        mSourceFrame.set(frame);
+        if (mFrameProvider != null) {
+            mFrameProvider.accept(mWindowContainer.getDisplayContent().mDisplayFrames,
+                    mWindowContainer, mSourceFrame);
         } else {
-            mTmpRect.setEmpty();
+            mSourceFrame.inset(win.mGivenContentInsets);
         }
-        mSource.setFrame(mTmpRect);
+        updateSourceFrameForServerVisibility();
 
         if (mImeFrameProvider != null) {
-            mImeOverrideFrame.set(win.getFrame());
+            mImeOverrideFrame.set(frame);
             mImeFrameProvider.accept(mWindowContainer.getDisplayContent().mDisplayFrames,
-                    mWindowContainer,
-                    mImeOverrideFrame);
+                    mWindowContainer, mImeOverrideFrame);
         }
 
         if (win.mGivenVisibleInsets.left != 0 || win.mGivenVisibleInsets.top != 0
                 || win.mGivenVisibleInsets.right != 0
                 || win.mGivenVisibleInsets.bottom != 0) {
-            mTmpRect.set(win.getFrame());
+            mTmpRect.set(frame);
             mTmpRect.inset(win.mGivenVisibleInsets);
             mSource.setVisibleFrame(mTmpRect);
         } else {
@@ -270,13 +242,24 @@ abstract class InsetsSourceProvider {
         }
     }
 
+    private void updateSourceFrameForServerVisibility() {
+        // Make sure we set the valid source frame only when server visible is true, because the
+        // frame may not yet determined that server side doesn't think the window is ready to
+        // visible. (i.e. No surface, pending insets that were given during layout, etc..)
+        if (mServerVisible) {
+            mSource.setFrame(mSourceFrame);
+        } else {
+            mSource.setFrame(0, 0, 0, 0);
+        }
+    }
+
     /** @return A new source computed by the specified window frame in the given display frames. */
-    InsetsSource createSimulatedSource(DisplayFrames displayFrames, Rect winFrame) {
+    InsetsSource createSimulatedSource(DisplayFrames displayFrames, Rect frame) {
         // Don't copy visible frame because it might not be calculated in the provided display
         // frames and it is not significant for this usage.
         final InsetsSource source = new InsetsSource(mSource.getType());
         source.setVisible(mSource.isVisible());
-        mTmpRect.set(winFrame);
+        mTmpRect.set(frame);
         if (mFrameProvider != null) {
             mFrameProvider.accept(displayFrames, mWindowContainer, mTmpRect);
         }
@@ -296,7 +279,6 @@ abstract class InsetsSourceProvider {
                 ? windowState.wouldBeVisibleIfPolicyIgnored() && windowState.isVisibleByPolicy()
                 : mWindowContainer.isVisibleRequested();
         setServerVisible(isServerVisible);
-        updateSourceFrame();
         if (mControl != null) {
             boolean changed = false;
             final Point position = getWindowFrameSurfacePosition();
@@ -496,6 +478,7 @@ abstract class InsetsSourceProvider {
     @VisibleForTesting
     void setServerVisible(boolean serverVisible) {
         mServerVisible = serverVisible;
+        updateSourceFrameForServerVisibility();
         updateVisibility();
     }
 

@@ -110,6 +110,14 @@ public class DisplayController {
     }
 
     /**
+     *  Get the InsetsState of a display.
+     */
+    public InsetsState getInsetsState(int displayId) {
+        final DisplayRecord r = mDisplays.get(displayId);
+        return r != null ? r.mInsetsState : null;
+    }
+
+    /**
      * Updates the insets for a given display.
      */
     public void updateDisplayInsets(int displayId, InsetsState state) {

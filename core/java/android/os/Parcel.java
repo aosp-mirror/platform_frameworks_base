@@ -549,6 +549,7 @@ public final class Parcel {
      */
     public final void recycle() {
         if (DEBUG_RECYCLE) mStack = null;
+        mClassCookies = null;
         freeBuffer();
 
         if (mOwnsNativeParcelObject) {
@@ -2172,7 +2173,7 @@ public final class Parcel {
      *   sized with the exact size of dimensions.
      *
      * @see #readFixedArray
-     * @see #createFixedArray
+     * @see #createFixedArray createFixedArray(Class&lt;T&gt;, Parcelable.Creator&lt;S&gt;, int...)
      * @see #writeBooleanArray
      * @see #writeByteArray
      * @see #writeCharArray

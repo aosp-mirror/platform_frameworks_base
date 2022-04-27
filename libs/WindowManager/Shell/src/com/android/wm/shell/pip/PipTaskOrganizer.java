@@ -18,7 +18,6 @@ package com.android.wm.shell.pip;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.util.RotationUtils.deltaRotation;
 import static android.util.RotationUtils.rotateBounds;
@@ -450,11 +449,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             tx.setWindowCrop(mLeash, destinationBounds.width(), destinationBounds.height());
             // We set to fullscreen here for now, but later it will be set to UNDEFINED for
             // the proper windowing mode to take place. See #applyWindowingModeChangeOnExit.
-            wct.setActivityWindowingMode(mToken,
-                    direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
-                            && !requestEnterSplit
-                            ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                            : WINDOWING_MODE_FULLSCREEN);
+            wct.setActivityWindowingMode(mToken, WINDOWING_MODE_FULLSCREEN);
             wct.setBounds(mToken, destinationBounds);
             wct.setBoundsChangeTransaction(mToken, tx);
         }
@@ -669,6 +664,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mSurfaceControlTransactionFactory.getTransaction();
         tx.setAlpha(mLeash, 0f);
         tx.apply();
+
+        // When entering PiP this transaction will be applied within WindowContainerTransaction and
+        // ensure that the PiP has rounded corners.
+        final SurfaceControl.Transaction boundsChangeTx =
+                mSurfaceControlTransactionFactory.getTransaction();
+        mSurfaceTransactionHelper
+                .crop(boundsChangeTx, mLeash, destinationBounds)
+                .round(boundsChangeTx, mLeash, true /* applyCornerRadius */);
+
         mPipTransitionState.setTransitionState(PipTransitionState.ENTRY_SCHEDULED);
         applyEnterPipSyncTransaction(destinationBounds, () -> {
             mPipAnimationController
@@ -681,7 +685,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // mState is set right after the animation is kicked off to block any resize
             // requests such as offsetPip that may have been called prior to the transition.
             mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
-        }, null /* boundsChangeTransaction */);
+        }, boundsChangeTx);
     }
 
     private void onEndOfSwipePipToHomeTransition() {
@@ -919,6 +923,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             removeContentOverlay(mSwipePipToHomeOverlay, null /* callback */);
             mSwipePipToHomeOverlay = null;
         }
+        resetShadowRadius();
         mPipTransitionState.setInSwipePipToHomeTransition(false);
         mPictureInPictureParams = null;
         mPipTransitionState.setTransitionState(PipTransitionState.UNDEFINED);
@@ -1076,13 +1081,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     private boolean applyPictureInPictureParams(@NonNull PictureInPictureParams params) {
         final Rational currentAspectRatio =
-                mPictureInPictureParams != null ? mPictureInPictureParams.getAspectRatioRational()
+                mPictureInPictureParams != null ? mPictureInPictureParams.getAspectRatio()
                         : null;
         final boolean aspectRatioChanged = !Objects.equals(currentAspectRatio,
-                params.getAspectRatioRational());
+                params.getAspectRatio());
         mPictureInPictureParams = params;
         if (aspectRatioChanged) {
-            mPipBoundsState.setAspectRatio(params.getAspectRatio());
+            mPipBoundsState.setAspectRatio(params.getAspectRatioFloat());
         }
         return aspectRatioChanged;
     }
@@ -1564,11 +1569,26 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // Avoid double removal, which is fatal.
             return;
         }
-        final SurfaceControl.Transaction tx =
-                mSurfaceControlTransactionFactory.getTransaction();
+        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         tx.remove(surface);
         tx.apply();
         if (callback != null) callback.run();
+    }
+
+    private void resetShadowRadius() {
+        if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
+            // mLeash is undefined when in PipTransitionState.UNDEFINED
+            return;
+        }
+        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
+        tx.setShadowRadius(mLeash, 0f);
+        tx.apply();
+    }
+
+    @VisibleForTesting
+    public void setSurfaceControlTransactionFactory(
+            PipSurfaceTransactionHelper.SurfaceControlTransactionFactory factory) {
+        mSurfaceControlTransactionFactory = factory;
     }
 
     /**

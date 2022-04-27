@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -47,6 +48,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
+import com.android.systemui.util.LargeScreenUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -705,6 +707,12 @@ public class AuthBiometricView extends LinearLayout {
 
         mTitleView.setText(mPromptInfo.getTitle());
 
+        //setSelected could make marguee work
+        mTitleView.setSelected(true);
+        mSubtitleView.setSelected(true);
+        //make description view become scrollable
+        mDescriptionView.setMovementMethod(new ScrollingMovementMethod());
+
         if (isDeviceCredentialAllowed()) {
             final CharSequence credentialButtonText;
             @Utils.CredentialType final int credentialType =
@@ -814,7 +822,7 @@ public class AuthBiometricView extends LinearLayout {
     }
 
     private boolean isLargeDisplay() {
-        return com.android.systemui.util.Utils.shouldUseSplitNotificationShade(getResources());
+        return LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
     }
 
     @Override

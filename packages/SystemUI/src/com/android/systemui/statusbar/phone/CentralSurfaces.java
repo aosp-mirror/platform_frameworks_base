@@ -110,6 +110,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
+import android.window.SplashScreen;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -225,6 +226,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
@@ -248,7 +250,6 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -358,6 +359,16 @@ public class CentralSurfaces extends CoreStartable implements
     private CentralSurfacesCommandQueueCallbacks mCommandQueueCallbacks;
     private float mTransitionToFullShadeProgress = 0f;
     private NotificationListContainer mNotifListContainer;
+
+    private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
+            new KeyguardStateController.Callback() {
+                @Override
+                public void onKeyguardShowingChanged() {
+                    boolean occluded = mKeyguardStateController.isOccluded();
+                    mStatusBarHideIconsForBouncerManager.setIsOccludedAndTriggerUpdate(occluded);
+                    mScrimController.setKeyguardOccluded(occluded);
+                }
+            };
 
     void onStatusBarWindowStateChanged(@WindowVisibleState int state) {
         updateBubblesVisibility();
@@ -641,6 +652,7 @@ public class CentralSurfaces extends CoreStartable implements
     private boolean mWallpaperSupported;
 
     private Runnable mLaunchTransitionEndRunnable;
+    private Runnable mLaunchTransitionCancelRunnable;
     private boolean mLaunchCameraWhenFinishedWaking;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
     private boolean mLaunchEmergencyActionWhenFinishedWaking;
@@ -654,7 +666,6 @@ public class CentralSurfaces extends CoreStartable implements
     private int mLastLoggedStateFingerprint;
     private boolean mTopHidesStatusBar;
     private boolean mStatusBarWindowHidden;
-    private boolean mIsOccluded;
     private boolean mIsLaunchingActivityOverLockscreen;
 
     private final UserSwitcherController mUserSwitcherController;
@@ -1001,7 +1012,6 @@ public class CentralSurfaces extends CoreStartable implements
             mCommandQueue.setIcon(result.mIcons.keyAt(i), result.mIcons.valueAt(i));
         }
 
-
         if (DEBUG) {
             Log.d(TAG, String.format(
                     "init: icons=%d disabled=0x%08x lights=0x%08x imeButton=0x%08x",
@@ -1035,7 +1045,6 @@ public class CentralSurfaces extends CoreStartable implements
         mKeyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onUnlockedChanged() {
-                updateKeyguardState();
                 logStateToEventlog();
             }
         });
@@ -1380,8 +1389,11 @@ public class CentralSurfaces extends CoreStartable implements
      * keyguard.
      */
     private void dispatchPanelExpansionForKeyguardDismiss(float fraction, boolean trackingTouch) {
-        // Things that mean we're not dismissing the keyguard, and should ignore this expansion:
+        // Things that mean we're not swiping to dismiss the keyguard, and should ignore this
+        // expansion:
         // - Keyguard isn't even visible.
+        // - Keyguard is occluded. Expansion changes here are the shade being expanded over the
+        //   occluding activity.
         // - Keyguard is visible, but can't be dismissed (swiping up will show PIN/password prompt).
         // - The SIM is locked, you can't swipe to unlock. If the SIM is locked but there is no
         //   device lock set, canDismissLockScreen returns true even though you should not be able
@@ -1389,6 +1401,7 @@ public class CentralSurfaces extends CoreStartable implements
         // - QS is expanded and we're swiping - swiping up now will hide QS, not dismiss the
         //   keyguard.
         if (!isKeyguardShowing()
+                || isOccluded()
                 || !mKeyguardStateController.canDismissLockScreen()
                 || mKeyguardViewMediator.isAnySimPinSecure()
                 || (mNotificationPanelViewController.isQsExpanded() && trackingTouch)) {
@@ -1406,7 +1419,9 @@ public class CentralSurfaces extends CoreStartable implements
         }
     }
 
-    private void onPanelExpansionChanged(float fraction, boolean expanded, boolean tracking) {
+    private void onPanelExpansionChanged(PanelExpansionChangeEvent event) {
+        float fraction = event.getFraction();
+        boolean tracking = event.getTracking();
         dispatchPanelExpansionForKeyguardDismiss(fraction, tracking);
 
         if (fraction == 0 || fraction == 1) {
@@ -1430,7 +1445,6 @@ public class CentralSurfaces extends CoreStartable implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, null, UserHandle.ALL);
     }
 
@@ -1598,6 +1612,7 @@ public class CentralSurfaces extends CoreStartable implements
                 mBiometricUnlockController,
                 mStackScroller,
                 mKeyguardBypassController);
+        mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
@@ -1695,12 +1710,20 @@ public class CentralSurfaces extends CoreStartable implements
     public void startActivity(Intent intent, boolean dismissShade,
             @Nullable ActivityLaunchAnimator.Controller animationController,
             boolean showOverLockscreenWhenLocked) {
+        startActivity(intent, dismissShade, animationController, showOverLockscreenWhenLocked,
+                getActivityUserHandle(intent));
+    }
+
+    @Override
+    public void startActivity(Intent intent, boolean dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            boolean showOverLockscreenWhenLocked, UserHandle userHandle) {
         // Make sure that we dismiss the keyguard if it is directly dismissable or when we don't
         // want to show the activity above it.
         if (mKeyguardStateController.isUnlocked() || !showOverLockscreenWhenLocked) {
             startActivityDismissingKeyguard(intent, false, dismissShade,
-                false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
-                0 /* flags */, animationController);
+                    false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
+                    0 /* flags */, animationController, userHandle);
             return;
         }
 
@@ -1755,7 +1778,7 @@ public class CentralSurfaces extends CoreStartable implements
                         .create(mContext)
                         .addNextIntent(intent)
                         .startActivities(getActivityOptions(getDisplayId(), adapter),
-                                UserHandle.CURRENT));
+                                userHandle));
     }
 
     /**
@@ -1775,7 +1798,7 @@ public class CentralSurfaces extends CoreStartable implements
     public void startActivity(Intent intent, boolean dismissShade, Callback callback) {
         startActivityDismissingKeyguard(intent, false, dismissShade,
                 false /* disallowEnterPictureInPictureWhileLaunching */, callback, 0,
-                null /* animationController */);
+                null /* animationController */, getActivityUserHandle(intent));
     }
 
     public void setQsExpanded(boolean expanded) {
@@ -1844,13 +1867,7 @@ public class CentralSurfaces extends CoreStartable implements
      * @return whether the keyguard is currently occluded
      */
     public boolean isOccluded() {
-        return mIsOccluded;
-    }
-
-    public void setOccluded(boolean occluded) {
-        mIsOccluded = occluded;
-        mStatusBarHideIconsForBouncerManager.setIsOccludedAndTriggerUpdate(occluded);
-        mScrimController.setKeyguardOccluded(occluded);
+        return mKeyguardStateController.isOccluded();
     }
 
     /** A launch animation was cancelled. */
@@ -1869,13 +1886,7 @@ public class CentralSurfaces extends CoreStartable implements
         if (!mPresenter.isCollapsing()) {
             onClosingFinished();
         }
-
-        // Collapse the panel if we're launching in fullscreen, over the lockscreen. Do not do this
-        // if the device has gone back to sleep - through a horrific chain of 15 or so function
-        // calls, instantCollapseNotificationPanel will eventually call through to
-        // StatusBar#wakeUpIfDozing, which will wake the device up even if it was put to sleep
-        // during the launch animation.
-        if (launchIsFullScreen && mPowerManager.isInteractive()) {
+        if (launchIsFullScreen) {
             instantCollapseNotificationPanel();
         }
     }
@@ -2255,7 +2266,7 @@ public class CentralSurfaces extends CoreStartable implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+    public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
@@ -2277,13 +2288,13 @@ public class CentralSurfaces extends CoreStartable implements
 
         pw.println("  ShadeWindowView: ");
         if (mNotificationShadeWindowViewController != null) {
-            mNotificationShadeWindowViewController.dump(fd, pw, args);
+            mNotificationShadeWindowViewController.dump(pw, args);
             dumpBarTransitions(pw, "PhoneStatusBarTransitions", mStatusBarTransitions);
         }
 
         pw.println("  mMediaManager: ");
         if (mMediaManager != null) {
-            mMediaManager.dump(fd, pw, args);
+            mMediaManager.dump(pw, args);
         }
 
         pw.println("  Panels: ");
@@ -2292,14 +2303,14 @@ public class CentralSurfaces extends CoreStartable implements
                     + mNotificationPanelViewController.getView() + " params="
                     + mNotificationPanelViewController.getView().getLayoutParams().debug(""));
             pw.print  ("      ");
-            mNotificationPanelViewController.dump(fd, pw, args);
+            mNotificationPanelViewController.dump(pw, args);
         }
         pw.println("  mStackScroller: ");
         if (mStackScroller != null) {
             // Double indent until we rewrite the rest of this dump()
             pw.increaseIndent();
             pw.increaseIndent();
-            mStackScroller.dump(fd, pw, args);
+            mStackScroller.dump(pw, args);
             pw.decreaseIndent();
             pw.decreaseIndent();
         }
@@ -2314,11 +2325,11 @@ public class CentralSurfaces extends CoreStartable implements
         pw.println("    light wallpaper theme: " + lightWpTheme);
 
         if (mKeyguardIndicationController != null) {
-            mKeyguardIndicationController.dump(fd, pw, args);
+            mKeyguardIndicationController.dump(pw, args);
         }
 
         if (mScrimController != null) {
-            mScrimController.dump(fd, pw, args);
+            mScrimController.dump(pw, args);
         }
 
         if (mLightRevealScrim != null) {
@@ -2332,27 +2343,27 @@ public class CentralSurfaces extends CoreStartable implements
             mStatusBarKeyguardViewManager.dump(pw);
         }
 
-        mNotificationsController.dump(fd, pw, args, DUMPTRUCK);
+        mNotificationsController.dump(pw, args, DUMPTRUCK);
 
         if (DEBUG_GESTURES) {
             pw.print("  status bar gestures: ");
-            mGestureRec.dump(fd, pw, args);
+            mGestureRec.dump(pw, args);
         }
 
         if (mHeadsUpManager != null) {
-            mHeadsUpManager.dump(fd, pw, args);
+            mHeadsUpManager.dump(pw, args);
         } else {
             pw.println("  mHeadsUpManager: null");
         }
 
         if (mStatusBarTouchableRegionManager != null) {
-            mStatusBarTouchableRegionManager.dump(fd, pw, args);
+            mStatusBarTouchableRegionManager.dump(pw, args);
         } else {
             pw.println("  mStatusBarTouchableRegionManager: null");
         }
 
         if (mLightBarController != null) {
-            mLightBarController.dump(fd, pw, args);
+            mLightBarController.dump(pw, args);
         }
 
         pw.println("SharedPreferences:");
@@ -2417,7 +2428,7 @@ public class CentralSurfaces extends CoreStartable implements
             boolean dismissShade, int flags) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
                 false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
-                flags, null /* animationController */);
+                flags, null /* animationController */, getActivityUserHandle(intent));
     }
 
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
@@ -2428,7 +2439,8 @@ public class CentralSurfaces extends CoreStartable implements
     void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             final boolean dismissShade, final boolean disallowEnterPictureInPictureWhileLaunching,
             final Callback callback, int flags,
-            @Nullable ActivityLaunchAnimator.Controller animationController) {
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            final UserHandle userHandle) {
         if (onlyProvisioned && !mDeviceProvisionedController.isDeviceProvisioned()) return;
 
         final boolean willLaunchResolverActivity =
@@ -2487,7 +2499,7 @@ public class CentralSurfaces extends CoreStartable implements
                                     intent,
                                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                                     null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,
-                                    options.toBundle(), UserHandle.CURRENT.getIdentifier());
+                                    options.toBundle(), userHandle.getIdentifier());
                         } catch (RemoteException e) {
                             Log.w(TAG, "Unable to start activity", e);
                         }
@@ -2622,8 +2634,6 @@ public class CentralSurfaces extends CoreStartable implements
                 }
                 finishBarAnimations();
                 resetUserExpandedStates();
-            } else if (DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG.equals(action)) {
-                mQSPanelController.showDeviceMonitoringDialog();
             }
             Trace.endSection();
         }
@@ -2860,7 +2870,8 @@ public class CentralSurfaces extends CoreStartable implements
                                 false /* disallowEnterPictureInPictureWhileLaunching */,
                                 null /* callback */,
                                 0 /* flags */,
-                                animationController),
+                                animationController,
+                                getActivityUserHandle(intent)),
                 delay);
     }
 
@@ -2881,8 +2892,7 @@ public class CentralSurfaces extends CoreStartable implements
     }
 
     boolean updateIsKeyguard(boolean forceStateChange) {
-        boolean wakeAndUnlocking = mBiometricUnlockController.getMode()
-                == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
+        boolean wakeAndUnlocking = mBiometricUnlockController.isWakeAndUnlock();
 
         // For dozing, keyguard needs to be shown whenever the device is non-interactive. Otherwise
         // there's no surface we can show to the user. Note that the device goes fully interactive
@@ -2892,7 +2902,7 @@ public class CentralSurfaces extends CoreStartable implements
                 && (!mDeviceInteractive || (isGoingToSleep()
                     && (isScreenFullyOff()
                         || (mKeyguardStateController.isShowing() && !isOccluded()))));
-        boolean isWakingAndOccluded = isOccluded() && isWaking();
+        boolean isWakingAndOccluded = isOccluded() && isWakingOrAwake();
         boolean shouldBeKeyguard = (mStatusBarStateController.isKeyguardRequested()
                 || keyguardForDozing) && !wakeAndUnlocking && !isWakingAndOccluded;
         if (keyguardForDozing) {
@@ -2964,12 +2974,15 @@ public class CentralSurfaces extends CoreStartable implements
      *
      * @param beforeFading the runnable to be run when the circle is fully expanded and the fading
      *                     starts
-     * @param endRunnable the runnable to be run when the transition is done
+     * @param endRunnable the runnable to be run when the transition is done. Will not run
+     *                    if the transition is cancelled, instead cancelRunnable will run
+     * @param cancelRunnable the runnable to be run if the transition is cancelled
      */
     public void fadeKeyguardAfterLaunchTransition(final Runnable beforeFading,
-            Runnable endRunnable) {
+            Runnable endRunnable, Runnable cancelRunnable) {
         mMessageRouter.cancelMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         mLaunchTransitionEndRunnable = endRunnable;
+        mLaunchTransitionCancelRunnable = cancelRunnable;
         Runnable hideRunnable = () -> {
             mKeyguardStateController.setLaunchTransitionFadingAway(true);
             if (beforeFading != null) {
@@ -2989,6 +3002,15 @@ public class CentralSurfaces extends CoreStartable implements
         } else {
             hideRunnable.run();
         }
+    }
+
+    private void cancelAfterLaunchTransitionRunnables() {
+        if (mLaunchTransitionCancelRunnable != null) {
+            mLaunchTransitionCancelRunnable.run();
+        }
+        mLaunchTransitionEndRunnable = null;
+        mLaunchTransitionCancelRunnable = null;
+        mNotificationPanelViewController.setLaunchTransitionEndRunnable(null);
     }
 
     /**
@@ -3030,6 +3052,7 @@ public class CentralSurfaces extends CoreStartable implements
     }
 
     private void runLaunchTransitionEndRunnable() {
+        mLaunchTransitionCancelRunnable = null;
         if (mLaunchTransitionEndRunnable != null) {
             Runnable r = mLaunchTransitionEndRunnable;
 
@@ -3076,7 +3099,6 @@ public class CentralSurfaces extends CoreStartable implements
         mMessageRouter.cancelMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         releaseGestureWakeLock();
         mNotificationPanelViewController.onAffordanceLaunchEnded();
-        mNotificationPanelViewController.cancelAnimation();
         mNotificationPanelViewController.resetAlpha();
         mNotificationPanelViewController.resetTranslation();
         mNotificationPanelViewController.resetViewGroupFade();
@@ -3128,6 +3150,10 @@ public class CentralSurfaces extends CoreStartable implements
     public void finishKeyguardFadingAway() {
         mKeyguardStateController.notifyKeyguardDoneFading();
         mScrimController.setExpansionAffectsAlpha(true);
+
+        // If the device was re-locked while unlocking, we might have a pending lock that was
+        // delayed because the keyguard was in the middle of going away.
+        mKeyguardViewMediator.maybeHandlePendingLock();
     }
 
     /**
@@ -3363,11 +3389,6 @@ public class CentralSurfaces extends CoreStartable implements
         return mLightRevealScrim;
     }
 
-    private void updateKeyguardState() {
-        mKeyguardStateController.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
-                mStatusBarKeyguardViewManager.isOccluded());
-    }
-
     public void onTrackingStarted() {
         mShadeController.runPostCollapseRunnables();
     }
@@ -3417,6 +3438,10 @@ public class CentralSurfaces extends CoreStartable implements
     // TODO: Figure out way to remove these.
     public NavigationBarView getNavigationBarView() {
         return mNavigationBarController.getNavigationBarView(mDisplayId);
+    }
+
+    public boolean isOverviewEnabled() {
+        return mNavigationBarController.isOverviewEnabled(mDisplayId);
     }
 
     public void showPinningEnterExitToast(boolean entering) {
@@ -3518,6 +3543,10 @@ public class CentralSurfaces extends CoreStartable implements
         public void onStartedGoingToSleep() {
             String tag = "CentralSurfaces#onStartedGoingToSleep";
             DejankUtils.startDetectingBlockingIpcs(tag);
+
+            //  cancel stale runnables that could put the device in the wrong state
+            cancelAfterLaunchTransitionRunnables();
+
             updateRevealEffect(false /* wakingUp */);
             updateNotificationPanelTouchState();
             maybeEscalateHeadsUp();
@@ -3576,7 +3605,8 @@ public class CentralSurfaces extends CoreStartable implements
                 mLaunchEmergencyActionWhenFinishedWaking = false;
                 Intent emergencyIntent = getEmergencyActionIntent();
                 if (emergencyIntent != null) {
-                    mContext.startActivityAsUser(emergencyIntent, UserHandle.CURRENT);
+                    mContext.startActivityAsUser(emergencyIntent,
+                            getActivityUserHandle(emergencyIntent));
                 }
             }
             updateScrimController();
@@ -3702,8 +3732,9 @@ public class CentralSurfaces extends CoreStartable implements
                 == WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP;
     }
 
-    boolean isWaking() {
-        return mWakefulnessLifecycle.getWakefulness() == WakefulnessLifecycle.WAKEFULNESS_WAKING;
+    boolean isWakingOrAwake() {
+        return mWakefulnessLifecycle.getWakefulness() == WakefulnessLifecycle.WAKEFULNESS_WAKING
+                || mWakefulnessLifecycle.getWakefulness() == WakefulnessLifecycle.WAKEFULNESS_AWAKE;
     }
 
     public void notifyBiometricAuthModeChanged() {
@@ -3718,6 +3749,14 @@ public class CentralSurfaces extends CoreStartable implements
      */
     public void setTransitionToFullShadeProgress(float transitionToFullShadeProgress) {
         mTransitionToFullShadeProgress = transitionToFullShadeProgress;
+    }
+
+    /**
+     * Sets the amount of progress to the bouncer being fully hidden/visible. 1 means the bouncer
+     * is fully hidden, while 0 means the bouncer is visible.
+     */
+    public void setBouncerHiddenFraction(float expansion) {
+        mScrimController.setBouncerHiddenFraction(expansion);
     }
 
     @VisibleForTesting
@@ -3772,6 +3811,8 @@ public class CentralSurfaces extends CoreStartable implements
             mScrimController.transitionTo(ScrimState.AOD);
         } else if (mKeyguardStateController.isShowing() && !isOccluded() && !unlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
+        } else if (mKeyguardStateController.isShowing() && mKeyguardUpdateMonitor.isDreaming()) {
+            mScrimController.transitionTo(ScrimState.DREAMING);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
@@ -4059,6 +4100,7 @@ public class CentralSurfaces extends CoreStartable implements
         } else {
             options = ActivityOptions.makeBasic();
         }
+        options.setSplashScreenStyle(SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR);
         return options;
     }
 
@@ -4178,6 +4220,7 @@ public class CentralSurfaces extends CoreStartable implements
             new KeyguardUpdateMonitorCallback() {
                 @Override
                 public void onDreamingStateChanged(boolean dreaming) {
+                    updateScrimController();
                     if (dreaming) {
                         maybeEscalateHeadsUp();
                     }
@@ -4360,15 +4403,13 @@ public class CentralSurfaces extends CoreStartable implements
                     checkBarModes();
                     updateScrimController();
                     mPresenter.updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
-                    updateKeyguardState();
                     Trace.endSection();
                 }
 
                 @Override
                 public void onDozeAmountChanged(float linear, float eased) {
                     if (mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)
-                            && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)
-                            && !mBiometricUnlockController.isWakeAndUnlock()) {
+                            && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
                         mLightRevealScrim.setRevealAmount(1f - linear);
                     }
                 }
@@ -4463,4 +4504,20 @@ public class CentralSurfaces extends CoreStartable implements
         @Override
         public void dispatchDemoCommand(String command, Bundle args) { }
     };
+
+    /**
+     *  Determines what UserHandle to use when launching an activity.
+     *
+     *  We want to ensure that activities that are launched within the systemui process should be
+     *  launched as user of the current process.
+     * @param intent
+     * @return UserHandle
+     */
+    private UserHandle getActivityUserHandle(Intent intent) {
+        if (intent.getComponent() != null
+                && mContext.getPackageName().equals(intent.getComponent().getPackageName())) {
+            return new UserHandle(UserHandle.myUserId());
+        }
+        return UserHandle.CURRENT;
+    }
 }

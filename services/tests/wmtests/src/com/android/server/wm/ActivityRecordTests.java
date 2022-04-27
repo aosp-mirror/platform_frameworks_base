@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
@@ -110,6 +112,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityOptions;
+import android.app.AppOpsManager;
 import android.app.ICompatCameraControlCallback;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
@@ -1847,9 +1850,12 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testIsSnapshotCompatible() {
         final ActivityRecord activity = createActivityWithTask();
+        final Task task = activity.getTask();
+        final Rect taskBounds = task.getBounds();
         final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
                 .setTopActivityComponent(activity.mActivityComponent)
                 .setRotation(activity.getWindowConfiguration().getRotation())
+                .setTaskSize(taskBounds.width(), taskBounds.height())
                 .build();
 
         assertTrue(activity.isSnapshotCompatible(snapshot));
@@ -1869,14 +1875,55 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setTask(activity.getTask())
                 .setOnTop(true)
                 .build();
+        final Task task = secondActivity.getTask();
+        final Rect taskBounds = task.getBounds();
         final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
                 .setTopActivityComponent(secondActivity.mActivityComponent)
+                .setTaskSize(taskBounds.width(), taskBounds.height())
                 .build();
 
         assertTrue(secondActivity.isSnapshotCompatible(snapshot));
 
         // Emulate the top activity changed.
         assertFalse(activity.isSnapshotCompatible(snapshot));
+    }
+
+    /**
+     * Test that the snapshot should be obsoleted if the task size changed.
+     */
+    @Test
+    public void testIsSnapshotCompatibleTaskSizeChanged() {
+        final ActivityRecord activity = createActivityWithTask();
+        final Task task = activity.getTask();
+        final Rect taskBounds = task.getBounds();
+        final int currentRotation = mDisplayContent.getRotation();
+        final int w = taskBounds.width();
+        final int h = taskBounds.height();
+        final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
+                .setTopActivityComponent(activity.mActivityComponent)
+                .setRotation(currentRotation)
+                .setTaskSize(w, h)
+                .build();
+
+        assertTrue(activity.isSnapshotCompatible(snapshot));
+
+        taskBounds.right = taskBounds.width() * 2;
+        task.getWindowConfiguration().setBounds(taskBounds);
+        activity.getWindowConfiguration().setBounds(taskBounds);
+
+        assertFalse(activity.isSnapshotCompatible(snapshot));
+
+        // Flipped size should be accepted if the activity will show with 90 degree rotation.
+        final int targetRotation = currentRotation + 1;
+        doReturn(targetRotation).when(mDisplayContent)
+                .rotationForActivityInDifferentOrientation(any());
+        final TaskSnapshot rotatedSnapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
+                .setTopActivityComponent(activity.mActivityComponent)
+                .setRotation(targetRotation)
+                .setTaskSize(h, w)
+                .build();
+        task.getWindowConfiguration().getBounds().set(0, 0, w, h);
+        assertTrue(activity.isSnapshotCompatible(rotatedSnapshot));
     }
 
     @Test
@@ -2201,6 +2248,28 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Activity not supports PIP
         activity.info.flags &= ~FLAG_SUPPORTS_PICTURE_IN_PICTURE;
         assertFalse(activity.supportsPictureInPicture());
+    }
+
+    @Test
+    public void testCheckEnterPictureInPictureState_displayNotSupportedPip() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setDisplay(mDisplayContent).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(task)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setActivityFlags(FLAG_SUPPORTS_PICTURE_IN_PICTURE)
+                .build();
+        mAtm.mSupportsPictureInPicture = true;
+        AppOpsManager appOpsManager = mAtm.getAppOpsManager();
+        doReturn(MODE_ALLOWED).when(appOpsManager).checkOpNoThrow(eq(OP_PICTURE_IN_PICTURE),
+                anyInt(), any());
+        doReturn(false).when(mAtm).shouldDisableNonVrUiLocked();
+
+        spyOn(mDisplayContent.mDwpcHelper);
+        doReturn(false).when(mDisplayContent.mDwpcHelper).isWindowingModeSupported(
+                WINDOWING_MODE_PINNED);
+
+        assertFalse(activity.checkEnterPictureInPictureState("TEST", false /* beforeStopping */));
     }
 
     @Test
@@ -2668,7 +2737,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .resumeFocusedTasksTopActivities();
         // Make mVisibleSetFromTransferredStartingWindow true.
         final ActivityRecord middle = new ActivityBuilder(mAtm).setTask(task).build();
-        task.startActivityLocked(middle, null /* focusedTopActivity */,
+        task.startActivityLocked(middle, null /* topTask */,
                 false /* newTask */, false /* isTaskSwitch */, null /* options */,
                 null /* sourceRecord */);
         middle.makeFinishingLocked();
@@ -2681,7 +2750,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // a visible activity.
         top.setVisible(false);
         // The finishing middle should be able to transfer starting window to top.
-        task.startActivityLocked(top, null /* focusedTopActivity */,
+        task.startActivityLocked(top, null /* topTask */,
                 false /* newTask */, false /* isTaskSwitch */, null /* options */,
                 null /* sourceRecord */);
 
@@ -3086,11 +3155,11 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Simulate app re-start input or turning screen off/on then unlocked by un-secure
         // keyguard to back to the app, expect IME insets is not frozen
+        mDisplayContent.updateImeInputAndControlTarget(app);
+        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
         imeSource.setFrame(new Rect(100, 400, 500, 500));
         app.getInsetsState().addSource(imeSource);
         app.getInsetsState().setSourceVisible(ITYPE_IME, true);
-        mDisplayContent.updateImeInputAndControlTarget(app);
-        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
         // Verify when IME is visible and the app can receive the right IME insets from policy.
         makeWindowVisibleAndDrawn(app, mImeWindow);
@@ -3134,12 +3203,14 @@ public class ActivityRecordTests extends WindowTestsBase {
         doReturn(true).when(app2).isReadyToDispatchInsetsState();
         mDisplayContent.setImeLayeringTarget(app2);
         mDisplayContent.updateImeInputAndControlTarget(app2);
+        mDisplayContent.mWmService.mRoot.performSurfacePlacement();
 
         // Verify after unfreezing app2's IME insets state, we won't dispatch visible IME insets
         // to client if the app didn't request IME visible.
         assertFalse(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
-        verify(app2.mClient, atLeastOnce()).insetsChanged(insetsStateCaptor.capture(), anyBoolean(),
-                anyBoolean());
+        verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),
+                insetsStateCaptor.capture(), anyBoolean(), anyBoolean(), anyInt(), anyInt(),
+                anyInt());
         assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 

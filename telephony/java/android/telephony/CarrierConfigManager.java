@@ -176,7 +176,7 @@ public class CarrierConfigManager {
      * This flag specifies whether VoLTE availability is based on provisioning. By default this is
      * false.
      * Used for UCE to determine if EAB provisioning checks should be based on provisioning.
-     * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead.
+     * @deprecated Use {@link Ims#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL} instead.
      */
     @Deprecated
     public static final String
@@ -504,7 +504,12 @@ public class CarrierConfigManager {
     /** Control whether users can choose a network operator. */
     public static final String KEY_OPERATOR_SELECTION_EXPAND_BOOL = "operator_selection_expand_bool";
 
-    /** Used in Cellular Network Settings for preferred network type. */
+    /**
+     * Used in the Preferred Network Types menu to determine if the 2G option is displayed.
+     * Value defaults to false as of Android T to discourage the use of insecure 2G protocols.
+     *
+     * @see #KEY_HIDE_ENABLE_2G
+     */
     public static final String KEY_PREFER_2G_BOOL = "prefer_2g_bool";
 
     /**
@@ -827,6 +832,17 @@ public class CarrierConfigManager {
             "dial_string_replace_string_array";
 
     /**
+     * Specifies a map from dialstrings to replacements for international roaming network service
+     * numbers which cannot be replaced on the carrier side.
+     * <p>
+     * Individual entries have the format:
+     * [dialstring to replace]:[replacement]
+     * @hide
+     */
+    public static final String KEY_INTERNATIONAL_ROAMING_DIAL_STRING_REPLACE_STRING_ARRAY =
+            "international_roaming_dial_string_replace_string_array";
+
+    /**
      * Flag specifying whether WFC over IMS supports the "wifi only" option.  If false, the wifi
      * calling settings will not include an option for "wifi only".  If true, the wifi calling
      * settings will include an option for "wifi only"
@@ -892,6 +908,9 @@ public class CarrierConfigManager {
      * Combines VoLTE, VT, VoWiFI calling provisioning into one parameter.
      * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead for
      * finer-grained control.
+     * changing carrier_volte_provisioning_required_bool requires changes to
+     * mmtel_requires_provisioning_bundle and vice versa
+     * {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE}
      */
     @Deprecated
     public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
@@ -974,6 +993,12 @@ public class CarrierConfigManager {
     /** Flag specifying whether VoLTE TTY is supported. */
     public static final String KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
             = "carrier_volte_tty_supported_bool";
+
+    /** Flag specifying whether VoWIFI TTY is supported.
+     * @hide
+     */
+    public static final String KEY_CARRIER_VOWIFI_TTY_SUPPORTED_BOOL =
+            "carrier_vowifi_tty_supported_bool";
 
     /**
      * Flag specifying whether IMS service can be turned off. If false then the service will not be
@@ -1919,6 +1944,13 @@ public class CarrierConfigManager {
             "show_4g_for_lte_data_icon_bool";
 
     /**
+     * Boolean indicating if default data account should show 4G LTE or 4G icon.
+     * @hide
+     */
+    public static final String KEY_SHOW_4GLTE_FOR_LTE_DATA_ICON_BOOL =
+            "show_4glte_for_lte_data_icon_bool";
+
+    /**
      * Boolean indicating if default data account should show 4G icon when in 3G.
      */
     public static final String KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL =
@@ -1952,6 +1984,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT =
             "nr_advanced_threshold_bandwidth_khz_int";
+
+    /**
+     * Boolean indicating if operator name should be shown in the status bar
+     * @hide
+     */
+    public static final String KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL =
+            "show_operator_name_in_statusbar_bool";
 
     /**
      * The string is used to filter redundant string from PLMN Network Name that's supplied by
@@ -2865,11 +2904,11 @@ public class CarrierConfigManager {
      * <p>
      * 4 threshold integers must be within the boundaries [-140 dB, -44 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-140, threshold1]"</LI>
-     *     <LI>"POOR: (threshold1, threshold2]"</LI>
-     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
-     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, -44]"</LI>
+     *     <LI>"NONE: [-140, threshold1)"</LI>
+     *     <LI>"POOR: [threshold1, threshold2)"</LI>
+     *     <LI>"MODERATE: [threshold2, threshold3)"</LI>
+     *     <LI>"GOOD:  [threshold3, threshold4)"</LI>
+     *     <LI>"EXCELLENT:  [threshold4, -44]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
@@ -2885,11 +2924,11 @@ public class CarrierConfigManager {
      * <p>
      * 4 threshold integers must be within the boundaries [-43 dB, 20 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-43, threshold1]"</LI>
-     *     <LI>"POOR: (threshold1, threshold2]"</LI>
-     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
-     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, 20]"</LI>
+     *     <LI>"NONE: [-43, threshold1)"</LI>
+     *     <LI>"POOR: [threshold1, threshold2)"</LI>
+     *     <LI>"MODERATE: [threshold2, threshold3)"</LI>
+     *     <LI>"GOOD:  [threshold3, threshold4)"</LI>
+     *     <LI>"EXCELLENT:  [threshold4, 20]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
@@ -2906,11 +2945,11 @@ public class CarrierConfigManager {
      * <p>
      * 4 threshold integers must be within the boundaries [-23 dB, 40 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-23, threshold1]"</LI>
-     *     <LI>"POOR: (threshold1, threshold2]"</LI>
-     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
-     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, 40]"</LI>
+     *     <LI>"NONE: [-23, threshold1)"</LI>
+     *     <LI>"POOR: [threshold1, threshold2)"</LI>
+     *     <LI>"MODERATE: [threshold2, threshold3)"</LI>
+     *     <LI>"GOOD:  [threshold3, threshold4)"</LI>
+     *     <LI>"EXCELLENT:  [threshold4, 40]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
@@ -4374,12 +4413,14 @@ public class CarrierConfigManager {
      * The data stall recovery timers array in milliseconds, each element is the delay before
      * performining next recovery action.
      *
-     * The default value of timers array are: [180000ms, 180000ms, 180000ms] (3 minutes)
+     * The default value of timers array are: [180000ms, 180000ms, 180000ms, 180000ms] (3 minutes)
      * Array[0]: It's the timer between RECOVERY_ACTION GET_DATA_CALL_LIST and CLEANUP, if data
      * stall symptom still occurred, it will perform next recovery action after 180000ms.
-     * Array[1]: It's the timer between RECOVERY_ACTION CLEANUP and RADIO_RESTART, if data stall
+     * Array[1]: It's the timer between RECOVERY_ACTION CLEANUP and RE-REGISTER, if data stall
      * symptom still occurred, it will perform next recovery action after 180000ms.
-     * Array[2]: It's the timer between RECOVERY_ACTION RADIO_RESTART and RESET_MODEM, if data stall
+     * Array[2]: It's the timer between RECOVERY_ACTION RE-REGISTER and RADIO_RESTART, if data stall
+     * symptom still occurred, it will perform next recovery action after 180000ms.
+     * Array[3]: It's the timer between RECOVERY_ACTION RADIO_RESTART and RESET_MODEM, if data stall
      * symptom still occurred, it will perform next recovery action after 180000ms.
      *
      * See the {@code RECOVERY_ACTION_*} constants in
@@ -4399,7 +4440,7 @@ public class CarrierConfigManager {
      * RECOVERY_ACTION_CLEANUP to true, then it can be ignored to speed up the recovery
      * action procedure.
      *
-     * The default value of boolean array are: [false, false, false, false]
+     * The default value of boolean array are: [false, false, true, false, false]
      * Array[0]: When performing the recovery action, we can use this boolean value to determine
      * if we need to perform RECOVERY_ACTION_GET_DATA_CALL_LIST.
      * Array[1]: If data stall symptom still occurred, we can use this boolean value to determine
@@ -4409,8 +4450,10 @@ public class CarrierConfigManager {
      * variable of action RECOVERY_ACTION_CLEANUP to true, then it can be ignored to speed up the
      * recovery action procedure.
      * Array[2]: If data stall symptom still occurred, we can use this boolean value to determine
-     * if we need to perform RECOVERY_ACTION_RADIO_RESTART.
+     * if we need to perform RE-REGISTER.
      * Array[3]: If data stall symptom still occurred, we can use this boolean value to determine
+     * if we need to perform RECOVERY_ACTION_RADIO_RESTART.
+     * Array[4]: If data stall symptom still occurred, we can use this boolean value to determine
      * if we need to perform RECOVERY_ACTION_MODEM_RESET.
      *
      * See the {@code RECOVERY_ACTION_*} constants in
@@ -4749,10 +4792,14 @@ public class CarrierConfigManager {
      * Either omit this key or pass a value of
      * {@link SubscriptionManager#USAGE_SETTING_UNKNOWN unknown} to preserve the current setting.
      *
+     * <p>Devices that support configuration of the cellular usage setting, including devices
+     * with HAL capability to set the cellular usage setting, must honor this setting accordingly.
+     *
      * {@link SubscriptionManager#USAGE_SETTING_DEFAULT default},
      * {@link SubscriptionManager#USAGE_SETTING_VOICE_CENTRIC voice-centric},
      * or {@link SubscriptionManager#USAGE_SETTING_DATA_CENTRIC data-centric}.
      * {@see SubscriptionInfo#getUsageSetting}
+     *
      */
     public static final String KEY_CELLULAR_USAGE_SETTING_INT =
             "cellular_usage_setting_int";
@@ -5393,6 +5440,10 @@ public class CarrierConfigManager {
          * </ul>
          * <p> The values are defined in
          * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech}
+         *
+         * changing mmtel_requires_provisioning_bundle requires changes to
+         * carrier_volte_provisioning_required_bool and vice versa
+         * {@link Ims#KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL}
          */
         public static final String KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE =
                 KEY_PREFIX + "mmtel_requires_provisioning_bundle";
@@ -8488,8 +8539,9 @@ public class CarrierConfigManager {
      *     <item value="source=GERAN|UTRAN, target:IWLAN, type=disallowed"/>
      *     <!-- Handover from IWLAN to 3G/4G/5G is not allowed if the device is roaming. -->
      *     <item value="source=IWLAN, target=UTRAN|EUTRAN|NGRAN, roaming=true, type=disallowed"/>
-     *     <!-- Handover from 4G to IWLAN is not allowed -->
-     *     <item value="source=EUTRAN, target=IWLAN, type=disallowed"/>
+     *     <!-- Handover from 4G to IWLAN is not allowed if the device has capability in either IMS
+     *     or EIMS-->
+     *     <item value="source=EUTRAN, target=IWLAN, type=disallowed, capabilities=IMS|EIMS"/>
      *     <!-- Handover is always allowed in any condition. -->
      *     <item value="source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN,
      *         target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"/>
@@ -8553,6 +8605,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
+        sDefaults.putBoolean(KEY_CARRIER_VOWIFI_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_IMS_GBA_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
@@ -8594,7 +8647,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL, false);
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
-        sDefaults.putBoolean(KEY_PREFER_2G_BOOL, true);
+        sDefaults.putBoolean(KEY_PREFER_2G_BOOL, false);
         sDefaults.putBoolean(KEY_4G_ONLY_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_APN_SETTING_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CDMA_CHOICES_BOOL, false);
@@ -8678,6 +8731,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_DIAL_STRING_REPLACE_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_INTERNATIONAL_ROAMING_DIAL_STRING_REPLACE_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_FORCE_HOME_NETWORK_BOOL, false);
         sDefaults.putInt(KEY_GSM_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
@@ -8886,6 +8940,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_4GLTE_FOR_LTE_DATA_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL, false);
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
@@ -8899,6 +8954,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_WORLD_MODE_ENABLED_BOOL, false);
         sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL, false);
@@ -9149,9 +9205,9 @@ public class CarrierConfigManager {
                 SubscriptionManager.USAGE_SETTING_UNKNOWN);
         // Default data stall recovery configurations.
         sDefaults.putLongArray(KEY_DATA_STALL_RECOVERY_TIMERS_LONG_ARRAY,
-                new long[] {180000, 180000, 180000});
+                new long[] {180000, 180000, 180000, 180000});
         sDefaults.putBooleanArray(KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY,
-                new boolean[] {false, false, false, false});
+                new boolean[] {false, false, true, false, false});
     }
 
     /**
@@ -9493,42 +9549,26 @@ public class CarrierConfigManager {
     private void addConfig(String key, Object value, PersistableBundle configs) {
         if (value instanceof String) {
             configs.putString(key, (String) value);
-        }
-
-        if (value instanceof String[]) {
+        } else if (value instanceof String[]) {
             configs.putStringArray(key, (String[]) value);
-        }
-
-        if (value instanceof Integer) {
+        } else if (value instanceof Integer) {
             configs.putInt(key, (Integer) value);
-        }
-
-        if (value instanceof Long) {
+        } else if (value instanceof Long) {
             configs.putLong(key, (Long) value);
-        }
-
-        if (value instanceof Double) {
+        } else if (value instanceof Double) {
             configs.putDouble(key, (Double) value);
-        }
-
-        if (value instanceof Boolean) {
+        } else if (value instanceof Boolean) {
             configs.putBoolean(key, (Boolean) value);
-        }
-
-        if (value instanceof int[]) {
+        } else if (value instanceof int[]) {
             configs.putIntArray(key, (int[]) value);
-        }
-
-        if (value instanceof double[]) {
+        } else if (value instanceof double[]) {
             configs.putDoubleArray(key, (double[]) value);
-        }
-
-        if (value instanceof boolean[]) {
+        } else if (value instanceof boolean[]) {
             configs.putBooleanArray(key, (boolean[]) value);
-        }
-
-        if (value instanceof long[]) {
+        } else if (value instanceof long[]) {
             configs.putLongArray(key, (long[]) value);
+        } else if (value instanceof PersistableBundle) {
+            configs.putPersistableBundle(key, (PersistableBundle) value);
         }
     }
 }

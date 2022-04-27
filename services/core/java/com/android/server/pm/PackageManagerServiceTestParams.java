@@ -109,10 +109,12 @@ public final class PackageManagerServiceTestParams {
     public AppDataHelper appDataHelper;
     public InstallPackageHelper installPackageHelper;
     public RemovePackageHelper removePackageHelper;
-    public InitAndSystemPackageHelper initAndSystemPackageHelper;
+    public InitAppsHelper initAndSystemPackageHelper;
     public DeletePackageHelper deletePackageHelper;
     public PreferredActivityHelper preferredActivityHelper;
     public ResolveIntentHelper resolveIntentHelper;
     public DexOptHelper dexOptHelper;
     public SuspendPackageHelper suspendPackageHelper;
+    public StorageEventHelper storageEventHelper;
+    public DistractingPackageHelper distractingPackageHelper;
 }

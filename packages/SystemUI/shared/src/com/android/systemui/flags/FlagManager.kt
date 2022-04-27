@@ -64,7 +64,7 @@ class FlagManager constructor(
         intent.setPackage(RECEIVING_PACKAGE)
 
         return CallbackToFutureAdapter.getFuture {
-            completer: CallbackToFutureAdapter.Completer<Any?> ->
+            completer: CallbackToFutureAdapter.Completer<Collection<Flag<*>>> ->
                 context.sendOrderedBroadcast(intent, null,
                     object : BroadcastReceiver() {
                         override fun onReceive(context: Context, intent: Intent) {
@@ -79,7 +79,7 @@ class FlagManager constructor(
                         }
                     }, null, Activity.RESULT_OK, "extra data", null)
             "QueryingFlags"
-        } as ListenableFuture<Collection<Flag<*>>>
+        }
     }
 
     /**

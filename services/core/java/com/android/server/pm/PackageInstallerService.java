@@ -410,7 +410,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     // Their staging dirs will be removed too
                     PackageInstallerSession root = !session.hasParentSessionId()
                             ? session : mSessions.get(session.getParentSessionId());
-                    if (!root.isDestroyed()) {
+                    if (root == null) {
+                        Slog.e(TAG, "freeStageDirs: found an orphaned session: "
+                                + session.sessionId + " parent=" + session.getParentSessionId());
+                    } else if (!root.isDestroyed()) {
                         root.abandon();
                     }
                 } else {
@@ -597,8 +600,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             String installerAttributionTag, int userId)
             throws IOException {
         final int callingUid = Binder.getCallingUid();
-        mPm.enforceCrossUserPermission(
-                callingUid, userId, true, true, "createSession");
+        final Computer snapshot = mPm.snapshotComputer();
+        snapshot.enforceCrossUserPermission(callingUid, userId, true, true, "createSession");
 
         if (mPm.isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
             throw new SecurityException("User restriction prevents installing");
@@ -640,7 +643,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 && params.installerPackageName.length() < SessionParams.MAX_PACKAGE_NAME_LENGTH)
                 ? params.installerPackageName : installerPackageName;
 
-        if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
+        if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)
+                || PackageInstallerSession.isSystemDataLoaderInstallation(params)) {
             params.installFlags |= PackageManager.INSTALL_FROM_ADB;
             // adb installs can override the installingPackageName, but not the
             // initiatingPackageName
@@ -663,11 +667,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;
             params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
             if ((params.installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0
-                    && !mPm.isCallerVerifier(callingUid)) {
+                    && !mPm.isCallerVerifier(snapshot, callingUid)) {
                 params.installFlags &= ~PackageManager.INSTALL_VIRTUAL_PRELOAD;
             }
-            if (mContext.checkCallingOrSelfPermission(
-                    Manifest.permission.INSTALL_TEST_ONLY_PACKAGE)
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_TEST_ONLY_PACKAGE)
                     != PackageManager.PERMISSION_GRANTED) {
                 params.installFlags &= ~PackageManager.INSTALL_ALLOW_TEST;
             }
@@ -676,7 +679,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         String originatingPackageName = null;
         if (params.originatingUid != SessionParams.UID_UNKNOWN
                 && params.originatingUid != callingUid) {
-            String[] packages = mPm.mIPackageManager.getPackagesForUid(params.originatingUid);
+            String[] packages = snapshot.getPackagesForUid(params.originatingUid);
             if (packages != null && packages.length > 0) {
                 // Choose an arbitrary representative package in the case of a shared UID.
                 originatingPackageName = packages[0];
@@ -727,7 +730,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0
                 && !isCalledBySystemOrShell(callingUid)
-                && (mPm.mIPackageManager.getFlagsForUid(callingUid) & ApplicationInfo.FLAG_SYSTEM)
+                && (snapshot.getFlagsForUid(callingUid) & ApplicationInfo.FLAG_SYSTEM)
                 == 0) {
             throw new SecurityException(
                     "Only system apps could use the PackageManager.INSTALL_INSTANT_APP flag.");
@@ -858,6 +861,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             mSessions.put(sessionId, session);
         }
+        mPm.addInstallerPackageName(session.getInstallSource());
 
         mCallbacks.notifySessionCreated(session.sessionId, session.userId);
 
@@ -1038,11 +1042,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         return "smdl" + sessionId + ".tmp";
     }
 
-    private boolean shouldFilterSession(int uid, SessionInfo info) {
+    private boolean shouldFilterSession(@NonNull Computer snapshot, int uid, SessionInfo info) {
         if (info == null) {
             return false;
         }
-        return uid != info.getInstallerUid() && !mPm.canQueryPackage(uid, info.getAppPackageName());
+        return uid != info.getInstallerUid()
+                && !snapshot.canQueryPackage(uid, info.getAppPackageName());
     }
 
     @Override
@@ -1055,7 +1060,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     ? session.generateInfoForCaller(true /* includeIcon */, callingUid)
                     : null;
         }
-        return shouldFilterSession(callingUid, result) ? null : result;
+        return shouldFilterSession(mPm.snapshotComputer(), callingUid, result) ? null : result;
     }
 
     @Override
@@ -1070,15 +1075,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 }
             }
         }
-        result.removeIf(info -> shouldFilterSession(callingUid, info));
+        final Computer snapshot = mPm.snapshotComputer();
+        result.removeIf(info -> shouldFilterSession(snapshot, callingUid, info));
         return new ParceledListSlice<>(result);
     }
 
     @Override
     public ParceledListSlice<SessionInfo> getAllSessions(int userId) {
         final int callingUid = Binder.getCallingUid();
-        mPm.enforceCrossUserPermission(
-                callingUid, userId, true, false, "getAllSessions");
+        final Computer snapshot = mPm.snapshotComputer();
+        snapshot.enforceCrossUserPermission(callingUid, userId, true, false, "getAllSessions");
 
         final List<SessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
@@ -1090,15 +1096,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 }
             }
         }
-        result.removeIf(info -> shouldFilterSession(callingUid, info));
+        result.removeIf(info -> shouldFilterSession(snapshot, callingUid, info));
         return new ParceledListSlice<>(result);
     }
 
     @Override
     public ParceledListSlice<SessionInfo> getMySessions(String installerPackageName, int userId) {
-        mPm.enforceCrossUserPermission(
-                Binder.getCallingUid(), userId, true, false, "getMySessions");
-        mAppOps.checkPackage(Binder.getCallingUid(), installerPackageName);
+        final Computer snapshot = mPm.snapshotComputer();
+        final int callingUid = Binder.getCallingUid();
+        snapshot.enforceCrossUserPermission(callingUid, userId, true, false, "getMySessions");
+        mAppOps.checkPackage(callingUid, installerPackageName);
 
         final List<SessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
@@ -1120,8 +1127,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     @Override
     public void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags,
                 IntentSender statusReceiver, int userId) {
+        final Computer snapshot = mPm.snapshotComputer();
         final int callingUid = Binder.getCallingUid();
-        mPm.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
+        snapshot.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
         if ((callingUid != Process.SHELL_UID) && (callingUid != Process.ROOT_UID)) {
             mAppOps.checkPackage(callingUid, callerPackageName);
         }
@@ -1154,8 +1162,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     .setAdmin(callerPackageName)
                     .write();
         } else {
-            ApplicationInfo appInfo = mPm.mIPackageManager
-                    .getApplicationInfo(callerPackageName, 0, userId);
+            ApplicationInfo appInfo = snapshot.getApplicationInfo(callerPackageName, 0, userId);
             if (appInfo.targetSdkVersion >= Build.VERSION_CODES.P) {
                 mContext.enforceCallingOrSelfPermission(Manifest.permission.REQUEST_DELETE_PACKAGES,
                         null);
@@ -1174,7 +1181,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             String callerPackageName, IntentSender statusReceiver, int userId) {
         final int callingUid = Binder.getCallingUid();
         mContext.enforceCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES, null);
-        mPm.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
+        final Computer snapshot = mPm.snapshotComputer();
+        snapshot.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
         if ((callingUid != Process.SHELL_UID) && (callingUid != Process.ROOT_UID)) {
             mAppOps.checkPackage(callingUid, callerPackageName);
         }
@@ -1206,8 +1214,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     @Override
     public void registerCallback(IPackageInstallerCallback callback, int userId) {
-        mPm.enforceCrossUserPermission(
-                Binder.getCallingUid(), userId, true, false, "registerCallback");
+        final Computer snapshot = mPm.snapshotComputer();
+        snapshot.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
+                "registerCallback");
         registerCallback(callback, eventUserId -> userId == eventUserId);
     }
 
@@ -1295,13 +1304,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
     }
 
-    private boolean shouldFilterSession(int uid, int sessionId) {
+    private boolean shouldFilterSession(@NonNull Computer snapshot, int uid, int sessionId) {
         final PackageInstallerSession session = getSession(sessionId);
         if (session == null) {
             return false;
         }
         return uid != session.getInstallerUid()
-                && !mPm.canQueryPackage(uid, session.getPackageName());
+                && !snapshot.canQueryPackage(uid, session.getPackageName());
     }
 
     static class PackageDeleteObserverAdapter extends PackageDeleteObserver {
@@ -1327,7 +1336,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         private String getDeviceOwnerDeletedPackageMsg() {
             DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-            return dpm.getString(PACKAGE_DELETED_BY_DO,
+            return dpm.getResources().getString(PACKAGE_DELETED_BY_DO,
                     () -> mContext.getString(R.string.package_updated_device_owner));
         }
 
@@ -1454,11 +1463,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             final int sessionId = msg.arg1;
             final int userId = msg.arg2;
             final int n = mCallbacks.beginBroadcast();
+            final Computer snapshot = mPm.snapshotComputer();
             for (int i = 0; i < n; i++) {
                 final IPackageInstallerCallback callback = mCallbacks.getBroadcastItem(i);
                 final BroadcastCookie cookie = (BroadcastCookie) mCallbacks.getBroadcastCookie(i);
                 if (cookie.userCheck.test(userId)
-                        && !shouldFilterSession(cookie.callingUid, sessionId)) {
+                        && !shouldFilterSession(snapshot, cookie.callingUid, sessionId)) {
                     try {
                         invokeCallback(callback, msg);
                     } catch (RemoteException ignored) {
@@ -1725,5 +1735,38 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
                 .setPackage(sessionInfo.installerPackageName);
         mContext.sendBroadcastAsUser(sessionUpdatedIntent, UserHandle.of(userId));
+    }
+
+    /**
+     * Abandon unfinished sessions if the installer package has been uninstalled.
+     * @param installerAppId the app ID of the installer package that has been uninstalled.
+     * @param userId the user that has the installer package uninstalled.
+     */
+    void onInstallerPackageDeleted(int installerAppId, int userId) {
+        synchronized (mSessions) {
+            for (int i = 0; i < mSessions.size(); i++) {
+                final PackageInstallerSession session = mSessions.valueAt(i);
+                if (!matchesInstaller(session, installerAppId, userId)) {
+                    continue;
+                }
+                // Find parent session and only abandon parent session if installer matches
+                PackageInstallerSession root = !session.hasParentSessionId()
+                        ? session : mSessions.get(session.getParentSessionId());
+                if (root != null && matchesInstaller(root, installerAppId, userId)
+                        && !root.isDestroyed()) {
+                    root.abandon();
+                }
+            }
+        }
+    }
+
+    private boolean matchesInstaller(PackageInstallerSession session, int installerAppId,
+            int userId) {
+        final int installerUid = session.getInstallerUid();
+        if (installerAppId == UserHandle.USER_ALL) {
+            return UserHandle.getAppId(installerUid) == installerAppId;
+        } else {
+            return UserHandle.getUid(userId, installerAppId) == installerUid;
+        }
     }
 }

@@ -64,6 +64,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Surface.OutOfResourcesException;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.VirtualRefBasePtr;
 
 import dalvik.system.CloseGuard;
@@ -82,6 +83,7 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Handle to an on-screen Surface managed by the system compositor. The SurfaceControl is
@@ -212,13 +214,15 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeReparent(long transactionObj, long nativeObject,
             long newParentNativeObject);
     private static native void nativeSetBuffer(long transactionObj, long nativeObject,
-            HardwareBuffer buffer, long fencePtr);
+            HardwareBuffer buffer, long fencePtr, Consumer<SyncFence> releaseCallback);
     private static native void nativeSetBufferTransform(long transactionObj, long nativeObject,
             int transform);
     private static native void nativeSetDataSpace(long transactionObj, long nativeObject,
             @DataSpace.NamedDataSpace int dataSpace);
     private static native void nativeSetDamageRegion(long transactionObj, long nativeObject,
             Region region);
+    private static native void nativeSetDimmingEnabled(long transactionObj, long nativeObject,
+            boolean dimmingEnabled);
 
     private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
 
@@ -2961,6 +2965,8 @@ public final class SurfaceControl implements Parcelable {
         @NonNull
         public Transaction setScale(@NonNull SurfaceControl sc, float scaleX, float scaleY) {
             checkPreconditions(sc);
+            Preconditions.checkArgument(scaleX >= 0, "Negative value passed in for scaleX");
+            Preconditions.checkArgument(scaleY >= 0, "Negative value passed in for scaleY");
             nativeSetScale(mNativeObject, sc.mNativeObject, scaleX, scaleY);
             return this;
         }
@@ -3205,6 +3211,7 @@ public final class SurfaceControl implements Parcelable {
         public @NonNull Transaction setCrop(@NonNull SurfaceControl sc, @Nullable Rect crop) {
             checkPreconditions(sc);
             if (crop != null) {
+                Preconditions.checkArgument(crop.isValid(), "Crop isn't valid.");
                 nativeSetWindowCrop(mNativeObject, sc.mNativeObject,
                         crop.left, crop.top, crop.right, crop.bottom);
             } else {
@@ -3740,17 +3747,61 @@ public final class SurfaceControl implements Parcelable {
          */
         public @NonNull Transaction setBuffer(@NonNull SurfaceControl sc,
                 @Nullable HardwareBuffer buffer, @Nullable SyncFence fence) {
+            return setBuffer(sc, buffer, fence, null);
+        }
+
+        /**
+         * Updates the HardwareBuffer displayed for the SurfaceControl.
+         *
+         * Note that the buffer must be allocated with {@link HardwareBuffer#USAGE_COMPOSER_OVERLAY}
+         * as well as {@link HardwareBuffer#USAGE_GPU_SAMPLED_IMAGE} as the surface control might
+         * be composited using either an overlay or using the GPU.
+         *
+         * A presentation fence may be passed to improve performance by allowing the buffer
+         * to complete rendering while it is waiting for the transaction to be applied.
+         * For example, if the buffer is being produced by rendering with OpenGL ES then
+         * a fence created with
+         * {@link android.opengl.EGLExt#eglDupNativeFenceFDANDROID(EGLDisplay, EGLSync)} can be
+         * used to allow the GPU rendering to be concurrent with the transaction. The compositor
+         * will wait for the fence to be signaled before the buffer is displayed. If multiple
+         * buffers are set as part of the same transaction, the presentation fences of all of them
+         * must signal before any buffer is displayed. That is, the entire transaction is delayed
+         * until all presentation fences have signaled, ensuring the transaction remains consistent.
+         *
+         * A releaseCallback may be passed to know when the buffer is safe to be reused. This
+         * is recommended when attempting to render continuously using SurfaceControl transactions
+         * instead of through {@link Surface}, as it provides a safe & reliable way to know when
+         * a buffer can be re-used. The callback will be invoked with a {@link SyncFence} which,
+         * if {@link SyncFence#isValid() valid}, must be waited on prior to using the buffer. This
+         * can either be done directly with {@link SyncFence#awaitForever()} or it may be done
+         * indirectly such as passing it as a release fence to
+         * {@link android.media.Image#setFence(SyncFence)} when using
+         * {@link android.media.ImageReader}.
+         *
+         * @param sc The SurfaceControl to update
+         * @param buffer The buffer to be displayed
+         * @param fence The presentation fence. If null or invalid, this is equivalent to
+         *              {@link #setBuffer(SurfaceControl, HardwareBuffer)}
+         * @param releaseCallback The callback to invoke when the buffer being set has been released
+         *                        by a later transaction. That is, the point at which it is safe
+         *                        to re-use the buffer.
+         * @return this
+         */
+        public @NonNull Transaction setBuffer(@NonNull SurfaceControl sc,
+                @Nullable HardwareBuffer buffer, @Nullable SyncFence fence,
+                @Nullable Consumer<SyncFence> releaseCallback) {
             checkPreconditions(sc);
             if (fence != null) {
                 synchronized (fence.getLock()) {
                     nativeSetBuffer(mNativeObject, sc.mNativeObject, buffer,
-                            fence.getNativeFence());
+                            fence.getNativeFence(), releaseCallback);
                 }
             } else {
-                nativeSetBuffer(mNativeObject, sc.mNativeObject, buffer, 0);
+                nativeSetBuffer(mNativeObject, sc.mNativeObject, buffer, 0, releaseCallback);
             }
             return this;
         }
+
 
         /**
          * Sets the buffer transform that should be applied to the current buffer.
@@ -3785,6 +3836,27 @@ public final class SurfaceControl implements Parcelable {
         public @NonNull Transaction setDamageRegion(@NonNull SurfaceControl sc,
                 @Nullable Region region) {
             nativeSetDamageRegion(mNativeObject, sc.mNativeObject, region);
+            return this;
+        }
+
+        /**
+         * Set if the layer can be dimmed.
+         *
+         * <p>Dimming is to adjust brightness of the layer.
+         * Default value is {@code true}, which means the layer can be dimmed.
+         * Disabling dimming means the brightness of the layer can not be changed, i.e.,
+         * keep the white point for the layer same as the display brightness.</p>
+         *
+         * @param sc The SurfaceControl on which to enable or disable dimming.
+         * @param dimmingEnabled The dimming flag.
+         * @return this.
+         *
+         * @hide
+         */
+        public @NonNull Transaction setDimmingEnabled(@NonNull SurfaceControl sc,
+                boolean dimmingEnabled) {
+            checkPreconditions(sc);
+            nativeSetDimmingEnabled(mNativeObject, sc.mNativeObject, dimmingEnabled);
             return this;
         }
 
@@ -4089,5 +4161,11 @@ public final class SurfaceControl implements Parcelable {
         }
 
         return -1;
+    }
+
+    // Called by native
+    private static void invokeReleaseCallback(Consumer<SyncFence> callback, long nativeFencePtr) {
+        SyncFence fence = new SyncFence(nativeFencePtr);
+        callback.accept(fence);
     }
 }

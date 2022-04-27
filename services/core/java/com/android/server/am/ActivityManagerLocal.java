@@ -74,6 +74,8 @@ public interface ActivityManagerLocal {
      * @param conn Receives information as the service is started and stopped.
      *        This must be a valid ServiceConnection object; it must not be null.
      * @param clientAppUid Uid of the app for which the sdk sandbox process needs to be spawned.
+     * @param clientAppPackage Package of the app for which the sdk sandbox process needs to
+     *        be spawned. This package must belong to the clientAppUid.
      * @param processName Unique identifier for the service instance. Each unique name here will
      *        result in a different service instance being created. Identifiers must only contain
      *        ASCII letters, digits, underscores, and periods.
@@ -87,6 +89,7 @@ public interface ActivityManagerLocal {
      */
     @SuppressLint("RethrowRemoteException")
     boolean bindSdkSandboxService(@NonNull Intent service, @NonNull ServiceConnection conn,
-            int clientAppUid, @NonNull String processName, @Context.BindServiceFlags int flags)
+            int clientAppUid, @NonNull String clientAppPackage, @NonNull String processName,
+            @Context.BindServiceFlags int flags)
             throws RemoteException;
 }

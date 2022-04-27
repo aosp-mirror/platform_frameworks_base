@@ -285,6 +285,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     public void disconnect() {
         synchronized (mProfileLock) {
+            if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                for (CachedBluetoothDevice member : getMemberDevice()) {
+                    Log.d(TAG, "Disconnect the member(" + member.getAddress() + ")");
+                    member.disconnect();
+                }
+            }
             mDevice.disconnect();
         }
         // Disconnect  PBAP server in case its connected
@@ -399,6 +405,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             }
 
             mDevice.connect();
+            if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                for (CachedBluetoothDevice member : getMemberDevice()) {
+                    Log.d(TAG, "connect the member(" + member.getAddress() + ")");
+                    member.connect();
+                }
+            }
         }
     }
 
@@ -741,7 +753,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         ParcelUuid[] uuids = mDevice.getUuids();
         if (uuids == null) return false;
 
-        ParcelUuid[] localUuids = mLocalAdapter.getUuids();
+        List<ParcelUuid> uuidsList = mLocalAdapter.getUuidsList();
+        ParcelUuid[] localUuids = new ParcelUuid[uuidsList.size()];
+        uuidsList.toArray(localUuids);
+
         if (localUuids == null) return false;
 
         /*
@@ -1105,7 +1120,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 final boolean isOnCall = Utils.isAudioModeOngoingCall(mContext);
                 if ((mIsActiveDeviceHearingAid)
                         || (mIsActiveDeviceHeadset && isOnCall)
-                        || (mIsActiveDeviceA2dp && !isOnCall)) {
+                        || (mIsActiveDeviceA2dp && !isOnCall)
+                        || mIsActiveDeviceLeAudio) {
                     if (isTwsBatteryAvailable(leftBattery, rightBattery) && !shortSummary) {
                         stringRes = R.string.bluetooth_active_battery_level_untethered;
                     } else if (batteryLevelPercentageString != null && !shortSummary) {
@@ -1141,18 +1157,26 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * See {@link #getCarConnectionSummary(boolean)}
+     * See {@link #getCarConnectionSummary(boolean, boolean)}
      */
     public String getCarConnectionSummary() {
-        return getCarConnectionSummary(false);
+        return getCarConnectionSummary(false /* shortSummary */);
+    }
+
+    /**
+     * See {@link #getCarConnectionSummary(boolean, boolean)}
+     */
+    public String getCarConnectionSummary(boolean shortSummary) {
+        return getCarConnectionSummary(shortSummary, true /* useDisconnectedString */);
     }
 
     /**
      * Returns android auto string that describes the connection state of this device.
      *
      * @param shortSummary {@code true} if need to return short version summary
+     * @param useDisconnectedString {@code true} if need to return disconnected summary string
      */
-    public String getCarConnectionSummary(boolean shortSummary) {
+    public String getCarConnectionSummary(boolean shortSummary, boolean useDisconnectedString) {
         boolean profileConnected = false;       // at least one profile is connected
         boolean a2dpNotConnected = false;       // A2DP is preferred but not connected
         boolean hfpNotConnected = false;        // HFP is preferred but not connected
@@ -1270,9 +1294,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             }
         }
 
-        return getBondState() == BluetoothDevice.BOND_BONDING ?
-                mContext.getString(R.string.bluetooth_pairing) :
-                mContext.getString(R.string.bluetooth_disconnected);
+        if (getBondState() == BluetoothDevice.BOND_BONDING) {
+            return mContext.getString(R.string.bluetooth_pairing);
+        }
+        return useDisconnectedString ? mContext.getString(R.string.bluetooth_disconnected) : null;
     }
 
     /**

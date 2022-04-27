@@ -134,6 +134,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private InteractionJankMonitor mJankMonitor;
     @Mock private StackStateLogger mStackLogger;
     @Mock private NotificationStackScrollLogger mLogger;
+    @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -186,7 +187,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mShadeController,
                 mJankMonitor,
                 mStackLogger,
-                mLogger
+                mLogger,
+                mNotificationStackSizeCalculator
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);

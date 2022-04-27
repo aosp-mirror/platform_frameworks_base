@@ -121,6 +121,7 @@ public class PhonePipMenuController implements PipMenuController {
     private final Optional<SplitScreenController> mSplitScreenController;
     private final PipUiEventLogger mPipUiEventLogger;
     private ParceledListSlice<RemoteAction> mAppActions;
+    private RemoteAction mCloseAction;
     private ParceledListSlice<RemoteAction> mMediaActions;
     private SyncRtSurfaceTransactionApplier mApplier;
     private int mMenuState;
@@ -132,19 +133,6 @@ public class PhonePipMenuController implements PipMenuController {
         public void onMediaActionsChanged(List<RemoteAction> mediaActions) {
             mMediaActions = new ParceledListSlice<>(mediaActions);
             updateMenuActions();
-        }
-    };
-
-    private final float[] mTmpValues = new float[9];
-    private final Runnable mUpdateEmbeddedMatrix = () -> {
-        if (mPipMenuView == null || mPipMenuView.getViewRootImpl() == null) {
-            return;
-        }
-        mMoveTransform.getValues(mTmpValues);
-        try {
-            mPipMenuView.getViewRootImpl().getAccessibilityEmbeddedConnection()
-                    .setScreenMatrix(mTmpValues);
-        } catch (RemoteException e) {
         }
     };
 
@@ -184,7 +172,7 @@ public class PhonePipMenuController implements PipMenuController {
         detachPipMenuView();
     }
 
-    private void attachPipMenuView() {
+    void attachPipMenuView() {
         // In case detach was not called (e.g. PIP unexpectedly closed)
         if (mPipMenuView != null) {
             detachPipMenuView();
@@ -348,11 +336,6 @@ public class PhonePipMenuController implements PipMenuController {
         } else {
             mApplier.scheduleApply(params);
         }
-
-        if (mPipMenuView.getViewRootImpl() != null) {
-            mPipMenuView.getHandler().removeCallbacks(mUpdateEmbeddedMatrix);
-            mPipMenuView.getHandler().post(mUpdateEmbeddedMatrix);
-        }
     }
 
     /**
@@ -474,8 +457,10 @@ public class PhonePipMenuController implements PipMenuController {
      * Sets the menu actions to the actions provided by the current PiP menu.
      */
     @Override
-    public void setAppActions(ParceledListSlice<RemoteAction> appActions) {
+    public void setAppActions(ParceledListSlice<RemoteAction> appActions,
+            RemoteAction closeAction) {
         mAppActions = appActions;
+        mCloseAction = closeAction;
         updateMenuActions();
     }
 
@@ -507,9 +492,8 @@ public class PhonePipMenuController implements PipMenuController {
     private void updateMenuActions() {
         if (mPipMenuView != null) {
             final ParceledListSlice<RemoteAction> menuActions = resolveMenuActions();
-            if (menuActions != null) {
-                mPipMenuView.setActions(mPipBoundsState.getBounds(), menuActions.getList());
-            }
+            mPipMenuView.setActions(mPipBoundsState.getBounds(),
+                    menuActions == null ? null : menuActions.getList(), mCloseAction);
         }
     }
 

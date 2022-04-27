@@ -61,7 +61,14 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_SCROLL_FLING;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_AVD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_ENTER;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_EXIT;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_RESIZE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_SCREEN_FOR_STATUS;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_NEXT_FLOW;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
@@ -176,6 +183,13 @@ public class InteractionJankMonitor {
     public static final int CUJ_ONE_HANDED_ENTER_TRANSITION = 42;
     public static final int CUJ_ONE_HANDED_EXIT_TRANSITION = 43;
     public static final int CUJ_UNFOLD_ANIM = 44;
+    public static final int CUJ_SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS = 45;
+    public static final int CUJ_SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS = 46;
+    public static final int CUJ_SUW_LOADING_TO_NEXT_FLOW = 47;
+    public static final int CUJ_SUW_LOADING_SCREEN_FOR_STATUS = 48;
+    public static final int CUJ_SPLIT_SCREEN_ENTER = 49;
+    public static final int CUJ_SPLIT_SCREEN_EXIT = 50;
+    public static final int CUJ_SPLIT_SCREEN_RESIZE = 51;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -229,6 +243,13 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_ENTER_TRANSITION,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_EXIT_TRANSITION,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_NEXT_FLOW,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_SCREEN_FOR_STATUS,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_ENTER,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_EXIT,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_RESIZE,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -294,6 +315,13 @@ public class InteractionJankMonitor {
             CUJ_ONE_HANDED_ENTER_TRANSITION,
             CUJ_ONE_HANDED_EXIT_TRANSITION,
             CUJ_UNFOLD_ANIM,
+            CUJ_SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS,
+            CUJ_SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS,
+            CUJ_SUW_LOADING_TO_NEXT_FLOW,
+            CUJ_SUW_LOADING_SCREEN_FOR_STATUS,
+            CUJ_SPLIT_SCREEN_ENTER,
+            CUJ_SPLIT_SCREEN_EXIT,
+            CUJ_SPLIT_SCREEN_RESIZE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -369,7 +397,8 @@ public class InteractionJankMonitor {
         synchronized (mLock) {
             FrameTrackerListener eventsListener = (s, act) -> handleCujEvents(act, s);
             return new FrameTracker(session, mWorker.getThreadHandler(),
-                    threadedRenderer, viewRoot, surfaceControl, choreographer, mMetrics,
+                    threadedRenderer, viewRoot, surfaceControl, choreographer,
+                    mMetrics, new FrameTracker.StatsLogWrapper(),
                     mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis,
                     eventsListener, config);
         }
@@ -701,6 +730,20 @@ public class InteractionJankMonitor {
                 return "ONE_HANDED_EXIT_TRANSITION";
             case CUJ_UNFOLD_ANIM:
                 return "UNFOLD_ANIM";
+            case CUJ_SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS:
+                return "SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS";
+            case CUJ_SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS:
+                return "SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS";
+            case CUJ_SUW_LOADING_TO_NEXT_FLOW:
+                return "SUW_LOADING_TO_NEXT_FLOW";
+            case CUJ_SUW_LOADING_SCREEN_FOR_STATUS:
+                return "SUW_LOADING_SCREEN_FOR_STATUS";
+            case CUJ_SPLIT_SCREEN_ENTER:
+                return "SPLIT_SCREEN_ENTER";
+            case CUJ_SPLIT_SCREEN_EXIT:
+                return "SPLIT_SCREEN_EXIT";
+            case CUJ_SPLIT_SCREEN_RESIZE:
+                return "CUJ_SPLIT_SCREEN_RESIZE";
         }
         return "UNKNOWN";
     }

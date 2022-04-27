@@ -414,4 +414,12 @@ public interface InputMethod {
         // intentionally empty
     }
 
+    /**
+     * Finish stylus handwriting session.
+     * @hide
+     */
+    default void finishStylusHandwriting() {
+        // intentionally empty
+    }
+
 }

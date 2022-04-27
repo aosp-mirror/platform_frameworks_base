@@ -75,7 +75,7 @@ public class NavigationBarControllerTest extends SysuiTestCase {
     @Mock
     private CommandQueue mCommandQueue;
     @Mock
-    private NavigationBar.Factory mNavigationBarFactory;
+    private NavigationBarComponent.Factory mNavigationBarFactory;
 
     @Before
     public void setUp() {

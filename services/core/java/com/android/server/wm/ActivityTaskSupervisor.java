@@ -402,7 +402,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     activities.add(r.info);
                 });
             }
-            if (!displayContent.mDwpcHelper.canContainActivities(activities)) {
+            if (!displayContent.mDwpcHelper.canContainActivities(activities,
+                    displayContent.getWindowingMode())) {
                 return false;
             }
         }
@@ -896,6 +897,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         proc.getThread(), r.token);
 
                 final boolean isTransitionForward = r.isTransitionForward();
+                final IBinder fragmentToken = r.getTaskFragment().getFragmentToken();
                 clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
@@ -906,7 +908,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         proc.getReportedProcState(), r.getSavedState(), r.getPersistentSavedState(),
                         results, newIntents, r.takeOptions(), isTransitionForward,
                         proc.createProfilerInfoIfNeeded(), r.assistToken, activityClientController,
-                        r.shareableActivityToken, r.getLaunchedFromBubble()));
+                        r.shareableActivityToken, r.getLaunchedFromBubble(), fragmentToken));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;

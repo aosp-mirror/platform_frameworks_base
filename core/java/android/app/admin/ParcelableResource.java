@@ -43,7 +43,8 @@ import java.util.function.Supplier;
 
 /**
  * Used to store the required information to load a resource that was updated using
- * {@link DevicePolicyManager#setDrawables} and {@link DevicePolicyManager#setStrings}.
+ * {@link DevicePolicyResourcesManager#setDrawables} and
+ * {@link DevicePolicyResourcesManager#setStrings}.
  *
  * @hide
  */

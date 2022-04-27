@@ -98,6 +98,7 @@ class DreamsSmartspaceController @Inject constructor(
             view.setPrimaryTextColor(Color.WHITE)
             smartspaceViews.add(view)
             connectSession()
+            view.setDozeAmount(0f)
         }
 
         override fun onViewDetachedFromWindow(v: View) {
@@ -127,6 +128,7 @@ class DreamsSmartspaceController @Inject constructor(
         }
 
         val view = buildView(parent)
+
         connectSession()
 
         return view
@@ -136,12 +138,13 @@ class DreamsSmartspaceController @Inject constructor(
         return if (plugin != null) {
             var view = smartspaceViewComponentFactory.create(parent, plugin, stateChangeListener)
                     .getView()
-
-            if (view is View) {
-                return view
+            if (view !is View) {
+                return null
             }
 
-            return null
+            view.setIsDreaming(true)
+
+            return view
         } else {
             null
         }
@@ -160,9 +163,8 @@ class DreamsSmartspaceController @Inject constructor(
             return
         }
 
-        // TODO(b/217559844): Replace with "dream" session when available.
         val newSession = smartspaceManager.createSmartspaceSession(
-                SmartspaceConfig.Builder(context, "lockscreen").build())
+                SmartspaceConfig.Builder(context, "dream").build())
         Log.d(TAG, "Starting smartspace session for dream")
         newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession

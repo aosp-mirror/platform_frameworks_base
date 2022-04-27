@@ -17,10 +17,13 @@
 package com.android.server.policy;
 
 import static android.Manifest.permission.POST_NOTIFICATIONS;
+import static android.app.ActivityOptions.ANIM_REMOTE_ANIMATION;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
@@ -54,6 +57,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -75,10 +79,12 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.infra.AndroidFuture;
+import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
@@ -91,6 +97,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityInterceptorCallback;
+import com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.ArrayList;
@@ -113,7 +120,6 @@ public final class PermissionPolicyService extends SystemService {
     private static final String SYSTEM_PKG = "android";
     private static final boolean DEBUG = false;
     private static final long USER_SENSITIVE_UPDATE_DELAY_MS = 60000;
-    private static final long ACTIVITY_START_DELAY_MS = 200;
 
     private final Object mLock = new Object();
 
@@ -154,11 +160,12 @@ public final class PermissionPolicyService extends SystemService {
     private List<String> mAppOpPermissions;
 
     private Context mContext;
-    private Handler mHandler;
     private PackageManagerInternal mPackageManagerInternal;
+    private PermissionManagerServiceInternal mPermissionManagerInternal;
     private NotificationManagerInternal mNotificationManager;
     private final KeyguardManager mKeyguardManager;
     private final PackageManager mPackageManager;
+    private final Handler mHandler;
 
     public PermissionPolicyService(@NonNull Context context) {
         super(context);
@@ -174,7 +181,7 @@ public final class PermissionPolicyService extends SystemService {
     public void onStart() {
         mPackageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
-        PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
+        mPermissionManagerInternal = LocalServices.getService(
                 PermissionManagerServiceInternal.class);
         final IAppOpsService appOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
@@ -206,7 +213,7 @@ public final class PermissionPolicyService extends SystemService {
             }
         });
 
-        permissionManagerInternal.addOnRuntimePermissionStateChangedListener(
+        mPermissionManagerInternal.addOnRuntimePermissionStateChangedListener(
                 this::synchronizePackagePermissionsAndAppOpsAsyncForUser);
 
         mAppOpsCallback = new IAppOpsCallback.Stub() {
@@ -218,7 +225,7 @@ public final class PermissionPolicyService extends SystemService {
         };
 
         final ArrayList<PermissionInfo> dangerousPerms =
-                permissionManagerInternal.getAllPermissionsWithProtection(
+                mPermissionManagerInternal.getAllPermissionsWithProtection(
                         PermissionInfo.PROTECTION_DANGEROUS);
         try {
             int numDangerousPerms = dangerousPerms.size();
@@ -243,7 +250,7 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         final List<PermissionInfo> appOpPermissionInfos =
-                permissionManagerInternal.getAllPermissionsWithProtectionFlags(
+                mPermissionManagerInternal.getAllPermissionsWithProtectionFlags(
                         PermissionInfo.PROTECTION_FLAG_APPOP);
         mAppOpPermissions = new ArrayList<>();
         final int appOpPermissionInfosSize = appOpPermissionInfos.size();
@@ -1060,7 +1067,8 @@ public final class PermissionPolicyService extends SystemService {
                             ActivityInterceptorInfo info) {
                         super.onActivityLaunched(taskInfo, activityInfo, info);
                         if (!shouldShowNotificationDialogOrClearFlags(taskInfo,
-                                activityInfo.packageName, info.intent, info.checkedOptions, true)) {
+                                activityInfo.packageName, info.intent, info.checkedOptions, true)
+                                || isNoDisplayActivity(activityInfo)) {
                             return;
                         }
                         UserHandle user = UserHandle.of(taskInfo.userId);
@@ -1068,8 +1076,11 @@ public final class PermissionPolicyService extends SystemService {
                                 activityInfo.packageName, user)) {
                             clearNotificationReviewFlagsIfNeeded(activityInfo.packageName, user);
                         } else {
-                            showNotificationPromptIfNeeded(activityInfo.packageName,
-                                    taskInfo.userId, taskInfo.taskId);
+                            // Post the activity start checks to ensure the notification channel
+                            // checks happen outside the WindowManager global lock.
+                            mHandler.post(() -> showNotificationPromptIfNeeded(
+                                    activityInfo.packageName, taskInfo.userId, taskInfo.taskId,
+                                    info));
                         }
                     }
                 };
@@ -1100,15 +1111,21 @@ public final class PermissionPolicyService extends SystemService {
             return true;
         }
 
+        @Override
         public void showNotificationPromptIfNeeded(@NonNull String packageName, int userId,
                 int taskId) {
+            showNotificationPromptIfNeeded(packageName, userId, taskId, null /* info */);
+        }
+
+        void showNotificationPromptIfNeeded(@NonNull String packageName, int userId,
+                int taskId, @Nullable ActivityInterceptorInfo info) {
             UserHandle user = UserHandle.of(userId);
             if (packageName == null || taskId == ActivityTaskManager.INVALID_TASK_ID
                     || !shouldForceShowNotificationPermissionRequest(packageName, user)) {
                 return;
             }
 
-            launchNotificationPermissionRequestDialog(packageName, user, taskId);
+            launchNotificationPermissionRequestDialog(packageName, user, taskId, info);
         }
 
         @Override
@@ -1124,6 +1141,22 @@ public final class PermissionPolicyService extends SystemService {
                 Intent intent) {
             return shouldShowNotificationDialogOrClearFlags(
                     taskInfo, currPkg, intent, null, false);
+        }
+
+        private boolean isNoDisplayActivity(@NonNull ActivityInfo aInfo) {
+            final int themeResource = aInfo.getThemeResource();
+            if (themeResource == Resources.ID_NULL) {
+                return false;
+            }
+
+            boolean noDisplay = false;
+            final AttributeCache.Entry ent = AttributeCache.instance()
+                    .get(aInfo.packageName, themeResource, R.styleable.Window, 0);
+            if (ent != null) {
+                noDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
+            }
+
+            return noDisplay;
         }
 
         /**
@@ -1177,19 +1210,34 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         private void launchNotificationPermissionRequestDialog(String pkgName, UserHandle user,
-                int taskId) {
+                int taskId, @Nullable ActivityInterceptorInfo info) {
             Intent grantPermission = mPackageManager
                     .buildRequestPermissionsIntent(new String[] { POST_NOTIFICATIONS });
+            // Prevent the front-most activity entering pip due to overlay activity started on top.
+            grantPermission.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_USER_ACTION);
             grantPermission.setAction(
                     ACTION_REQUEST_PERMISSIONS_FOR_OTHER);
             grantPermission.putExtra(Intent.EXTRA_PACKAGE_NAME, pkgName);
 
-            ActivityOptions options = new ActivityOptions(new Bundle());
+            final boolean remoteAnimation = info != null && info.checkedOptions != null
+                    && info.checkedOptions.getAnimationType() == ANIM_REMOTE_ANIMATION
+                    && info.clearOptionsAnimation != null;
+            ActivityOptions options = remoteAnimation ? ActivityOptions.makeRemoteAnimation(
+                        info.checkedOptions.getRemoteAnimationAdapter(),
+                        info.checkedOptions.getRemoteTransition())
+                    : new ActivityOptions(new Bundle());
             options.setTaskOverlay(true, false);
             options.setLaunchTaskId(taskId);
+            if (remoteAnimation) {
+                // Remote animation set on the intercepted activity will be handled by the grant
+                // permission activity, which is launched below. So we need to clear remote
+                // animation from the intercepted activity and its siblings to prevent duplication.
+                // This should trigger ActivityRecord#clearOptionsAnimationForSiblings for the
+                // intercepted activity.
+                info.clearOptionsAnimation.run();
+            }
             try {
-                mHandler.postDelayed(() -> mContext.startActivityAsUser(
-                        grantPermission, options.toBundle(), user), ACTIVITY_START_DELAY_MS);
+                mContext.startActivityAsUser(grantPermission, options.toBundle(), user);
             } catch (Exception e) {
                 Log.e(LOG_TAG, "couldn't start grant permission dialog"
                         + "for other package " + pkgName, e);
@@ -1283,10 +1331,12 @@ public final class PermissionPolicyService extends SystemService {
             }
             boolean hasCreatedNotificationChannels = mNotificationManager
                     .getNumNotificationChannelsForPackage(pkgName, uid, true) > 0;
+            boolean granted = mPermissionManagerInternal.checkUidPermission(uid, POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED;
             int flags = mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, pkgName, user);
             boolean explicitlySet = (flags & PermissionManager.EXPLICIT_SET_FLAGS) != 0;
             boolean needsReview = (flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0;
-            return hasCreatedNotificationChannels && (needsReview || !explicitlySet);
+            return !granted && hasCreatedNotificationChannels && (needsReview || !explicitlySet);
         }
     }
 }

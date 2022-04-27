@@ -16,15 +16,31 @@
 
 package android.app.admin;
 
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.END_TAG;
+import static org.xmlpull.v1.XmlPullParser.TEXT;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.IndentingPrintWriter;
+import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Network configuration to be set for the user profile
@@ -36,6 +52,20 @@ public final class PreferentialNetworkServiceConfig implements Parcelable {
     final boolean mAllowFallbackToDefaultConnection;
     final int[] mIncludedUids;
     final int[] mExcludedUids;
+
+    private static final String LOG_TAG = "PreferentialNetworkServiceConfig";
+    private static final String TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIG =
+            "preferential_network_service_config";
+    private static final String TAG_CONFIG_ENABLED =
+            "preferential_network_service_config_enabled";
+    private static final String TAG_UID = "uid";
+    private static final String TAG_NETWORK_ID =
+            "preferential_network_service_network_id";
+    private static final String TAG_ALLOW_FALLBACK_TO_DEFAULT_CONNECTION =
+            "allow_fallback_to_default_connection";
+    private static final String TAG_INCLUDED_UIDS = "included_uids";
+    private static final String TAG_EXCLUDED_UIDS = "excluded_uids";
+    private static final String ATTR_VALUE = "value";
 
     /** @hide */
     public static final PreferentialNetworkServiceConfig DEFAULT =
@@ -159,8 +189,8 @@ public final class PreferentialNetworkServiceConfig implements Parcelable {
         return "PreferentialNetworkServiceConfig{"
                 + "mIsEnabled=" + isEnabled()
                 + "mAllowFallbackToDefaultConnection=" + isFallbackToDefaultConnectionAllowed()
-                + "mIncludedUids=" + mIncludedUids.toString()
-                + "mExcludedUids=" + mExcludedUids.toString()
+                + "mIncludedUids=" + Arrays.toString(mIncludedUids)
+                + "mExcludedUids=" + Arrays.toString(mExcludedUids)
                 + "mNetworkId=" + mNetworkId
                 + '}';
     }
@@ -307,6 +337,135 @@ public final class PreferentialNetworkServiceConfig implements Parcelable {
         dest.writeInt(mNetworkId);
         dest.writeIntArray(mIncludedUids);
         dest.writeIntArray(mExcludedUids);
+    }
+
+    private void writeAttributeValueToXml(TypedXmlSerializer out, String tag, int value)
+            throws IOException {
+        out.startTag(null, tag);
+        out.attributeInt(null, ATTR_VALUE, value);
+        out.endTag(null, tag);
+    }
+
+    private void writeAttributeValueToXml(TypedXmlSerializer out, String tag, boolean value)
+            throws IOException {
+        out.startTag(null, tag);
+        out.attributeBoolean(null, ATTR_VALUE, value);
+        out.endTag(null, tag);
+    }
+
+    private void writeAttributeValuesToXml(TypedXmlSerializer out, String outerTag, String innerTag,
+            @NonNull Collection<String> values) throws IOException {
+        out.startTag(null, outerTag);
+        for (String value : values) {
+            out.startTag(null, innerTag);
+            out.attribute(null, ATTR_VALUE, value);
+            out.endTag(null, innerTag);
+        }
+        out.endTag(null, outerTag);
+    }
+
+    private static  void readAttributeValues(
+            TypedXmlPullParser parser, String tag, Collection<String> result)
+            throws XmlPullParserException, IOException {
+        result.clear();
+        int outerDepthDAM = parser.getDepth();
+        int typeDAM;
+        while ((typeDAM = parser.next()) != END_DOCUMENT
+                && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
+            if (typeDAM == END_TAG || typeDAM == TEXT) {
+                continue;
+            }
+            String tagDAM = parser.getName();
+            if (tag.equals(tagDAM)) {
+                result.add(parser.getAttributeValue(null, ATTR_VALUE));
+            } else {
+                Log.e(LOG_TAG, "Expected tag " + tag + " but found " + tagDAM);
+            }
+        }
+    }
+
+    private List<String> intArrayToStringList(int[] array) {
+        return Arrays.stream(array).mapToObj(String::valueOf).collect(Collectors.toList());
+    }
+
+    private static int[] readStringListToIntArray(TypedXmlPullParser parser, String tag)
+            throws XmlPullParserException, IOException {
+        List<String> stringList = new ArrayList<>();
+        readAttributeValues(parser, tag, stringList);
+        int[] intArray = stringList.stream()
+                .map(s -> Integer.parseInt(s))
+                .mapToInt(Integer::intValue)
+                .toArray();
+        return intArray;
+    }
+
+    /**
+     * @hide
+     */
+    public static PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig(
+            TypedXmlPullParser parser, String tag) throws XmlPullParserException, IOException  {
+        int outerDepthDAM = parser.getDepth();
+        int typeDAM;
+        PreferentialNetworkServiceConfig.Builder resultBuilder =
+                new PreferentialNetworkServiceConfig.Builder();
+        while ((typeDAM = parser.next()) != END_DOCUMENT
+                && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
+            if (typeDAM == END_TAG || typeDAM == TEXT) {
+                continue;
+            }
+            String tagDAM = parser.getName();
+            if (TAG_CONFIG_ENABLED.equals(tagDAM)) {
+                resultBuilder.setEnabled(parser.getAttributeBoolean(null, ATTR_VALUE,
+                        DevicePolicyManager.PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT));
+            } else if (TAG_NETWORK_ID.equals(tagDAM)) {
+                int val = parser.getAttributeInt(null, ATTR_VALUE, 0);
+                if (val != 0) {
+                    resultBuilder.setNetworkId(val);
+                }
+            } else if (TAG_ALLOW_FALLBACK_TO_DEFAULT_CONNECTION.equals(tagDAM)) {
+                resultBuilder.setFallbackToDefaultConnectionAllowed(parser.getAttributeBoolean(
+                        null, ATTR_VALUE, true));
+            } else if (TAG_INCLUDED_UIDS.equals(tagDAM)) {
+                resultBuilder.setIncludedUids(readStringListToIntArray(parser, TAG_UID));
+            } else if (TAG_EXCLUDED_UIDS.equals(tagDAM)) {
+                resultBuilder.setExcludedUids(readStringListToIntArray(parser, TAG_UID));
+            } else {
+                Log.w(LOG_TAG, "Unknown tag under " + tag + ": " + tagDAM);
+            }
+        }
+        return resultBuilder.build();
+    }
+
+    /**
+     * @hide
+     */
+    public void writeToXml(@NonNull TypedXmlSerializer out) throws IOException {
+        out.startTag(null, TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIG);
+        writeAttributeValueToXml(out, TAG_CONFIG_ENABLED, isEnabled());
+        writeAttributeValueToXml(out, TAG_NETWORK_ID, getNetworkId());
+        writeAttributeValueToXml(out, TAG_ALLOW_FALLBACK_TO_DEFAULT_CONNECTION,
+                isFallbackToDefaultConnectionAllowed());
+        writeAttributeValuesToXml(out, TAG_INCLUDED_UIDS, TAG_UID,
+                intArrayToStringList(getIncludedUids()));
+        writeAttributeValuesToXml(out, TAG_EXCLUDED_UIDS, TAG_UID,
+                intArrayToStringList(getExcludedUids()));
+        out.endTag(null, TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIG);
+    }
+
+    /**
+     * @hide
+     */
+    public void dump(IndentingPrintWriter pw) {
+        pw.print("networkId=");
+        pw.println(mNetworkId);
+        pw.print("isEnabled=");
+        pw.println(mIsEnabled);
+        pw.print("allowFallbackToDefaultConnection=");
+        pw.println(mAllowFallbackToDefaultConnection);
+        pw.print("includedUids=");
+        pw.println(mIncludedUids);
+        pw.print("excludedUids=");
+        pw.println(mExcludedUids);
     }
 
     @Override

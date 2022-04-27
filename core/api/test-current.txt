@@ -19,6 +19,7 @@ package android {
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final String INSTALL_TEST_ONLY_PACKAGE = "android.permission.INSTALL_TEST_ONLY_PACKAGE";
     field public static final String KEEP_UNINSTALLED_PACKAGES = "android.permission.KEEP_UNINSTALLED_PACKAGES";
+    field public static final String MAKE_UID_VISIBLE = "android.permission.MAKE_UID_VISIBLE";
     field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_ACTIVITY_TASKS = "android.permission.MANAGE_ACTIVITY_TASKS";
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
@@ -35,6 +36,7 @@ package android {
     field public static final String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
     field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
+    field public static final String REQUEST_UNIQUE_ID_ATTESTATION = "android.permission.REQUEST_UNIQUE_ID_ATTESTATION";
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
     field public static final String REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL = "android.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL";
     field public static final String SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS = "android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS";
@@ -61,14 +63,14 @@ package android {
   public static final class R.bool {
     field public static final int config_assistantOnTopOfDream = 17891333; // 0x1110005
     field public static final int config_perDisplayFocusEnabled = 17891332; // 0x1110004
-    field public static final int config_preventImeStartupUnlessTextEditor;
+    field public static final int config_preventImeStartupUnlessTextEditor = 17891335; // 0x1110007
     field public static final int config_remoteInsetsControllerControlsSystemBars = 17891334; // 0x1110006
   }
 
   public static final class R.string {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultDialer = 17039395; // 0x1040023
-    field public static final int config_systemAutomotiveCalendarSyncManager;
+    field public static final int config_systemAutomotiveCalendarSyncManager = 17039423; // 0x104003f
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
     field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
     field public static final int config_systemGallery = 17039399; // 0x1040027
@@ -95,15 +97,14 @@ package android.accessibilityservice {
 package android.animation {
 
   public class ValueAnimator extends android.animation.Animator {
-    method public static float getDurationScale();
-    method public static void setDurationScale(float);
+    method @MainThread public static void setDurationScale(@FloatRange(from=0) float);
   }
 
 }
 
 package android.app {
 
-  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public final boolean addDumpable(@NonNull android.util.Dumpable);
     method public void dumpInternal(@NonNull String, @Nullable java.io.FileDescriptor, @NonNull java.io.PrintWriter, @Nullable String[]);
     method public void onMovedToDisplay(int, android.content.res.Configuration);
@@ -167,11 +168,11 @@ package android.app {
   }
 
   public static interface ActivityOptions.OnAnimationFinishedListener {
-    method public void onAnimationFinished();
+    method public void onAnimationFinished(long);
   }
 
   public static interface ActivityOptions.OnAnimationStartedListener {
-    method public void onAnimationStarted();
+    method public void onAnimationStarted(long);
   }
 
   public class ActivityTaskManager {
@@ -300,7 +301,6 @@ package android.app {
   }
 
   public class LocaleManager {
-    method @Nullable public android.os.LocaleList getSystemLocales();
     method public void setSystemLocales(@NonNull android.os.LocaleList);
   }
 
@@ -356,14 +356,8 @@ package android.app {
   }
 
   public final class PictureInPictureParams implements android.os.Parcelable {
-    method public java.util.List<android.app.RemoteAction> getActions();
-    method public float getAspectRatio();
-    method @Nullable public android.app.RemoteAction getCloseAction();
-    method public float getExpandedAspectRatio();
-    method public android.graphics.Rect getSourceRectHint();
-    method @Nullable public CharSequence getSubtitle();
-    method @Nullable public CharSequence getTitle();
-    method public boolean isSeamlessResizeEnabled();
+    method public float getAspectRatioFloat();
+    method public float getExpandedAspectRatioFloat();
   }
 
   public final class PictureInPictureUiState implements android.os.Parcelable {
@@ -422,9 +416,9 @@ package android.app {
     method @NonNull public android.content.res.Configuration getConfiguration();
     method public int getParentTaskId();
     method @Nullable public android.app.PictureInPictureParams getPictureInPictureParams();
-    method public boolean getPreferDockBigOverlays();
     method @NonNull public android.window.WindowContainerToken getToken();
     method public boolean hasParentTask();
+    method public boolean shouldDockBigOverlays();
   }
 
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {
@@ -470,6 +464,7 @@ package android.app {
     method @NonNull public android.graphics.Rect getMaxBounds();
     method public int getRotation();
     method public int getWindowingMode();
+    method public static boolean isFloating(int);
     method public void setActivityType(int);
     method public void setAppBounds(android.graphics.Rect);
     method public void setBounds(android.graphics.Rect);
@@ -508,6 +503,7 @@ package android.app.admin {
     method public void forceUpdateUserSetupComplete(int);
     method @NonNull public java.util.Set<java.lang.String> getDefaultCrossProfilePackages();
     method public int getDeviceOwnerType(@NonNull android.content.ComponentName);
+    method @Nullable public String getDevicePolicyManagementRoleHolderUpdaterPackage();
     method @NonNull public java.util.Set<java.lang.String> getDisallowedSystemApps(@NonNull android.content.ComponentName, int, @NonNull String);
     method public long getLastBugReportRequestTime();
     method public long getLastNetworkLogRetrievalTime();
@@ -518,7 +514,6 @@ package android.app.admin {
     method public boolean isFactoryResetProtectionPolicySupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public boolean isNewUserDisclaimerAcknowledged();
     method public boolean isRemovingAdmin(@NonNull android.content.ComponentName, int);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}, conditional=true) public void markProfileOwnerOnOrganizationOwnedDevice(@NonNull android.content.ComponentName);
     method @NonNull public static String operationSafetyReasonToString(int);
     method @NonNull public static String operationToString(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void resetDefaultCrossProfileIntentFilters(int);
@@ -527,6 +522,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwnerOnly(@NonNull android.content.ComponentName, @Nullable String, int);
     method public void setDeviceOwnerType(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public void setNextOperationSafety(int, int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}, conditional=true) public void setProfileOwnerOnOrganizationOwnedDevice(@NonNull android.content.ComponentName, boolean);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
     field public static final String ACTION_DEVICE_POLICY_CONSTANTS_CHANGED = "android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED";
     field public static final int DEVICE_OWNER_TYPE_DEFAULT = 0; // 0x0
@@ -622,7 +618,7 @@ package android.app.blob {
 package android.app.cloudsearch {
 
   public static final class SearchRequest.Builder {
-    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setSource(@NonNull String);
+    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setCallerPackageName(@NonNull String);
   }
 
 }
@@ -836,6 +832,7 @@ package android.content.pm {
     method @Nullable public String getSystemTextClassifierPackageName();
     method @Nullable public String getWellbeingPackageName();
     method public void holdLock(android.os.IBinder, int);
+    method @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE) public void makeUidVisible(int, int);
     method @RequiresPermission(android.Manifest.permission.KEEP_UNINSTALLED_PACKAGES) public void setKeepUninstalledPackages(@NonNull java.util.List<java.lang.String>);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final String FEATURE_COMMUNAL_MODE = "android.software.communal_mode";
@@ -1195,6 +1192,9 @@ package android.hardware.display {
     method public boolean alwaysOnAvailable();
     method public boolean alwaysOnAvailableForUser(int);
     method public boolean alwaysOnEnabled(int);
+    method public void disableDozeSettings(int);
+    method public void disableDozeSettings(boolean, int);
+    method public void restoreDozeSettings(int);
   }
 
   public final class DisplayManager {
@@ -1872,6 +1872,9 @@ package android.os {
     method public static android.os.VibrationEffect get(int, boolean);
     method @Nullable public static android.os.VibrationEffect get(android.net.Uri, android.content.Context);
     method public abstract long getDuration();
+    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform();
+    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform(@NonNull android.os.VibrationEffect.VibrationParameter);
+    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform(@NonNull android.os.VibrationEffect.VibrationParameter, @NonNull android.os.VibrationEffect.VibrationParameter);
     field public static final int EFFECT_POP = 4; // 0x4
     field public static final int EFFECT_STRENGTH_LIGHT = 0; // 0x0
     field public static final int EFFECT_STRENGTH_MEDIUM = 1; // 0x1
@@ -1889,8 +1892,33 @@ package android.os {
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Composed> CREATOR;
   }
 
+  public static final class VibrationEffect.Composition {
+    method @NonNull public android.os.VibrationEffect.Composition addEffect(@NonNull android.os.VibrationEffect);
+    method @NonNull public android.os.VibrationEffect.Composition addOffDuration(@NonNull java.time.Duration);
+    method @NonNull public android.os.VibrationEffect.Composition repeatEffectIndefinitely(@NonNull android.os.VibrationEffect);
+  }
+
+  public static final class VibrationEffect.Composition.UnreachableAfterRepeatingIndefinitelyException extends java.lang.IllegalStateException {
+  }
+
+  public static class VibrationEffect.VibrationParameter {
+    method @NonNull public static android.os.VibrationEffect.VibrationParameter targetAmplitude(@FloatRange(from=0, to=1) float);
+    method @NonNull public static android.os.VibrationEffect.VibrationParameter targetFrequency(@FloatRange(from=1) float);
+  }
+
+  public static final class VibrationEffect.WaveformBuilder {
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addSustain(@NonNull java.time.Duration);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addTransition(@NonNull java.time.Duration, @NonNull android.os.VibrationEffect.VibrationParameter);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addTransition(@NonNull java.time.Duration, @NonNull android.os.VibrationEffect.VibrationParameter, @NonNull android.os.VibrationEffect.VibrationParameter);
+    method @NonNull public android.os.VibrationEffect build();
+  }
+
   public abstract class Vibrator {
     method public int getDefaultVibrationIntensity(int);
+    method @Nullable public android.os.vibrator.VibratorFrequencyProfile getFrequencyProfile();
+    method public float getQFactor();
+    method public float getResonantFrequency();
+    method public boolean hasFrequencyControl();
     field public static final int VIBRATION_INTENSITY_HIGH = 3; // 0x3
     field public static final int VIBRATION_INTENSITY_LOW = 1; // 0x1
     field public static final int VIBRATION_INTENSITY_MEDIUM = 2; // 0x2
@@ -2073,6 +2101,13 @@ package android.os.vibrator {
   public abstract class VibrationEffectSegment implements android.os.Parcelable {
     method public abstract long getDuration();
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.VibrationEffectSegment> CREATOR;
+  }
+
+  public final class VibratorFrequencyProfile {
+    method public float getMaxAmplitudeMeasurementInterval();
+    method @FloatRange(from=0, to=1) @NonNull public float[] getMaxAmplitudeMeasurements();
+    method public float getMaxFrequency();
+    method public float getMinFrequency();
   }
 
 }
@@ -2369,8 +2404,6 @@ package android.service.dreams {
 
   public abstract class DreamOverlayService extends android.app.Service {
     ctor public DreamOverlayService();
-    method @Nullable public final CharSequence getDreamLabel();
-    method public final boolean isPreviewMode();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
     method public final void requestExit();
@@ -2405,7 +2438,6 @@ package android.service.quickaccesswallet {
     method public void notifyWalletDismissed();
     method public void removeWalletServiceEventListener(@NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletServiceEventListener);
     method public void selectWalletCard(@NonNull android.service.quickaccesswallet.SelectWalletCardRequest);
-    method public boolean useTargetActivityForQuickAccess();
   }
 
   public static interface QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
@@ -2434,7 +2466,7 @@ package android.service.quicksettings {
 package android.service.voice {
 
   public class AlwaysOnHotwordDetector implements android.service.voice.HotwordDetector {
-    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[], @NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
   }
 
   public static final class AlwaysOnHotwordDetector.EventPayload.Builder {
@@ -3255,6 +3287,7 @@ package android.window {
     method public void onDisplayAreaVanished(@NonNull android.window.DisplayAreaInfo);
     method @CallSuper @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.window.DisplayAreaAppearedInfo> registerOrganizer(int);
     field public static final int FEATURE_DEFAULT_TASK_CONTAINER = 1; // 0x1
+    field public static final int FEATURE_IME = 8; // 0x8
     field public static final int FEATURE_ONE_HANDED = 3; // 0x3
     field public static final int FEATURE_ROOT = 0; // 0x0
     field public static final int FEATURE_SYSTEM_FIRST = 0; // 0x0
@@ -3263,10 +3296,6 @@ package android.window {
     field public static final int FEATURE_VENDOR_FIRST = 10001; // 0x2711
     field public static final int FEATURE_WINDOWED_MAGNIFICATION = 4; // 0x4
     field public static final int FEATURE_WINDOW_TOKENS = 2; // 0x2
-  }
-
-  public interface OnBackInvokedDispatcher {
-    field public static final long DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME = 195946584L; // 0xbade858L
   }
 
   public final class SplashScreenView extends android.widget.FrameLayout {
@@ -3357,6 +3386,7 @@ package android.window {
 
   public final class WindowContainerTransaction implements android.os.Parcelable {
     ctor public WindowContainerTransaction();
+    method @NonNull public android.window.WindowContainerTransaction clearLaunchAdjacentFlagRoot(@NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction createTaskFragment(@NonNull android.window.TaskFragmentCreationParams);
     method @NonNull public android.window.WindowContainerTransaction deleteTaskFragment(@NonNull android.window.WindowContainerToken);
     method public int describeContents();
@@ -3375,6 +3405,7 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction setErrorCallbackToken(@NonNull android.os.IBinder);
     method @NonNull public android.window.WindowContainerTransaction setFocusable(@NonNull android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction setHidden(@NonNull android.window.WindowContainerToken, boolean);
+    method @NonNull public android.window.WindowContainerTransaction setLaunchAdjacentFlagRoot(@NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction setLaunchRoot(@NonNull android.window.WindowContainerToken, @Nullable int[], @Nullable int[]);
     method @NonNull public android.window.WindowContainerTransaction setScreenSizeDp(@NonNull android.window.WindowContainerToken, int, int);
     method @NonNull public android.window.WindowContainerTransaction setSmallestScreenWidthDp(@NonNull android.window.WindowContainerToken, int);

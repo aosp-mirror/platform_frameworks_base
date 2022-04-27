@@ -28,19 +28,19 @@ import java.util.Objects;
 
 /**
  * Used to pass in the required information for updating an enterprise string resource using
- * {@link DevicePolicyManager#setStrings}.
+ * {@link DevicePolicyResourcesManager#setStrings}.
  *
  * @hide
  */
 @SystemApi
 public final class DevicePolicyStringResource implements Parcelable {
-    @NonNull private final @DevicePolicyResources.UpdatableStringId String mStringId;
+    @NonNull private final String mStringId;
     private final @StringRes int mResourceIdInCallingPackage;
     @NonNull private ParcelableResource mResource;
 
     /**
      * Creates an object containing the required information for updating an enterprise string
-     * resource using {@link DevicePolicyManager#setStrings}.
+     * resource using {@link DevicePolicyResourcesManager#setStrings}.
      *
      * <p>It will be used to update the string defined by {@code stringId} to the string with ID
      * {@code resourceIdInCallingPackage} in the calling package</p>
@@ -54,14 +54,14 @@ public final class DevicePolicyStringResource implements Parcelable {
      */
     public DevicePolicyStringResource(
             @NonNull Context context,
-            @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
+            @NonNull String stringId,
             @StringRes int resourceIdInCallingPackage) {
         this(stringId, resourceIdInCallingPackage, new ParcelableResource(
                 context, resourceIdInCallingPackage, ParcelableResource.RESOURCE_TYPE_STRING));
     }
 
     private DevicePolicyStringResource(
-            @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
+            @NonNull String stringId,
             @StringRes int resourceIdInCallingPackage,
             @NonNull ParcelableResource resource) {
         Objects.requireNonNull(stringId, "stringId must be provided.");
@@ -75,7 +75,6 @@ public final class DevicePolicyStringResource implements Parcelable {
     /**
      * Returns the ID of the string to update.
      */
-    @DevicePolicyResources.UpdatableStringId
     @NonNull
     public String getStringId() {
         return mStringId;

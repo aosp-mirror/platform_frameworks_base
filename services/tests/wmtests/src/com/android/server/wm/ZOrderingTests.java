@@ -274,6 +274,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 "imeAppTargetChildBelowWindow");
 
         mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        makeWindowVisible(mImeWindow);
         mDisplayContent.assignChildLayers(mTransaction);
 
         // Ime should be above all app windows except for child windows that are z-ordered above it
@@ -293,8 +294,7 @@ public class ZOrderingTests extends WindowTestsBase {
     public void testAssignWindowLayers_ForImeWithAppTargetAndAppAbove() {
         final WindowState appBelowImeTarget = createWindow("appBelowImeTarget");
         final WindowState imeAppTarget = createWindow("imeAppTarget");
-        final WindowState appAboveImeTarget = createWindow(imeAppTarget, TYPE_APPLICATION,
-                "appAboveImeTarget");
+        final WindowState appAboveImeTarget = createWindow("appAboveImeTarget");
 
         mDisplayContent.setImeLayeringTarget(imeAppTarget);
         mDisplayContent.setImeControlTarget(imeAppTarget);
@@ -600,6 +600,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 WINDOWING_MODE_MULTI_WINDOW);
         mDisplayContent.setImeLayeringTarget(mAppWindow);
         mDisplayContent.setImeInputTarget(mAppWindow);
+        makeWindowVisible(mImeWindow);
 
         // Create a popupWindow
         assertWindowHigher(mImeWindow, mAppWindow);

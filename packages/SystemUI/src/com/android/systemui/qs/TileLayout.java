@@ -8,6 +8,7 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.Nullable;
 
@@ -240,6 +241,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             } else {
                 record.tileView.setLeftTopRightBottom(left, top, right, bottom);
             }
+            record.tileView.setPosition(i);
             mLastTileBottom = bottom;
         }
     }
@@ -295,5 +297,12 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
                 ((HeightOverrideable) record.tileView).setSquishinessFraction(mSquishinessFraction);
             }
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        info.setCollectionInfo(
+                new AccessibilityNodeInfo.CollectionInfo(mRecords.size(), 1, false));
     }
 }

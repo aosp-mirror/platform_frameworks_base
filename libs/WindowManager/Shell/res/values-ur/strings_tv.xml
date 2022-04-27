@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"‏PIP کو منتقل کریں"</string>
     <string name="pip_expand" msgid="7605396312689038178">"‏PIP کو پھیلائیں"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"‏PIP کو سکیڑیں"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" کنٹرولز کے لیے "<annotation icon="home_icon">"ہوم "</annotation>" بٹن کو دو بار دبائیں"</string>
 </resources>

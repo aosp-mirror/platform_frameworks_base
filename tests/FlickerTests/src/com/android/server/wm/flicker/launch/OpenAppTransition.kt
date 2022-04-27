@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.launch
 
 import android.app.Instrumentation
-import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -216,7 +215,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
      * Checks that [testApp] window is not on top at the start of the transition, and then becomes
      * the top visible window until the end of the transition.
      */
-    @FlakyTest(bugId = 203538234)
+    @Presubmit
     @Test
     open fun appWindowBecomesTopWindow() {
         testSpec.assertWm {

@@ -87,6 +87,7 @@ import android.view.IDisplayWindowInsetsController;
 import android.view.IWindow;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -793,7 +794,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             @Override
-            public void topFocusedWindowChanged(String packageName) {
+            public void topFocusedWindowChanged(String packageName,
+                    InsetsVisibilities requestedVisibilities) {
             }
         };
     }
@@ -903,7 +905,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         doReturn(100).when(hardwareBuffer).getHeight();
     }
 
-    private static ComponentName getUniqueComponentName() {
+    static ComponentName getUniqueComponentName() {
         return ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
                 DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
     }
@@ -1264,6 +1266,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                         mOrganizer.getOrganizerToken(), DEFAULT_TASK_FRAGMENT_ORGANIZER_UID,
                         DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
             }
+            spyOn(taskFragment);
             return taskFragment;
         }
     }

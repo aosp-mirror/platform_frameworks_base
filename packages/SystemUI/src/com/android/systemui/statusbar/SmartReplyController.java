@@ -29,7 +29,6 @@ import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Set;
 
@@ -116,7 +115,7 @@ public class SmartReplyController implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("mSendingKeys: " + mSendingKeys.size());
         for (String key : mSendingKeys) {
             pw.println(" * " + key);

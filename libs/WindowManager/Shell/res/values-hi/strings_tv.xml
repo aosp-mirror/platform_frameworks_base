@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"पीआईपी को दूसरी जगह लेकर जाएं"</string>
     <string name="pip_expand" msgid="7605396312689038178">"पीआईपी विंडो को बड़ा करें"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"पीआईपी विंडो को छोटा करें"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" कंट्रोल मेन्यू पर जाने के लिए, "<annotation icon="home_icon">" होम बटन"</annotation>" दो बार दबाएं"</string>
 </resources>

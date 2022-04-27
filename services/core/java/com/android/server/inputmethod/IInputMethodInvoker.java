@@ -245,4 +245,13 @@ final class IInputMethodInvoker {
             logRemoteException(e);
         }
     }
+
+    @AnyThread
+    void finishStylusHandwriting() {
+        try {
+            mTarget.finishStylusHandwriting();
+        } catch (RemoteException e) {
+            logRemoteException(e);
+        }
+    }
 }

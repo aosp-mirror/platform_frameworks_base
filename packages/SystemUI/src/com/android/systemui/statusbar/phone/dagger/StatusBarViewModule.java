@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.concurrent.Executor;
@@ -73,9 +74,9 @@ import dagger.Provides;
 @Module(subcomponents = StatusBarFragmentComponent.class)
 public abstract class StatusBarViewModule {
 
-    public static final String SPLIT_SHADE_HEADER = "split_shade_header";
+    public static final String LARGE_SCREEN_SHADE_HEADER = "large_screen_shade_header";
     private static final String SPLIT_SHADE_BATTERY_VIEW = "split_shade_battery_view";
-    public static final String SPLIT_SHADE_BATTERY_CONTROLLER = "split_shade_battery_controller";
+    public static final String LARGE_SCREEN_BATTERY_CONTROLLER = "split_shade_battery_controller";
     public static final String STATUS_BAR_FRAGMENT = "status_bar_fragment";
 
     /** */
@@ -159,15 +160,15 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @Named(SPLIT_SHADE_HEADER)
+    @Named(LARGE_SCREEN_SHADE_HEADER)
     @CentralSurfacesComponent.CentralSurfacesScope
-    public static View getSplitShadeStatusBarView(
+    public static View getLargeScreenShadeHeaderBarView(
             NotificationShadeWindowView notificationShadeWindowView,
             FeatureFlags featureFlags) {
         ViewStub stub = notificationShadeWindowView.findViewById(R.id.qs_header_stub);
         int layoutId = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)
                 ? R.layout.combined_qs_header
-                : R.layout.split_shade_header;
+                : R.layout.large_screen_shade_header;
         stub.setLayoutResource(layoutId);
         View v = stub.inflate();
         return v;
@@ -177,14 +178,15 @@ public abstract class StatusBarViewModule {
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
     public static OngoingPrivacyChip getSplitShadeOngoingPrivacyChip(
-            @Named(SPLIT_SHADE_HEADER) View header) {
+            @Named(LARGE_SCREEN_SHADE_HEADER) View header) {
         return header.findViewById(R.id.privacy_chip);
     }
 
     /** */
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
-    static StatusIconContainer providesStatusIconContainer(@Named(SPLIT_SHADE_HEADER) View header) {
+    static StatusIconContainer providesStatusIconContainer(
+            @Named(LARGE_SCREEN_SHADE_HEADER) View header) {
         return header.findViewById(R.id.statusIcons);
     }
 
@@ -192,13 +194,13 @@ public abstract class StatusBarViewModule {
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
     @Named(SPLIT_SHADE_BATTERY_VIEW)
-    static BatteryMeterView getBatteryMeterView(@Named(SPLIT_SHADE_HEADER) View view) {
+    static BatteryMeterView getBatteryMeterView(@Named(LARGE_SCREEN_SHADE_HEADER) View view) {
         return view.findViewById(R.id.batteryRemainingIcon);
     }
 
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
-    @Named(SPLIT_SHADE_BATTERY_CONTROLLER)
+    @Named(LARGE_SCREEN_BATTERY_CONTROLLER)
     static BatteryMeterViewController getBatteryMeterViewController(
             @Named(SPLIT_SHADE_BATTERY_VIEW) BatteryMeterView batteryMeterView,
             ConfigurationController configurationController,
@@ -262,6 +264,7 @@ public abstract class StatusBarViewModule {
             NetworkController networkController,
             StatusBarStateController statusBarStateController,
             CommandQueue commandQueue,
+            CarrierConfigTracker carrierConfigTracker,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
             SecureSettings secureSettings,
@@ -281,6 +284,7 @@ public abstract class StatusBarViewModule {
                 networkController,
                 statusBarStateController,
                 commandQueue,
+                carrierConfigTracker,
                 collapsedStatusBarFragmentLogger,
                 operatorNameViewControllerFactory,
                 secureSettings,

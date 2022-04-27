@@ -17,7 +17,7 @@
 package android.os;
 
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_BADGED_LABEL;
-import static android.app.admin.DevicePolicyResources.Strings.UNDEFINED;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
 import android.Manifest;
 import android.accounts.AccountManager;
@@ -299,6 +299,10 @@ public class UserManager {
      * a profile owner of an organization-owned managed profile on the parent profile.
      * When it is set by any of these owners, it prevents all users from using
      * Wi-Fi tethering. Other forms of tethering are not affected.
+     *
+     * This user restriction disables only Wi-Fi tethering.
+     * Use {@link #DISALLOW_CONFIG_TETHERING} to limit all forms of tethering.
+     * When {@link #DISALLOW_CONFIG_TETHERING} is set, this user restriction becomes obsolete.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -735,7 +739,7 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_DATE_TIME = "no_config_date_time";
 
     /**
-     * Specifies if a user is disallowed from configuring Tethering and portable hotspots
+     * Specifies if a user is disallowed from using and configuring Tethering and portable hotspots
      * via Settings.
      *
      * <p>This restriction can only be set by a device owner, a profile owner on the primary
@@ -1703,12 +1707,40 @@ public class UserManager {
 
     /**
      * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
-     * an error occurred that prevented the user from being removed or set as ephemeral.
+     * an unknown error occurred that prevented the user from being removed or set as ephemeral.
      *
      * @hide
      */
     @SystemApi
-    public static final int REMOVE_RESULT_ERROR = 3;
+    public static final int REMOVE_RESULT_ERROR_UNKNOWN = -1;
+
+    /**
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * the user could not be removed due to a {@link #DISALLOW_REMOVE_MANAGED_PROFILE} or
+     * {@link #DISALLOW_REMOVE_USER} user restriction.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int REMOVE_RESULT_ERROR_USER_RESTRICTION = -2;
+
+    /**
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * user being removed does not exist.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int REMOVE_RESULT_ERROR_USER_NOT_FOUND = -3;
+
+    /**
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * user being removed is a {@link UserHandle#SYSTEM} user which can't be removed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int REMOVE_RESULT_ERROR_SYSTEM_USER = -4;
 
     /**
      * Possible response codes from {@link #removeUserWhenPossible(UserHandle, boolean)}.
@@ -1719,7 +1751,10 @@ public class UserManager {
             REMOVE_RESULT_REMOVED,
             REMOVE_RESULT_DEFERRED,
             REMOVE_RESULT_ALREADY_BEING_REMOVED,
-            REMOVE_RESULT_ERROR,
+            REMOVE_RESULT_ERROR_USER_RESTRICTION,
+            REMOVE_RESULT_ERROR_USER_NOT_FOUND,
+            REMOVE_RESULT_ERROR_SYSTEM_USER,
+            REMOVE_RESULT_ERROR_UNKNOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RemoveResult {}
@@ -2155,9 +2190,17 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.GET_ACCOUNTS_PRIVILEGED})
-    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
+            android.Manifest.permission.QUERY_USERS,
+            android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED})
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresAnyOfPermissionsIfNotCaller = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.CREATE_USERS,
+                    android.Manifest.permission.QUERY_USERS})
     public boolean isUserNameSet() {
         try {
             return mService.isUserNameSet(getContextUserIfAppropriate());
@@ -2261,8 +2304,11 @@ public class UserManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
+            android.Manifest.permission.QUERY_USERS})
     @UserHandleAware
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isUserOfType(@NonNull String userType) {
         try {
             return mService.isUserOfType(mUserId, userType);
@@ -4718,7 +4764,7 @@ public class UserManager {
             return label;
         }
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(
+        return dpm.getResources().getString(
                 getUpdatableUserBadgedLabelId(userId),
                 () -> getDefaultUserBadgedLabel(label, userId),
                 /* formatArgs= */ label);
@@ -4763,7 +4809,7 @@ public class UserManager {
     }
 
     /**
-     * Returns {@code true} if the user shares lock settings credential with its parent user
+     * Returns whether the user can have shared lockscreen credential with its parent user.
      *
      * This API only works for {@link UserManager#isProfile() profiles}
      * and will always return false for any other user type.
@@ -4776,9 +4822,9 @@ public class UserManager {
                     Manifest.permission.MANAGE_USERS,
                     Manifest.permission.INTERACT_ACROSS_USERS})
     @SuppressAutoDoc
-    public boolean isCredentialSharedWithParent() {
+    public boolean isCredentialSharableWithParent() {
         try {
-            return mService.isCredentialSharedWithParent(mUserId);
+            return mService.isCredentialSharableWithParent(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -4846,8 +4892,10 @@ public class UserManager {
      * the {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
      *
      * @return the {@link RemoveResult} code: {@link #REMOVE_RESULT_REMOVED},
-     * {@link #REMOVE_RESULT_DEFERRED}, {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED}, or
-     * {@link #REMOVE_RESULT_ERROR}.
+     * {@link #REMOVE_RESULT_DEFERRED}, {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED},
+     * {@link #REMOVE_RESULT_ERROR_USER_RESTRICTION}, {@link #REMOVE_RESULT_ERROR_USER_NOT_FOUND},
+     * {@link #REMOVE_RESULT_ERROR_SYSTEM_USER}, or {@link #REMOVE_RESULT_ERROR_UNKNOWN}. All error
+     * codes have negative values.
      *
      * @hide
      */
@@ -4861,6 +4909,19 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Check if {@link #removeUserWhenPossible} returned a success code which means that the user
+     * has been removed or is slated for removal.
+     *
+     * @param result is {@link #RemoveResult} code return by {@link #removeUserWhenPossible}.
+     * @return {@code true} if it is a success code.
+     * @hide
+     */
+    @SystemApi
+    public static boolean isRemoveResultSuccessful(@RemoveResult int result) {
+        return result >= 0;
     }
 
     /**

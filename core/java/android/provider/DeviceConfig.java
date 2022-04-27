@@ -74,6 +74,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
 
     /**
+     * Namespace for activity manager, specific to the "component alias" feature. We needed a
+     * different namespace in order to avoid phonetype from resetting it.
+     * @hide
+     */
+    public static final String NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS = "activity_manager_ca";
+
+    /**
      * Namespace for all activity manager related features that are used at the native level.
      * These features are applied at reboot.
      *
@@ -320,6 +327,13 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_NNAPI_NATIVE = "nnapi_native";
+
+    /**
+     * Namespace for all OnDevicePersonalization related feature.
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_ON_DEVICE_PERSONALIZATION = "on_device_personalization";
 
     /**
      * Namespace for features related to the Package Manager Service.
@@ -584,6 +598,13 @@ public final class DeviceConfig {
      */
     @TestApi
     public static final String NAMESPACE_SELECTION_TOOLBAR = "selection_toolbar";
+
+    /**
+     * Definitions for voice interaction related functions.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_VOICE_INTERACTION = "voice_interaction";
 
     /**
      * List of namespaces which can be read without READ_DEVICE_CONFIG permission
@@ -894,7 +915,8 @@ public final class DeviceConfig {
      * @param name        The name of the property to create or update.
      * @param value       The value to store for the property.
      * @param makeDefault Whether to make the new value the default one.
-     * @return True if the value was set, false if the storage implementation throws errors.
+     * @return {@code true} if the value was set, {@code false} if the storage implementation throws
+     * errors.
      * @hide
      * @see #resetToDefaults(int, String).
      */
@@ -918,7 +940,7 @@ public final class DeviceConfig {
      *
      * @param properties the complete set of properties to set for a specific namespace.
      * @throws BadConfigException if the provided properties are banned by RescueParty.
-     * @return True if the values were set, false otherwise.
+     * @return {@code true} if the values were set, {@code false} otherwise.
      * @hide
      */
     @SystemApi
@@ -934,8 +956,8 @@ public final class DeviceConfig {
      *
      * @param namespace   The namespace containing the property to delete.
      * @param name        The name of the property to delete.
-     * @return True if the property was deleted or it did not exist in the first place.
-     * False if the storage implementation throws errors.
+     * @return {@code true} if the property was deleted or it did not exist in the first place.
+     * Return {@code false} if the storage implementation throws errors.
      * @hide
      */
     @SystemApi

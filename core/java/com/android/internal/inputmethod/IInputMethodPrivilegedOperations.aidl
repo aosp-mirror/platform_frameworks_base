@@ -43,5 +43,5 @@ oneway interface IInputMethodPrivilegedOperations {
     void notifyUserActionAsync();
     void applyImeVisibilityAsync(IBinder showOrHideInputToken, boolean setVisible);
     void onStylusHandwritingReady(int requestId, int pid);
-    void finishStylusHandwriting(int requestId);
+    void resetStylusHandwriting(int requestId);
 }

@@ -81,6 +81,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_CAN_START_STYLUS_HANDWRITING = 100;
     private static final int DO_START_STYLUS_HANDWRITING = 110;
     private static final int DO_INIT_INK_WINDOW = 120;
+    private static final int DO_FINISH_STYLUS_HANDWRITING = 130;
 
     final WeakReference<InputMethodServiceInternal> mTarget;
     final Context mContext;
@@ -263,6 +264,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 inputMethod.initInkWindow();
                 return;
             }
+            case DO_FINISH_STYLUS_HANDWRITING: {
+                inputMethod.finishStylusHandwriting();
+                return;
+            }
 
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
@@ -426,5 +431,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @Override
     public void initInkWindow() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_INIT_INK_WINDOW));
+    }
+
+    @BinderThread
+    @Override
+    public void finishStylusHandwriting() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_FINISH_STYLUS_HANDWRITING));
     }
 }

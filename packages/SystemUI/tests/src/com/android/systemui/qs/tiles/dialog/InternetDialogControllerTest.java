@@ -385,18 +385,16 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void launchWifiNetworkDetailsSetting_withNoWifiEntryKey_doNothing() {
-        mInternetDialogController.launchWifiNetworkDetailsSetting(null /* key */,
-                mDialogLaunchView);
+    public void launchWifiDetailsSetting_withNoWifiEntryKey_doNothing() {
+        mInternetDialogController.launchWifiDetailsSetting(null /* key */, mDialogLaunchView);
 
         verify(mActivityStarter, never())
                 .postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
     }
 
     @Test
-    public void launchWifiNetworkDetailsSetting_withWifiEntryKey_startActivity() {
-        mInternetDialogController.launchWifiNetworkDetailsSetting("wifi_entry_key",
-                mDialogLaunchView);
+    public void launchWifiDetailsSetting_withWifiEntryKey_startActivity() {
+        mInternetDialogController.launchWifiDetailsSetting("wifi_entry_key", mDialogLaunchView);
 
         verify(mActivityStarter).postStartActivityDismissingKeyguard(any(Intent.class), anyInt(),
                 any());

@@ -25,7 +25,8 @@ import android.util.Log;
 
 /**
  * <p>A class for producing sounds that match those produced by various actions
- * taken by the media and camera APIs.  </p>
+ * taken by the media and camera APIs. It is recommended to call methods in this class
+ * in a background thread since it relies on binder calls.</p>
  *
  * <p>This class is recommended for use with the {@link android.hardware.camera2} API, since the
  * camera2 API does not play any sounds on its own for any capture or video recording actions.</p>
@@ -109,7 +110,7 @@ public class MediaActionSound {
 
     /**
      * <p>Returns true if the application must play the shutter sound in accordance
-     * to certain regional restrictions. </p>
+     * to certain regional restrictions.</p>
      *
      * <p>If this method returns true, applications are strongly recommended to use
      * MediaActionSound.play(SHUTTER_CLICK) or START_VIDEO_RECORDING whenever it captures

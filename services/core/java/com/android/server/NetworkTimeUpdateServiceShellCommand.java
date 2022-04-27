@@ -46,6 +46,7 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
      */
     private static final String SHELL_COMMAND_SET_SERVER_CONFIG = "set_server_config";
     private static final String SET_SERVER_CONFIG_HOSTNAME_ARG = "--hostname";
+    private static final String SET_SERVER_CONFIG_PORT_ARG = "--port";
     private static final String SET_SERVER_CONFIG_TIMEOUT_ARG = "--timeout_millis";
 
     @NonNull
@@ -87,12 +88,17 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
 
     private int runSetServerConfig() {
         String hostname = null;
+        Integer port = null;
         Duration timeout = null;
         String opt;
         while ((opt = getNextArg()) != null) {
             switch (opt) {
                 case SET_SERVER_CONFIG_HOSTNAME_ARG: {
                     hostname = getNextArgRequired();
+                    break;
+                }
+                case SET_SERVER_CONFIG_PORT_ARG: {
+                    port = Integer.parseInt(getNextArgRequired());
                     break;
                 }
                 case SET_SERVER_CONFIG_TIMEOUT_ARG: {
@@ -104,7 +110,7 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
                 }
             }
         }
-        mNetworkTimeUpdateService.setServerConfigForTests(hostname, timeout);
+        mNetworkTimeUpdateService.setServerConfigForTests(hostname, port, timeout);
         return 0;
     }
 
@@ -120,8 +126,9 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
         pw.printf("    Refreshes the latest time. Prints whether it was successful.\n");
         pw.printf("  %s\n", SHELL_COMMAND_SET_SERVER_CONFIG);
         pw.printf("    Sets the NTP server config for tests. The config is not persisted.\n");
-        pw.printf("      Options: [%s <hostname>] [%s <millis>]\n",
-                SET_SERVER_CONFIG_HOSTNAME_ARG, SET_SERVER_CONFIG_TIMEOUT_ARG);
+        pw.printf("      Options: [%s <hostname>] [%s <port>] [%s <millis>]\n",
+                SET_SERVER_CONFIG_HOSTNAME_ARG, SET_SERVER_CONFIG_PORT_ARG,
+                SET_SERVER_CONFIG_TIMEOUT_ARG);
         pw.printf("      Each key/value is optional and must be specified to override the\n");
         pw.printf("      normal value, not specifying a key causes it to reset to the original.\n");
         pw.println();

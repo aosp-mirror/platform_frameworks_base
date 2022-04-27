@@ -284,9 +284,9 @@ public class EconomyManager {
     /** @hide */
     public static final int DEFAULT_AM_MAX_SATIATED_BALANCE = 1440;
     /** @hide */
-    public static final int DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT = 28800;
+    public static final int DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT = 4000;
     /** @hide */
-    public static final int DEFAULT_AM_HARD_CONSUMPTION_LIMIT = 52000;
+    public static final int DEFAULT_AM_HARD_CONSUMPTION_LIMIT = 28_800;
     // TODO: add AlarmManager modifier default values
     /** @hide */
     public static final int DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT = 0;
@@ -373,9 +373,9 @@ public class EconomyManager {
     /** @hide */
     public static final int DEFAULT_JS_MAX_SATIATED_BALANCE = 60000;
     /** @hide */
-    public static final int DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT = 460_000;
+    public static final int DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT = 100_000;
     /** @hide */
-    public static final int DEFAULT_JS_HARD_CONSUMPTION_LIMIT = 900_000;
+    public static final int DEFAULT_JS_HARD_CONSUMPTION_LIMIT = 460_000;
     // TODO: add JobScheduler modifier default values
     /** @hide */
     public static final int DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT = 0;

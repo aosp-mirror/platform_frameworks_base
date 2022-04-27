@@ -426,6 +426,7 @@ public abstract class GameSession {
      *                 or failed.
      * @throws IllegalStateException if this method is called prior to {@link #onCreate}.
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY)
     public void takeScreenshot(@NonNull Executor executor, @NonNull ScreenshotCallback callback) {
         if (mGameSessionController == null) {
             throw new IllegalStateException("Can not call before onCreate()");

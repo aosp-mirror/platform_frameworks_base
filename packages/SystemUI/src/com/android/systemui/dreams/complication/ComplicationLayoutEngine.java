@@ -32,6 +32,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Constraints;
 
 import com.android.systemui.R;
+import com.android.systemui.dreams.complication.ComplicationLayoutParams.Position;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.touch.TouchInsetManager;
 
@@ -39,7 +40,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -378,6 +381,14 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
                 directionGroup.updateViews(head.getView());
             }
         }
+
+        private ArrayList<ViewEntry> getViews() {
+            final ArrayList<ViewEntry> views = new ArrayList<>();
+            for (DirectionGroup directionGroup : mDirectionGroups.values()) {
+                views.addAll(directionGroup.getViews());
+            }
+            return views;
+        }
     }
 
     /**
@@ -453,6 +464,10 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
                 viewEntry.applyLayoutParams(groupHead);
                 groupHead = viewEntry.getView();
             }
+        }
+
+        private List<ViewEntry> getViews() {
+            return mViews;
         }
     }
 
@@ -540,13 +555,26 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
     /**
      * Removes a complication by {@link ComplicationId}.
      */
-    public void removeComplication(ComplicationId id) {
-        if (!mEntries.containsKey(id)) {
+    public boolean removeComplication(ComplicationId id) {
+        final ViewEntry entry = mEntries.remove(id);
+
+        if (entry == null) {
             Log.e(TAG, "could not find id:" + id);
-            return;
+            return false;
         }
 
-        final ViewEntry entry = mEntries.get(id);
         entry.remove();
+        return true;
+    }
+
+    /**
+     * Gets an unordered list of all the views at a particular position.
+     */
+    public List<View> getViewsAtPosition(@Position int position) {
+        return mPositions.entrySet().stream()
+                .filter(entry -> (entry.getKey() & position) == position)
+                .flatMap(entry -> entry.getValue().getViews().stream())
+                .map(ViewEntry::getView)
+                .collect(Collectors.toList());
     }
 }

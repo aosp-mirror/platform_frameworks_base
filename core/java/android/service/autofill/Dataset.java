@@ -876,7 +876,7 @@ public final class Dataset implements Parcelable {
          * if (filter != null) {
          *     fieldBuilder.setFilter(filter);
          * }
-         * Presentations.Builder presentationsBuilder = new Presentations.Builder(id);
+         * Presentations.Builder presentationsBuilder = new Presentations.Builder();
          * if (presentation != null) {
          *     presentationsBuilder.setMenuPresentation(presentation);
          * }

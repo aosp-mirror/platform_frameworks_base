@@ -37,7 +37,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.ClientWindowFrames;
-import android.window.IOnBackInvokedCallback;
+import android.window.OnBackInvokedCallbackInfo;
 
 import java.util.List;
 
@@ -104,7 +104,43 @@ interface IWindowSession {
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out InsetsSourceControl[] activeControls);
+            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
+            out Bundle bundle);
+
+    /**
+     * Changes the view visibility and the attributes of a window. This should only be called when
+     * the visibility of the root view is changed. This returns a valid surface if the root view is
+     * visible. This also returns the latest information for the caller to compute its window frame.
+     *
+     * @param window The window being updated.
+     * @param attrs If non-null, new attributes to apply to the window.
+     * @param viewVisibility Window root view's visibility.
+     * @param outMergedConfiguration New config container that holds global, override and merged
+     * config for window, if it is now becoming visible and the merged configuration has changed
+     * since it was last displayed.
+     * @param outSurfaceControl Object in which is placed the new display surface.
+     * @param outInsetsState The current insets state in the system.
+     * @param outActiveControls The insets source controls for the caller to override the insets
+     * state in the system.
+     *
+     * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
+     */
+    int updateVisibility(IWindow window, in WindowManager.LayoutParams attrs, int viewVisibility,
+            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
+            out InsetsState outInsetsState, out InsetsSourceControl[] outActiveControls);
+
+    /**
+     * Reports the layout results and the attributes of a window to the server.
+     *
+     * @param window The window being reported.
+     * @param attrs If non-null, new attributes to apply to the window.
+     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
+     * @param clientFrames the window frames computed by the client.
+     * @param requestedWidth The width the window wants to be.
+     * @param requestedHeight The height the window wants to be.
+     */
+    oneway void updateLayout(IWindow window, in WindowManager.LayoutParams attrs, int flags,
+            in ClientWindowFrames clientFrames, int requestedWidth, int requestedHeight);
 
     /*
      * Notify the window manager that an application is relaunching and
@@ -142,7 +178,8 @@ interface IWindowSession {
      * is null if there is no sync required.
      */
     @UnsupportedAppUsage
-    oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction);
+    oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction,
+            int seqId);
 
     @UnsupportedAppUsage
     oneway void setInTouchMode(boolean showFocus);
@@ -334,14 +371,14 @@ interface IWindowSession {
             in String hashAlgorithm, in RemoteCallback callback);
 
     /**
-     * Sets the {@link IOnBackInvokedCallback} to be invoked for a window when back is triggered.
+     * Sets the {@link OnBackInvokedCallbackInfo} containing the callback to be invoked for
+     * a window when back is triggered.
      *
      * @param window The token for the window to set the callback to.
-     * @param callback The {@link IOnBackInvokedCallback} to set.
-     * @param priority The priority of the callback.
+     * @param callbackInfo The {@link OnBackInvokedCallbackInfo} to set.
      */
-    oneway void setOnBackInvokedCallback(
-            IWindow window, IOnBackInvokedCallback callback, int priority);
+    oneway void setOnBackInvokedCallbackInfo(
+            IWindow window, in OnBackInvokedCallbackInfo callbackInfo);
 
     /**
      * Clears a touchable region set by {@link #setInsets}.

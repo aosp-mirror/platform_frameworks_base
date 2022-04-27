@@ -24,4 +24,5 @@
     <string name="pip_move" msgid="1544227837964635439">"Перамясціць PIP"</string>
     <string name="pip_expand" msgid="7605396312689038178">"Разгарнуць відарыс у відарысе"</string>
     <string name="pip_collapse" msgid="5732233773786896094">"Згарнуць відарыс у відарысе"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Двойчы націсніце "<annotation icon="home_icon">" ГАЛОЎНЫ ЭКРАН "</annotation>" для пераходу ў налады"</string>
 </resources>

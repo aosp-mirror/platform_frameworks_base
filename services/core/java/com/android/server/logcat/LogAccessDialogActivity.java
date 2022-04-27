@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -29,6 +30,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.logcat.ILogcatManagerService;
 import android.util.Slog;
+import android.view.InflateException;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -55,33 +57,46 @@ public class LogAccessDialogActivity extends Activity implements
     private String mAlertTitle;
     private AlertDialog.Builder mAlertDialog;
     private AlertDialog mAlert;
+    private View mAlertView;
 
-    private static final int DIALOG_TIME_OUT = 300000;
+    private static final int DIALOG_TIME_OUT = Build.IS_DEBUGGABLE ? 60000 : 300000;
     private static final int MSG_DISMISS_DIALOG = 0;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContext = this;
 
-        Intent intent = getIntent();
-        mPackageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
-        mUid = intent.getIntExtra("com.android.server.logcat.uid", 0);
-        mGid = intent.getIntExtra("com.android.server.logcat.gid", 0);
-        mPid = intent.getIntExtra("com.android.server.logcat.pid", 0);
-        mFd = intent.getIntExtra("com.android.server.logcat.fd", 0);
-        mAlertTitle = getTitleString(mContext, mPackageName, mUid);
+        try {
+            mContext = this;
 
-        if (mAlertTitle != null) {
+            // retrieve Intent extra information
+            Intent intent = getIntent();
+            getIntentInfo(intent);
 
+            // retrieve the title string from passed intent extra
+            mAlertTitle = getTitleString(mContext, mPackageName, mUid);
+
+            // creaet View
+            mAlertView = createView();
+
+            // create AlertDialog
             mAlertDialog = new AlertDialog.Builder(this);
-            mAlertDialog.setView(createView());
+            mAlertDialog.setView(mAlertView);
 
+            // show Alert
             mAlert = mAlertDialog.create();
             mAlert.show();
+
+            // set Alert Timeout
             mHandler.sendEmptyMessageDelayed(MSG_DISMISS_DIALOG, DIALOG_TIME_OUT);
 
+        } catch (Exception e) {
+            try {
+                Slog.e(TAG, "onCreate failed, declining the logd access", e);
+                mLogcatManagerService.decline(mUid, mGid, mPid, mFd);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Fails to call remote functions", ex);
+            }
         }
     }
 
@@ -92,6 +107,23 @@ public class LogAccessDialogActivity extends Activity implements
             mAlert.dismiss();
         }
         mAlert = null;
+    }
+
+    private void getIntentInfo(Intent intent) throws Exception {
+
+        if (intent == null) {
+            throw new NullPointerException("Intent is null");
+        }
+
+        mPackageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+        if (mPackageName == null || mPackageName.length() == 0) {
+            throw new NullPointerException("Package Name is null");
+        }
+
+        mUid = intent.getIntExtra("com.android.server.logcat.uid", 0);
+        mGid = intent.getIntExtra("com.android.server.logcat.gid", 0);
+        mPid = intent.getIntExtra("com.android.server.logcat.pid", 0);
+        mFd = intent.getIntExtra("com.android.server.logcat.fd", 0);
     }
 
     private Handler mHandler = new Handler() {
@@ -115,26 +147,46 @@ public class LogAccessDialogActivity extends Activity implements
         }
     };
 
-    private String getTitleString(Context context, String callingPackage, int uid) {
+    private String getTitleString(Context context, String callingPackage, int uid)
+            throws Exception {
+
         PackageManager pm = context.getPackageManager();
-        try {
-            return context.getString(
-                    com.android.internal.R.string.log_access_confirmation_title,
-                    pm.getApplicationInfoAsUser(callingPackage,
-                            PackageManager.MATCH_DIRECT_BOOT_AUTO,
-                            UserHandle.getUserId(uid)).loadLabel(pm));
-        } catch (NameNotFoundException e) {
-            Slog.e(TAG, "App name is unknown.", e);
-            return null;
+        if (pm == null) {
+            throw new NullPointerException("PackageManager is null");
         }
+
+        CharSequence appLabel = pm.getApplicationInfoAsUser(callingPackage,
+                PackageManager.MATCH_DIRECT_BOOT_AUTO,
+                UserHandle.getUserId(uid)).loadLabel(pm);
+        if (appLabel == null || appLabel.length() == 0) {
+            throw new NameNotFoundException("Application Label is null");
+        }
+
+        String titleString = context.getString(
+                com.android.internal.R.string.log_access_confirmation_title, appLabel);
+        if (titleString == null || titleString.length() == 0) {
+            throw new NullPointerException("Title is null");
+        }
+
+        return titleString;
     }
 
-    private View createView() {
+    /**
+     * Returns the dialog view.
+     * If we cannot retrieve the package name, it returns null and we decline the full device log
+     * access
+     */
+    private View createView() throws Exception {
+
         final View view = getLayoutInflater().inflate(
                 R.layout.log_access_user_consent_dialog_permission, null /*root*/);
 
+        if (view == null) {
+            throw new InflateException();
+        }
+
         ((TextView) view.findViewById(R.id.log_access_dialog_title))
-                .setText(mAlertTitle);
+            .setText(mAlertTitle);
 
         Button button_allow = (Button) view.findViewById(R.id.log_access_dialog_allow_button);
         button_allow.setOnClickListener(this);
@@ -143,6 +195,7 @@ public class LogAccessDialogActivity extends Activity implements
         button_deny.setOnClickListener(this);
 
         return view;
+
     }
 
     @Override

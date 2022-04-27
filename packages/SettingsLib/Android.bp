@@ -51,6 +51,7 @@ android_library {
         "SettingsLibSettingsTransition",
         "SettingsLibButtonPreference",
         "setupdesign",
+        "zxing-core-1.7",
     ],
 
     // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES

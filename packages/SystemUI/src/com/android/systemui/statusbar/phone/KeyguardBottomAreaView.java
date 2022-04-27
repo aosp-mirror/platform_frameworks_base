@@ -555,6 +555,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mControlsButton.setImageResource(mControlsComponent.getTileImageId());
         mControlsButton.setContentDescription(getContext()
                 .getString(mControlsComponent.getTileTitleId()));
+        updateAffordanceColors();
 
         boolean hasFavorites = mControlsComponent.getControlsController()
                 .map(c -> c.getFavorites().size() > 0)
@@ -1100,7 +1101,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             mIndicationArea.setPadding(mIndicationPadding, 0, mIndicationPadding, 0);
         } else {
             mQRCodeScannerButton.setVisibility(GONE);
-            mIndicationArea.setPadding(0, 0, 0, 0);
+            if (mControlsButton.getVisibility() == GONE) {
+                mIndicationArea.setPadding(0, 0, 0, 0);
+            }
         }
     }
 

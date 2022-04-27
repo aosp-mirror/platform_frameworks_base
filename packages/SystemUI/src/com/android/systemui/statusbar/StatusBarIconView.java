@@ -573,11 +573,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         } catch (RuntimeException e) {
             Log.e(TAG, "Unable to recover builder", e);
             // Trying to get the app name from the app info instead.
-            Parcelable appInfo = n.extras.getParcelable(
-                    Notification.EXTRA_BUILDER_APPLICATION_INFO);
-            if (appInfo instanceof ApplicationInfo) {
-                appName = String.valueOf(((ApplicationInfo) appInfo).loadLabel(
-                        c.getPackageManager()));
+            ApplicationInfo appInfo = n.extras.getParcelable(
+                    Notification.EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
+            if (appInfo != null) {
+                appName = String.valueOf(appInfo.loadLabel(c.getPackageManager()));
             }
         }
 

@@ -1,15 +1,19 @@
 package com.android.systemui.qs
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
-import android.provider.DeviceConfig
+import android.safetycenter.SafetyCenterManager
 import android.view.View
 import androidx.annotation.WorkerThread
 import com.android.internal.R
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.appops.AppOpsController
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyChipEvent
@@ -18,7 +22,6 @@ import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.statusbar.phone.StatusIconContainer
-import com.android.systemui.util.DeviceConfigProxy
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import com.android.systemui.dagger.qualifiers.Background
@@ -50,15 +53,11 @@ class HeaderPrivacyIconsController @Inject constructor(
     @Main private val uiExecutor: Executor,
     private val activityStarter: ActivityStarter,
     private val appOpsController: AppOpsController,
-    private val deviceConfigProxy: DeviceConfigProxy
+    private val broadcastDispatcher: BroadcastDispatcher,
+    private val safetyCenterManager: SafetyCenterManager
 ) {
 
-    companion object {
-        const val SAFETY_CENTER_ENABLED = "safety_center_is_enabled"
-    }
-
     var chipVisibilityListener: ChipVisibilityListener? = null
-
     private var listening = false
     private var micCameraIndicatorsEnabled = false
     private var locationIndicatorsEnabled = false
@@ -68,20 +67,40 @@ class HeaderPrivacyIconsController @Inject constructor(
     private val micSlot = privacyChip.resources.getString(R.string.status_bar_microphone)
     private val locationSlot = privacyChip.resources.getString(R.string.status_bar_location)
 
-    private val devicePropertiesChangedListener =
-        object : DeviceConfig.OnPropertiesChangedListener {
-            override fun onPropertiesChanged(properties: DeviceConfig.Properties) {
-                safetyCenterEnabled = properties.getBoolean(SAFETY_CENTER_ENABLED, false)
-            }
+    private val safetyCenterReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            safetyCenterEnabled = safetyCenterManager.isSafetyCenterEnabled()
+        }
+    }
+
+    val attachStateChangeListener = object : View.OnAttachStateChangeListener {
+        override fun onViewAttachedToWindow(v: View) {
+            broadcastDispatcher.registerReceiver(
+                    safetyCenterReceiver,
+                    IntentFilter(SafetyCenterManager.ACTION_SAFETY_CENTER_ENABLED_CHANGED),
+                    executor = backgroundExecutor
+            )
         }
 
+        override fun onViewDetachedFromWindow(v: View) {
+            broadcastDispatcher.unregisterReceiver(safetyCenterReceiver)
+        }
+    }
+
     init {
-        safetyCenterEnabled = deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-            SAFETY_CENTER_ENABLED, false)
-        deviceConfigProxy.addOnPropertiesChangedListener(
-            DeviceConfig.NAMESPACE_PRIVACY,
-            uiExecutor,
-            devicePropertiesChangedListener)
+        backgroundExecutor.execute {
+            safetyCenterEnabled = safetyCenterManager.isSafetyCenterEnabled()
+        }
+
+        if (privacyChip.isAttachedToWindow()) {
+            broadcastDispatcher.registerReceiver(
+                    safetyCenterReceiver,
+                    IntentFilter(SafetyCenterManager.ACTION_SAFETY_CENTER_ENABLED_CHANGED),
+                    executor = backgroundExecutor
+            )
+        }
+
+        privacyChip.addOnAttachStateChangeListener(attachStateChangeListener)
     }
 
     private val picCallback: PrivacyItemController.Callback =

@@ -20,6 +20,7 @@ import static android.Manifest.permission.BIND_VPN_SERVICE;
 import static android.Manifest.permission.CONTROL_VPN;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 import static android.net.VpnManager.NOTIFICATION_CHANNEL_VPN;
@@ -75,6 +76,7 @@ import android.net.RouteInfo;
 import android.net.UidRangeParcel;
 import android.net.UnderlyingNetworkInfo;
 import android.net.VpnManager;
+import android.net.VpnProfileState;
 import android.net.VpnService;
 import android.net.VpnTransportInfo;
 import android.net.ipsec.ike.ChildSessionCallback;
@@ -83,6 +85,7 @@ import android.net.ipsec.ike.ChildSessionParams;
 import android.net.ipsec.ike.IkeSession;
 import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.ipsec.ike.IkeSessionParams;
+import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
@@ -2265,6 +2268,11 @@ public class Vpn {
                 profile.setAllowedAlgorithms(Ikev2VpnProfile.DEFAULT_ALGORITHMS);
                 startVpnProfilePrivileged(profile, VpnConfig.LEGACY_VPN);
                 return;
+            case VpnProfile.TYPE_IKEV2_FROM_IKE_TUN_CONN_PARAMS:
+                // All the necessary IKE options should come from IkeTunnelConnectionParams in the
+                // profile.
+                startVpnProfilePrivileged(profile, VpnConfig.LEGACY_VPN);
+                return;
             case VpnProfile.TYPE_L2TP_IPSEC_PSK:
                 racoon = new String[] {
                     iface, profile.server, "udppsk", profile.ipsecIdentifier,
@@ -2312,6 +2320,13 @@ public class Vpn {
                     "usepeerdns", "idle", "1800", "mtu", "1270", "mru", "1270",
                     (profile.mppe ? "+mppe" : "nomppe"),
                 };
+                if (profile.mppe) {
+                    // Disallow PAP authentication when MPPE is requested, as MPPE cannot work
+                    // with PAP anyway, and users may not expect PAP (plain text) to be used when
+                    // MPPE was requested.
+                    mtpd = Arrays.copyOf(mtpd, mtpd.length + 1);
+                    mtpd[mtpd.length - 1] = "-pap";
+                }
                 break;
             case VpnProfile.TYPE_L2TP_IPSEC_PSK:
             case VpnProfile.TYPE_L2TP_IPSEC_RSA:
@@ -2541,6 +2556,7 @@ public class Vpn {
                 req = new NetworkRequest.Builder()
                         .clearCapabilities()
                         .addTransportType(NetworkCapabilities.TRANSPORT_TEST)
+                        .addCapability(NET_CAPABILITY_NOT_VPN)
                         .build();
             } else {
                 // Basically, the request here is referring to the default request which is defined
@@ -2691,15 +2707,31 @@ public class Vpn {
                         return; // VPN has been shut down.
                     }
 
+                    // Clear mInterface to prevent Ikev2VpnRunner being cleared when
+                    // interfaceRemoved() is called.
+                    mInterface = null;
                     // Without MOBIKE, we have no way to seamlessly migrate. Close on old
                     // (non-default) network, and start the new one.
                     resetIkeState();
                     mActiveNetwork = network;
 
-                    final IkeSessionParams ikeSessionParams =
-                            VpnIkev2Utils.buildIkeSessionParams(mContext, mProfile, network);
-                    final ChildSessionParams childSessionParams =
-                            VpnIkev2Utils.buildChildSessionParams(mProfile.getAllowedAlgorithms());
+                    // Get Ike options from IkeTunnelConnectionParams if it's available in the
+                    // profile.
+                    final IkeTunnelConnectionParams ikeTunConnParams =
+                            mProfile.getIkeTunnelConnectionParams();
+                    final IkeSessionParams ikeSessionParams;
+                    final ChildSessionParams childSessionParams;
+                    if (ikeTunConnParams != null) {
+                        final IkeSessionParams.Builder builder = new IkeSessionParams.Builder(
+                                ikeTunConnParams.getIkeSessionParams()).setNetwork(network);
+                        ikeSessionParams = builder.build();
+                        childSessionParams = ikeTunConnParams.getTunnelModeChildSessionParams();
+                    } else {
+                        ikeSessionParams = VpnIkev2Utils.buildIkeSessionParams(
+                                mContext, mProfile, network);
+                        childSessionParams = VpnIkev2Utils.buildChildSessionParams(
+                                mProfile.getAllowedAlgorithms());
+                    }
 
                     // TODO: Remove the need for adding two unused addresses with
                     // IPsec tunnels.
@@ -3220,6 +3252,7 @@ public class Vpn {
             case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS:
             case VpnProfile.TYPE_IKEV2_IPSEC_PSK:
             case VpnProfile.TYPE_IKEV2_IPSEC_RSA:
+            case VpnProfile.TYPE_IKEV2_FROM_IKE_TUN_CONN_PARAMS:
                 if (!mContext.getPackageManager().hasSystemFeature(
                         PackageManager.FEATURE_IPSEC_TUNNELS)) {
                     throw new UnsupportedOperationException(
@@ -3393,6 +3426,7 @@ public class Vpn {
                 case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS:
                 case VpnProfile.TYPE_IKEV2_IPSEC_PSK:
                 case VpnProfile.TYPE_IKEV2_IPSEC_RSA:
+                case VpnProfile.TYPE_IKEV2_FROM_IKE_TUN_CONN_PARAMS:
                     mVpnRunner =
                             new IkeV2VpnRunner(Ikev2VpnProfile.fromVpnProfile(profile));
                     mVpnRunner.start();
@@ -3436,6 +3470,45 @@ public class Vpn {
         if (isCurrentIkev2VpnLocked(packageName)) {
             prepareInternal(VpnConfig.LEGACY_VPN);
         }
+    }
+
+    private @VpnProfileState.State int getStateFromLegacyState(int legacyState) {
+        switch (legacyState) {
+            case LegacyVpnInfo.STATE_CONNECTING:
+                return VpnProfileState.STATE_CONNECTING;
+            case LegacyVpnInfo.STATE_CONNECTED:
+                return VpnProfileState.STATE_CONNECTED;
+            case LegacyVpnInfo.STATE_DISCONNECTED:
+                return VpnProfileState.STATE_DISCONNECTED;
+            case LegacyVpnInfo.STATE_FAILED:
+                return VpnProfileState.STATE_FAILED;
+            default:
+                Log.wtf(TAG, "Unhandled state " + legacyState
+                        + ", treat it as STATE_DISCONNECTED");
+                return VpnProfileState.STATE_DISCONNECTED;
+        }
+    }
+
+    private VpnProfileState makeVpnProfileState() {
+        // TODO: mSessionKey will be moved to Ikev2VpnRunner once aosp/2007077 is merged, so after
+        //  merging aosp/2007077, here should check Ikev2VpnRunner is null or not. Session key will
+        //  be null if Ikev2VpnRunner is null.
+        return new VpnProfileState(getStateFromLegacyState(mLegacyState), mSessionKey, mAlwaysOn,
+                mLockdown);
+    }
+
+    /**
+     * Retrieve the VpnProfileState for the profile provisioned by the given package.
+     *
+     * @return the VpnProfileState with current information, or null if there was no profile
+     *         provisioned by the given package.
+     */
+    @Nullable
+    public synchronized VpnProfileState getProvisionedVpnProfileState(
+            @NonNull String packageName) {
+        requireNonNull(packageName, "No package name provided");
+        enforceNotRestrictedUser();
+        return isCurrentIkev2VpnLocked(packageName) ? makeVpnProfileState() : null;
     }
 
     /**

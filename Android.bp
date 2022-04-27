@@ -65,7 +65,6 @@ filegroup {
         // Java/AIDL sources under frameworks/base
         ":framework-annotations",
         ":framework-blobstore-sources",
-        ":framework-connectivity-tiramisu-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
         ":framework-graphics-nonupdatable-sources",
@@ -97,6 +96,7 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
+        ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
         ":android.hardware.security.keymint-V2-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
@@ -271,8 +271,6 @@ java_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
-            // TODO: remove when moved to the below package
-            "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
             "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
@@ -325,9 +323,11 @@ java_defaults {
         "av-types-aidl-java",
         "tv_tuner_resource_manager_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
+        "modules-utils-build",
         "modules-utils-preconditions",
         "modules-utils-synchronous-result-receiver",
         "modules-utils-os",
+        "modules-utils-uieventlogger-interface",
         "framework-permission-aidl-java",
         "spatializer-aidl-java",
         "audiopolicy-types-aidl-java",
@@ -529,8 +529,6 @@ stubs_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
-            // TODO: remove when moved to the below package
-            "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
             "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",

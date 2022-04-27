@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
+import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import android.annotation.NonNull;
 import android.os.Trace;
@@ -29,6 +30,8 @@ import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+
+import java.util.ArrayList;
 
 /**
  * Utility class for collecting WindowContainers that will merge transactions.
@@ -64,9 +67,17 @@ class BLASTSyncEngine {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
     }
 
-    interface SyncEngineListener {
-        /** Called when there is no more active sync set. */
-        void onSyncEngineFree();
+    /**
+     * Represents the desire to make a {@link BLASTSyncEngine.SyncGroup} while another is active.
+     *
+     * @see #queueSyncSet
+     */
+    private static class PendingSyncSet {
+        /** Called immediately when the {@link BLASTSyncEngine} is free. */
+        private Runnable mStartSync;
+
+        /** Posted to the main handler after {@link #mStartSync} is called. */
+        private Runnable mApplySync;
     }
 
     /**
@@ -137,13 +148,53 @@ class BLASTSyncEngine {
             for (WindowContainer wc : mRootMembers) {
                 wc.finishSync(merged, false /* cancel */);
             }
+
+            final ArraySet<WindowContainer> wcAwaitingCommit = new ArraySet<>();
+            for (WindowContainer wc : mRootMembers) {
+                wc.waitForSyncTransactionCommit(wcAwaitingCommit);
+            }
+            final Runnable callback = new Runnable() {
+                // Can run a second time if the action completes after the timeout.
+                boolean ran = false;
+                public void run() {
+                    synchronized (mWm.mGlobalLock) {
+                        if (ran) {
+                            return;
+                        }
+                        mWm.mH.removeCallbacks(this);
+                        ran = true;
+                        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                        for (WindowContainer wc : wcAwaitingCommit) {
+                            wc.onSyncTransactionCommitted(t);
+                        }
+                        t.apply();
+                        wcAwaitingCommit.clear();
+                    }
+                }
+            };
+            merged.addTransactionCommittedListener((r) -> { r.run(); }, callback::run);
+            mWm.mH.postDelayed(callback, BLAST_TIMEOUT_DURATION);
+
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
             mListener.onTransactionReady(mSyncId, merged);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             mActiveSyncs.remove(mSyncId);
             mWm.mH.removeCallbacks(mOnTimeout);
-            if (mSyncEngineListener != null && mActiveSyncs.size() == 0) {
-                mSyncEngineListener.onSyncEngineFree();
+
+            // Immediately start the next pending sync-transaction if there is one.
+            if (mActiveSyncs.size() == 0 && !mPendingSyncSets.isEmpty()) {
+                ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "PendingStartTransaction found");
+                final PendingSyncSet pt = mPendingSyncSets.remove(0);
+                pt.mStartSync.run();
+                if (mActiveSyncs.size() == 0) {
+                    throw new IllegalStateException("Pending Sync Set didn't start a sync.");
+                }
+                // Post this so that the now-playing transition setup isn't interrupted.
+                mWm.mH.post(() -> {
+                    synchronized (mWm.mGlobalLock) {
+                        pt.mApplySync.run();
+                    }
+                });
             }
         }
 
@@ -183,15 +234,16 @@ class BLASTSyncEngine {
     private final WindowManagerService mWm;
     private int mNextSyncId = 0;
     private final SparseArray<SyncGroup> mActiveSyncs = new SparseArray<>();
-    private SyncEngineListener mSyncEngineListener;
+
+    /**
+     * A queue of pending sync-sets waiting for their turn to run.
+     *
+     * @see #queueSyncSet
+     */
+    private final ArrayList<PendingSyncSet> mPendingSyncSets = new ArrayList<>();
 
     BLASTSyncEngine(WindowManagerService wms) {
         mWm = wms;
-    }
-
-    /** Sets listener listening to whether the sync engine is free. */
-    void setSyncEngineListener(SyncEngineListener listener) {
-        mSyncEngineListener = listener;
     }
 
     /**
@@ -203,7 +255,7 @@ class BLASTSyncEngine {
     }
 
     int startSyncSet(TransactionReadyListener listener) {
-        return startSyncSet(listener, WindowState.BLAST_TIMEOUT_DURATION, "");
+        return startSyncSet(listener, BLAST_TIMEOUT_DURATION, "");
     }
 
     int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name) {
@@ -213,7 +265,7 @@ class BLASTSyncEngine {
     }
 
     void startSyncSet(SyncGroup s) {
-        startSyncSet(s, WindowState.BLAST_TIMEOUT_DURATION);
+        startSyncSet(s, BLAST_TIMEOUT_DURATION);
     }
 
     void startSyncSet(SyncGroup s, long timeoutMs) {
@@ -274,5 +326,32 @@ class BLASTSyncEngine {
         for (int i = mActiveSyncs.size() - 1; i >= 0; --i) {
             mActiveSyncs.valueAt(i).onSurfacePlacement();
         }
+    }
+
+    /**
+     * Queues a sync operation onto this engine. It will wait until any current/prior sync-sets
+     * have finished to run. This is needed right now because currently {@link BLASTSyncEngine}
+     * only supports 1 sync at a time.
+     *
+     * Code-paths should avoid using this unless absolutely necessary. Usually, we use this for
+     * difficult edge-cases that we hope to clean-up later.
+     *
+     * @param startSync will be called immediately when the {@link BLASTSyncEngine} is free to
+     *                  "reserve" the {@link BLASTSyncEngine} by calling one of the
+     *                  {@link BLASTSyncEngine#startSyncSet} variants.
+     * @param applySync will be posted to the main handler after {@code startSync} has been
+     *                  called. This is posted so that it doesn't interrupt any clean-up for the
+     *                  prior sync-set.
+     */
+    void queueSyncSet(@NonNull Runnable startSync, @NonNull Runnable applySync) {
+        final PendingSyncSet pt = new PendingSyncSet();
+        pt.mStartSync = startSync;
+        pt.mApplySync = applySync;
+        mPendingSyncSets.add(pt);
+    }
+
+    /** @return {@code true} if there are any sync-sets waiting to start. */
+    boolean hasPendingSyncSets() {
+        return !mPendingSyncSets.isEmpty();
     }
 }

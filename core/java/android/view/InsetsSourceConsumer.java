@@ -25,6 +25,7 @@ import static android.view.InsetsSourceConsumerProto.IS_REQUESTED_VISIBLE;
 import static android.view.InsetsSourceConsumerProto.PENDING_FRAME;
 import static android.view.InsetsSourceConsumerProto.PENDING_VISIBLE_FRAME;
 import static android.view.InsetsSourceConsumerProto.SOURCE_CONTROL;
+import static android.view.InsetsSourceControl.INVALID_HINTS;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.getDefaultVisibility;
 import static android.view.InsetsState.toPublicType;
@@ -163,8 +164,10 @@ public class InsetsSourceConsumer {
             // We are gaining control, and need to run an animation since previous state
             // didn't match
             final boolean requestedVisible = isRequestedVisibleAwaitingControl();
-            final boolean needAnimation = requestedVisible != mState.getSource(mType).isVisible();
-            if (control.getLeash() != null && (needAnimation || mIsAnimationPending)) {
+            final boolean fakeControl = INVALID_HINTS.equals(control.getInsetsHint());
+            final boolean needsAnimation = requestedVisible != mState.getSource(mType).isVisible()
+                    && !fakeControl;
+            if (control.getLeash() != null && (needsAnimation || mIsAnimationPending)) {
                 if (DEBUG) Log.d(TAG, String.format("Gaining control in %s, requestedVisible: %b",
                         mController.getHost().getRootViewTitle(), requestedVisible));
                 if (requestedVisible) {
@@ -174,7 +177,7 @@ public class InsetsSourceConsumer {
                 }
                 mIsAnimationPending = false;
             } else {
-                if (needAnimation) {
+                if (needsAnimation) {
                     // We need animation but we haven't had a leash yet. Set this flag that when we
                     // get the leash we can play the deferred animation.
                     mIsAnimationPending = true;

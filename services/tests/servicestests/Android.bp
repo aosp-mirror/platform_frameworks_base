@@ -64,6 +64,7 @@ android_test {
         "testng",
         "junit",
         "platform-compat-test-rules",
+        "ActivityContext",
     ],
 
     aidl: {

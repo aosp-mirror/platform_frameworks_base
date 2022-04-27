@@ -383,6 +383,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     @Nullable
     private SparseIntArray minExtensionVersions;
     private int minSdkVersion = ParsingUtils.DEFAULT_MIN_SDK_VERSION;
+    private int maxSdkVersion = ParsingUtils.DEFAULT_MAX_SDK_VERSION;
     private int networkSecurityConfigRes;
     @Nullable
     private CharSequence nonLocalizedLabel;
@@ -1306,6 +1307,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         dest.writeFloat(this.maxAspectRatio);
         dest.writeFloat(this.minAspectRatio);
         dest.writeInt(this.minSdkVersion);
+        dest.writeInt(this.maxSdkVersion);
         dest.writeInt(this.networkSecurityConfigRes);
         dest.writeCharSequence(this.nonLocalizedLabel);
         dest.writeString(this.permission);
@@ -1454,6 +1456,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.maxAspectRatio = in.readFloat();
         this.minAspectRatio = in.readFloat();
         this.minSdkVersion = in.readInt();
+        this.maxSdkVersion = in.readInt();
         this.networkSecurityConfigRes = in.readInt();
         this.nonLocalizedLabel = in.readCharSequence();
         this.permission = in.readString();
@@ -2068,6 +2071,11 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     }
 
     @Override
+    public int getMaxSdkVersion() {
+        return maxSdkVersion;
+    }
+
+    @Override
     public int getNetworkSecurityConfigRes() {
         return networkSecurityConfigRes;
     }
@@ -2588,6 +2596,12 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     @Override
     public ParsingPackageImpl setMinSdkVersion(int value) {
         minSdkVersion = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setMaxSdkVersion(int value) {
+        maxSdkVersion = value;
         return this;
     }
 

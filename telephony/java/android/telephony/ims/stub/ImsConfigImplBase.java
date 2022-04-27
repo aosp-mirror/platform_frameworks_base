@@ -587,13 +587,15 @@ public class ImsConfigImplBase {
         if (mCallbacks == null) {
             return;
         }
-        mCallbacks.broadcastAction(c -> {
-            try {
-                c.onIntConfigChanged(item, value);
-            } catch (RemoteException e) {
-                Log.w(TAG, "notifyConfigChanged(int): dead binder in notify, skipping.");
-            }
-        });
+        synchronized (mCallbacks) {
+            mCallbacks.broadcastAction(c -> {
+                try {
+                    c.onIntConfigChanged(item, value);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "notifyConfigChanged(int): dead binder in notify, skipping.");
+                }
+            });
+        }
     }
 
     private void notifyConfigChanged(int item, String value) {
@@ -601,13 +603,15 @@ public class ImsConfigImplBase {
         if (mCallbacks == null) {
             return;
         }
-        mCallbacks.broadcastAction(c -> {
-            try {
-                c.onStringConfigChanged(item, value);
-            } catch (RemoteException e) {
-                Log.w(TAG, "notifyConfigChanged(string): dead binder in notify, skipping.");
-            }
-        });
+        synchronized (mCallbacks) {
+            mCallbacks.broadcastAction(c -> {
+                try {
+                    c.onStringConfigChanged(item, value);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "notifyConfigChanged(string): dead binder in notify, skipping.");
+                }
+            });
+        }
     }
 
     private void addRcsConfigCallback(IRcsConfigCallback c) {
@@ -635,13 +639,15 @@ public class ImsConfigImplBase {
 
         // can be null in testing
         if (mRcsCallbacks != null) {
-            mRcsCallbacks.broadcastAction(c -> {
-                try {
-                    c.onConfigurationChanged(mRcsConfigData);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "dead binder in notifyRcsAutoConfigurationReceived, skipping.");
-                }
-            });
+            synchronized (mRcsCallbacks) {
+                mRcsCallbacks.broadcastAction(c -> {
+                    try {
+                        c.onConfigurationChanged(mRcsConfigData);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "dead binder in notifyRcsAutoConfigurationReceived, skipping.");
+                    }
+                });
+            }
         }
         notifyRcsAutoConfigurationReceived(config, isCompressed);
     }
@@ -649,13 +655,15 @@ public class ImsConfigImplBase {
     private void onNotifyRcsAutoConfigurationRemoved() {
         mRcsConfigData = null;
         if (mRcsCallbacks != null) {
-            mRcsCallbacks.broadcastAction(c -> {
-                try {
-                    c.onConfigurationReset();
-                } catch (RemoteException e) {
-                    Log.w(TAG, "dead binder in notifyRcsAutoConfigurationRemoved, skipping.");
-                }
-            });
+            synchronized (mRcsCallbacks) {
+                mRcsCallbacks.broadcastAction(c -> {
+                    try {
+                        c.onConfigurationReset();
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "dead binder in notifyRcsAutoConfigurationRemoved, skipping.");
+                    }
+                });
+            }
         }
         notifyRcsAutoConfigurationRemoved();
     }
@@ -801,13 +809,15 @@ public class ImsConfigImplBase {
         if (mRcsCallbacks == null) {
             return;
         }
-        mRcsCallbacks.broadcastAction(c -> {
-            try {
-                c.onAutoConfigurationErrorReceived(errorCode, errorString);
-            } catch (RemoteException e) {
-                Log.w(TAG, "dead binder in notifyAutoConfigurationErrorReceived, skipping.");
-            }
-        });
+        synchronized (mRcsCallbacks) {
+            mRcsCallbacks.broadcastAction(c -> {
+                try {
+                    c.onAutoConfigurationErrorReceived(errorCode, errorString);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "dead binder in notifyAutoConfigurationErrorReceived, skipping.");
+                }
+            });
+        }
     }
 
     /**
@@ -825,13 +835,15 @@ public class ImsConfigImplBase {
         if (mRcsCallbacks == null) {
             return;
         }
-        mRcsCallbacks.broadcastAction(c -> {
-            try {
-                c.onPreProvisioningReceived(configXml);
-            } catch (RemoteException e) {
-                Log.w(TAG, "dead binder in notifyPreProvisioningReceived, skipping.");
-            }
-        });
+        synchronized (mRcsCallbacks) {
+            mRcsCallbacks.broadcastAction(c -> {
+                try {
+                    c.onPreProvisioningReceived(configXml);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "dead binder in notifyPreProvisioningReceived, skipping.");
+                }
+            });
+        }
     }
 
     /**

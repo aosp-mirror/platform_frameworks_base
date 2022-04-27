@@ -29,6 +29,7 @@ import static com.android.server.wm.WindowManagerService.H.UPDATE_MULTI_WINDOW_S
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
@@ -79,8 +80,8 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
     }
 
     @Override
-    void updateSourceFrame() {
-        super.updateSourceFrame();
+    void updateSourceFrame(Rect frame) {
+        super.updateSourceFrame(frame);
         onSourceChanged();
     }
 

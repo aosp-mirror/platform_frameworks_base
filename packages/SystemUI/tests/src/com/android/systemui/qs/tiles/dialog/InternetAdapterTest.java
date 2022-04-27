@@ -4,14 +4,19 @@ import static com.android.systemui.qs.tiles.dialog.InternetDialogController.MAX_
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableResources;
@@ -30,6 +35,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -40,6 +46,7 @@ import java.util.List;
 @RunWith(AndroidTestingRunner.class)
 public class InternetAdapterTest extends SysuiTestCase {
 
+    private static final String WIFI_KEY = "Wi-Fi_Key";
     private static final String WIFI_TITLE = "Wi-Fi Title";
     private static final String WIFI_SUMMARY = "Wi-Fi Summary";
     private static final int GEAR_ICON_RES_ID = R.drawable.ic_settings_24dp;
@@ -47,6 +54,8 @@ public class InternetAdapterTest extends SysuiTestCase {
 
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
+    @Spy
+    private Context mSpyContext = mContext;
 
     @Mock
     private WifiEntry mInternetWifiEntry;
@@ -74,6 +83,7 @@ public class InternetAdapterTest extends SysuiTestCase {
         when(mInternetWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
         when(mInternetWifiEntry.isDefaultNetwork()).thenReturn(true);
         when(mInternetWifiEntry.hasInternetAccess()).thenReturn(true);
+        when(mWifiEntry.getKey()).thenReturn(WIFI_KEY);
         when(mWifiEntry.getTitle()).thenReturn(WIFI_TITLE);
         when(mWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
 
@@ -194,6 +204,66 @@ public class InternetAdapterTest extends SysuiTestCase {
 
         assertThat(mInternetAdapter.mWifiEntriesCount).isEqualTo(maxCount);
         assertThat(mInternetAdapter.mMaxEntriesCount).isEqualTo(maxCount);
+    }
+
+    @Test
+    public void viewHolderShouldEnabled_wifiCanConnect_returnTrue() {
+        when(mWifiEntry.canConnect()).thenReturn(true);
+
+        assertThat(mViewHolder.shouldEnabled(mWifiEntry)).isTrue();
+    }
+
+    @Test
+    public void viewHolderShouldEnabled_wifiCanNotConnect_returnFalse() {
+        when(mWifiEntry.canConnect()).thenReturn(false);
+
+        assertThat(mViewHolder.shouldEnabled(mWifiEntry)).isFalse();
+    }
+
+    @Test
+    public void viewHolderShouldEnabled_wifiCanNotConnectButCanDisconnect_returnTrue() {
+        when(mWifiEntry.canConnect()).thenReturn(false);
+        when(mWifiEntry.canConnect()).thenReturn(true);
+
+        assertThat(mViewHolder.shouldEnabled(mWifiEntry)).isTrue();
+    }
+
+    @Test
+    public void viewHolderShouldEnabled_wifiCanNotConnectButIsSaved_returnTrue() {
+        when(mWifiEntry.canConnect()).thenReturn(false);
+        when(mWifiEntry.isSaved()).thenReturn(true);
+
+        assertThat(mViewHolder.shouldEnabled(mWifiEntry)).isTrue();
+    }
+
+    @Test
+    public void viewHolderOnWifiClick_wifiShouldEditBeforeConnect_startActivity() {
+        when(mWifiEntry.shouldEditBeforeConnect()).thenReturn(true);
+        mViewHolder = mInternetAdapter.onCreateViewHolder(new LinearLayout(mSpyContext), 0);
+        doNothing().when(mSpyContext).startActivity(any());
+
+        mViewHolder.onWifiClick(mWifiEntry, mock(View.class));
+
+        verify(mSpyContext).startActivity(any());
+    }
+
+    @Test
+    public void viewHolderOnWifiClick_wifiCanConnect_connectWifi() {
+        when(mWifiEntry.canConnect()).thenReturn(true);
+
+        mViewHolder.onWifiClick(mWifiEntry, mock(View.class));
+
+        verify(mInternetDialogController).connect(mWifiEntry);
+    }
+
+    @Test
+    public void viewHolderOnWifiClick_wifiCanNotConnectButIsSaved_launchWifiDetailsSetting() {
+        when(mWifiEntry.canConnect()).thenReturn(false);
+        when(mWifiEntry.isSaved()).thenReturn(true);
+
+        mViewHolder.onWifiClick(mWifiEntry, mock(View.class));
+
+        verify(mInternetDialogController).launchWifiDetailsSetting(anyString(), any());
     }
 
     @Test

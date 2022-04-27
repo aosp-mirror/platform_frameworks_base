@@ -33,16 +33,17 @@ import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
 import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.ICommunicationDeviceDispatcher;
+import android.media.IDeviceVolumeBehaviorDispatcher;
 import android.media.IMuteAwaitConnectionCallback;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.ISpatializerCallback;
+import android.media.ISpatializerHeadTrackerAvailableCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerOutputCallback;
-import android.media.IVolumeController;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
 import android.media.VolumeInfo;
@@ -414,6 +415,11 @@ interface IAudioService {
 
     boolean isHeadTrackerEnabled(in AudioDeviceAttributes device);
 
+    boolean isHeadTrackerAvailable();
+
+    void registerSpatializerHeadTrackerAvailableCallback(
+            in ISpatializerHeadTrackerAvailableCallback cb, boolean register);
+
     void setSpatializerEnabled(boolean enabled);
 
     boolean canBeSpatialized(in AudioAttributes aa, in AudioFormat af);
@@ -476,6 +482,10 @@ interface IAudioService {
 
     void setTestDeviceConnectionState(in AudioDeviceAttributes device, boolean connected);
 
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING,android.Manifest.permission.QUERY_AUDIO_STATE})")
+    void registerDeviceVolumeBehaviorDispatcher(boolean register,
+            in IDeviceVolumeBehaviorDispatcher dispatcher);
+
     List<AudioFocusInfo> getFocusStack();
 
     boolean sendFocusLoss(in AudioFocusInfo focusLoser, in IAudioPolicyCallback apcb);
@@ -499,7 +509,8 @@ interface IAudioService {
     void registerDeviceVolumeDispatcherForAbsoluteVolume(boolean register,
             in IAudioDeviceVolumeDispatcher cb,
             in String packageName,
-            in AudioDeviceAttributes device, in List<VolumeInfo> volumes);
+            in AudioDeviceAttributes device, in List<VolumeInfo> volumes,
+            boolean handlesvolumeAdjustment);
 
     String getHalVersion();
 }

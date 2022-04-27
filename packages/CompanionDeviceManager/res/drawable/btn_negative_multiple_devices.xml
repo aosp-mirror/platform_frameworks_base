@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2022 The Android Open Source Project
   ~
@@ -20,6 +21,6 @@
     <corners android:topLeftRadius="16dp" android:topRightRadius="16dp"
              android:bottomLeftRadius="16dp" android:bottomRightRadius="16dp"/>
     <stroke
-        android:width="2dp"
+        android:width="1dp"
         android:color="@android:color/system_accent1_600" />
 </shape>

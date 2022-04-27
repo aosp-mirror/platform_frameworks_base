@@ -25,15 +25,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 /**
  * Adapter for the list of "found" devices.
  */
-class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolder> implements
-        Observer<List<DeviceFilterPair<?>>> {
+class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolder> {
     public int mSelectedPosition = RecyclerView.NO_POSITION;
 
     private final Context mContext;
@@ -96,9 +94,8 @@ class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolde
         mSelectedPosition = position;
     }
 
-    @Override
-    public void onChanged(List<DeviceFilterPair<?>> deviceFilterPairs) {
-        mDevices = deviceFilterPairs;
+    void setDevices(List<DeviceFilterPair<?>> devices) {
+        mDevices = devices;
         notifyDataSetChanged();
     }
 

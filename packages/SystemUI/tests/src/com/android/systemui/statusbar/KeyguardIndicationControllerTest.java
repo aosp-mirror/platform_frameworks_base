@@ -51,6 +51,7 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.app.Instrumentation;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyResourcesManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -125,6 +126,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
+    @Mock
+    private DevicePolicyResourcesManager mDevicePolicyResourcesManager;
     @Mock
     private ViewGroup mIndicationArea;
     @Mock
@@ -210,12 +213,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 .thenReturn(mIndicationAreaBottom);
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);
 
+        when(mDevicePolicyManager.getResources()).thenReturn(mDevicePolicyResourcesManager);
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser())
                 .thenReturn(DEVICE_OWNER_COMPONENT);
         when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
-        when(mDevicePolicyManager.getString(anyString(), any())).thenReturn(mDisclosureGeneric);
-        when(mDevicePolicyManager.getString(anyString(), any(), anyString()))
+        when(mDevicePolicyResourcesManager.getString(anyString(), any()))
+                .thenReturn(mDisclosureGeneric);
+        when(mDevicePolicyResourcesManager.getString(anyString(), any(), anyString()))
                 .thenReturn(mDisclosureWithOrganization);
 
         mWakeLock = new WakeLockFake();
@@ -226,6 +231,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @After
     public void tearDown() throws Exception {
         mTextView.setAnimationsEnabled(true);
+        if (mController != null) {
+            mController.destroy();
+            mController = null;
+        }
     }
 
     private void createController() {
@@ -740,33 +749,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onRequireUnlockForNfc();
 
         verifyTransientMessage(message);
-    }
-
-    @Test
-    public void faceAuthMessageSuppressed() {
-        createController();
-        String faceHelpMsg = "Face auth help message";
-
-        // GIVEN state of showing message when keyguard screen is on
-        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
-        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-
-        // GIVEN fingerprint is also running (not udfps)
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(false);
-
-        mController.setVisible(true);
-
-        // WHEN a face help message comes in
-        mController.getKeyguardCallback().onBiometricHelp(
-                KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, faceHelpMsg,
-                BiometricSourceType.FACE);
-
-        // THEN no help message appears
-        verify(mRotateTextViewController, never()).showTransient(anyString());
-
-        // THEN the face help message is still announced for a11y
-        verify(mIndicationAreaBottom).announceForAccessibility(eq(faceHelpMsg));
     }
 
     @Test

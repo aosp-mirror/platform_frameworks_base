@@ -34,6 +34,7 @@ import android.hardware.keymaster.HardwareAuthToken;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.log.BiometricContext;
@@ -66,6 +67,13 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     private final int mMaxTemplatesPerUser;
     private boolean mIsPointerDown;
 
+    private static boolean shouldVibrateFor(Context context,
+            FingerprintSensorPropertiesInternal sensorProps) {
+        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
+        final boolean isAccessbilityEnabled = am.isTouchExplorationEnabled();
+        return !sensorProps.isAnyUdfpsType() || isAccessbilityEnabled;
+    }
+
     FingerprintEnrollClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
@@ -78,8 +86,8 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
             int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason) {
         // UDFPS haptics occur when an image is acquired (instead of when the result is known)
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
-                0 /* timeoutSec */, sensorId,
-                !sensorProps.isAnyUdfpsType() /* shouldVibrate */, logger, biometricContext);
+                0 /* timeoutSec */, sensorId, shouldVibrateFor(context, sensorProps), logger,
+                biometricContext);
         setRequestId(requestId);
         mSensorProps = sensorProps;
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
@@ -119,7 +127,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
         // For UDFPS, notify SysUI that the illumination can be turned off.
         // See AcquiredInfo#GOOD and AcquiredInfo#RETRYING_CAPTURE
         if (mSensorProps.isAnyUdfpsType()) {
-            if (acquiredGood) {
+            if (acquiredGood && mShouldVibrate) {
                 vibrateSuccess();
             }
             mSensorOverlays.ifUdfps(

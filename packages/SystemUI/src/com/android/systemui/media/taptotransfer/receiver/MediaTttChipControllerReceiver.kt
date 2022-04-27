@@ -127,6 +127,15 @@ class MediaTttChipControllerReceiver @Inject constructor(
                 chipInfo.appNameOverride
         )
     }
+
+    override fun getIconSize(isAppIcon: Boolean): Int? =
+        context.resources.getDimensionPixelSize(
+            if (isAppIcon) {
+                R.dimen.media_ttt_icon_size_receiver
+            } else {
+                R.dimen.media_ttt_generic_icon_size_receiver
+            }
+        )
 }
 
 data class ChipReceiverInfo(

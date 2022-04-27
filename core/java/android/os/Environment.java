@@ -478,8 +478,18 @@ public class Environment {
     }
 
     /** {@hide} */
+    public static File getDataMiscCeSharedSdkSandboxDirectory(int userId, String packageName) {
+        return buildPath(getDataMiscCeDirectory(userId), "sdksandbox", packageName, "shared");
+    }
+
+    /** {@hide} */
     public static File getDataMiscDeDirectory(int userId) {
         return buildPath(getDataDirectory(), "misc_de", String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getDataMiscDeSharedSdkSandboxDirectory(int userId, String packageName) {
+        return buildPath(getDataMiscDeDirectory(userId), "sdksandbox", packageName, "shared");
     }
 
     private static File getDataProfilesDeDirectory(int userId) {
