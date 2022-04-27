@@ -358,9 +358,7 @@ final class DexOptHelper {
         }
         final long callingId = Binder.clearCallingIdentity();
         try {
-            synchronized (mPm.mInstallLock) {
-                return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
-            }
+            return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -429,33 +427,50 @@ final class DexOptHelper {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
 
-        synchronized (mPm.mInstallLock) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
-            // Whoever is calling forceDexOpt wants a compiled package.
-            // Don't use profiles since that may cause compilation to be skipped.
-            final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
-                    new DexoptOptions(packageName,
-                            getDefaultCompilerFilter(),
-                            DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
+        // Whoever is calling forceDexOpt wants a compiled package.
+        // Don't use profiles since that may cause compilation to be skipped.
+        final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
+                new DexoptOptions(packageName, REASON_CMDLINE,
+                        getDefaultCompilerFilter(), null /* splitName */,
+                        DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
-                throw new IllegalStateException("Failed to dexopt: " + res);
-            }
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
+            throw new IllegalStateException("Failed to dexopt: " + res);
         }
     }
 
-    public boolean performDexOptMode(String packageName,
+    public boolean performDexOptMode(@NonNull Computer snapshot, String packageName,
             boolean checkProfiles, String targetCompilerFilter, boolean force,
             boolean bootComplete, String splitName) {
-        PackageManagerServiceUtils.enforceSystemOrRootOrShell("performDexOptMode");
+        if (!PackageManagerServiceUtils.isSystemOrRootOrShell()
+                && !isCallerInstallerForPackage(snapshot, packageName)) {
+            throw new SecurityException("performDexOptMode");
+        }
 
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0)
                 | (force ? DexoptOptions.DEXOPT_FORCE : 0)
                 | (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
         return performDexOpt(new DexoptOptions(packageName, REASON_CMDLINE,
                 targetCompilerFilter, splitName, flags));
+    }
+
+    private boolean isCallerInstallerForPackage(@NonNull Computer snapshot, String packageName) {
+        final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+        if (packageState == null) {
+            return false;
+        }
+        final InstallSource installSource = packageState.getInstallSource();
+
+        final PackageStateInternal installerPackageState =
+                snapshot.getPackageStateInternal(installSource.installerPackageName);
+        if (installerPackageState == null) {
+            return false;
+        }
+        final AndroidPackage installerPkg = installerPackageState.getPkg();
+        return installerPkg.getUid() == Binder.getCallingUid();
     }
 
     public boolean performDexOptSecondary(String packageName, String compilerFilter,

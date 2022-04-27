@@ -28,6 +28,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_W
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
+import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS;
@@ -408,6 +409,25 @@ class KeyguardController {
     }
 
     /**
+     * Called when keyguard going away state changed.
+     */
+    private void handleKeyguardGoingAwayChanged(DisplayContent dc) {
+        mService.deferWindowLayout();
+        try {
+            dc.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, 0 /* transitFlags */);
+            // We are deprecating TRANSIT_KEYGUARD_GOING_AWAY for Shell transition and use
+            // TRANSIT_FLAG_KEYGUARD_GOING_AWAY to indicate that it should animate keyguard going
+            // away.
+            dc.mAtmService.getTransitionController().requestTransitionIfNeeded(
+                    TRANSIT_OPEN, TRANSIT_FLAG_KEYGUARD_GOING_AWAY, null /* trigger */, dc);
+            updateKeyguardSleepToken();
+            mWindowManager.executeAppTransition();
+        } finally {
+            mService.continueWindowLayout();
+        }
+    }
+
+    /**
      * Called when somebody wants to dismiss the Keyguard via the flag.
      */
     private void handleDismissKeyguard(int displayId) {
@@ -533,11 +553,13 @@ class KeyguardController {
         }
 
         /**
-         * Updates {@link #mOccluded}, {@link #mTopTurnScreenOnActivity} and
-         * {@link #mDismissingKeyguardActivity} if the top task could be visible.
+         * Updates keyguard status if the top task could be visible. The top task may occlude
+         * keyguard, request to dismiss keyguard or make insecure keyguard go away based on its
+         * properties.
          */
         void updateVisibility(KeyguardController controller, DisplayContent display) {
             final boolean lastOccluded = mOccluded;
+            final boolean lastKeyguardGoingAway = mKeyguardGoingAway;
 
             final ActivityRecord lastDismissKeyguardActivity = mDismissingKeyguardActivity;
             final ActivityRecord lastTurnScreenOnActivity = mTopTurnScreenOnActivity;
@@ -561,14 +583,18 @@ class KeyguardController {
                     mTopTurnScreenOnActivity = top;
                 }
 
-                final boolean showWhenLocked = top.canShowWhenLocked();
-                if (showWhenLocked) {
+                final boolean isKeyguardSecure = controller.mWindowManager.isKeyguardSecure(
+                        controller.mService.getCurrentUserId());
+                if (top.mDismissKeyguardIfInsecure && mKeyguardShowing && !isKeyguardSecure) {
+                    mKeyguardGoingAway = true;
+                } else if (top.canShowWhenLocked()) {
                     mTopOccludesActivity = top;
                 }
 
                 // Only the top activity may control occluded, as we can't occlude the Keyguard
                 // if the top app doesn't want to occlude it.
-                occludedByActivity = showWhenLocked || (mDismissingKeyguardActivity != null
+                occludedByActivity = mTopOccludesActivity != null
+                        || (mDismissingKeyguardActivity != null
                         && task.topRunningActivity() == mDismissingKeyguardActivity
                         && controller.canShowWhileOccluded(
                                 true /* dismissKeyguard */, false /* showWhenLocked */));
@@ -583,10 +609,8 @@ class KeyguardController {
                     && top.getActivityType() == ACTIVITY_TYPE_DREAM);
             mOccluded = mShowingDream || occludedByActivity;
             mRequestDismissKeyguard = lastDismissKeyguardActivity != mDismissingKeyguardActivity
-                    && !mOccluded
-                    && mDismissingKeyguardActivity != null
-                    && controller.mWindowManager.isKeyguardSecure(
-                    controller.mService.getCurrentUserId());
+                    && !mOccluded && !mKeyguardGoingAway
+                    && mDismissingKeyguardActivity != null;
 
             if (mTopTurnScreenOnActivity != lastTurnScreenOnActivity
                     && mTopTurnScreenOnActivity != null
@@ -598,6 +622,8 @@ class KeyguardController {
 
             if (lastOccluded != mOccluded) {
                 controller.handleOccludedChanged(mDisplayId, mTopOccludesActivity);
+            } else if (!lastKeyguardGoingAway && mKeyguardGoingAway) {
+                controller.handleKeyguardGoingAwayChanged(display);
             }
         }
 

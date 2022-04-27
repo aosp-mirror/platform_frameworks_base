@@ -57,33 +57,33 @@ public class SystemUIDialogTest extends SysuiTestCase {
 
     @Test
     public void testRegisterReceiver() {
-        final SystemUIDialog mDialog = new SystemUIDialog(mContext);
+        final SystemUIDialog dialog = new SystemUIDialog(mContext);
         final ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         final ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
 
-        mDialog.show();
+        dialog.show();
         verify(mBroadcastDispatcher).registerReceiver(broadcastReceiverCaptor.capture(),
                 intentFilterCaptor.capture(), eq(null), any());
         assertTrue(intentFilterCaptor.getValue().hasAction(Intent.ACTION_SCREEN_OFF));
         assertTrue(intentFilterCaptor.getValue().hasAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
-        mDialog.dismiss();
+        dialog.dismiss();
         verify(mBroadcastDispatcher).unregisterReceiver(eq(broadcastReceiverCaptor.getValue()));
     }
 
 
     @Test
     public void testNoRegisterReceiver() {
-        final SystemUIDialog mDialog = new SystemUIDialog(mContext, false);
+        final SystemUIDialog dialog = new SystemUIDialog(mContext, false);
 
-        mDialog.show();
+        dialog.show();
         verify(mBroadcastDispatcher, never()).registerReceiver(any(), any(), eq(null), any());
-        assertTrue(mDialog.isShowing());
+        assertTrue(dialog.isShowing());
 
-        mDialog.dismiss();
+        dialog.dismiss();
         verify(mBroadcastDispatcher, never()).unregisterReceiver(any());
-        assertFalse(mDialog.isShowing());
+        assertFalse(dialog.isShowing());
     }
 }

@@ -509,7 +509,8 @@ interface IAudioService {
     void registerDeviceVolumeDispatcherForAbsoluteVolume(boolean register,
             in IAudioDeviceVolumeDispatcher cb,
             in String packageName,
-            in AudioDeviceAttributes device, in List<VolumeInfo> volumes);
+            in AudioDeviceAttributes device, in List<VolumeInfo> volumes,
+            boolean handlesvolumeAdjustment);
 
     String getHalVersion();
 }

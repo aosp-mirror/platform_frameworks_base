@@ -118,6 +118,16 @@ public final class SEService {
                 });
             }
         }
+
+        @Override
+        public String getInterfaceHash() {
+            return ISecureElementListener.HASH;
+        }
+
+        @Override
+        public int getInterfaceVersion() {
+            return ISecureElementListener.VERSION;
+        }
     }
     private SEListener mSEListener = new SEListener();
 

@@ -1058,9 +1058,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.NETWORK_SCORING_PROVISIONED,
                 GlobalSettingsProto.Network.SCORING_PROVISIONED);
         dumpSetting(s, p,
-                Settings.Global.NETWORK_ACCESS_TIMEOUT_MS,
-                GlobalSettingsProto.Network.ACCESS_TIMEOUT_MS);
-        dumpSetting(s, p,
                 Settings.Global.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS,
                 GlobalSettingsProto.Network.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS);
         p.end(networkToken);

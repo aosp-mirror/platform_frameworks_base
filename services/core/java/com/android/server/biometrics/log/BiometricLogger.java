@@ -53,14 +53,26 @@ public class BiometricLogger {
     private boolean mShouldLogMetrics = true;
 
     private class ALSProbe implements Probe {
+        private boolean mDestroyed = false;
+
         @Override
-        public void enable() {
-            setLightSensorLoggingEnabled(getAmbientLightSensor(mSensorManager));
+        public synchronized void enable() {
+            if (!mDestroyed) {
+                setLightSensorLoggingEnabled(getAmbientLightSensor(mSensorManager));
+            }
         }
 
         @Override
-        public void disable() {
-            setLightSensorLoggingEnabled(null);
+        public synchronized void disable() {
+            if (!mDestroyed) {
+                setLightSensorLoggingEnabled(null);
+            }
+        }
+
+        @Override
+        public synchronized void destroy() {
+            disable();
+            mDestroyed = true;
         }
     }
 

@@ -54,8 +54,18 @@ public class LocaleManager {
      *
      * <p>Pass a {@link LocaleList#getEmptyLocaleList()} to reset to the system locale.
      *
-     * <p><b>Note:</b> The set locales are persisted; they are backed up if the user has enabled
-     * Backup & Restore.
+     * <p><b>Note:</b> Changes to app locales will result in a configuration change (and potentially
+     * an Activity lifecycle event) being applied to the calling application. For more information,
+     * see the <a
+     * href="https://developer.android.com/guide/topics/resources/runtime-changes">section on
+     * handling configuration changes</a>. The set locales are persisted; they are backed up if the
+     * user has enabled Backup & Restore.
+     *
+     * <p><b>Note:</b> Users' locale preferences are passed to applications by creating a union of
+     * any app-specific locales and system locales, with the app-specific locales appearing first.
+     * Language resources are then chosen per usual (as described in the <a
+     * href="https://developer.android.com/guide/topics/resources/multilingual-support">section on
+     * locale resolution</a>).
      *
      * @param locales the desired locales for the calling app.
      */
@@ -69,8 +79,18 @@ public class LocaleManager {
      *
      * <p>Pass a {@link LocaleList#getEmptyLocaleList()} to reset to the system locale.
      *
-     * <p><b>Note:</b> The set locales are persisted; they are backed up if the user has enabled
-     * Backup & Restore.
+     * <p><b>Note:</b> Changes to app locales will result in a configuration change (and potentially
+     * an Activity lifecycle event) being applied to the specified application. For more
+     * information, see the <a
+     * href="https://developer.android.com/guide/topics/resources/runtime-changes">section on
+     * handling configuration changes</a>. The set locales are persisted; they are backed up if the
+     * user has enabled Backup & Restore.
+     *
+     * <p><b>Note:</b> Users' locale preferences are passed to applications by creating a union of
+     * any app-specific locales and system locales, with the app-specific locales appearing first.
+     * Language resources are then chosen per usual (as described in the <a
+     * href="https://developer.android.com/guide/topics/resources/multilingual-support">section on
+     * locale resolution</a>).
      *
      * @param appPackageName the package name of the app for which to set the locales.
      * @param locales the desired locales for the specified app.

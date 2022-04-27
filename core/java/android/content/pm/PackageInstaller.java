@@ -419,8 +419,8 @@ public class PackageInstaller {
     public @interface FileLocation{}
 
     /**
-     * The installer did not call SessionParams#setPackageSource(int) to specify the package
-     * source.
+     * The installer did not call {@link PackageInstaller.SessionParams#setPackageSource(int)} to
+     * specify the package source.
      */
     public static final int PACKAGE_SOURCE_UNSPECIFIED = 0;
 
@@ -444,8 +444,8 @@ public class PackageInstaller {
 
     /**
      * Code indicating that the package being installed comes from a file that was downloaded to
-     * the device by the user. For use in place of PACKAGE_SOURCE_LOCAL_FILE when the installer
-     * knows the package was downloaded.
+     * the device by the user. For use in place of {@link #PACKAGE_SOURCE_LOCAL_FILE} when the
+     * installer knows the package was downloaded.
      */
     public static final int PACKAGE_SOURCE_DOWNLOADED_FILE = 4;
 
@@ -1984,7 +1984,13 @@ public class PackageInstaller {
         }
 
         /**
-         * Sets the apk package installation source.
+         * Optionally indicate the package source of the app being installed. This is
+         * informational and may be used as a signal by the system.
+         *
+         * An installer should specify {@link #PACKAGE_SOURCE_OTHER} if no other package source
+         * constant adequately reflects the source for this session.
+         *
+         * The default value is {@link #PACKAGE_SOURCE_UNSPECIFIED}.
          */
         public void setPackageSource(@PackageSourceType int packageSource) {
             this.packageSource = packageSource;
@@ -2302,8 +2308,14 @@ public class PackageInstaller {
          *
          * <ul>
          *     <li>{@code requireUserAction} is set to {@link #USER_ACTION_NOT_REQUIRED}.</li>
-         *     <li>The app being installed targets {@link android.os.Build.VERSION_CODES#Q API 29}
-         *     or higher.</li>
+         *     <li>The app being installed targets:
+         *          <ul>
+         *              <li>{@link android.os.Build.VERSION_CODES#Q API 29} or higher on
+         *              Android S ({@link android.os.Build.VERSION_CODES#S API 31})</li>
+         *              <li>{@link android.os.Build.VERSION_CODES#R API 30} or higher after
+         *              Android S ({@link android.os.Build.VERSION_CODES#S API 31})</li>
+         *          </ul>
+         *     </li>
          *     <li>The installer is the {@link InstallSourceInfo#getInstallingPackageName()
          *     installer of record} of an existing version of the app (in other words, this install
          *     session is an app update) or the installer is updating itself.</li>
@@ -2991,7 +3003,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Gets the apk package installation source.
+         * Get the package source that was set in
+         * {@link PackageInstaller.SessionParams#setPackageSource(int)}.
          */
         public @PackageSourceType int getPackageSource() {
             return packageSource;

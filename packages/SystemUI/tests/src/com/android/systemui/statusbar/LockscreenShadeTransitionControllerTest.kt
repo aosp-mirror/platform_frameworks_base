@@ -44,6 +44,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.junit.MockitoJUnit
 
 private fun <T> anyObject(): T {
@@ -75,6 +76,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var expandHelperCallback: ExpandHelper.Callback
     @Mock lateinit var mCentralSurfaces: CentralSurfaces
     @Mock lateinit var qS: QS
+    @Mock lateinit var singleShadeOverScroller: SingleShadeLockScreenOverScroller
+    @Mock lateinit var splitShadeOverScroller: SplitShadeLockScreenOverScroller
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
     private val configurationController = FakeConfigurationController()
@@ -90,22 +93,34 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 .addOverride(R.bool.config_use_split_notification_shade, false)
         context.getOrCreateTestableResources()
             .addOverride(R.dimen.lockscreen_shade_depth_controller_transition_distance, 100)
-        transitionController = LockscreenShadeTransitionController(
-            statusBarStateController = statusbarStateController,
-            logger = logger,
-            keyguardBypassController = keyguardBypassController,
-            lockScreenUserManager = lockScreenUserManager,
-            falsingCollector = falsingCollector,
-            ambientState = ambientState,
-            mediaHierarchyManager = mediaHierarchyManager,
-            scrimController = scrimController,
-            depthController = depthController,
-            wakefulnessLifecycle = wakefulnessLifecycle,
-            context = context,
-            configurationController = configurationController,
-            falsingManager = falsingManager,
-            dumpManager = dumpManager
-        )
+        transitionController =
+            LockscreenShadeTransitionController(
+                statusBarStateController = statusbarStateController,
+                logger = logger,
+                keyguardBypassController = keyguardBypassController,
+                lockScreenUserManager = lockScreenUserManager,
+                falsingCollector = falsingCollector,
+                ambientState = ambientState,
+                mediaHierarchyManager = mediaHierarchyManager,
+                depthController = depthController,
+                wakefulnessLifecycle = wakefulnessLifecycle,
+                context = context,
+                configurationController = configurationController,
+                falsingManager = falsingManager,
+                dumpManager = dumpManager,
+                splitShadeOverScrollerFactory = { _, _ -> splitShadeOverScroller },
+                singleShadeOverScrollerFactory = { singleShadeOverScroller },
+                scrimTransitionController =
+                LockscreenShadeScrimTransitionController(
+                    scrimController, context, configurationController, dumpManager),
+                keyguardTransitionControllerFactory = { notificationPanelController ->
+                    LockscreenShadeKeyguardTransitionController(
+                        mediaHierarchyManager,
+                        notificationPanelController,
+                        context,
+                        configurationController,
+                        dumpManager)
+                })
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
         transitionController.notificationPanelController = notificationPanelController
@@ -229,7 +244,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testDragDownAmountDoesntCallOutInLockedDownShade() {
         whenever(nsslController.isInLockedDownShade).thenReturn(true)
         transitionController.dragDownAmount = 10f
-        verify(nsslController, never()).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(nsslController, never()).setTransitionToFullShadeAmount(anyFloat())
         verify(mediaHierarchyManager, never()).setTransitionToFullShadeAmount(anyFloat())
         verify(scrimController, never()).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(notificationPanelController, never()).setTransitionToFullShadeAmount(anyFloat(),
@@ -240,7 +255,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Test
     fun testDragDownAmountCallsOut() {
         transitionController.dragDownAmount = 10f
-        verify(nsslController).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(nsslController).setTransitionToFullShadeAmount(anyFloat())
         verify(mediaHierarchyManager).setTransitionToFullShadeAmount(anyFloat())
         verify(scrimController).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
         verify(notificationPanelController).setTransitionToFullShadeAmount(anyFloat(),
@@ -250,14 +265,25 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testDragDownAmount_depthDistanceIsZero_doesNotSetProgress() {
+    fun testDragDownAmount_depthDistanceIsZero_setsProgressToZero() {
         context.getOrCreateTestableResources()
             .addOverride(R.dimen.lockscreen_shade_depth_controller_transition_distance, 0)
         configurationController.notifyConfigurationChanged()
 
         transitionController.dragDownAmount = 10f
 
-        verify(depthController, never()).transitionToFullShadeProgress
+        verify(depthController).transitionToFullShadeProgress = 0f
+    }
+
+    @Test
+    fun testDragDownAmount_depthDistanceNonZero_setsProgressBasedOnDistance() {
+        context.getOrCreateTestableResources()
+            .addOverride(R.dimen.lockscreen_shade_depth_controller_transition_distance, 100)
+        configurationController.notifyConfigurationChanged()
+
+        transitionController.dragDownAmount = 10f
+
+        verify(depthController).transitionToFullShadeProgress = 0.1f
     }
 
     @Test
@@ -282,8 +308,9 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun setDragAmount_notInSplitShade_setsKeyguardTranslationToZero() {
         val mediaTranslationY = 123
         disableSplitShade()
+        whenever(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).thenReturn(true)
         whenever(mediaHierarchyManager.getGuidedTransformationTranslationY())
-                .thenReturn(mediaTranslationY)
+            .thenReturn(mediaTranslationY)
 
         transitionController.dragDownAmount = 10f
 
@@ -294,13 +321,33 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun setDragAmount_inSplitShade_setsKeyguardTranslationBasedOnMediaTranslation() {
         val mediaTranslationY = 123
         enableSplitShade()
+        whenever(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).thenReturn(true)
         whenever(mediaHierarchyManager.getGuidedTransformationTranslationY())
-                .thenReturn(mediaTranslationY)
+            .thenReturn(mediaTranslationY)
 
         transitionController.dragDownAmount = 10f
 
         verify(notificationPanelController)
-                .setKeyguardTransitionProgress(anyFloat(), eq(mediaTranslationY))
+            .setKeyguardTransitionProgress(anyFloat(), eq(mediaTranslationY))
+    }
+
+    @Test
+    fun setDragAmount_inSplitShade_mediaNotShowing_setsKeyguardTranslationBasedOnDistance() {
+        enableSplitShade()
+        whenever(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).thenReturn(false)
+        whenever(mediaHierarchyManager.getGuidedTransformationTranslationY()).thenReturn(123)
+
+        transitionController.dragDownAmount = 10f
+
+        val distance =
+            context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_keyguard_transition_distance)
+        val offset =
+            context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_keyguard_transition_vertical_offset)
+        val expectedTranslation = 10f / distance * offset
+        verify(notificationPanelController)
+            .setKeyguardTransitionProgress(anyFloat(), eq(expectedTranslation.toInt()))
     }
 
     @Test
@@ -386,6 +433,48 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.dragDownAmount = 10f
 
         verify(mediaHierarchyManager).setTransitionToFullShadeAmount(10f)
+    }
+
+    @Test
+    fun setDragAmount_notInSplitShade_forwardsToSingleShadeOverScroller() {
+        disableSplitShade()
+
+        transitionController.dragDownAmount = 10f
+
+        verify(singleShadeOverScroller).expansionDragDownAmount = 10f
+        verifyZeroInteractions(splitShadeOverScroller)
+    }
+
+    @Test
+    fun setDragAmount_inSplitShade_forwardsToSplitShadeOverScroller() {
+        enableSplitShade()
+
+        transitionController.dragDownAmount = 10f
+
+        verify(splitShadeOverScroller).expansionDragDownAmount = 10f
+        verifyZeroInteractions(singleShadeOverScroller)
+    }
+
+    @Test
+    fun setDragDownAmount_inSplitShade_setsKeyguardStatusBarAlphaBasedOnDistance() {
+        val alphaDistance = context.resources.getDimensionPixelSize(
+            R.dimen.lockscreen_shade_npvc_keyguard_content_alpha_transition_distance)
+        val dragDownAmount = 10f
+        enableSplitShade()
+
+        transitionController.dragDownAmount = dragDownAmount
+
+        val expectedAlpha = 1 - dragDownAmount / alphaDistance
+        verify(notificationPanelController).setKeyguardStatusBarAlpha(expectedAlpha)
+    }
+
+    @Test
+    fun setDragDownAmount_notInSplitShade_setsKeyguardStatusBarAlphaToMinusOne() {
+        disableSplitShade()
+
+        transitionController.dragDownAmount = 10f
+
+        verify(notificationPanelController).setKeyguardStatusBarAlpha(-1f)
     }
 
     private fun enableSplitShade() {

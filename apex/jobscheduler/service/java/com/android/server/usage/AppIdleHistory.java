@@ -623,7 +623,8 @@ public class AppIdleHistory {
      * @param elapsedRealtime current time
      * @param screenTimeThresholds Array of screen times, in ascending order, first one is 0
      * @param elapsedTimeThresholds Array of elapsed time, in ascending order, first one is 0
-     * @return The index whose values the app's used time exceeds (in both arrays)
+     * @return The index whose values the app's used time exceeds (in both arrays) or {@code -1} to
+     *         indicate that the app has never been used.
      */
     int getThresholdIndex(String packageName, int userId, long elapsedRealtime,
             long[] screenTimeThresholds, long[] elapsedTimeThresholds) {
@@ -631,14 +632,13 @@ public class AppIdleHistory {
         AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
                 elapsedRealtime, false);
         // If we don't have any state for the app, assume never used
-        if (appUsageHistory == null) return screenTimeThresholds.length - 1;
+        if (appUsageHistory == null || appUsageHistory.lastUsedElapsedTime < 0
+                || appUsageHistory.lastUsedScreenTime < 0) {
+            return -1;
+        }
 
-        long screenOnDelta = appUsageHistory.lastUsedScreenTime >= 0
-                ? getScreenOnTime(elapsedRealtime) - appUsageHistory.lastUsedScreenTime
-                : Long.MAX_VALUE;
-        long elapsedDelta = appUsageHistory.lastUsedElapsedTime >= 0
-                ? getElapsedTime(elapsedRealtime) - appUsageHistory.lastUsedElapsedTime
-                : Long.MAX_VALUE;
+        long screenOnDelta = getScreenOnTime(elapsedRealtime) - appUsageHistory.lastUsedScreenTime;
+        long elapsedDelta = getElapsedTime(elapsedRealtime) - appUsageHistory.lastUsedElapsedTime;
 
         if (DEBUG) Slog.d(TAG, packageName
                 + " lastUsedScreen=" + appUsageHistory.lastUsedScreenTime
@@ -684,6 +684,17 @@ public class AppIdleHistory {
     File getUserFile(int userId) {
         return new File(new File(new File(mStorageDir, "users"),
                 Integer.toString(userId)), APP_IDLE_FILENAME);
+    }
+
+    void clearLastUsedTimestamps(String packageName, int userId) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
+                SystemClock.elapsedRealtime(), false /* create */);
+        if (appUsageHistory != null) {
+            appUsageHistory.lastUsedByUserElapsedTime = Integer.MIN_VALUE;
+            appUsageHistory.lastUsedElapsedTime = Integer.MIN_VALUE;
+            appUsageHistory.lastUsedScreenTime = Integer.MIN_VALUE;
+        }
     }
 
     /**

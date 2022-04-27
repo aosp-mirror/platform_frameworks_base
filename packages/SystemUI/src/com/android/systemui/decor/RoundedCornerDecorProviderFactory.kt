@@ -25,14 +25,13 @@ class RoundedCornerDecorProviderFactory(
 
     override val hasProviders: Boolean
         get() = roundedCornerResDelegate.run {
-            // We don't consider isMultipleRadius here because it makes no sense if size is zero.
-            topRoundedSize.width > 0 || bottomRoundedSize.width > 0
+            hasTop || hasBottom
         }
 
     override val providers: List<DecorProvider>
     get() {
-        val hasTop = roundedCornerResDelegate.topRoundedSize.width > 0
-        val hasBottom = roundedCornerResDelegate.bottomRoundedSize.width > 0
+        val hasTop = roundedCornerResDelegate.hasTop
+        val hasBottom = roundedCornerResDelegate.hasBottom
         return when {
             hasTop && hasBottom -> listOf(
                 RoundedCornerDecorProviderImpl(

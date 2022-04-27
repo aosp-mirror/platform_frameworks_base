@@ -16,10 +16,14 @@
 
 package com.android.systemui.dreams;
 
+import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
+import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,18 +35,18 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.provider.Settings;
-import android.service.notification.NotificationListenerService;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.time.DateFormatUtil;
 
@@ -84,13 +88,11 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     IndividualSensorPrivacyController mSensorPrivacyController;
     @Mock
-    StatusBarNotification mStatusBarNotification;
-    @Mock
-    NotificationListenerService.RankingMap mRankingMap;
-    @Mock
-    NotificationListener mNotificationListener;
-    @Mock
     ZenModeController mZenModeController;
+    @Mock
+    DreamOverlayNotificationCountProvider mDreamOverlayNotificationCountProvider;
+    @Mock
+    StatusBarWindowStateController mStatusBarWindowStateController;
 
     private final Executor mMainExecutor = Runnable::run;
 
@@ -113,8 +115,9 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mNextAlarmController,
                 mDateFormatUtil,
                 mSensorPrivacyController,
-                mNotificationListener,
-                mZenModeController);
+                mDreamOverlayNotificationCountProvider,
+                mZenModeController,
+                mStatusBarWindowStateController);
     }
 
     @Test
@@ -123,6 +126,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         verify(mNextAlarmController).addCallback(any());
         verify(mSensorPrivacyController).addCallback(any());
         verify(mZenModeController).addCallback(any());
+        verify(mDreamOverlayNotificationCountProvider).addCallback(any());
     }
 
     @Test
@@ -202,17 +206,26 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testOnViewAttachedShowsNotificationsIconWhenNotificationsExist() {
-        StatusBarNotification[] notifications = { mStatusBarNotification };
-        when(mNotificationListener.getActiveNotifications()).thenReturn(notifications);
         mController.onViewAttached();
+
+        final ArgumentCaptor<DreamOverlayNotificationCountProvider.Callback> callbackCapture =
+                ArgumentCaptor.forClass(DreamOverlayNotificationCountProvider.Callback.class);
+        verify(mDreamOverlayNotificationCountProvider).addCallback(callbackCapture.capture());
+        callbackCapture.getValue().onNotificationCountChanged(1);
+
         verify(mView).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(true), any());
     }
 
     @Test
     public void testOnViewAttachedHidesNotificationsIconWhenNoNotificationsExist() {
-        when(mNotificationListener.getActiveNotifications()).thenReturn(null);
         mController.onViewAttached();
+
+        final ArgumentCaptor<DreamOverlayNotificationCountProvider.Callback> callbackCapture =
+                ArgumentCaptor.forClass(DreamOverlayNotificationCountProvider.Callback.class);
+        verify(mDreamOverlayNotificationCountProvider).addCallback(callbackCapture.capture());
+        callbackCapture.getValue().onNotificationCountChanged(0);
+
         verify(mView).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(false), isNull());
     }
@@ -248,6 +261,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         verify(mNextAlarmController).removeCallback(any());
         verify(mSensorPrivacyController).removeCallback(any());
         verify(mZenModeController).removeCallback(any());
+        verify(mDreamOverlayNotificationCountProvider).removeCallback(any());
     }
 
     @Test
@@ -309,13 +323,10 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     public void testNotificationsIconShownWhenNotificationAdded() {
         mController.onViewAttached();
 
-        StatusBarNotification[] notifications = { mStatusBarNotification };
-        when(mNotificationListener.getActiveNotifications()).thenReturn(notifications);
-
-        final ArgumentCaptor<NotificationListener.NotificationHandler> callbackCapture =
-                ArgumentCaptor.forClass(NotificationListener.NotificationHandler.class);
-        verify(mNotificationListener).addNotificationHandler(callbackCapture.capture());
-        callbackCapture.getValue().onNotificationPosted(mStatusBarNotification, mRankingMap);
+        final ArgumentCaptor<DreamOverlayNotificationCountProvider.Callback> callbackCapture =
+                ArgumentCaptor.forClass(DreamOverlayNotificationCountProvider.Callback.class);
+        verify(mDreamOverlayNotificationCountProvider).addCallback(callbackCapture.capture());
+        callbackCapture.getValue().onNotificationCountChanged(1);
 
         verify(mView).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(true), any());
@@ -323,15 +334,12 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationsIconHiddenWhenLastNotificationRemoved() {
-        StatusBarNotification[] notifications = { mStatusBarNotification };
-        when(mNotificationListener.getActiveNotifications()).thenReturn(notifications)
-                .thenReturn(null);
         mController.onViewAttached();
 
-        final ArgumentCaptor<NotificationListener.NotificationHandler> callbackCapture =
-                ArgumentCaptor.forClass(NotificationListener.NotificationHandler.class);
-        verify(mNotificationListener).addNotificationHandler(callbackCapture.capture());
-        callbackCapture.getValue().onNotificationPosted(mStatusBarNotification, mRankingMap);
+        final ArgumentCaptor<DreamOverlayNotificationCountProvider.Callback> callbackCapture =
+                ArgumentCaptor.forClass(DreamOverlayNotificationCountProvider.Callback.class);
+        verify(mDreamOverlayNotificationCountProvider).addCallback(callbackCapture.capture());
+        callbackCapture.getValue().onNotificationCountChanged(0);
 
         verify(mView).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(false), any());
@@ -402,5 +410,42 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
 
         verify(mView).showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON, false, null);
+    }
+
+    @Test
+    public void testStatusBarHiddenWhenSystemStatusBarShown() {
+        mController.onViewAttached();
+
+        final ArgumentCaptor<StatusBarWindowStateListener>
+                callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
+        verify(mStatusBarWindowStateController).addListener(callbackCapture.capture());
+        callbackCapture.getValue().onStatusBarWindowStateChanged(WINDOW_STATE_SHOWING);
+
+        verify(mView).setVisibility(View.INVISIBLE);
+    }
+
+    @Test
+    public void testStatusBarShownWhenSystemStatusBarHidden() {
+        mController.onViewAttached();
+
+        final ArgumentCaptor<StatusBarWindowStateListener>
+                callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
+        verify(mStatusBarWindowStateController).addListener(callbackCapture.capture());
+        callbackCapture.getValue().onStatusBarWindowStateChanged(WINDOW_STATE_HIDDEN);
+
+        verify(mView).setVisibility(View.VISIBLE);
+    }
+
+    @Test
+    public void testUnattachedStatusBarVisibilityUnchangedWhenSystemStatusBarHidden() {
+        mController.onViewAttached();
+        mController.onViewDetached();
+
+        final ArgumentCaptor<StatusBarWindowStateListener>
+                callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
+        verify(mStatusBarWindowStateController).addListener(callbackCapture.capture());
+        callbackCapture.getValue().onStatusBarWindowStateChanged(WINDOW_STATE_SHOWING);
+
+        verify(mView, never()).setVisibility(anyInt());
     }
 }

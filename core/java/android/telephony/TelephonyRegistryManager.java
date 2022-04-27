@@ -38,7 +38,6 @@ import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.SrvccState;
 import android.telephony.TelephonyManager.CarrierPrivilegesCallback;
-import android.telephony.TelephonyManager.CarrierPrivilegesListener;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 import android.util.ArraySet;
@@ -1264,147 +1263,50 @@ public class TelephonyRegistryManager {
                 pkgName, attributionTag, callback, new int[0], notifyNow);
     }
 
-    // TODO(b/216549778): Remove listener logic once all clients switch to CarrierPrivilegesCallback
     private static class CarrierPrivilegesCallbackWrapper extends ICarrierPrivilegesCallback.Stub
             implements ListenerExecutor {
-        // Either mListener or mCallback may be null, never both
-        @Nullable private final WeakReference<CarrierPrivilegesListener> mListener;
-        @Nullable private final WeakReference<CarrierPrivilegesCallback> mCallback;
+        @NonNull private final WeakReference<CarrierPrivilegesCallback> mCallback;
         @NonNull private final Executor mExecutor;
 
         CarrierPrivilegesCallbackWrapper(
                 @NonNull CarrierPrivilegesCallback callback, @NonNull Executor executor) {
-            mListener = null;
             mCallback = new WeakReference<>(callback);
-            mExecutor = executor;
-        }
-
-        CarrierPrivilegesCallbackWrapper(
-                @NonNull CarrierPrivilegesListener listener, @NonNull Executor executor) {
-            mListener = new WeakReference<>(listener);
-            mCallback = null;
             mExecutor = executor;
         }
 
         @Override
         public void onCarrierPrivilegesChanged(
                 @NonNull List<String> privilegedPackageNames, @NonNull int[] privilegedUids) {
-            if (mListener != null) {
-                Binder.withCleanCallingIdentity(
-                        () ->
-                                executeSafely(
-                                        mExecutor,
-                                        mListener::get,
-                                        cpl ->
-                                                cpl.onCarrierPrivilegesChanged(
-                                                        privilegedPackageNames, privilegedUids)));
-            }
-
-            if (mCallback != null) {
-                // AIDL interface does not support Set, keep the List/Array and translate them here
-                Set<String> privilegedPkgNamesSet = Set.copyOf(privilegedPackageNames);
-                Set<Integer> privilegedUidsSet = Arrays.stream(privilegedUids).boxed().collect(
-                        Collectors.toSet());
-                Binder.withCleanCallingIdentity(
-                        () ->
-                                executeSafely(
-                                        mExecutor,
-                                        mCallback::get,
-                                        cpc ->
-                                                cpc.onCarrierPrivilegesChanged(
-                                                        privilegedPkgNamesSet, privilegedUidsSet)));
-            }
+            // AIDL interface does not support Set, keep the List/Array and translate them here
+            Set<String> privilegedPkgNamesSet = Set.copyOf(privilegedPackageNames);
+            Set<Integer> privilegedUidsSet = Arrays.stream(privilegedUids).boxed().collect(
+                    Collectors.toSet());
+            Binder.withCleanCallingIdentity(
+                    () ->
+                            executeSafely(
+                                    mExecutor,
+                                    mCallback::get,
+                                    cpc ->
+                                            cpc.onCarrierPrivilegesChanged(
+                                                    privilegedPkgNamesSet, privilegedUidsSet)));
         }
 
         @Override
         public void onCarrierServiceChanged(@Nullable String packageName, int uid) {
-            if (mCallback != null) {
-                Binder.withCleanCallingIdentity(
-                        () ->
-                                executeSafely(
-                                        mExecutor,
-                                        mCallback::get,
-                                        cpc -> cpc.onCarrierServiceChanged(packageName, uid)));
-            }
+            Binder.withCleanCallingIdentity(
+                    () ->
+                            executeSafely(
+                                    mExecutor,
+                                    mCallback::get,
+                                    cpc -> cpc.onCarrierServiceChanged(packageName, uid)));
         }
     }
 
-    // TODO(b/216549778): Change the map key to CarrierPrivilegesCallback once all clients switch to
-    // CarrierPrivilegesCallback. Before that, the key is either CarrierPrivilegesCallback or
-    // CarrierPrivilegesListener, no logic actually depends on the type.
     @NonNull
     @GuardedBy("sCarrierPrivilegeCallbacks")
-    private static final WeakHashMap<Object,  WeakReference<CarrierPrivilegesCallbackWrapper>>
+    private static final WeakHashMap<CarrierPrivilegesCallback,
+            WeakReference<CarrierPrivilegesCallbackWrapper>>
             sCarrierPrivilegeCallbacks = new WeakHashMap<>();
-
-    /**
-     * Registers a {@link CarrierPrivilegesListener} on the given {@code logicalSlotIndex} to
-     * receive callbacks when the set of packages with carrier privileges changes. The callback will
-     * immediately be called with the latest state.
-     *
-     * @param logicalSlotIndex The SIM slot to listen on
-     * @param executor The executor where {@code listener} will be invoked
-     * @param listener The callback to register
-     *
-     * @deprecated Use {@link #addCarrierPrivilegesCallback} instead. This API will be removed
-     * prior to API finalization.
-     */
-    @Deprecated
-    public void addCarrierPrivilegesListener(
-            int logicalSlotIndex,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull CarrierPrivilegesListener listener) {
-        if (listener == null || executor == null) {
-            throw new IllegalArgumentException("listener and executor must be non-null");
-        }
-        synchronized (sCarrierPrivilegeCallbacks) {
-            WeakReference<CarrierPrivilegesCallbackWrapper> existing =
-                    sCarrierPrivilegeCallbacks.get(listener);
-            if (existing != null && existing.get() != null) {
-                Log.d(TAG, "addCarrierPrivilegesListener: listener already registered");
-                return;
-            }
-            CarrierPrivilegesCallbackWrapper wrapper =
-                    new CarrierPrivilegesCallbackWrapper(listener, executor);
-            sCarrierPrivilegeCallbacks.put(listener, new WeakReference<>(wrapper));
-            try {
-                sRegistry.addCarrierPrivilegesCallback(
-                        logicalSlotIndex,
-                        wrapper,
-                        mContext.getOpPackageName(),
-                        mContext.getAttributionTag());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Unregisters a {@link CarrierPrivilegesListener}.
-     *
-     * @param listener The callback to unregister
-     *
-     * @deprecated Use {@link #removeCarrierPrivilegesCallback} instead. The callback will prior
-     * to API finalization.
-     */
-    @Deprecated
-    public void removeCarrierPrivilegesListener(@NonNull CarrierPrivilegesListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must be non-null");
-        }
-        synchronized (sCarrierPrivilegeCallbacks) {
-            WeakReference<CarrierPrivilegesCallbackWrapper> ref =
-                    sCarrierPrivilegeCallbacks.remove(listener);
-            if (ref == null) return;
-            CarrierPrivilegesCallbackWrapper wrapper = ref.get();
-            if (wrapper == null) return;
-            try {
-                sRegistry.removeCarrierPrivilegesCallback(wrapper, mContext.getOpPackageName());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
 
     /**
      * Registers a {@link CarrierPrivilegesCallback} on the given {@code logicalSlotIndex} to

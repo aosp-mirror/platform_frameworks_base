@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -27,6 +28,8 @@ import android.os.ServiceManager;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -40,6 +43,22 @@ public class AudioDeviceVolumeManager {
 
     // define when using Log.*
     //private static final String TAG = "AudioDeviceVolumeManager";
+
+    /** Indicates no special treatment in the handling of the volume adjustment */
+    public static final int ADJUST_MODE_NORMAL = 0;
+    /** Indicates the start of a volume adjustment */
+    public static final int ADJUST_MODE_START = 1;
+    /** Indicates the end of a volume adjustment */
+    public static final int ADJUST_MODE_END = 2;
+
+    @IntDef(flag = false, prefix = "ADJUST_MODE", value = {
+            ADJUST_MODE_NORMAL,
+            ADJUST_MODE_START,
+            ADJUST_MODE_END}
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VolumeAdjustmentMode {}
+
     private static IAudioService sService;
 
     private final String mPackageName;
@@ -65,18 +84,33 @@ public class AudioDeviceVolumeManager {
         void onAudioDeviceVolumeChanged(
                 @NonNull AudioDeviceAttributes device,
                 @NonNull VolumeInfo vol);
+
+        /**
+         * Called when the volume for the given audio device has been adjusted.
+         * @param device the audio device whose volume has been adjusted
+         * @param vol the volume info for the device
+         * @param direction the direction of the adjustment
+         * @param mode the volume adjustment mode
+         */
+        void onAudioDeviceVolumeAdjusted(
+                @NonNull AudioDeviceAttributes device,
+                @NonNull VolumeInfo vol,
+                @AudioManager.VolumeAdjustment int direction,
+                @VolumeAdjustmentMode int mode);
     }
 
     static class ListenerInfo {
         final @NonNull OnAudioDeviceVolumeChangedListener mListener;
         final @NonNull Executor mExecutor;
         final @NonNull AudioDeviceAttributes mDevice;
+        final @NonNull boolean mHandlesVolumeAdjustment;
 
         ListenerInfo(@NonNull OnAudioDeviceVolumeChangedListener listener, @NonNull Executor exe,
-                @NonNull AudioDeviceAttributes device) {
+                @NonNull AudioDeviceAttributes device, boolean handlesVolumeAdjustment) {
             mListener = listener;
             mExecutor = exe;
             mDevice = device;
+            mHandlesVolumeAdjustment = handlesVolumeAdjustment;
         }
     }
 
@@ -98,11 +132,12 @@ public class AudioDeviceVolumeManager {
          * @param device device for which volume is monitored
          */
         public void register(boolean register, @NonNull AudioDeviceAttributes device,
-                @NonNull List<VolumeInfo> volumes) {
+                @NonNull List<VolumeInfo> volumes, boolean handlesVolumeAdjustment) {
             try {
                 getService().registerDeviceVolumeDispatcherForAbsoluteVolume(register,
                         this, mPackageName,
-                        Objects.requireNonNull(device), Objects.requireNonNull(volumes));
+                        Objects.requireNonNull(device), Objects.requireNonNull(volumes),
+                        handlesVolumeAdjustment);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
@@ -116,9 +151,26 @@ public class AudioDeviceVolumeManager {
                 volumeListeners = (ArrayList<ListenerInfo>) mDeviceVolumeListeners.clone();
             }
             for (ListenerInfo listenerInfo : volumeListeners) {
-                if (listenerInfo.mDevice.equals(device)) {
+                if (listenerInfo.mDevice.equalTypeAddress(device)) {
                     listenerInfo.mExecutor.execute(
                             () -> listenerInfo.mListener.onAudioDeviceVolumeChanged(device, vol));
+                }
+            }
+        }
+
+        @Override
+        public void dispatchDeviceVolumeAdjusted(
+                @NonNull AudioDeviceAttributes device, @NonNull VolumeInfo vol, int direction,
+                int mode) {
+            final ArrayList<ListenerInfo> volumeListeners;
+            synchronized (mDeviceVolumeListenerLock) {
+                volumeListeners = (ArrayList<ListenerInfo>) mDeviceVolumeListeners.clone();
+            }
+            for (ListenerInfo listenerInfo : volumeListeners) {
+                if (listenerInfo.mDevice.equalTypeAddress(device)) {
+                    listenerInfo.mExecutor.execute(
+                            () -> listenerInfo.mListener.onAudioDeviceVolumeAdjusted(device, vol,
+                                    direction, mode));
                 }
             }
         }
@@ -139,10 +191,12 @@ public class AudioDeviceVolumeManager {
             @NonNull AudioDeviceAttributes device,
             @NonNull VolumeInfo volume,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OnAudioDeviceVolumeChangedListener vclistener) {
+            @NonNull OnAudioDeviceVolumeChangedListener vclistener,
+            boolean handlesVolumeAdjustment) {
         final ArrayList<VolumeInfo> volumes = new ArrayList<>(1);
         volumes.add(volume);
-        setDeviceAbsoluteMultiVolumeBehavior(device, volumes, executor, vclistener);
+        setDeviceAbsoluteMultiVolumeBehavior(device, volumes, executor, vclistener,
+                handlesVolumeAdjustment);
     }
 
     /**
@@ -153,6 +207,9 @@ public class AudioDeviceVolumeManager {
      * @param volumes the list of volumes the given device responds to
      * @param executor the Executor used for receiving volume updates through the listener
      * @param vclistener the callback for volume updates
+     * @param handlesVolumeAdjustment whether the controller handles volume adjustments separately
+     *  from volume changes. If true, adjustments from {@link AudioManager#adjustStreamVolume}
+     *  will be sent via {@link OnAudioDeviceVolumeChangedListener#onAudioDeviceVolumeAdjusted}.
      */
     @RequiresPermission(anyOf = { android.Manifest.permission.MODIFY_AUDIO_ROUTING,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED })
@@ -160,14 +217,15 @@ public class AudioDeviceVolumeManager {
             @NonNull AudioDeviceAttributes device,
             @NonNull List<VolumeInfo> volumes,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OnAudioDeviceVolumeChangedListener vclistener) {
+            @NonNull OnAudioDeviceVolumeChangedListener vclistener,
+            boolean handlesVolumeAdjustment) {
         Objects.requireNonNull(device);
         Objects.requireNonNull(volumes);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(vclistener);
 
-        // TODO verify not already registered
-        //final ListenerInfo listenerInfo = new ListenerInfo(vclistener, executor, device);
+        final ListenerInfo listenerInfo = new ListenerInfo(
+                vclistener, executor, device, handlesVolumeAdjustment);
         synchronized (mDeviceVolumeListenerLock) {
             if (mDeviceVolumeListeners == null) {
                 mDeviceVolumeListeners = new ArrayList<>();
@@ -176,8 +234,17 @@ public class AudioDeviceVolumeManager {
                 if (mDeviceVolumeDispatcherStub == null) {
                     mDeviceVolumeDispatcherStub = new DeviceVolumeDispatcherStub();
                 }
+            } else {
+                for (ListenerInfo info : mDeviceVolumeListeners) {
+                    if (info.mListener == vclistener) {
+                        throw new IllegalArgumentException(
+                                "attempt to call setDeviceAbsoluteMultiVolumeBehavior() "
+                                        + "on a previously registered listener");
+                    }
+                }
             }
-            mDeviceVolumeDispatcherStub.register(true, device, volumes);
+            mDeviceVolumeListeners.add(listenerInfo);
+            mDeviceVolumeDispatcherStub.register(true, device, volumes, handlesVolumeAdjustment);
         }
     }
 

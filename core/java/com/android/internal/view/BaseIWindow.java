@@ -50,7 +50,7 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void resized(ClientWindowFrames frames, boolean reportDraw,
-            MergedConfiguration mergedConfiguration, boolean forceLayout,
+            MergedConfiguration mergedConfiguration, InsetsState insetsState, boolean forceLayout,
             boolean alwaysConsumeSystemBars, int displayId, int seqId, int resizeMode) {
         if (reportDraw) {
             try {
@@ -61,12 +61,8 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void insetsChanged(InsetsState insetsState, boolean willMove, boolean willResize) {
-    }
-
-    @Override
     public void insetsControlChanged(InsetsState insetsState,
-            InsetsSourceControl[] activeControls, boolean willMove, boolean willResize) {
+            InsetsSourceControl[] activeControls) {
     }
 
     @Override

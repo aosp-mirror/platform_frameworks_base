@@ -193,7 +193,7 @@ public class VibrationSettingsTest {
     public void removeListener_noMoreCallbacksToListener() {
         mVibrationSettings.addListener(mListenerMock);
 
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
+        setUserSetting(Settings.System.RING_VIBRATION_INTENSITY, 0);
         verify(mListenerMock).onChange();
 
         mVibrationSettings.removeListener(mListenerMock);
@@ -291,8 +291,6 @@ public class VibrationSettingsTest {
     public void shouldIgnoreVibration_withRingerModeSilent_ignoresRingtoneAndNotification() {
         // Vibrating settings on are overruled by ringer mode.
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED, 1);
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
-        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 1);
         setRingerMode(AudioManager.RINGER_MODE_SILENT);
 
         for (int usage : ALL_USAGES) {
@@ -360,44 +358,25 @@ public class VibrationSettingsTest {
             assertVibrationNotIgnoredForUsage(usage);
         }
     }
+
     @Test
-    public void shouldIgnoreVibration_withRingSettingsOff_disableRingtoneVibrations() {
+    public void shouldIgnoreVibration_withRingSettingsOff_allowsAllVibrations() {
+        // VIBRATE_WHEN_RINGING is deprecated and should have no effect on the ring vibration
+        // setting. The ramping ringer is also independent now, instead of a 3-state setting.
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
         setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
 
         for (int usage : ALL_USAGES) {
-            if (usage == USAGE_RINGTONE) {
-                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_SETTINGS);
-            } else {
-                assertVibrationNotIgnoredForUsage(usage);
-            }
+            assertVibrationNotIgnoredForUsage(usage);
             assertVibrationNotIgnoredForUsageAndFlags(usage,
                     VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF);
         }
     }
 
     @Test
-    public void shouldIgnoreVibration_withRingSettingsOn_allowsAllVibrations() {
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
-        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
-
-        for (int usage : ALL_USAGES) {
-            assertVibrationNotIgnoredForUsage(usage);
-        }
-    }
-
-    @Test
-    public void shouldIgnoreVibration_withRampingRingerOn_allowsAllVibrations() {
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 1);
-
-        for (int usage : ALL_USAGES) {
-            assertVibrationNotIgnoredForUsage(usage);
-        }
-    }
-
-    @Test
     public void shouldIgnoreVibration_withHapticFeedbackDisabled_ignoresTouchVibration() {
+        // HAPTIC_FEEDBACK_ENABLED is deprecated but it was the only setting used to disable touch
+        // feedback vibrations. Continue to apply this on top of the intensity setting.
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED, 0);
 
         for (int usage : ALL_USAGES) {
@@ -459,8 +438,6 @@ public class VibrationSettingsTest {
     @Test
     public void shouldIgnoreVibration_withRingSettingsOff_ignoresRingtoneVibrations() {
         // Vibrating settings on are overruled by ring intensity setting.
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
-        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 1);
         setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
         setUserSetting(Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
 
@@ -479,7 +456,6 @@ public class VibrationSettingsTest {
     public void shouldIgnoreVibration_updateTriggeredAfterInternalRingerModeChanged() {
         // Vibrating settings on are overruled by ringer mode.
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED, 1);
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
         setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 1);
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
 

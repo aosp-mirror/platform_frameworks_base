@@ -231,7 +231,7 @@ droiddoc {
         "android.whichdoc offline",
     ],
     compat_config: ":global-compat-config",
-    proofread_file: "offline-sdk-docs-proofrerad.txt",
+    proofread_file: "offline-sdk-docs-proofread.txt",
     args: framework_docs_only_args + " -offlinemode -title \"Android SDK\"",
     static_doc_index_redirect: "docs/docs-preview-index.html",
 }
@@ -248,7 +248,7 @@ droiddoc {
     hdf: [
         "android.whichdoc offline",
     ],
-    proofread_file: "offline-sdk-referenceonly-docs-proofrerad.txt",
+    proofread_file: "offline-sdk-referenceonly-docs-proofread.txt",
     args: framework_docs_only_args + " -offlinemode -title \"Android SDK\" -referenceonly",
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
     static_doc_properties: "docs/source.properties",
@@ -266,7 +266,7 @@ droiddoc {
     hdf: [
         "android.whichdoc offline",
     ],
-    proofread_file: "offline-system-sdk-referenceonly-docs-proofrerad.txt",
+    proofread_file: "offline-system-sdk-referenceonly-docs-proofread.txt",
     args: framework_docs_only_args + " -hide 101 -hide 104 -hide 108" +
     " -offlinemode -title \"Android System SDK\" -referenceonly",
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
@@ -283,7 +283,7 @@ droiddoc {
         "android.whichdoc online",
         "android.hasSamples true",
     ],
-    proofread_file: "online-sdk-docs-proofrerad.txt",
+    proofread_file: "online-sdk-docs-proofread.txt",
     args: framework_docs_only_args +
         " -toroot / -samplegroup Admin " +
         " -samplegroup Background " +
@@ -312,7 +312,7 @@ droiddoc {
         "android.whichdoc online",
         "android.hasSamples true",
     ],
-    proofread_file: "online-system-api-sdk-docs-proofrerad.txt",
+    proofread_file: "online-system-api-sdk-docs-proofread.txt",
     args: framework_docs_only_args +
         " -referenceonly " +
         " -title \"Android SDK - Including system APIs.\" " +
@@ -347,7 +347,7 @@ droiddoc {
         "android.whichdoc online",
         "android.hasSamples true",
     ],
-    proofread_file: "ds-docs-proofrerad.txt",
+    proofread_file: "ds-docs-proofread.txt",
     args: framework_docs_only_args +
         " -toroot / -yamlV2 -metalavaApiSince -samplegroup Admin " +
         " -samplegroup Background " +
@@ -458,7 +458,7 @@ droiddoc {
         "android.whichdoc online",
         "android.hasSamples true",
     ],
-    proofread_file: "online-sdk-dev-docs-proofrerad.txt",
+    proofread_file: "online-sdk-dev-docs-proofread.txt",
     args: framework_docs_only_args +
         " -toroot / -samplegroup Admin " +
         " -samplegroup Background " +
@@ -483,7 +483,7 @@ droiddoc {
     srcs: [
         ":framework-doc-stubs",
     ],
-    proofread_file: "hidden-docs-proofrerad.txt",
+    proofread_file: "hidden-docs-proofread.txt",
     args: framework_docs_only_args +
         " -referenceonly " +
         " -title \"Android SDK - Including hidden APIs.\"",

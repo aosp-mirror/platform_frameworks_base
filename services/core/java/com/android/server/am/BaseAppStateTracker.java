@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActiveServices.SERVICE_START_FOREGROUND_TIMEOUT;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -41,6 +40,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.app.IAppOpsService;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -159,6 +159,20 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
                 mStateListeners.get(i).onStateChange(uid, packageName, start, now, stateType);
             }
         }
+    }
+
+    /**
+     * Return the type of tracker (as defined by AppRestrictionController.TrackerType)
+     */
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_UNKNOWN;
+    }
+
+    /**
+     * Return the relevant info object for the tracker for the given uid, used for statsd.
+     */
+    byte[] getTrackerInfoForStatsd(int uid) {
+        return null;
     }
 
     /**
@@ -362,7 +376,7 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
         }
 
         long getServiceStartForegroundTimeout() {
-            return SERVICE_START_FOREGROUND_TIMEOUT;
+            return mActivityManagerInternal.getServiceStartForegroundTimeout();
         }
 
         RoleManager getRoleManager() {

@@ -27,6 +27,9 @@ class OverlayWindow(private val context: Context) {
     val rootView = RegionInterceptingFrameLayout(context) as ViewGroup
     private val viewProviderMap = mutableMapOf<Int, Pair<View, DecorProvider>>()
 
+    val viewIds: List<Int>
+        get() = viewProviderMap.keys.toList()
+
     fun addDecorProvider(
         decorProvider: DecorProvider,
         @Surface.Rotation rotation: Int
@@ -46,6 +49,25 @@ class OverlayWindow(private val context: Context) {
             rootView.removeView(view)
             viewProviderMap.remove(id)
         }
+    }
+
+    /**
+     * Remove views which does not been found in expectExistViewIds
+     */
+    fun removeRedundantViews(expectExistViewIds: IntArray?) {
+        viewIds.forEach {
+            if (expectExistViewIds == null || !(expectExistViewIds.contains(it))) {
+                removeView(it)
+            }
+        }
+    }
+
+    /**
+     * Check that newProviders is the same list with viewProviderMap.
+     */
+    fun hasSameProviders(newProviders: List<DecorProvider>): Boolean {
+        return (newProviders.size == viewProviderMap.size) &&
+                newProviders.all { getView(it.viewId) != null }
     }
 
     /**

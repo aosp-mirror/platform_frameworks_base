@@ -32,7 +32,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-@DataClass(genHiddenConstructor = true)
+@DataClass
 @SystemApi
 public final class GrantTrustResult implements Parcelable {
 
@@ -42,14 +42,9 @@ public final class GrantTrustResult implements Parcelable {
     /** The device went from locked to unlocked as a result of the call. */
     public static final int STATUS_UNLOCKED_BY_GRANT = 1;
 
+    /** The status code of the result. */
     @Status
     private int mStatus;
-
-    /** Returns a new {@link GrantTrustResult} with the specified status. */
-    @NonNull
-    public static GrantTrustResult withStatus(@Status int status) {
-        return new GrantTrustResult(status);
-    }
 
 
 
@@ -90,7 +85,8 @@ public final class GrantTrustResult implements Parcelable {
     /**
      * Creates a new GrantTrustResult.
      *
-     * @hide
+     * @param status
+     *   The status code of the result.
      */
     @DataClass.Generated.Member
     public GrantTrustResult(
@@ -109,6 +105,9 @@ public final class GrantTrustResult implements Parcelable {
         // onConstructed(); // You can define this method to get a callback
     }
 
+    /**
+     * The status code of the result.
+     */
     @DataClass.Generated.Member
     public @Status int getStatus() {
         return mStatus;
@@ -165,10 +164,10 @@ public final class GrantTrustResult implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1647878197834L,
+            time = 1648138312806L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/trust/GrantTrustResult.java",
-            inputSignatures = "public static final  int STATUS_UNKNOWN\npublic static final  int STATUS_UNLOCKED_BY_GRANT\nprivate @android.service.trust.GrantTrustResult.Status int mStatus\npublic static @android.annotation.NonNull android.service.trust.GrantTrustResult withStatus(int)\nclass GrantTrustResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true)")
+            inputSignatures = "public static final  int STATUS_UNKNOWN\npublic static final  int STATUS_UNLOCKED_BY_GRANT\nprivate @android.service.trust.GrantTrustResult.Status int mStatus\nclass GrantTrustResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass")
     @Deprecated
     private void __metadata() {}
 

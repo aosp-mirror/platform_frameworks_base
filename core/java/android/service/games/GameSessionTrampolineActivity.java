@@ -51,7 +51,6 @@ public final class GameSessionTrampolineActivity extends Activity {
             startActivityAsCaller(
                     getIntent().getParcelableExtra(INTENT_KEY),
                     getIntent().getBundleExtra(OPTIONS_KEY),
-                    null,
                     false,
                     getUserId(),
                     REQUEST_CODE);

@@ -38,7 +38,7 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class UserUnlockRequestTest {
-    private val context: Context = getApplicationContext()
+    private val context = getApplicationContext<Context>()
     private val trustManager = context.getSystemService(TrustManager::class.java) as TrustManager
     private val userId = context.userId
     private val activityScenarioRule = ActivityScenarioRule(TrustTestActivity::class.java)

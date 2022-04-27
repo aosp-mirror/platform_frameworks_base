@@ -96,7 +96,7 @@ import java.util.function.Consumer;
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
 public class PipController implements PipTransitionController.PipTransitionCallback,
-        RemoteCallable<PipController>, DisplayController.OnDisplaysChangedListener {
+        RemoteCallable<PipController> {
     private static final String TAG = "PipController";
 
     private Context mContext;
@@ -107,7 +107,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private PipAppOpsListener mAppOpsListener;
     private PipMediaController mMediaController;
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
+    private PipKeepClearAlgorithm mPipKeepClearAlgorithm;
     private PipBoundsState mPipBoundsState;
+    private PipMotionHelper mPipMotionHelper;
     private PipTouchHandler mTouchHandler;
     private PipTransitionController mPipTransitionController;
     private TaskStackListenerImpl mTaskStackListener;
@@ -131,12 +133,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         void onPipAnimationStarted();
 
         /**
-         * Notifies the listener about PiP round corner radius changes.
+         * Notifies the listener about PiP resource dimensions changed.
          * Listener can expect an immediate callback the first time they attach.
          *
          * @param cornerRadius the pixel value of the corner radius, zero means it's disabled.
+         * @param shadowRadius the pixel value of the shadow radius, zero means it's disabled.
          */
-        void onPipCornerRadiusChanged(int cornerRadius);
+        void onPipResourceDimensionsChanged(int cornerRadius, int shadowRadius);
 
         /**
          * Notifies the listener that user leaves PiP by tapping on the expand button.
@@ -234,6 +237,18 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
                             true /* saveRestoreSnapFraction */);
                 }
+
+                @Override
+                public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
+                        Set<Rect> unrestricted) {
+                    if (mPipBoundsState.getDisplayId() == displayId) {
+                        mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+                        mPipMotionHelper.moveToBounds(mPipKeepClearAlgorithm.adjust(
+                                mPipBoundsState.getBounds(),
+                                mPipBoundsState.getRestrictedKeepClearAreas(),
+                                mPipBoundsState.getUnrestrictedKeepClearAreas()));
+                    }
+                }
             };
 
     /**
@@ -284,7 +299,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     @Nullable
     public static Pip create(Context context, DisplayController displayController,
             PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipBoundsState pipBoundsState, PipMediaController pipMediaController,
+            PipKeepClearAlgorithm pipKeepClearAlgorithm, PipBoundsState pipBoundsState,
+            PipMotionHelper pipMotionHelper, PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
@@ -298,9 +314,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         return new PipController(context, displayController, pipAppOpsListener, pipBoundsAlgorithm,
-                pipBoundsState, pipMediaController, phonePipMenuController, pipTaskOrganizer,
-                pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
-                taskStackListener, oneHandedController, mainExecutor)
+                pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper, pipMediaController,
+                phonePipMenuController, pipTaskOrganizer,  pipTouchHandler, pipTransitionController,
+                windowManagerShellWrapper, taskStackListener, oneHandedController, mainExecutor)
                 .mImpl;
     }
 
@@ -308,7 +324,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             DisplayController displayController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipKeepClearAlgorithm pipKeepClearAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
+            PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController,
             PipTaskOrganizer pipTaskOrganizer,
@@ -330,7 +348,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mWindowManagerShellWrapper = windowManagerShellWrapper;
         mDisplayController = displayController;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
+        mPipKeepClearAlgorithm = pipKeepClearAlgorithm;
         mPipBoundsState = pipBoundsState;
+        mPipMotionHelper = pipMotionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
         mMainExecutor = mainExecutor;
         mMediaController = pipMediaController;
@@ -463,14 +483,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         return mMainExecutor;
     }
 
-    @Override
-    public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
-            Set<Rect> unrestricted) {
-        if (mPipBoundsState.getDisplayId() == displayId) {
-            mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
-        }
-    }
-
     private void onConfigurationChanged(Configuration newConfig) {
         mPipBoundsAlgorithm.onConfigurationChanged(mContext);
         mTouchHandler.onConfigurationChanged();
@@ -479,7 +491,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void onDensityOrFontScaleChanged() {
         mPipTaskOrganizer.onDensityOrFontScaleChanged(mContext);
-        onPipCornerRadiusChanged();
+        onPipResourceDimensionsChanged();
     }
 
     private void onOverlayChanged() {
@@ -509,6 +521,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         };
 
         if (mPipTaskOrganizer.isInPip() && saveRestoreSnapFraction) {
+            mMenuController.attachPipMenuView();
             // Calculate the snap fraction of the current stack along the old movement bounds
             final PipSnapAlgorithm pipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
             final Rect postChangeStackBounds = new Rect(mPipBoundsState.getBounds());
@@ -590,14 +603,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void setPinnedStackAnimationListener(PipAnimationListener callback) {
         mPinnedStackAnimationRecentsCallback = callback;
-        onPipCornerRadiusChanged();
+        onPipResourceDimensionsChanged();
     }
 
-    private void onPipCornerRadiusChanged() {
+    private void onPipResourceDimensionsChanged() {
         if (mPinnedStackAnimationRecentsCallback != null) {
-            final int cornerRadius =
-                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
-            mPinnedStackAnimationRecentsCallback.onPipCornerRadiusChanged(cornerRadius);
+            mPinnedStackAnimationRecentsCallback.onPipResourceDimensionsChanged(
+                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius),
+                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius));
         }
     }
 
@@ -916,8 +929,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             }
 
             @Override
-            public void onPipCornerRadiusChanged(int cornerRadius) {
-                mListener.call(l -> l.onPipCornerRadiusChanged(cornerRadius));
+            public void onPipResourceDimensionsChanged(int cornerRadius, int shadowRadius) {
+                mListener.call(l -> l.onPipResourceDimensionsChanged(cornerRadius, shadowRadius));
             }
 
             @Override

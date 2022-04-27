@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"タブレットの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Android TV デバイスの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"モバイル デバイスの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"ボディーセンサー（心拍数モニターなど）へのアクセス"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"心拍数、体温、血液中の酸素の割合などのボディセンサー データにアクセスする権限です。"</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"ボディセンサー（心拍数モニター）のデータへのバックグラウンドでのアクセス権限"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"心拍数、体温、血液中の酸素の割合などのボディセンサー データにバックグラウンドでアクセスする権限です。"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"使用時の、心拍数などのボディセンサー データへのアクセス"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"アプリの使用時に、心拍数、体温、血中酸素濃度など、ボディセンサー データにアクセスすることをアプリに許可します。"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"バックグラウンド動作時の、心拍数などのボディセンサー データへのアクセス"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"バックグラウンドでのアプリの動作時に、心拍数、体温、血中酸素濃度など、ボディセンサー データにアクセスすることをアプリに許可します。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"カレンダーの予定と詳細を読み取り"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"このアプリは、お使いのタブレットに保存されたカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"このアプリは、Android TV デバイスに保存されているカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"エラー認証"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"画面ロックの使用"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"続行するには画面ロックを入力してください"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"指紋の一部しか検出できません"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"センサーにしっかりと押し当ててください"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"指紋を処理できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"指紋認証センサーの汚れを取り除いて、もう一度お試しください"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"センサーの汚れを取り除いて、もう一度お試しください"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"指紋を認識できません"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"センサーにしっかりと押し当ててください"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"指紋を認識できません"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"指紋認証を完了しました"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"顔を認証しました"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"顔を認証しました。[確認] を押してください"</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"共有ストレージからの音声ファイルの読み取りをアプリに許可します。"</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"共有ストレージからの動画ファイルの読み取り"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"共有ストレージからの動画ファイルの読み取りをアプリに許可します。"</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"共有ストレージからの画像ファイルの読み取り"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"共有ストレージからの画像ファイルの読み取りをアプリに許可します。"</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"共有ストレージからの画像ファイルの読み取り"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"共有ストレージからの画像ファイルの読み取りをアプリに許可します。"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"共有ストレージのコンテンツの変更または削除"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"共有ストレージのコンテンツの書き込みをアプリに許可します。"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP通話の発着信"</string>
@@ -834,7 +834,7 @@
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"FAX（自宅）"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"ポケベル"</string>
     <string name="phoneTypeOther" msgid="6918196243648754715">"その他"</string>
-    <string name="phoneTypeCallback" msgid="3455781500844157767">"コールバック"</string>
+    <string name="phoneTypeCallback" msgid="3455781500844157767">"かけ直す"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"クルマ"</string>
     <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"会社代表番号"</string>
     <string name="phoneTypeIsdn" msgid="2496238954533998512">"ISDN"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"MENUキーでロック解除(または緊急通報)"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"MENUキーでロック解除"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"パターンを入力"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"緊急通報"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"緊急通報"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"通話に戻る"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"一致しました"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"もう一度お試しください"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"保存しない"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"このページへのアクセスは許可されていません。"</string>
     <string name="text_copied" msgid="2531420577879738860">"テキストをクリップボードにコピーしました。"</string>
-    <string name="copied" msgid="4675902854553014676">"コピーしました"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> から <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> に貼り付けました"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> にクリップボードから貼り付けました"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> がクリップボード内のテキストを貼り付けました"</string>
@@ -1452,8 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"電池の最適化の無視についてアプリが確認することを許可します。"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"すべてのパッケージを照会する"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"すべてのインストール済みパッケージを参照することをアプリに許可します。"</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis へのアクセス"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"SupplementalApis へのアクセスをアプリに許可します。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ダブルタップでズームします"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ウィジェットを追加できませんでした。"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"移動"</string>
@@ -1682,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ON"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"OFF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能が必要な場合には適していますが、その他の多くのアプリには不要です。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"画面の表示と操作"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリでコンテンツを表示することができます。"</string>
@@ -1716,6 +1712,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>に切り替えています…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> をログアウトしています…"</string>
     <string name="owner_name" msgid="8713560351570795743">"所有者"</string>
+    <string name="guest_name" msgid="8502103277839834324">"ゲスト"</string>
     <string name="error_message_title" msgid="4082495589294631966">"エラー"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"この変更は管理者によって許可されていません"</string>
     <string name="app_not_found" msgid="3429506115332341800">"この操作を行うアプリが見つかりません"</string>
@@ -1852,8 +1849,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"バッテリー セーバーを有効にすると、ダークモードが ON になり、バックグラウンド アクティビティ、一部の視覚効果、特定の機能、一部のネットワーク接続が制限されるか OFF になります。"</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"バッテリー セーバーを有効にすると、ダークモードが ON になり、バックグラウンド アクティビティ、一部の視覚効果、特定の機能、一部のネットワーク接続が制限されるか OFF になります。"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"バッテリー セーバーを ON にすると、ダークモードが ON になります。また、バックグラウンド アクティビティ、一部の視覚効果、特定の機能、一部のネットワーク接続が制限されるか OFF になります。"</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"バッテリー セーバーを ON にすると、ダークモードが ON になります。また、バックグラウンド アクティビティ、一部の視覚効果、特定の機能、一部のネットワーク接続が制限されるか OFF になります。"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータを送受信することはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>
@@ -1935,9 +1932,22 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"現在 <xliff:g id="APP_NAME">%1$s</xliff:g> はご利用になれません。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>は利用できません"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。Android TV デバイスでのアクセスをお試しください。"</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。タブレットでのアクセスをお試しください。"</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"権限が必要"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"カメラ: 使用不可"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"スマートフォンで続行"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"マイク: 使用不可"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV の設定: 使用不可"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"タブレットの設定: 使用不可"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"スマートフォンの設定: 使用不可"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。Android TV デバイスでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。タブレットでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。Android TV デバイスでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。タブレットでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"このアプリはセキュリティの強化を求めています。Android TV デバイスでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"このアプリはセキュリティの強化を求めています。タブレットでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"このアプリはセキュリティの強化を求めています。スマートフォンでのアクセスをお試しください。"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"このアプリは以前のバージョンの Android 用に作成されており、正常に動作しない可能性があります。アップデートを確認するか、デベロッパーにお問い合わせください。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"アップデートを確認"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"新着メッセージがあります"</string>
@@ -2027,10 +2037,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"アンインストール"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"開く"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"有害なアプリが検出されました"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"システムログへのアクセスのリクエスト"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"今回のみ"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> にすべてのデバイスログへのアクセスを許可しますか？"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"1 回限りのアクセスを許可"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"許可しない"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> が機能デバッグのためにシステムログをリクエストしています。これらのログには、デバイス上のアプリやサービスが書き込んだ情報が含まれている可能性があります。"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスを許可しなかった場合も、このアプリはアプリ独自のログにアクセスできます。また、デバイスのメーカーもデバイスの一部のログや情報にアクセスできる可能性があります。詳細"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"次回から表示しない"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」が「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示をリクエストしています"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編集"</string>
@@ -2042,6 +2052,11 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"タップすると、詳細を確認して設定を変更できます。"</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"サイレント モードが変わりました"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"タップしてブロック対象をご確認ください。"</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"通知設定の確認"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"後で"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"閉じる"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"システム"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"設定"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"カメラ"</string>
@@ -2260,9 +2275,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> に翻訳しました。"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"メッセージを<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>から<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>に翻訳しました。"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"バックグラウンド アクティビティ"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"バックグラウンド アクティビティ"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドでバッテリーを消費しています。タップして確認。"</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで長時間実行されています。タップしてご確認ください。"</string>
-    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"有効なアプリをチェック"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"このデバイスからはカメラにアクセスできません"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"アプリがバッテリーを消費しています"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"アプリがまだアクティブです"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで実行されています。タップすると、バッテリー使用量を管理できます。"</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> がバッテリー駆動時間に影響を与えている可能性があります。タップして、実行中のアプリをご確認ください。"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"実行中のアプリをチェック"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> からスマートフォンのカメラにアクセスできません"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> からタブレットのカメラにアクセスできません"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"システムの言語"</string>
 </resources>

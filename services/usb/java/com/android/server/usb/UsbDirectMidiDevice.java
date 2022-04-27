@@ -16,6 +16,7 @@
 
 package com.android.server.usb;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
@@ -28,10 +29,12 @@ import android.media.midi.MidiDeviceStatus;
 import android.media.midi.MidiManager;
 import android.media.midi.MidiReceiver;
 import android.os.Bundle;
+import android.service.usb.UsbDirectMidiDeviceProto;
 import android.util.Log;
 
 import com.android.internal.midi.MidiEventScheduler;
 import com.android.internal.midi.MidiEventScheduler.MidiEvent;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.usb.descriptors.UsbDescriptorParser;
 import com.android.server.usb.descriptors.UsbEndpointDescriptor;
 import com.android.server.usb.descriptors.UsbInterfaceDescriptor;
@@ -52,6 +55,7 @@ public final class UsbDirectMidiDevice implements Closeable {
     private static final boolean DEBUG = false;
 
     private Context mContext;
+    private String mName;
     private UsbDevice mUsbDevice;
     private UsbDescriptorParser mParser;
     private ArrayList<UsbInterfaceDescriptor> mUsbInterfaces;
@@ -84,7 +88,7 @@ public final class UsbDirectMidiDevice implements Closeable {
     private final Object mLock = new Object();
     private boolean mIsOpen;
 
-    private final UsbMidiPacketConverter mUsbMidiPacketConverter = new UsbMidiPacketConverter();
+    private UsbMidiPacketConverter mUsbMidiPacketConverter;
 
     private final MidiDeviceServer.Callback mCallback = new MidiDeviceServer.Callback() {
 
@@ -264,6 +268,11 @@ public final class UsbDirectMidiDevice implements Closeable {
         Log.d(TAG, "openLocked()");
         UsbManager manager = mContext.getSystemService(UsbManager.class);
 
+        // Converting from raw MIDI to USB MIDI is not thread-safe.
+        // UsbMidiPacketConverter creates a converter from raw MIDI
+        // to USB MIDI for each USB output.
+        mUsbMidiPacketConverter = new UsbMidiPacketConverter(mNumOutputs);
+
         mUsbDeviceConnections = new ArrayList<UsbDeviceConnection>(mUsbInterfaces.size());
         mInputUsbEndpoints = new ArrayList<ArrayList<UsbEndpoint>>(mUsbInterfaces.size());
         mOutputUsbEndpoints = new ArrayList<ArrayList<UsbEndpoint>>(mUsbInterfaces.size());
@@ -415,7 +424,7 @@ public final class UsbDirectMidiDevice implements Closeable {
                             } else {
                                 convertedArray =
                                         mUsbMidiPacketConverter.rawMidiToUsbMidi(
-                                                 event.data, event.count);
+                                                 event.data, event.count, portFinal);
                             }
 
                             if (DEBUG) {
@@ -472,7 +481,7 @@ public final class UsbDirectMidiDevice implements Closeable {
         } else {
             name += " MIDI 1.0";
         }
-        Log.e(TAG, name);
+        mName = name;
         properties.putString(MidiDeviceInfo.PROPERTY_NAME, name);
         properties.putString(MidiDeviceInfo.PROPERTY_MANUFACTURER, manufacturer);
         properties.putString(MidiDeviceInfo.PROPERTY_PRODUCT, product);
@@ -517,6 +526,8 @@ public final class UsbDirectMidiDevice implements Closeable {
         mUsbDeviceConnections = null;
         mInputUsbEndpoints = null;
         mOutputUsbEndpoints = null;
+
+        mUsbMidiPacketConverter = null;
 
         mIsOpen = false;
     }
@@ -565,5 +576,22 @@ public final class UsbDirectMidiDevice implements Closeable {
             Log.w(TAG, "no alternate interface");
         }
         return true;
+    }
+
+    /**
+     * Write a description of the device to a dump stream.
+     */
+    public void dump(@NonNull DualDumpOutputStream dump, @NonNull String idName, long id) {
+        long token = dump.start(idName, id);
+
+        dump.write("num_inputs", UsbDirectMidiDeviceProto.NUM_INPUTS, mNumInputs);
+        dump.write("num_outputs", UsbDirectMidiDeviceProto.NUM_OUTPUTS, mNumOutputs);
+        dump.write("is_universal", UsbDirectMidiDeviceProto.IS_UNIVERSAL, mIsUniversalMidiDevice);
+        dump.write("name", UsbDirectMidiDeviceProto.NAME, mName);
+        if (mIsUniversalMidiDevice) {
+            mMidiBlockParser.dump(dump, "block_parser", UsbDirectMidiDeviceProto.BLOCK_PARSER);
+        }
+
+        dump.end(token);
     }
 }

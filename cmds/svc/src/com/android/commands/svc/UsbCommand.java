@@ -16,11 +16,19 @@
 
 package com.android.commands.svc;
 
+import android.app.ActivityThread;
 import android.content.Context;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbPort;
+import android.hardware.usb.UsbPortStatus;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+
+import java.util.function.Consumer;
+import java.util.concurrent.Executor;
+import java.util.List;
 
 public class UsbCommand extends Svc.Command {
     public UsbCommand() {
@@ -39,8 +47,9 @@ public class UsbCommand extends Svc.Command {
                 + "usage: svc usb setFunctions [function]\n"
                 + "         Set the current usb function. If function is blank, sets to charging.\n"
                 + "       svc usb setScreenUnlockedFunctions [function]\n"
-                + "         Sets the functions which, if the device was charging, become current on"
-                    + "screen unlock. If function is blank, turn off this feature.\n"
+                + "         Sets the functions which, if the device was charging,\n"
+                + "         become current on screen unlock.\n"
+                + "         If function is blank, turn off this feature.\n"
                 + "       svc usb getFunctions\n"
                 + "         Gets the list of currently enabled functions\n"
                 + "         possible values of [function] are any of 'mtp', 'ptp', 'rndis',\n"
@@ -59,14 +68,28 @@ public class UsbCommand extends Svc.Command {
                 + "       svc usb getUsbHalVersion\n"
                 + "         Gets current USB Hal Version\n"
                 + "         possible values of Hal version are any of 'unknown', 'V1_0', 'V1_1',\n"
-                + "         'V1_2', 'V1_3'\n";
+                + "         'V1_2', 'V1_3'\n"
+                + "       svc usb resetUsbPort [port number]\n"
+                + "         Reset the specified connected usb port\n"
+                + "         default: the first connected usb port\n";
     }
 
     @Override
     public void run(String[] args) {
         if (args.length >= 2) {
+            Looper.prepareMainLooper();
+            Context context = ActivityThread.systemMain().getSystemContext();
+            UsbManager usbManager = context.getSystemService(UsbManager.class);
             IUsbManager usbMgr = IUsbManager.Stub.asInterface(ServiceManager.getService(
                     Context.USB_SERVICE));
+
+            Executor executor = context.getMainExecutor();
+            Consumer<Integer> consumer = new Consumer<Integer>(){
+                public void accept(Integer status){
+                    System.out.println("Consumer status: " + status);
+                };
+            };
+
             if ("setFunctions".equals(args[1])) {
                 try {
                     usbMgr.setCurrentFunctions(UsbManager.usbFunctionsFromString(
@@ -131,6 +154,49 @@ public class UsbCommand extends Svc.Command {
                         System.err.println("unknown");
                     }
                 } catch (RemoteException e) {
+                    System.err.println("Error communicating with UsbManager: " + e);
+                }
+                return;
+            } else if ("resetUsbPort".equals(args[1])) {
+                try {
+                    int portNum = args.length >= 3 ? Integer.parseInt(args[2]) : -1;
+                    UsbPort port = null;
+                    UsbPortStatus portStatus = null;
+                    List<UsbPort> ports = usbManager.getPorts();
+                    final int numPorts = ports.size();
+
+                    if (numPorts > 0) {
+                        if (portNum != -1 && portNum < numPorts) {
+                            portStatus = ports.get(portNum).getStatus();
+                            if (portStatus.isConnected()) {
+                                port = ports.get(portNum);
+                                System.err.println(
+                                        "Get the USB port: port" + portNum);
+                            }
+                        } else {
+                            for (portNum = 0; portNum < numPorts; portNum++) {
+                                UsbPortStatus status = ports.get(portNum).getStatus();
+                                if (status.isConnected()) {
+                                    port = ports.get(portNum);
+                                    portStatus = status;
+                                    System.err.println(
+                                            "Use the default USB port: port" + portNum);
+                                    break;
+                                }
+                            }
+                        }
+                        if (port != null && portStatus.isConnected()) {
+                            System.err.println(
+                                    "Reset the USB port: port" + portNum);
+                            port.resetUsbPort(executor, consumer);
+                        } else {
+                            System.err.println(
+                                    "There is no available reset USB port");
+                        }
+                    } else {
+                        System.err.println("No USB ports");
+                    }
+                } catch (Exception e) {
                     System.err.println("Error communicating with UsbManager: " + e);
                 }
                 return;

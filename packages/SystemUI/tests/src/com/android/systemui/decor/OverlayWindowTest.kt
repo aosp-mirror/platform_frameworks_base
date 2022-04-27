@@ -40,12 +40,14 @@ class OverlayWindowTest : SysuiTestCase() {
 
     companion object {
         private val TEST_DECOR_VIEW_ID_1 = R.id.privacy_dot_top_left_container
-        private val TEST_DECOR_VIEW_ID_2 = R.id.privacy_dot_bottom_right_container
+        private val TEST_DECOR_VIEW_ID_2 = R.id.privacy_dot_bottom_left_container
+        private val TEST_DECOR_VIEW_ID_3 = R.id.privacy_dot_bottom_right_container
     }
 
     private lateinit var overlay: OverlayWindow
     private lateinit var decorProvider1: DecorProvider
     private lateinit var decorProvider2: DecorProvider
+    private lateinit var decorProvider3: DecorProvider
 
     @Before
     fun setUp() {
@@ -56,6 +58,11 @@ class OverlayWindowTest : SysuiTestCase() {
                 layoutId = R.layout.privacy_dot_top_left))
         decorProvider2 = spy(PrivacyDotCornerDecorProviderImpl(
                 viewId = TEST_DECOR_VIEW_ID_2,
+                alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
+                alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
+                layoutId = R.layout.privacy_dot_bottom_left))
+        decorProvider3 = spy(PrivacyDotCornerDecorProviderImpl(
+                viewId = TEST_DECOR_VIEW_ID_3,
                 alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
                 alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
                 layoutId = R.layout.privacy_dot_bottom_right))
@@ -122,5 +129,54 @@ class OverlayWindowTest : SysuiTestCase() {
                 overlay.getView(TEST_DECOR_VIEW_ID_1)!!, 1, Surface.ROTATION_90, null)
         verify(decorProvider2, times(1)).onReloadResAndMeasure(
                 overlay.getView(TEST_DECOR_VIEW_ID_2)!!, 1, Surface.ROTATION_90, null)
+    }
+
+    @Test
+    fun testRemoveRedundantViewsWithNullParameter() {
+        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_270)
+        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_270)
+
+        overlay.removeRedundantViews(null)
+
+        Assert.assertNull(overlay.getView(TEST_DECOR_VIEW_ID_1))
+        Assert.assertNull(overlay.rootView.findViewById(TEST_DECOR_VIEW_ID_1))
+        Assert.assertNull(overlay.getView(TEST_DECOR_VIEW_ID_2))
+        Assert.assertNull(overlay.rootView.findViewById(TEST_DECOR_VIEW_ID_2))
+    }
+
+    @Test
+    fun testRemoveRedundantViewsWith2Providers() {
+        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_270)
+        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_270)
+
+        overlay.removeRedundantViews(IntArray(2).apply {
+            this[0] = TEST_DECOR_VIEW_ID_3
+            this[1] = TEST_DECOR_VIEW_ID_1
+        })
+
+        Assert.assertNotNull(overlay.getView(TEST_DECOR_VIEW_ID_1))
+        Assert.assertNotNull(overlay.rootView.findViewById(TEST_DECOR_VIEW_ID_1))
+        Assert.assertNull(overlay.getView(TEST_DECOR_VIEW_ID_2))
+        Assert.assertNull(overlay.rootView.findViewById(TEST_DECOR_VIEW_ID_2))
+    }
+
+    @Test
+    fun testHasSameProviders() {
+        Assert.assertTrue(overlay.hasSameProviders(emptyList()))
+        Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider1)))
+        Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider2)))
+        Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider2, decorProvider1)))
+
+        overlay.addDecorProvider(decorProvider1, Surface.ROTATION_0)
+        Assert.assertFalse(overlay.hasSameProviders(emptyList()))
+        Assert.assertTrue(overlay.hasSameProviders(listOf(decorProvider1)))
+        Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider2)))
+        Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider2, decorProvider1)))
+
+        overlay.addDecorProvider(decorProvider2, Surface.ROTATION_0)
+        Assert.assertFalse(overlay.hasSameProviders(emptyList()))
+        Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider1)))
+        Assert.assertFalse(overlay.hasSameProviders(listOf(decorProvider2)))
+        Assert.assertTrue(overlay.hasSameProviders(listOf(decorProvider2, decorProvider1)))
     }
 }

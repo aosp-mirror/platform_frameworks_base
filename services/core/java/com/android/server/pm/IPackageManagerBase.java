@@ -803,7 +803,7 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     public final String getSystemCaptionsServicePackageName() {
         return mService.ensureSystemPackageName(snapshot(),
                 mService.getPackageFromComponentString(
-                        R.string.config_defaultSystemCaptionsService));
+                        R.string.config_defaultSystemCaptionsManagerService));
     }
 
     @Nullable
@@ -972,8 +972,9 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     public final boolean performDexOptMode(String packageName,
             boolean checkProfiles, String targetCompilerFilter, boolean force,
             boolean bootComplete, String splitName) {
-        return mDexOptHelper.performDexOptMode(packageName, checkProfiles, targetCompilerFilter,
-                force, bootComplete, splitName);
+        final Computer snapshot = snapshot();
+        return mDexOptHelper.performDexOptMode(snapshot, packageName, checkProfiles,
+                targetCompilerFilter, force, bootComplete, splitName);
     }
 
     /**
