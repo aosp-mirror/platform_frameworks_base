@@ -113,4 +113,20 @@ public class TestableNotificationManagerService extends NotificationManagerServi
     protected void doChannelWarningToast(int uid, CharSequence toastText) {
         mChannelToastsSent.add(uid);
     }
+
+    public class StrongAuthTrackerFake extends NotificationManagerService.StrongAuthTracker {
+        private int mGetStrongAuthForUserReturnValue = 0;
+        StrongAuthTrackerFake(Context context) {
+            super(context);
+        }
+
+        public void setGetStrongAuthForUserReturnValue(int val) {
+            mGetStrongAuthForUserReturnValue = val;
+        }
+
+        @Override
+        public int getStrongAuthForUser(int userId) {
+            return mGetStrongAuthForUserReturnValue;
+        }
+    }
 }
