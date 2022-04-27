@@ -25,8 +25,12 @@ import org.mockito.Mockito.`when` as whenever
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.Icon
 import android.graphics.drawable.RippleDrawable
@@ -124,7 +128,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var transitionParent: ViewGroup
     private lateinit var appIcon: ImageView
-    private lateinit var albumView: ImageView
+    @Mock private lateinit var albumView: ImageView
     private lateinit var titleText: TextView
     private lateinit var artistText: TextView
     private lateinit var seamless: ViewGroup
@@ -296,7 +300,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // Set up mock views for the players
         appIcon = ImageView(context)
-        albumView = ImageView(context)
         titleText = TextView(context)
         artistText = TextView(context)
         seamless = FrameLayout(context)
@@ -416,7 +419,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(coverContainer1.context).thenReturn(mockContext)
         whenever(coverContainer2.context).thenReturn(mockContext)
         whenever(coverContainer3.context).thenReturn(mockContext)
-
     }
 
     @After
@@ -534,6 +536,60 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(actionNext.isEnabled()).isFalse()
         assertThat(actionNext.drawable).isNull()
         verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.INVISIBLE)
+    }
+
+    @Test
+    fun bindAlbumView_setAfterExecutors() {
+        val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        canvas.drawColor(Color.RED)
+        val albumArt = Icon.createWithBitmap(bmp)
+        val state = mediaData.copy(artwork = albumArt)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+
+        verify(albumView).setImageDrawable(any(Drawable::class.java))
+    }
+
+    @Test
+    fun bindAlbumView_bitmapInLaterStates_setAfterExecutors() {
+        val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        canvas.drawColor(Color.RED)
+        val albumArt = Icon.createWithBitmap(bmp)
+
+        val state0 = mediaData.copy(artwork = null)
+        val state1 = mediaData.copy(artwork = albumArt)
+        val state2 = mediaData.copy(artwork = albumArt)
+        player.attachPlayer(viewHolder)
+
+        // First binding sets (empty) drawable
+        player.bindPlayer(state0, PACKAGE)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+        verify(albumView).setImageDrawable(any(Drawable::class.java))
+
+        // Run Metadata update so that later states don't update
+        val captor = argumentCaptor<Animator.AnimatorListener>()
+        verify(mockAnimator, times(2)).addListener(captor.capture())
+        captor.value.onAnimationEnd(mockAnimator)
+        assertThat(titleText.getText()).isEqualTo(TITLE)
+        assertThat(artistText.getText()).isEqualTo(ARTIST)
+
+        // Second binding sets transition drawable
+        player.bindPlayer(state1, PACKAGE)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+        verify(albumView, times(2)).setImageDrawable(any(Drawable::class.java))
+
+        // Third binding does run transition or update background
+        player.bindPlayer(state2, PACKAGE)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+        verify(albumView, times(2)).setImageDrawable(any(Drawable::class.java))
     }
 
     @Test
