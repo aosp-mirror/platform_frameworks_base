@@ -192,6 +192,15 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onPanelExpansionChanged_propagatesToBouncer_evenAfterHidden() {
+        mStatusBarKeyguardViewManager.hide(0, 0);
+        when(mBouncer.inTransit()).thenReturn(true);
+
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
+        verify(mBouncer).setExpansion(eq(EXPANSION_EVENT.getFraction()));
+    }
+
+    @Test
     public void onPanelExpansionChanged_showsBouncerWhenSwiping() {
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
