@@ -522,6 +522,55 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testApplyTransaction_requestFocusOnTaskFragment() {
+        mOrganizer.applyTransaction(mTransaction);
+        mController.registerOrganizer(mIOrganizer);
+        final Task task = createTask(mDisplayContent);
+        final IBinder token0 = new Binder();
+        final TaskFragment tf0 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(token0)
+                .setOrganizer(mOrganizer)
+                .createActivityCount(1)
+                .build();
+        final IBinder token1 = new Binder();
+        final TaskFragment tf1 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(token1)
+                .setOrganizer(mOrganizer)
+                .createActivityCount(1)
+                .build();
+        mAtm.mWindowOrganizerController.mLaunchTaskFragments.put(token0, tf0);
+        mAtm.mWindowOrganizerController.mLaunchTaskFragments.put(token1, tf1);
+        final ActivityRecord activity0 = tf0.getTopMostActivity();
+        final ActivityRecord activity1 = tf1.getTopMostActivity();
+
+        // No effect if the current focus is in a different Task.
+        final ActivityRecord activityInOtherTask = createActivityRecord(mDefaultDisplay);
+        mDisplayContent.setFocusedApp(activityInOtherTask);
+        mTransaction.requestFocusOnTaskFragment(token0);
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        assertEquals(activityInOtherTask, mDisplayContent.mFocusedApp);
+
+        // No effect if there is no resumed activity in the request TaskFragment.
+        activity0.setState(ActivityRecord.State.PAUSED, "test");
+        activity1.setState(ActivityRecord.State.RESUMED, "test");
+        mDisplayContent.setFocusedApp(activity1);
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        assertEquals(activity1, mDisplayContent.mFocusedApp);
+
+        // Set focus to the request TaskFragment when the current focus is in the same Task, and it
+        // has a resumed activity.
+        activity0.setState(ActivityRecord.State.RESUMED, "test");
+        mDisplayContent.setFocusedApp(activity1);
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        assertEquals(activity0, mDisplayContent.mFocusedApp);
+    }
+
+    @Test
     public void testTaskFragmentInPip_startActivityInTaskFragment() {
         setupTaskFragmentInPip();
         final ActivityRecord activity = mTaskFragment.getTopMostActivity();
