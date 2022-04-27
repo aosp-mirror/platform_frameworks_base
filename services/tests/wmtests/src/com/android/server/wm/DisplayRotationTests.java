@@ -40,7 +40,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.clearInvocations;
 
+import android.app.WindowConfiguration;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -515,6 +517,69 @@ public class DisplayRotationTests {
     }
 
     @Test
+    public void testAllowAllRotations_allowsUpsideDownSuggestion()
+            throws Exception {
+        mBuilder.build();
+        mTarget.updateOrientation(SCREEN_ORIENTATION_UNSPECIFIED, true);
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(true);
+        freezeRotation(Surface.ROTATION_0);
+        enableOrientationSensor();
+
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+        assertTrue(waitForUiHandler());
+
+        verify(mMockStatusBarManagerInternal)
+                .onProposedRotationChanged(Surface.ROTATION_180, true);
+    }
+
+    @Test
+    public void testDoNotAllowAllRotations_doesNotAllowUpsideDownSuggestion()
+            throws Exception {
+        mBuilder.build();
+        mTarget.updateOrientation(SCREEN_ORIENTATION_UNSPECIFIED, true);
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(false);
+        freezeRotation(Surface.ROTATION_0);
+        enableOrientationSensor();
+
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+        assertTrue(waitForUiHandler());
+
+        verify(mMockStatusBarManagerInternal)
+                .onProposedRotationChanged(Surface.ROTATION_180, false);
+    }
+
+    @Test
+    public void testAllowAllRotations_allowAllRotationsBecomesDisabled_forbidsUpsideDownSuggestion()
+            throws Exception {
+        mBuilder.build();
+        mTarget.updateOrientation(SCREEN_ORIENTATION_UNSPECIFIED, true);
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(true);
+        freezeRotation(Surface.ROTATION_0);
+        enableOrientationSensor();
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_0));
+        assertTrue(waitForUiHandler());
+
+        // Change resource to disallow all rotations.
+        // Reset "allowAllRotations".
+        mTarget.applyCurrentRotation(Surface.ROTATION_0);
+        clearInvocations(mMockStatusBarManagerInternal);
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(false);
+        mTarget.resetAllowAllRotations();
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+        assertTrue(waitForUiHandler());
+
+        verify(mMockStatusBarManagerInternal)
+                .onProposedRotationChanged(Surface.ROTATION_180, false);
+    }
+
+    @Test
     public void testReturnsCompatibleRotation_SensorEnabled_RotationThawed() throws Exception {
         mBuilder.build();
         configureDisplayRotation(SCREEN_ORIENTATION_PORTRAIT, false, false);
@@ -935,6 +1000,8 @@ public class DisplayRotationTests {
                     .thenReturn(WmDisplayCutout.NO_CUTOUT);
             when(mMockDisplayContent.getDefaultTaskDisplayArea())
                     .thenReturn(mock(TaskDisplayArea.class));
+            when(mMockDisplayContent.getWindowConfiguration())
+                    .thenReturn(new WindowConfiguration());
 
             mMockDisplayPolicy = mock(DisplayPolicy.class);
 
