@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy;
+package com.android.wm.shell.kidsmode;
 
 import android.content.ContentResolver;
 import android.content.Context;
