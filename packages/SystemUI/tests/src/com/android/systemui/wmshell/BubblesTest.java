@@ -1447,6 +1447,25 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(stackView.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
+    @Test
+    public void testSetShouldAutoExpand_notifiesFlagChanged() {
+        mEntryListener.onPendingEntryAdded(mRow);
+
+        assertTrue(mBubbleController.hasBubbles());
+        Bubble b = mBubbleData.getBubbleInStackWithKey(mBubbleEntry.getKey());
+        assertThat(b.shouldAutoExpand()).isFalse();
+
+        // Set it to the same thing
+        b.setShouldAutoExpand(false);
+
+        // Verify it doesn't notify
+        verify(mBubbleController, never()).onBubbleMetadataFlagChanged(any());
+
+        // Set it to something different
+        b.setShouldAutoExpand(true);
+        verify(mBubbleController).onBubbleMetadataFlagChanged(b);
+    }
+
     /** Creates a bubble using the userId and package. */
     private Bubble createBubble(int userId, String pkg) {
         final UserHandle userHandle = new UserHandle(userId);

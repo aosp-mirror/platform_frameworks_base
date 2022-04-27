@@ -771,11 +771,16 @@ public class Bubble implements BubbleViewProvider {
         return isEnabled(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
     }
 
-    void setShouldAutoExpand(boolean shouldAutoExpand) {
+    @VisibleForTesting
+    public void setShouldAutoExpand(boolean shouldAutoExpand) {
+        boolean prevAutoExpand = shouldAutoExpand();
         if (shouldAutoExpand) {
             enable(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
         } else {
             disable(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
+        }
+        if (prevAutoExpand != shouldAutoExpand && mBubbleMetadataFlagListener != null) {
+            mBubbleMetadataFlagListener.onBubbleMetadataFlagChanged(this);
         }
     }
 

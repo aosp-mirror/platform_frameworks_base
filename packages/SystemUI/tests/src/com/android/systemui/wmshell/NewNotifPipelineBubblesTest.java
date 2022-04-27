@@ -1267,6 +1267,25 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         assertThat(stackView.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
+    @Test
+    public void testSetShouldAutoExpand_notifiesFlagChanged() {
+        mBubbleController.updateBubble(mBubbleEntry);
+
+        assertTrue(mBubbleController.hasBubbles());
+        Bubble b = mBubbleData.getBubbleInStackWithKey(mBubbleEntry.getKey());
+        assertThat(b.shouldAutoExpand()).isFalse();
+
+        // Set it to the same thing
+        b.setShouldAutoExpand(false);
+
+        // Verify it doesn't notify
+        verify(mBubbleController, never()).onBubbleMetadataFlagChanged(any());
+
+        // Set it to something different
+        b.setShouldAutoExpand(true);
+        verify(mBubbleController).onBubbleMetadataFlagChanged(b);
+    }
+
     /**
      * Sets the bubble metadata flags for this entry. These flags are normally set by
      * NotificationManagerService when the notification is sent, however, these tests do not
