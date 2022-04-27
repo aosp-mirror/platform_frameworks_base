@@ -1207,7 +1207,7 @@ public class NotificationStackScrollLayoutController {
      */
     public void updateShowEmptyShadeView() {
         Trace.beginSection("NSSLC.updateShowEmptyShadeView");
-        mShowEmptyShadeView = mBarState != KEYGUARD
+        mShowEmptyShadeView = mStatusBarStateController.getCurrentOrUpcomingState() != KEYGUARD
                 && !mView.isQsFullScreen()
                 && getVisibleNotificationCount() == 0;
 
