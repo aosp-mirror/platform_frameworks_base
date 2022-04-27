@@ -1288,7 +1288,7 @@ public class MediaControlPanel {
             }
             logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT,
                     interactedSubcardRank,
-                    getSmartspaceSubCardCardinality());
+                    mSmartspaceMediaItemsCount);
 
             if (shouldSmartspaceRecItemOpenInForeground(action)) {
                 // Request to unlock the device if the activity needs to be opened in foreground.
@@ -1372,14 +1372,5 @@ public class MediaControlPanel {
                 new int[]{getSurfaceForSmartspaceLogging()},
                 interactedSubcardRank,
                 interactedSubcardCardinality);
-    }
-
-    private int getSmartspaceSubCardCardinality() {
-        if (!mMediaCarouselController.getMediaCarouselScrollHandler().getQsExpanded()
-                && mSmartspaceMediaItemsCount > 3) {
-            return 3;
-        }
-
-        return mSmartspaceMediaItemsCount;
     }
 }

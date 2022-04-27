@@ -124,7 +124,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var collapsedSet: ConstraintSet
     @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
-    @Mock private lateinit var mediaCarouselScrollHandler: MediaCarouselScrollHandler
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var transitionParent: ViewGroup
     private lateinit var appIcon: ImageView
@@ -294,9 +293,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
      */
     private fun initMediaViewHolderMocks() {
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
-        whenever(mediaCarouselController.mediaCarouselScrollHandler)
-            .thenReturn(mediaCarouselScrollHandler)
-        whenever(mediaCarouselScrollHandler.qsExpanded).thenReturn(false)
 
         // Set up mock views for the players
         appIcon = ImageView(context)
