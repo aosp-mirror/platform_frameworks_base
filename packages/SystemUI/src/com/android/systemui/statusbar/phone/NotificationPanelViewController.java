@@ -1735,6 +1735,11 @@ public class NotificationPanelViewController extends PanelViewController {
         return false;
     }
 
+    @VisibleForTesting
+    boolean isQsTracking() {
+        return mQsTracking;
+    }
+
     @Override
     protected boolean isInContentBounds(float x, float y) {
         float stackScrollerX = mNotificationStackScrollLayoutController.getX();
@@ -2812,7 +2817,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean shouldQuickSettingsIntercept(float x, float y, float yDiff) {
         if (!isQsExpansionEnabled() || mCollapsedOnDown
                 || (mKeyguardShowing && mKeyguardBypassController.getBypassEnabled())
-                || (mKeyguardShowing && mShouldUseSplitNotificationShade)) {
+                || mShouldUseSplitNotificationShade) {
             return false;
         }
         View header = mKeyguardShowing || mQs == null ? mKeyguardStatusBar : mQs.getHeader();
