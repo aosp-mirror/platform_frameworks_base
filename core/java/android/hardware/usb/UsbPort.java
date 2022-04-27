@@ -16,6 +16,10 @@
 
 package android.hardware.usb;
 
+import static android.hardware.usb.UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL;
+import static android.hardware.usb.UsbOperationInternal.USB_OPERATION_ERROR_NOT_SUPPORTED;
+import static android.hardware.usb.UsbOperationInternal.USB_OPERATION_ERROR_PORT_MISMATCH;
+import static android.hardware.usb.UsbOperationInternal.USB_OPERATION_SUCCESS;
 import static android.hardware.usb.UsbPortStatus.CONTAMINANT_DETECTION_DETECTED;
 import static android.hardware.usb.UsbPortStatus.CONTAMINANT_DETECTION_DISABLED;
 import static android.hardware.usb.UsbPortStatus.CONTAMINANT_DETECTION_NOT_DETECTED;
@@ -34,15 +38,23 @@ import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SINK;
 import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SOURCE;
 
 import android.Manifest;
+import android.annotation.CheckResult;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.hardware.usb.UsbOperationInternal;
 import android.hardware.usb.V1_0.Constants;
+import android.os.Binder;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Represents a physical USB port and describes its characteristics.
@@ -51,6 +63,7 @@ import java.util.Objects;
  */
 @SystemApi
 public final class UsbPort {
+    private static final String TAG = "UsbPort";
     private final String mId;
     private final int mSupportedModes;
     private final UsbManager mUsbManager;
@@ -63,6 +76,47 @@ public final class UsbPort {
      * Points to the first power role in the IUsb HAL.
      */
     private static final int POWER_ROLE_OFFSET = Constants.PortPowerRole.NONE;
+
+    /**
+     * Counter for tracking UsbOperation operations.
+     */
+    private static final AtomicInteger sUsbOperationCount = new AtomicInteger();
+
+    /**
+     * The {@link #enableUsbData} request was successfully completed.
+     */
+    public static final int ENABLE_USB_DATA_SUCCESS = 0;
+
+    /**
+     * The {@link #enableUsbData} request failed due to internal error.
+     */
+    public static final int ENABLE_USB_DATA_ERROR_INTERNAL = 1;
+
+    /**
+     * The {@link #enableUsbData} request failed as it's not supported.
+     */
+    public static final int ENABLE_USB_DATA_ERROR_NOT_SUPPORTED = 2;
+
+    /**
+     * The {@link #enableUsbData} request failed as port id mismatched.
+     */
+    public static final int ENABLE_USB_DATA_ERROR_PORT_MISMATCH = 3;
+
+    /**
+     * The {@link #enableUsbData} request failed due to other reasons.
+     */
+    public static final int ENABLE_USB_DATA_ERROR_OTHER = 4;
+
+    /** @hide */
+    @IntDef(prefix = { "ENABLE_USB_DATA_" }, value = {
+            ENABLE_USB_DATA_SUCCESS,
+            ENABLE_USB_DATA_ERROR_INTERNAL,
+            ENABLE_USB_DATA_ERROR_NOT_SUPPORTED,
+            ENABLE_USB_DATA_ERROR_PORT_MISMATCH,
+            ENABLE_USB_DATA_ERROR_OTHER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface EnableUsbDataStatus{}
 
     /** @hide */
     public UsbPort(@NonNull UsbManager usbManager, @NonNull String id, int supportedModes,
@@ -157,7 +211,7 @@ public final class UsbPort {
      * {@link UsbPortStatus#isRoleCombinationSupported UsbPortStatus.isRoleCombinationSupported}.
      * </p><p>
      * Note: This function is asynchronous and may fail silently without applying
-     * the requested changes.  If this function does cause a status change to occur then
+     * the operationed changes.  If this function does cause a status change to occur then
      * a {@link UsbManager#ACTION_USB_PORT_CHANGED} broadcast will be sent.
      * </p>
      *
@@ -174,6 +228,47 @@ public final class UsbPort {
         UsbPort.checkRoles(powerRole, dataRole);
 
         mUsbManager.setPortRoles(this, powerRole, dataRole);
+    }
+
+    /**
+     * Enables/Disables Usb data on the port.
+     *
+     * @param enable When true enables USB data if disabled.
+     *               When false disables USB data if enabled.
+     * @return       {@link #ENABLE_USB_DATA_SUCCESS} when request completes successfully or
+     *               {@link #ENABLE_USB_DATA_ERROR_INTERNAL} when request fails due to internal
+     *               error or
+     *               {@link ENABLE_USB_DATA_ERROR_NOT_SUPPORTED} when not supported or
+     *               {@link ENABLE_USB_DATA_ERROR_PORT_MISMATCH} when request fails due to port id
+     *               mismatch or
+     *               {@link ENABLE_USB_DATA_ERROR_OTHER} when fails due to other reasons.
+     */
+    @CheckResult
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public @EnableUsbDataStatus int enableUsbData(boolean enable) {
+        // UID is added To minimize operationID overlap between two different packages.
+        int operationId = sUsbOperationCount.incrementAndGet() + Binder.getCallingUid();
+        Log.i(TAG, "enableUsbData opId:" + operationId
+                + " callingUid:" + Binder.getCallingUid());
+        UsbOperationInternal opCallback =
+                new UsbOperationInternal(operationId, mId);
+        if (mUsbManager.enableUsbData(this, enable, operationId, opCallback) == true) {
+            opCallback.waitForOperationComplete();
+        }
+
+        int result = opCallback.getStatus();
+        switch (result) {
+            case USB_OPERATION_SUCCESS:
+                return ENABLE_USB_DATA_SUCCESS;
+            case USB_OPERATION_ERROR_INTERNAL:
+                return ENABLE_USB_DATA_ERROR_INTERNAL;
+            case USB_OPERATION_ERROR_NOT_SUPPORTED:
+                return ENABLE_USB_DATA_ERROR_NOT_SUPPORTED;
+            case USB_OPERATION_ERROR_PORT_MISMATCH:
+                return ENABLE_USB_DATA_ERROR_PORT_MISMATCH;
+            default:
+                return ENABLE_USB_DATA_ERROR_OTHER;
+        }
     }
 
     /**
