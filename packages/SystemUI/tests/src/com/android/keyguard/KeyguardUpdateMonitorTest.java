@@ -177,6 +177,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
     @Mock
     private KeyguardUpdateMonitorCallback mTestCallback;
+    @Mock
+    private ActiveUnlockConfig mActiveUnlockConfig;
     // Direct executor
     private Executor mBackgroundExecutor = Runnable::run;
     private Executor mMainExecutor = Runnable::run;
@@ -1188,7 +1190,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mBackgroundExecutor, mMainExecutor,
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager,
-                    mInteractionJankMonitor, mLatencyTracker);
+                    mInteractionJankMonitor, mLatencyTracker, mActiveUnlockConfig);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 
