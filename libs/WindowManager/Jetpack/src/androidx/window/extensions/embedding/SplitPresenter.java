@@ -217,12 +217,13 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * @param launchingActivity An activity that should be in the primary container. If it is not
      *                          currently in an existing container, a new one will be created and
      *                          the activity will be re-parented to it.
-     * @param activityIntent The intent to start the new activity.
-     * @param activityOptions The options to apply to new activity start.
-     * @param rule The split rule to be applied to the container.
+     * @param activityIntent    The intent to start the new activity.
+     * @param activityOptions   The options to apply to new activity start.
+     * @param rule              The split rule to be applied to the container.
+     * @param isPlaceholder     Whether the launch is a placeholder.
      */
     void startActivityToSide(@NonNull Activity launchingActivity, @NonNull Intent activityIntent,
-            @Nullable Bundle activityOptions, @NonNull SplitRule rule) {
+            @Nullable Bundle activityOptions, @NonNull SplitRule rule, boolean isPlaceholder) {
         final Rect parentBounds = getParentContainerBounds(launchingActivity);
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_START, parentBounds, rule,
                 isLtr(launchingActivity, rule));
@@ -244,6 +245,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         startActivityToSide(wct, primaryContainer.getTaskFragmentToken(), primaryRectBounds,
                 launchingActivity, secondaryContainer.getTaskFragmentToken(), secondaryRectBounds,
                 activityIntent, activityOptions, rule);
+        if (isPlaceholder) {
+            // When placeholder is launched in split, we should keep the focus on the primary.
+            wct.requestFocusOnTaskFragment(primaryContainer.getTaskFragmentToken());
+        }
         applyTransaction(wct);
 
         primaryContainer.setLastRequestedBounds(primaryRectBounds);
@@ -272,14 +277,21 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 isLtr);
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds, rule,
                 isLtr);
+        final TaskFragmentContainer secondaryContainer = splitContainer.getSecondaryContainer();
+        // Whether the placeholder is becoming side-by-side with the primary from fullscreen.
+        final boolean isPlaceholderBecomingSplit = splitContainer.isPlaceholderContainer()
+                && secondaryContainer.areLastRequestedBoundsEqual(null /* bounds */)
+                && !secondaryRectBounds.isEmpty();
 
         // If the task fragments are not registered yet, the positions will be updated after they
         // are created again.
         resizeTaskFragmentIfRegistered(wct, primaryContainer, primaryRectBounds);
-        final TaskFragmentContainer secondaryContainer = splitContainer.getSecondaryContainer();
         resizeTaskFragmentIfRegistered(wct, secondaryContainer, secondaryRectBounds);
-
         setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule);
+        if (isPlaceholderBecomingSplit) {
+            // When placeholder is shown in split, we should keep the focus on the primary.
+            wct.requestFocusOnTaskFragment(primaryContainer.getTaskFragmentToken());
+        }
     }
 
     private void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
