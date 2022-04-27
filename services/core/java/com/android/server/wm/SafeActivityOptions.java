@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.CONTROL_KEYGUARD;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STATUS_BAR_SERVICE;
@@ -292,6 +293,20 @@ public class SafeActivityOptions {
                 final String msg = "Permission Denial: starting " + getIntentString(intent)
                         + " from " + callerApp + " (pid=" + callingPid
                         + ", uid=" + callingUid + ") with overrideTaskTransition=true";
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+        }
+
+        // Check if the caller is allowed to dismiss keyguard.
+        final boolean dismissKeyguard = options.getDismissKeyguard();
+        if (aInfo != null && dismissKeyguard) {
+            final int controlKeyguardPerm = ActivityTaskManagerService.checkPermission(
+                    CONTROL_KEYGUARD, callingPid, callingUid);
+            if (controlKeyguardPerm != PERMISSION_GRANTED) {
+                final String msg = "Permission Denial: starting " + getIntentString(intent)
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ") with dismissKeyguard=true";
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }
