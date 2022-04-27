@@ -42,15 +42,13 @@ public class WorkPolicyUtils {
     private static final int USER_NULL = -10000;
 
     public WorkPolicyUtils(
-            Context applicationContext,
-            PackageManager mPm,
-            UserManager mUm,
-            DevicePolicyManager mDpm
+            Context context
     ) {
-        mContext = applicationContext;
-        mPackageManager = mPm;
-        mUserManager = mUm;
-        mDevicePolicyManager = mDpm;
+        mContext = context;
+        mPackageManager = context.getPackageManager();
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mDevicePolicyManager =
+                (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
     }
 
     /**
