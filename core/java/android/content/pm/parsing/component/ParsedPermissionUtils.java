@@ -25,6 +25,8 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.util.ArrayMap;
+import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -32,6 +34,8 @@ import com.android.internal.R;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 
 /** @hide */
 public class ParsedPermissionUtils {
@@ -232,5 +236,51 @@ public class ParsedPermissionUtils {
 
         return ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, permissionGroup,
                 input);
+    }
+
+    /**
+     * Determines if a duplicate permission is malformed .i.e. defines different protection level
+     * or group
+     */
+    private static boolean isMalformedDuplicate(ParsedPermission p1, ParsedPermission p2) {
+        // Since a permission tree is also added as a permission with normal protection
+        // level, we need to skip if the parsedPermission is a permission tree.
+        if (p1 == null || p2 == null || p1.isTree() || p2.isTree()) {
+            return false;
+        }
+
+        if (p1.getProtectionLevel() != p2.getProtectionLevel()) {
+            return true;
+        }
+        if (!Objects.equals(p1.getGroup(), p2.getGroup())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return {@code true} if the package declares malformed duplicate permissions.
+     *
+     */
+    public static boolean declareDuplicatePermission(@NonNull ParsingPackage pkg) {
+        final List<ParsedPermission> permissions = pkg.getPermissions();
+        final int size = permissions.size();
+        if (size > 0) {
+            final ArrayMap<String, ParsedPermission> checkDuplicatePerm = new ArrayMap<>(size);
+            for (int i = 0; i < size; i++) {
+                final ParsedPermission parsedPermission = permissions.get(i);
+                final String name = parsedPermission.getName();
+                final ParsedPermission perm = checkDuplicatePerm.get(name);
+                if (isMalformedDuplicate(parsedPermission, perm)) {
+                    // Fix for b/213323615
+                    EventLog.writeEvent(0x534e4554, "213323615",
+                            "The package " + pkg.getPackageName() + " seems malicious");
+                    return true;
+                }
+                checkDuplicatePerm.put(name, parsedPermission);
+            }
+        }
+        return false;
     }
 }
