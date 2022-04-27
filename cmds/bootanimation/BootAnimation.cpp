@@ -1440,6 +1440,8 @@ bool BootAnimation::playAnimation(const Animation& animation) {
 
     int fadedFramesCount = 0;
     int lastDisplayedProgress = 0;
+    int colorTransitionStart = animation.colorTransitionStart;
+    int colorTransitionEnd = animation.colorTransitionEnd;
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
@@ -1452,14 +1454,26 @@ bool BootAnimation::playAnimation(const Animation& animation) {
             continue; //to next part
         }
 
-        if (animation.dynamicColoringEnabled && part.useDynamicColoring && !mDynamicColorsApplied) {
-            SLOGD("Trying to load dynamic color sysprops.");
-            initDynamicColors();
-        }
-
         // process the part not only while the count allows but also if already fading
         for (int r=0 ; !part.count || r<part.count || fadedFramesCount > 0 ; r++) {
             if (shouldStopPlayingPart(part, fadedFramesCount, lastDisplayedProgress)) break;
+
+            // It's possible that the sysprops were not loaded yet at this boot phase.
+            // If that's the case, then we should keep trying until they are available.
+            if (animation.dynamicColoringEnabled && !mDynamicColorsApplied
+                && (part.useDynamicColoring || part.postDynamicColoring)) {
+                SLOGD("Trying to load dynamic color sysprops.");
+                initDynamicColors();
+                if (mDynamicColorsApplied) {
+                    // Sysprops were loaded. Next step is to adjust the animation if we loaded
+                    // the colors after the animation should have started.
+                    const int transitionLength = colorTransitionEnd - colorTransitionStart;
+                    if (part.postDynamicColoring) {
+                        colorTransitionStart = 0;
+                        colorTransitionEnd = fmin(transitionLength, fcount - 1);
+                    }
+                }
+            }
 
             mCallbacks->playPart(i, part, r);
 
@@ -1490,9 +1504,8 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 // - 1 for parts that come after.
                 float colorProgress = part.useDynamicColoring
                     ? fmin(fmax(
-                        ((float)j - animation.colorTransitionStart) /
-                            fmax(animation.colorTransitionEnd -
-                                animation.colorTransitionStart, 1.0f), 0.0f), 1.0f)
+                        ((float)j - colorTransitionStart) /
+                            fmax(colorTransitionEnd - colorTransitionStart, 1.0f), 0.0f), 1.0f)
                     : (part.postDynamicColoring ? 1 : 0);
 
                 processDisplayEvents();

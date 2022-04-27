@@ -8515,13 +8515,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean isDeviceOwnerUserId(int userId) {
-        synchronized (getLockObject()) {
-            return mOwners.hasDeviceOwner()
-                    && mOwners.getDeviceOwnerUserId() == userId;
-        }
-    }
-
     private boolean isDeviceOwnerPackage(String packageName, int userId) {
         synchronized (getLockObject()) {
             return mOwners.hasDeviceOwner()
@@ -14655,6 +14648,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new SecurityException(
                     "Only the system can mark a profile owner of organization-owned device.");
         }
+        // Only a test admin can be unmarked as a profile owner on an organization-owned device.
+        synchronized (getLockObject()) {
+            if (!isProfileOwnerOnOrganizationOwnedDevice && !isAdminTestOnlyLocked(who, userId)) {
+                throw new SecurityException("Only a test admin can be unmarked as a "
+                        + "profile owner of organization-owned device.");
+            }
+        }
 
         if (isAdb(caller)) {
             if (hasIncompatibleAccountsOrNonAdbNoLock(caller, userId, who)) {
@@ -18267,7 +18267,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void updateNetworkPreferenceForUser(int userId,
             List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs) {
-        if (!isManagedProfile(userId) && !isDeviceOwnerUserId(userId)) {
+        if (!isManagedProfile(userId)) {
             return;
         }
         List<ProfileNetworkPreference> preferences = new ArrayList<>();
