@@ -305,12 +305,17 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"օգտագործել օրացույցը"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ուղարկել և դիտել SMS-ները"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Ֆայլեր և փաստաթղթեր"</string>
+    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"սարքի ֆայլերի և փաստաթղթերի օգտագործման թույլտվություն"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Երաժշտություն և այլ աուդիո նյութեր"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"բացել ձեր սարքում պահված աուդիո ֆայլերը"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Լուսանկարներ և տեսանյութեր"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"բացել ձեր սարքում պահված գրաֆիկական և վիդեո ֆայլերը"</string>
+    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
+    <skip />
+    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Խոսափող"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ձայնագրել"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Ֆիզիկական ակտիվություն"</string>
@@ -2053,7 +2058,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"«Չանհանգստացնել» ռեժիմի կարգավորումները փոխվել են"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Հպեք՝ տեսնելու, թե ինչ է արգելափակվել:"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Ստուգեք ծանուցումների կարգավորումները"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13-ում ձեր տեղադրած հավելվածներին անհրաժեշտ է տրամադրել ծանուցումներ ուղարկելու թույլտվություն։ Հպեք և փոխեք այս թույլտվությունն արդեն տեղադրված հավելվածների համար։"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Հիշեցնել ավելի ուշ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Փակել"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Համակարգ"</string>
@@ -2139,7 +2145,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Այս բովանդակությունը հնարավոր չէ ուղարկել անձնական հավելվածներով"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Այս բովանդակությունը հնարավոր չէ բացել անձնական հավելվածներով"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Աշխատանքային պրոֆիլի ծառայությունը դադարեցված է"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Հպեք՝ միացնելու համար"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Հպեք միացնելու համար"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Աշխատանքային հավելվածներ չկան"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Անձնական հավելվածներ չկան"</string>
     <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Բացե՞լ <xliff:g id="APP">%s</xliff:g> հավելվածը ձեր անձնական պրոֆիլում"</string>
