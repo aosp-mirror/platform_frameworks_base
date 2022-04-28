@@ -16,6 +16,8 @@
 
 package com.android.server.vcn.routeselection;
 
+import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.LinkProperties;
@@ -23,7 +25,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
 import android.os.ParcelUuid;
-import android.os.PersistableBundle;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
@@ -41,10 +42,14 @@ import java.util.Objects;
  * @hide
  */
 public class UnderlyingNetworkRecord {
+    private static final int PRIORITY_CLASS_INVALID = Integer.MAX_VALUE;
+
     @NonNull public final Network network;
     @NonNull public final NetworkCapabilities networkCapabilities;
     @NonNull public final LinkProperties linkProperties;
     public final boolean isBlocked;
+
+    private int mPriorityClass = PRIORITY_CLASS_INVALID;
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public UnderlyingNetworkRecord(
@@ -56,6 +61,34 @@ public class UnderlyingNetworkRecord {
         this.networkCapabilities = networkCapabilities;
         this.linkProperties = linkProperties;
         this.isBlocked = isBlocked;
+    }
+
+    private int getOrCalculatePriorityClass(
+            VcnContext vcnContext,
+            List<VcnUnderlyingNetworkTemplate> underlyingNetworkTemplates,
+            ParcelUuid subscriptionGroup,
+            TelephonySubscriptionSnapshot snapshot,
+            UnderlyingNetworkRecord currentlySelected,
+            PersistableBundleWrapper carrierConfig) {
+        // Never changes after the underlying network record is created.
+        if (mPriorityClass == PRIORITY_CLASS_INVALID) {
+            mPriorityClass =
+                    NetworkPriorityClassifier.calculatePriorityClass(
+                            vcnContext,
+                            this,
+                            underlyingNetworkTemplates,
+                            subscriptionGroup,
+                            snapshot,
+                            currentlySelected,
+                            carrierConfig);
+        }
+
+        return mPriorityClass;
+    }
+
+    // Used in UnderlyingNetworkController
+    int getPriorityClass() {
+        return mPriorityClass;
     }
 
     @Override
@@ -81,21 +114,19 @@ public class UnderlyingNetworkRecord {
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
-            PersistableBundle carrierConfig) {
+            PersistableBundleWrapper carrierConfig) {
         return (left, right) -> {
             final int leftIndex =
-                    NetworkPriorityClassifier.calculatePriorityClass(
+                    left.getOrCalculatePriorityClass(
                             vcnContext,
-                            left,
                             underlyingNetworkTemplates,
                             subscriptionGroup,
                             snapshot,
                             currentlySelected,
                             carrierConfig);
             final int rightIndex =
-                    NetworkPriorityClassifier.calculatePriorityClass(
+                    right.getOrCalculatePriorityClass(
                             vcnContext,
-                            right,
                             underlyingNetworkTemplates,
                             subscriptionGroup,
                             snapshot,
@@ -137,21 +168,20 @@ public class UnderlyingNetworkRecord {
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
-            PersistableBundle carrierConfig) {
+            PersistableBundleWrapper carrierConfig) {
         pw.println("UnderlyingNetworkRecord:");
         pw.increaseIndent();
 
         final int priorityIndex =
-                NetworkPriorityClassifier.calculatePriorityClass(
+                getOrCalculatePriorityClass(
                         vcnContext,
-                        this,
                         underlyingNetworkTemplates,
                         subscriptionGroup,
                         snapshot,
                         currentlySelected,
                         carrierConfig);
 
-        pw.println("Priority index:" + priorityIndex);
+        pw.println("Priority index: " + priorityIndex);
         pw.println("mNetwork: " + network);
         pw.println("mNetworkCapabilities: " + networkCapabilities);
         pw.println("mLinkProperties: " + linkProperties);

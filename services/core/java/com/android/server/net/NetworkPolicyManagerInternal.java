@@ -16,6 +16,9 @@
 
 package com.android.server.net;
 
+import static com.android.server.net.NetworkPolicyManagerService.UidBlockedState.getAllowedReasonsForProcState;
+import static com.android.server.net.NetworkPolicyManagerService.UidBlockedState.getEffectiveBlockedReasons;
+
 import android.annotation.Nullable;
 import android.net.Network;
 import android.os.PowerExemptionManager.ReasonCode;
@@ -84,7 +87,6 @@ public abstract class NetworkPolicyManagerInternal {
     public abstract void setMeteredRestrictedPackages(
             Set<String> packageNames, int userId);
 
-
     /**
      * Similar to {@link #setMeteredRestrictedPackages(Set, int)} but updates the restricted
      * packages list asynchronously.
@@ -97,4 +99,10 @@ public abstract class NetworkPolicyManagerInternal {
 
     /** Informs that the Low Power Standby allowlist has changed */
     public abstract void setLowPowerStandbyAllowlist(int[] uids);
+
+    /** Update the {@code blockedReasons} taking into account the {@code procState} of the uid */
+    public static int updateBlockedReasonsWithProcState(int blockedReasons, int procState) {
+        final int allowedReasons = getAllowedReasonsForProcState(procState);
+        return getEffectiveBlockedReasons(blockedReasons, allowedReasons);
+    }
 }

@@ -52,6 +52,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.IWeakEscrowTokenActivatedListener;
 import com.android.internal.widget.IWeakEscrowTokenRemovedListener;
@@ -183,6 +184,19 @@ public class KeyguardManager {
     })
     @interface LockTypes {}
 
+    private final IKeyguardLockedStateListener mIKeyguardLockedStateListener =
+            new IKeyguardLockedStateListener.Stub() {
+                @Override
+                public void onKeyguardLockedStateChanged(boolean isKeyguardLocked) {
+                    mKeyguardLockedStateListeners.forEach((listener, executor) -> {
+                        executor.execute(
+                                () -> listener.onKeyguardLockedStateChanged(isKeyguardLocked));
+                    });
+                }
+            };
+    private final ArrayMap<KeyguardLockedStateListener, Executor>
+            mKeyguardLockedStateListeners = new ArrayMap<>();
+
     /**
      * Get an intent to prompt the user to confirm credentials (pin, pattern, password or biometrics
      * if enrolled) for the current user of the device. The caller is expected to launch this
@@ -247,8 +261,10 @@ public class KeyguardManager {
             CharSequence title, CharSequence description, int userId,
             boolean disallowBiometricsIfPolicyExists) {
         Intent intent = this.createConfirmDeviceCredentialIntent(title, description, userId);
-        intent.putExtra(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
-                disallowBiometricsIfPolicyExists);
+        if (intent != null) {
+            intent.putExtra(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
+                    disallowBiometricsIfPolicyExists);
+        }
         return intent;
     }
 
@@ -534,7 +550,7 @@ public class KeyguardManager {
     /**
      * Return whether the keyguard is currently locked.
      *
-     * @return true if keyguard is locked.
+     * @return {@code true} if the keyguard is locked.
      */
     public boolean isKeyguardLocked() {
         try {
@@ -550,7 +566,7 @@ public class KeyguardManager {
      *
      * <p>See also {@link #isDeviceSecure()} which ignores SIM locked states.
      *
-     * @return true if a PIN, pattern or password is set or a SIM card is locked.
+     * @return {@code true} if a PIN, pattern or password is set or a SIM card is locked.
      */
     public boolean isKeyguardSecure() {
         try {
@@ -565,7 +581,7 @@ public class KeyguardManager {
      * keyguard password emergency screen). When in such mode, certain keys,
      * such as the Home key and the right soft keys, don't work.
      *
-     * @return true if in keyguard restricted input mode.
+     * @return {@code true} if in keyguard restricted input mode.
      * @deprecated Use {@link #isKeyguardLocked()} instead.
      */
     public boolean inKeyguardRestrictedInputMode() {
@@ -576,7 +592,7 @@ public class KeyguardManager {
      * Returns whether the device is currently locked and requires a PIN, pattern or
      * password to unlock.
      *
-     * @return true if unlocking the device currently requires a PIN, pattern or
+     * @return {@code true} if unlocking the device currently requires a PIN, pattern or
      * password.
      */
     public boolean isDeviceLocked() {
@@ -603,7 +619,7 @@ public class KeyguardManager {
      *
      * <p>See also {@link #isKeyguardSecure} which treats SIM locked states as secure.
      *
-     * @return true if a PIN, pattern or password was set.
+     * @return {@code true} if a PIN, pattern or password was set.
      */
     public boolean isDeviceSecure() {
         return isDeviceSecure(mContext.getUserId());
@@ -762,7 +778,7 @@ public class KeyguardManager {
     *        as the output of String#getBytes
     * @param complexity - complexity level imposed by the requester
     *        as defined in {@code DevicePolicyManager.PasswordComplexity}
-    * @return true if the password is valid, false otherwise
+    * @return {@code true} if the password is valid, false otherwise
     * @hide
     */
     @RequiresPermission(Manifest.permission.SET_INITIAL_LOCK)
@@ -821,7 +837,7 @@ public class KeyguardManager {
     *        as the output of String#getBytes
     * @param complexity - complexity level imposed by the requester
     *        as defined in {@code DevicePolicyManager.PasswordComplexity}
-    * @return true if the lock is successfully set, false otherwise
+    * @return {@code true} if the lock is successfully set, false otherwise
     * @hide
     */
     @RequiresPermission(Manifest.permission.SET_INITIAL_LOCK)
@@ -903,8 +919,8 @@ public class KeyguardManager {
     /**
      * Remove a weak escrow token.
      *
-     * @return true if the given handle refers to a valid weak token previously returned from
-     * {@link #addWeakEscrowToken}, whether it's active or not. return false otherwise.
+     * @return {@code true} if the given handle refers to a valid weak token previously returned
+     * from {@link #addWeakEscrowToken}, whether it's active or not. return false otherwise.
      * @hide
      */
     @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
@@ -944,7 +960,7 @@ public class KeyguardManager {
     /**
      * Register the given WeakEscrowTokenRemovedListener.
      *
-     * @return true if the listener is registered successfully, return false otherwise.
+     * @return {@code true} if the listener is registered successfully, return false otherwise.
      * @hide
      */
     @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
@@ -982,7 +998,7 @@ public class KeyguardManager {
     /**
      * Unregister the given WeakEscrowTokenRemovedListener.
      *
-     * @return true if the listener is unregistered successfully, return false otherwise.
+     * @return {@code true} if the listener is unregistered successfully, return false otherwise.
      * @hide
      */
     @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
@@ -1074,6 +1090,64 @@ public class KeyguardManager {
                 return LockscreenCredential.createPattern(pattern);
             default:
                 throw new IllegalArgumentException("Unknown lock type " + lockType);
+        }
+    }
+
+    /**
+     * Listener for keyguard locked state changes.
+     */
+    @FunctionalInterface
+    public interface KeyguardLockedStateListener {
+        /**
+         * Callback function that executes when the keyguard locked state changes.
+         */
+        void onKeyguardLockedStateChanged(boolean isKeyguardLocked);
+    }
+
+    /**
+     * Registers a listener to execute when the keyguard locked state changes.
+     *
+     * @param listener The listener to add to receive keyguard locked state changes.
+     *
+     * @see #isKeyguardLocked()
+     * @see #removeKeyguardLockedStateListener(KeyguardLockedStateListener)
+     */
+    @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
+    public void addKeyguardLockedStateListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull KeyguardLockedStateListener listener) {
+        synchronized (mKeyguardLockedStateListeners) {
+            mKeyguardLockedStateListeners.put(listener, executor);
+            if (mKeyguardLockedStateListeners.size() > 1) {
+                return;
+            }
+            try {
+                mWM.addKeyguardLockedStateListener(mIKeyguardLockedStateListener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Unregisters a listener that executes when the keyguard locked state changes.
+     *
+     * @param listener The listener to remove.
+     *
+     * @see #isKeyguardLocked()
+     * @see #addKeyguardLockedStateListener(Executor, KeyguardLockedStateListener)
+     */
+    @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
+    public void removeKeyguardLockedStateListener(@NonNull KeyguardLockedStateListener listener) {
+        synchronized (mKeyguardLockedStateListeners) {
+            mKeyguardLockedStateListeners.remove(listener);
+            if (!mKeyguardLockedStateListeners.isEmpty()) {
+                return;
+            }
+            try {
+                mWM.removeKeyguardLockedStateListener(mIKeyguardLockedStateListener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 }

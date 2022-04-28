@@ -262,6 +262,7 @@ Result FilterClient::getFilterMq() {
 
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->getQueueDesc(&aidlMqDesc);
+        res = ClientHelper::getServiceSpecificErrorCode(s);
         if (s.isOk()) {
             mFilterMQ = new (nothrow) AidlMQ(aidlMqDesc, false/*resetPointer*/);
             EventFlag::createEventFlag(mFilterMQ->getEventFlagWord(), &mFilterMQEventFlag);

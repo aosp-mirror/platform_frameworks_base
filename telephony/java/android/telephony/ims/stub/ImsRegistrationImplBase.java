@@ -93,7 +93,7 @@ public class ImsRegistrationImplBase {
 
     /**
      * This is used to check the upper range of registration tech
-     * {@hide}
+     * @hide
      */
     public static final int REGISTRATION_TECH_MAX = REGISTRATION_TECH_NR + 1;
 

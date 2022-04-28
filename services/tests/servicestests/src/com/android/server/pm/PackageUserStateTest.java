@@ -85,7 +85,7 @@ public class PackageUserStateTest {
 
         oldUserState = new PackageUserStateImpl();
         oldUserState.putSuspendParams("suspendingPackage",
-                SuspendParams.getInstanceOrNull(null, new PersistableBundle(), null));
+                new SuspendParams(null, new PersistableBundle(), null));
         assertThat(testUserState.equals(oldUserState), is(false));
 
         oldUserState = new PackageUserStateImpl();
@@ -185,7 +185,7 @@ public class PackageUserStateTest {
 
     private static SuspendParams createSuspendParams(SuspendDialogInfo dialogInfo,
             PersistableBundle appExtras, PersistableBundle launcherExtras) {
-        return SuspendParams.getInstanceOrNull(dialogInfo, appExtras, launcherExtras);
+        return new SuspendParams(dialogInfo, appExtras, launcherExtras);
     }
 
     private static PersistableBundle createPersistableBundle(String lKey, long lValue, String sKey,

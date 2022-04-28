@@ -1058,9 +1058,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.NETWORK_SCORING_PROVISIONED,
                 GlobalSettingsProto.Network.SCORING_PROVISIONED);
         dumpSetting(s, p,
-                Settings.Global.NETWORK_ACCESS_TIMEOUT_MS,
-                GlobalSettingsProto.Network.ACCESS_TIMEOUT_MS);
-        dumpSetting(s, p,
                 Settings.Global.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS,
                 GlobalSettingsProto.Network.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS);
         p.end(networkToken);
@@ -2252,9 +2249,14 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.MULTI_PRESS_TIMEOUT,
                 SecureSettingsProto.MULTI_PRESS_TIMEOUT);
 
+        final long navBar = p.start(SecureSettingsProto.NAV_BAR);
+        dumpSetting(s, p,
+                Settings.Secure.NAV_BAR_FORCE_VISIBLE,
+                SecureSettingsProto.NavBar.NAV_BAR_FORCE_VISIBLE);
         dumpSetting(s, p,
                 Settings.Secure.NAV_BAR_KIDS_MODE,
-                SecureSettingsProto.NAV_BAR_KIDS_MODE);
+                SecureSettingsProto.NavBar.NAV_BAR_KIDS_MODE);
+        p.end(navBar);
 
         dumpSetting(s, p,
                 Settings.Secure.NAVIGATION_MODE,

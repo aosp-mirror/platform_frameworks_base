@@ -16,6 +16,8 @@
 
 package com.android.systemui;
 
+import android.annotation.StyleRes;
+import android.content.res.TypedArray;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
@@ -23,9 +25,9 @@ import android.widget.TextView;
 /**
  * Utility class to update the font size when the configuration has changed.
  */
-public class FontSizeUtils {
+public final class FontSizeUtils {
 
-    public static final float LARGE_TEXT_SCALE = 1.3f;
+    private FontSizeUtils() {}
 
     public static void updateFontSize(View parent, int viewId, int dimensId) {
         updateFontSize((TextView) parent.findViewById(viewId), dimensId);
@@ -36,5 +38,21 @@ public class FontSizeUtils {
             v.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     v.getResources().getDimensionPixelSize(dimensId));
         }
+    }
+
+    /**
+     * Updates the font size according to the style given.
+     *
+     * @param v     Text to update.
+     * @param resId Style applying to the text.
+     */
+    public static void updateFontSizeFromStyle(TextView v, @StyleRes int resId) {
+        int[] attrs = {android.R.attr.textSize};
+        int indexOfAttrTextSize = 0;
+        TypedArray ta = v.getContext().obtainStyledAttributes(resId, attrs);
+        int updatedTextPixelSize = ta.getDimensionPixelSize(indexOfAttrTextSize,
+                (int) v.getTextSize());
+        v.setTextSize(TypedValue.COMPLEX_UNIT_PX, updatedTextPixelSize);
+        ta.recycle();
     }
 }

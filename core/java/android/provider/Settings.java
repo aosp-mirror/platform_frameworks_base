@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -79,6 +78,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.speech.tts.TextToSpeech;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
@@ -86,8 +86,11 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
 import android.view.Display;
+import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
+import android.widget.Editor;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -239,6 +242,20 @@ public final class Settings {
     @SystemApi
     public static final String ACTION_TETHER_PROVISIONING_UI =
             "android.settings.TETHER_PROVISIONING_UI";
+
+    /**
+     * Activity Action: Show a dialog activity to notify tethering is NOT supported by carrier.
+     *
+     * When {@link android.telephony.CarrierConfigManager#KEY_CARRIER_SUPPORTS_TETHERING_BOOL}
+     * is false, and tethering is started by Settings, this dialog activity will be started to
+     * tell the user that tethering is not supported by carrier.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_TETHER_UNSUPPORTED_CARRIER_UI =
+            "android.settings.TETHER_UNSUPPORTED_CARRIER_UI";
 
     /**
      * Activity Action: Show settings to allow entering/exiting airplane mode.
@@ -1996,6 +2013,15 @@ public final class Settings {
             "android.settings.ALL_APPS_NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show app settings specifically for sending notifications. Same as
+     * ALL_APPS_NOTIFICATION_SETTINGS but meant for internal use.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW =
+            "android.settings.ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW";
+
+    /**
      * Activity Action: Show notification settings for a single app.
      * <p>
      *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
@@ -2128,10 +2154,10 @@ public final class Settings {
     /**
      * Intent extra: The id of a setting restricted by supervisors.
      * <p>
-     * Type: String with a value from the SupervisorVerificationSetting annotation below.
+     * Type: Integer with a value from the one of the SUPERVISOR_VERIFICATION_* constants below.
      * <ul>
-     * <li>{@link #SUPERVISOR_VERIFICATION_SETTING_UNKNOWN}
-     * <li>{@link #SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS}
+     * <li>{@see #SUPERVISOR_VERIFICATION_SETTING_UNKNOWN}
+     * <li>{@see #SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS}
      * </ul>
      * </p>
      */
@@ -2139,22 +2165,23 @@ public final class Settings {
             "android.provider.extra.SUPERVISOR_RESTRICTED_SETTING_KEY";
 
     /**
-     * Unknown setting.
+     * The unknown setting can usually be ignored and is used for compatibility with future
+     * supervisor settings.
      */
-    public static final String SUPERVISOR_VERIFICATION_SETTING_UNKNOWN = "";
+    public static final int SUPERVISOR_VERIFICATION_SETTING_UNKNOWN = 0;
 
     /**
-     * Biometric settings for supervisors.
+     * Settings for supervisors to control what kinds of biometric sensors, such a face and
+     * fingerprint scanners, can be used on the device.
      */
-    public static final String SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS =
-            "supervisor_restricted_biometrics_controller";
+    public static final int SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS = 1;
 
     /**
      * Keys for {@link #EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY}.
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef(prefix = { "SUPERVISOR_VERIFICATION_SETTING_" }, value = {
+    @IntDef(prefix = { "SUPERVISOR_VERIFICATION_SETTING_" }, value = {
             SUPERVISOR_VERIFICATION_SETTING_UNKNOWN,
             SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS,
     })
@@ -4499,13 +4526,6 @@ public final class Settings {
          */
         @Readable
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
-
-        /**
-         * The amount of time in milliseconds before the device goes to sleep or begins to dream
-         * after a period of inactivity while it is docked.
-         * @hide
-         */
-        public static final String SCREEN_OFF_TIMEOUT_DOCKED = "screen_off_timeout_docked";
 
         /**
          * The screen backlight brightness between 0 and 255.
@@ -7066,7 +7086,7 @@ public final class Settings {
          *
          * @hide
          */
-        @Readable
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
         public static final String ALWAYS_ON_VPN_LOCKDOWN_WHITELIST =
                 "always_on_vpn_lockdown_whitelist";
 
@@ -7212,6 +7232,13 @@ public final class Settings {
          */
         public static final String LOCATION_SHOW_SYSTEM_OPS = "locationShowSystemOps";
 
+
+        /**
+         * Whether or not an indicator experiment has started.
+         * @hide
+         */
+        public static final String LOCATION_INDICATOR_EXPERIMENT_STARTED =
+                "locationIndicatorExperimentStarted";
         /**
          * A flag containing settings used for biometric weak
          * @hide
@@ -7461,6 +7488,16 @@ public final class Settings {
                 "accessibility_shortcut_dialog_shown";
 
         /**
+         * Setting specifying if the timeout restriction
+         * {@link ViewConfiguration#getAccessibilityShortcutKeyTimeout()}
+         * of the accessibility shortcut dialog is skipped.
+         *
+         * @hide
+         */
+        public static final String SKIP_ACCESSIBILITY_SHORTCUT_DIALOG_TIMEOUT_RESTRICTION =
+                "skip_accessibility_shortcut_dialog_timeout_restriction";
+
+        /**
          * Setting specifying the accessibility services, accessibility shortcut targets,
          * or features to be toggled via the accessibility shortcut.
          *
@@ -7640,6 +7677,20 @@ public final class Settings {
         @Readable
         public static final String ZEN_SETTINGS_SUGGESTION_VIEWED =
                 "zen_settings_suggestion_viewed";
+
+        /**
+         * State of whether review notification permissions notification needs to
+         * be shown the user, and whether the user has interacted.
+         *
+         * Valid values:
+         *   -1 = UNKNOWN
+         *    0 = SHOULD_SHOW
+         *    1 = USER_INTERACTED
+         *    2 = DISMISSED
+         * @hide
+         */
+        public static final String REVIEW_PERMISSIONS_NOTIFICATION_STATE =
+                "review_permissions_notification_state";
 
         /**
          * Whether the in call notification is enabled to play sound during calls.  The value is
@@ -9950,6 +10001,14 @@ public final class Settings {
         public static final String LOCKSCREEN_SHOW_CONTROLS = "lockscreen_show_controls";
 
         /**
+         * Whether trivial home controls can be used without authentication
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS =
+                "lockscreen_allow_trivial_controls";
+
+        /**
          * Whether wallet should be accessible from the lockscreen
          *
          * @hide
@@ -9963,6 +10022,13 @@ public final class Settings {
          */
         public static final String LOCKSCREEN_USE_DOUBLE_LINE_CLOCK =
                 "lockscreen_use_double_line_clock";
+
+        /**
+         * Whether to show the vibrate icon in the Status Bar (default off)
+         *
+         * @hide
+         */
+        public static final String STATUS_BAR_SHOW_VIBRATE_ICON = "status_bar_show_vibrate_icon";
 
         /**
          * Specifies whether the web action API is enabled.
@@ -10240,10 +10306,18 @@ public final class Settings {
          * The strategy used for generating the tonal palettes can be defined with the
          * {@code android.theme.customization.theme_style} key, with one of the following options:
          * <ul>
-         *   <li> TONAL_SPOT = Default Material You theme since Android S.</li>
-         *   <li> VIBRANT = Theme where accent 2 and 3 are analogous to accent 1.</li>
-         *   <li> EXPRESSIVE = Highly chromatic theme.</li>
-         *   <li> SPRITZ = Desaturated theme, almost greyscale.</li>
+         *   <li> {@code TONAL_SPOT} is a mid vibrancy palette that uses an accent 3 analogous to
+         *   accent 1.</li>
+         *   <li> {@code VIBRANT} is a high vibrancy palette that harmoniously blends subtle shifts
+         *   between colors.</li>
+         *   <li> {@code EXPRESSIVE} is a high vibrancy palette that pairs unexpected and unique
+         *   accents colors together.</li>
+         *   <li> {@code SPRITZ} is a low vibrancy palette that creates a soft wash between
+         *   colors.</li>
+         *   <li> {@code RAINBOW} uses both chromatic accents and neutral surfaces to create a more
+         *   subtle color experience for users.</li>
+         *   <li> {@code FRUIT_SALAD} experiments with the concept of "two tone colors" to give
+         *   users more expression.</li>
          * </ul>
          *
          * Example of valid fabricated theme specification:
@@ -10259,6 +10333,14 @@ public final class Settings {
         @Readable
         public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES =
                 "theme_customization_overlay_packages";
+
+        /**
+         * Indicates whether the nav bar is forced to always be visible, even in immersive mode.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String NAV_BAR_FORCE_VISIBLE = "nav_bar_force_visible";
 
         /**
          * Indicates whether the device is in kids nav mode.
@@ -10690,14 +10772,6 @@ public final class Settings {
          */
         public static final String COMMUNAL_MODE_TRUSTED_NETWORKS =
                 "communal_mode_trusted_networks";
-
-        /**
-         * Setting to allow Fast Pair scans to be enabled.
-         * @hide
-         */
-        @SystemApi
-        @Readable
-        public static final String FAST_PAIR_SCAN_ENABLED = "fast_pair_scan_enabled";
 
         /**
          * Setting to store denylisted system languages by the CEC {@code <Set Menu Language>}
@@ -11274,8 +11348,9 @@ public final class Settings {
 
         /**
          * Whether or not data roaming is enabled. (0 = false, 1 = true)
+         * Use {@link TelephonyManager#isDataRoamingEnabled} instead of calling via settings.
          */
-        @Readable
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
         public static final String DATA_ROAMING = "data_roaming";
 
         /**
@@ -11436,6 +11511,15 @@ public final class Settings {
         */
         @Readable
         public static final String DEVICE_PROVISIONED = "device_provisioned";
+
+        /**
+         * Whether bypassing the device policy management role holder qualifcation is allowed,
+         * (0 = false, 1 = true).
+         *
+         * @hide
+         */
+        public static final String BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS =
+                "bypass_device_policy_management_role_qualifications";
 
         /**
          * Indicates whether mobile data should be allowed while the device is being provisioned.
@@ -14203,6 +14287,14 @@ public final class Settings {
                 "emergency_gesture_power_button_cooldown_period_ms";
 
         /**
+         * The minimum time in milliseconds to perform the emergency gesture.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS =
+                "emergency_gesture_tap_detection_min_time_ms";
+
+        /**
          * Whether to enable automatic system server heap dumps. This only works on userdebug or
          * eng builds, not on user builds. This is set by the user and overrides the config value.
          * 1 means enable, 0 means disable.
@@ -15299,16 +15391,6 @@ public final class Settings {
         public static final String DEVICE_DEMO_MODE = "device_demo_mode";
 
         /**
-         * Indicates the maximum time that an app is blocked for the network rules to get updated.
-         *
-         * Type: long
-         *
-         * @hide
-         */
-        @Readable
-        public static final String NETWORK_ACCESS_TIMEOUT_MS = "network_access_timeout_ms";
-
-        /**
          * The reason for the settings database being downgraded. This is only for
          * troubleshooting purposes and its value should not be interpreted in any way.
          *
@@ -15481,6 +15563,17 @@ public final class Settings {
          */
         @Readable
         public static final String AUTOFILL_MAX_VISIBLE_DATASETS = "autofill_max_visible_datasets";
+
+        /**
+         * Toggle for enabling stylus handwriting. When enabled, current Input method receives
+         * stylus {@link MotionEvent}s if an {@link Editor} is focused.
+         *
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String STYLUS_HANDWRITING_ENABLED = "stylus_handwriting_enabled";
 
         /**
          * Exemptions to the hidden API blacklist.

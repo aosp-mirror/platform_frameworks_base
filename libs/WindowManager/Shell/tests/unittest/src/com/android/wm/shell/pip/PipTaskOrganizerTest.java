@@ -48,7 +48,6 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
@@ -76,7 +75,6 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     @Mock private PipTransitionController mMockPipTransitionController;
     @Mock private PipSurfaceTransactionHelper mMockPipSurfaceTransactionHelper;
     @Mock private PipUiEventLogger mMockPipUiEventLogger;
-    @Mock private Optional<LegacySplitScreenController> mMockOptionalLegacySplitScreen;
     @Mock private Optional<SplitScreenController> mMockOptionalSplitScreen;
     @Mock private ShellTaskOrganizer mMockShellTaskOrganizer;
     private TestShellExecutor mMainExecutor;
@@ -101,8 +99,8 @@ public class PipTaskOrganizerTest extends ShellTestCase {
                 mMockSyncTransactionQueue, mPipTransitionState, mPipBoundsState,
                 mPipBoundsAlgorithm, mMockPhonePipMenuController,
                 mMockPipAnimationController, mMockPipSurfaceTransactionHelper,
-                mMockPipTransitionController, mMockOptionalLegacySplitScreen,
-                mMockOptionalSplitScreen, mMockDisplayController, mMockPipUiEventLogger,
+                mMockPipTransitionController, mMockOptionalSplitScreen,
+                mMockDisplayController, mMockPipUiEventLogger,
                 mMockShellTaskOrganizer, mMainExecutor));
         mMainExecutor.flushAll();
         preparePipTaskOrg();
@@ -244,6 +242,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mPipBoundsState.setDisplayLayout(new DisplayLayout(info,
                 mContext.getResources(), true, true));
         mSpiedPipTaskOrganizer.setOneShotAnimationType(PipAnimationController.ANIM_TYPE_ALPHA);
+        mSpiedPipTaskOrganizer.setSurfaceControlTransactionFactory(PipDummySurfaceControlTx::new);
         doNothing().when(mSpiedPipTaskOrganizer).enterPipWithAlphaAnimation(any(), anyLong());
         doNothing().when(mSpiedPipTaskOrganizer).scheduleAnimateResizePip(any(), anyInt(), any());
     }

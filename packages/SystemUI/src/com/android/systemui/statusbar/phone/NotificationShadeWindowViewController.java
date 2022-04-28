@@ -36,19 +36,21 @@ import com.android.keyguard.LockIconViewController;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.tuner.TunerService;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Optional;
 
@@ -57,6 +59,7 @@ import javax.inject.Inject;
 /**
  * Controller for {@link NotificationShadeWindowView}.
  */
+@CentralSurfacesComponent.CentralSurfacesScope
 public class NotificationShadeWindowViewController {
     private static final String TAG = "NotifShadeWindowVC";
     private final FalsingCollector mFalsingCollector;
@@ -69,6 +72,8 @@ public class NotificationShadeWindowViewController {
     private final LockIconViewController mLockIconViewController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final StatusBarWindowStateController mStatusBarWindowStateController;
+    private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    private final AmbientState mAmbientState;
 
     private GestureDetector mGestureDetector;
     private View mBrightnessMirror;
@@ -77,8 +82,8 @@ public class NotificationShadeWindowViewController {
     private boolean mExpandAnimationRunning;
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarViewController mStatusBarViewController;
-    private StatusBar mService;
-    private NotificationShadeWindowController mNotificationShadeWindowController;
+    private final CentralSurfaces mService;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
     private boolean mDoubleTapEnabled;
     private boolean mSingleTapEnabled;
@@ -105,7 +110,11 @@ public class NotificationShadeWindowViewController {
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             StatusBarWindowStateController statusBarWindowStateController,
             LockIconViewController lockIconViewController,
-            Optional<LowLightClockController> lowLightClockController) {
+            Optional<LowLightClockController> lowLightClockController,
+            CentralSurfaces centralSurfaces,
+            NotificationShadeWindowController controller,
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            AmbientState ambientState) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mTunerService = tunerService;
@@ -120,6 +129,10 @@ public class NotificationShadeWindowViewController {
         mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
         mLowLightClockController = lowLightClockController;
+        mService = centralSurfaces;
+        mNotificationShadeWindowController = controller;
+        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
+        mAmbientState = ambientState;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -197,7 +210,6 @@ public class NotificationShadeWindowViewController {
                 // Reset manual touch dispatch state here but make sure the UP/CANCEL event still
                 // gets
                 // delivered.
-
                 if (!isCancel && mService.shouldIgnoreTouch()) {
                     return false;
                 }
@@ -211,6 +223,16 @@ public class NotificationShadeWindowViewController {
                 }
                 if (mTouchCancelled || mExpandAnimationRunning) {
                     return false;
+                }
+
+                if (mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
+                    // If the user was sliding their finger across the lock screen,
+                    // we may have been intercepting the touch and forwarding it to the
+                    // UDFPS affordance via mStatusBarKeyguardViewManager.onTouch (see below).
+                    // If this touch ended up unlocking the device, we want to cancel the touch
+                    // immediately, so we don't cause swipe or expand animations afterwards.
+                    cancelCurrentTouch();
+                    return true;
                 }
 
                 mFalsingCollector.onTouchEvent(ev);
@@ -424,9 +446,10 @@ public class NotificationShadeWindowViewController {
             event.recycle();
             mTouchCancelled = true;
         }
+        mAmbientState.setSwipingUp(false);
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.print("  mExpandAnimationRunning=");
         pw.println(mExpandAnimationRunning);
         pw.print("  mTouchCancelled=");
@@ -450,11 +473,6 @@ public class NotificationShadeWindowViewController {
 
     public void setStatusBarViewController(PhoneStatusBarViewController statusBarViewController) {
         mStatusBarViewController = statusBarViewController;
-    }
-
-    public void setService(StatusBar statusBar, NotificationShadeWindowController controller) {
-        mService = statusBar;
-        mNotificationShadeWindowController = controller;
     }
 
     /**

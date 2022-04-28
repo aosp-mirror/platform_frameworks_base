@@ -18,7 +18,6 @@ package com.android.server.accessibility;
 
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_BY_ADMIN;
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_SUCCESS;
-import static android.content.pm.PackageManagerInternal.PACKAGE_INSTALLER;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -31,9 +30,7 @@ import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -42,14 +39,12 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.settingslib.RestrictedLockUtils;
 
@@ -85,8 +80,6 @@ public class AccessibilitySecurityPolicy {
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
             | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
 
-    public static final boolean POLICY_WARNING_ENABLED = true;
-
     /**
      * Methods that should find their way into separate modules, but are still in AMS
      * TODO (b/111889696): Refactoring UserState to AccessibilityUserManager.
@@ -111,6 +104,7 @@ public class AccessibilitySecurityPolicy {
     private AppWidgetManagerInternal mAppWidgetService;
     private AccessibilityWindowManager mAccessibilityWindowManager;
     private int mCurrentUserId = UserHandle.USER_NULL;
+    private boolean mSendNonA11yToolNotificationEnabled = false;
 
     /**
      * Constructor for AccessibilityManagerService.
@@ -124,7 +118,25 @@ public class AccessibilitySecurityPolicy {
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mPolicyWarningUIController = policyWarningUIController;
-        mPolicyWarningUIController.setAccessibilityPolicyManager(this);
+    }
+
+    /**
+     * Enables sending the notification for non-AccessibilityTool services with the given state.
+     *
+     */
+    public void setSendingNonA11yToolNotificationLocked(boolean enable) {
+        if (enable == mSendNonA11yToolNotificationEnabled) {
+            return;
+        }
+
+        mSendNonA11yToolNotificationEnabled = enable;
+        mPolicyWarningUIController.enableSendingNonA11yToolNotification(enable);
+        if (enable) {
+            for (int i = 0; i < mNonA11yCategoryServices.size(); i++) {
+                final ComponentName service = mNonA11yCategoryServices.valueAt(i);
+                mPolicyWarningUIController.onNonA11yCategoryServiceBound(mCurrentUserId, service);
+            }
+        }
     }
 
     /**
@@ -652,6 +664,14 @@ public class AccessibilitySecurityPolicy {
             return false;
         }
 
+        if ((serviceInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) != 0) {
+            Slog.w(LOG_TAG, "Skipping accessibility service " + new ComponentName(
+                    serviceInfo.packageName, serviceInfo.name).flattenToShortString()
+                    + ": the service is the external one and doesn't allow to register as "
+                    + "an accessibility service ");
+            return false;
+        }
+
         int servicePackageUid = serviceInfo.applicationInfo.uid;
         if (mAppOpsManager.noteOpNoThrow(AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE,
                 servicePackageUid, serviceInfo.packageName, null, null)
@@ -722,9 +742,6 @@ public class AccessibilitySecurityPolicy {
      */
     public void onBoundServicesChangedLocked(int userId,
             ArrayList<AccessibilityServiceConnection> boundServices) {
-        if (!POLICY_WARNING_ENABLED) {
-            return;
-        }
         if (mAccessibilityUserManager.getCurrentUserIdLocked() != userId) {
             return;
         }
@@ -734,12 +751,14 @@ public class AccessibilitySecurityPolicy {
             final AccessibilityServiceInfo a11yServiceInfo = boundServices.get(
                     i).getServiceInfo();
             final ComponentName service = a11yServiceInfo.getComponentName().clone();
-            if (!isA11yCategoryService(a11yServiceInfo)) {
+            if (!a11yServiceInfo.isAccessibilityTool()) {
                 tempNonA11yCategoryServices.add(service);
                 if (mNonA11yCategoryServices.contains(service)) {
                     mNonA11yCategoryServices.remove(service);
                 } else {
-                    mPolicyWarningUIController.onNonA11yCategoryServiceBound(userId, service);
+                    if (mSendNonA11yToolNotificationEnabled) {
+                        mPolicyWarningUIController.onNonA11yCategoryServiceBound(userId, service);
+                    }
                 }
             }
         }
@@ -760,14 +779,11 @@ public class AccessibilitySecurityPolicy {
      * @param enabledServices The enabled services
      */
     public void onSwitchUserLocked(int userId, Set<ComponentName> enabledServices) {
-        if (!POLICY_WARNING_ENABLED) {
-            return;
-        }
         if (mCurrentUserId == userId) {
             return;
         }
-
-        mPolicyWarningUIController.onSwitchUserLocked(userId, enabledServices);
+        mPolicyWarningUIController.onSwitchUser(userId,
+                new ArraySet<>(enabledServices));
 
         for (int i = 0; i < mNonA11yCategoryServices.size(); i++) {
             mPolicyWarningUIController.onNonA11yCategoryServiceUnbound(mCurrentUserId,
@@ -783,80 +799,11 @@ public class AccessibilitySecurityPolicy {
      * @param userId          The user id
      * @param enabledServices The enabled services
      */
-    public void onEnabledServicesChangedLocked(int userId,
-            Set<ComponentName> enabledServices) {
-        if (!POLICY_WARNING_ENABLED) {
-            return;
-        }
+    public void onEnabledServicesChangedLocked(int userId, Set<ComponentName> enabledServices) {
         if (mAccessibilityUserManager.getCurrentUserIdLocked() != userId) {
             return;
         }
-
-        mPolicyWarningUIController.onEnabledServicesChangedLocked(userId, enabledServices);
-    }
-
-    /**
-     * Identifies whether the accessibility service is true and designed for accessibility. An
-     * accessibility service is considered as accessibility category if meets all conditions below:
-     * <ul>
-     *     <li> {@link AccessibilityServiceInfo#isAccessibilityTool} is true</li>
-     *     <li> is installed from the trusted install source</li>
-     * </ul>
-     *
-     * @param serviceInfo The accessibility service's serviceInfo.
-     * @return Returns true if it is a true accessibility service.
-     */
-    public boolean isA11yCategoryService(AccessibilityServiceInfo serviceInfo) {
-        if (!serviceInfo.isAccessibilityTool()) {
-            return false;
-        }
-        if (!serviceInfo.getResolveInfo().serviceInfo.applicationInfo.isSystemApp()) {
-            return hasTrustedSystemInstallSource(
-                    serviceInfo.getResolveInfo().serviceInfo.packageName);
-        }
-        return true;
-    }
-
-    /** Returns true if the {@code installedPackage} is installed from the trusted install source.
-     */
-    private boolean hasTrustedSystemInstallSource(String installedPackage) {
-        try {
-            InstallSourceInfo installSourceInfo = mPackageManager.getInstallSourceInfo(
-                    installedPackage);
-            if (installSourceInfo == null) {
-                return false;
-            }
-            final String installSourcePackageName = installSourceInfo.getInitiatingPackageName();
-            if (installSourcePackageName == null || !mPackageManager.getPackageInfo(
-                    installSourcePackageName,
-                    0).applicationInfo.isSystemApp()) {
-                return false;
-            }
-            return isTrustedInstallSource(installSourcePackageName);
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.w(LOG_TAG, "can't find the package's install source:" + installedPackage);
-        }
-        return false;
-    }
-
-    /** Returns true if the {@code installerPackage} is a trusted install source. */
-    private boolean isTrustedInstallSource(String installerPackage) {
-        final String[] allowedInstallingSources = mContext.getResources().getStringArray(
-                com.android.internal.R.array
-                        .config_accessibility_allowed_install_source);
-
-        if (allowedInstallingSources.length == 0) {
-            //Filters unwanted default installers if no allowed install sources.
-            String defaultInstaller = ArrayUtils.firstOrNull(LocalServices.getService(
-                    PackageManagerInternal.class).getKnownPackageNames(PACKAGE_INSTALLER,
-                    mCurrentUserId));
-            return !TextUtils.equals(defaultInstaller, installerPackage);
-        }
-        for (int i = 0; i < allowedInstallingSources.length; i++) {
-            if (TextUtils.equals(allowedInstallingSources[i], installerPackage)) {
-                return true;
-            }
-        }
-        return false;
+        mPolicyWarningUIController.onEnabledServicesChanged(userId,
+                new ArraySet<>(enabledServices));
     }
 }

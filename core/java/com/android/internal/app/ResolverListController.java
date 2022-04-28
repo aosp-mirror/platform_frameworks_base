@@ -393,14 +393,6 @@ public class ResolverListController {
         return mResolverComparator.getScore(componentName);
     }
 
-    /**
-     * Returns the list of top K component names which have highest
-     * {@link #getScore(DisplayResolveInfo)}
-     */
-    public List<ComponentName> getTopComponentNames(int topK) {
-        return mResolverComparator.getTopComponentNames(topK);
-    }
-
     public void updateModel(ComponentName componentName) {
         mResolverComparator.updateModel(componentName);
     }

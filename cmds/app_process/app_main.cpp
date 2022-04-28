@@ -15,7 +15,6 @@
 
 #include <android-base/macros.h>
 #include <binder/IPCThreadState.h>
-#include <bionic/pac.h>
 #include <hwbinder/IPCThreadState.h>
 #include <utils/Log.h>
 #include <cutils/memory.h>
@@ -182,10 +181,6 @@ int main(int argc, char* const argv[])
       }
       ALOGV("app_process main with argv: %s", argv_String.string());
     }
-
-    // Because of applications that are using PAC instructions incorrectly, PAC
-    // is disabled in application processes for now.
-    ScopedDisablePAC x;
 
     AppRuntime runtime(argv[0], computeArgBlockSize(argc, argv));
     // Process command line arguments

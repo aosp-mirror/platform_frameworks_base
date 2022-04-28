@@ -29,8 +29,10 @@ import com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity;
 import com.android.systemui.settings.brightness.BrightnessDialog;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationPanelActivity;
 import com.android.systemui.tuner.TunerActivity;
+import com.android.systemui.usb.UsbConfirmActivity;
 import com.android.systemui.usb.UsbDebuggingActivity;
 import com.android.systemui.usb.UsbDebuggingSecondaryUserActivity;
+import com.android.systemui.usb.UsbPermissionActivity;
 import com.android.systemui.user.CreateUserActivity;
 
 import dagger.Binds;
@@ -79,6 +81,18 @@ public abstract class DefaultActivityBinder {
     @ClassKey(UsbDebuggingSecondaryUserActivity.class)
     public abstract Activity bindUsbDebuggingSecondaryUserActivity(
             UsbDebuggingSecondaryUserActivity activity);
+
+    /** Inject into UsbPermissionActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(UsbPermissionActivity.class)
+    public abstract Activity bindUsbPermissionActivity(UsbPermissionActivity activity);
+
+    /** Inject into UsbConfirmActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(UsbConfirmActivity.class)
+    public abstract Activity bindUsbConfirmActivity(UsbConfirmActivity activity);
 
     /** Inject into CreateUserActivity. */
     @Binds

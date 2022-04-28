@@ -114,15 +114,13 @@ public class RemoteInputViewTest extends SysuiTestCase {
         mContext.unregisterReceiver(mReceiver);
     }
 
-    private void setTestPendingIntent(RemoteInputView view, RemoteInputViewController controller) {
+    private void setTestPendingIntent(RemoteInputViewController controller) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(TEST_ACTION), PendingIntent.FLAG_MUTABLE);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).build();
         RemoteInput[] inputs = {input};
 
-        view.setPendingIntent(pendingIntent);
         controller.setPendingIntent(pendingIntent);
-        view.setRemoteInput(inputs, input, null /* editedSuggestionInfo */);
         controller.setRemoteInput(input);
         controller.setRemoteInputs(inputs);
     }
@@ -137,7 +135,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
         RemoteInputViewController controller = bindController(view, row.getEntry());
 
-        setTestPendingIntent(view, controller);
+        setTestPendingIntent(controller);
 
         view.focus();
 
@@ -177,7 +175,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
         RemoteInputViewController controller = bindController(view, row.getEntry());
 
-        setTestPendingIntent(view, controller);
+        setTestPendingIntent(controller);
 
         view.focus();
 
@@ -235,7 +233,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
         RemoteInputViewController controller = bindController(view, row.getEntry());
 
-        setTestPendingIntent(view, controller);
+        setTestPendingIntent(controller);
 
         // Open view, send a reply
         view.focus();
@@ -265,7 +263,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
         RemoteInputViewController controller = bindController(view, row.getEntry());
 
-        setTestPendingIntent(view, controller);
+        setTestPendingIntent(controller);
 
         // Open view, attach an image
         view.focus();

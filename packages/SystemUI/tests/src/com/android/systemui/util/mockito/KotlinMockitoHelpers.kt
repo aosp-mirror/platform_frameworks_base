@@ -24,6 +24,7 @@ package com.android.systemui.util.mockito
  */
 
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatcher
 import org.mockito.Mockito
 
 /**
@@ -42,6 +43,14 @@ fun <T> eq(obj: T): T = Mockito.eq<T>(obj)
  */
 fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
 inline fun <reified T> any(): T = any(T::class.java)
+
+/**
+ * Returns Mockito.argThat() as nullable type to avoid java.lang.IllegalStateException when
+ * null is returned.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+fun <T> argThat(matcher: ArgumentMatcher<T>): T = Mockito.argThat(matcher)
 
 /**
  * Kotlin type-inferred version of Mockito.nullable()

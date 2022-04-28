@@ -50,7 +50,7 @@ import java.util.Optional;
 @SmallTest
 public class FullscreenTaskListenerTest {
     private static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.debug.shell_transit", false);
+            SystemProperties.getBoolean("persist.wm.debug.shell_transit", false);
 
     @Mock
     private SyncTransactionQueue mSyncQueue;

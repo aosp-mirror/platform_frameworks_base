@@ -49,7 +49,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 
 import com.google.android.collect.Sets;
@@ -105,7 +105,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 mVisibilityProvider,
                 mEntryManager,
                 mock(RemoteInputNotificationRebuilder.class),
-                () -> Optional.of(mock(StatusBar.class)),
+                () -> Optional.of(mock(CentralSurfaces.class)),
                 mStateController,
                 Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController,
@@ -196,7 +196,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 NotificationVisibilityProvider visibilityProvider,
                 NotificationEntryManager notificationEntryManager,
                 RemoteInputNotificationRebuilder rebuilder,
-                Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+                Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
                 StatusBarStateController statusBarStateController,
                 Handler mainHandler,
                 RemoteInputUriController remoteInputUriController,
@@ -211,7 +211,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                     visibilityProvider,
                     notificationEntryManager,
                     rebuilder,
-                    statusBarOptionalLazy,
+                    centralSurfacesOptionalLazy,
                     statusBarStateController,
                     mainHandler,
                     remoteInputUriController,

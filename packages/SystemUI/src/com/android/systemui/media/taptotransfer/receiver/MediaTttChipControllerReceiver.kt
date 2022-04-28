@@ -22,15 +22,21 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
 import android.os.Handler
+import android.os.PowerManager
 import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.media.taptotransfer.common.ChipInfoCommon
+import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
 import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
+import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.gesture.TapGestureDetector
+import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.view.ViewUtil
 import javax.inject.Inject
 
 /**
@@ -42,10 +48,23 @@ import javax.inject.Inject
 class MediaTttChipControllerReceiver @Inject constructor(
     commandQueue: CommandQueue,
     context: Context,
+    @MediaTttReceiverLogger logger: MediaTttLogger,
     windowManager: WindowManager,
+    viewUtil: ViewUtil,
+    mainExecutor: DelayableExecutor,
+    tapGestureDetector: TapGestureDetector,
+    powerManager: PowerManager,
     @Main private val mainHandler: Handler,
-) : MediaTttChipControllerCommon<ChipStateReceiver>(
-    context, windowManager, R.layout.media_ttt_chip_receiver
+    private val uiEventLogger: MediaTttReceiverUiEventLogger,
+) : MediaTttChipControllerCommon<ChipReceiverInfo>(
+    context,
+    logger,
+    windowManager,
+    viewUtil,
+    mainExecutor,
+    tapGestureDetector,
+    powerManager,
+    R.layout.media_ttt_chip_receiver
 ) {
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
         override fun updateMediaTapToTransferReceiverDisplay(
@@ -70,33 +89,61 @@ class MediaTttChipControllerReceiver @Inject constructor(
         appIcon: Icon?,
         appName: CharSequence?
     ) {
-        when(displayState) {
-            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER -> {
-                val packageName = routeInfo.packageName
-                if (appIcon == null) {
-                    displayChip(ChipStateReceiver(packageName, null, appName))
-                } else {
-                    appIcon.loadDrawableAsync(
-                        context,
-                        Icon.OnDrawableLoadedListener { drawable ->
-                            displayChip(
-                                ChipStateReceiver(packageName, drawable, appName)
-                            )},
-                        // Notify the listener on the main handler since the listener will update
-                        // the UI.
-                        mainHandler
-                    )
-                }
-            }
-            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER -> removeChip()
-            else ->
-                Log.e(RECEIVER_TAG, "Unhandled MediaTransferReceiverState $displayState")
+        val chipState: ChipStateReceiver? = ChipStateReceiver.getReceiverStateFromId(displayState)
+        val stateName = chipState?.name ?: "Invalid"
+        logger.logStateChange(stateName, routeInfo.id)
+
+        if (chipState == null) {
+            Log.e(RECEIVER_TAG, "Unhandled MediaTransferReceiverState $displayState")
+            return
         }
+        uiEventLogger.logReceiverStateChange(chipState)
+
+        if (chipState == ChipStateReceiver.FAR_FROM_SENDER) {
+            removeChip(removalReason = ChipStateReceiver.FAR_FROM_SENDER::class.simpleName!!)
+            return
+        }
+        if (appIcon == null) {
+            displayChip(ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appName))
+            return
+        }
+
+        appIcon.loadDrawableAsync(
+                context,
+                Icon.OnDrawableLoadedListener { drawable ->
+                    displayChip(ChipReceiverInfo(routeInfo, drawable, appName))
+                },
+                // Notify the listener on the main handler since the listener will update
+                // the UI.
+                mainHandler
+        )
     }
 
-    override fun updateChipView(chipState: ChipStateReceiver, currentChipView: ViewGroup) {
-        setIcon(chipState, currentChipView)
+    override fun updateChipView(chipInfo: ChipReceiverInfo, currentChipView: ViewGroup) {
+        setIcon(
+                currentChipView,
+                chipInfo.routeInfo.packageName,
+                chipInfo.appIconDrawableOverride,
+                chipInfo.appNameOverride
+        )
     }
+
+    override fun getIconSize(isAppIcon: Boolean): Int? =
+        context.resources.getDimensionPixelSize(
+            if (isAppIcon) {
+                R.dimen.media_ttt_icon_size_receiver
+            } else {
+                R.dimen.media_ttt_generic_icon_size_receiver
+            }
+        )
+}
+
+data class ChipReceiverInfo(
+    val routeInfo: MediaRoute2Info,
+    val appIconDrawableOverride: Drawable?,
+    val appNameOverride: CharSequence?
+) : ChipInfoCommon {
+    override fun getTimeoutMs() = DEFAULT_TIMEOUT_MILLIS
 }
 
 private const val RECEIVER_TAG = "MediaTapToTransferRcvr"

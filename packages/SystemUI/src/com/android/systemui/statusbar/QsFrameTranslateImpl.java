@@ -21,7 +21,7 @@ import android.view.View;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import javax.inject.Inject;
 
@@ -32,8 +32,8 @@ import javax.inject.Inject;
 public class QsFrameTranslateImpl extends QsFrameTranslateController {
 
     @Inject
-    public QsFrameTranslateImpl(StatusBar statusBar) {
-        super(statusBar);
+    public QsFrameTranslateImpl(CentralSurfaces centralSurfaces) {
+        super(centralSurfaces);
     }
 
     @Override

@@ -32,11 +32,10 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
-import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSource;
+import com.android.systemui.statusbar.phone.NotifPanelEvents;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,10 +52,10 @@ import javax.inject.Inject;
 // TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
 public class VisualStabilityCoordinator implements Coordinator, Dumpable,
-        NotifPanelEventSource.Callbacks {
+        NotifPanelEvents.Listener {
     private final DelayableExecutor mDelayableExecutor;
     private final HeadsUpManager mHeadsUpManager;
-    private final NotifPanelEventSource mNotifPanelEventSource;
+    private final NotifPanelEvents mNotifPanelEvents;
     private final StatusBarStateController mStatusBarStateController;
     private final VisualStabilityProvider mVisualStabilityProvider;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
@@ -87,7 +86,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
             DelayableExecutor delayableExecutor,
             DumpManager dumpManager,
             HeadsUpManager headsUpManager,
-            NotifPanelEventSource notifPanelEventSource,
+            NotifPanelEvents notifPanelEvents,
             StatusBarStateController statusBarStateController,
             VisualStabilityProvider visualStabilityProvider,
             WakefulnessLifecycle wakefulnessLifecycle) {
@@ -96,7 +95,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mDelayableExecutor = delayableExecutor;
-        mNotifPanelEventSource = notifPanelEventSource;
+        mNotifPanelEvents = notifPanelEvents;
 
         dumpManager.registerDumpable(this);
     }
@@ -109,7 +108,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
 
         mStatusBarStateController.addCallback(mStatusBarStateControllerListener);
         mPulsing = mStatusBarStateController.isPulsing();
-        mNotifPanelEventSource.registerCallbacks(this);
+        mNotifPanelEvents.registerListener(this);
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
@@ -253,11 +252,15 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
     };
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("pipelineRunAllowed: " + mPipelineRunAllowed);
+        pw.println("  notifPanelCollapsing: " + mNotifPanelCollapsing);
+        pw.println("  launchingNotifActivity: " + mNotifPanelLaunchingActivity);
         pw.println("reorderingAllowed: " + mReorderingAllowed);
         pw.println("  screenOn: " + mScreenOn);
         pw.println("  panelExpanded: " + mPanelExpanded);
         pw.println("  pulsing: " + mPulsing);
+        pw.println("isSuppressingPipelineRun: " + mIsSuppressingPipelineRun);
         pw.println("isSuppressingGroupChange: " + mIsSuppressingGroupChange);
         pw.println("isSuppressingEntryReorder: " + mIsSuppressingEntryReorder);
         pw.println("entriesWithSuppressedSectionChange: "

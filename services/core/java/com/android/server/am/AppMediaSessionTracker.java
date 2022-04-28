@@ -36,6 +36,7 @@ import android.util.SparseArray;
 
 import com.android.internal.app.ProcessMap;
 import com.android.server.am.AppMediaSessionTracker.AppMediaSessionPolicy;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.BaseAppStateDurationsTracker.SimplePackageDurations;
 import com.android.server.am.BaseAppStateEventsTracker.BaseAppStateEventsPolicy;
 
@@ -158,6 +159,11 @@ final class AppMediaSessionTracker
     private void trimDurations() {
         final long now = SystemClock.elapsedRealtime();
         trim(Math.max(0, now - mInjector.getPolicy().getMaxTrackingDuration()));
+    }
+
+    @Override
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_MEDIA_SESSION;
     }
 
     @Override

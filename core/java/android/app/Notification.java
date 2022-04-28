@@ -19,8 +19,8 @@ package android.app;
 import static android.annotation.Dimension.DP;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.NOTIFICATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
-import static android.app.admin.DevicePolicyResources.Drawables.UNDEFINED;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
 import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
 
@@ -361,9 +361,9 @@ public class Notification implements Parcelable
      * {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK} flag, which requires
      * that you take care of task management as described in the
      * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
-     * Stack</a> document.  In particular, make sure to read the notification section
-     * <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#HandlingNotifications">Handling
-     * Notifications</a> for the correct ways to launch an application from a
+     * Stack</a> document.  In particular, make sure to read the
+     * <a href="{@docRoot}/training/notify-user/navigation">Start
+     * an Activity from a Notification</a> page for the correct ways to launch an application from a
      * notification.
      */
     public PendingIntent contentIntent;
@@ -628,6 +628,9 @@ public class Notification implements Parcelable
      * Bit to be bitwise-ored into the {@link #flags} field that should be
      * set if you would only like the sound, vibrate and ticker to be played
      * if the notification was not already showing.
+     *
+     * Note that using this flag will stop any ongoing alerting behaviour such
+     * as sound, vibration or blinking notification LED.
      */
     public static final int FLAG_ONLY_ALERT_ONCE    = 0x00000008;
 
@@ -1898,6 +1901,11 @@ public class Notification implements Parcelable
 
             /**
              * Construct a new builder for {@link Action} object.
+             * <p>As of Android {@link android.os.Build.VERSION_CODES#N},
+             * action button icons will not be displayed on action buttons, but are still required
+             * and are available to
+             * {@link android.service.notification.NotificationListenerService notification listeners},
+             * which may display them in other contexts, for example on a wearable device.
              * @param icon icon to show for this action
              * @param title the title of the action
              * @param intent the {@link PendingIntent} to fire when users trigger this action
@@ -1919,6 +1927,12 @@ public class Notification implements Parcelable
              * <p>How an Action is displayed, including whether the {@code icon}, {@code text}, or
              * both are displayed or required, depends on where and how the action is used, and the
              * {@link Style} applied to the Notification.
+             *
+             * <p>As of Android {@link android.os.Build.VERSION_CODES#N}, action button icons
+             * will not be displayed on action buttons, but are still required and are available
+             * to {@link android.service.notification.NotificationListenerService notification
+             * listeners}, which may display them in other contexts, for example on a wearable
+             * device.
              *
              * <p>When the {@code title} is a {@link android.text.Spanned}, any colors set by a
              * {@link ForegroundColorSpan} or {@link TextAppearanceSpan} may be removed or displayed
@@ -2810,8 +2824,8 @@ public class Notification implements Parcelable
         }
 
         if (extras != null) {
-            visitIconUri(visitor, extras.getParcelable(EXTRA_LARGE_ICON_BIG));
-            visitIconUri(visitor, extras.getParcelable(EXTRA_PICTURE_ICON));
+            visitIconUri(visitor, extras.getParcelable(EXTRA_LARGE_ICON_BIG, Icon.class));
+            visitIconUri(visitor, extras.getParcelable(EXTRA_PICTURE_ICON, Icon.class));
 
             // NOTE: The documentation of EXTRA_AUDIO_CONTENTS_URI explicitly says that it is a
             // String representation of a Uri, but the previous implementation (and unit test) of
@@ -2835,7 +2849,7 @@ public class Notification implements Parcelable
                 }
             }
 
-            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON);
+            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
             if (person != null) {
                 visitor.accept(person.getIconUri());
             }
@@ -4633,6 +4647,9 @@ public class Notification implements Parcelable
          * Set this flag if you would only like the sound, vibrate
          * and ticker to be played if the notification is not already showing.
          *
+         * Note that using this flag will stop any ongoing alerting behaviour such
+         * as sound, vibration or blinking notification LED.
+         *
          * @see Notification#FLAG_ONLY_ALERT_ONCE
          */
         @NonNull
@@ -4912,6 +4929,12 @@ public class Notification implements Parcelable
          * while processing broadcast receivers or services in response to notification action
          * clicks. To launch an activity in those cases, provide a {@link PendingIntent} to the
          * activity itself.
+         * <p>
+         * As of Android {@link android.os.Build.VERSION_CODES#N},
+         * action button icons will not be displayed on action buttons, but are still required
+         * and are available to
+         * {@link android.service.notification.NotificationListenerService notification listeners},
+         * which may display them in other contexts, for example on a wearable device.
          *
          * @param icon Resource ID of a drawable that represents the action.
          * @param title Text describing the action.
@@ -5079,7 +5102,7 @@ public class Notification implements Parcelable
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
             DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-            return dpm.getDrawable(
+            return dpm.getResources().getDrawable(
                     getUpdatableProfileBadgeId(), SOLID_COLORED, NOTIFICATION,
                     this::getDefaultProfileBadgeDrawable);
         }
@@ -6467,7 +6490,7 @@ public class Notification implements Parcelable
         public static Notification.Builder recoverBuilder(Context context, Notification n) {
             // Re-create notification context so we can access app resources.
             ApplicationInfo applicationInfo = n.extras.getParcelable(
-                    EXTRA_BUILDER_APPLICATION_INFO);
+                    EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
             Context builderContext;
             if (applicationInfo != null) {
                 try {
@@ -6919,9 +6942,8 @@ public class Notification implements Parcelable
         boolean isMediaStyle = (MediaStyle.class.equals(style)
                 || DecoratedMediaCustomViewStyle.class.equals(style));
 
-        boolean hasMediaSession = (extras.getParcelable(Notification.EXTRA_MEDIA_SESSION) != null
-                && extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
-                instanceof MediaSession.Token);
+        boolean hasMediaSession = extras.getParcelable(Notification.EXTRA_MEDIA_SESSION,
+                MediaSession.Token.class) != null;
 
         return isMediaStyle && hasMediaSession;
     }
@@ -7516,7 +7538,7 @@ public class Notification implements Parcelable
 
             if (extras.containsKey(EXTRA_LARGE_ICON_BIG)) {
                 mBigLargeIconSet = true;
-                mBigLargeIcon = extras.getParcelable(EXTRA_LARGE_ICON_BIG);
+                mBigLargeIcon = extras.getParcelable(EXTRA_LARGE_ICON_BIG, Icon.class);
             }
 
             if (extras.containsKey(EXTRA_PICTURE_CONTENT_DESCRIPTION)) {
@@ -7536,11 +7558,11 @@ public class Notification implements Parcelable
             // When this style adds a picture, we only add one of the keys.  If both were added,
             // it would most likely be a legacy app trying to override the picture in some way.
             // Because of that case it's better to give precedence to the legacy field.
-            Bitmap bitmapPicture = extras.getParcelable(EXTRA_PICTURE);
+            Bitmap bitmapPicture = extras.getParcelable(EXTRA_PICTURE, Bitmap.class);
             if (bitmapPicture != null) {
                 return Icon.createWithBitmap(bitmapPicture);
             } else {
-                return extras.getParcelable(EXTRA_PICTURE_ICON);
+                return extras.getParcelable(EXTRA_PICTURE_ICON, Icon.class);
             }
         }
 
@@ -7917,6 +7939,8 @@ public class Notification implements Parcelable
          * @hide
          */
         public MessagingStyle setShortcutIcon(@Nullable Icon conversationIcon) {
+            // TODO(b/228941516): This icon should be downscaled to avoid using too much memory,
+            // see reduceImageSizes.
             mShortcutIcon = conversationIcon;
             return this;
         }
@@ -8157,7 +8181,7 @@ public class Notification implements Parcelable
         protected void restoreFromExtras(Bundle extras) {
             super.restoreFromExtras(extras);
 
-            mUser = extras.getParcelable(EXTRA_MESSAGING_PERSON);
+            mUser = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
             if (mUser == null) {
                 CharSequence displayName = extras.getCharSequence(EXTRA_SELF_DISPLAY_NAME);
                 mUser = new Person.Builder().setName(displayName).build();
@@ -8169,7 +8193,7 @@ public class Notification implements Parcelable
             mHistoricMessages = Message.getMessagesFromBundleArray(histMessages);
             mIsGroupConversation = extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION);
             mUnreadMessageCount = extras.getInt(EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
-            mShortcutIcon = extras.getParcelable(EXTRA_CONVERSATION_ICON);
+            mShortcutIcon = extras.getParcelable(EXTRA_CONVERSATION_ICON, Icon.class);
         }
 
         /**
@@ -8421,6 +8445,51 @@ public class Notification implements Parcelable
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             return makeMessagingView(StandardTemplateParams.VIEW_TYPE_HEADS_UP);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void reduceImageSizes(Context context) {
+            super.reduceImageSizes(context);
+            Resources resources = context.getResources();
+            boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
+            if (mShortcutIcon != null) {
+                int maxSize = resources.getDimensionPixelSize(
+                        isLowRam ? R.dimen.notification_small_icon_size_low_ram
+                                : R.dimen.notification_small_icon_size);
+                mShortcutIcon.scaleDownIfNecessary(maxSize, maxSize);
+            }
+
+            int maxAvatarSize = resources.getDimensionPixelSize(
+                    isLowRam ? R.dimen.notification_person_icon_max_size
+                            : R.dimen.notification_person_icon_max_size_low_ram);
+            if (mUser != null && mUser.getIcon() != null) {
+                mUser.getIcon().scaleDownIfNecessary(maxAvatarSize, maxAvatarSize);
+            }
+
+            reduceMessagesIconSizes(mMessages, maxAvatarSize);
+            reduceMessagesIconSizes(mHistoricMessages, maxAvatarSize);
+        }
+
+        /**
+         * @hide
+         */
+        private static void reduceMessagesIconSizes(@Nullable List<Message> messages, int maxSize) {
+            if (messages == null) {
+                return;
+            }
+
+            for (Message message : messages) {
+                Person sender = message.mSender;
+                if (sender != null) {
+                    Icon icon = sender.getIcon();
+                    if (icon != null) {
+                        icon.scaleDownIfNecessary(maxSize, maxSize);
+                    }
+                }
+            }
         }
 
         public static final class Message {
@@ -8678,7 +8747,7 @@ public class Notification implements Parcelable
                         return null;
                     } else {
 
-                        Person senderPerson = bundle.getParcelable(KEY_SENDER_PERSON);
+                        Person senderPerson = bundle.getParcelable(KEY_SENDER_PERSON, Person.class);
                         if (senderPerson == null) {
                             // Legacy apps that use compat don't actually provide the sender objects
                             // We need to fix the compat version to provide people / use
@@ -8695,7 +8764,7 @@ public class Notification implements Parcelable
                         if (bundle.containsKey(KEY_DATA_MIME_TYPE) &&
                                 bundle.containsKey(KEY_DATA_URI)) {
                             message.setData(bundle.getString(KEY_DATA_MIME_TYPE),
-                                    (Uri) bundle.getParcelable(KEY_DATA_URI));
+                                    bundle.getParcelable(KEY_DATA_URI, Uri.class));
                         }
                         if (bundle.containsKey(KEY_EXTRAS_BUNDLE)) {
                             message.getExtras().putAll(bundle.getBundle(KEY_EXTRAS_BUNDLE));
@@ -9009,6 +9078,10 @@ public class Notification implements Parcelable
          * information that will replace the default values for the output switcher chip on the
          * media control, as well as an intent to use when the output switcher chip is tapped,
          * on devices where this is supported.
+         * <p>
+         * This method is intended for system applications to provide information and/or
+         * functionality that would otherwise be unavailable to the default output switcher because
+         * the media originated on a remote device.
          *
          * @param deviceName The name of the remote device to display
          * @param iconResource Icon resource representing the device
@@ -9097,7 +9170,7 @@ public class Notification implements Parcelable
             super.restoreFromExtras(extras);
 
             if (extras.containsKey(EXTRA_MEDIA_SESSION)) {
-                mToken = extras.getParcelable(EXTRA_MEDIA_SESSION);
+                mToken = extras.getParcelable(EXTRA_MEDIA_SESSION, MediaSession.Token.class);
             }
             if (extras.containsKey(EXTRA_COMPACT_ACTIONS)) {
                 mActionsToShowInCompact = extras.getIntArray(EXTRA_COMPACT_ACTIONS);
@@ -9109,7 +9182,8 @@ public class Notification implements Parcelable
                 mDeviceIcon = extras.getInt(EXTRA_MEDIA_REMOTE_ICON);
             }
             if (extras.containsKey(EXTRA_MEDIA_REMOTE_INTENT)) {
-                mDeviceIntent = extras.getParcelable(EXTRA_MEDIA_REMOTE_INTENT);
+                mDeviceIntent = extras.getParcelable(
+                        EXTRA_MEDIA_REMOTE_INTENT, PendingIntent.class);
             }
         }
 
@@ -9701,12 +9775,12 @@ public class Notification implements Parcelable
             super.restoreFromExtras(extras);
             mCallType = extras.getInt(EXTRA_CALL_TYPE);
             mIsVideo = extras.getBoolean(EXTRA_CALL_IS_VIDEO);
-            mPerson = extras.getParcelable(EXTRA_CALL_PERSON);
+            mPerson = extras.getParcelable(EXTRA_CALL_PERSON, Person.class);
             mVerificationIcon = extras.getParcelable(EXTRA_VERIFICATION_ICON);
             mVerificationText = extras.getCharSequence(EXTRA_VERIFICATION_TEXT);
-            mAnswerIntent = extras.getParcelable(EXTRA_ANSWER_INTENT);
-            mDeclineIntent = extras.getParcelable(EXTRA_DECLINE_INTENT);
-            mHangUpIntent = extras.getParcelable(EXTRA_HANG_UP_INTENT);
+            mAnswerIntent = extras.getParcelable(EXTRA_ANSWER_INTENT, PendingIntent.class);
+            mDeclineIntent = extras.getParcelable(EXTRA_DECLINE_INTENT, PendingIntent.class);
+            mHangUpIntent = extras.getParcelable(EXTRA_HANG_UP_INTENT, PendingIntent.class);
             mAnswerButtonColor = extras.containsKey(EXTRA_ANSWER_COLOR)
                     ? extras.getInt(EXTRA_ANSWER_COLOR) : null;
             mDeclineButtonColor = extras.containsKey(EXTRA_DECLINE_COLOR)
@@ -10767,9 +10841,9 @@ public class Notification implements Parcelable
         // Keys within EXTRA_WEARABLE_EXTENSIONS for wearable options.
         private static final String KEY_ACTIONS = "actions";
         private static final String KEY_FLAGS = "flags";
-        private static final String KEY_DISPLAY_INTENT = "displayIntent";
+        static final String KEY_DISPLAY_INTENT = "displayIntent";
         private static final String KEY_PAGES = "pages";
-        private static final String KEY_BACKGROUND = "background";
+        static final String KEY_BACKGROUND = "background";
         private static final String KEY_CONTENT_ICON = "contentIcon";
         private static final String KEY_CONTENT_ICON_GRAVITY = "contentIconGravity";
         private static final String KEY_CONTENT_ACTION_INDEX = "contentActionIndex";
@@ -10826,7 +10900,8 @@ public class Notification implements Parcelable
                 }
 
                 mFlags = wearableBundle.getInt(KEY_FLAGS, DEFAULT_FLAGS);
-                mDisplayIntent = wearableBundle.getParcelable(KEY_DISPLAY_INTENT);
+                mDisplayIntent = wearableBundle.getParcelable(
+                        KEY_DISPLAY_INTENT, PendingIntent.class);
 
                 Notification[] pages = getParcelableArrayFromBundle(
                         wearableBundle, KEY_PAGES, Notification.class);
@@ -10834,7 +10909,7 @@ public class Notification implements Parcelable
                     Collections.addAll(mPages, pages);
                 }
 
-                mBackground = wearableBundle.getParcelable(KEY_BACKGROUND);
+                mBackground = wearableBundle.getParcelable(KEY_BACKGROUND, Bitmap.class);
                 mContentIcon = wearableBundle.getInt(KEY_CONTENT_ICON);
                 mContentIconGravity = wearableBundle.getInt(KEY_CONTENT_ICON_GRAVITY,
                         DEFAULT_CONTENT_ICON_GRAVITY);
@@ -11547,7 +11622,7 @@ public class Notification implements Parcelable
             Bundle carBundle = notif.extras == null ?
                     null : notif.extras.getBundle(EXTRA_CAR_EXTENDER);
             if (carBundle != null) {
-                mLargeIcon = carBundle.getParcelable(EXTRA_LARGE_ICON);
+                mLargeIcon = carBundle.getParcelable(EXTRA_LARGE_ICON, Bitmap.class);
                 mColor = carBundle.getInt(EXTRA_COLOR, Notification.COLOR_DEFAULT);
 
                 Bundle b = carBundle.getBundle(EXTRA_CONVERSATION);
@@ -11653,9 +11728,9 @@ public class Notification implements Parcelable
             private static final String KEY_AUTHOR = "author";
             private static final String KEY_TEXT = "text";
             private static final String KEY_MESSAGES = "messages";
-            private static final String KEY_REMOTE_INPUT = "remote_input";
-            private static final String KEY_ON_REPLY = "on_reply";
-            private static final String KEY_ON_READ = "on_read";
+            static final String KEY_REMOTE_INPUT = "remote_input";
+            static final String KEY_ON_REPLY = "on_reply";
+            static final String KEY_ON_READ = "on_read";
             private static final String KEY_PARTICIPANTS = "participants";
             private static final String KEY_TIMESTAMP = "timestamp";
 
@@ -11780,10 +11855,10 @@ public class Notification implements Parcelable
                     }
                 }
 
-                PendingIntent onRead = b.getParcelable(KEY_ON_READ);
-                PendingIntent onReply = b.getParcelable(KEY_ON_REPLY);
+                PendingIntent onRead = b.getParcelable(KEY_ON_READ, PendingIntent.class);
+                PendingIntent onReply = b.getParcelable(KEY_ON_REPLY, PendingIntent.class);
 
-                RemoteInput remoteInput = b.getParcelable(KEY_REMOTE_INPUT);
+                RemoteInput remoteInput = b.getParcelable(KEY_REMOTE_INPUT, RemoteInput.class);
 
                 String[] participants = b.getStringArray(KEY_PARTICIPANTS);
                 if (participants == null || participants.length != 1) {
@@ -11925,8 +12000,8 @@ public class Notification implements Parcelable
 
         private static final String EXTRA_TV_EXTENDER = "android.tv.EXTENSIONS";
         private static final String EXTRA_FLAGS = "flags";
-        private static final String EXTRA_CONTENT_INTENT = "content_intent";
-        private static final String EXTRA_DELETE_INTENT = "delete_intent";
+        static final String EXTRA_CONTENT_INTENT = "content_intent";
+        static final String EXTRA_DELETE_INTENT = "delete_intent";
         private static final String EXTRA_CHANNEL_ID = "channel_id";
         private static final String EXTRA_SUPPRESS_SHOW_OVER_APPS = "suppressShowOverApps";
 
@@ -11958,8 +12033,8 @@ public class Notification implements Parcelable
                 mFlags = bundle.getInt(EXTRA_FLAGS);
                 mChannelId = bundle.getString(EXTRA_CHANNEL_ID);
                 mSuppressShowOverApps = bundle.getBoolean(EXTRA_SUPPRESS_SHOW_OVER_APPS);
-                mContentIntent = bundle.getParcelable(EXTRA_CONTENT_INTENT);
-                mDeleteIntent = bundle.getParcelable(EXTRA_DELETE_INTENT);
+                mContentIntent = bundle.getParcelable(EXTRA_CONTENT_INTENT, PendingIntent.class);
+                mDeleteIntent = bundle.getParcelable(EXTRA_DELETE_INTENT, PendingIntent.class);
             }
         }
 

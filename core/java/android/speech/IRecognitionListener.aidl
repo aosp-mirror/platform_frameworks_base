@@ -79,7 +79,7 @@ oneway interface IRecognitionListener {
 
     /**
      * Called for each ready segment of a recognition request. To request segmented speech results
-     * use {@link RecognizerIntent#EXTRA_SEGMENT_SESSION}. The callback might be called
+     * use {@link RecognizerIntent#EXTRA_SEGMENTED_SESSION}. The callback might be called
      * any number of times between {@link #onBeginningOfSpeech()} and
      * {@link #onEndOfSegmentedSession()}.
      *
@@ -91,7 +91,7 @@ oneway interface IRecognitionListener {
 
     /**
      * Called at the end of a segmented recognition request. To request segmented speech results
-     * use {@link RecognizerIntent#EXTRA_SEGMENT_SESSION}.
+     * use {@link RecognizerIntent#EXTRA_SEGMENTED_SESSION}.
      */
     void onEndOfSegmentedSession();
 

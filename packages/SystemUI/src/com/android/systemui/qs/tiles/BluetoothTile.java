@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
@@ -114,6 +115,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_BLUETOOTH);
         final boolean transientEnabling = arg == ARG_SHOW_TRANSIENT_ENABLING;
         final boolean enabled = transientEnabling || mController.isBluetoothEnabled();
         final boolean connected = mController.isBluetoothConnected();

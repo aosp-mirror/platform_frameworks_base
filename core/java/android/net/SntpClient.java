@@ -60,7 +60,7 @@ public class SntpClient {
     private static final int TRANSMIT_TIME_OFFSET = 40;
     private static final int NTP_PACKET_SIZE = 48;
 
-    private static final int NTP_PORT = 123;
+    public static final int STANDARD_NTP_PORT = 123;
     private static final int NTP_MODE_CLIENT = 3;
     private static final int NTP_MODE_SERVER = 4;
     private static final int NTP_MODE_BROADCAST = 5;
@@ -108,18 +108,21 @@ public class SntpClient {
      * Sends an SNTP request to the given host and processes the response.
      *
      * @param host host name of the server.
+     * @param port port of the server.
      * @param timeout network timeout in milliseconds. the timeout doesn't include the DNS lookup
      *                time, and it applies to each individual query to the resolved addresses of
      *                the NTP server.
      * @param network network over which to send the request.
      * @return true if the transaction was successful.
      */
-    public boolean requestTime(String host, int timeout, Network network) {
+    public boolean requestTime(String host, int port, int timeout, Network network) {
         final Network networkForResolv = network.getPrivateDnsBypassingCopy();
         try {
             final InetAddress[] addresses = networkForResolv.getAllByName(host);
             for (int i = 0; i < addresses.length; i++) {
-                if (requestTime(addresses[i], NTP_PORT, timeout, networkForResolv)) return true;
+                if (requestTime(addresses[i], port, timeout, networkForResolv)) {
+                    return true;
+                }
             }
         } catch (UnknownHostException e) {
             Log.w(TAG, "Unknown host: " + host);

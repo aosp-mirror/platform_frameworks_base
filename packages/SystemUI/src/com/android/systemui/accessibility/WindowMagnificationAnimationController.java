@@ -156,6 +156,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         }
         mAnimationCallback = animationCallback;
         setupEnableAnimationSpecs(scale, centerX, centerY);
+
         if (mEndSpec.equals(mStartSpec)) {
             if (mState == STATE_DISABLED) {
                 mController.enableWindowMagnificationInternal(scale, centerX, centerY,
@@ -178,6 +179,24 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         }
     }
 
+    void moveWindowMagnifierToPosition(float centerX, float centerY,
+            IRemoteMagnificationAnimationCallback callback) {
+        if (mState == STATE_ENABLED) {
+            // We set the animation duration to shortAnimTime which would be reset at the end.
+            mValueAnimator.setDuration(mContext.getResources()
+                    .getInteger(com.android.internal.R.integer.config_shortAnimTime));
+            enableWindowMagnification(Float.NaN, centerX, centerY,
+                    /* magnificationFrameOffsetRatioX */ Float.NaN,
+                    /* magnificationFrameOffsetRatioY */ Float.NaN, callback);
+        } else if (mState == STATE_ENABLING) {
+            sendAnimationCallback(false);
+            mAnimationCallback = callback;
+            mValueAnimator.setDuration(mContext.getResources()
+                    .getInteger(com.android.internal.R.integer.config_shortAnimTime));
+            setupEnableAnimationSpecs(Float.NaN, centerX, centerY);
+        }
+    }
+
     private void setupEnableAnimationSpecs(float scale, float centerX, float centerY) {
         if (mController == null) {
             return;
@@ -193,9 +212,16 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
                     R.integer.magnification_default_scale) : scale, centerX, centerY);
         } else {
             mStartSpec.set(currentScale, currentCenterX, currentCenterY);
-            mEndSpec.set(Float.isNaN(scale) ? currentScale : scale,
-                    Float.isNaN(centerX) ? currentCenterX : centerX,
-                    Float.isNaN(centerY) ? currentCenterY : centerY);
+
+            final float endScale = (mState == STATE_ENABLING ? mEndSpec.mScale : currentScale);
+            final float endCenterX =
+                    (mState == STATE_ENABLING ? mEndSpec.mCenterX : currentCenterX);
+            final float endCenterY =
+                    (mState == STATE_ENABLING ? mEndSpec.mCenterY : currentCenterY);
+
+            mEndSpec.set(Float.isNaN(scale) ? endScale : scale,
+                    Float.isNaN(centerX) ? endCenterX : centerX,
+                    Float.isNaN(centerY) ? endCenterY : centerY);
         }
         if (DEBUG) {
             Log.d(TAG, "SetupEnableAnimationSpecs : mStartSpec = " + mStartSpec + ", endSpec = "
@@ -269,6 +295,9 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
             setState(STATE_ENABLED);
         }
         sendAnimationCallback(true);
+        // We reset the duration to config_longAnimTime
+        mValueAnimator.setDuration(mContext.getResources()
+                .getInteger(com.android.internal.R.integer.config_longAnimTime));
     }
 
     @Override
@@ -313,10 +342,10 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
                 mMagnificationFrameOffsetRatioX, mMagnificationFrameOffsetRatioY);
     }
 
-    private static ValueAnimator newValueAnimator(Resources resources) {
+    private static ValueAnimator newValueAnimator(Resources resource) {
         final ValueAnimator valueAnimator = new ValueAnimator();
         valueAnimator.setDuration(
-                resources.getInteger(com.android.internal.R.integer.config_longAnimTime));
+                resource.getInteger(com.android.internal.R.integer.config_longAnimTime));
         valueAnimator.setInterpolator(new AccelerateInterpolator(2.5f));
         valueAnimator.setFloatValues(0.0f, 1.0f);
         return valueAnimator;

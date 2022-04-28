@@ -54,7 +54,6 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
-import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -121,7 +120,6 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mock(KeyguardBypassController.class),
                 Optional.of(mock(Bubbles.class)),
                 mock(DynamicPrivacyController.class),
-                mock(ForegroundServiceSectionController.class),
                 mock(DynamicChildBindController.class),
                 mock(LowPriorityInflationHelper.class),
                 mock(AssistantFeedbackController.class),

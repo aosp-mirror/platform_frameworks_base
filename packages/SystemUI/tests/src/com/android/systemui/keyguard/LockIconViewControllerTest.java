@@ -399,7 +399,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
                         /* resetLockoutRequiresHwToken */ false,
                         List.of(new SensorLocationInternal("" /* displayId */,
                                 (int) udfpsLocation.x, (int) udfpsLocation.y, radius)));
-        when(mAuthController.getUdfpsSensorLocation()).thenReturn(udfpsLocation);
+        when(mAuthController.getUdfpsLocation()).thenReturn(udfpsLocation);
         when(mAuthController.getUdfpsProps()).thenReturn(List.of(fpProps));
 
         return new Pair(radius, udfpsLocation);
