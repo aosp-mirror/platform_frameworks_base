@@ -702,17 +702,17 @@ public class DisplayRotation {
     }
 
     boolean canRotateSeamlessly(int oldRotation, int newRotation) {
+        // If the navigation bar can't change sides, then it will jump when we change orientations
+        // and we don't rotate seamlessly - unless that is allowed, eg. with gesture navigation
+        // where the navbar is low-profile enough that this isn't very noticeable.
+        if (mAllowSeamlessRotationDespiteNavBarMoving || mDisplayPolicy.navigationBarCanMove()) {
+            return true;
+        }
         // For the upside down rotation we don't rotate seamlessly as the navigation bar moves
         // position. Note most apps (using orientation:sensor or user as opposed to fullSensor)
         // will not enter the reverse portrait orientation, so actually the orientation won't change
         // at all.
-        if (oldRotation == mUpsideDownRotation || newRotation == mUpsideDownRotation) {
-            return false;
-        }
-        // If the navigation bar can't change sides, then it will jump when we change orientations
-        // and we don't rotate seamlessly - unless that is allowed, eg. with gesture navigation
-        // where the navbar is low-profile enough that this isn't very noticeable.
-        return mAllowSeamlessRotationDespiteNavBarMoving || mDisplayPolicy.navigationBarCanMove();
+        return oldRotation != Surface.ROTATION_180 && newRotation != Surface.ROTATION_180;
     }
 
     void markForSeamlessRotation(WindowState w, boolean seamlesslyRotated) {
