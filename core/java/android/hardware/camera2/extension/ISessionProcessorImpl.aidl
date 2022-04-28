@@ -15,6 +15,7 @@
  */
 package android.hardware.camera2.extension;
 
+import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.extension.CameraSessionConfig;
 import android.hardware.camera2.extension.ICaptureCallback;
 import android.hardware.camera2.extension.IRequestProcessorImpl;
@@ -30,5 +31,7 @@ interface ISessionProcessorImpl
     void onCaptureSessionEnd();
     int startRepeating(in ICaptureCallback callback);
     void stopRepeating();
-    int startCapture(in ICaptureCallback callback, int jpegRotation, int jpegQuality);
+    int startCapture(in ICaptureCallback callback);
+    void setParameters(in CaptureRequest captureRequest);
+    int startTrigger(in CaptureRequest captureRequest, in ICaptureCallback callback);
 }

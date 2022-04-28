@@ -15,17 +15,21 @@
   ~ limitations under the License.
   -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-       android:inset="@dimen/new_qs_footer_action_inset">
+       android:inset="@dimen/qs_footer_action_inset">
     <ripple
         android:color="?android:attr/colorControlHighlight">
         <item android:id="@android:id/mask">
-            <shape android:shape="oval">
+            <!-- We make this shape a rounded rectangle instead of a oval so that it can animate -->
+            <!-- properly into an app/dialog. -->
+            <shape android:shape="rectangle">
                 <solid android:color="@android:color/white"/>
+                <corners android:radius="@dimen/qs_footer_action_corner_radius"/>
             </shape>
         </item>
         <item>
-            <shape android:shape="oval">
+            <shape android:shape="rectangle">
                 <solid android:color="?attr/offStateColor"/>
+                <corners android:radius="@dimen/qs_footer_action_corner_radius"/>
             </shape>
         </item>
 

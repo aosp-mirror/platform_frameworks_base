@@ -577,12 +577,14 @@ class AppErrors {
             mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode(),
                     PackageWatchdog.FAILURE_REASON_APP_CRASH);
 
-            mService.mProcessList.noteAppKill(r, (crashInfo != null
-                      && "Native crash".equals(crashInfo.exceptionClassName))
-                      ? ApplicationExitInfo.REASON_CRASH_NATIVE
-                      : ApplicationExitInfo.REASON_CRASH,
-                      ApplicationExitInfo.SUBREASON_UNKNOWN,
-                    "crash");
+            synchronized (mService) {
+                mService.mProcessList.noteAppKill(r, (crashInfo != null
+                          && "Native crash".equals(crashInfo.exceptionClassName))
+                          ? ApplicationExitInfo.REASON_CRASH_NATIVE
+                          : ApplicationExitInfo.REASON_CRASH,
+                          ApplicationExitInfo.SUBREASON_UNKNOWN,
+                        "crash");
+            }
         }
 
         final int relaunchReason = r != null

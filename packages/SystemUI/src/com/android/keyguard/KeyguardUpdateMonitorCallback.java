@@ -97,10 +97,16 @@ public class KeyguardUpdateMonitorCallback {
 
     /**
      * Called when the keyguard enters or leaves bouncer mode.
-     * @param bouncer if true, keyguard is showing the bouncer or transitioning from/to bouncer
-     *                mode.
+     * @param bouncerIsOrWillBeShowing if true, keyguard is showing the bouncer or transitioning
+     *                                 from/to bouncer mode.
      */
-    public void onKeyguardBouncerChanged(boolean bouncer) { }
+    public void onKeyguardBouncerStateChanged(boolean bouncerIsOrWillBeShowing) { }
+
+    /**
+     * Called when the keyguard fully transitions to the bouncer or is no longer the bouncer
+     * @param bouncerIsFullyShowing if true, keyguard is fully showing the bouncer
+     */
+    public void onKeyguardBouncerFullyShowingChanged(boolean bouncerIsFullyShowing) { }
 
     /**
      * Called when visibility of lockscreen clock changes, such as when
@@ -206,8 +212,10 @@ public class KeyguardUpdateMonitorCallback {
      * It is guaranteed that either {@link #onBiometricAuthenticated} or
      * {@link #onBiometricAuthFailed(BiometricSourceType)} is called after this method eventually.
      * @param biometricSourceType
+     * @param acquireInfo see {@link android.hardware.biometrics.BiometricFaceConstants} and
+     *                    {@link android.hardware.biometrics.BiometricFingerprintConstants}
      */
-    public void onBiometricAcquired(BiometricSourceType biometricSourceType) { }
+    public void onBiometricAcquired(BiometricSourceType biometricSourceType, int acquireInfo) { }
 
     /**
      * Called when a biometric couldn't be authenticated.
@@ -296,6 +304,11 @@ public class KeyguardUpdateMonitorCallback {
      * Called when the secondary lock screen requirement changes.
      */
     public void onSecondaryLockscreenRequirementChanged(int userId) { }
+
+    /**
+     * Called when device policy manager state changes.
+     */
+    public void onDevicePolicyManagerStateChanged() { }
 
     /**
      * Called when notifying user to unlock in order to use NFC.

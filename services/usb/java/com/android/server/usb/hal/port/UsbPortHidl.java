@@ -318,7 +318,7 @@ public final class UsbPortHidl implements UsbPortHal {
     }
 
     @Override
-    public boolean resetUsbPort(String portName, long transactionId,
+    public void resetUsbPort(String portName, long transactionId,
             IUsbOperationInternal callback) {
         try {
             callback.onOperationComplete(USB_OPERATION_ERROR_NOT_SUPPORTED);
@@ -327,7 +327,6 @@ public final class UsbPortHidl implements UsbPortHal {
                     + transactionId
                     + " portId:" + portName, e);
         }
-        return false;
     }
 
     @Override

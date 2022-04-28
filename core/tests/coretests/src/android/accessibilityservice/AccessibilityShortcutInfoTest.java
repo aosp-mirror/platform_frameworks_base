@@ -129,7 +129,7 @@ public class AccessibilityShortcutInfoTest {
     @Test
     public void testTileService() {
         assertThat("Tile service is not correct",
-                mShortcutInfo.getTileServiceClassName(), is(TILE_SERVICE_NAME));
+                mShortcutInfo.getTileServiceName(), is(TILE_SERVICE_NAME));
     }
 
 

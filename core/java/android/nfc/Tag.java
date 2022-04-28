@@ -142,9 +142,13 @@ public final class Tag implements Parcelable {
         mTagService = tagService;
 
         mConnectedTechnology = -1;
+        mCookie = SystemClock.elapsedRealtime();
+
+        if (tagService == null) {
+            return;
+        }
 
         try {
-            mCookie = SystemClock.elapsedRealtime();
             tagService.setTagUpToDate(mCookie);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -370,6 +374,10 @@ public final class Tag implements Parcelable {
     /** @hide */
     @UnsupportedAppUsage
     public INfcTag getTagService() {
+        if (mTagService == null) {
+            return null;
+        }
+
         try {
             if (!mTagService.isTagUpToDate(mCookie)) {
                 String id_str = "";

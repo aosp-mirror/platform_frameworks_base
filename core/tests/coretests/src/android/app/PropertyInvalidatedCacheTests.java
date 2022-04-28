@@ -38,7 +38,7 @@ import org.junit.Test;
 public class PropertyInvalidatedCacheTests {
 
     // Configuration for creating caches
-    private static final int MODULE = PropertyInvalidatedCache.MODULE_TEST;
+    private static final String MODULE = PropertyInvalidatedCache.MODULE_TEST;
     private static final String API = "testApi";
 
     // This class is a proxy for binder calls.  It contains a counter that increments
@@ -214,13 +214,13 @@ public class PropertyInvalidatedCacheTests {
             this(MODULE, API);
         }
 
-        TestCache(int module, String api) {
+        TestCache(String module, String api) {
             this(module, api, new TestQuery());
             setTestMode(true);
             testPropertyName();
         }
 
-        TestCache(int module, String api, TestQuery query) {
+        TestCache(String module, String api, TestQuery query) {
             super(4, module, api, api, query);
             mQuery = query;
             setTestMode(true);
@@ -364,15 +364,6 @@ public class PropertyInvalidatedCacheTests {
         n1 = PropertyInvalidatedCache.createPropertyName(
             PropertyInvalidatedCache.MODULE_SYSTEM, "get_package_info");
         assertEquals(n1, "cache_key.system_server.get_package_info");
-        try {
-            n1 = PropertyInvalidatedCache.createPropertyName(
-                PropertyInvalidatedCache.MODULE_SYSTEM - 1, "get package_info");
-            // n1 is an invalid api name.
-            assertEquals(false, true);
-        } catch (IllegalArgumentException e) {
-            // An exception is expected here.
-        }
-
         n1 = PropertyInvalidatedCache.createPropertyName(
             PropertyInvalidatedCache.MODULE_BLUETOOTH, "getState");
         assertEquals(n1, "cache_key.bluetooth.get_state");

@@ -53,14 +53,13 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,7 +101,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final StatusBarIconController mIconController;
     private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
     private int mCurrentUser;
-    private final Optional<StatusBar> mStatusBarOptional;
+    private final Optional<CentralSurfaces> mCentralSurfacesOptional;
     private Context mUserContext;
     private UserTracker mUserTracker;
     private SecureSettings mSecureSettings;
@@ -121,7 +120,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             Provider<AutoTileManager> autoTiles,
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
-            Optional<StatusBar> statusBarOptional,
+            Optional<CentralSurfaces> centralSurfacesOptional,
             QSLogger qsLogger,
             UiEventLogger uiEventLogger,
             UserTracker userTracker,
@@ -143,7 +142,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mTileLifeCycleManagerFactory = tileLifecycleManagerFactory;
 
         mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
-        mStatusBarOptional = statusBarOptional;
+        mCentralSurfacesOptional = centralSurfacesOptional;
 
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
@@ -227,17 +226,17 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
     @Override
     public void collapsePanels() {
-        mStatusBarOptional.ifPresent(StatusBar::postAnimateCollapsePanels);
+        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateCollapsePanels);
     }
 
     @Override
     public void forceCollapsePanels() {
-        mStatusBarOptional.ifPresent(StatusBar::postAnimateForceCollapsePanels);
+        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateForceCollapsePanels);
     }
 
     @Override
     public void openPanels() {
-        mStatusBarOptional.ifPresent(StatusBar::postAnimateOpenPanels);
+        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateOpenPanels);
     }
 
     @Override
@@ -564,9 +563,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("QSTileHost:");
         mTiles.values().stream().filter(obj -> obj instanceof Dumpable)
-                .forEach(o -> ((Dumpable) o).dump(fd, pw, args));
+                .forEach(o -> ((Dumpable) o).dump(pw, args));
     }
 }

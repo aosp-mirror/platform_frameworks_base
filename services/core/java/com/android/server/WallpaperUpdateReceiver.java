@@ -16,13 +16,17 @@
 
 package com.android.server;
 
+import android.annotation.RequiresPermission;
 import android.app.ActivityThread;
+import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
 /**
@@ -50,6 +54,10 @@ public class WallpaperUpdateReceiver extends BroadcastReceiver {
             ActivityThread currentActivityThread = ActivityThread.currentActivityThread();
             Context uiContext = currentActivityThread.getSystemUiContext();
             WallpaperManager wallpaperManager = WallpaperManager.getInstance(uiContext);
+            if (isUserSetWallpaper(wallpaperManager, uiContext)) {
+                Slog.i(TAG, "User has set wallpaper, skip to resetting");
+                return;
+            }
             if (DEBUG) Slog.d(TAG, "Set customized default_wallpaper.");
             Bitmap blank = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
             // set a blank wallpaper to force a redraw of default_wallpaper
@@ -58,5 +66,33 @@ public class WallpaperUpdateReceiver extends BroadcastReceiver {
         } catch (Exception e) {
             Slog.w(TAG, "Failed to customize system wallpaper." + e);
         }
+    }
+
+    /**
+     * A function to validate if users have set customized (live)wallpaper
+     * <p>
+     * return true if users have customized their wallpaper
+     **/
+    @RequiresPermission(android.Manifest.permission.READ_WALLPAPER_INTERNAL)
+    private boolean isUserSetWallpaper(WallpaperManager wm, Context context) {
+        WallpaperInfo info = wm.getWallpaperInfo();
+        if (info == null) {
+            //Image Wallpaper
+            ParcelFileDescriptor sysWallpaper =
+                    wm.getWallpaperFile(WallpaperManager.FLAG_SYSTEM);
+            ParcelFileDescriptor lockWallpaper =
+                    wm.getWallpaperFile(WallpaperManager.FLAG_LOCK);
+            if (sysWallpaper != null || lockWallpaper != null) {
+                return true;
+            }
+        } else {
+            //live wallpaper
+            ComponentName currCN = info.getComponent();
+            ComponentName defaultCN = WallpaperManager.getDefaultWallpaperComponent(context);
+            if (!currCN.equals(defaultCN)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

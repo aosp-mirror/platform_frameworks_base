@@ -41,9 +41,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodSession;
 
-/** @hide */
-// TODO(b/215636776): move IInputMethodSessionWrapper to proper package
-public class IInputMethodSessionWrapper extends IInputMethodSession.Stub
+class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         implements HandlerCaller.Callback {
     private static final String TAG = "InputMethodWrapper";
 
@@ -55,7 +53,6 @@ public class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     private static final int DO_APP_PRIVATE_COMMAND = 100;
     private static final int DO_FINISH_SESSION = 110;
     private static final int DO_VIEW_CLICKED = 115;
-    private static final int DO_NOTIFY_IME_HIDDEN = 120;
     private static final int DO_REMOVE_IME_SURFACE = 130;
     private static final int DO_FINISH_INPUT = 140;
     private static final int DO_INVALIDATE_INPUT = 150;
@@ -135,10 +132,6 @@ public class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 mInputMethodSession.viewClicked(msg.arg1 == 1);
                 return;
             }
-            case DO_NOTIFY_IME_HIDDEN: {
-                mInputMethodSession.notifyImeHidden();
-                return;
-            }
             case DO_REMOVE_IME_SURFACE: {
                 mInputMethodSession.removeImeSurface();
                 return;
@@ -197,11 +190,6 @@ public class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     public void viewClicked(boolean focusChanged) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageI(DO_VIEW_CLICKED, focusChanged ? 1 : 0));
-    }
-
-    @Override
-    public void notifyImeHidden() {
-        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_NOTIFY_IME_HIDDEN));
     }
 
     @Override

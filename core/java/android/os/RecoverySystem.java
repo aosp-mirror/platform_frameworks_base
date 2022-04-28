@@ -674,10 +674,12 @@ public class RecoverySystem {
             }
             try {
                 if (!rs.allocateSpaceForUpdate(packageFile)) {
+                    rs.clearBcb();
                     throw new IOException("Failed to allocate space for update "
                             + packageFile.getAbsolutePath());
                 }
             } catch (RemoteException e) {
+                rs.clearBcb();
                 e.rethrowAsRuntimeException();
             }
 

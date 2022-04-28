@@ -1,3 +1,7 @@
+include /core/java/com/android/internal/widget/OWNERS
+
+# Notifications related
+per-file CachingIconViewTest.java = file:/services/core/java/com/android/server/notification/OWNERS
 # LockSettings related
 per-file *LockPattern* = file:/services/core/java/com/android/server/locksettings/OWNERS
 per-file *Lockscreen* = file:/services/core/java/com/android/server/locksettings/OWNERS

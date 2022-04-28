@@ -54,7 +54,7 @@ public final class ProfcollectForwardingService extends SystemService {
 
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
 
-    private static final long BG_PROCESS_PERIOD = TimeUnit.DAYS.toMillis(1); // every 1 day.
+    private static final long BG_PROCESS_PERIOD = TimeUnit.HOURS.toMillis(4); // every 4 hours.
 
     private IProfCollectd mIProfcollect;
     private static ProfcollectForwardingService sSelfService;
@@ -112,7 +112,7 @@ public final class ProfcollectForwardingService extends SystemService {
         try {
             mIProfcollect.registerProviderStatusCallback(mProviderStatusCallback);
         } catch (RemoteException e) {
-            Log.e(LOG_TAG, e.getMessage());
+            Log.e(LOG_TAG, "Failed to register provider status callback: " + e.getMessage());
         }
     }
 
@@ -123,7 +123,7 @@ public final class ProfcollectForwardingService extends SystemService {
         try {
             return !mIProfcollect.get_supported_provider().isEmpty();
         } catch (RemoteException e) {
-            Log.e(LOG_TAG, e.getMessage());
+            Log.e(LOG_TAG, "Failed to get supported provider: " + e.getMessage());
             return false;
         }
     }
@@ -219,7 +219,8 @@ public final class ProfcollectForwardingService extends SystemService {
                         try {
                             sSelfService.mIProfcollect.process();
                         } catch (RemoteException e) {
-                            Log.e(LOG_TAG, e.getMessage());
+                            Log.e(LOG_TAG, "Failed to process profiles in background: "
+                                    + e.getMessage());
                         }
                     });
             return true;
@@ -234,8 +235,11 @@ public final class ProfcollectForwardingService extends SystemService {
 
     // Event observers
     private void registerObservers() {
-        registerAppLaunchObserver();
-        registerOTAObserver();
+        BackgroundThread.get().getThreadHandler().post(
+                () -> {
+                    registerAppLaunchObserver();
+                    registerOTAObserver();
+                });
     }
 
     private final AppLaunchObserver mAppLaunchObserver = new AppLaunchObserver();
@@ -264,7 +268,7 @@ public final class ProfcollectForwardingService extends SystemService {
                 try {
                     mIProfcollect.trace_once("applaunch");
                 } catch (RemoteException e) {
-                    Log.e(LOG_TAG, e.getMessage());
+                    Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                 }
             });
         }
@@ -348,7 +352,7 @@ public final class ProfcollectForwardingService extends SystemService {
                         .putExtra("filename", reportName);
                 context.sendBroadcast(intent);
             } catch (RemoteException e) {
-                Log.e(LOG_TAG, e.getMessage());
+                Log.e(LOG_TAG, "Failed to upload report: " + e.getMessage());
             }
         });
     }

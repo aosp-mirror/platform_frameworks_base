@@ -26,10 +26,10 @@ import com.android.server.SystemService;
 interface GameServiceProviderSelector {
 
     /**
-     * Returns the {@link GameServiceProviderConfiguration} associated with the selected Game
+     * Returns the {@link GameServiceConfiguration} associated with the selected Game
      * Service provider for the given user or {@code null} if none should be used.
      */
     @Nullable
-    GameServiceProviderConfiguration get(@Nullable SystemService.TargetUser user,
+    GameServiceConfiguration get(@Nullable SystemService.TargetUser user,
             @Nullable String packageNameOverride);
 }

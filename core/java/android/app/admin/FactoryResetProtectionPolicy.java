@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -254,4 +255,18 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
         return !mFactoryResetProtectionAccounts.isEmpty() && mFactoryResetProtectionEnabled;
     }
 
+    /**
+     * @hide
+     */
+    public void dump(IndentingPrintWriter pw) {
+        pw.print("factoryResetProtectionEnabled=");
+        pw.println(mFactoryResetProtectionEnabled);
+
+        pw.print("factoryResetProtectionAccounts=");
+        pw.increaseIndent();
+        for (int i = 0; i < mFactoryResetProtectionAccounts.size(); i++) {
+            pw.println(mFactoryResetProtectionAccounts.get(i));
+        }
+        pw.decreaseIndent();
+    }
 }

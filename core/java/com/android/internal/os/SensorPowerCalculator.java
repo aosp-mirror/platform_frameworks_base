@@ -51,7 +51,9 @@ public class SensorPowerCalculator extends PowerCalculator {
                 builder.getUidBatteryConsumerBuilders();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
-            appsPowerMah += calculateApp(app, app.getBatteryStatsUid(), rawRealtimeUs);
+            if (!app.isVirtualUid()) {
+                appsPowerMah += calculateApp(app, app.getBatteryStatsUid(), rawRealtimeUs);
+            }
         }
 
         builder.getAggregateBatteryConsumerBuilder(

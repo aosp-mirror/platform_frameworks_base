@@ -96,7 +96,9 @@ public class CustomMeasuredPowerCalculator extends PowerCalculator {
                 app.setConsumedPowerForCustomComponent(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + i,
                         customMeasuredPowerMah[i]);
-                newTotalPowerMah[i] += customMeasuredPowerMah[i];
+                if (!app.isVirtualUid()) {
+                    newTotalPowerMah[i] += customMeasuredPowerMah[i];
+                }
             }
         }
         return newTotalPowerMah;

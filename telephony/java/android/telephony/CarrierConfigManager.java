@@ -176,7 +176,7 @@ public class CarrierConfigManager {
      * This flag specifies whether VoLTE availability is based on provisioning. By default this is
      * false.
      * Used for UCE to determine if EAB provisioning checks should be based on provisioning.
-     * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead.
+     * @deprecated Use {@link Ims#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL} instead.
      */
     @Deprecated
     public static final String
@@ -504,7 +504,12 @@ public class CarrierConfigManager {
     /** Control whether users can choose a network operator. */
     public static final String KEY_OPERATOR_SELECTION_EXPAND_BOOL = "operator_selection_expand_bool";
 
-    /** Used in Cellular Network Settings for preferred network type. */
+    /**
+     * Used in the Preferred Network Types menu to determine if the 2G option is displayed.
+     * Value defaults to false as of Android T to discourage the use of insecure 2G protocols.
+     *
+     * @see #KEY_HIDE_ENABLE_2G
+     */
     public static final String KEY_PREFER_2G_BOOL = "prefer_2g_bool";
 
     /**
@@ -827,6 +832,17 @@ public class CarrierConfigManager {
             "dial_string_replace_string_array";
 
     /**
+     * Specifies a map from dialstrings to replacements for international roaming network service
+     * numbers which cannot be replaced on the carrier side.
+     * <p>
+     * Individual entries have the format:
+     * [dialstring to replace]:[replacement]
+     * @hide
+     */
+    public static final String KEY_INTERNATIONAL_ROAMING_DIAL_STRING_REPLACE_STRING_ARRAY =
+            "international_roaming_dial_string_replace_string_array";
+
+    /**
      * Flag specifying whether WFC over IMS supports the "wifi only" option.  If false, the wifi
      * calling settings will not include an option for "wifi only".  If true, the wifi calling
      * settings will include an option for "wifi only"
@@ -892,6 +908,9 @@ public class CarrierConfigManager {
      * Combines VoLTE, VT, VoWiFI calling provisioning into one parameter.
      * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead for
      * finer-grained control.
+     * changing carrier_volte_provisioning_required_bool requires changes to
+     * mmtel_requires_provisioning_bundle and vice versa
+     * {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE}
      */
     @Deprecated
     public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
@@ -974,6 +993,12 @@ public class CarrierConfigManager {
     /** Flag specifying whether VoLTE TTY is supported. */
     public static final String KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
             = "carrier_volte_tty_supported_bool";
+
+    /** Flag specifying whether VoWIFI TTY is supported.
+     * @hide
+     */
+    public static final String KEY_CARRIER_VOWIFI_TTY_SUPPORTED_BOOL =
+            "carrier_vowifi_tty_supported_bool";
 
     /**
      * Flag specifying whether IMS service can be turned off. If false then the service will not be
@@ -1919,6 +1944,13 @@ public class CarrierConfigManager {
             "show_4g_for_lte_data_icon_bool";
 
     /**
+     * Boolean indicating if default data account should show 4G LTE or 4G icon.
+     * @hide
+     */
+    public static final String KEY_SHOW_4GLTE_FOR_LTE_DATA_ICON_BOOL =
+            "show_4glte_for_lte_data_icon_bool";
+
+    /**
      * Boolean indicating if default data account should show 4G icon when in 3G.
      */
     public static final String KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL =
@@ -1952,6 +1984,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT =
             "nr_advanced_threshold_bandwidth_khz_int";
+
+    /**
+     * Boolean indicating if operator name should be shown in the status bar
+     * @hide
+     */
+    public static final String KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL =
+            "show_operator_name_in_statusbar_bool";
 
     /**
      * The string is used to filter redundant string from PLMN Network Name that's supplied by
@@ -2865,11 +2904,11 @@ public class CarrierConfigManager {
      * <p>
      * 4 threshold integers must be within the boundaries [-140 dB, -44 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-140, threshold1]"</LI>
-     *     <LI>"POOR: (threshold1, threshold2]"</LI>
-     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
-     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, -44]"</LI>
+     *     <LI>"NONE: [-140, threshold1)"</LI>
+     *     <LI>"POOR: [threshold1, threshold2)"</LI>
+     *     <LI>"MODERATE: [threshold2, threshold3)"</LI>
+     *     <LI>"GOOD:  [threshold3, threshold4)"</LI>
+     *     <LI>"EXCELLENT:  [threshold4, -44]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
@@ -2885,11 +2924,11 @@ public class CarrierConfigManager {
      * <p>
      * 4 threshold integers must be within the boundaries [-43 dB, 20 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-43, threshold1]"</LI>
-     *     <LI>"POOR: (threshold1, threshold2]"</LI>
-     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
-     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, 20]"</LI>
+     *     <LI>"NONE: [-43, threshold1)"</LI>
+     *     <LI>"POOR: [threshold1, threshold2)"</LI>
+     *     <LI>"MODERATE: [threshold2, threshold3)"</LI>
+     *     <LI>"GOOD:  [threshold3, threshold4)"</LI>
+     *     <LI>"EXCELLENT:  [threshold4, 20]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
@@ -2906,11 +2945,11 @@ public class CarrierConfigManager {
      * <p>
      * 4 threshold integers must be within the boundaries [-23 dB, 40 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-23, threshold1]"</LI>
-     *     <LI>"POOR: (threshold1, threshold2]"</LI>
-     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
-     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, 40]"</LI>
+     *     <LI>"NONE: [-23, threshold1)"</LI>
+     *     <LI>"POOR: [threshold1, threshold2)"</LI>
+     *     <LI>"MODERATE: [threshold2, threshold3)"</LI>
+     *     <LI>"GOOD:  [threshold3, threshold4)"</LI>
+     *     <LI>"EXCELLENT:  [threshold4, 40]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
@@ -3850,30 +3889,42 @@ public class CarrierConfigManager {
     public static final String KEY_OPPORTUNISTIC_ESIM_DOWNLOAD_VIA_WIFI_ONLY_BOOL =
             "opportunistic_esim_download_via_wifi_only_bool";
 
-    /**
-     * Controls RSRP threshold at which OpportunisticNetworkService will decide whether
+/**
+     * Controls RSRP threshold, in dBm, at which OpportunisticNetworkService will decide whether
      * the opportunistic network is good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRsrp()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT =
             "opportunistic_network_entry_threshold_rsrp_int";
 
     /**
-     * Controls RSSNR threshold at which OpportunisticNetworkService will decide whether
-     * the opportunistic network is good enough for internet data.
+     * Controls RSSNR threshold, in dB, at which OpportunisticNetworkService will
+     * decide whether the opportunistic network is good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRssnr()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT =
             "opportunistic_network_entry_threshold_rssnr_int";
 
     /**
-     * Controls RSRP threshold below which OpportunisticNetworkService will decide whether
+     * Controls RSRP threshold, in dBm, below which OpportunisticNetworkService will decide whether
      * the opportunistic network available is not good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRsrp()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT =
             "opportunistic_network_exit_threshold_rsrp_int";
 
     /**
-     * Controls RSSNR threshold below which OpportunisticNetworkService will decide whether
-     * the opportunistic network available is not good enough for internet data.
+     * Controls RSSNR threshold, in dB, below which OpportunisticNetworkService will
+     * decide whether the opportunistic network available is not good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRssnr()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT =
             "opportunistic_network_exit_threshold_rssnr_int";
@@ -3957,101 +4008,248 @@ public class CarrierConfigManager {
     public static final String KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG =
             "opportunistic_network_max_backoff_time_long";
 
-    /**
-    * Controls SS-RSRP threshold in dBm at which 5G opportunistic network will be considered good
-    * enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRP_INT =
-            "opportunistic_network_entry_threshold_ss_rsrp_int";
+    /** @hide */
+    public static class OpportunisticNetwork {
+        /**
+         * Prefix of all {@code OpportunisticNetwork.KEY_*} constants.
+         *
+         * @hide
+         */
+        public static final String PREFIX = "opportunistic.";
 
-    /**
-    * Controls SS-RSRQ threshold in dB at which 5G opportunistic network will be considered good
-    * enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE =
-            "opportunistic_network_entry_threshold_ss_rsrq_double";
+        /**
+         * Controls SS-RSRP threshold in dBm at which 5G opportunistic network will be considered
+         * good enough for internet data. Note other factors may be considered for the final
+         * decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrp()} will be compared with this
+         * threshold.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRP_INT =
+                PREFIX + "entry_threshold_ss_rsrp_int";
 
-    /**
-    * Controls SS-RSRP threshold in dBm below which 5G opportunistic network available will not
-    * be considered good enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRP_INT =
-            "opportunistic_network_exit_threshold_ss_rsrp_int";
+        /**
+         * Similar to {@link #KEY_ENTRY_THRESHOLD_SS_RSRP_INT} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_ENTRY_THRESHOLD_SS_RSRP_INT}.
+         *
+         * <p>For each key-value in the bundle: the key is the band number in string, which
+         * shall be a decimal integer as defined in {@code NgranBands.BAND_*} constants;
+         * the value is the threshold in int.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRP_INT_BUNDLE =
+                PREFIX + "entry_threshold_ss_rsrp_int_bundle";
 
-    /**
-    * Controls SS-RSRQ threshold in dB below which 5G opportunistic network available will not
-    * be considered good enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRQ_DOUBLE =
-            "opportunistic_network_exit_threshold_ss_rsrq_double";
+        /**
+         * Controls SS-RSRQ threshold in dB at which 5G opportunistic network will be considered
+         * good enough for internet data. Note other factors may be considered for the final
+         * decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrq()} will be compared with this
+         * threshold.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE =
+                PREFIX + "entry_threshold_ss_rsrq_double";
 
-    /**
-     * Controls back off time in milliseconds for switching back to
-     * 5G opportunistic subscription. This time will be added to
-     * {@link CarrierConfigManager#KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG} to
-     * determine hysteresis time if there is ping pong situation
-     * (determined by system app or 1st party app) between primary and 5G opportunistic
-     * subscription. Ping ping situation is defined in
-     * #KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG.
-     * If ping pong situation continuous #KEY_OPPORTUNISTIC_5G_NETWORK_BACKOFF_TIME_LONG
-     * will be added to previously determined hysteresis time.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_BACKOFF_TIME_LONG =
-            "opportunistic_network_5g_backoff_time_long";
+        /**
+         * Similar to {@link #KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE}.
+         *
+         * <p>For each key-value in the bundle: the key is the band number in string, which
+         * shall be a decimal integer as defined in {@code NgranBands.BAND_*} constants;
+         * the value is the threshold in double.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE =
+                PREFIX + "entry_threshold_ss_rsrq_double_bundle";
 
-    /**
-     * Controls the max back off time in milliseconds for switching back to
-     * 5G opportunistic subscription.
-     * This time will be the max hysteresis that can be determined irrespective of there is
-     * continuous ping pong situation or not as described in
-     * #KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG and
-     * #KEY_OPPORTUNISTIC_NETWORK_5G_BACKOFF_TIME_LONG.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_MAX_BACKOFF_TIME_LONG =
-            "opportunistic_network_5g_max_backoff_time_long";
+        /**
+         * Controls SS-RSRP threshold in dBm below which 5G opportunistic network available will not
+         * be considered good enough for internet data. Note other factors may be considered
+         * for the final decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrp()} will be compared with this
+         * threshold.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRP_INT =
+                PREFIX + "exit_threshold_ss_rsrp_int";
 
-    /**
-    * Controls the ping pong determination of 5G opportunistic network.
-    * If opportunistic network is determined as out of service or below
-    * #KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRP_INT or
-    * #KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRQ_INT within
-    * #KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG of switching to opportunistic network,
-    * it will be determined as ping pong situation by system app or 1st party app.
-     *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG =
-            "opportunistic_network_5g_ping_pong_time_long";
+        /**
+         * Similar to {@link #KEY_EXIT_THRESHOLD_SS_RSRP_INT} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_EXIT_THRESHOLD_SS_RSRP_INT}.
+         *
+         * <p>The syntax of its value is similar to
+         * {@link #KEY_ENTRY_THRESHOLD_SS_RSRP_INT_BUNDLE}.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRP_INT_BUNDLE =
+                PREFIX + "exit_threshold_ss_rsrp_int_bundle";
 
-    /**
-     * Controls hysteresis time in milliseconds for which will be waited before switching
-     * data to a 5G opportunistic network.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG =
-            "opportunistic_network_5g_data_switch_hysteresis_time_long";
+        /**
+         * Controls SS-RSRQ threshold in dB below which 5G opportunistic network available will not
+         * be considered good enough for internet data. Note other factors may be considered
+         * for the final decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrq()} will be compared with this
+         * threshold.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE =
+                PREFIX + "exit_threshold_ss_rsrq_double";
 
-    /**
-     * Controls hysteresis time in milliseconds for which will be waited before switching from
-     * 5G opportunistic network to primary network.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG =
-            "opportunistic_network_5g_data_switch_exit_hysteresis_time_long";
+        /**
+         * Similar to {@link #KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE}.
+         *
+         * <p>The syntax of its value is similar to
+         * {@link #KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE}.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE =
+                PREFIX + "exit_threshold_ss_rsrq_double_bundle";
+
+        /**
+         * Controls hysteresis time in milliseconds for which will be waited before switching
+         * data to a 5G opportunistic network.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG =
+                PREFIX + "5g_data_switch_hysteresis_time_long";
+
+        /**
+         * Similar to {@link #KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG} but supports
+         * different values for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG}.
+         *
+         * <p>For each key-value in the bundle: the key is the band number in string, which
+         * shall be a decimal integer as defined in {@code NgranBands.BAND_*} constants;
+         * the value is the time in long.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG_BUNDLE =
+                PREFIX + "5g_data_switch_hysteresis_time_long_bundle";
+
+        /**
+         * Controls hysteresis time in milliseconds for which will be waited before switching from
+         * 5G opportunistic network to primary network.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG =
+                PREFIX + "5g_data_switch_exit_hysteresis_time_long";
+
+        /**
+         * Similar to {@link #KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG} but supports
+         * different values for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG}.
+         *
+         * <p>The syntax is similar to
+         * {@link KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG_BUNDLE}.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG_BUNDLE =
+                PREFIX + "5g_data_switch_exit_hysteresis_time_long_bundle";
+
+        /**
+         * Controls back off time in milliseconds for switching back to
+         * 5G opportunistic subscription. This time will be added to
+         * {@link #KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG} to
+         * determine hysteresis time if there is ping pong situation
+         * (determined by system app or 1st party app) between primary and 5G opportunistic
+         * subscription. Ping ping situation is defined in
+         * {@link #KEY_5G_PING_PONG_TIME_LONG}.
+         * If ping pong situation continuous {@link #KEY_5G_NETWORK_BACKOFF_TIME_LONG}
+         * will be added to previously determined hysteresis time.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_BACKOFF_TIME_LONG =
+                PREFIX + "5g_backoff_time_long";
+
+        /**
+         * Controls the max back off time in milliseconds for switching back to
+         * 5G opportunistic subscription.
+         * This time will be the max hysteresis that can be determined irrespective of there is
+         * continuous ping pong situation or not as described in
+         * {@link #KEY_5G_PING_PONG_TIME_LONG} and
+         * {@link #KEY_5G_BACKOFF_TIME_LONG}.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_MAX_BACKOFF_TIME_LONG =
+                PREFIX + "5g_max_backoff_time_long";
+
+        /**
+         * Controls the ping pong determination of 5G opportunistic network.
+         * If opportunistic network is determined as out of service or below
+         * {@link #KEY_EXIT_THRESHOLD_SS_RSRP_INT} or
+         * {@link #KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE} within
+         * {@link #KEY_5G_PING_PONG_TIME_LONG} of switching to opportunistic network,
+         * it will be determined as ping pong situation by system app or 1st party app.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_PING_PONG_TIME_LONG =
+                PREFIX + "5g_ping_pong_time_long";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            // Default value is -111 dBm for all bands.
+            sDefaults.putInt(KEY_ENTRY_THRESHOLD_SS_RSRP_INT, -111);
+            sDefaults.putPersistableBundle(KEY_ENTRY_THRESHOLD_SS_RSRP_INT_BUNDLE,
+                                           PersistableBundle.EMPTY);
+            // Default value is -18.5 dB for all bands.
+            sDefaults.putDouble(KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
+            sDefaults.putPersistableBundle(
+                    KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is -120 dBm for all bands.
+            sDefaults.putInt(KEY_EXIT_THRESHOLD_SS_RSRP_INT, -120);
+            sDefaults.putPersistableBundle(KEY_EXIT_THRESHOLD_SS_RSRP_INT_BUNDLE,
+                                           PersistableBundle.EMPTY);
+            // Default value is -18.5 dB for all bands.
+            sDefaults.putDouble(KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
+            sDefaults.putPersistableBundle(
+                    KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is 2 seconds for all bands.
+            defaults.putLong(KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG, 2000);
+            defaults.putPersistableBundle(
+                    KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is 2 seconds for all bands.
+            defaults.putLong(KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 2000);
+            defaults.putPersistableBundle(
+                    KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is 10 seconds.
+            sDefaults.putLong(KEY_5G_BACKOFF_TIME_LONG, 10000);
+            // Default value is 60 seconds.
+            sDefaults.putLong(KEY_5G_MAX_BACKOFF_TIME_LONG, 60000);
+            // Default value is 60 seconds.
+            sDefaults.putLong(KEY_5G_PING_PONG_TIME_LONG, 60000);
+            return defaults;
+        }
+    }
+
     /**
      * Controls whether 4G opportunistic networks should be scanned for possible data switch.
      *
@@ -4215,12 +4413,14 @@ public class CarrierConfigManager {
      * The data stall recovery timers array in milliseconds, each element is the delay before
      * performining next recovery action.
      *
-     * The default value of timers array are: [180000ms, 180000ms, 180000ms] (3 minutes)
+     * The default value of timers array are: [180000ms, 180000ms, 180000ms, 180000ms] (3 minutes)
      * Array[0]: It's the timer between RECOVERY_ACTION GET_DATA_CALL_LIST and CLEANUP, if data
      * stall symptom still occurred, it will perform next recovery action after 180000ms.
-     * Array[1]: It's the timer between RECOVERY_ACTION CLEANUP and RADIO_RESTART, if data stall
+     * Array[1]: It's the timer between RECOVERY_ACTION CLEANUP and RE-REGISTER, if data stall
      * symptom still occurred, it will perform next recovery action after 180000ms.
-     * Array[2]: It's the timer between RECOVERY_ACTION RADIO_RESTART and RESET_MODEM, if data stall
+     * Array[2]: It's the timer between RECOVERY_ACTION RE-REGISTER and RADIO_RESTART, if data stall
+     * symptom still occurred, it will perform next recovery action after 180000ms.
+     * Array[3]: It's the timer between RECOVERY_ACTION RADIO_RESTART and RESET_MODEM, if data stall
      * symptom still occurred, it will perform next recovery action after 180000ms.
      *
      * See the {@code RECOVERY_ACTION_*} constants in
@@ -4240,7 +4440,7 @@ public class CarrierConfigManager {
      * RECOVERY_ACTION_CLEANUP to true, then it can be ignored to speed up the recovery
      * action procedure.
      *
-     * The default value of boolean array are: [false, false, false, false]
+     * The default value of boolean array are: [false, false, true, false, false]
      * Array[0]: When performing the recovery action, we can use this boolean value to determine
      * if we need to perform RECOVERY_ACTION_GET_DATA_CALL_LIST.
      * Array[1]: If data stall symptom still occurred, we can use this boolean value to determine
@@ -4250,8 +4450,10 @@ public class CarrierConfigManager {
      * variable of action RECOVERY_ACTION_CLEANUP to true, then it can be ignored to speed up the
      * recovery action procedure.
      * Array[2]: If data stall symptom still occurred, we can use this boolean value to determine
-     * if we need to perform RECOVERY_ACTION_RADIO_RESTART.
+     * if we need to perform RE-REGISTER.
      * Array[3]: If data stall symptom still occurred, we can use this boolean value to determine
+     * if we need to perform RECOVERY_ACTION_RADIO_RESTART.
+     * Array[4]: If data stall symptom still occurred, we can use this boolean value to determine
      * if we need to perform RECOVERY_ACTION_MODEM_RESET.
      *
      * See the {@code RECOVERY_ACTION_*} constants in
@@ -4590,10 +4792,14 @@ public class CarrierConfigManager {
      * Either omit this key or pass a value of
      * {@link SubscriptionManager#USAGE_SETTING_UNKNOWN unknown} to preserve the current setting.
      *
+     * <p>Devices that support configuration of the cellular usage setting, including devices
+     * with HAL capability to set the cellular usage setting, must honor this setting accordingly.
+     *
      * {@link SubscriptionManager#USAGE_SETTING_DEFAULT default},
      * {@link SubscriptionManager#USAGE_SETTING_VOICE_CENTRIC voice-centric},
      * or {@link SubscriptionManager#USAGE_SETTING_DATA_CENTRIC data-centric}.
      * {@see SubscriptionInfo#getUsageSetting}
+     *
      */
     public static final String KEY_CELLULAR_USAGE_SETTING_INT =
             "cellular_usage_setting_int";
@@ -5234,6 +5440,10 @@ public class CarrierConfigManager {
          * </ul>
          * <p> The values are defined in
          * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech}
+         *
+         * changing mmtel_requires_provisioning_bundle requires changes to
+         * carrier_volte_provisioning_required_bool and vice versa
+         * {@link Ims#KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL}
          */
         public static final String KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE =
                 KEY_PREFIX + "mmtel_requires_provisioning_bundle";
@@ -8329,8 +8539,9 @@ public class CarrierConfigManager {
      *     <item value="source=GERAN|UTRAN, target:IWLAN, type=disallowed"/>
      *     <!-- Handover from IWLAN to 3G/4G/5G is not allowed if the device is roaming. -->
      *     <item value="source=IWLAN, target=UTRAN|EUTRAN|NGRAN, roaming=true, type=disallowed"/>
-     *     <!-- Handover from 4G to IWLAN is not allowed -->
-     *     <item value="source=EUTRAN, target=IWLAN, type=disallowed"/>
+     *     <!-- Handover from 4G to IWLAN is not allowed if the device has capability in either IMS
+     *     or EIMS-->
+     *     <item value="source=EUTRAN, target=IWLAN, type=disallowed, capabilities=IMS|EIMS"/>
      *     <!-- Handover is always allowed in any condition. -->
      *     <item value="source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN,
      *         target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"/>
@@ -8394,6 +8605,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
+        sDefaults.putBoolean(KEY_CARRIER_VOWIFI_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_IMS_GBA_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
@@ -8435,7 +8647,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL, false);
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
-        sDefaults.putBoolean(KEY_PREFER_2G_BOOL, true);
+        sDefaults.putBoolean(KEY_PREFER_2G_BOOL, false);
         sDefaults.putBoolean(KEY_4G_ONLY_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_APN_SETTING_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CDMA_CHOICES_BOOL, false);
@@ -8519,6 +8731,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_DIAL_STRING_REPLACE_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_INTERNATIONAL_ROAMING_DIAL_STRING_REPLACE_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_FORCE_HOME_NETWORK_BOOL, false);
         sDefaults.putInt(KEY_GSM_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
@@ -8727,6 +8940,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_4GLTE_FOR_LTE_DATA_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL, false);
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
@@ -8740,6 +8954,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_WORLD_MODE_ENABLED_BOOL, false);
         sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL, false);
@@ -8854,9 +9069,9 @@ public class CarrierConfigManager {
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_MODERATE */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT, -118);
         /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_GOOD */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 45);
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 5);
         /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_MODERATE */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 10);
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 1);
         /* Default value is 1024 kbps */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_BANDWIDTH_INT, 1024);
         /* Default value is 10 seconds */
@@ -8865,6 +9080,7 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG, 10000);
         /* Default value is 3 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 3000);
+        sDefaults.putAll(OpportunisticNetwork.getDefaults());
         sDefaults.putBoolean(KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL, true);
         sDefaults.putBoolean(KEY_SWITCH_DATA_TO_PRIMARY_IF_PRIMARY_IS_OOS_BOOL, true);
         /* Default value is 60 seconds. */
@@ -8873,24 +9089,6 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG, 10000);
         /* Default value is 60 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG, 60000);
-        /* Default value is -111 dBm. */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRP_INT, -111);
-        /* Default value is -18.5 dB. */
-        sDefaults.putDouble(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
-        /* Default value is -120 dBm. */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRP_INT, -120);
-        /* Default value is -18.5 dB. */
-        sDefaults.putDouble(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
-        /* Default value is 10 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_BACKOFF_TIME_LONG, 10000);
-        /* Default value is 60 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_MAX_BACKOFF_TIME_LONG, 60000);
-        /* Default value is 60 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG, 60000);
-        /* Default value is 2 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG, 2000);
-        /* Default value is 2 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 2000);
         sDefaults.putBoolean(KEY_ENABLE_4G_OPPORTUNISTIC_NETWORK_SCAN_BOOL, true);
         sDefaults.putLong(KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG, 60000L);
         sDefaults.putLong(
@@ -9007,9 +9205,9 @@ public class CarrierConfigManager {
                 SubscriptionManager.USAGE_SETTING_UNKNOWN);
         // Default data stall recovery configurations.
         sDefaults.putLongArray(KEY_DATA_STALL_RECOVERY_TIMERS_LONG_ARRAY,
-                new long[] {180000, 180000, 180000});
+                new long[] {180000, 180000, 180000, 180000});
         sDefaults.putBooleanArray(KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY,
-                new boolean[] {false, false, false, false});
+                new boolean[] {false, false, true, false, false});
     }
 
     /**
@@ -9351,42 +9549,26 @@ public class CarrierConfigManager {
     private void addConfig(String key, Object value, PersistableBundle configs) {
         if (value instanceof String) {
             configs.putString(key, (String) value);
-        }
-
-        if (value instanceof String[]) {
+        } else if (value instanceof String[]) {
             configs.putStringArray(key, (String[]) value);
-        }
-
-        if (value instanceof Integer) {
+        } else if (value instanceof Integer) {
             configs.putInt(key, (Integer) value);
-        }
-
-        if (value instanceof Long) {
+        } else if (value instanceof Long) {
             configs.putLong(key, (Long) value);
-        }
-
-        if (value instanceof Double) {
+        } else if (value instanceof Double) {
             configs.putDouble(key, (Double) value);
-        }
-
-        if (value instanceof Boolean) {
+        } else if (value instanceof Boolean) {
             configs.putBoolean(key, (Boolean) value);
-        }
-
-        if (value instanceof int[]) {
+        } else if (value instanceof int[]) {
             configs.putIntArray(key, (int[]) value);
-        }
-
-        if (value instanceof double[]) {
+        } else if (value instanceof double[]) {
             configs.putDoubleArray(key, (double[]) value);
-        }
-
-        if (value instanceof boolean[]) {
+        } else if (value instanceof boolean[]) {
             configs.putBooleanArray(key, (boolean[]) value);
-        }
-
-        if (value instanceof long[]) {
+        } else if (value instanceof long[]) {
             configs.putLongArray(key, (long[]) value);
+        } else if (value instanceof PersistableBundle) {
+            configs.putPersistableBundle(key, (PersistableBundle) value);
         }
     }
 }

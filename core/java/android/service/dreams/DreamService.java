@@ -219,7 +219,7 @@ public class DreamService extends Service implements Window.Callback {
      * The default value for whether to show complications on the overlay.
      * @hide
      */
-    public static final boolean DEFAULT_SHOW_COMPLICATIONS = true;
+    public static final boolean DEFAULT_SHOW_COMPLICATIONS = false;
 
     private final IDreamManager mDreamManager;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -263,10 +263,12 @@ public class DreamService extends Service implements Window.Callback {
                 return;
             }
 
+            final ServiceInfo serviceInfo = fetchServiceInfo(context, dreamService);
+
             final Intent overlayIntent = new Intent();
             overlayIntent.setComponent(overlayService);
             overlayIntent.putExtra(EXTRA_SHOW_COMPLICATIONS,
-                    fetchShouldShowComplications(context, dreamService));
+                    fetchShouldShowComplications(context, serviceInfo));
 
             context.bindService(overlayIntent,
                     this, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);
@@ -988,7 +990,9 @@ public class DreamService extends Service implements Window.Callback {
 
         // Connect to the overlay service if present.
         if (!mWindowless) {
-            mOverlayConnection.bind(this, intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT),
+            mOverlayConnection.bind(
+                    /* context= */ this,
+                    intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT),
                     new ComponentName(this, getClass()));
         }
 
@@ -1019,13 +1023,13 @@ public class DreamService extends Service implements Window.Callback {
         }
         mFinished = true;
 
+        mOverlayConnection.unbind(this);
+
         if (mDreamToken == null) {
             Slog.w(mTag, "Finish was called before the dream was attached.");
             stopSelf();
             return;
         }
-
-        mOverlayConnection.unbind(this);
 
         try {
             // finishSelf will unbind the dream controller from the dream service. This will
@@ -1111,7 +1115,10 @@ public class DreamService extends Service implements Window.Callback {
      * @hide
      */
     @Nullable
-    public static DreamMetadata getDreamMetadata(Context context, ServiceInfo serviceInfo) {
+    public static DreamMetadata getDreamMetadata(Context context,
+            @Nullable ServiceInfo serviceInfo) {
+        if (serviceInfo == null) return null;
+
         final PackageManager pm = context.getPackageManager();
 
         final TypedArray rawMetadata = readMetadata(pm, serviceInfo);
@@ -1258,6 +1265,9 @@ public class DreamService extends Service implements Window.Callback {
             i.setPackage(getApplicationContext().getPackageName());
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             i.putExtra(DreamActivity.EXTRA_CALLBACK, mDreamServiceWrapper);
+            final ServiceInfo serviceInfo = fetchServiceInfo(this,
+                    new ComponentName(this, getClass()));
+            i.putExtra(DreamActivity.EXTRA_DREAM_TITLE, fetchDreamLabel(this, serviceInfo));
 
             try {
                 if (!ActivityTaskManager.getService().startDreamActivity(i)) {
@@ -1319,7 +1329,9 @@ public class DreamService extends Service implements Window.Callback {
                     public void onViewDetachedFromWindow(View v) {
                         if (mActivity == null || !mActivity.isChangingConfigurations()) {
                             // Only stop the dream if the view is not detached by relaunching
-                            // activity for configuration changes.
+                            // activity for configuration changes. It is important to also clear
+                            // the window reference in order to fully release the DreamActivity.
+                            mWindow = null;
                             mActivity = null;
                             finish();
                         }
@@ -1350,22 +1362,33 @@ public class DreamService extends Service implements Window.Callback {
      * {@link DreamService#DEFAULT_SHOW_COMPLICATIONS}.
      */
     private static boolean fetchShouldShowComplications(Context context,
-            ComponentName componentName) {
+            @Nullable ServiceInfo serviceInfo) {
+        final DreamMetadata metadata = getDreamMetadata(context, serviceInfo);
+        if (metadata != null) {
+            return metadata.showComplications;
+        }
+        return DEFAULT_SHOW_COMPLICATIONS;
+    }
+
+    @Nullable
+    private static CharSequence fetchDreamLabel(Context context,
+            @Nullable ServiceInfo serviceInfo) {
+        if (serviceInfo == null) return null;
+        final PackageManager pm = context.getPackageManager();
+        return serviceInfo.loadLabel(pm);
+    }
+
+    @Nullable
+    private static ServiceInfo fetchServiceInfo(Context context, ComponentName componentName) {
         final PackageManager pm = context.getPackageManager();
 
         try {
-            final ServiceInfo si = pm.getServiceInfo(componentName,
+            return pm.getServiceInfo(componentName,
                     PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA));
-            final DreamMetadata metadata = getDreamMetadata(context, si);
-
-            if (metadata != null) {
-                return metadata.showComplications;
-            }
         } catch (PackageManager.NameNotFoundException e) {
             if (DEBUG) Log.w(TAG, "cannot find component " + componentName.flattenToShortString());
         }
-
-        return DEFAULT_SHOW_COMPLICATIONS;
+        return null;
     }
 
     @Override

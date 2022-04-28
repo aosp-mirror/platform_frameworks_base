@@ -157,7 +157,7 @@ public interface StatusBarManagerInternal {
      * @see com.android.internal.statusbar.IStatusBar#requestWindowMagnificationConnection(boolean
      * request)
      */
-    void requestWindowMagnificationConnection(boolean request);
+    boolean requestWindowMagnificationConnection(boolean request);
 
     /**
      * Handles a logging command from the WM shell command.

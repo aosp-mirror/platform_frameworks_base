@@ -123,6 +123,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     public void forceFinishTransition() {
     }
 
+    /** Called when the fixed rotation started. */
+    public void onFixedRotationStarted() {
+    }
+
     public PipTransitionController(PipBoundsState pipBoundsState,
             PipMenuController pipMenuController, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipAnimationController pipAnimationController, Transitions transitions,
@@ -189,6 +193,17 @@ public abstract class PipTransitionController implements Transitions.TransitionH
             ActivityInfo activityInfo) {
         mPipBoundsState.setBoundsStateForEntry(componentName, activityInfo, params,
                 mPipBoundsAlgorithm);
+    }
+
+    /**
+     * Called when the display is going to rotate.
+     *
+     * @return {@code true} if it was handled, otherwise the existing pip logic
+     *                      will deal with rotation.
+     */
+    public boolean handleRotateDisplay(int startRotation, int endRotation,
+            WindowContainerTransaction wct) {
+        return false;
     }
 
     /**

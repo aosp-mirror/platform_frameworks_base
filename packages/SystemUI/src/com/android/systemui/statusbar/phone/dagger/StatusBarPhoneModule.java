@@ -92,10 +92,9 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
@@ -115,7 +114,6 @@ import com.android.systemui.util.concurrency.MessageRouter;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
 import java.util.Optional;
@@ -128,16 +126,16 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Dagger Module providing {@link StatusBar}.
+ * Dagger Module providing {@link CentralSurfaces}.
  */
 @Module
 public interface StatusBarPhoneModule {
     /**
-     * Provides our instance of StatusBar which is considered optional.
+     * Provides our instance of CentralSurfaces which is considered optional.
      */
     @Provides
     @SysUISingleton
-    static StatusBar provideStatusBar(
+    static CentralSurfaces provideCentralSurfaces(
             Context context,
             NotificationsController notificationsController,
             FragmentService fragmentService,
@@ -197,11 +195,8 @@ public interface StatusBarPhoneModule {
             DozeScrimController dozeScrimController,
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
-            StatusBarComponent.Factory statusBarComponentFactory,
+            CentralSurfacesComponent.Factory statusBarComponentFactory,
             PluginManager pluginManager,
-            Optional<LegacySplitScreen> splitScreenOptional,
-            StatusBarNotificationActivityStarter.Builder
-                    statusBarNotificationActivityStarterBuilder,
             ShadeController shadeController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
@@ -236,7 +231,7 @@ public interface StatusBarPhoneModule {
             DeviceStateManager deviceStateManager,
             DreamOverlayStateController dreamOverlayStateController,
             WiredChargingRippleController wiredChargingRippleController) {
-        return new StatusBar(
+        return new CentralSurfaces(
                 context,
                 notificationsController,
                 fragmentService,
@@ -298,8 +293,6 @@ public interface StatusBarPhoneModule {
                 commandQueue,
                 statusBarComponentFactory,
                 pluginManager,
-                splitScreenOptional,
-                statusBarNotificationActivityStarterBuilder,
                 shadeController,
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,

@@ -103,13 +103,11 @@ java_library_static {
         ":android.hardware.biometrics.face-V2-java-source",
         ":statslog-art-java-gen",
         ":statslog-contexthub-java-gen",
-        ":services.bluetooth-sources", // TODO(b/214988855) : Remove once apex is ready
         ":services.core-sources",
         ":services.core.protologsrc",
         ":dumpstate_aidl",
         ":framework_native_aidl",
         ":gsiservice_aidl",
-        ":inputconstants_aidl",
         ":installd_aidl",
         ":storaged_aidl",
         ":vold_aidl",
@@ -122,7 +120,6 @@ java_library_static {
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/wm/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
-        ":services.connectivity-tiramisu-sources",
     ],
 
     libs: [
@@ -134,7 +131,7 @@ java_library_static {
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
         "service-permission.stubs.system_server",
-        "service-supplementalprocess.stubs.system_server",
+        "service-sdksandbox.stubs.system_server",
     ],
 
     required: [
@@ -164,7 +161,6 @@ java_library_static {
         "android.hardware.biometrics.fingerprint-V2-java",
         "android.hardware.oemlock-V1.0-java",
         "android.hardware.configstore-V1.1-java",
-        "android.hardware.contexthub-V1.0-java",
         "android.hardware.ir-V1-java",
         "android.hardware.rebootescrow-V1-java",
         "android.hardware.soundtrigger-V2.3-java",
@@ -177,9 +173,6 @@ java_library_static {
         "overlayable_policy_aidl-java",
         "SurfaceFlingerProperties",
         "com.android.sysprop.watchdog",
-        // This is used for services.connectivity-tiramisu-sources.
-        // TODO: delete when NetworkStatsService is moved to the mainline module.
-        "net-utils-device-common-bpf",
     ],
     javac_shard_size: 50,
 }

@@ -275,7 +275,7 @@ public class PeopleSpaceWidgetManager {
                 updateSingleConversationWidgets(widgetIds);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Exception: " + e);
+            Log.e(TAG, "failed to update widgets", e);
         }
     }
 
@@ -348,7 +348,7 @@ public class PeopleSpaceWidgetManager {
         try {
             return getTileForExistingWidgetThrowing(appWidgetId);
         } catch (Exception e) {
-            Log.e(TAG, "Failed to retrieve conversation for tile: " + e);
+            Log.e(TAG, "failed to retrieve tile for widget ID " + appWidgetId, e);
             return null;
         }
     }
@@ -423,7 +423,7 @@ public class PeopleSpaceWidgetManager {
             // Add current state.
             return getTileWithCurrentState(storedTile.build(), ACTION_BOOT_COMPLETED);
         } catch (RemoteException e) {
-            Log.e(TAG, "Could not retrieve data: " + e);
+            Log.e(TAG, "getTileFromPersistentStorage failing", e);
             return null;
         }
     }
@@ -441,12 +441,16 @@ public class PeopleSpaceWidgetManager {
                 Log.d(TAG, "Notification removed, key: " + sbn.getKey());
             }
         }
+        if (DEBUG) Log.d(TAG, "Fetching notifications");
+        Collection<NotificationEntry> notifications = mNotifCollection.getAllNotifs();
         mBgExecutor.execute(
-                () -> updateWidgetsWithNotificationChangedInBackground(sbn, notificationAction));
+                () -> updateWidgetsWithNotificationChangedInBackground(
+                        sbn, notificationAction, notifications));
     }
 
     private void updateWidgetsWithNotificationChangedInBackground(StatusBarNotification sbn,
-            PeopleSpaceUtils.NotificationAction action) {
+            PeopleSpaceUtils.NotificationAction action,
+            Collection<NotificationEntry> notifications) {
         try {
             PeopleTileKey key = new PeopleTileKey(
                     sbn.getShortcutId(), sbn.getUser().getIdentifier(), sbn.getPackageName());
@@ -469,23 +473,23 @@ public class PeopleSpaceWidgetManager {
                     Log.d(TAG, "Widgets by URI to be updated:" + tilesUpdatedByUri.toString());
                 }
                 tilesUpdated.addAll(tilesUpdatedByUri);
-                updateWidgetIdsBasedOnNotifications(tilesUpdated);
+                updateWidgetIdsBasedOnNotifications(tilesUpdated, notifications);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Throwing exception: " + e);
+            Log.e(TAG, "updateWidgetsWithNotificationChangedInBackground failing", e);
         }
     }
 
     /** Updates {@code widgetIdsToUpdate} with {@code action}. */
-    private void updateWidgetIdsBasedOnNotifications(Set<String> widgetIdsToUpdate) {
+    private void updateWidgetIdsBasedOnNotifications(Set<String> widgetIdsToUpdate,
+            Collection<NotificationEntry> ungroupedNotifications) {
         if (widgetIdsToUpdate.isEmpty()) {
             if (DEBUG) Log.d(TAG, "No widgets to update, returning.");
             return;
         }
         try {
-            if (DEBUG) Log.d(TAG, "Fetching grouped notifications");
             Map<PeopleTileKey, Set<NotificationEntry>> groupedNotifications =
-                    getGroupedConversationNotifications();
+                    groupConversationNotifications(ungroupedNotifications);
 
             widgetIdsToUpdate
                     .stream()
@@ -495,7 +499,7 @@ public class PeopleSpaceWidgetManager {
                             id -> getAugmentedTileForExistingWidget(id, groupedNotifications)))
                     .forEach((id, tile) -> updateAppWidgetOptionsAndViewOptional(id, tile));
         } catch (Exception e) {
-            Log.e(TAG, "Exception updating widgets: " + e);
+            Log.e(TAG, "updateWidgetIdsBasedOnNotifications failing", e);
         }
     }
 
@@ -510,7 +514,7 @@ public class PeopleSpaceWidgetManager {
                     "Augmenting tile from NotificationEntryManager widget: " + key.toString());
         }
         Map<PeopleTileKey, Set<NotificationEntry>> notifications =
-                getGroupedConversationNotifications();
+                groupConversationNotifications(mNotifCollection.getAllNotifs());
         String contactUri = null;
         if (tile.getContactUri() != null) {
             contactUri = tile.getContactUri().toString();
@@ -518,9 +522,10 @@ public class PeopleSpaceWidgetManager {
         return augmentTileFromNotifications(tile, key, contactUri, notifications, appWidgetId);
     }
 
-    /** Returns active and pending notifications grouped by {@link PeopleTileKey}. */
-    public Map<PeopleTileKey, Set<NotificationEntry>> getGroupedConversationNotifications() {
-        Collection<NotificationEntry> notifications = mNotifCollection.getAllNotifs();
+    /** Groups active and pending notifications grouped by {@link PeopleTileKey}. */
+    public Map<PeopleTileKey, Set<NotificationEntry>> groupConversationNotifications(
+            Collection<NotificationEntry> notifications
+    ) {
         if (DEBUG) Log.d(TAG, "Number of total notifications: " + notifications.size());
         Map<PeopleTileKey, Set<NotificationEntry>> groupedNotifications =
                 notifications
@@ -846,7 +851,7 @@ public class PeopleSpaceWidgetManager {
                     Collections.singletonList(tile.getId()),
                     tile.getUserHandle(), LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS);
         } catch (Exception e) {
-            Log.w(TAG, "Exception caching shortcut:" + e);
+            Log.w(TAG, "failed to cache shortcut", e);
         }
         PeopleSpaceTile finalTile = tile;
         mBgExecutor.execute(
@@ -954,7 +959,7 @@ public class PeopleSpaceWidgetManager {
                     UserHandle.of(key.getUserId()),
                     LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS);
         } catch (Exception e) {
-            Log.d(TAG, "Exception uncaching shortcut:" + e);
+            Log.d(TAG, "failed to uncache shortcut", e);
         }
     }
 
@@ -1037,7 +1042,7 @@ public class PeopleSpaceWidgetManager {
                     packageName, userHandle.getIdentifier(), shortcutId);
             tile = PeopleSpaceUtils.getTile(channel, mLauncherApps);
         } catch (Exception e) {
-            Log.w(TAG, "Exception getting tiles: " + e);
+            Log.w(TAG, "failed to get conversation or tile", e);
             return null;
         }
         if (tile == null) {
@@ -1086,7 +1091,7 @@ public class PeopleSpaceWidgetManager {
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 // Delete data for uninstalled widgets.
-                Log.e(TAG, "Package no longer found for tile: " + e);
+                Log.e(TAG, "package no longer found for tile", e);
                 JobScheduler jobScheduler = mContext.getSystemService(JobScheduler.class);
                 if (jobScheduler != null
                         && jobScheduler.getPendingJob(PeopleBackupFollowUpJob.JOB_ID) != null) {
@@ -1296,7 +1301,7 @@ public class PeopleSpaceWidgetManager {
                     try {
                         editor.putString(newId, (String) entry.getValue());
                     } catch (Exception e) {
-                        Log.e(TAG, "Malformed entry value: " + entry.getValue());
+                        Log.e(TAG, "malformed entry value: " + entry.getValue(), e);
                     }
                     editor.remove(key);
                     break;
@@ -1306,7 +1311,7 @@ public class PeopleSpaceWidgetManager {
                     try {
                         oldWidgetIds = (Set<String>) entry.getValue();
                     } catch (Exception e) {
-                        Log.e(TAG, "Malformed entry value: " + entry.getValue());
+                        Log.e(TAG, "malformed entry value: " + entry.getValue(), e);
                         editor.remove(key);
                         break;
                     }
@@ -1337,7 +1342,7 @@ public class PeopleSpaceWidgetManager {
             try {
                 oldWidgetIds = (Set<String>) entry.getValue();
             } catch (Exception e) {
-                Log.e(TAG, "Malformed entry value: " + entry.getValue());
+                Log.e(TAG, "malformed entry value: " + entry.getValue(), e);
                 followUpEditor.remove(key);
                 continue;
             }

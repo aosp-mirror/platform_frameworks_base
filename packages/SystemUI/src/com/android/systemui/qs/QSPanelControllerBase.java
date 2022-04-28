@@ -37,11 +37,10 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.util.Utils;
+import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -88,7 +87,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 @Override
                 public void onConfigurationChange(Configuration newConfig) {
                     mShouldUseSplitNotificationShade =
-                            Utils.shouldUseSplitNotificationShade(getResources());
+                            LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
                     onConfigurationChanged();
                     if (newConfig.orientation != mLastOrientation) {
                         mLastOrientation = newConfig.orientation;
@@ -133,7 +132,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
         mShouldUseSplitNotificationShade =
-                Utils.shouldUseSplitNotificationShade(getResources());
+                LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
     }
 
     @Override
@@ -217,7 +216,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     /** */
     public void refreshAllTiles() {
         for (QSPanelControllerBase.TileRecord r : mRecords) {
-            r.tile.refreshState();
+            if (!r.tile.isListening()) {
+                // Only refresh tiles that were not already in the listening state. Tiles that are
+                // already listening is as if they are already expanded (for example, tiles that
+                // are both in QQS and QS).
+                r.tile.refreshState();
+            }
         }
     }
 
@@ -382,12 +386,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(getClass().getSimpleName() + ":");
         pw.println("  Tile records:");
         for (QSPanelControllerBase.TileRecord record : mRecords) {
             if (record.tile instanceof Dumpable) {
-                pw.print("    "); ((Dumpable) record.tile).dump(fd, pw, args);
+                pw.print("    "); ((Dumpable) record.tile).dump(pw, args);
                 pw.print("    "); pw.println(record.tileView.toString());
             }
         }
@@ -417,6 +421,24 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     @Nullable
     public View getBrightnessView() {
         return mView.getBrightnessView();
+    }
+
+    /**
+     * Set a listener to collapse/expand QS.
+     * @param action
+     */
+    public void setCollapseExpandAction(Runnable action) {
+        mView.setCollapseExpandAction(action);
+    }
+
+    /** Sets whether we are currently on lock screen. */
+    public void setIsOnKeyguard(boolean isOnKeyguard) {
+        boolean isOnSplitShadeLockscreen = mShouldUseSplitNotificationShade && isOnKeyguard;
+        // When the split shade is expanding on lockscreen, the media container transitions from the
+        // lockscreen to QS.
+        // We have to prevent the media container position from moving during the transition to have
+        // a smooth translation animation without stuttering.
+        mView.setShouldMoveMediaOnExpansion(!isOnSplitShadeLockscreen);
     }
 
     /** */

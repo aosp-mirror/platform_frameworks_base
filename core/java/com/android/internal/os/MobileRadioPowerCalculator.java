@@ -111,9 +111,9 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
             calculateApp(app, uid, total, query, keys);
         }
 
-        final long consumptionUC = batteryStats.getMobileRadioMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(consumptionUC, query);
-        calculateRemaining(total, powerModel, batteryStats, rawRealtimeUs, consumptionUC);
+        final long totalConsumptionUC = batteryStats.getMobileRadioMeasuredBatteryConsumptionUC();
+        final int powerModel = getPowerModel(totalConsumptionUC, query);
+        calculateRemaining(total, powerModel, batteryStats, rawRealtimeUs, totalConsumptionUC);
 
         if (total.remainingPowerMah != 0 || total.totalAppPowerMah != 0) {
             builder.getAggregateBatteryConsumerBuilder(
@@ -136,12 +136,14 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
             PowerAndDuration total,
             BatteryUsageStatsQuery query, BatteryConsumer.Key[] keys) {
         final long radioActiveDurationMs = calculateDuration(u, BatteryStats.STATS_SINCE_CHARGED);
-        total.totalAppDurationMs += radioActiveDurationMs;
-
         final long consumptionUC = u.getMobileRadioMeasuredBatteryConsumptionUC();
         final int powerModel = getPowerModel(consumptionUC, query);
         final double powerMah = calculatePower(u, powerModel, radioActiveDurationMs, consumptionUC);
-        total.totalAppPowerMah += powerMah;
+
+        if (!app.isVirtualUid()) {
+            total.totalAppDurationMs += radioActiveDurationMs;
+            total.totalAppPowerMah += powerMah;
+        }
 
         app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                         radioActiveDurationMs)
@@ -185,12 +187,13 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
 
     private void calculateRemaining(PowerAndDuration total,
             @BatteryConsumer.PowerModel int powerModel, BatteryStats batteryStats,
-            long rawRealtimeUs, long consumptionUC) {
+            long rawRealtimeUs, long totalConsumptionUC) {
         long signalTimeMs = 0;
         double powerMah = 0;
 
         if (powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
-            powerMah = uCtoMah(consumptionUC);
+            powerMah = uCtoMah(totalConsumptionUC) - total.totalAppPowerMah;
+            if (powerMah < 0) powerMah = 0;
         }
 
         for (int i = 0; i < NUM_SIGNAL_STRENGTH_LEVELS; i++) {

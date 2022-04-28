@@ -19,6 +19,7 @@ package com.android.systemui.qs.user
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.content.DialogInterface.BUTTON_NEUTRAL
 import android.content.Intent
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -84,16 +85,20 @@ class UserSwitchDialogController @VisibleForTesting constructor(
             setPositiveButton(R.string.quick_settings_done) { _, _ ->
                 uiEventLogger.log(QSUserSwitcherEvent.QS_USER_DETAIL_CLOSE)
             }
-            setNeutralButton(R.string.quick_settings_more_user_settings) { _, _ ->
+            setNeutralButton(R.string.quick_settings_more_user_settings, { _, _ ->
                 if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                    dialogLaunchAnimator.disableAllCurrentDialogsExitAnimations()
                     uiEventLogger.log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
+                    val controller = dialogLaunchAnimator.createActivityLaunchController(
+                        getButton(BUTTON_NEUTRAL))
+
+                    if (controller == null) {
+                        dismiss()
+                    }
+
                     activityStarter.postStartActivityDismissingKeyguard(
-                        USER_SETTINGS_INTENT,
-                        0
-                    )
+                        USER_SETTINGS_INTENT, 0, controller)
                 }
-            }
+            }, false /* dismissOnClick */)
             val gridFrame = LayoutInflater.from(this.context)
                 .inflate(R.layout.qs_user_dialog_content, null)
             setView(gridFrame)

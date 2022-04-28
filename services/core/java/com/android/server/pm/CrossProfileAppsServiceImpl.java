@@ -112,7 +112,9 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             String callingFeatureId,
             ComponentName component,
             @UserIdInt int userId,
-            boolean launchMainActivity) throws RemoteException {
+            boolean launchMainActivity,
+            IBinder targetTask,
+            Bundle options) throws RemoteException {
         Objects.requireNonNull(callingPackage);
         Objects.requireNonNull(component);
 
@@ -145,8 +147,12 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         if (launchMainActivity) {
             launchIntent.setAction(Intent.ACTION_MAIN);
             launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            if (targetTask == null) {
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            } else {
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            }
             // Only package name is set here, as opposed to component name, because intent action
             // and category are ignored if component name is present while we are resolving intent.
             launchIntent.setPackage(component.getPackageName());
@@ -170,15 +176,20 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         }
         verifyActivityCanHandleIntentAndExported(launchIntent, component, callingUid, userId);
 
+        // Always show the cross profile animation
+        if (options == null) {
+            options = ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle();
+        } else {
+            options.putAll(ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle());
+        }
+
         launchIntent.setPackage(null);
         launchIntent.setComponent(component);
         mInjector.getActivityTaskManagerInternal().startActivityAsUser(
                 caller, callingPackage, callingFeatureId, launchIntent,
-                /* resultTo= */ null,
-                Intent.FLAG_ACTIVITY_NEW_TASK,
-                launchMainActivity
-                        ? ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle()
-                        : null,
+                targetTask,
+                /* startFlags= */ 0,
+                options,
                 userId);
     }
 
@@ -224,6 +235,13 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         }
 
         verifyActivityCanHandleIntent(launchIntent, callingUid, userId);
+
+        // Always show the cross profile animation
+        if (options == null) {
+            options = ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle();
+        } else {
+            options.putAll(ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle());
+        }
 
         mInjector.getActivityTaskManagerInternal()
                 .startActivityAsUser(

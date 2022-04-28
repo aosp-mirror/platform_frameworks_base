@@ -154,6 +154,70 @@ public class LogModule {
         return factory.create("SwipeStatusBarAwayLog", 30);
     }
 
+    /**
+     * Provides a logging buffer for logs related to the media tap-to-transfer chip on the sender
+     * device. See {@link com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger}.
+     */
+    @Provides
+    @SysUISingleton
+    @MediaTttSenderLogBuffer
+    public static LogBuffer provideMediaTttSenderLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaTttSender", 20);
+    }
+
+    /**
+     * Provides a logging buffer for logs related to the media tap-to-transfer chip on the receiver
+     * device. See {@link com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger}.
+     */
+    @Provides
+    @SysUISingleton
+    @MediaTttReceiverLogBuffer
+    public static LogBuffer provideMediaTttReceiverLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaTttReceiver", 20);
+    }
+
+    /**
+     * Provides a logging buffer for logs related to the media mute-await connections. See
+     * {@link com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager}.
+     */
+    @Provides
+    @SysUISingleton
+    @MediaMuteAwaitLog
+    public static LogBuffer provideMediaMuteAwaitLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaMuteAwaitLog", 20);
+    }
+
+    /**
+     * Provides a logging buffer for logs related to the media mute-await connections. See
+     * {@link com.android.systemui.media.nearby.NearbyMediaDevicesManager}.
+     */
+    @Provides
+    @SysUISingleton
+    @NearbyMediaDevicesLog
+    public static LogBuffer provideNearbyMediaDevicesLogBuffer(LogBufferFactory factory) {
+        return factory.create("NearbyMediaDevicesLog", 20);
+    }
+
+    /**
+     * Provides a buffer for logs related to media view events
+     */
+    @Provides
+    @SysUISingleton
+    @MediaViewLog
+    public static LogBuffer provideMediaViewLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaView", 100);
+    }
+
+    /**
+     * Provides a buffer for media playback state changes
+     */
+    @Provides
+    @SysUISingleton
+    @MediaTimeoutListenerLog
+    public static LogBuffer providesMediaTimeoutListenerLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaTimeout", 100);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton

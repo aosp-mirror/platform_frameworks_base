@@ -44,7 +44,7 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-/** Controls the signal policies for icons shown in the StatusBar. **/
+/** Controls the signal policies for icons shown in the statusbar. **/
 @SysUISingleton
 public class StatusBarSignalPolicy implements SignalCallback,
         SecurityController.SecurityControllerCallback, Tunable {
@@ -449,7 +449,7 @@ public class StatusBarSignalPolicy implements SignalCallback,
     }
 
     /**
-     * Stores the StatusBar state for no Calling & SMS.
+     * Stores the statusbar state for no Calling & SMS.
      */
     public static class CallIndicatorIconState {
         public boolean isNoCalling;

@@ -146,6 +146,27 @@ public class TaskTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveContainer_multipleNestedTasks() {
+        final Task rootTask = createTask(mDisplayContent);
+        rootTask.mCreatedByOrganizer = true;
+        final Task task1 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final Task task2 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final ActivityRecord activity1 = createActivityRecord(task1);
+        final ActivityRecord activity2 = createActivityRecord(task2);
+        activity1.setVisible(false);
+
+        // All activities under the root task should be finishing.
+        rootTask.remove(true /* withTransition */, "test");
+        assertTrue(activity1.finishing);
+        assertTrue(activity2.finishing);
+
+        // After all activities activities are destroyed, the root task should also be removed.
+        activity1.removeImmediately();
+        activity2.removeImmediately();
+        assertFalse(rootTask.isAttached());
+    }
+
+    @Test
     public void testRemoveContainer_deferRemoval() {
         final Task rootTask = createTask(mDisplayContent);
         final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
@@ -235,6 +256,20 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent, task2);
         assertEquals(activity1, task1.isInTask(activity1));
         assertNull(task1.isInTask(activity2));
+    }
+
+    @Test
+    public void testPerformClearTop() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task).build();
+        // Detach from process so the activities can be removed from hierarchy when finishing.
+        activity1.detachFromProcess();
+        activity2.detachFromProcess();
+        assertNull(task.performClearTop(activity1, 0 /* launchFlags */));
+        assertFalse(task.hasChild());
+        // In real case, the task should be preserved for adding new activity.
+        assertTrue(task.isAttached());
     }
 
     @Test

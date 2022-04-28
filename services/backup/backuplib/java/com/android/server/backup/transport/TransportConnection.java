@@ -449,6 +449,9 @@ public class TransportConnection {
     private void onServiceDisconnected() {
         synchronized (mStateLock) {
             log(Priority.ERROR, "Service disconnected: client UNUSABLE");
+            if (mTransport != null) {
+                mTransport.onBecomingUnusable();
+            }
             setStateLocked(State.UNUSABLE, null);
             try {
                 // After unbindService() no calls back to mConnection
@@ -473,6 +476,9 @@ public class TransportConnection {
             checkStateIntegrityLocked();
 
             log(Priority.ERROR, "Binding died: client UNUSABLE");
+            if (mTransport != null) {
+                mTransport.onBecomingUnusable();
+            }
             // After unbindService() no calls back to mConnection
             switch (mState) {
                 case State.UNUSABLE:

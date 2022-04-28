@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.telephony.TelephonyManager;
 import android.telephony.euicc.DownloadableSubscription;
 import android.telephony.euicc.EuiccInfo;
 import android.telephony.euicc.EuiccManager;
@@ -744,18 +743,16 @@ public abstract class EuiccService extends Service {
                 public void run() {
                     DownloadSubscriptionResult result;
                     try {
-                        result =
-                            EuiccService.this.onDownloadSubscription(
-                                slotId, subscription, switchAfterDownload, forceDeactivateSim,
-                                resolvedBundle);
-                    } catch (AbstractMethodError e) {
-                        Log.w(TAG, "The new onDownloadSubscription(int, "
+                        result = EuiccService.this.onDownloadSubscription(
+                                slotId, portIndex, subscription, switchAfterDownload,
+                                forceDeactivateSim, resolvedBundle);
+                    } catch (UnsupportedOperationException | AbstractMethodError e) {
+                        Log.w(TAG, "The new onDownloadSubscription(int, int, "
                                 + "DownloadableSubscription, boolean, boolean, Bundle) is not "
                                 + "implemented. Fall back to the old one.", e);
-                        int resultCode = EuiccService.this.onDownloadSubscription(
-                                slotId, subscription, switchAfterDownload, forceDeactivateSim);
-                        result = new DownloadSubscriptionResult(resultCode,
-                            0 /* resolvableErrors */, TelephonyManager.UNSUPPORTED_CARD_ID);
+                        result = EuiccService.this.onDownloadSubscription(
+                                slotId, subscription, switchAfterDownload,
+                                forceDeactivateSim, resolvedBundle);
                     }
                     try {
                         callback.onComplete(result);

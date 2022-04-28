@@ -16,10 +16,6 @@
 
 package com.android.server.usage;
 
-import static android.app.ActivityManager.procStateToString;
-
-import static com.android.server.usage.UsageStatsService.DEBUG_RESPONSE_STATS;
-
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -29,11 +25,9 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager.ProcessState;
 import android.app.usage.BroadcastResponseStats;
 import android.os.UserHandle;
-import android.text.TextUtils;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -44,19 +38,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 class BroadcastResponseStatsTracker {
-    private static final String TAG = "ResponseStatsTracker";
+    static final String TAG = "ResponseStatsTracker";
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"NOTIFICATION_EVENT"}, value = {
-            NOTIFICATION_EVENT_POSTED,
-            NOTIFICATION_EVENT_UPDATED,
-            NOTIFICATION_EVENT_CANCELLED
+    @IntDef(prefix = {"NOTIFICATION_EVENT_TYPE_"}, value = {
+            NOTIFICATION_EVENT_TYPE_POSTED,
+            NOTIFICATION_EVENT_TYPE_UPDATED,
+            NOTIFICATION_EVENT_TYPE_CANCELLED
     })
-    public @interface NotificationEvent {}
+    public @interface NotificationEventType {}
 
-    private static final int NOTIFICATION_EVENT_POSTED = 0;
-    private static final int NOTIFICATION_EVENT_UPDATED = 1;
-    private static final int NOTIFICATION_EVENT_CANCELLED = 2;
+    static final int NOTIFICATION_EVENT_TYPE_POSTED = 0;
+    static final int NOTIFICATION_EVENT_TYPE_UPDATED = 1;
+    static final int NOTIFICATION_EVENT_TYPE_CANCELLED = 2;
 
     private final Object mLock = new Object();
 
@@ -76,21 +70,19 @@ class BroadcastResponseStatsTracker {
             new SparseArray<>();
 
     private AppStandbyInternal mAppStandby;
+    private BroadcastResponseStatsLogger mLogger;
 
     BroadcastResponseStatsTracker(@NonNull AppStandbyInternal appStandby) {
         mAppStandby = appStandby;
+        mLogger = new BroadcastResponseStatsLogger();
     }
 
     // TODO (206518114): Move all callbacks handling to a handler thread.
     void reportBroadcastDispatchEvent(int sourceUid, @NonNull String targetPackage,
             UserHandle targetUser, long idForResponseEvent,
             @ElapsedRealtimeLong long timestampMs, @ProcessState int targetUidProcState) {
-        if (DEBUG_RESPONSE_STATS) {
-            Slog.d(TAG, TextUtils.formatSimple("reportBroadcastDispatchEvent; "
-                            + "srcUid=%d, tgtPkg=%s, tgtUsr=%d, id=%d, ts=%s, state=%s",
-                    sourceUid, targetPackage, targetUser, idForResponseEvent,
-                    TimeUtils.formatDuration(timestampMs), procStateToString(targetUidProcState)));
-        }
+        mLogger.logBroadcastDispatchEvent(sourceUid, targetPackage, targetUser,
+                idForResponseEvent, timestampMs, targetUidProcState);
         if (targetUidProcState <= mAppStandby.getBroadcastResponseFgThresholdState()) {
             // No need to track the broadcast response state while the target app is
             // in the foreground.
@@ -110,29 +102,23 @@ class BroadcastResponseStatsTracker {
 
     void reportNotificationPosted(@NonNull String packageName, UserHandle user,
             @ElapsedRealtimeLong long timestampMs) {
-        reportNotificationEvent(NOTIFICATION_EVENT_POSTED, packageName, user, timestampMs);
+        reportNotificationEvent(NOTIFICATION_EVENT_TYPE_POSTED, packageName, user, timestampMs);
     }
 
     void reportNotificationUpdated(@NonNull String packageName, UserHandle user,
             @ElapsedRealtimeLong long timestampMs) {
-        reportNotificationEvent(NOTIFICATION_EVENT_UPDATED, packageName, user, timestampMs);
+        reportNotificationEvent(NOTIFICATION_EVENT_TYPE_UPDATED, packageName, user, timestampMs);
 
     }
 
     void reportNotificationCancelled(@NonNull String packageName, UserHandle user,
             @ElapsedRealtimeLong long timestampMs) {
-        reportNotificationEvent(NOTIFICATION_EVENT_CANCELLED, packageName, user, timestampMs);
+        reportNotificationEvent(NOTIFICATION_EVENT_TYPE_CANCELLED, packageName, user, timestampMs);
     }
 
-    private void reportNotificationEvent(@NotificationEvent int event,
+    private void reportNotificationEvent(@NotificationEventType int event,
             @NonNull String packageName, UserHandle user, @ElapsedRealtimeLong long timestampMs) {
-        if (DEBUG_RESPONSE_STATS) {
-            Slog.d(TAG, TextUtils.formatSimple(
-                    "reportNotificationEvent; event=<%s>, pkg=%s, usr=%d, ts=%s",
-                    notificationEventToString(event), packageName, user.getIdentifier(),
-                    TimeUtils.formatDuration(timestampMs)));
-        }
-        // TODO (206518114): Store last N events to dump for debugging purposes.
+        mLogger.logNotificationEvent(event, packageName, user, timestampMs);
         synchronized (mLock) {
             final LongSparseArray<BroadcastEvent> broadcastEvents =
                     getBroadcastEventsLocked(packageName, user);
@@ -157,13 +143,13 @@ class BroadcastResponseStatsTracker {
                         continue;
                     }
                     switch (event) {
-                        case NOTIFICATION_EVENT_POSTED:
+                        case NOTIFICATION_EVENT_TYPE_POSTED:
                             responseStats.incrementNotificationsPostedCount(1);
                             break;
-                        case NOTIFICATION_EVENT_UPDATED:
+                        case NOTIFICATION_EVENT_TYPE_UPDATED:
                             responseStats.incrementNotificationsUpdatedCount(1);
                             break;
-                        case NOTIFICATION_EVENT_CANCELLED:
+                        case NOTIFICATION_EVENT_TYPE_CANCELLED:
                             responseStats.incrementNotificationsCancelledCount(1);
                             break;
                         default:
@@ -329,20 +315,6 @@ class BroadcastResponseStatsTracker {
         return userResponseStats.getOrCreateBroadcastResponseStats(broadcastEvent);
     }
 
-    @NonNull
-    private String notificationEventToString(@NotificationEvent int event) {
-        switch (event) {
-            case NOTIFICATION_EVENT_POSTED:
-                return "posted";
-            case NOTIFICATION_EVENT_UPDATED:
-                return "updated";
-            case NOTIFICATION_EVENT_CANCELLED:
-                return "cancelled";
-            default:
-                return String.valueOf(event);
-        }
-    }
-
     void dump(@NonNull IndentingPrintWriter ipw) {
         ipw.println("Broadcast response stats:");
         ipw.increaseIndent();
@@ -351,6 +323,8 @@ class BroadcastResponseStatsTracker {
             dumpBroadcastEventsLocked(ipw);
             ipw.println();
             dumpResponseStatsLocked(ipw);
+            ipw.println();
+            mLogger.dumpLogs(ipw);
         }
 
         ipw.decreaseIndent();

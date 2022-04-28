@@ -57,4 +57,7 @@
     <dimen name="privacy_chip_dot_bg_height">18dp</dimen>
     <dimen name="privacy_chip_dot_bg_radius">9dp</dimen>
 
+    <dimen name="unblock_hw_sensor_icon_width">@dimen/bottom_sheet_icon_size</dimen>
+    <dimen name="unblock_hw_sensor_icon_height">@dimen/bottom_sheet_icon_size</dimen>
+
 </resources>

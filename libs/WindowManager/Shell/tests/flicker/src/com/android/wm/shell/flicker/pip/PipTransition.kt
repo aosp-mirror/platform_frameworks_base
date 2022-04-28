@@ -56,13 +56,6 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
                 .sendBroadcast(createIntentWithAction(broadcastAction))
         }
 
-        fun requestOrientationForPip(orientation: Int) {
-            instrumentation.context.sendBroadcast(
-                    createIntentWithAction(Components.PipActivity.ACTION_SET_REQUESTED_ORIENTATION)
-                    .putExtra(Components.PipActivity.EXTRA_PIP_ORIENTATION, orientation.toString())
-            )
-        }
-
         companion object {
             // Corresponds to ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             @JvmStatic
@@ -122,15 +115,14 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
 
             setup {
                 test {
-                    removeAllTasksButHome()
                     if (!eachRun) {
-                        pipApp.launchViaIntent(wmHelper, stringExtras = stringExtras)
+                        pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
                         wmHelper.waitPipShown()
                     }
                 }
                 eachRun {
                     if (eachRun) {
-                        pipApp.launchViaIntent(wmHelper, stringExtras = stringExtras)
+                        pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
                         wmHelper.waitPipShown()
                     }
                 }
@@ -145,7 +137,6 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
                     if (!eachRun) {
                         pipApp.exit(wmHelper)
                     }
-                    removeAllTasksButHome()
                 }
             }
 

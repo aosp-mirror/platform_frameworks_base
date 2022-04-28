@@ -133,10 +133,20 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     @Override
     public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
+        b.setParent(findTaskSurface(taskId));
+    }
+
+    @Override
+    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
+            SurfaceControl.Transaction t) {
+        t.reparent(sc, findTaskSurface(taskId));
+    }
+
+    private SurfaceControl findTaskSurface(int taskId) {
         if (!mDataByTaskId.contains(taskId)) {
             throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
         }
-        b.setParent(mDataByTaskId.get(taskId).surface);
+        return mDataByTaskId.get(taskId).surface;
     }
 
     @Override

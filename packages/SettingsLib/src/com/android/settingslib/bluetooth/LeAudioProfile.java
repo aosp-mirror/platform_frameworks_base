@@ -246,6 +246,13 @@ public class LeAudioProfile implements LocalBluetoothProfile {
         return R.drawable.ic_bt_le_audio;
     }
 
+    public int getAudioLocation(BluetoothDevice device) {
+        if (mService == null || device == null) {
+            return BluetoothLeAudio.AUDIO_LOCATION_INVALID;
+        }
+        return mService.getAudioLocation(device);
+    }
+
     @RequiresApi(Build.VERSION_CODES.S)
     protected void finalize() {
         if (DEBUG) {

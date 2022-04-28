@@ -25,6 +25,7 @@ import android.app.Activity;
 import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.nfc.INfcCardEmulation;
@@ -62,7 +63,9 @@ public final class CardEmulation {
      * replace the current default service with the service
      * identified with the ComponentName specified in
      * {@link #EXTRA_SERVICE_COMPONENT}, for the category
-     * specified in {@link #EXTRA_CATEGORY}
+     * specified in {@link #EXTRA_CATEGORY}. There is an optional
+     * extra field using {@link Intent#EXTRA_USER} to specify
+     * the {@link UserHandle} of the user that owns the app.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CHANGE_DEFAULT =
@@ -82,13 +85,6 @@ public final class CardEmulation {
      * @see #ACTION_CHANGE_DEFAULT
      */
     public static final String EXTRA_SERVICE_COMPONENT = "component";
-
-    /**
-     * The caller userId extra for {@link #ACTION_CHANGE_DEFAULT}.
-     *
-     * @see #ACTION_CHANGE_DEFAULT
-     */
-    public static final String EXTRA_USERID = "android.nfc.cardemulation.extra.USERID";
 
     /**
      * Category used for NFC payment services.

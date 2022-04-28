@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
+import android.view.Display
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
@@ -31,10 +32,15 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.WindowManagerConditionsFactory
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import org.junit.Assume
+import org.junit.Before
 
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -52,10 +58,15 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
 @Presubmit
-class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParameter) {
+open class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = SimpleAppHelper(instrumentation)
     private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+
+    @Before
+    open fun before() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+    }
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -64,12 +75,22 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
                 eachRun {
                     this.setRotation(testSpec.startRotation)
                     testApp.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(testApp.component)
-                    wmHelper.waitForAppTransitionIdle()
+                    val testAppVisible = wmHelper.waitFor(
+                        WindowManagerStateHelper.isAppFullScreen(testApp.component),
+                        WindowManagerConditionsFactory.isAppTransitionIdle(
+                            Display.DEFAULT_DISPLAY))
+                    require(testAppVisible) {
+                        "Expected ${testApp.component.toWindowName()} to be visible"
+                    }
 
                     imeTestApp.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(testApp.component)
-                    wmHelper.waitForAppTransitionIdle()
+                    val imeAppVisible = wmHelper.waitFor(
+                        WindowManagerStateHelper.isAppFullScreen(imeTestApp.component),
+                        WindowManagerConditionsFactory.isAppTransitionIdle(
+                            Display.DEFAULT_DISPLAY))
+                    require(imeAppVisible) {
+                        "Expected ${imeTestApp.component.toWindowName()} to be visible"
+                    }
 
                     imeTestApp.openIME(device, wmHelper)
                 }

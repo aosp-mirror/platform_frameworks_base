@@ -80,8 +80,8 @@ public class BiometricActionDisabledByAdminControllerTest {
         assertEquals(Settings.ACTION_MANAGE_SUPERVISOR_RESTRICTED_SETTING,
                 intentCaptor.getValue().getAction());
         assertEquals(Settings.SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS,
-                intentCaptor.getValue().getStringExtra(
-                        Settings.EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY));
+                intentCaptor.getValue().getIntExtra(
+                        Settings.EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY, -1));
         assertEquals(componentName.getPackageName(), intentCaptor.getValue().getPackage());
     }
 }
