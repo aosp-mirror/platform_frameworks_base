@@ -150,6 +150,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsHapticsSimulator mUdfpsHapticsSimulator;
     @Mock
+    private UdfpsShell mUdfpsShell;
+    @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private DisplayManager mDisplayManager;
@@ -247,6 +249,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mScreenLifecycle,
                 mVibrator,
                 mUdfpsHapticsSimulator,
+                mUdfpsShell,
                 Optional.of(mHbmProvider),
                 mKeyguardStateController,
                 mDisplayManager,

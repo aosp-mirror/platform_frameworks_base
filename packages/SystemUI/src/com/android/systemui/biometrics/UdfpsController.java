@@ -555,6 +555,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull ScreenLifecycle screenLifecycle,
             @NonNull VibratorHelper vibrator,
             @NonNull UdfpsHapticsSimulator udfpsHapticsSimulator,
+            @NonNull UdfpsShell udfpsShell,
             @NonNull Optional<UdfpsHbmProvider> hbmProvider,
             @NonNull KeyguardStateController keyguardStateController,
             @NonNull DisplayManager displayManager,
@@ -608,7 +609,8 @@ public class UdfpsController implements DozeReceiver {
                     return Unit.INSTANCE;
                 });
 
-        mFingerprintManager.setUdfpsOverlayController(new UdfpsOverlayController());
+        final UdfpsOverlayController mUdfpsOverlayController = new UdfpsOverlayController();
+        mFingerprintManager.setUdfpsOverlayController(mUdfpsOverlayController);
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -616,6 +618,7 @@ public class UdfpsController implements DozeReceiver {
                 Context.RECEIVER_EXPORTED_UNAUDITED);
 
         udfpsHapticsSimulator.setUdfpsController(this);
+        udfpsShell.setUdfpsOverlayController(mUdfpsOverlayController);
     }
 
     /**
