@@ -48,7 +48,6 @@ import android.view.animation.Interpolator;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
-import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -66,7 +65,6 @@ import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManage
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 public abstract class PanelViewController {
@@ -122,6 +120,7 @@ public abstract class PanelViewController {
     private float mInitialOffsetOnTouch;
     private boolean mCollapsedAndHeadsUpOnDown;
     private float mExpandedFraction = 0;
+    private float mExpansionDragDownAmountPx = 0;
     protected float mExpandedHeight = 0;
     private boolean mPanelClosedOnDown;
     private boolean mHasLayoutedSinceDown;
@@ -795,12 +794,10 @@ public abstract class PanelViewController {
                     mHeightAnimator.end();
                 }
             }
+            mExpansionDragDownAmountPx = h;
             mExpandedFraction = Math.min(1f,
                     maxPanelHeight == 0 ? 0 : mExpandedHeight / maxPanelHeight);
-            mAmbientState.setExpansionFraction(mKeyguardStateController.isUnlocked()
-                    ? mExpandedFraction
-                    : BouncerPanelExpansionCalculator
-                            .getBackScrimScaledExpansion(mExpandedFraction));
+            mAmbientState.setExpansionFraction(mExpandedFraction);
             onHeightUpdated(mExpandedHeight);
             updatePanelExpansionAndVisibility();
         });
@@ -1114,7 +1111,7 @@ public abstract class PanelViewController {
      */
     public void updatePanelExpansionAndVisibility() {
         mPanelExpansionStateManager.onPanelExpansionChanged(
-                mExpandedFraction, isExpanded(), mTracking);
+                mExpandedFraction, isExpanded(), mTracking, mExpansionDragDownAmountPx);
         updateVisibility();
     }
 
@@ -1145,7 +1142,7 @@ public abstract class PanelViewController {
 
     protected abstract boolean isDozing();
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(String.format("[PanelView(%s): expandedHeight=%f maxPanelHeight=%d closing=%s"
                         + " tracking=%s timeAnim=%s%s "
                         + "touchDisabled=%s" + "]",

@@ -97,7 +97,6 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
             transitions {
                 taplInstrumentation.launchedAppState.quickSwitchToPreviousApp()
                 wmHelper.waitForFullScreenApp(testApp1.component)
-                wmHelper.waitSnapshotGone()
                 wmHelper.waitForAppTransitionIdle()
                 wmHelper.waitForNavBarStatusBarVisible()
             }

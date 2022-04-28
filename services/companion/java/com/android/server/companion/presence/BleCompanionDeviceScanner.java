@@ -194,6 +194,8 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         // Collect MAC addresses from all associations.
         final Set<String> macAddresses = new HashSet<>();
         for (AssociationInfo association : mAssociationStore.getAssociations()) {
+            if (!association.isNotifyOnDeviceNearby()) continue;
+
             // Beware that BT stack does not consider low-case MAC addresses valid, while
             // MacAddress.toString() return a low-case String.
             final String macAddress = association.getDeviceMacAddressAsString();

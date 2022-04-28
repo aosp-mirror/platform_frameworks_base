@@ -179,4 +179,177 @@ public class UserUsageStatsServiceTest {
         assertTrue(hasTestEvent);
         assertEquals(2, count);
     }
+
+    /** Tests that the API works as expected even with the caching system. */
+    @Test
+    public void testQueryEarliestEventsForPackage_Caching() throws Exception {
+        final long forcedDiff = 5000;
+        Event event1 = new Event(NOTIFICATION_SEEN, SystemClock.elapsedRealtime());
+        event1.mPackage = TEST_PACKAGE_NAME;
+        mService.reportEvent(event1);
+        final long event1ReportTime = System.currentTimeMillis();
+        Thread.sleep(forcedDiff);
+        Event event2 = new Event(ACTIVITY_RESUMED, SystemClock.elapsedRealtime());
+        event2.mPackage = TEST_PACKAGE_NAME;
+        mService.reportEvent(event2);
+        final long event2ReportTime = System.currentTimeMillis();
+
+        // Force persist the events instead of waiting for them to be processed on the handler.
+        mService.persistActiveStats();
+
+        long now = System.currentTimeMillis();
+        long startTime = now - forcedDiff * 2;
+        UsageEvents events = mService.queryEarliestEventsForPackage(
+                startTime, now, TEST_PACKAGE_NAME, ACTIVITY_RESUMED);
+
+        assertNotNull(events);
+        boolean hasTestEvent = false;
+        int count = 0;
+        while (events.hasNextEvent()) {
+            count++;
+            Event outEvent = new Event();
+            events.getNextEvent(outEvent);
+            if (outEvent.mEventType == ACTIVITY_RESUMED) {
+                hasTestEvent = true;
+            }
+        }
+        assertTrue(hasTestEvent);
+        assertEquals(2, count);
+
+        // Query again
+        events = mService.queryEarliestEventsForPackage(
+                startTime, now, TEST_PACKAGE_NAME, ACTIVITY_RESUMED);
+
+        assertNotNull(events);
+        hasTestEvent = false;
+        count = 0;
+        while (events.hasNextEvent()) {
+            count++;
+            Event outEvent = new Event();
+            events.getNextEvent(outEvent);
+            if (outEvent.mEventType == ACTIVITY_RESUMED) {
+                hasTestEvent = true;
+            }
+        }
+        assertTrue(hasTestEvent);
+        assertEquals(2, count);
+
+        // Query around just the first event
+        now = event1ReportTime;
+        startTime = now - forcedDiff * 2;
+        events = mService.queryEarliestEventsForPackage(
+                startTime, now, TEST_PACKAGE_NAME, ACTIVITY_RESUMED);
+
+        assertNotNull(events);
+        hasTestEvent = false;
+        count = 0;
+        while (events.hasNextEvent()) {
+            count++;
+            Event outEvent = new Event();
+            events.getNextEvent(outEvent);
+            if (outEvent.mEventType == ACTIVITY_RESUMED) {
+                hasTestEvent = true;
+            }
+        }
+        assertFalse(hasTestEvent);
+        assertEquals(1, count);
+
+        // Shift query around the first event, still exclude the second
+        now = event1ReportTime + forcedDiff / 2;
+        startTime = event1ReportTime - forcedDiff / 2;
+        events = mService.queryEarliestEventsForPackage(
+                startTime, now, TEST_PACKAGE_NAME, ACTIVITY_RESUMED);
+
+        assertNotNull(events);
+        hasTestEvent = false;
+        count = 0;
+        while (events.hasNextEvent()) {
+            count++;
+            Event outEvent = new Event();
+            events.getNextEvent(outEvent);
+            if (outEvent.mEventType == ACTIVITY_RESUMED) {
+                hasTestEvent = true;
+            }
+        }
+        assertFalse(hasTestEvent);
+        assertEquals(1, count);
+
+        // Shift query around the second event only
+        now = event2ReportTime + 1;
+        startTime = event1ReportTime + forcedDiff / 4;
+        events = mService.queryEarliestEventsForPackage(
+                startTime, now, TEST_PACKAGE_NAME, ACTIVITY_RESUMED);
+
+        assertNotNull(events);
+        hasTestEvent = false;
+        count = 0;
+        while (events.hasNextEvent()) {
+            count++;
+            Event outEvent = new Event();
+            events.getNextEvent(outEvent);
+            if (outEvent.mEventType == ACTIVITY_RESUMED) {
+                hasTestEvent = true;
+            }
+        }
+        assertTrue(hasTestEvent);
+        assertEquals(1, count);
+
+        // Shift query around both events
+        now = event2ReportTime + 1;
+        startTime = now - forcedDiff * 2;
+        events = mService.queryEarliestEventsForPackage(
+                startTime, now, TEST_PACKAGE_NAME, ACTIVITY_RESUMED);
+
+        assertNotNull(events);
+        hasTestEvent = false;
+        count = 0;
+        while (events.hasNextEvent()) {
+            count++;
+            Event outEvent = new Event();
+            events.getNextEvent(outEvent);
+            if (outEvent.mEventType == ACTIVITY_RESUMED) {
+                hasTestEvent = true;
+            }
+        }
+        assertTrue(hasTestEvent);
+        assertEquals(2, count);
+
+        // Query around just the first event and then shift end time to include second event
+        now = event1ReportTime;
+        startTime = now - forcedDiff * 2;
+        events = mService.queryEarliestEventsForPackage(
+                startTime, now, TEST_PACKAGE_NAME, ACTIVITY_RESUMED);
+
+        assertNotNull(events);
+        hasTestEvent = false;
+        count = 0;
+        while (events.hasNextEvent()) {
+            count++;
+            Event outEvent = new Event();
+            events.getNextEvent(outEvent);
+            if (outEvent.mEventType == ACTIVITY_RESUMED) {
+                hasTestEvent = true;
+            }
+        }
+        assertFalse(hasTestEvent);
+        assertEquals(1, count);
+
+        now = event2ReportTime + 1;
+        events = mService.queryEarliestEventsForPackage(
+                startTime, now, TEST_PACKAGE_NAME, ACTIVITY_RESUMED);
+
+        assertNotNull(events);
+        hasTestEvent = false;
+        count = 0;
+        while (events.hasNextEvent()) {
+            count++;
+            Event outEvent = new Event();
+            events.getNextEvent(outEvent);
+            if (outEvent.mEventType == ACTIVITY_RESUMED) {
+                hasTestEvent = true;
+            }
+        }
+        assertTrue(hasTestEvent);
+        assertEquals(2, count);
+    }
 }

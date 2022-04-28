@@ -34,27 +34,27 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
-import android.window.DisplayAreaInfo;
+import android.view.SurfaceSession;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
@@ -81,8 +81,6 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock
     private SyncTransactionQueue mSyncQueue;
     @Mock
-    private RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
-    @Mock
     private MainStage mMainStage;
     @Mock
     private SideStage mSideStage;
@@ -104,21 +102,33 @@ public class StageCoordinatorTests extends ShellTestCase {
     private TransactionPool mTransactionPool;
     @Mock
     private SplitscreenEventLogger mLogger;
+    @Mock
+    private ShellExecutor mMainExecutor;
 
     private final Rect mBounds1 = new Rect(10, 20, 30, 40);
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
 
+    private SurfaceSession mSurfaceSession = new SurfaceSession();
+    private SurfaceControl mRootLeash;
+    private ActivityManager.RunningTaskInfo mRootTask;
     private StageCoordinator mStageCoordinator;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mStageCoordinator = spy(createStageCoordinator(mSplitLayout));
+        mStageCoordinator = spy(new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
+                mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
+                mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool, mLogger,
+                mMainExecutor, Optional.empty(), new UnfoldControllerProvider()));
         doNothing().when(mStageCoordinator).updateActivityOptions(any(), anyInt());
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
         when(mSplitLayout.isLandscape()).thenReturn(false);
+
+        mRootTask = new TestRunningTaskInfoBuilder().build();
+        mRootLeash = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
+        mStageCoordinator.onTaskAppeared(mRootTask, mRootLeash);
     }
 
     @Test
@@ -158,14 +168,17 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testDisplayAreaAppeared_initializesUnfoldControllers() {
-        // Create a stage coordinator with null split layout to test layout init flow.
-        mStageCoordinator = createStageCoordinator(null /* splitLayout */);
-
-        mStageCoordinator.onDisplayAreaAppeared(mock(DisplayAreaInfo.class));
-
+    public void testRootTaskAppeared_initializesUnfoldControllers() {
         verify(mMainUnfoldController).init();
         verify(mSideUnfoldController).init();
+        verify(mStageCoordinator).onRootTaskAppeared();
+    }
+
+    @Test
+    public void testRootTaskInfoChanged_updatesSplitLayout() {
+        mStageCoordinator.onTaskInfoChanged(mRootTask);
+
+        verify(mSplitLayout).updateConfiguration(any(Configuration.class));
     }
 
     @Test
@@ -299,15 +312,7 @@ public class StageCoordinatorTests extends ShellTestCase {
     public void testFinishEnterSplitScreen_applySurfaceLayout() {
         mStageCoordinator.finishEnterSplitScreen(new SurfaceControl.Transaction());
 
-        verify(mSplitLayout).applySurfaceChanges(any(), any(), any(), any(), any());
-    }
-
-    private StageCoordinator createStageCoordinator(SplitLayout splitLayout) {
-        return new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
-                mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
-                mDisplayController, mDisplayImeController, mDisplayInsetsController, splitLayout,
-                mTransitions, mTransactionPool, mLogger, Optional.empty(),
-                new UnfoldControllerProvider());
+        verify(mSplitLayout).applySurfaceChanges(any(), any(), any(), any(), any(), eq(false));
     }
 
     private class UnfoldControllerProvider implements

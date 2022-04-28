@@ -21,7 +21,6 @@ import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
 import android.view.InputChannel;
-import android.view.InputEvent;
 
 import java.util.List;
 
@@ -31,14 +30,6 @@ import java.util.List;
  * @hide Only for use within the system server.
  */
 public abstract class InputManagerInternal {
-    /**
-     * Inject an input event.
-     *
-     * @param event The InputEvent to inject
-     * @param mode Synchronous or asynchronous mode
-     * @return True if injection has succeeded
-     */
-    public abstract boolean injectInputEvent(InputEvent event, int mode);
 
     /**
      * Called by the display manager to set information about the displays as needed

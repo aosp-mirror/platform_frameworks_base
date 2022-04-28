@@ -1,14 +1,11 @@
 package com.android.systemui.animation
 
-import android.app.ActivityManager
 import android.view.View
 import android.window.SurfaceSyncer
 
 /** A util class to synchronize 2 view roots. */
 // TODO(b/200284684): Remove this class.
 object ViewRootSync {
-    // TODO(b/217621394): Remove special handling for low-RAM devices after animation sync is fixed
-    private val forceDisableSynchronization = ActivityManager.isLowRamDeviceStatic()
     private var surfaceSyncer: SurfaceSyncer? = null
 
     /**
@@ -23,8 +20,7 @@ object ViewRootSync {
         otherView: View,
         then: () -> Unit
     ) {
-        if (forceDisableSynchronization ||
-            !view.isAttachedToWindow || view.viewRootImpl == null ||
+        if (!view.isAttachedToWindow || view.viewRootImpl == null ||
             !otherView.isAttachedToWindow || otherView.viewRootImpl == null ||
             view.viewRootImpl == otherView.viewRootImpl) {
             // No need to synchronize if either the touch surface or dialog view is not attached

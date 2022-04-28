@@ -17,13 +17,13 @@
 package android.companion.virtual;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
@@ -48,7 +48,12 @@ import android.os.ResultReceiver;
 import android.util.ArrayMap;
 import android.view.Surface;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * System level service for managing virtual devices.
@@ -69,6 +74,35 @@ public final class VirtualDeviceManager {
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            prefix = "LAUNCH_",
+            value = {
+                    LAUNCH_SUCCESS,
+                    LAUNCH_FAILURE_PENDING_INTENT_CANCELED,
+                    LAUNCH_FAILURE_NO_ACTIVITY})
+    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    public @interface PendingIntentLaunchStatus {}
+
+    /**
+     * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch was
+     * successful.
+     */
+    public static final int LAUNCH_SUCCESS = 0;
+
+    /**
+     * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch failed
+     * because the pending intent was canceled.
+     */
+    public static final int LAUNCH_FAILURE_PENDING_INTENT_CANCELED = 1;
+
+    /**
+     * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch failed
+     * because no activity starts were detected as a result of calling the pending intent.
+     */
+    public static final int LAUNCH_FAILURE_NO_ACTIVITY = 2;
 
     private final IVirtualDeviceManager mService;
     private final Context mContext;
@@ -173,16 +207,20 @@ public final class VirtualDeviceManager {
          *   intent, the activity will be started on the virtual display using
          *   {@link android.app.ActivityOptions#setLaunchDisplayId}. If the intent is a service or
          *   broadcast intent, an attempt will be made to catch activities started as a result of
-         *   sending the pending intent and move them to the given display.
+         *   sending the pending intent and move them to the given display. When it completes,
+         *   {@code listener} will be called with the status of whether the launch attempt is
+         *   successful or not.
          * @param executor The executor to run {@code launchCallback} on.
-         * @param launchCallback Callback that is called when the pending intent launching is
-         *   complete.
+         * @param listener Listener that is called when the pending intent launching is complete.
+         *   The argument is {@link #LAUNCH_SUCCESS} if the launch successfully started an activity
+         *   on the virtual display, or one of the {@code LAUNCH_FAILED} status explaining why it
+         *   failed.
          */
         public void launchPendingIntent(
                 int displayId,
                 @NonNull PendingIntent pendingIntent,
                 @NonNull Executor executor,
-                @NonNull LaunchCallback launchCallback) {
+                @NonNull IntConsumer listener) {
             try {
                 mVirtualDevice.launchPendingIntent(
                         displayId,
@@ -191,13 +229,7 @@ public final class VirtualDeviceManager {
                             @Override
                             protected void onReceiveResult(int resultCode, Bundle resultData) {
                                 super.onReceiveResult(resultCode, resultData);
-                                executor.execute(() -> {
-                                    if (resultCode == Activity.RESULT_OK) {
-                                        launchCallback.onLaunchSuccess();
-                                    } else {
-                                        launchCallback.onLaunchFailed();
-                                    }
-                                });
+                                executor.execute(() -> listener.accept(resultCode));
                             }
                         });
             } catch (RemoteException e) {
@@ -439,26 +471,11 @@ public final class VirtualDeviceManager {
          * {@link #addActivityListener}.
          *
          * @param listener The listener to remove.
-         * @see #addActivityListener(ActivityListener, Executor)
+         * @see #addActivityListener(Executor, ActivityListener)
          */
         public void removeActivityListener(@NonNull ActivityListener listener) {
             mActivityListeners.remove(listener);
         }
-    }
-
-    /**
-     * Callback for launching pending intents on the virtual device.
-     */
-    public interface LaunchCallback {
-        /**
-         * Called when the pending intent launched successfully.
-         */
-        void onLaunchSuccess();
-
-        /**
-         * Called when the pending intent failed to launch.
-         */
-        void onLaunchFailed();
     }
 
     /**

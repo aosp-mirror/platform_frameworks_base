@@ -35,4 +35,9 @@
     <color name="personal_apps_suspension_notification_color">#8AB4F8</color>
 
     <color name="overview_background">@color/overview_background_dark</color>
+
+    <color name="user_icon_4">#fff439a0</color><!-- pink -->
+    <color name="user_icon_6">#ff4ecde6</color><!-- cyan -->
+    <color name="user_icon_7">#fffbbc04</color><!-- yellow -->
+    <color name="user_icon_8">#fffa903e</color><!-- orange -->
 </resources>

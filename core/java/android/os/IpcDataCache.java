@@ -23,7 +23,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.PropertyInvalidatedCache;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FastPrintWriter;
@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -324,8 +323,8 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
     @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
     public IpcDataCache(int maxEntries, @NonNull @IpcDataCacheModule String module,
-            @NonNull String api,
-            @NonNull String cacheName, @NonNull QueryHandler<Query, Result> computer) {
+            @NonNull String api, @NonNull String cacheName,
+            @NonNull QueryHandler<Query, Result> computer) {
         super(maxEntries, module, api, cacheName, computer);
     }
 
@@ -381,5 +380,211 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
     public static void invalidateCache(@NonNull @IpcDataCacheModule String module,
             @NonNull String api) {
         PropertyInvalidatedCache.invalidateCache(module, api);
+    }
+
+    /**
+     * This is a convenience class that encapsulates configuration information for a
+     * cache.  It may be supplied to the cache constructors in lieu of the other
+     * parameters.  The class captures maximum entry count, the module, the key, and the
+     * api.
+     *
+     * There are three specific use cases supported by this class.
+     *
+     * 1. Instance-per-cache: create a static instance of this class using the same
+     *    parameters as would have been given to IpcDataCache (or
+     *    PropertyInvalidatedCache).  This static instance provides a hook for the
+     *    invalidateCache() and disableForLocalProcess() calls, which, generally, must
+     *    also be static.
+     *
+     * 2. Short-hand for shared configuration parameters: create an instance of this class
+     *    to capture the maximum number of entries and the module to be used by more than
+     *    one cache in the class.  Refer to this instance when creating new configs.  Only
+     *    the api and (optionally key) for the new cache must be supplied.
+     *
+     * 3. Tied caches: create a static instance of this class to capture the maximum
+     *    number of entries, the module, and the key.  Refer to this instance when
+     *    creating a new config that differs in only the api.  The new config can be
+     *    created as part of the cache constructor.  All caches that trace back to the
+     *    root config share the same key and are invalidated by the invalidateCache()
+     *    method of the root config.  All caches that trace back to the root config can be
+     *    disabled in the local process by the disableAllForCurrentProcess() method of the
+     *    root config.
+     *
+     * @hide
+     */
+    public static class Config {
+        private final int mMaxEntries;
+        @IpcDataCacheModule
+        private final String mModule;
+        private final String mApi;
+        private final String mName;
+
+        /**
+         * The list of cache names that were created extending this Config.  If
+         * disableForCurrentProcess() is invoked on this config then all children will be
+         * disabled.  Furthermore, any new children based off of this config will be
+         * disabled.  The construction order guarantees that new caches will be disabled
+         * before they are created (the Config must be created before the IpcDataCache is
+         * created).
+         */
+        private ArraySet<String> mChildren;
+
+        /**
+         * True if registered children are disabled in the current process.  If this is
+         * true then all new children are disabled as they are registered.
+         */
+        private boolean mDisabled = false;
+
+        public Config(int maxEntries, @NonNull @IpcDataCacheModule String module,
+                @NonNull String api, @NonNull String name) {
+            mMaxEntries = maxEntries;
+            mModule = module;
+            mApi = api;
+            mName = name;
+        }
+
+        /**
+         * A short-hand constructor that makes the name the same as the api.
+         */
+        public Config(int maxEntries, @NonNull @IpcDataCacheModule String module,
+                @NonNull String api) {
+            this(maxEntries, module, api, api);
+        }
+
+        /**
+         * Copy the module and max entries from the Config and take the api and name from
+         * the parameter list.
+         */
+        public Config(@NonNull Config root, @NonNull String api, @NonNull String name) {
+            this(root.maxEntries(), root.module(), api, name);
+        }
+
+        /**
+         * Copy the module and max entries from the Config and take the api and name from
+         * the parameter list.
+         */
+        public Config(@NonNull Config root, @NonNull String api) {
+            this(root.maxEntries(), root.module(), api, api);
+        }
+
+        /**
+         * Fetch a config that is a child of <this>.  The child shares the same api as the
+         * parent and is registered with the parent for the purposes of disabling in the
+         * current process.
+         */
+        public Config child(@NonNull String name) {
+            final Config result = new Config(this, api(), name);
+            registerChild(name);
+            return result;
+        }
+
+        public final int maxEntries() {
+            return mMaxEntries;
+        }
+
+        @IpcDataCacheModule
+        public final @NonNull String module() {
+            return mModule;
+        }
+
+        public final @NonNull String api() {
+            return mApi;
+        }
+
+        public final @NonNull String name() {
+            return mName;
+        }
+
+        /**
+         * Register a child cache name.  If disableForCurrentProcess() has been called
+         * against this cache, disable th new child.
+         */
+        private final void registerChild(String name) {
+            synchronized (this) {
+                if (mChildren == null) {
+                    mChildren = new ArraySet<>();
+                }
+                mChildren.add(name);
+                if (mDisabled) {
+                    IpcDataCache.disableForCurrentProcess(name);
+                }
+            }
+        }
+
+        /**
+         * Invalidate all caches that share this Config's module and api.
+         */
+        public void invalidateCache() {
+            IpcDataCache.invalidateCache(mModule, mApi);
+        }
+
+        /**
+         * Disable all caches that share this Config's name.
+         */
+        public void disableForCurrentProcess() {
+            IpcDataCache.disableForCurrentProcess(mName);
+        }
+
+        /**
+         * Disable this cache and all children.  Any child that is added in the future
+         * will alwo be disabled.
+         */
+        public void disableAllForCurrentProcess() {
+            synchronized (this) {
+                mDisabled = true;
+                disableForCurrentProcess();
+                if (mChildren != null) {
+                    for (String c : mChildren) {
+                        IpcDataCache.disableForCurrentProcess(c);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Create a new cache using a config.
+     * @hide
+     */
+    public IpcDataCache(@NonNull Config config, @NonNull QueryHandler<Query, Result> computer) {
+        super(config.maxEntries(), config.module(), config.api(), config.name(), computer);
+    }
+
+    /**
+     * An interface suitable for a lambda expression instead of a QueryHandler.
+     * @hide
+     */
+    public interface RemoteCall<Query, Result> {
+        Result apply(Query query) throws RemoteException;
+    }
+
+    /**
+     * This is a query handler that is created with a lambda expression that is invoked
+     * every time the handler is called.  The handler is specifically meant for services
+     * hosted by system_server; the handler automatically rethrows RemoteException as a
+     * RuntimeException, which is the usual handling for failed binder calls.
+     */
+    private static class SystemServerCallHandler<Query, Result>
+            extends IpcDataCache.QueryHandler<Query, Result> {
+        private final RemoteCall<Query, Result> mHandler;
+        public SystemServerCallHandler(RemoteCall handler) {
+            mHandler = handler;
+        }
+        @Override
+        public Result apply(Query query) {
+            try {
+                return mHandler.apply(query);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Create a cache using a config and a lambda expression.
+     * @hide
+     */
+    public IpcDataCache(@NonNull Config config, @NonNull RemoteCall<Query, Result> computer) {
+        this(config, new SystemServerCallHandler<>(computer));
     }
 }

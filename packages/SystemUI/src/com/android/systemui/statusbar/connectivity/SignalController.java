@@ -22,9 +22,12 @@ import android.content.Context;
 import android.util.Log;
 
 import com.android.settingslib.SignalIcon.IconGroup;
+import com.android.systemui.dump.DumpsysTableLogger;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 
 
 /**
@@ -193,18 +196,66 @@ public abstract class SignalController<T extends ConnectivityState, I extends Ic
         pw.println("  - " + mTag + " -----");
         pw.println("  Current State: " + mCurrentState);
         if (RECORD_HISTORY) {
-            // Count up the states that actually contain time stamps, and only display those.
-            int size = 0;
-            for (int i = 0; i < HISTORY_SIZE; i++) {
-                if (mHistory[i].time != 0) size++;
-            }
-            // Print out the previous states in ordered number.
-            for (int i = mHistoryIndex + HISTORY_SIZE - 1;
-                    i >= mHistoryIndex + HISTORY_SIZE - size; i--) {
-                pw.println("  Previous State(" + (mHistoryIndex + HISTORY_SIZE - i) + "): "
-                        + mHistory[i & (HISTORY_SIZE - 1)]);
+            List<ConnectivityState> history = getOrderedHistoryExcludingCurrentState();
+            for (int i = 0; i < history.size(); i++) {
+                pw.println("  Previous State(" + (i + 1) + "): " + mHistory[i]);
             }
         }
+    }
+
+    /**
+     * mHistory is a ring, so use this method to get the time-ordered (from youngest to oldest)
+     * list of historical states. Filters out any state whose `time` is `0`.
+     *
+     * For ease of compatibility, this list returns JUST the historical states, not the current
+     * state which has yet to be copied into the history
+     *
+     * @see #getOrderedHistory()
+     * @return historical states, ordered from newest to oldest
+     */
+    List<ConnectivityState> getOrderedHistoryExcludingCurrentState() {
+        ArrayList<ConnectivityState> history = new ArrayList<>();
+
+        // Count up the states that actually contain time stamps, and only display those.
+        int size = 0;
+        for (int i = 0; i < HISTORY_SIZE; i++) {
+            if (mHistory[i].time != 0) size++;
+        }
+        // Print out the previous states in ordered number.
+        for (int i = mHistoryIndex + HISTORY_SIZE - 1;
+                i >= mHistoryIndex + HISTORY_SIZE - size; i--) {
+            history.add(mHistory[i & (HISTORY_SIZE - 1)]);
+        }
+
+        return history;
+    }
+
+    /**
+     * Get the ordered history states, including the current yet-to-be-copied state. Useful for
+     * logging
+     *
+     * @see #getOrderedHistoryExcludingCurrentState()
+     * @return [currentState, historicalState...] array
+     */
+    List<ConnectivityState> getOrderedHistory() {
+        ArrayList<ConnectivityState> history = new ArrayList<>();
+        // Start with the current state
+        history.add(mCurrentState);
+        history.addAll(getOrderedHistoryExcludingCurrentState());
+        return history;
+    }
+
+    void dumpTableData(PrintWriter pw) {
+        List<List<String>> tableData = new ArrayList<List<String>>();
+        List<ConnectivityState> history = getOrderedHistory();
+        for (int i = 0; i < history.size(); i++) {
+            tableData.add(history.get(i).tableData());
+        }
+
+        DumpsysTableLogger logger =
+                new DumpsysTableLogger(mTag, mCurrentState.tableColumns(), tableData);
+
+        logger.printTableData(pw);
     }
 
     final void notifyListeners() {

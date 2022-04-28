@@ -33,7 +33,6 @@ import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,16 +63,10 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-@FlakyTest(bugId = 218604389)
 open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val fixedApp = FixedAppHelper(instrumentation)
     private val screenBoundsStart = WindowUtils.getDisplayBounds(testSpec.startRotation)
     private val screenBoundsEnd = WindowUtils.getDisplayBounds(testSpec.endRotation)
-
-    @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
 
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition(eachRun = false) {
@@ -136,12 +129,27 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     /**
      * Checks that [pipApp] layer is within [screenBoundsStart] at the start of the transition
      */
-    @Presubmit
-    @Test
-    fun pipLayerRotates_StartingBounds() {
+    private fun pipLayerRotates_StartingBounds_internal() {
         testSpec.assertLayersStart {
             visibleRegion(pipApp.component).coversAtMost(screenBoundsStart)
         }
+    }
+
+    /**
+     * Checks that [pipApp] layer is within [screenBoundsStart] at the start of the transition
+     */
+    @Presubmit
+    @Test
+    fun pipLayerRotates_StartingBounds() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        pipLayerRotates_StartingBounds_internal()
+    }
+
+    @FlakyTest(bugId = 228024285)
+    @Test
+    fun pipLayerRotates_StartingBounds_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        pipLayerRotates_StartingBounds_internal()
     }
 
     /**

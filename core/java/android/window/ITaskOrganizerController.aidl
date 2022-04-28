@@ -69,4 +69,14 @@ interface ITaskOrganizerController {
 
     /** Updates a state of camera compat control for stretched issues in the viewfinder. */
     void updateCameraCompatControlState(in WindowContainerToken task, int state);
+
+    /**
+     * Controls whether ignore orientation request logic in {@link
+     * com.android.server.wm.DisplayArea} is disabled at runtime.
+     *
+     * @param isDisabled when {@code true}, the system always ignores the value of {@link
+     *                   com.android.server.wm.DisplayArea#getIgnoreOrientationRequest} and app
+     *                   requested orientation is respected.
+     */
+     void setIsIgnoreOrientationRequestDisabled(boolean isDisabled);
 }

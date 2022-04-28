@@ -396,7 +396,8 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
                 return true;
             case MATCH_CARRIER:
             case MATCH_MOBILE:
-                return !template.getSubscriberIds().isEmpty();
+                return !template.getSubscriberIds().isEmpty()
+                        && template.getMeteredness() == METERED_YES;
             case MATCH_WIFI:
                 if (template.getWifiNetworkKeys().isEmpty()
                         && template.getSubscriberIds().isEmpty()) {

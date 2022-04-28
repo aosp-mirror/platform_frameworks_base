@@ -41,12 +41,14 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.IRecentsAnimationController;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.RemoteTransition;
+import android.window.TaskSnapshot;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
@@ -243,22 +245,28 @@ public class RemoteTransitionCompat implements Parcelable {
         @SuppressLint("NewApi")
         boolean merge(TransitionInfo info, SurfaceControl.Transaction t,
                 RecentsAnimationListener recents) {
-            ArrayList<TransitionInfo.Change> openingTasks = null;
+            SparseArray<TransitionInfo.Change> openingTasks = null;
             boolean cancelRecents = false;
             boolean homeGoingAway = false;
             boolean hasChangingApp = false;
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 if (change.getMode() == TRANSIT_OPEN || change.getMode() == TRANSIT_TO_FRONT) {
-                    if (change.getTaskInfo() != null) {
-                        if (change.getTaskInfo().topActivityType == ACTIVITY_TYPE_HOME) {
+                    final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+                    if (taskInfo != null) {
+                        if (taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
                             // canceling recents animation
                             cancelRecents = true;
                         }
                         if (openingTasks == null) {
-                            openingTasks = new ArrayList<>();
+                            openingTasks = new SparseArray<>();
                         }
-                        openingTasks.add(change);
+                        if (taskInfo.hasParentTask()) {
+                            // Collects opening leaf tasks only since Launcher monitors leaf task
+                            // ids to perform recents animation.
+                            openingTasks.remove(taskInfo.parentTaskId);
+                        }
+                        openingTasks.put(taskInfo.taskId, change);
                     }
                 } else if (change.getMode() == TRANSIT_CLOSE
                         || change.getMode() == TRANSIT_TO_BACK) {
@@ -286,7 +294,7 @@ public class RemoteTransitionCompat implements Parcelable {
             int pauseMatches = 0;
             if (!cancelRecents) {
                 for (int i = 0; i < openingTasks.size(); ++i) {
-                    if (mPausingTasks.contains(openingTasks.get(i).getContainer())) {
+                    if (mPausingTasks.contains(openingTasks.valueAt(i).getContainer())) {
                         ++pauseMatches;
                     }
                 }
@@ -307,10 +315,11 @@ public class RemoteTransitionCompat implements Parcelable {
             final RemoteAnimationTargetCompat[] targets =
                     new RemoteAnimationTargetCompat[openingTasks.size()];
             for (int i = 0; i < openingTasks.size(); ++i) {
-                mOpeningLeashes.add(openingTasks.get(i).getLeash());
+                final TransitionInfo.Change change = openingTasks.valueAt(i);
+                mOpeningLeashes.add(change.getLeash());
                 // We are receiving new opening tasks, so convert to onTasksAppeared.
                 final RemoteAnimationTargetCompat target = new RemoteAnimationTargetCompat(
-                        openingTasks.get(i), layer, info, t);
+                        change, layer, info, t);
                 mLeashMap.put(mOpeningLeashes.get(i), target.leash);
                 t.reparent(target.leash, mInfo.getRootLeash());
                 t.setLayer(target.leash, layer);
@@ -322,7 +331,16 @@ public class RemoteTransitionCompat implements Parcelable {
         }
 
         @Override public ThumbnailData screenshotTask(int taskId) {
-            return mWrapped != null ? mWrapped.screenshotTask(taskId) : null;
+            try {
+                final TaskSnapshot snapshot =
+                        ActivityTaskManager.getService().takeTaskSnapshot(taskId);
+                if (snapshot != null) {
+                    return new ThumbnailData(snapshot);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to screenshot task", e);
+            }
+            return null;
         }
 
         @Override public void setInputConsumerEnabled(boolean enabled) {

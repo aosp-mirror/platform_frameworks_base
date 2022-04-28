@@ -23,6 +23,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.view.accessibility.AccessibilityManager;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
@@ -40,13 +41,15 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
 
     private static final long CHECKMARK_ANIMATION_DELAY_MS = 200L;
     private static final long CHECKMARK_ANIMATION_DURATION_MS = 300L;
-    private static final long FILL_COLOR_ANIMATION_DURATION_MS = 200L;
+    private static final long FILL_COLOR_ANIMATION_DURATION_MS = 350L;
     private static final long PROGRESS_ANIMATION_DURATION_MS = 400L;
     private static final float STROKE_WIDTH_DP = 12f;
+    private static final Interpolator DEACCEL = new DecelerateInterpolator();
 
     private final float mStrokeWidthPx;
     @ColorInt private final int mProgressColor;
     @ColorInt private final int mHelpColor;
+    @ColorInt private final int mOnFirstBucketFailedColor;
     @NonNull private final Drawable mCheckmarkDrawable;
     @NonNull private final Interpolator mCheckmarkInterpolator;
     @NonNull private final Paint mBackgroundPaint;
@@ -64,6 +67,9 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     @Nullable private ValueAnimator mFillColorAnimator;
     @NonNull private final ValueAnimator.AnimatorUpdateListener mFillColorUpdateListener;
 
+    @Nullable private ValueAnimator mBackgroundColorAnimator;
+    @NonNull private final ValueAnimator.AnimatorUpdateListener mBackgroundColorUpdateListener;
+
     private boolean mComplete = false;
     private float mCheckmarkScale = 0f;
     @Nullable private ValueAnimator mCheckmarkAnimator;
@@ -76,8 +82,10 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
         final boolean isAccessbilityEnabled = am.isTouchExplorationEnabled();
         if (!isAccessbilityEnabled) {
             mHelpColor = context.getColor(R.color.udfps_enroll_progress_help);
+            mOnFirstBucketFailedColor = context.getColor(R.color.udfps_moving_target_fill_error);
         } else {
             mHelpColor = context.getColor(R.color.udfps_enroll_progress_help_with_talkback);
+            mOnFirstBucketFailedColor = mHelpColor;
         }
         mCheckmarkDrawable = context.getDrawable(R.drawable.udfps_enroll_checkmark);
         mCheckmarkDrawable.mutate();
@@ -110,6 +118,11 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
 
         mCheckmarkUpdateListener = animation -> {
             mCheckmarkScale = (float) animation.getAnimatedValue();
+            invalidateSelf();
+        };
+
+        mBackgroundColorUpdateListener = animation -> {
+            mBackgroundPaint.setColor((int) animation.getAnimatedValue());
             invalidateSelf();
         };
     }
@@ -163,19 +176,38 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
         }
     }
 
+    private void animateBackgroundColor() {
+        if (mBackgroundColorAnimator != null && mBackgroundColorAnimator.isRunning()) {
+            mBackgroundColorAnimator.end();
+        }
+        mBackgroundColorAnimator = ValueAnimator.ofArgb(mBackgroundPaint.getColor(),
+                mOnFirstBucketFailedColor);
+        mBackgroundColorAnimator.setDuration(FILL_COLOR_ANIMATION_DURATION_MS);
+        mBackgroundColorAnimator.setRepeatCount(1);
+        mBackgroundColorAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        mBackgroundColorAnimator.setInterpolator(DEACCEL);
+        mBackgroundColorAnimator.addUpdateListener(mBackgroundColorUpdateListener);
+        mBackgroundColorAnimator.start();
+    }
+
     private void updateFillColor(boolean showingHelp) {
-        if (mShowingHelp == showingHelp) {
+        if (!mAfterFirstTouch && showingHelp) {
+            // If we are on the first touch, animate the background color
+            // instead of the progress color.
+            animateBackgroundColor();
             return;
         }
-        mShowingHelp = showingHelp;
 
         if (mFillColorAnimator != null && mFillColorAnimator.isRunning()) {
-            mFillColorAnimator.cancel();
+            mFillColorAnimator.end();
         }
 
         @ColorInt final int targetColor = showingHelp ? mHelpColor : mProgressColor;
         mFillColorAnimator = ValueAnimator.ofArgb(mFillPaint.getColor(), targetColor);
         mFillColorAnimator.setDuration(FILL_COLOR_ANIMATION_DURATION_MS);
+        mFillColorAnimator.setRepeatCount(1);
+        mFillColorAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        mFillColorAnimator.setInterpolator(DEACCEL);
         mFillColorAnimator.addUpdateListener(mFillColorUpdateListener);
         mFillColorAnimator.start();
     }

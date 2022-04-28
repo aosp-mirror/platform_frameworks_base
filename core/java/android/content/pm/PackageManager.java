@@ -4188,6 +4188,8 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
      * supports window magnification.
+     *
+     * @see android.accessibilityservice.MagnificationConfig#MAGNIFICATION_MODE_WINDOW
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WINDOW_MAGNIFICATION =

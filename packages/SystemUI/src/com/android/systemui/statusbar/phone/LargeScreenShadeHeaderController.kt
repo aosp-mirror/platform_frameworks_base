@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.app.StatusBarManager
 import android.view.View
 import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.settingslib.Utils
@@ -33,7 +34,6 @@ import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_BATTERY_CONTROLLER
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_SHADE_HEADER
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Named
@@ -69,6 +69,9 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private val iconContainer: StatusIconContainer
     private val carrierIconSlots: List<String>
     private val qsCarrierGroupController: QSCarrierGroupController
+
+    private var qsDisabled = false
+
     private var visible = false
         set(value) {
             if (field == value) {
@@ -178,6 +181,13 @@ class LargeScreenShadeHeaderController @Inject constructor(
         updateConstraints()
     }
 
+    fun disable(state1: Int, state2: Int, animate: Boolean) {
+        val disabled = state2 and StatusBarManager.DISABLE2_QUICK_SETTINGS != 0
+        if (disabled == qsDisabled) return
+        qsDisabled = disabled
+        updateVisibility()
+    }
+
     private fun updateScrollY() {
         if (!active && combinedHeaders) {
             header.scrollY = qsScrollY
@@ -205,7 +215,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
     }
 
     private fun updateVisibility() {
-        val visibility = if (!active && !combinedHeaders) {
+        val visibility = if (!active && !combinedHeaders || qsDisabled) {
             View.GONE
         } else if (shadeExpanded) {
             View.VISIBLE
@@ -259,7 +269,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("visible: $visible")
         pw.println("shadeExpanded: $shadeExpanded")
         pw.println("shadeExpandedFraction: $shadeExpandedFraction")

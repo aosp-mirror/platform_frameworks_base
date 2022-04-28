@@ -70,7 +70,6 @@ public class QuickStatusBarHeader extends FrameLayout {
     private View mDateView;
     // DateView next to clock. Visible on QQS
     private VariableDateView mClockDateView;
-    private View mSecurityHeaderView;
     private View mStatusIconsView;
     private View mContainer;
 
@@ -137,7 +136,6 @@ public class QuickStatusBarHeader extends FrameLayout {
         mPrivacyChip = findViewById(R.id.privacy_chip);
         mDateView = findViewById(R.id.date);
         mClockDateView = findViewById(R.id.date_clock);
-        mSecurityHeaderView = findViewById(R.id.header_text_container);
         mClockIconsSeparator = findViewById(R.id.separator);
         mRightLayout = findViewById(R.id.rightLayout);
         mDateContainer = findViewById(R.id.date_container);
@@ -152,8 +150,6 @@ public class QuickStatusBarHeader extends FrameLayout {
         updateResources();
         Configuration config = mContext.getResources().getConfiguration();
         setDatePrivacyContainersWidth(config.orientation == Configuration.ORIENTATION_LANDSCAPE);
-        setSecurityHeaderContainerVisibility(
-                config.orientation == Configuration.ORIENTATION_LANDSCAPE);
 
         // QS will always show the estimate, and BatteryMeterView handles the case where
         // it's unavailable or charging
@@ -207,8 +203,6 @@ public class QuickStatusBarHeader extends FrameLayout {
         super.onConfigurationChanged(newConfig);
         updateResources();
         setDatePrivacyContainersWidth(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE);
-        setSecurityHeaderContainerVisibility(
-                newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE);
     }
 
     @Override
@@ -227,10 +221,6 @@ public class QuickStatusBarHeader extends FrameLayout {
         lp.width = landscape ? WRAP_CONTENT : 0;
         lp.weight = landscape ? 0f : 1f;
         mPrivacyContainer.setLayoutParams(lp);
-    }
-
-    private void setSecurityHeaderContainerVisibility(boolean landscape) {
-        mSecurityHeaderView.setVisibility(landscape ? VISIBLE : GONE);
     }
 
     private void updateBatteryMode() {
@@ -337,7 +327,6 @@ public class QuickStatusBarHeader extends FrameLayout {
             return;
         }
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
-                .addFloat(mSecurityHeaderView, "alpha", 0, 1)
                 // These views appear on expanding down
                 .addFloat(mDateView, "alpha", 0, 0, 1)
                 .addFloat(mClockDateView, "alpha", 1, 0, 0)

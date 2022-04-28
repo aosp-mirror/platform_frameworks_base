@@ -42,7 +42,7 @@ import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
-import com.android.systemui.statusbar.phone.ShadeController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter
 import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA
@@ -63,7 +63,7 @@ class UserSwitcherActivity @Inject constructor(
     private val layoutInflater: LayoutInflater,
     private val falsingManager: FalsingManager,
     private val userManager: UserManager,
-    private val shadeController: ShadeController
+    private val userTracker: UserTracker
 ) : LifecycleActivity() {
 
     private lateinit var parent: ViewGroup
@@ -215,6 +215,11 @@ class UserSwitcherActivity @Inject constructor(
         initBroadcastReceiver()
 
         parent.post { buildUserViews() }
+        userTracker.addCallback(object : UserTracker.Callback {
+            override fun onUserChanged(newUser: Int, userContext: Context) {
+                finish()
+            }
+        }, mainExecutor)
     }
 
     private fun showPopupMenu() {

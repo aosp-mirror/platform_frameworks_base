@@ -219,6 +219,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 mKeyguardSecurityCallback.userActivity();
                 showMessage(null, null);
             }
+            if (mUpdateMonitor.isFaceEnrolled()
+                    && mUpdateMonitor.mRequestActiveUnlockOnUnlockIntent) {
+                mUpdateMonitor.requestActiveUnlock("unlock-intent, reason=swipeUpOnBouncer",
+                        true);
+            }
         }
     };
     private ConfigurationController.ConfigurationListener mConfigurationListener =

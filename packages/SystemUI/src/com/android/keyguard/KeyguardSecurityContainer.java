@@ -315,6 +315,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         Log.i(TAG, "Switching mode from " + modeToString(mCurrentMode) + " to "
                 + modeToString(mode));
         mCurrentMode = mode;
+        mViewMode.onDestroy();
 
         switch (mode) {
             case MODE_ONE_HANDED:
@@ -555,7 +556,9 @@ public class KeyguardSecurityContainer extends FrameLayout {
         int bottomInset = insets.getInsetsIgnoringVisibility(systemBars()).bottom;
         int imeInset = insets.getInsets(ime()).bottom;
         int inset = max(bottomInset, imeInset);
-        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), inset);
+        int paddingBottom = max(inset, getContext().getResources()
+                .getDimensionPixelSize(R.dimen.keyguard_security_view_bottom_margin));
+        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), paddingBottom);
         return insets.inset(0, 0, 0, inset);
     }
 
@@ -700,6 +703,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     public void reset() {
+        mViewMode.reset();
         mDisappearAnimRunning = false;
     }
 
@@ -707,7 +711,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
      * Enscapsulates the differences between bouncer modes for the container.
      */
     interface ViewMode {
-
         default void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
@@ -735,6 +738,9 @@ public class KeyguardSecurityContainer extends FrameLayout {
         default int getChildWidthMeasureSpec(int parentWidthMeasureSpec) {
             return parentWidthMeasureSpec;
         }
+
+        /** Called when we are setting a new ViewMode */
+        default void onDestroy() {};
     }
 
     /**
@@ -778,6 +784,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
         private UserSwitcherController mUserSwitcherController;
         private KeyguardUserSwitcherPopupMenu mPopup;
         private Resources mResources;
+        private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
+                this::setupUserSwitcher;
 
         @Override
         public void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
@@ -798,13 +806,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mUserSwitcherViewGroup =  mView.findViewById(R.id.keyguard_bouncer_user_switcher);
             }
 
-            Drawable userIcon = findUserIcon(KeyguardUpdateMonitor.getCurrentUser());
-            ((ImageView) mView.findViewById(R.id.user_icon)).setImageDrawable(userIcon);
-
             updateSecurityViewLocation();
 
             mUserSwitcher = mView.findViewById(R.id.user_switcher_header);
             setupUserSwitcher();
+            mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
         }
 
         @Override
@@ -813,6 +819,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mPopup.dismiss();
                 mPopup = null;
             }
+        }
+
+        @Override
+        public void onDestroy() {
+            mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
         }
 
         private Drawable findUserIcon(int userId) {
@@ -858,6 +869,12 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
         private void setupUserSwitcher() {
             final UserRecord currentUser = mUserSwitcherController.getCurrentUserRecord();
+            if (currentUser == null) {
+                Log.e(TAG, "Current user in user switcher is null.");
+                return;
+            }
+            Drawable userIcon = findUserIcon(currentUser.info.id);
+            ((ImageView) mView.findViewById(R.id.user_icon)).setImageDrawable(userIcon);
             mUserSwitcher.setText(mUserSwitcherController.getCurrentUserName());
 
             ViewGroup anchor = mView.findViewById(R.id.user_switcher_anchor);
