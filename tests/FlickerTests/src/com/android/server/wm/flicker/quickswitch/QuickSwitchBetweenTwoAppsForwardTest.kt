@@ -71,6 +71,11 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
     private val testApp1 = SimpleAppHelper(instrumentation)
     private val testApp2 = NonResizeableAppHelper(instrumentation)
 
+    @Before
+    open fun before() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+    }
+
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
@@ -101,7 +106,6 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
                 taplInstrumentation.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
 
                 wmHelper.waitForFullScreenApp(testApp2.component)
-                wmHelper.waitSnapshotGone()
                 wmHelper.waitForAppTransitionIdle()
                 wmHelper.waitForNavBarStatusBarVisible()
             }
@@ -113,12 +117,6 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
                 }
             }
         }
-    }
-
-    @Before
-    open fun setup() {
-        // This test doesn't work in shell transitions because of b/213867585
-        Assume.assumeFalse(isShellTransitionsEnabled)
     }
 
     /**

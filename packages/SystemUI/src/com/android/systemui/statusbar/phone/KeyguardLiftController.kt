@@ -30,7 +30,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.Assert
 import com.android.systemui.util.sensors.AsyncSensorManager
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -72,12 +71,18 @@ class KeyguardLiftController @Inject constructor(
             isListening = false
             updateListeningState()
             keyguardUpdateMonitor.requestFaceAuth(true)
-            keyguardUpdateMonitor.requestActiveUnlock()
+            if (keyguardUpdateMonitor.mRequestActiveUnlockOnWakeup) {
+                keyguardUpdateMonitor.requestActiveUnlock("wake-unlock," +
+                        " extra=KeyguardLiftController")
+            } else if (keyguardUpdateMonitor.mInitiateActiveUnlockOnWakeup) {
+                keyguardUpdateMonitor.initiateActiveUnlock("wake-initiate," +
+                        " extra=KeyguardLiftController")
+            }
         }
     }
 
     private val keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
-        override fun onKeyguardBouncerChanged(bouncer: Boolean) {
+        override fun onKeyguardBouncerFullyShowingChanged(bouncer: Boolean) {
             bouncerVisible = bouncer
             updateListeningState()
         }
@@ -93,7 +98,7 @@ class KeyguardLiftController @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("KeyguardLiftController:")
         pw.println("  pickupSensor: $pickupSensor")
         pw.println("  isListening: $isListening")

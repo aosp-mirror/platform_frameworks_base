@@ -72,6 +72,7 @@ class DeviceIdleModifier extends Modifier {
     }
 
     private final class DeviceIdleTracker extends BroadcastReceiver {
+        private boolean mIsSetup = false;
 
         private volatile boolean mDeviceIdle;
         private volatile boolean mDeviceLightIdle;
@@ -80,6 +81,10 @@ class DeviceIdleModifier extends Modifier {
         }
 
         void startTracking(@NonNull Context context) {
+            if (mIsSetup) {
+                return;
+            }
+
             IntentFilter filter = new IntentFilter();
             filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
             filter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
@@ -88,10 +93,17 @@ class DeviceIdleModifier extends Modifier {
             // Initialise tracker state.
             mDeviceIdle = mPowerManager.isDeviceIdleMode();
             mDeviceLightIdle = mPowerManager.isLightDeviceIdleMode();
+
+            mIsSetup = true;
         }
 
         void stopTracking(@NonNull Context context) {
+            if (!mIsSetup) {
+                return;
+            }
+
             context.unregisterReceiver(this);
+            mIsSetup = false;
         }
 
         @Override

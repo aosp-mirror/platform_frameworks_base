@@ -80,7 +80,6 @@ import com.android.systemui.utils.os.FakeHandler;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -293,6 +292,22 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void deleteWindowMagnification_notifySourceBoundsChanged() {
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                        Float.NaN,
+                        Float.NaN));
+
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.deleteWindowMagnification());
+
+        // The first time is for notifying magnification enabled and the second time is for
+        // notifying magnification disabled.
+        verify(mWindowMagnifierCallback, times(2)).onSourceBoundsChanged(
+                (eq(mContext.getDisplayId())), any());
+    }
+
+    @Test
     public void moveMagnifier_schedulesFrame() {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
@@ -303,7 +318,6 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         verify(mSfVsyncFrameProvider, atLeastOnce()).postFrameCallback(any());
     }
 
-    @Ignore("b/224717753")
     @Test
     public void moveWindowMagnifierToPositionWithAnimation_expectedValuesAndInvokeCallback()
             throws InterruptedException {
@@ -338,7 +352,6 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertEquals(mWindowMagnificationController.getCenterY(), targetCenterY, 0);
     }
 
-    @Ignore("b/224717753")
     @Test
     public void moveWindowMagnifierToPositionMultipleTimes_expectedValuesAndInvokeCallback()
             throws InterruptedException {

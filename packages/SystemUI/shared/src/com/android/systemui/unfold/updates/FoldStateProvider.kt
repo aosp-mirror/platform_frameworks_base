@@ -28,7 +28,7 @@ interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
     fun start()
     fun stop()
 
-    val isFullyOpened: Boolean
+    val isFinishedOpening: Boolean
 
     interface FoldUpdatesListener {
         fun onHingeAngleUpdate(@FloatRange(from = 0.0, to = 180.0) angle: Float)

@@ -20,6 +20,7 @@ import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.navBarLayerPositionEnd
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.Test
 
@@ -99,4 +100,27 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter)
     @FlakyTest(bugId = 203538234)
     @Test
     override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
+
+    /**
+     * Checks the position of the navigation bar at the start and end of the transition
+     *
+     * Differently from the normal usage of this assertion, check only the final state of the
+     * transition because the display is off at the start and the NavBar is never visible
+     */
+    @Presubmit
+    @Test
+    override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerPositionEnd()
+
+    /**
+     * Checks that the status bar layer is visible at the end of the trace
+     *
+     * It is not possible to check at the start because the screen is off
+     */
+    @Presubmit
+    @Test
+    override fun statusBarLayerIsVisible() {
+        testSpec.assertLayersEnd {
+            this.isVisible(FlickerComponentName.STATUS_BAR)
+        }
+    }
 }

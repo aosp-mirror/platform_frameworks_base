@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"以下にデバイス暗号化用のパスワードを入力してください。このパスワードはバックアップアーカイブの暗号化にも使用します。"</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"フルバックアップデータの暗号化に使用するパスワードを入力してください。空白のままにした場合、現在のバックアップ用のパスワードが使用されます:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"フルバックアップのデータを暗号化する場合は、以下にパスワードを入力してください:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"デバイスは暗号化されているため、バックアップを暗号化する必要があります。下にパスワードを入力してください。"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"復元するデータが暗号化されている場合、以下にパスワードを入力してください:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"バックアップを開始しています..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"バックアップが終了しました"</string>

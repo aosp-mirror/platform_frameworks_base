@@ -205,10 +205,9 @@ public class NavigationBarTest extends SysuiTestCase {
         when(mNavigationBarView.getAccessibilityButton()).thenReturn(mAccessibilityButton);
         when(mNavigationBarView.getImeSwitchButton()).thenReturn(mImeSwitchButton);
         when(mNavigationBarView.getBackButton()).thenReturn(mBackButton);
-        when(mNavigationBarView.getBarTransitions()).thenReturn(mNavigationBarTransitions);
         when(mNavigationBarView.getRotationButtonController())
                 .thenReturn(mRotationButtonController);
-        when(mNavigationBarView.getLightTransitionsController())
+        when(mNavigationBarTransitions.getLightTransitionsController())
                 .thenReturn(mLightBarTransitionsController);
         when(mStatusBarKeyguardViewManager.isNavBarVisible()).thenReturn(true);
         setupSysuiDependency();
@@ -459,6 +458,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 mInputMethodManager,
                 mDeadZone,
                 mDeviceConfigProxyFake,
+                mNavigationBarTransitions,
                 Optional.of(mock(BackAnimation.class))));
     }
 

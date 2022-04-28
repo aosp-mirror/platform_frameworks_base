@@ -36,6 +36,7 @@ import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.modules.utils.build.UnboundedSdkLevel;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -334,8 +335,9 @@ public class FrameworkParsingPackageUtils {
      * If {@code targetCode} is not specified, e.g. the value is {@code null}, then the {@code
      * targetVers} will be returned unmodified.
      * <p>
-     * Otherwise, the behavior varies based on whether the current platform is a pre-release
-     * version, e.g. the {@code platformSdkCodenames} array has length > 0:
+     * When {@code allowUnknownCodenames} is false, the behavior varies based on whether the
+     * current platform is a pre-release version, e.g. the {@code platformSdkCodenames} array has
+     * length > 0:
      * <ul>
      * <li>If this is a pre-release platform and the value specified by
      * {@code targetCode} is contained within the array of allowed pre-release
@@ -343,20 +345,30 @@ public class FrameworkParsingPackageUtils {
      * <li>If this is a released platform, this method will return -1 to
      * indicate that the package is not compatible with this platform.
      * </ul>
+     * <p>
+     * When {@code allowUnknownCodenames} is true, any codename that is not known (presumed to be
+     * a codename announced after the build of the current device) is allowed and this method will
+     * return {@link Build.VERSION_CODES#CUR_DEVELOPMENT}.
      *
-     * @param targetVers           targetSdkVersion number, if specified in the application
-     *                             manifest, or 0 otherwise
-     * @param targetCode           targetSdkVersion code, if specified in the application manifest,
-     *                             or {@code null} otherwise
-     * @param platformSdkCodenames array of allowed pre-release SDK codenames for this platform
+     * @param targetVers            targetSdkVersion number, if specified in the application
+     *                              manifest, or 0 otherwise
+     * @param targetCode            targetSdkVersion code, if specified in the application manifest,
+     *                              or {@code null} otherwise
+     * @param platformSdkCodenames  array of allowed pre-release SDK codenames for this platform
+     * @param allowUnknownCodenames allow unknown codenames, if true this method will accept unknown
+     *                              (presumed to be future) codenames
      * @return the targetSdkVersion to use at runtime if successful
      */
     public static ParseResult<Integer> computeTargetSdkVersion(@IntRange(from = 0) int targetVers,
             @Nullable String targetCode, @NonNull String[] platformSdkCodenames,
-            @NonNull ParseInput input) {
+            @NonNull ParseInput input, boolean allowUnknownCodenames) {
         // If it's a release SDK, return the version number unmodified.
         if (targetCode == null) {
             return input.success(targetVers);
+        }
+
+        if (allowUnknownCodenames && UnboundedSdkLevel.isAtMost(targetCode)) {
+            return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
         }
 
         // If it's a pre-release SDK and the codename matches this platform, it

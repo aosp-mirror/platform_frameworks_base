@@ -87,7 +87,7 @@ public class LeakReporter {
                 w.print("Build: "); w.println(SystemProperties.get("ro.build.description"));
                 w.println();
                 w.flush();
-                mLeakDetector.dump(fos.getFD(), w, new String[0]);
+                mLeakDetector.dump(w, new String[0]);
                 w.close();
             }
 

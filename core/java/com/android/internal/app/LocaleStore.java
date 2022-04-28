@@ -25,9 +25,11 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IllformedLocaleException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -278,12 +280,31 @@ public class LocaleStore {
     }
 
     /**
+     * Returns a list of system languages with LocaleInfo
+     */
+    public static List<LocaleInfo> getSystemCurrentLocaleInfo() {
+        List<LocaleInfo> localeList = new ArrayList<>();
+
+        LocaleList systemLangList = LocaleList.getDefault();
+        for(int i = 0; i < systemLangList.size(); i++) {
+            LocaleInfo systemLocaleInfo = new LocaleInfo(systemLangList.get(i));
+            systemLocaleInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SIM;
+            systemLocaleInfo.mIsTranslated = true;
+            localeList.add(systemLocaleInfo);
+        }
+        return localeList;
+    }
+
+    /**
      * The "system default" is special case for per-app picker. Intentionally keep the locale
      * empty to let activity know "system default" been selected.
      */
-    public static LocaleInfo getSystemDefaultLocaleInfo() {
+    public static LocaleInfo getSystemDefaultLocaleInfo(boolean hasAppLanguage) {
         LocaleInfo systemDefaultInfo = new LocaleInfo("");
         systemDefaultInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SYSTEM_LANGUAGE;
+        if (hasAppLanguage) {
+            systemDefaultInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_CURRENT;
+        }
         systemDefaultInfo.mIsTranslated = true;
         return systemDefaultInfo;
     }

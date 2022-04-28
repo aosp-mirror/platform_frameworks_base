@@ -37,6 +37,7 @@ class PanelExpansionStateManager @Inject constructor() {
     @FloatRange(from = 0.0, to = 1.0) private var fraction: Float = 0f
     private var expanded: Boolean = false
     private var tracking: Boolean = false
+    private var dragDownPxAmount: Float = 0f
 
     /**
      * Adds a listener that will be notified when the panel expansion fraction has changed.
@@ -45,7 +46,8 @@ class PanelExpansionStateManager @Inject constructor() {
      */
     fun addExpansionListener(listener: PanelExpansionListener) {
         expansionListeners.add(listener)
-        listener.onPanelExpansionChanged(fraction, expanded, tracking)
+        listener.onPanelExpansionChanged(
+            PanelExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount))
     }
 
     /** Removes an expansion listener. */
@@ -77,7 +79,8 @@ class PanelExpansionStateManager @Inject constructor() {
     fun onPanelExpansionChanged(
         @FloatRange(from = 0.0, to = 1.0) fraction: Float,
         expanded: Boolean,
-        tracking: Boolean
+        tracking: Boolean,
+        dragDownPxAmount: Float
     ) {
         require(!fraction.isNaN()) { "fraction cannot be NaN" }
         val oldState = state
@@ -85,6 +88,7 @@ class PanelExpansionStateManager @Inject constructor() {
         this.fraction = fraction
         this.expanded = expanded
         this.tracking = tracking
+        this.dragDownPxAmount = dragDownPxAmount
 
         var fullyClosed = true
         var fullyOpened = false
@@ -110,14 +114,17 @@ class PanelExpansionStateManager @Inject constructor() {
                     "f=$fraction " +
                     "expanded=$expanded " +
                     "tracking=$tracking" +
+                    "drawDownPxAmount=$dragDownPxAmount " +
                     "${if (fullyOpened) " fullyOpened" else ""} " +
                     if (fullyClosed) " fullyClosed" else ""
         )
 
-        expansionListeners.forEach { it.onPanelExpansionChanged(fraction, expanded, tracking) }
+        val expansionChangeEvent =
+            PanelExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
+        expansionListeners.forEach { it.onPanelExpansionChanged(expansionChangeEvent) }
     }
 
-    /** Updates the panel state if necessary.  */
+    /** Updates the panel state if necessary. */
     fun updateState(@PanelState state: Int) {
         debugLog("update state: ${this.state.stateToString()} -> ${state.stateToString()}")
         if (this.state != state) {
@@ -137,7 +144,7 @@ class PanelExpansionStateManager @Inject constructor() {
     }
 }
 
-/** Enum for the current state of the panel.  */
+/** Enum for the current state of the panel. */
 @Retention(AnnotationRetention.SOURCE)
 @IntDef(value = [STATE_CLOSED, STATE_OPENING, STATE_OPEN])
 internal annotation class PanelState

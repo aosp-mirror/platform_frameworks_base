@@ -18,6 +18,7 @@ package com.android.systemui.media
 
 import android.app.smartspace.SmartspaceAction
 import android.content.Intent
+import com.android.internal.logging.InstanceId
 
 /** State of a Smartspace media recommendations view. */
 data class SmartspaceMediaData(
@@ -50,11 +51,11 @@ data class SmartspaceMediaData(
      */
     val dismissIntent: Intent?,
     /**
-     * View's background color.
-     */
-    val backgroundColor: Int,
-    /**
      * The timestamp in milliseconds that headphone is connected.
      */
-    val headphoneConnectionTimeMillis: Long
+    val headphoneConnectionTimeMillis: Long,
+    /**
+     * Instance ID for [MediaUiEventLogger]
+     */
+    val instanceId: InstanceId
 )

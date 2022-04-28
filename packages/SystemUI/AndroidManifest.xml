@@ -224,6 +224,7 @@
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
 
     <!-- It's like, reality, but, you know, virtual -->
     <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
@@ -318,6 +319,9 @@
     <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE" />
     <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
+
+    <!-- To read safety center status -->
+    <uses-permission android:name="android.permission.READ_SAFETY_CENTER_STATUS" />
 
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
@@ -519,7 +523,8 @@
                   android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
                   android:theme="@style/Theme.SystemUI.Dialog.Alert"
-                  android:finishOnCloseSystemDialogs="true">
+                  android:finishOnCloseSystemDialogs="true"
+                  android:showForAllUsers="true">
         </activity>
 
         <!-- started from SensoryPrivacyService -->
@@ -528,7 +533,8 @@
                   android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
                   android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true">
+                  android:finishOnCloseSystemDialogs="true"
+                  android:showForAllUsers="true">
         </activity>
 
 
