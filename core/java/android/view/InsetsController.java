@@ -833,10 +833,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
-     * @see InsetsState#calculateVisibleInsets(Rect, int)
+     * @see InsetsState#calculateVisibleInsets(Rect, int, int, int, int)
      */
-    public Insets calculateVisibleInsets(@SoftInputModeFlags int softInputMode) {
-        return mState.calculateVisibleInsets(mFrame, softInputMode);
+    public Insets calculateVisibleInsets(int windowType, int windowingMode,
+            @SoftInputModeFlags int softInputMode, int windowFlags) {
+        return mState.calculateVisibleInsets(mFrame, windowType, windowingMode, softInputMode,
+                windowFlags);
     }
 
     /**
@@ -1310,8 +1312,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     private void cancelAnimation(InsetsAnimationControlRunner control, boolean invokeCallback) {
-        if (DEBUG) Log.d(TAG, String.format("cancelAnimation of types: %d, animType: %d",
-                control.getTypes(), control.getAnimationType()));
+        if (DEBUG) Log.d(TAG, String.format("cancelAnimation of types: %d, animType: %d, host: %s",
+                control.getTypes(), control.getAnimationType(), mHost.getRootViewTitle()));
         if (invokeCallback) {
             control.cancel();
         }

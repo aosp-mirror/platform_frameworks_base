@@ -23,6 +23,8 @@ package {
 
 android_test {
     name: "WMJetpackUnitTests",
+    // To make the test run via TEST_MAPPING
+    test_suites: ["device-tests"],
 
     srcs: [
         "**/*.java",
@@ -44,6 +46,12 @@ android_test {
         "android.test.mock",
         "android.test.base",
         "android.test.runner",
+    ],
+
+    // These are not normally accessible from apps so they must be explicitly included.
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
     ],
 
     optimize: {

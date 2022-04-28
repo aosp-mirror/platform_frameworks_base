@@ -19,6 +19,7 @@ package android.service.wallpapereffectsgeneration;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.CallSuper;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.Service;
@@ -69,7 +70,6 @@ public abstract class WallpaperEffectsGenerationService extends Service {
      * {@link android.permission#MANAGE_WALLPAPER_EFFECTS_GENERATION}
      * permission.
      *
-     * @hide
      */
     public static final String SERVICE_INTERFACE =
             "android.service.wallpapereffectsgeneration.WallpaperEffectsGenerationService";
@@ -97,6 +97,7 @@ public abstract class WallpaperEffectsGenerationService extends Service {
      *
      * @param request the cinematic effect request passed from the client.
      */
+    @MainThread
     public abstract void onGenerateCinematicEffect(@NonNull CinematicEffectRequest request);
 
     /**

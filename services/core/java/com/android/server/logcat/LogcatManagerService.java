@@ -23,7 +23,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Binder;
 import android.os.ILogd;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -76,6 +75,7 @@ public final class LogcatManagerService extends SystemService {
         @Override
         public void approve(int uid, int gid, int pid, int fd) {
             try {
+                Slog.d(TAG, "Allow logd access for uid: " + uid);
                 getLogdService().approve(uid, gid, pid, fd);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Fails to call remote functions", e);
@@ -85,6 +85,7 @@ public final class LogcatManagerService extends SystemService {
         @Override
         public void decline(int uid, int gid, int pid, int fd) {
             try {
+                Slog.d(TAG, "Decline logd access for uid: " + uid);
                 getLogdService().decline(uid, gid, pid, fd);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Fails to call remote functions", e);
@@ -101,16 +102,27 @@ public final class LogcatManagerService extends SystemService {
         }
     }
 
-    private void showDialog(int uid, int gid, int pid, int fd) {
+    /**
+     * Returns the package name.
+     * If we cannot retrieve the package name, it returns null and we decline the full device log
+     * access
+     */
+    private String getPackageName(int uid, int gid, int pid, int fd) {
+
         final ActivityManagerInternal activityManagerInternal =
                 LocalServices.getService(ActivityManagerInternal.class);
+        if (activityManagerInternal != null) {
+            String packageName = activityManagerInternal.getPackageNameByPid(pid);
+            if (packageName != null) {
+                return packageName;
+            }
+        }
 
         PackageManager pm = mContext.getPackageManager();
-        String packageName = activityManagerInternal.getPackageNameByPid(pid);
-        if (packageName != null) {
-            Intent mIntent = createIntent(packageName, uid, gid, pid, fd);
-            mContext.startActivityAsUser(mIntent, UserHandle.SYSTEM);
-            return;
+        if (pm == null) {
+            // Decline the logd access if PackageManager is null
+            Slog.e(TAG, "PackageManager is null, declining the logd access");
+            return null;
         }
 
         String[] packageNames = pm.getPackagesForUid(uid);
@@ -118,21 +130,19 @@ public final class LogcatManagerService extends SystemService {
         if (ArrayUtils.isEmpty(packageNames)) {
             // Decline the logd access if the app name is unknown
             Slog.e(TAG, "Unknown calling package name, declining the logd access");
-            declineLogdAccess(uid, gid, pid, fd);
-            return;
+            return null;
         }
 
         String firstPackageName = packageNames[0];
 
-        if (firstPackageName.isEmpty() || firstPackageName == null) {
+        if (firstPackageName == null || firstPackageName.isEmpty()) {
             // Decline the logd access if the package name from uid is unknown
             Slog.e(TAG, "Unknown calling package name, declining the logd access");
-            declineLogdAccess(uid, gid, pid, fd);
-            return;
+            return null;
         }
 
-        final Intent mIntent = createIntent(firstPackageName, uid, gid, pid, fd);
-        mContext.startActivityAsUser(mIntent, UserHandle.SYSTEM);
+        return firstPackageName;
+
     }
 
     private void declineLogdAccess(int uid, int gid, int pid, int fd) {
@@ -194,17 +204,25 @@ public final class LogcatManagerService extends SystemService {
                     return;
                 }
 
-                final int procState = mActivityManager.getUidImportance(Binder.getCallingUid());
-                // If the process is foreground, send a notification for user consent
-                if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
-                    showDialog(mUid, mGid, mPid, mFd);
-                } else {
-                    /**
-                     * If the process is background, decline the logd access.
-                     **/
-                    declineLogdAccess(mUid, mGid, mPid, mFd);
-                    return;
+                final int procState = LocalServices.getService(ActivityManagerInternal.class)
+                        .getUidProcessState(mUid);
+                // If the process is foreground and we can retrieve the package name, show a dialog
+                // for user consent
+                if (procState == ActivityManager.PROCESS_STATE_TOP) {
+                    String packageName = getPackageName(mUid, mGid, mPid, mFd);
+                    if (packageName != null) {
+                        final Intent mIntent = createIntent(packageName, mUid, mGid, mPid, mFd);
+                        mContext.startActivityAsUser(mIntent, UserHandle.SYSTEM);
+                        return;
+                    }
                 }
+
+                /**
+                 * If the process is background or cannot retrieve the package name,
+                 * decline the logd access.
+                 **/
+                declineLogdAccess(mUid, mGid, mPid, mFd);
+                return;
             }
         }
     }

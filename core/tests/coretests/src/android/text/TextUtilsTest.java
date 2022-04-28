@@ -43,6 +43,7 @@ import com.google.android.collect.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -779,6 +780,81 @@ public class TextUtilsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testTrimToSizeThrowsExceptionForZeroSize() {
         TextUtils.trimToSize("abc", 0);
+    }
+
+    @Test
+    public void truncateStringForUtf8Storage() {
+        assertEquals("", TextUtils.truncateStringForUtf8Storage("abc", 0));
+
+        //================ long normal case ================
+        StringBuilder builder = new StringBuilder();
+
+        int n = 50;
+        for (int i = 0; i < 2 * n; i++) {
+            builder.append("哈");
+        }
+        String initial = builder.toString();
+        String result = TextUtils.truncateStringForUtf8Storage(initial, n);
+
+        // Result should be the beginning of initial
+        assertTrue(initial.startsWith(result));
+
+        // Result should take less than n bytes in UTF-8
+        assertTrue(result.getBytes(StandardCharsets.UTF_8).length <= n);
+
+        // result + the next codePoint should take strictly more than
+        // n bytes in UTF-8
+        assertTrue(initial.substring(0, initial.offsetByCodePoints(result.length(), 1))
+                .getBytes(StandardCharsets.UTF_8).length > n);
+
+        // =================== short normal case =====================
+        String s = "sf\u20ACgk\u00E9ls\u00E9fg";
+        result = TextUtils.truncateStringForUtf8Storage(s, 100);
+        assertEquals(s, result);
+    }
+
+    @Test
+    public void testTruncateInMiddleOfSurrogate() {
+        StringBuilder builder = new StringBuilder();
+        String beginning = "a";
+        builder.append(beginning);
+        builder.append(Character.toChars(0x1D11E));
+
+        String result = TextUtils.truncateStringForUtf8Storage(builder.toString(), 3);
+
+        // \u1D11E is a surrogate and needs 4 bytes in UTF-8. beginning == "a" uses
+        // only 1 bytes in UTF8
+        // As we allow only 3 bytes for the whole string, so just 2 for this
+        // codePoint, there is not enough place and the string will be truncated
+        // just before it
+        assertEquals(beginning, result);
+    }
+
+    @Test
+    public void testTruncateInMiddleOfChar() {
+        StringBuilder builder = new StringBuilder();
+        String beginning = "a";
+        builder.append(beginning);
+        builder.append(Character.toChars(0x20AC));
+
+        String result = TextUtils.truncateStringForUtf8Storage(builder.toString(), 3);
+
+        // Like above, \u20AC uses 3 bytes in UTF-8, with "beginning", that makes
+        // 4 bytes so it is too big and should be truncated
+        assertEquals(beginning, result);
+    }
+
+    @Test
+    public void testTruncateSubString() {
+        String test = "sdgkl;hjsl;gjhdgkljdfhglkdj";
+        String sub = test.substring(10, 20);
+        String res = TextUtils.truncateStringForUtf8Storage(sub, 255);
+        assertEquals(sub, res);
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void truncateStringForUtf8StorageThrowsExceptionForNegativeSize() {
+        TextUtils.truncateStringForUtf8Storage("abc", -1);
     }
 
     @Test

@@ -33,7 +33,7 @@
             android:layout_height="match_parent"
             android:background="@drawable/media_output_item_background"
             android:layout_gravity="center_vertical|start">
-            <com.android.systemui.media.dialog.MediaOutputSeekbar
+            <SeekBar
                 android:id="@+id/volume_seekbar"
                 android:splitTrack="false"
                 android:visibility="gone"
@@ -119,15 +119,24 @@
             android:importantForAccessibility="no"
             android:visibility="gone"/>
 
+        <LinearLayout
+            android:id="@+id/end_action_area"
+            android:visibility="gone"
+            android:orientation="vertical"
+            android:layout_width="48dp"
+            android:layout_height="64dp"
+            android:layout_gravity="right|center"
+            android:gravity="center_vertical">
         <CheckBox
             android:id="@+id/check_box"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginEnd="16dp"
-            android:layout_gravity="right|center"
+            android:layout_gravity="right"
             android:button="@drawable/ic_circle_check_box"
             android:visibility="gone"
-            android:clickable="false"
         />
+
+        </LinearLayout>
     </FrameLayout>
 </LinearLayout>

@@ -87,6 +87,17 @@ public class AccessibilityFloatingMenuTest extends SysuiTestCase {
         assertThat(mMenuView.isShowing()).isFalse();
     }
 
+    @Test
+    public void showMenuView_emptyTarget_notShow() {
+        final List<String> emptyTargets = new ArrayList<>();
+        doReturn(emptyTargets).when(mAccessibilityManager).getAccessibilityShortcutTargets(
+                anyInt());
+
+        mMenu.show();
+
+        assertThat(mMenuView.isShowing()).isFalse();
+    }
+
     @After
     public void tearDown() {
         mMenu.hide();

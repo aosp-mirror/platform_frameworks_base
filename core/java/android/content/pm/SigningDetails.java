@@ -112,6 +112,29 @@ public final class SigningDetails implements Parcelable {
         int AUTH = 16;
     }
 
+    @IntDef(value = {CapabilityMergeRule.MERGE_SELF_CAPABILITY,
+                    CapabilityMergeRule.MERGE_OTHER_CAPABILITY,
+                    CapabilityMergeRule.MERGE_RESTRICTED_CAPABILITY})
+    public @interface CapabilityMergeRule {
+        /**
+         * When capabilities are different for a common signer in the lineage, use the capabilities
+         * from this instance.
+         */
+        int MERGE_SELF_CAPABILITY = 0;
+
+        /**
+         * When capabilities are different for a common signer in the lineage, use the capabilites
+         * from the other instance.
+         */
+        int MERGE_OTHER_CAPABILITY = 1;
+
+        /**
+         * When capabilities are different for a common signer in the lineage, use the most
+         * restrictive between the two signers.
+         */
+        int MERGE_RESTRICTED_CAPABILITY = 2;
+    }
+
     /** A representation of unknown signing details. Use instead of null. */
     public static final SigningDetails UNKNOWN = new SigningDetails(/* signatures */ null,
             SignatureSchemeVersion.UNKNOWN, /* keys */ null, /* pastSigningCertificates */ null);
@@ -164,30 +187,60 @@ public final class SigningDetails implements Parcelable {
 
     /**
      * Merges the signing lineage of this instance with the lineage in the provided {@code
-     * otherSigningDetails} when one has the same or an ancestor signer of the other.
+     * otherSigningDetails} using {@link CapabilityMergeRule#MERGE_OTHER_CAPABILITY} as the merge
+     * rule.
+     *
+     * @param otherSigningDetails the {@code SigningDetails} with which to merge
+     * @return Merged {@code SigningDetails} instance when one has the same or an ancestor signer
+     *         of the other. If neither instance has a lineage, or if neither has the same or an
+     *         ancestor signer then this instance is returned.
+     * @see #mergeLineageWith(SigningDetails, int)
+     */
+    public @NonNull SigningDetails mergeLineageWith(@NonNull SigningDetails otherSigningDetails) {
+        return mergeLineageWith(otherSigningDetails, CapabilityMergeRule.MERGE_OTHER_CAPABILITY);
+    }
+
+    /**
+     * Merges the signing lineage of this instance with the lineage in the provided {@code
+     * otherSigningDetails} when one has the same or an ancestor signer of the other using the
+     * provided {@code mergeRule} to handle differences in capabilities for shared signers.
      *
      * <p>Merging two signing lineages will result in a new {@code SigningDetails} instance
-     * containing the longest common lineage with the most restrictive capabilities. If the two
-     * lineages contain the same signers with the same capabilities then the instance on which
-     * this was invoked is returned without any changes. Similarly if neither instance has a
-     * lineage, or if neither has the same or an ancestor signer then this instance is returned.
+     * containing the longest common lineage with differences in capabilities for shared signers
+     * resolved using the provided {@code mergeRule}. If the two lineages contain the same signers
+     * with the same capabilities then the instance on which this was invoked is returned without
+     * any changes. Similarly if neither instance has a lineage, or if neither has the same or an
+     * ancestor signer then this instance is returned.
      *
      * Following are some example results of this method for lineages with signers A, B, C, D:
-     * - lineage B merged with lineage A -> B returns lineage A -> B.
-     * - lineage A -> B merged with lineage B -> C returns lineage A -> B -> C
-     * - lineage A -> B with the {@code PERMISSION} capability revoked for A merged with
-     *  lineage A -> B with the {@code SHARED_USER_ID} capability revoked for A returns
-     *  lineage A -> B with both capabilities revoked for A.
-     * - lineage A -> B -> C merged with lineage A -> B -> D would return the original lineage
-     *  A -> B -> C since the current signer of both instances is not the same or in the
-     *   lineage of the other.
+     * <ul>
+     *     <li>lineage B merged with lineage A -> B returns lineage A -> B.
+     *     <li>lineage A -> B merged with lineage B -> C returns lineage A -> B -> C
+     *     <li>lineage A -> B with the {@code PERMISSION} capability revoked for A merged with
+     *     lineage A -> B with the {@code SHARED_USER_ID} capability revoked for A returns the
+     *     following based on the {@code mergeRule}:
+     *     <ul>
+     *         <li>{@code MERGE_SELF_CAPABILITY} - lineage A -> B with {@code PERMISSION} revoked
+     *         for A.
+     *         <li>{@code MERGE_OTHER_CAPABILITY} - lineage A -> B with {@code SHARED_USER_ID}
+     *         revoked for A.
+     *         <li>{@code MERGE_RESTRICTED_CAPABILITY} - lineage A -> B with {@code PERMISSION} and
+     *         {@code SHARED_USER_ID} revoked for A.
+     *     </ul>
+     *     <li>lineage A -> B -> C merged with lineage A -> B -> D would return the original lineage
+     *     A -> B -> C since the current signer of both instances is not the same or in the
+     *     lineage of the other.
+     * </ul>
      *
-     * @param otherSigningDetails The {@code SigningDetails} you would like to merge with.
+     * @param otherSigningDetails the {@code SigningDetails} with which to merge
+     * @param mergeRule the {@link CapabilityMergeRule} to use when resolving differences in
+     *                  capabilities for shared signers
      * @return Merged {@code SigningDetails} instance when one has the same or an ancestor signer
      *         of the other. If neither instance has a lineage, or if neither has the same or an
      *         ancestor signer then this instance is returned.
      */
-    public @NonNull SigningDetails mergeLineageWith(@NonNull SigningDetails otherSigningDetails) {
+    public @NonNull SigningDetails mergeLineageWith(@NonNull SigningDetails otherSigningDetails,
+            @CapabilityMergeRule int mergeRule) {
         if (!hasPastSigningCertificates()) {
             return otherSigningDetails.hasPastSigningCertificates()
                     && otherSigningDetails.hasAncestorOrSelf(this) ? otherSigningDetails : this;
@@ -201,19 +254,43 @@ public final class SigningDetails implements Parcelable {
         if (descendantSigningDetails == null) {
             return this;
         }
-        return descendantSigningDetails == this ? mergeLineageWithAncestorOrSelf(
-                otherSigningDetails) : otherSigningDetails.mergeLineageWithAncestorOrSelf(this);
+        SigningDetails mergedDetails = this;
+        if (descendantSigningDetails == this) {
+            // If this instance is the descendant then the merge will also be invoked against this
+            // instance and the provided mergeRule can be used as is.
+            mergedDetails = mergeLineageWithAncestorOrSelf(otherSigningDetails, mergeRule);
+        } else {
+            // If the provided instance is the descendant then the merge will be invoked against the
+            // other instance and a self or other merge rule will need to be flipped.
+            switch (mergeRule) {
+                case CapabilityMergeRule.MERGE_SELF_CAPABILITY:
+                    mergedDetails = otherSigningDetails.mergeLineageWithAncestorOrSelf(this,
+                            CapabilityMergeRule.MERGE_OTHER_CAPABILITY);
+                    break;
+                case CapabilityMergeRule.MERGE_OTHER_CAPABILITY:
+                    mergedDetails = otherSigningDetails.mergeLineageWithAncestorOrSelf(this,
+                            CapabilityMergeRule.MERGE_SELF_CAPABILITY);
+                    break;
+                case CapabilityMergeRule.MERGE_RESTRICTED_CAPABILITY:
+                    mergedDetails = otherSigningDetails.mergeLineageWithAncestorOrSelf(this,
+                            mergeRule);
+                    break;
+            }
+        }
+        return mergedDetails;
     }
 
     /**
      * Merges the signing lineage of this instance with the lineage of the ancestor (or same)
      * signer in the provided {@code otherSigningDetails}.
      *
-     * @param otherSigningDetails The {@code SigningDetails} you would like to merge with.
+     * @param otherSigningDetails the {@code SigningDetails} with which to merge
+     * @param mergeRule the {@link CapabilityMergeRule} to use when resolving differences in
+     *                  capabilities for shared signers
      * @return Merged {@code SigningDetails} instance.
      */
     private @NonNull SigningDetails mergeLineageWithAncestorOrSelf(
-            @NonNull SigningDetails otherSigningDetails) {
+            @NonNull SigningDetails otherSigningDetails, @CapabilityMergeRule int mergeRule) {
         // This method should only be called with instances that contain lineages.
         int index = mPastSigningCertificates.length - 1;
         int otherIndex = otherSigningDetails.mPastSigningCertificates.length - 1;
@@ -236,16 +313,26 @@ public final class SigningDetails implements Parcelable {
         }
 
         do {
-            // Add the common signer to the merged lineage with the most restrictive
-            // capabilities of the two lineages.
+            // Add the common signer to the merged lineage and resolve any differences in
+            // capabilites with the merge rule.
             Signature signature = mPastSigningCertificates[index--];
             Signature ancestorSignature =
                     otherSigningDetails.mPastSigningCertificates[otherIndex--];
             Signature mergedSignature = new Signature(signature);
-            int mergedCapabilities = signature.getFlags() & ancestorSignature.getFlags();
-            if (signature.getFlags() != mergedCapabilities) {
+            if (signature.getFlags() != ancestorSignature.getFlags()) {
                 capabilitiesModified = true;
-                mergedSignature.setFlags(mergedCapabilities);
+                switch (mergeRule) {
+                    case CapabilityMergeRule.MERGE_SELF_CAPABILITY:
+                        mergedSignature.setFlags(signature.getFlags());
+                        break;
+                    case CapabilityMergeRule.MERGE_OTHER_CAPABILITY:
+                        mergedSignature.setFlags(ancestorSignature.getFlags());
+                        break;
+                    case CapabilityMergeRule.MERGE_RESTRICTED_CAPABILITY:
+                        mergedSignature.setFlags(
+                                signature.getFlags() & ancestorSignature.getFlags());
+                        break;
+                }
             }
             mergedSignatures.add(mergedSignature);
         } while (index >= 0 && otherIndex >= 0 && mPastSigningCertificates[index].equals(
@@ -858,7 +945,7 @@ public final class SigningDetails implements Parcelable {
 
 
 
-    // Code below generated by codegen v1.0.22.
+    // Code below generated by codegen v1.0.23.
     //
     // DO NOT MODIFY!
     // CHECKSTYLE:OFF Generated code
@@ -914,10 +1001,10 @@ public final class SigningDetails implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1616984092921L,
-            codegenVersion = "1.0.22",
+            time = 1650058974710L,
+            codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/SigningDetails.java",
-            inputSignatures = "private static final  java.lang.String TAG\nprivate final @android.annotation.Nullable android.content.pm.Signature[] mSignatures\nprivate final @android.content.pm.SigningDetails.SignatureSchemeVersion int mSignatureSchemeVersion\nprivate final @android.annotation.Nullable android.util.ArraySet<java.security.PublicKey> mPublicKeys\nprivate final @android.annotation.Nullable android.content.pm.Signature[] mPastSigningCertificates\nprivate static final  int PAST_CERT_EXISTS\npublic static final  android.content.pm.SigningDetails UNKNOWN\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.SigningDetails> CREATOR\npublic @android.annotation.NonNull android.content.pm.SigningDetails mergeLineageWith(android.content.pm.SigningDetails)\nprivate @android.annotation.NonNull android.content.pm.SigningDetails mergeLineageWithAncestorOrSelf(android.content.pm.SigningDetails)\npublic  boolean hasCommonAncestor(android.content.pm.SigningDetails)\npublic  boolean hasAncestorOrSelfWithDigest(java.util.Set<java.lang.String>)\nprivate @android.annotation.Nullable android.content.pm.SigningDetails getDescendantOrSelf(android.content.pm.SigningDetails)\npublic  boolean hasSignatures()\npublic  boolean hasPastSigningCertificates()\npublic  boolean hasAncestorOrSelf(android.content.pm.SigningDetails)\npublic  boolean hasAncestor(android.content.pm.SigningDetails)\npublic  boolean hasCommonSignerWithCapability(android.content.pm.SigningDetails,int)\npublic  boolean checkCapability(android.content.pm.SigningDetails,int)\npublic  boolean checkCapabilityRecover(android.content.pm.SigningDetails,int)\npublic  boolean hasCertificate(android.content.pm.Signature)\npublic  boolean hasCertificate(android.content.pm.Signature,int)\npublic  boolean hasCertificate(byte[])\nprivate  boolean hasCertificateInternal(android.content.pm.Signature,int)\npublic  boolean checkCapability(java.lang.String,int)\npublic  boolean hasSha256Certificate(byte[])\npublic  boolean hasSha256Certificate(byte[],int)\nprivate  boolean hasSha256CertificateInternal(byte[],int)\npublic  boolean signaturesMatchExactly(android.content.pm.SigningDetails)\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\npublic @java.lang.Override boolean equals(java.lang.Object)\npublic @java.lang.Override int hashCode()\npublic static  android.util.ArraySet<java.security.PublicKey> toSigningKeys(android.content.pm.Signature[])\nclass SigningDetails extends java.lang.Object implements [android.os.Parcelable]\nprivate @android.annotation.NonNull android.content.pm.Signature[] mSignatures\nprivate @android.content.pm.SigningDetails.SignatureSchemeVersion int mSignatureSchemeVersion\nprivate @android.annotation.Nullable android.content.pm.Signature[] mPastSigningCertificates\npublic  android.content.pm.SigningDetails.Builder setSignatures(android.content.pm.Signature[])\npublic  android.content.pm.SigningDetails.Builder setSignatureSchemeVersion(int)\npublic  android.content.pm.SigningDetails.Builder setPastSigningCertificates(android.content.pm.Signature[])\nprivate  void checkInvariants()\npublic  android.content.pm.SigningDetails build()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false, genParcelable=true, genAidl=false)")
+            inputSignatures = "private static final  java.lang.String TAG\nprivate final @android.annotation.Nullable android.content.pm.Signature[] mSignatures\nprivate final @android.content.pm.SigningDetails.SignatureSchemeVersion int mSignatureSchemeVersion\nprivate final @android.annotation.Nullable android.util.ArraySet<java.security.PublicKey> mPublicKeys\nprivate final @android.annotation.Nullable android.content.pm.Signature[] mPastSigningCertificates\nprivate static final  int PAST_CERT_EXISTS\npublic static final  android.content.pm.SigningDetails UNKNOWN\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.SigningDetails> CREATOR\npublic @android.annotation.NonNull android.content.pm.SigningDetails mergeLineageWith(android.content.pm.SigningDetails)\npublic @android.annotation.NonNull android.content.pm.SigningDetails mergeLineageWith(android.content.pm.SigningDetails,int)\nprivate @android.annotation.NonNull android.content.pm.SigningDetails mergeLineageWithAncestorOrSelf(android.content.pm.SigningDetails,int)\npublic  boolean hasCommonAncestor(android.content.pm.SigningDetails)\npublic  boolean hasAncestorOrSelfWithDigest(java.util.Set<java.lang.String>)\nprivate @android.annotation.Nullable android.content.pm.SigningDetails getDescendantOrSelf(android.content.pm.SigningDetails)\npublic  boolean hasSignatures()\npublic  boolean hasPastSigningCertificates()\npublic  boolean hasAncestorOrSelf(android.content.pm.SigningDetails)\npublic  boolean hasAncestor(android.content.pm.SigningDetails)\npublic  boolean hasCommonSignerWithCapability(android.content.pm.SigningDetails,int)\npublic  boolean checkCapability(android.content.pm.SigningDetails,int)\npublic  boolean checkCapabilityRecover(android.content.pm.SigningDetails,int)\npublic  boolean hasCertificate(android.content.pm.Signature)\npublic  boolean hasCertificate(android.content.pm.Signature,int)\npublic  boolean hasCertificate(byte[])\nprivate  boolean hasCertificateInternal(android.content.pm.Signature,int)\npublic  boolean checkCapability(java.lang.String,int)\npublic  boolean hasSha256Certificate(byte[])\npublic  boolean hasSha256Certificate(byte[],int)\nprivate  boolean hasSha256CertificateInternal(byte[],int)\npublic  boolean signaturesMatchExactly(android.content.pm.SigningDetails)\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\npublic @java.lang.Override boolean equals(java.lang.Object)\npublic @java.lang.Override int hashCode()\npublic static  android.util.ArraySet<java.security.PublicKey> toSigningKeys(android.content.pm.Signature[])\nclass SigningDetails extends java.lang.Object implements [android.os.Parcelable]\nprivate @android.annotation.NonNull android.content.pm.Signature[] mSignatures\nprivate @android.content.pm.SigningDetails.SignatureSchemeVersion int mSignatureSchemeVersion\nprivate @android.annotation.Nullable android.content.pm.Signature[] mPastSigningCertificates\npublic  android.content.pm.SigningDetails.Builder setSignatures(android.content.pm.Signature[])\npublic  android.content.pm.SigningDetails.Builder setSignatureSchemeVersion(int)\npublic  android.content.pm.SigningDetails.Builder setPastSigningCertificates(android.content.pm.Signature[])\nprivate  void checkInvariants()\npublic  android.content.pm.SigningDetails build()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false, genParcelable=true, genAidl=false)")
     @Deprecated
     private void __metadata() {}
 

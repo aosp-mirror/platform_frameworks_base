@@ -16,15 +16,28 @@
 
 package com.android.wm.shell.draganddrop;
 
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.DragEvent.ACTION_DRAG_STARTED;
+
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
+import android.content.Intent;
 import android.os.RemoteException;
 import android.view.Display;
 import android.view.DragEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -33,12 +46,15 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 /**
  * Tests for the drag and drop controller.
@@ -56,6 +72,9 @@ public class DragAndDropControllerTest {
     @Mock
     private UiEventLogger mUiEventLogger;
 
+    @Mock
+    private DragAndDropController.DragAndDropListener mDragAndDropListener;
+
     private DragAndDropController mController;
 
     @Before
@@ -63,6 +82,7 @@ public class DragAndDropControllerTest {
         MockitoAnnotations.initMocks(this);
         mController = new DragAndDropController(mContext, mDisplayController, mUiEventLogger,
                 mock(IconProvider.class), mock(ShellExecutor.class));
+        mController.initialize(Optional.of(mock(SplitScreenController.class)));
     }
 
     @Test
@@ -76,5 +96,46 @@ public class DragAndDropControllerTest {
         // Expect no per-display layout to be added
         mController.onDisplayAdded(nonDefaultDisplayId);
         assertFalse(mController.onDrag(dragLayout, mock(DragEvent.class)));
+    }
+
+    @Test
+    public void testListenerOnDragStarted() {
+        final View dragLayout = mock(View.class);
+        final Display display = mock(Display.class);
+        doReturn(display).when(dragLayout).getDisplay();
+        doReturn(DEFAULT_DISPLAY).when(display).getDisplayId();
+
+        final ClipData clipData = createClipData();
+        final DragEvent event = mock(DragEvent.class);
+        doReturn(ACTION_DRAG_STARTED).when(event).getAction();
+        doReturn(clipData).when(event).getClipData();
+        doReturn(clipData.getDescription()).when(event).getClipDescription();
+
+        mController.addListener(mDragAndDropListener);
+
+        // Ensure there's a target so that onDrag will execute
+        mController.addDisplayDropTarget(0, mContext, mock(WindowManager.class),
+                mock(FrameLayout.class), mock(DragLayout.class));
+
+        // Verify the listener is called on a valid drag action.
+        mController.onDrag(dragLayout, event);
+        verify(mDragAndDropListener, times(1)).onDragStarted();
+
+        // Verify the listener isn't called after removal.
+        reset(mDragAndDropListener);
+        mController.removeListener(mDragAndDropListener);
+        mController.onDrag(dragLayout, event);
+        verify(mDragAndDropListener, never()).onDragStarted();
+    }
+
+    private ClipData createClipData() {
+        ClipDescription clipDescription = new ClipDescription(MIMETYPE_APPLICATION_SHORTCUT,
+                new String[] { MIMETYPE_APPLICATION_SHORTCUT });
+        Intent i = new Intent();
+        i.putExtra(Intent.EXTRA_PACKAGE_NAME, "pkg");
+        i.putExtra(Intent.EXTRA_SHORTCUT_ID, "shortcutId");
+        i.putExtra(Intent.EXTRA_USER, android.os.Process.myUserHandle());
+        ClipData.Item item = new ClipData.Item(i);
+        return new ClipData(clipDescription, item);
     }
 }

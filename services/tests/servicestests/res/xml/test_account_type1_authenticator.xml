@@ -18,4 +18,5 @@
     android:accountType="@string/test_account_type1"
     android:icon="@drawable/icon1"
     android:smallIcon="@drawable/icon1"
+    android:customTokens="true"
     android:label="@string/test_account_type1_authenticator_label" />

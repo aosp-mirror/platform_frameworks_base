@@ -33,6 +33,7 @@ import android.app.admin.PasswordMetrics;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
+import android.app.admin.WifiSsidPolicy;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -545,10 +546,8 @@ interface IDevicePolicyManager {
     void setMinimumRequiredWifiSecurityLevel(int level);
     int getMinimumRequiredWifiSecurityLevel();
 
-    void setSsidAllowlist(in List<String> ssids);
-    List<String> getSsidAllowlist();
-    void setSsidDenylist(in List<String> ssids);
-    List<String> getSsidDenylist();
+    void setWifiSsidPolicy(in WifiSsidPolicy policy);
+    WifiSsidPolicy getWifiSsidPolicy();
 
     List<UserHandle> listForegroundAffiliatedUsers();
     void setDrawables(in List<DevicePolicyDrawableResource> drawables);

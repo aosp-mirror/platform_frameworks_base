@@ -58,6 +58,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.server.am.AppPermissionTracker.AppPermissionPolicy;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.PrintWriter;
@@ -101,6 +102,11 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
         super(context, controller, injector, outerContext);
         mHandler = new MyHandler(this);
         mInjector.setPolicy(new AppPermissionPolicy(mInjector, this));
+    }
+
+    @Override
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_PERMISSION;
     }
 
     @Override

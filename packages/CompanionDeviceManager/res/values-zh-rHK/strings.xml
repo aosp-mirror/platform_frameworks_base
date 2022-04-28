@@ -26,26 +26,22 @@
     <string name="permission_apps_summary" msgid="798718816711515431">"串流播放手機應用程式內容"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;存取您手機中的這項資料"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"跨裝置服務"</string>
-    <!-- no translation found for helper_summary_app_streaming (7380294597268573523) -->
-    <skip />
+    <string name="helper_summary_app_streaming" msgid="7380294597268573523">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在代表 <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> 要求必要權限，以便存取手機上的相片、媒體和通知"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;存取您手機中的這項資料"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="permission_notification" msgid="693762568127741203">"通知"</string>
-    <!-- no translation found for permission_notification_summary (884075314530071011) -->
-    <skip />
+    <string name="permission_notification_summary" msgid="884075314530071011">"可以讀取所有通知，包括聯絡人、訊息和電話等資訊"</string>
     <string name="permission_storage" msgid="6831099350839392343">"相片和媒體"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play 服務"</string>
-    <!-- no translation found for helper_summary_computer (1676407599909474428) -->
-    <skip />
+    <string name="helper_summary_computer" msgid="1676407599909474428">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在代表 <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> 要求必要權限，以便在裝置之間串流應用程式內容"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"裝置"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"允許"</string>
     <string name="consent_no" msgid="2640796915611404382">"不允許"</string>
-    <!-- no translation found for consent_back (2560683030046918882) -->
-    <skip />
+    <string name="consent_back" msgid="2560683030046918882">"返回"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"將應用程式權限轉移至手錶"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"為簡化手錶的設定程序，在設定過程中安裝到手錶上的應用程式都將沿用手機上的權限。\n\n這些權限可能包括手錶麥克風和位置的存取權。"</string>
 </resources>

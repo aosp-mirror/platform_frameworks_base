@@ -12,120 +12,135 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/activity_confirmation"
-              style="@style/ContainerLayout">
-
-    <!-- A header for selfManaged devices only. -->
-    <include layout="@layout/vendor_header" />
-
-    <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
-
-    <ImageView
-        android:id="@+id/profile_icon"
+        android:id="@+id/activity_confirmation"
         android:layout_width="match_parent"
-        android:layout_height="32dp"
-        android:gravity="center"
-        android:layout_marginTop="18dp"
-        android:tint="@android:color/system_accent1_600"/>
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:minWidth="340dp">
 
-    <LinearLayout style="@style/Description">
-        <TextView
-            android:id="@+id/title"
-            style="@style/DescriptionTitle" />
+    <LinearLayout android:id="@+id/association_confirmation"
+                  style="@style/ContainerLayout">
 
-        <TextView
-            android:id="@+id/summary"
-            style="@style/DescriptionSummary" />
+        <!-- A header for selfManaged devices only. -->
+        <include layout="@layout/vendor_header" />
+
+        <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
+
+        <ImageView
+            android:id="@+id/profile_icon"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:layout_marginTop="18dp"
+            android:tint="@android:color/system_accent1_600"/>
+
+        <LinearLayout style="@style/Description">
+            <TextView
+                android:id="@+id/title"
+                style="@style/DescriptionTitle" />
+
+            <TextView
+                android:id="@+id/summary"
+                style="@style/DescriptionSummary" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:id="@+id/multiple_device_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <View
+                    android:id="@+id/border_top"
+                    style="@style/DeviceListBorder" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/device_list"
+                    android:layout_width="match_parent"
+                    android:scrollbars="vertical"
+                    android:layout_marginBottom="12dp"
+                    android:layout_height="200dp" />
+
+                <View
+                    android:id="@+id/border_bottom"
+                    style="@style/DeviceListBorder" />
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/permission_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <ProgressBar
+                android:id="@+id/spinner_multiple_device"
+                android:visibility="gone"
+                style="@style/Spinner"  />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp">
+
+            <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
+
+            <Button
+                android:id="@+id/btn_positive"
+                style="@style/PositiveButton"
+                android:text="@string/consent_yes" />
+
+            <Button
+                android:id="@+id/btn_negative"
+                android:layout_marginBottom="12dp"
+                style="@style/NegativeButton"
+                android:text="@string/consent_no" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom|right"
+            android:orientation="vertical"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="16dp">
+
+            <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
+
+            <Button
+                android:id="@+id/btn_negative_multiple_devices"
+                style="@style/NegativeButtonMultipleDevices"
+                android:textColor="?android:textColorPrimary"
+                android:visibility="gone"
+                android:text="@string/consent_no" />
+        </LinearLayout>
 
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1">
 
-        <LinearLayout
-            android:id="@+id/multiple_device_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <View
-                android:id="@+id/border_top"
-                style="@style/DeviceListBorder" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/device_list"
-                android:layout_width="match_parent"
-                android:scrollbars="vertical"
-                android:layout_marginBottom="12dp"
-                android:layout_height="200dp" />
-
-            <View
-                android:id="@+id/border_bottom"
-                style="@style/DeviceListBorder" />
-
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/permission_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
         <ProgressBar
-            android:id="@+id/spinner"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_centerInParent="true"
-            android:indeterminate="true"
-            android:tint="@android:color/system_accent1_600"
+            android:id="@+id/spinner_single_device"
             android:visibility="gone"
-            style="?android:attr/progressBarStyleLarge" />
-
-    </RelativeLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp">
-
-        <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
-
-        <Button
-            android:id="@+id/btn_positive"
-            style="@style/PositiveButton"
-            android:text="@string/consent_yes" />
-
-        <Button
-            android:id="@+id/btn_negative"
-            android:layout_marginBottom="12dp"
-            style="@style/NegativeButton"
-            android:text="@string/consent_no" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="bottom|right"
-        android:orientation="vertical"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="16dp">
-
-        <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
-
-        <Button
-            android:id="@+id/btn_negative_multiple_devices"
-            style="@style/NegativeButtonMultipleDevices"
-            android:textColor="?android:textColorPrimary"
-            android:visibility="gone"
-            android:text="@string/consent_no" />
-    </LinearLayout>
+            style="@style/Spinner" />
+    </RelativeLayout>>
 
 </LinearLayout>
