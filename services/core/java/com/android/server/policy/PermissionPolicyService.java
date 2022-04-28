@@ -66,11 +66,13 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.permission.LegacyPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.provider.Telephony;
 import android.telecom.TelecomManager;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -106,6 +108,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -163,6 +166,7 @@ public final class PermissionPolicyService extends SystemService {
     private PackageManagerInternal mPackageManagerInternal;
     private PermissionManagerServiceInternal mPermissionManagerInternal;
     private NotificationManagerInternal mNotificationManager;
+    private TelephonyManager mTelephonyManager;
     private final KeyguardManager mKeyguardManager;
     private final PackageManager mPackageManager;
     private final Handler mHandler;
@@ -384,6 +388,13 @@ public final class PermissionPolicyService extends SystemService {
     public void onBootPhase(int phase) {
         if (DEBUG) Slog.i(LOG_TAG, "onBootPhase(" + phase + ")");
 
+        if (phase == PHASE_DEVICE_SPECIFIC_SERVICES_READY) {
+            registerCarrierPrivilegesCallbacks();
+            IntentFilter filter =
+                    new IntentFilter(TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED);
+            mContext.registerReceiver(mSimConfigBroadcastReceiver, filter);
+        }
+
         if (phase == PHASE_ACTIVITY_MANAGER_READY) {
             final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
 
@@ -407,6 +418,94 @@ public final class PermissionPolicyService extends SystemService {
         }
 
     }
+
+    private void initTelephonyManagerIfNeeded() {
+        if (mTelephonyManager == null) {
+            mTelephonyManager = TelephonyManager.from(mContext);
+        }
+    }
+
+    private void registerCarrierPrivilegesCallbacks() {
+        initTelephonyManagerIfNeeded();
+        if (mTelephonyManager == null) {
+            return;
+        }
+
+        int numPhones = mTelephonyManager.getActiveModemCount();
+        for (int i = 0; i < numPhones; i++) {
+            PhoneCarrierPrivilegesCallback callback = new PhoneCarrierPrivilegesCallback(i);
+            mPhoneCarrierPrivilegesCallbacks.add(callback);
+            mTelephonyManager.registerCarrierPrivilegesCallback(i, mContext.getMainExecutor(),
+                    callback);
+        }
+    }
+
+    private void unregisterCarrierPrivilegesCallback() {
+        initTelephonyManagerIfNeeded();
+        if (mTelephonyManager == null) {
+            return;
+        }
+
+        for (int i = 0; i < mPhoneCarrierPrivilegesCallbacks.size(); i++) {
+            PhoneCarrierPrivilegesCallback callback = mPhoneCarrierPrivilegesCallbacks.get(i);
+            if (callback != null) {
+                mTelephonyManager.unregisterCarrierPrivilegesCallback(callback);
+            }
+        }
+        mPhoneCarrierPrivilegesCallbacks.clear();
+    }
+
+    private final class PhoneCarrierPrivilegesCallback
+            implements TelephonyManager.CarrierPrivilegesCallback {
+        private int mPhoneId;
+
+        PhoneCarrierPrivilegesCallback(int phoneId) {
+            mPhoneId = phoneId;
+        }
+        @Override
+        public void onCarrierPrivilegesChanged(
+                @NonNull Set<String> privilegedPackageNames,
+                @NonNull Set<Integer> privilegedUids) {
+            initTelephonyManagerIfNeeded();
+            if (mTelephonyManager == null) {
+                Log.e(LOG_TAG, "Cannot grant default permissions to Carrier Service app. "
+                        + "TelephonyManager is null");
+                return;
+            }
+
+            String servicePkg = mTelephonyManager.getCarrierServicePackageNameForLogicalSlot(
+                    mPhoneId);
+            if (servicePkg == null) {
+                return;
+            }
+            int[] users = LocalServices.getService(UserManagerInternal.class).getUserIds();
+            LegacyPermissionManager legacyPermManager =
+                    mContext.getSystemService(LegacyPermissionManager.class);
+            for (int i = 0; i < users.length; i++) {
+                try {
+                    mPackageManager.getPackageInfoAsUser(servicePkg, 0, users[i]);
+                    legacyPermManager.grantDefaultPermissionsToCarrierServiceApp(
+                            servicePkg, users[i]);
+                } catch (PackageManager.NameNotFoundException e) {
+                    // Do nothing if the package does not exist for the specified user
+                }
+            }
+        }
+    }
+
+    private final ArrayList<PhoneCarrierPrivilegesCallback> mPhoneCarrierPrivilegesCallbacks =
+            new ArrayList<>();
+
+    private final BroadcastReceiver mSimConfigBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED.equals(intent.getAction())) {
+                return;
+            }
+            unregisterCarrierPrivilegesCallback();
+            registerCarrierPrivilegesCallbacks();
+        }
+    };
 
     /**
      * @return Whether the user is started but not yet stopped
