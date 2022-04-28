@@ -298,35 +298,35 @@ public class VpnIkev2Utils {
     static class IkeSessionCallbackImpl implements IkeSessionCallback {
         private final String mTag;
         private final Vpn.IkeV2VpnRunnerCallback mCallback;
-        private final Network mNetwork;
+        private final int mToken;
 
-        IkeSessionCallbackImpl(String tag, Vpn.IkeV2VpnRunnerCallback callback, Network network) {
+        IkeSessionCallbackImpl(String tag, Vpn.IkeV2VpnRunnerCallback callback, int token) {
             mTag = tag;
             mCallback = callback;
-            mNetwork = network;
+            mToken = token;
         }
 
         @Override
         public void onOpened(@NonNull IkeSessionConfiguration ikeSessionConfig) {
-            Log.d(mTag, "IkeOpened for network " + mNetwork);
+            Log.d(mTag, "IkeOpened for token " + mToken);
             // Nothing to do here.
         }
 
         @Override
         public void onClosed() {
-            Log.d(mTag, "IkeClosed for network " + mNetwork);
-            mCallback.onSessionLost(mNetwork, null); // Server requested session closure. Retry?
+            Log.d(mTag, "IkeClosed for token " + mToken);
+            mCallback.onSessionLost(mToken, null); // Server requested session closure. Retry?
         }
 
         @Override
         public void onClosedExceptionally(@NonNull IkeException exception) {
-            Log.d(mTag, "IkeClosedExceptionally for network " + mNetwork, exception);
-            mCallback.onSessionLost(mNetwork, exception);
+            Log.d(mTag, "IkeClosedExceptionally for token " + mToken, exception);
+            mCallback.onSessionLost(mToken, exception);
         }
 
         @Override
         public void onError(@NonNull IkeProtocolException exception) {
-            Log.d(mTag, "IkeError for network " + mNetwork, exception);
+            Log.d(mTag, "IkeError for token " + mToken, exception);
             // Non-fatal, log and continue.
         }
     }
@@ -334,36 +334,36 @@ public class VpnIkev2Utils {
     static class ChildSessionCallbackImpl implements ChildSessionCallback {
         private final String mTag;
         private final Vpn.IkeV2VpnRunnerCallback mCallback;
-        private final Network mNetwork;
+        private final int mToken;
 
-        ChildSessionCallbackImpl(String tag, Vpn.IkeV2VpnRunnerCallback callback, Network network) {
+        ChildSessionCallbackImpl(String tag, Vpn.IkeV2VpnRunnerCallback callback, int token) {
             mTag = tag;
             mCallback = callback;
-            mNetwork = network;
+            mToken = token;
         }
 
         @Override
         public void onOpened(@NonNull ChildSessionConfiguration childConfig) {
-            Log.d(mTag, "ChildOpened for network " + mNetwork);
-            mCallback.onChildOpened(mNetwork, childConfig);
+            Log.d(mTag, "ChildOpened for token " + mToken);
+            mCallback.onChildOpened(mToken, childConfig);
         }
 
         @Override
         public void onClosed() {
-            Log.d(mTag, "ChildClosed for network " + mNetwork);
-            mCallback.onSessionLost(mNetwork, null);
+            Log.d(mTag, "ChildClosed for token " + mToken);
+            mCallback.onSessionLost(mToken, null);
         }
 
         @Override
         public void onClosedExceptionally(@NonNull IkeException exception) {
-            Log.d(mTag, "ChildClosedExceptionally for network " + mNetwork, exception);
-            mCallback.onSessionLost(mNetwork, exception);
+            Log.d(mTag, "ChildClosedExceptionally for token " + mToken, exception);
+            mCallback.onSessionLost(mToken, exception);
         }
 
         @Override
         public void onIpSecTransformCreated(@NonNull IpSecTransform transform, int direction) {
-            Log.d(mTag, "ChildTransformCreated; Direction: " + direction + "; network " + mNetwork);
-            mCallback.onChildTransformCreated(mNetwork, transform, direction);
+            Log.d(mTag, "ChildTransformCreated; Direction: " + direction + "; token " + mToken);
+            mCallback.onChildTransformCreated(mToken, transform, direction);
         }
 
         @Override
@@ -371,8 +371,7 @@ public class VpnIkev2Utils {
             // Nothing to be done; no references to the IpSecTransform are held by the
             // Ikev2VpnRunner (or this callback class), and this transform will be closed by the
             // IKE library.
-            Log.d(mTag,
-                    "ChildTransformDeleted; Direction: " + direction + "; for network " + mNetwork);
+            Log.d(mTag, "ChildTransformDeleted; Direction: " + direction + "; for token " + mToken);
         }
     }
 
@@ -412,8 +411,8 @@ public class VpnIkev2Utils {
 
         @Override
         public void onLost(@NonNull Network network) {
-            Log.d(mTag, "Tearing down; lost network: " + network);
-            mExecutor.execute(() -> mCallback.onSessionLost(network, null));
+            Log.d(mTag, "onLost called for network: " + network);
+            mExecutor.execute(() -> mCallback.onDefaultNetworkLost(network));
         }
     }
 
