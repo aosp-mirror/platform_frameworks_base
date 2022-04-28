@@ -57,6 +57,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.server.pm.InstantAppResolverConnection.ConnectionException;
 import com.android.server.pm.InstantAppResolverConnection.PhaseTwoCallback;
+import com.android.server.pm.resolution.ComponentResolver;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -134,8 +135,9 @@ public abstract class InstantAppResolver {
         }
     }
 
-    public static AuxiliaryResolveInfo doInstantAppResolutionPhaseOne(
-            InstantAppResolverConnection connection, InstantAppRequest requestObj) {
+    public static AuxiliaryResolveInfo doInstantAppResolutionPhaseOne(@NonNull Computer computer,
+            @NonNull UserManagerService userManager, InstantAppResolverConnection connection,
+            InstantAppRequest requestObj) {
         final long startTime = System.currentTimeMillis();
         final String token = requestObj.token;
         if (DEBUG_INSTANT) {
@@ -149,7 +151,7 @@ public abstract class InstantAppResolver {
             final List<InstantAppResolveInfo> instantAppResolveInfoList =
                     connection.getInstantAppResolveInfoList(buildRequestInfo(requestObj));
             if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
-                resolveInfo = InstantAppResolver.filterInstantAppIntent(
+                resolveInfo = InstantAppResolver.filterInstantAppIntent(computer, userManager,
                         instantAppResolveInfoList, origIntent, requestObj.resolvedType,
                         requestObj.userId, origIntent.getPackage(), token,
                         requestObj.hostDigestPrefixSecure);
@@ -187,9 +189,10 @@ public abstract class InstantAppResolver {
         return resolveInfo;
     }
 
-    public static void doInstantAppResolutionPhaseTwo(Context context,
-            InstantAppResolverConnection connection, InstantAppRequest requestObj,
-            ActivityInfo instantAppInstaller, Handler callbackHandler) {
+    public static void doInstantAppResolutionPhaseTwo(Context context, @NonNull Computer computer,
+            @NonNull UserManagerService userManager, InstantAppResolverConnection connection,
+            InstantAppRequest requestObj, ActivityInfo instantAppInstaller,
+            Handler callbackHandler) {
         final long startTime = System.currentTimeMillis();
         final String token = requestObj.token;
         if (DEBUG_INSTANT) {
@@ -205,7 +208,7 @@ public abstract class InstantAppResolver {
                 final Intent failureIntent;
                 if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
                     final AuxiliaryResolveInfo instantAppIntentInfo =
-                            InstantAppResolver.filterInstantAppIntent(
+                            InstantAppResolver.filterInstantAppIntent(computer, userManager,
                                     instantAppResolveInfoList, origIntent, null /*resolvedType*/,
                                     0 /*userId*/, origIntent.getPackage(),
                                     token, requestObj.hostDigestPrefixSecure);
@@ -386,7 +389,8 @@ public abstract class InstantAppResolver {
         );
     }
 
-    private static AuxiliaryResolveInfo filterInstantAppIntent(
+    private static AuxiliaryResolveInfo filterInstantAppIntent(@NonNull Computer computer,
+            @NonNull UserManagerService userManager,
             List<InstantAppResolveInfo> instantAppResolveInfoList, Intent origIntent,
             String resolvedType, int userId, String packageName, String token,
             int[] hostDigestPrefixSecure) {
@@ -421,7 +425,8 @@ public abstract class InstantAppResolver {
             }
             // We matched a resolve info; resolve the filters to see if anything matches completely.
             List<AuxiliaryResolveInfo.AuxiliaryFilter> matchFilters = computeResolveFilters(
-                    origIntent, resolvedType, userId, packageName, token, instantAppResolveInfo);
+                    computer, userManager, origIntent, resolvedType, userId, packageName, token,
+                    instantAppResolveInfo);
             if (matchFilters != null) {
                 if (matchFilters.isEmpty()) {
                     requiresSecondPhase = true;
@@ -464,7 +469,8 @@ public abstract class InstantAppResolver {
      *
      */
     private static List<AuxiliaryResolveInfo.AuxiliaryFilter> computeResolveFilters(
-            Intent origIntent, String resolvedType, int userId, String packageName, String token,
+            @NonNull Computer computer, @NonNull UserManagerService userManager, Intent origIntent,
+            String resolvedType, int userId, String packageName, String token,
             InstantAppResolveInfo instantAppInfo) {
         if (instantAppInfo.shouldLetInstallerDecide()) {
             return Collections.singletonList(
@@ -490,7 +496,7 @@ public abstract class InstantAppResolver {
             return Collections.emptyList();
         }
         final ComponentResolver.InstantAppIntentResolver instantAppResolver =
-                new ComponentResolver.InstantAppIntentResolver();
+                new ComponentResolver.InstantAppIntentResolver(userManager);
         for (int j = instantAppFilters.size() - 1; j >= 0; --j) {
             final InstantAppIntentFilter instantAppFilter = instantAppFilters.get(j);
             final List<IntentFilter> splitFilters = instantAppFilter.getFilters();
@@ -508,7 +514,7 @@ public abstract class InstantAppResolver {
                         && filter.hasCategory(Intent.CATEGORY_BROWSABLE)) {
                     continue;
                 }
-                instantAppResolver.addFilter(
+                instantAppResolver.addFilter(computer,
                         new AuxiliaryResolveInfo.AuxiliaryFilter(
                                 filter,
                                 instantAppInfo,
@@ -518,8 +524,8 @@ public abstract class InstantAppResolver {
             }
         }
         List<AuxiliaryResolveInfo.AuxiliaryFilter> matchedResolveInfoList =
-                instantAppResolver.queryIntent(
-                        origIntent, resolvedType, false /*defaultOnly*/, userId);
+                instantAppResolver.queryIntent(computer, origIntent, resolvedType,
+                        false /*defaultOnly*/, userId);
         if (!matchedResolveInfoList.isEmpty()) {
             if (DEBUG_INSTANT) {
                 Log.d(TAG, "[" + token + "] Found match(es); " + matchedResolveInfoList);

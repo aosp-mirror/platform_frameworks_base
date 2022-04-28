@@ -34,6 +34,7 @@ import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.resolution.ComponentResolver;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import java.util.List;
@@ -98,7 +99,7 @@ public class PackageManagerServiceInjector {
     private final Singleton<UserManagerService>
             mUserManagerProducer;
     private final Singleton<Settings> mSettingsProducer;
-    private final Singleton<AppsFilter> mAppsFilterProducer;
+    private final Singleton<AppsFilterImpl> mAppsFilterProducer;
     private final Singleton<PlatformCompat>
             mPlatformCompatProducer;
     private final Singleton<SystemConfig> mSystemConfigProducer;
@@ -147,7 +148,7 @@ public class PackageManagerServiceInjector {
             Producer<PermissionManagerServiceInternal> permissionManagerServiceProducer,
             Producer<UserManagerService> userManagerProducer,
             Producer<Settings> settingsProducer,
-            Producer<AppsFilter> appsFilterProducer,
+            Producer<AppsFilterImpl> appsFilterProducer,
             Producer<PlatformCompat> platformCompatProducer,
             Producer<SystemConfig> systemConfigProducer,
             Producer<PackageDexOptimizer> packageDexOptimizerProducer,
@@ -281,7 +282,7 @@ public class PackageManagerServiceInjector {
         return mSettingsProducer.get(this, mPackageManager);
     }
 
-    public AppsFilter getAppsFilter() {
+    public AppsFilterImpl getAppsFilter() {
         return mAppsFilterProducer.get(this, mPackageManager);
     }
 

@@ -601,8 +601,10 @@ public class PreferencesHelper implements RankingConfig {
                 out.attribute(null, ATT_NAME, r.pkg);
                 if (!notifPermissions.isEmpty()) {
                     Pair<Integer, String> app = new Pair(r.uid, r.pkg);
+                    final Pair<Boolean, Boolean> permission = notifPermissions.get(app);
                     out.attributeInt(null, ATT_IMPORTANCE,
-                            notifPermissions.get(app).first ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
+                            permission != null && permission.first ? IMPORTANCE_DEFAULT
+                                    : IMPORTANCE_NONE);
                     notifPermissions.remove(app);
                 } else {
                     if (r.importance != DEFAULT_IMPORTANCE) {
@@ -1669,14 +1671,14 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     /**
-     * Gets all notification channels associated with the given pkg and userId that can bypass dnd
+     * Gets all notification channels associated with the given pkg and uid that can bypass dnd
      */
     public ParceledListSlice<NotificationChannel> getNotificationChannelsBypassingDnd(String pkg,
-            int userId) {
+            int uid) {
         List<NotificationChannel> channels = new ArrayList<>();
         synchronized (mPackagePreferences) {
             final PackagePreferences r = mPackagePreferences.get(
-                    packagePreferencesKey(pkg, userId));
+                    packagePreferencesKey(pkg, uid));
             if (r != null) {
                 for (NotificationChannel channel : r.channels.values()) {
                     if (channelIsLiveLocked(r, channel) && channel.canBypassDnd()) {

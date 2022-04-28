@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package android.media.tv.interactive;
 
-import android.media.tv.interactive.TvInteractiveAppInfo;
+import android.media.tv.interactive.TvInteractiveAppServiceInfo;
 
 /**
  * Interface to receive callbacks from ITvInteractiveAppManager regardless of sessions.
@@ -26,6 +26,6 @@ interface ITvInteractiveAppManagerCallback {
     void onInteractiveAppServiceAdded(in String iAppServiceId);
     void onInteractiveAppServiceRemoved(in String iAppServiceId);
     void onInteractiveAppServiceUpdated(in String iAppServiceId);
-    void onTvInteractiveAppInfoUpdated(in TvInteractiveAppInfo tvIAppInfo);
+    void onTvInteractiveAppServiceInfoUpdated(in TvInteractiveAppServiceInfo tvIAppInfo);
     void onStateChanged(in String iAppServiceId, int type, int state, int err);
 }

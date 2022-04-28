@@ -39,14 +39,17 @@
     <!-- Elevation of toast view -->
     <dimen name="toast_elevation">2dp</dimen>
 
+    <!-- The default height of the status bar used in {@link SystemBarUtils#getStatusBarHeight} to
+         calculate the status bar height. -->
+    <dimen name="status_bar_height_default">24dp</dimen>
     <!-- Height of the status bar.
          Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
          -->
-    <dimen name="status_bar_height">24dp</dimen>
+    <dimen name="status_bar_height">@dimen/status_bar_height_portrait</dimen>
     <!-- Height of the status bar in portrait.
          Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
          -->
-    <dimen name="status_bar_height_portrait">@dimen/status_bar_height</dimen>
+    <dimen name="status_bar_height_portrait">24dp</dimen>
     <!-- Height of the status bar in landscape.
          Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
          -->
@@ -606,6 +609,9 @@
     <!-- The padding ratio of the Accessibility icon foreground drawable -->
     <item name="accessibility_icon_foreground_padding_ratio" type="dimen">21.88%</item>
 
+    <!-- The minimum window size of the accessibility window magnifier -->
+    <dimen name="accessibility_window_magnifier_min_size">122dp</dimen>
+
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
 
@@ -665,8 +671,14 @@
     <dimen name="lock_pattern_dot_line_width">22dp</dimen>
     <dimen name="lock_pattern_dot_size">14dp</dimen>
     <dimen name="lock_pattern_dot_size_activated">30dp</dimen>
+    <!-- How much of the cell space is classified as hit areas [0..1] where 1 means that hit area is
+         a circle with diameter equals to cell minimum side min(width, height). -->
+    <item type="dimen" format="float" name="lock_pattern_dot_hit_factor">0.6</item>
     <!-- Width of a gradient applied to a lock pattern line while its disappearing animation. -->
     <dimen name="lock_pattern_fade_away_gradient_width">8dp</dimen>
+    <!-- Parameters applied to line disappearing animation in LockPatternView in milliseconds. -->
+    <integer name="lock_pattern_line_fade_out_duration">500</integer>
+    <integer name="lock_pattern_line_fade_out_delay">150</integer>
 
     <dimen name="text_handle_min_size">40dp</dimen>
 
@@ -713,16 +725,6 @@
 
     <!-- The default minimal size of a resizable task, in both dimensions. -->
     <dimen name="default_minimal_size_resizable_task">220dp</dimen>
-
-    <!-- The default minimal size of a PiP task, in both dimensions. -->
-    <dimen name="default_minimal_size_pip_resizable_task">108dp</dimen>
-
-    <!--
-      The overridable minimal size of a PiP task, in both dimensions.
-      Different from default_minimal_size_pip_resizable_task, this is to limit the dimension
-      when the pinned stack size is overridden by app via minWidth/minHeight.
-    -->
-    <dimen name="overridable_minimal_size_pip_resizable_task">48dp</dimen>
 
     <!-- Height of a task when in minimized mode from the top when launcher is resizable. -->
     <dimen name="task_height_of_minimized_mode">80dp</dimen>
@@ -780,6 +782,10 @@
     <dimen name="notification_left_icon_start">@dimen/notification_icon_circle_start</dimen>
     <!-- The alpha of a disabled notification button -->
     <item type="dimen" format="float" name="notification_action_disabled_alpha">0.5</item>
+    <!-- The maximum size of Person avatar image in MessagingStyle notifications.
+         This is bigger than displayed because listeners can use it for other displays
+         e.g. wearables. -->
+    <dimen name="notification_person_icon_max_size">144dp</dimen>
 
     <!-- The maximum size of the small notification icon on low memory devices. -->
     <dimen name="notification_small_icon_size_low_ram">@dimen/notification_small_icon_size</dimen>
@@ -793,6 +799,10 @@
     <dimen name="notification_big_picture_max_width_low_ram">294dp</dimen>
     <!-- The size of the right icon image when on low ram -->
     <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size</dimen>
+    <!-- The maximum size of Person avatar image in MessagingStyle notifications.
+     This is bigger than displayed because listeners can use it for other displays
+     e.g. wearables. -->
+    <dimen name="notification_person_icon_max_size_low_ram">96dp</dimen>
     <!-- The maximum size of the grayscale icon -->
     <dimen name="notification_grayscale_icon_max_size">256dp</dimen>
 
@@ -878,7 +888,7 @@
     <integer name="autofill_max_visible_datasets">3</integer>
 
     <!-- Size of an icon in the Autolfill fill dialog -->
-    <dimen name="autofill_dialog_icon_size">56dp</dimen>
+    <dimen name="autofill_dialog_icon_size">24dp</dimen>
 
     <!-- Size of a slice shortcut view -->
     <dimen name="slice_shortcut_size">56dp</dimen>
@@ -994,4 +1004,8 @@
 
     <!-- Default size for user icons (a.k.a. avatar images) -->
     <dimen name="user_icon_size">190dp</dimen>
+
+    <!-- Dimensions for the translations of the default dialog animation. -->
+    <dimen name="popup_enter_animation_from_y_delta">20dp</dimen>
+    <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
 </resources>

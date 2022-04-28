@@ -66,24 +66,21 @@ public final class HeadToHeadTemplateData extends BaseTemplateData {
     }
 
     private HeadToHeadTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable Text titleText,
-            @Nullable Icon titleIcon,
-            @Nullable Text subtitleText,
-            @Nullable Icon subTitleIcon,
-            @Nullable TapAction primaryTapAction,
-            @Nullable Text supplementalSubtitleText,
-            @Nullable Icon supplementalSubtitleIcon,
-            @Nullable TapAction supplementalSubtitleTapAction,
-            @Nullable Text supplementalAlarmText,
+            @Nullable SubItemInfo primaryItem,
+            @Nullable SubItemInfo subtitleItem,
+            @Nullable SubItemInfo subtitleSupplementalItem,
+            @Nullable SubItemInfo supplementalLineItem,
+            @Nullable SubItemInfo supplementalAlarmItem,
+            int layoutWeight,
             @Nullable Text headToHeadTitle,
             @Nullable Icon headToHeadFirstCompetitorIcon,
             @Nullable Icon headToHeadSecondCompetitorIcon,
             @Nullable Text headToHeadFirstCompetitorText,
             @Nullable Text headToHeadSecondCompetitorText,
             @Nullable TapAction headToHeadAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
-                supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
-                supplementalAlarmText);
+        super(templateType, primaryItem, subtitleItem, subtitleSupplementalItem,
+                supplementalLineItem, supplementalAlarmItem, layoutWeight);
+
         mHeadToHeadTitle = headToHeadTitle;
         mHeadToHeadFirstCompetitorIcon = headToHeadFirstCompetitorIcon;
         mHeadToHeadSecondCompetitorIcon = headToHeadSecondCompetitorIcon;
@@ -284,10 +281,9 @@ public final class HeadToHeadTemplateData extends BaseTemplateData {
          */
         @NonNull
         public HeadToHeadTemplateData build() {
-            return new HeadToHeadTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
-                    getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalAlarmText(),
+            return new HeadToHeadTemplateData(getTemplateType(), getPrimaryItem(),
+                    getSubtitleItem(), getSubtitleSupplemtnalItem(),
+                    getSupplementalLineItem(), getSupplementalAlarmItem(), getLayoutWeight(),
                     mHeadToHeadTitle,
                     mHeadToHeadFirstCompetitorIcon,
                     mHeadToHeadSecondCompetitorIcon, mHeadToHeadFirstCompetitorText,

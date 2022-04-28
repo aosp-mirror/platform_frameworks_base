@@ -65,7 +65,12 @@ public class AgentTrendCalculatorTest {
         }
 
         @Override
-        long getMaxSatiatedCirculation() {
+        long getInitialSatiatedConsumptionLimit() {
+            return 0;
+        }
+
+        @Override
+        long getHardSatiatedConsumptionLimit() {
             return 0;
         }
 
@@ -102,7 +107,7 @@ public class AgentTrendCalculatorTest {
         TrendCalculator trendCalculator = new TrendCalculator();
         mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT, 20);
 
-        trendCalculator.reset(0, null);
+        trendCalculator.reset(0, 0, null);
         assertEquals("Expected not to cross lower threshold",
                 TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
                 trendCalculator.getTimeToCrossLowerThresholdMs());
@@ -115,10 +120,10 @@ public class AgentTrendCalculatorTest {
                 new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT, 1, 0))),
                 mock(AffordabilityChangeListener.class), mEconomicPolicy));
         for (ActionAffordabilityNote note : affordabilityNotes) {
-            note.recalculateModifiedPrice(mEconomicPolicy, 0, "com.test.app");
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
         }
 
-        trendCalculator.reset(1234, affordabilityNotes);
+        trendCalculator.reset(1234, 1234, affordabilityNotes);
         assertEquals("Expected not to cross lower threshold",
                 TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
                 trendCalculator.getTimeToCrossLowerThresholdMs());
@@ -133,32 +138,28 @@ public class AgentTrendCalculatorTest {
 
         OngoingEvent[] events = new OngoingEvent[]{
                 new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING, "1",
-                        null, 1, 1),
+                        1, new EconomicPolicy.Cost(1, 4)),
                 new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_RUNNING, "2",
-                        null, 2, 3),
-                new OngoingEvent(EconomicPolicy.REWARD_TOP_ACTIVITY, "3",
-                        null, 3, -3),
+                        2, new EconomicPolicy.Cost(3, 6)),
+                new OngoingEvent(EconomicPolicy.REWARD_TOP_ACTIVITY, "3", 3,
+                        new EconomicPolicy.Reward(EconomicPolicy.REWARD_TOP_ACTIVITY, 0, 3, 3)),
         };
 
-        trendCalculator.reset(0, null);
+        trendCalculator.reset(0, 100, null);
         for (OngoingEvent event : events) {
             trendCalculator.accept(event);
         }
-        assertEquals("Expected not to cross lower threshold",
-                TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
-                trendCalculator.getTimeToCrossLowerThresholdMs());
+        assertEquals(25_000, trendCalculator.getTimeToCrossLowerThresholdMs());
         assertEquals("Expected not to cross upper threshold",
                 TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
                 trendCalculator.getTimeToCrossUpperThresholdMs());
 
         ArraySet<ActionAffordabilityNote> affordabilityNotes = new ArraySet<>();
-        trendCalculator.reset(1234, affordabilityNotes);
+        trendCalculator.reset(1234, 1234, affordabilityNotes);
         for (OngoingEvent event : events) {
             trendCalculator.accept(event);
         }
-        assertEquals("Expected not to cross lower threshold",
-                TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
-                trendCalculator.getTimeToCrossLowerThresholdMs());
+        assertEquals(308_000, trendCalculator.getTimeToCrossLowerThresholdMs());
         assertEquals("Expected not to cross upper threshold",
                 TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
                 trendCalculator.getTimeToCrossUpperThresholdMs());
@@ -174,18 +175,19 @@ public class AgentTrendCalculatorTest {
                 new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_RUNNING, 0, 1000))),
                 mock(AffordabilityChangeListener.class), mEconomicPolicy));
         for (ActionAffordabilityNote note : affordabilityNotes) {
-            note.recalculateModifiedPrice(mEconomicPolicy, 0, "com.test.app");
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
         }
 
         // Balance is already above threshold and events are all positive delta.
         // There should be no time to report.
-        trendCalculator.reset(1234, affordabilityNotes);
+        trendCalculator.reset(1234, 1234, affordabilityNotes);
         trendCalculator.accept(
-                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING, "1",
-                        null, 1, 1));
+                new OngoingEvent(EconomicPolicy.REWARD_TOP_ACTIVITY, "1", 1,
+                        new EconomicPolicy.Reward(EconomicPolicy.REWARD_TOP_ACTIVITY, 1, 1, 1)));
         trendCalculator.accept(
-                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_RUNNING, "2",
-                        null, 2, 3));
+                new OngoingEvent(EconomicPolicy.REWARD_OTHER_USER_INTERACTION, "2", 2,
+                        new EconomicPolicy.Reward(EconomicPolicy.REWARD_OTHER_USER_INTERACTION,
+                                3, 3, 3)));
 
         assertEquals("Expected not to cross lower threshold",
                 TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
@@ -196,16 +198,16 @@ public class AgentTrendCalculatorTest {
 
         // Balance is already below threshold and events are all negative delta.
         // There should be no time to report.
-        trendCalculator.reset(1, affordabilityNotes);
+        trendCalculator.reset(1, 0, affordabilityNotes);
         trendCalculator.accept(
                 new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING, "1",
-                        null, 1, -1));
+                        1, new EconomicPolicy.Cost(1, 1)));
         trendCalculator.accept(
                 new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_RUNNING, "2",
-                        null, 2, -3));
+                        2, new EconomicPolicy.Cost(3, 3)));
 
         assertEquals("Expected not to cross lower threshold",
-                TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
+                0,
                 trendCalculator.getTimeToCrossLowerThresholdMs());
         assertEquals("Expected not to cross upper threshold",
                 TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
@@ -213,7 +215,7 @@ public class AgentTrendCalculatorTest {
     }
 
     @Test
-    public void testSimpleTrendToThreshold() {
+    public void testSimpleTrendToThreshold_Balance() {
         TrendCalculator trendCalculator = new TrendCalculator();
         mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 20);
 
@@ -222,18 +224,19 @@ public class AgentTrendCalculatorTest {
                 new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 1, 0))),
                 mock(AffordabilityChangeListener.class), mEconomicPolicy));
         for (ActionAffordabilityNote note : affordabilityNotes) {
-            note.recalculateModifiedPrice(mEconomicPolicy, 0, "com.test.app");
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
         }
 
         // Balance is below threshold and events are all positive delta.
         // Should report the correct time to the upper threshold.
-        trendCalculator.reset(0, affordabilityNotes);
+        trendCalculator.reset(0, 1000, affordabilityNotes);
         trendCalculator.accept(
-                new OngoingEvent(EconomicPolicy.REWARD_TOP_ACTIVITY, "1",
-                        null, 1, 1));
+                new OngoingEvent(EconomicPolicy.REWARD_TOP_ACTIVITY, "1", 1,
+                        new EconomicPolicy.Reward(EconomicPolicy.REWARD_TOP_ACTIVITY, 1, 1, 1)));
         trendCalculator.accept(
-                new OngoingEvent(EconomicPolicy.REWARD_OTHER_USER_INTERACTION, "2",
-                        null, 2, 3));
+                new OngoingEvent(EconomicPolicy.REWARD_OTHER_USER_INTERACTION, "2", 2,
+                        new EconomicPolicy.Reward(EconomicPolicy.REWARD_OTHER_USER_INTERACTION,
+                                3, 3, 3)));
 
         assertEquals("Expected not to cross lower threshold",
                 TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
@@ -242,15 +245,132 @@ public class AgentTrendCalculatorTest {
 
         // Balance is above the threshold and events are all negative delta.
         // Should report the correct time to the lower threshold.
-        trendCalculator.reset(40, affordabilityNotes);
+        trendCalculator.reset(40, 100, affordabilityNotes);
         trendCalculator.accept(
                 new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING, "1",
-                        null, 1, -1));
+                        1, new EconomicPolicy.Cost(1, 1)));
         trendCalculator.accept(
                 new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_RUNNING, "2",
-                        null, 2, -3));
+                        2, new EconomicPolicy.Cost(3, 3)));
 
         assertEquals(5_000, trendCalculator.getTimeToCrossLowerThresholdMs());
+        assertEquals("Expected not to cross upper threshold",
+                TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
+                trendCalculator.getTimeToCrossUpperThresholdMs());
+    }
+
+    @Test
+    public void testSelectCorrectThreshold_Balance() {
+        TrendCalculator trendCalculator = new TrendCalculator();
+        mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 20);
+        mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_START, 15);
+        mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_LOW_START, 10);
+        mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_MIN_START, 5);
+
+        ArraySet<ActionAffordabilityNote> affordabilityNotes = new ArraySet<>();
+        affordabilityNotes.add(new ActionAffordabilityNote(new ActionBill(List.of(
+                new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 1, 0))),
+                mock(AffordabilityChangeListener.class), mEconomicPolicy));
+        affordabilityNotes.add(new ActionAffordabilityNote(new ActionBill(List.of(
+                new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_START, 1, 0))),
+                mock(AffordabilityChangeListener.class), mEconomicPolicy));
+        affordabilityNotes.add(new ActionAffordabilityNote(new ActionBill(List.of(
+                new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_LOW_START, 1, 0))),
+                mock(AffordabilityChangeListener.class), mEconomicPolicy));
+        affordabilityNotes.add(new ActionAffordabilityNote(new ActionBill(List.of(
+                new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_MIN_START, 1, 0))),
+                mock(AffordabilityChangeListener.class), mEconomicPolicy));
+        for (ActionAffordabilityNote note : affordabilityNotes) {
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
+        }
+
+        // Balance is below threshold and events are all positive delta.
+        // Should report the correct time to the correct upper threshold.
+        trendCalculator.reset(0, 10_000, affordabilityNotes);
+        trendCalculator.accept(
+                new OngoingEvent(EconomicPolicy.REWARD_TOP_ACTIVITY, "1", 1,
+                        new EconomicPolicy.Reward(EconomicPolicy.REWARD_TOP_ACTIVITY, 1, 1, 1)));
+
+        assertEquals("Expected not to cross lower threshold",
+                TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
+                trendCalculator.getTimeToCrossLowerThresholdMs());
+        assertEquals(5_000, trendCalculator.getTimeToCrossUpperThresholdMs());
+
+        // Balance is above the threshold and events are all negative delta.
+        // Should report the correct time to the correct lower threshold.
+        trendCalculator.reset(30, 500, affordabilityNotes);
+        trendCalculator.accept(
+                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING, "1",
+                        1, new EconomicPolicy.Cost(1, 1)));
+
+        assertEquals(10_000, trendCalculator.getTimeToCrossLowerThresholdMs());
+        assertEquals("Expected not to cross upper threshold",
+                TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
+                trendCalculator.getTimeToCrossUpperThresholdMs());
+    }
+
+    @Test
+    public void testTrendsToBothThresholds_Balance() {
+        TrendCalculator trendCalculator = new TrendCalculator();
+        mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 20);
+        mEconomicPolicy.mEventCosts.put(AlarmManagerEconomicPolicy.ACTION_ALARM_CLOCK, 50);
+
+        ArraySet<ActionAffordabilityNote> affordabilityNotes = new ArraySet<>();
+        affordabilityNotes.add(new ActionAffordabilityNote(new ActionBill(List.of(
+                new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 1, 0))),
+                mock(AffordabilityChangeListener.class), mEconomicPolicy));
+        affordabilityNotes.add(new ActionAffordabilityNote(new ActionBill(List.of(
+                new AnticipatedAction(AlarmManagerEconomicPolicy.ACTION_ALARM_CLOCK, 1, 0))),
+                mock(AffordabilityChangeListener.class), mEconomicPolicy));
+        for (ActionAffordabilityNote note : affordabilityNotes) {
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
+        }
+
+        // Balance is between both thresholds and events are mixed positive/negative delta.
+        // Should report the correct time to each threshold.
+        trendCalculator.reset(35, 10_000, affordabilityNotes);
+        trendCalculator.accept(
+                new OngoingEvent(EconomicPolicy.REWARD_TOP_ACTIVITY, "1", 1,
+                        new EconomicPolicy.Reward(EconomicPolicy.REWARD_TOP_ACTIVITY, 3, 3, 3)));
+        trendCalculator.accept(
+                new OngoingEvent(EconomicPolicy.REWARD_OTHER_USER_INTERACTION, "2", 2,
+                        new EconomicPolicy.Reward(EconomicPolicy.REWARD_OTHER_USER_INTERACTION, 2,
+                                2, 2)));
+        trendCalculator.accept(
+                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_LOW_RUNNING, "3",
+                        3, new EconomicPolicy.Cost(2, 2)));
+        trendCalculator.accept(
+                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING, "4",
+                        4, new EconomicPolicy.Cost(3, 3)));
+
+        assertEquals(3_000, trendCalculator.getTimeToCrossLowerThresholdMs());
+        assertEquals(3_000, trendCalculator.getTimeToCrossUpperThresholdMs());
+    }
+
+    @Test
+    public void testSimpleTrendToThreshold_ConsumptionLimit() {
+        TrendCalculator trendCalculator = new TrendCalculator();
+        mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 20);
+
+        ArraySet<ActionAffordabilityNote> affordabilityNotes = new ArraySet<>();
+        affordabilityNotes.add(new ActionAffordabilityNote(new ActionBill(List.of(
+                new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 1, 0))),
+                mock(AffordabilityChangeListener.class), mEconomicPolicy));
+        for (ActionAffordabilityNote note : affordabilityNotes) {
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
+        }
+
+        // Events are all negative delta. Consumable credits will run out before app's balance.
+        // Should report the correct time to the lower threshold.
+        trendCalculator.reset(10000, 40, affordabilityNotes);
+        trendCalculator.accept(
+                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING, "1",
+                        1, new EconomicPolicy.Cost(1, 10)));
+        trendCalculator.accept(
+                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_RUNNING, "2",
+                        2, new EconomicPolicy.Cost(3, 40)));
+
+        assertEquals(10_000, trendCalculator.getTimeToCrossLowerThresholdMs());
         assertEquals("Expected not to cross upper threshold",
                 TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
                 trendCalculator.getTimeToCrossUpperThresholdMs());
@@ -278,68 +398,45 @@ public class AgentTrendCalculatorTest {
                 new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_MIN_START, 1, 0))),
                 mock(AffordabilityChangeListener.class), mEconomicPolicy));
         for (ActionAffordabilityNote note : affordabilityNotes) {
-            note.recalculateModifiedPrice(mEconomicPolicy, 0, "com.test.app");
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
         }
 
-        // Balance is below threshold and events are all positive delta.
-        // Should report the correct time to the correct upper threshold.
-        trendCalculator.reset(0, affordabilityNotes);
+        // Balance is above threshold, consumable credits is 0, and events are all positive delta.
+        // There should be no time to the upper threshold since consumable credits is the limiting
+        // factor.
+        trendCalculator.reset(10_000, 0, affordabilityNotes);
         trendCalculator.accept(
-                new OngoingEvent(EconomicPolicy.REWARD_TOP_ACTIVITY, "1",
-                        null, 1, 1));
+                new OngoingEvent(EconomicPolicy.REWARD_TOP_ACTIVITY, "1", 1,
+                        new EconomicPolicy.Reward(EconomicPolicy.REWARD_TOP_ACTIVITY, 1, 1, 1)));
 
         assertEquals("Expected not to cross lower threshold",
                 TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
                 trendCalculator.getTimeToCrossLowerThresholdMs());
-        assertEquals(5_000, trendCalculator.getTimeToCrossUpperThresholdMs());
-
-        // Balance is above the threshold and events are all negative delta.
-        // Should report the correct time to the correct lower threshold.
-        trendCalculator.reset(30, affordabilityNotes);
-        trendCalculator.accept(
-                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING, "1",
-                        null, 1, -1));
-
-        assertEquals(10_000, trendCalculator.getTimeToCrossLowerThresholdMs());
         assertEquals("Expected not to cross upper threshold",
                 TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
                 trendCalculator.getTimeToCrossUpperThresholdMs());
-    }
 
-    @Test
-    public void testTrendsToBothThresholds() {
-        TrendCalculator trendCalculator = new TrendCalculator();
-        mEconomicPolicy.mEventCosts.put(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 20);
-        mEconomicPolicy.mEventCosts.put(AlarmManagerEconomicPolicy.ACTION_ALARM_CLOCK, 50);
+        // Balance is above threshold, consumable credits is low, and events are all negative delta.
+        trendCalculator.reset(10_000, 4, affordabilityNotes);
+        trendCalculator.accept(
+                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING, "1",
+                        1, new EconomicPolicy.Cost(1, 10)));
 
-        ArraySet<ActionAffordabilityNote> affordabilityNotes = new ArraySet<>();
-        affordabilityNotes.add(new ActionAffordabilityNote(new ActionBill(List.of(
-                new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 1, 0))),
-                mock(AffordabilityChangeListener.class), mEconomicPolicy));
-        affordabilityNotes.add(new ActionAffordabilityNote(new ActionBill(List.of(
-                new AnticipatedAction(AlarmManagerEconomicPolicy.ACTION_ALARM_CLOCK, 1, 0))),
-                mock(AffordabilityChangeListener.class), mEconomicPolicy));
-        for (ActionAffordabilityNote note : affordabilityNotes) {
-            note.recalculateModifiedPrice(mEconomicPolicy, 0, "com.test.app");
-        }
+        assertEquals(4000, trendCalculator.getTimeToCrossLowerThresholdMs());
+        assertEquals("Expected not to cross upper threshold",
+                TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
+                trendCalculator.getTimeToCrossUpperThresholdMs());
 
-        // Balance is between both thresholds and events are mixed positive/negative delta.
-        // Should report the correct time to each threshold.
-        trendCalculator.reset(35, affordabilityNotes);
+        // Balance is above threshold, consumable credits is 0, and events are all negative delta.
+        // Time to the lower threshold should be 0 since consumable credits is already 0.
+        trendCalculator.reset(10_000, 0, affordabilityNotes);
         trendCalculator.accept(
-                new OngoingEvent(EconomicPolicy.REWARD_TOP_ACTIVITY, "1",
-                        null, 1, 3));
-        trendCalculator.accept(
-                new OngoingEvent(EconomicPolicy.REWARD_OTHER_USER_INTERACTION, "2",
-                        null, 2, 2));
-        trendCalculator.accept(
-                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_LOW_RUNNING, "3",
-                        null, 3, -2));
-        trendCalculator.accept(
-                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING, "4",
-                        null, 4, -3));
+                new OngoingEvent(JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_RUNNING, "1",
+                        1, new EconomicPolicy.Cost(1, 10)));
 
-        assertEquals(3_000, trendCalculator.getTimeToCrossLowerThresholdMs());
-        assertEquals(3_000, trendCalculator.getTimeToCrossUpperThresholdMs());
+        assertEquals(0, trendCalculator.getTimeToCrossLowerThresholdMs());
+        assertEquals("Expected not to cross upper threshold",
+                TrendCalculator.WILL_NOT_CROSS_THRESHOLD,
+                trendCalculator.getTimeToCrossUpperThresholdMs());
     }
 }

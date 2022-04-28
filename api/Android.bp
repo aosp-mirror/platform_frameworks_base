@@ -109,10 +109,11 @@ combined_apis {
         "android.net.ipsec.ike",
         "art.module.public.api",
         "conscrypt.module.public.api",
+        "framework-adservices",
         "framework-appsearch",
         "framework-bluetooth",
         "framework-connectivity",
-        "framework-connectivity-tiramisu",
+        "framework-connectivity-t",
         "framework-graphics",
         "framework-media",
         "framework-mediaprovider",
@@ -122,20 +123,16 @@ combined_apis {
         "framework-scheduling",
         "framework-sdkextensions",
         "framework-statsd",
-        "framework-supplementalprocess",
+        "framework-sdksandbox",
         "framework-tethering",
         "framework-uwb",
         "framework-wifi",
         "i18n.module.public.api",
     ],
-    conditional_bootclasspath: [
-        "framework-auxiliary",
-        "framework-supplementalapi",
-    ],
     system_server_classpath: [
         "service-media-s",
         "service-permission",
-        "service-supplementalprocess",
+        "service-sdksandbox",
     ],
 }
 
@@ -186,8 +183,10 @@ genrule {
     cmd: metalava_cmd +
         "--check-compatibility:api:released $(location :android.api.module-lib.latest) " +
         // Note: having "public" be the base of module-lib is not perfect -- it should
-        // ideally be a merged public+system), but this will  help when migrating from
-        // MODULE_LIBS -> public.
+        // ideally be a merged public+system (which metalava is not currently able to generate).
+        // This "base" will help when migrating from MODULE_LIBS -> public, but not when
+        // migrating from MODULE_LIBS -> system (where it needs to instead be listed as
+        // an incompatibility).
         "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.module-lib.latest) " +
         "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +

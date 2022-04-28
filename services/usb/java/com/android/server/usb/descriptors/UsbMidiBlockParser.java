@@ -15,9 +15,14 @@
  */
 package com.android.server.usb.descriptors;
 
+import android.annotation.NonNull;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDeviceConnection;
+import android.service.usb.UsbGroupTerminalBlockProto;
+import android.service.usb.UsbMidiBlockParserProto;
 import android.util.Log;
+
+import com.android.internal.util.dump.DualDumpOutputStream;
 
 import java.util.ArrayList;
 
@@ -69,6 +74,34 @@ public class UsbMidiBlockParser {
             mMaxInputBandwidth = stream.unpackUsbShort();
             mMaxOutputBandwidth = stream.unpackUsbShort();
             return mLength;
+        }
+
+        /**
+         * Write the state of the block to a dump stream.
+         */
+        public void dump(@NonNull DualDumpOutputStream dump, @NonNull String idName, long id) {
+            long token = dump.start(idName, id);
+
+            dump.write("length", UsbGroupTerminalBlockProto.LENGTH, mLength);
+            dump.write("descriptor_type", UsbGroupTerminalBlockProto.DESCRIPTOR_TYPE,
+                    mDescriptorType);
+            dump.write("descriptor_subtype", UsbGroupTerminalBlockProto.DESCRIPTOR_SUBTYPE,
+                    mDescriptorSubtype);
+            dump.write("group_block_id", UsbGroupTerminalBlockProto.GROUP_BLOCK_ID, mGroupBlockId);
+            dump.write("group_terminal_block_type",
+                    UsbGroupTerminalBlockProto.GROUP_TERMINAL_BLOCK_TYPE, mGroupTerminalBlockType);
+            dump.write("group_terminal", UsbGroupTerminalBlockProto.GROUP_TERMINAL,
+                    mGroupTerminal);
+            dump.write("num_group_terminals", UsbGroupTerminalBlockProto.NUM_GROUP_TERMINALS,
+                    mNumGroupTerminals);
+            dump.write("block_item", UsbGroupTerminalBlockProto.BLOCK_ITEM, mBlockItem);
+            dump.write("midi_protocol", UsbGroupTerminalBlockProto.MIDI_PROTOCOL, mMidiProtocol);
+            dump.write("max_input_bandwidth", UsbGroupTerminalBlockProto.MAX_INPUT_BANDWIDTH,
+                    mMaxInputBandwidth);
+            dump.write("max_output_bandwidth", UsbGroupTerminalBlockProto.MAX_OUTPUT_BANDWIDTH,
+                    mMaxOutputBandwidth);
+
+            dump.end(token);
         }
     }
 
@@ -170,4 +203,24 @@ public class UsbMidiBlockParser {
         }
         return DEFAULT_MIDI_TYPE;
     }
+
+    /**
+     * Write the state of the parser to a dump stream.
+     */
+    public void dump(@NonNull DualDumpOutputStream dump, @NonNull String idName, long id) {
+        long token = dump.start(idName, id);
+
+        dump.write("length", UsbMidiBlockParserProto.LENGTH, mHeaderLength);
+        dump.write("descriptor_type", UsbMidiBlockParserProto.DESCRIPTOR_TYPE,
+                mHeaderDescriptorType);
+        dump.write("descriptor_subtype", UsbMidiBlockParserProto.DESCRIPTOR_SUBTYPE,
+                mHeaderDescriptorSubtype);
+        dump.write("total_length", UsbMidiBlockParserProto.TOTAL_LENGTH, mTotalLength);
+        for (GroupTerminalBlock groupTerminalBlock : mGroupTerminalBlocks) {
+            groupTerminalBlock.dump(dump, "block", UsbMidiBlockParserProto.BLOCK);
+        }
+
+        dump.end(token);
+    }
+
 }

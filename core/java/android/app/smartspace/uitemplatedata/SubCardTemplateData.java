@@ -59,21 +59,18 @@ public final class SubCardTemplateData extends BaseTemplateData {
     }
 
     private SubCardTemplateData(int templateType,
-            @Nullable Text titleText,
-            @Nullable Icon titleIcon,
-            @Nullable Text subtitleText,
-            @Nullable Icon subTitleIcon,
-            @Nullable TapAction primaryTapAction,
-            @Nullable Text supplementalSubtitleText,
-            @Nullable Icon supplementalSubtitleIcon,
-            @Nullable TapAction supplementalSubtitleTapAction,
-            @Nullable Text supplementalAlarmText,
+            @Nullable SubItemInfo primaryItem,
+            @Nullable SubItemInfo subtitleItem,
+            @Nullable SubItemInfo subtitleSupplementalItem,
+            @Nullable SubItemInfo supplementalLineItem,
+            @Nullable SubItemInfo supplementalAlarmItem,
+            int layoutWeight,
             @NonNull Icon subCardIcon,
             @Nullable Text subCardText,
             @Nullable TapAction subCardAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
-                supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
-                supplementalAlarmText);
+        super(templateType, primaryItem, subtitleItem, subtitleSupplementalItem,
+                supplementalLineItem, supplementalAlarmItem, layoutWeight);
+
         mSubCardIcon = subCardIcon;
         mSubCardText = subCardText;
         mSubCardAction = subCardAction;
@@ -195,10 +192,10 @@ public final class SubCardTemplateData extends BaseTemplateData {
          */
         @NonNull
         public SubCardTemplateData build() {
-            return new SubCardTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
-                    getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalAlarmText(), mSubCardIcon,
+            return new SubCardTemplateData(getTemplateType(), getPrimaryItem(),
+                    getSubtitleItem(), getSubtitleSupplemtnalItem(),
+                    getSupplementalLineItem(), getSupplementalAlarmItem(), getLayoutWeight(),
+                    mSubCardIcon,
                     mSubCardText,
                     mSubCardAction);
         }

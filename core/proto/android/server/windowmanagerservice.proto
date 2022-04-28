@@ -53,6 +53,7 @@ message WindowManagerServiceDumpProto {
     optional int32 last_orientation = 8 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation", deprecated=true];
     optional int32 focused_display_id = 9;
     optional bool hard_keyboard_available = 10;
+    optional bool window_frames_valid = 11;
 }
 
 /* represents RootWindowContainer object */
@@ -382,6 +383,8 @@ message ActivityRecordProto {
     optional bool in_size_compat_mode = 32;
     optional float min_aspect_ratio = 33;
     optional bool provides_max_bounds = 34;
+    optional bool enable_recents_screenshot = 35;
+    optional int32 last_drop_input_mode = 36;
 }
 
 /* represents WindowToken */
@@ -445,6 +448,7 @@ message WindowStateProto {
     optional bool has_compat_scale = 43;
     optional float global_scale = 44;
     repeated .android.graphics.RectProto keep_clear_areas = 45;
+    repeated .android.graphics.RectProto unrestricted_keep_clear_areas = 46;
 }
 
 message IdentifierProto {

@@ -24,6 +24,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,6 +42,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.View;
@@ -324,31 +328,31 @@ public class StatusBarManager {
     public @interface RequestResult {}
 
     /**
-     * Constant for {@link #setNavBarModeOverride(int)} indicating the default navbar mode.
+     * Constant for {@link #setNavBarMode(int)} indicating the default navbar mode.
      *
      * @hide
      */
     @SystemApi
-    public static final int NAV_BAR_MODE_OVERRIDE_NONE = 0;
+    public static final int NAV_BAR_MODE_DEFAULT = 0;
 
     /**
-     * Constant for {@link #setNavBarModeOverride(int)} indicating kids navbar mode.
+     * Constant for {@link #setNavBarMode(int)} indicating kids navbar mode.
      *
      * <p>When used, back and home icons will change drawables and layout, recents will be hidden,
-     * and the navbar will remain visible when apps are in immersive mode.
+     * and enables the setting to force navbar visible, even when apps are in immersive mode.
      *
      * @hide
      */
     @SystemApi
-    public static final int NAV_BAR_MODE_OVERRIDE_KIDS = 1;
+    public static final int NAV_BAR_MODE_KIDS = 1;
 
     /** @hide */
-    @IntDef(prefix = {"NAV_BAR_MODE_OVERRIDE_"}, value = {
-            NAV_BAR_MODE_OVERRIDE_NONE,
-            NAV_BAR_MODE_OVERRIDE_KIDS
+    @IntDef(prefix = {"NAV_BAR_MODE_"}, value = {
+            NAV_BAR_MODE_DEFAULT,
+            NAV_BAR_MODE_KIDS
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface NavBarModeOverride {}
+    public @interface NavBarMode {}
 
     /**
      * State indicating that this sender device is close to a receiver device, so the user can
@@ -519,6 +523,27 @@ public class StatusBarManager {
      */
     private final Map<NearbyMediaDevicesProvider, NearbyMediaDevicesProviderWrapper>
             nearbyMediaDevicesProviderMap = new HashMap<>();
+
+    /**
+     * Media controls based on {@link android.app.Notification.MediaStyle} notifications will have
+     * actions based on the media session's {@link android.media.session.PlaybackState}, rather than
+     * the notification's actions.
+     *
+     * These actions will be:
+     * - Play/Pause (depending on whether the current state is a playing state)
+     * - Previous (if declared), or a custom action if the slot is not reserved with
+     *   {@code SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_PREV}
+     * - Next (if declared), or a custom action if the slot is not reserved with
+     *   {@code SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_NEXT}
+     * - Custom action
+     * - Custom action
+     *
+     * @see androidx.media.utils.MediaConstants#SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_PREV
+     * @see androidx.media.utils.MediaConstants#SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_NEXT
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long MEDIA_CONTROL_SESSION_ACTIONS = 203800354L;
 
     @UnsupportedAppUsage
     private Context mContext;
@@ -844,6 +869,24 @@ public class StatusBarManager {
     }
 
     /**
+     * Sets an active {@link android.service.quicksettings.TileService} to listening state
+     *
+     * The {@code componentName}'s package must match the calling package.
+     *
+     * @param componentName the tile to set into listening state
+     * @see android.service.quicksettings.TileService#requestListeningState
+     * @hide
+     */
+    public void requestTileServiceListeningState(@NonNull ComponentName componentName) {
+        Objects.requireNonNull(componentName);
+        try {
+            getService().requestTileServiceListeningState(componentName, mContext.getUserId());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Request to the user to add a {@link android.service.quicksettings.TileService}
      * to the set of current QS tiles.
      * <p>
@@ -926,25 +969,23 @@ public class StatusBarManager {
     }
 
     /**
-     * Sets or removes the navigation bar mode override.
+     * Sets or removes the navigation bar mode.
      *
-     * @param navBarModeOverride the mode of the navigation bar override to be set.
+     * @param navBarMode the mode of the navigation bar to be set.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
-    public void setNavBarModeOverride(@NavBarModeOverride int navBarModeOverride) {
-        if (navBarModeOverride != NAV_BAR_MODE_OVERRIDE_NONE
-                && navBarModeOverride != NAV_BAR_MODE_OVERRIDE_KIDS) {
-            throw new IllegalArgumentException(
-                    "Supplied navBarModeOverride not supported: " + navBarModeOverride);
+    public void setNavBarMode(@NavBarMode int navBarMode) {
+        if (navBarMode != NAV_BAR_MODE_DEFAULT && navBarMode != NAV_BAR_MODE_KIDS) {
+            throw new IllegalArgumentException("Supplied navBarMode not supported: " + navBarMode);
         }
 
         try {
             final IStatusBarService svc = getService();
             if (svc != null) {
-                svc.setNavBarModeOverride(navBarModeOverride);
+                svc.setNavBarMode(navBarMode);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -952,23 +993,23 @@ public class StatusBarManager {
     }
 
     /**
-     * Gets the navigation bar mode override. Returns default value if no override is set.
+     * Gets the navigation bar mode. Returns default value if no mode is set.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
-    public @NavBarModeOverride int getNavBarModeOverride() {
-        int navBarModeOverride = NAV_BAR_MODE_OVERRIDE_NONE;
+    public @NavBarMode int getNavBarMode() {
+        int navBarMode = NAV_BAR_MODE_DEFAULT;
         try {
             final IStatusBarService svc = getService();
             if (svc != null) {
-                navBarModeOverride = svc.getNavBarModeOverride();
+                navBarMode = svc.getNavBarMode();
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return navBarModeOverride;
+        return navBarMode;
     }
 
     /**
@@ -1109,6 +1150,21 @@ public class StatusBarManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Checks whether the given package should use session-based actions for its media controls.
+     *
+     * @param packageName App posting media controls
+     * @param user Current user handle
+     * @return true if the app supports session actions
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG,
+            android.Manifest.permission.LOG_COMPAT_CHANGE})
+    public static boolean useMediaSessionActionsForApp(String packageName, UserHandle user) {
+        return CompatChanges.isChangeEnabled(MEDIA_CONTROL_SESSION_ACTIONS, packageName, user);
     }
 
     /** @hide */

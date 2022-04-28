@@ -49,6 +49,8 @@ public class CloudSearchPerUserService extends
     @GuardedBy("mLock")
     private final CircularQueue<String, CloudSearchCallbackInfo> mCallbackQueue =
             new CircularQueue<>(QUEUE_SIZE);
+    private final String mServiceName;
+    private final ComponentName mRemoteComponentName;
     @Nullable
     @GuardedBy("mLock")
     private RemoteCloudSearchService mRemoteService;
@@ -60,8 +62,10 @@ public class CloudSearchPerUserService extends
     private boolean mZombie;
 
     protected CloudSearchPerUserService(CloudSearchManagerService master,
-            Object lock, int userId) {
+            Object lock, int userId, String serviceName) {
         super(master, lock, userId);
+        mServiceName = serviceName;
+        mRemoteComponentName = ComponentName.unflattenFromString(mServiceName);
     }
 
     @Override // from PerUserSystemService
@@ -103,12 +107,16 @@ public class CloudSearchPerUserService extends
     @GuardedBy("mLock")
     public void onSearchLocked(@NonNull SearchRequest searchRequest,
             @NonNull ICloudSearchManagerCallback callback) {
+        if (mRemoteComponentName == null) {
+            return;
+        }
+
         String filterList = searchRequest.getSearchConstraints().containsKey(
                 SearchRequest.CONSTRAINT_SEARCH_PROVIDER_FILTER)
                 ? searchRequest.getSearchConstraints().getString(
                 SearchRequest.CONSTRAINT_SEARCH_PROVIDER_FILTER) : "";
 
-        String remoteServicePackageName = getServiceComponentName().getPackageName();
+        String remoteServicePackageName = mRemoteComponentName.getPackageName();
         // By default, all providers are marked as wanted.
         boolean wantedProvider = true;
         if (filterList.length() > 0) {
@@ -150,11 +158,19 @@ public class CloudSearchPerUserService extends
     /**
      * Used to return results back to the clients.
      */
+    @GuardedBy("mLock")
     public void onReturnResultsLocked(@NonNull IBinder token,
             @NonNull String requestId,
             @NonNull SearchResponse response) {
+        if (mRemoteService == null) {
+            return;
+        }
+        ICloudSearchService serviceInterface = mRemoteService.getServiceInterface();
+        if (serviceInterface == null || token != serviceInterface.asBinder()) {
+            return;
+        }
         if (mCallbackQueue.containsKey(requestId)) {
-            response.setSource(mRemoteService.getComponentName().getPackageName());
+            response.setSource(mServiceName);
             final CloudSearchCallbackInfo sessionInfo = mCallbackQueue.getElement(requestId);
             try {
                 if (response.getStatusCode() == SearchResponse.SEARCH_STATUS_OK) {
@@ -163,6 +179,10 @@ public class CloudSearchPerUserService extends
                     sessionInfo.mCallback.onSearchFailed(response);
                 }
             } catch (RemoteException e) {
+                if (mMaster.debug) {
+                    Slog.e(TAG, "Exception in posting results");
+                    e.printStackTrace();
+                }
                 onDestroyLocked(requestId);
             }
         }
@@ -177,7 +197,9 @@ public class CloudSearchPerUserService extends
             Slog.d(TAG, "onDestroyLocked(): requestId=" + requestId);
         }
         final CloudSearchCallbackInfo sessionInfo = mCallbackQueue.removeElement(requestId);
-        sessionInfo.destroy();
+        if (sessionInfo != null) {
+            sessionInfo.destroy();
+        }
     }
 
     @Override
@@ -297,7 +319,7 @@ public class CloudSearchPerUserService extends
     @Nullable
     private RemoteCloudSearchService getRemoteServiceLocked() {
         if (mRemoteService == null) {
-            final String serviceName = getComponentNameLocked();
+            final String serviceName = getComponentNameForMultipleLocked(mServiceName);
             if (serviceName == null) {
                 if (mMaster.verbose) {
                     Slog.v(TAG, "getRemoteServiceLocked(): not set");

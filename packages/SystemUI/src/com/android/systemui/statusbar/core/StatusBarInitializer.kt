@@ -21,18 +21,18 @@ import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.PhoneStatusBarView
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import java.lang.IllegalStateException
 import javax.inject.Inject
 
 /**
- * Responsible for creating the StatusBar window and initializing the root components of that window
- * (see [CollapsedStatusBarFragment])
+ * Responsible for creating the status bar window and initializing the root components of that
+ * window (see [CollapsedStatusBarFragment])
  */
-@StatusBarScope
+@CentralSurfacesScope
 class StatusBarInitializer @Inject constructor(
     private val windowController: StatusBarWindowController
 ) {
@@ -43,7 +43,7 @@ class StatusBarInitializer @Inject constructor(
      * Creates the status bar window and root views, and initializes the component
      */
     fun initializeStatusBar(
-        sbComponent: StatusBarComponent
+        centralSurfacesComponent: CentralSurfacesComponent
     ) {
         windowController.fragmentHostManager.addTagListener(
                 CollapsedStatusBarFragment.TAG,
@@ -64,7 +64,7 @@ class StatusBarInitializer @Inject constructor(
                 }).fragmentManager
                 .beginTransaction()
                 .replace(R.id.status_bar_container,
-                        sbComponent.createCollapsedStatusBarFragment(),
+                        centralSurfacesComponent.createCollapsedStatusBarFragment(),
                         CollapsedStatusBarFragment.TAG)
                 .commit()
     }

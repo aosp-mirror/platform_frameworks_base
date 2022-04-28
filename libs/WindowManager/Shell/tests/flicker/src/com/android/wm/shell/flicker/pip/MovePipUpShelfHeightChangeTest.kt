@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
+import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory

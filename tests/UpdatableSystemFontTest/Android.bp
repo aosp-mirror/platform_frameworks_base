@@ -37,8 +37,6 @@ android_test {
         "vts",
     ],
     data: [
-        ":NotoSerif-Regular.ttf",
-        ":NotoSerif-Bold.ttf",
         ":UpdatableSystemFontTestCertDer",
         ":UpdatableSystemFontTest_NotoColorEmoji.ttf",
         ":UpdatableSystemFontTest_NotoColorEmoji.sig",
@@ -48,7 +46,9 @@ android_test {
         ":UpdatableSystemFontTest_NotoColorEmojiVPlus1.sig",
         ":UpdatableSystemFontTest_NotoColorEmojiVPlus2.ttf",
         ":UpdatableSystemFontTest_NotoColorEmojiVPlus2.sig",
+        ":UpdatableSystemFontTest_NotoSerif-Regular.ttf",
         ":UpdatableSystemFontTest_NotoSerif-Regular.sig",
+        ":UpdatableSystemFontTest_NotoSerif-Bold.ttf",
         ":UpdatableSystemFontTest_NotoSerif-Bold.sig",
     ],
     sdk_version: "test_current",

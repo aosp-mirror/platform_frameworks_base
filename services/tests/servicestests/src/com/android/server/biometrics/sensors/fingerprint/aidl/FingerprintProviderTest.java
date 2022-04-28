@@ -42,9 +42,9 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.BiometricScheduler;
+import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import org.junit.Before;
@@ -71,7 +71,7 @@ public class FingerprintProviderTest {
     @Mock
     private GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     @Mock
-    private FingerprintStateCallback mFingerprintStateCallback;
+    private BiometricStateCallback mBiometricStateCallback;
     @Mock
     private BiometricContext mBiometricContext;
 
@@ -107,7 +107,7 @@ public class FingerprintProviderTest {
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
 
         mFingerprintProvider = new TestableFingerprintProvider(mDaemon, mContext,
-                mFingerprintStateCallback, mSensorProps, TAG, mLockoutResetDispatcher,
+                mBiometricStateCallback, mSensorProps, TAG, mLockoutResetDispatcher,
                 mGestureAvailabilityDispatcher, mBiometricContext);
     }
 
@@ -156,13 +156,13 @@ public class FingerprintProviderTest {
 
         TestableFingerprintProvider(@NonNull IFingerprint daemon,
                 @NonNull Context context,
-                @NonNull FingerprintStateCallback fingerprintStateCallback,
+                @NonNull BiometricStateCallback biometricStateCallback,
                 @NonNull SensorProps[] props,
                 @NonNull String halInstanceName,
                 @NonNull LockoutResetDispatcher lockoutResetDispatcher,
                 @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
                 @NonNull BiometricContext biometricContext) {
-            super(context, fingerprintStateCallback, props, halInstanceName, lockoutResetDispatcher,
+            super(context, biometricStateCallback, props, halInstanceName, lockoutResetDispatcher,
                     gestureAvailabilityDispatcher, biometricContext);
             mDaemon = daemon;
         }

@@ -33,14 +33,13 @@ import java.util.concurrent.Executor
  * will be notified.
  *
  * See [AudioManager.muteAwaitConnection] and b/206614671 for more details.
- *
- * TODO(b/206614671): Add logging.
  */
 class MediaMuteAwaitConnectionManager constructor(
     @Main private val mainExecutor: Executor,
     private val localMediaManager: LocalMediaManager,
     private val context: Context,
-    private val deviceIconUtil: DeviceIconUtil
+    private val deviceIconUtil: DeviceIconUtil,
+    private val logger: MediaMuteAwaitLogger
 ) {
     var currentMutedDevice: AudioDeviceAttributes? = null
 
@@ -48,11 +47,14 @@ class MediaMuteAwaitConnectionManager constructor(
 
     val muteAwaitConnectionChangeListener = object : AudioManager.MuteAwaitConnectionCallback() {
         override fun onMutedUntilConnection(device: AudioDeviceAttributes, mutedUsages: IntArray) {
-            if (USAGE_MEDIA in mutedUsages) {
+            logger.logMutedDeviceAdded(device.address, device.name, mutedUsages.hasMedia())
+            if (mutedUsages.hasMedia()) {
                 // There should only be one device that's mutedUntilConnection at a time, so we can
                 // safely override any previous value.
                 currentMutedDevice = device
-                localMediaManager.dispatchAboutToConnectDeviceChanged(device.name, device.getIcon())
+                localMediaManager.dispatchAboutToConnectDeviceAdded(
+                    device.address, device.name, device.getIcon()
+                )
             }
         }
 
@@ -61,9 +63,13 @@ class MediaMuteAwaitConnectionManager constructor(
             device: AudioDeviceAttributes,
             mutedUsages: IntArray
         ) {
-            if (currentMutedDevice == device && USAGE_MEDIA in mutedUsages) {
+            val isMostRecentDevice = currentMutedDevice == device
+            logger.logMutedDeviceRemoved(
+                device.address, device.name, mutedUsages.hasMedia(), isMostRecentDevice
+            )
+            if (isMostRecentDevice && mutedUsages.hasMedia()) {
                 currentMutedDevice = null
-                localMediaManager.dispatchAboutToConnectDeviceChanged(null, null)
+                localMediaManager.dispatchAboutToConnectDeviceRemoved()
             }
         }
     }
@@ -76,8 +82,8 @@ class MediaMuteAwaitConnectionManager constructor(
         val currentDevice = audioManager.mutingExpectedDevice
         if (currentDevice != null) {
             currentMutedDevice = currentDevice
-            localMediaManager.dispatchAboutToConnectDeviceChanged(
-                currentDevice.name, currentDevice.getIcon()
+            localMediaManager.dispatchAboutToConnectDeviceAdded(
+                currentDevice.address, currentDevice.name, currentDevice.getIcon()
             )
         }
     }
@@ -90,4 +96,6 @@ class MediaMuteAwaitConnectionManager constructor(
     private fun AudioDeviceAttributes.getIcon(): Drawable {
         return deviceIconUtil.getIconFromAudioDeviceType(this.type, context)
     }
+
+    private fun IntArray.hasMedia() = USAGE_MEDIA in this
 }

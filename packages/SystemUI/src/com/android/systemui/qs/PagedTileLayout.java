@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Scroller;
@@ -38,6 +39,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private static final boolean DEBUG = false;
     private static final String CURRENT_PAGE = "current_page";
+    private static final int NO_PAGE = -1;
 
     private static final String TAG = "PagedTileLayout";
     private static final int REVEAL_SCROLL_DURATION_MILLIS = 750;
@@ -108,13 +110,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     public void saveInstanceState(Bundle outState) {
-        outState.putInt(CURRENT_PAGE, getCurrentItem());
+        int resolvedPage = mPageToRestore != NO_PAGE ? mPageToRestore : getCurrentPageNumber();
+        outState.putInt(CURRENT_PAGE, resolvedPage);
     }
 
     public void restoreInstanceState(Bundle savedInstanceState) {
         // There's only 1 page at this point. We want to restore the correct page once the
         // pages have been inflated
-        mPageToRestore = savedInstanceState.getInt(CURRENT_PAGE, -1);
+        mPageToRestore = savedInstanceState.getInt(CURRENT_PAGE, NO_PAGE);
     }
 
     @Override
@@ -150,12 +153,15 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
+        // The configuration change will change the flag in the view (that's returned in
+        // isLayoutRtl). As we detect the change, we use the cached direction to store the page
+        // before setting it.
+        final int page = getPageNumberForDirection(mLayoutDirection == LAYOUT_DIRECTION_RTL);
         super.onRtlPropertiesChanged(layoutDirection);
         if (mLayoutDirection != layoutDirection) {
             mLayoutDirection = layoutDirection;
             setAdapter(mAdapter);
-            setCurrentItem(0, false);
-            mPageToRestore = 0;
+            setCurrentItem(page, false);
         }
     }
 
@@ -171,8 +177,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
      * Obtains the current page number respecting RTL
      */
     private int getCurrentPageNumber() {
+        return getPageNumberForDirection(isLayoutRtl());
+    }
+
+    private int getPageNumberForDirection(boolean isLayoutRTL) {
         int page = getCurrentItem();
-        if (mLayoutDirection == LAYOUT_DIRECTION_RTL) {
+        if (isLayoutRTL) {
             page = mPages.size() - 1 - page;
         }
         return page;
@@ -387,9 +397,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mPageIndicator.setNumPages(mPages.size());
         setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
-        if (mPageToRestore != -1) {
+        if (mPageToRestore != NO_PAGE) {
             setCurrentItem(mPageToRestore, false);
-            mPageToRestore = -1;
+            mPageToRestore = NO_PAGE;
         }
     }
 
@@ -478,7 +488,25 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 maxHeight = height;
             }
         }
+        if (mPages.get(0).getParent() == null) {
+            // Measure page 0 so we know how tall it is if it's not attached to the pager.
+            mPages.get(0).measure(widthMeasureSpec, heightMeasureSpec);
+            int height = mPages.get(0).getMeasuredHeight();
+            if (height > maxHeight) {
+                maxHeight = height;
+            }
+        }
         setMeasuredDimension(getMeasuredWidth(), maxHeight + getPaddingBottom());
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        if (mPages.get(0).getParent() == null) {
+            // Layout page 0, so we can get the bottom of the tiles. We only do this if the page
+            // is not attached.
+            mPages.get(0).layout(l, t, r, b);
+        }
     }
 
     public int getColumnCount() {
@@ -552,6 +580,51 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         postInvalidateOnAnimation();
     }
 
+    private int sanitizePageAction(int action) {
+        int pageLeftId = AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_LEFT.getId();
+        int pageRightId = AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_RIGHT.getId();
+        if (action == pageLeftId || action == pageRightId) {
+            if (!isLayoutRtl()) {
+                if (action == pageLeftId) {
+                    return AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD;
+                } else {
+                    return AccessibilityNodeInfo.ACTION_SCROLL_FORWARD;
+                }
+            } else {
+                if (action == pageLeftId) {
+                    return AccessibilityNodeInfo.ACTION_SCROLL_FORWARD;
+                } else {
+                    return AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD;
+                }
+            }
+        }
+        return action;
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        action = sanitizePageAction(action);
+        boolean performed = super.performAccessibilityAction(action, arguments);
+        if (performed && (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
+                || action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
+            requestAccessibilityFocus();
+        }
+        return performed;
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        // getCurrentItem does not respect RTL, so it works well together with page actions that
+        // use left/right positioning.
+        if (getCurrentItem() != 0) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_LEFT);
+        }
+        if (getCurrentItem() != mPages.size() - 1) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_RIGHT);
+        }
+    }
+
     private static Animator setupBounceAnimator(View view, int ordinal) {
         view.setAlpha(0f);
         view.setScaleX(0f);
@@ -579,8 +652,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                     if (mPageIndicator == null) return;
                     if (mPageListener != null) {
                         int pageNumber = isLayoutRtl() ? mPages.size() - 1 - position : position;
-                        mPageListener.onPageChanged(isLayoutRtl() ? position == mPages.size() - 1
-                                : position == 0, pageNumber);
+                        mPageListener.onPageChanged(pageNumber == 0, pageNumber);
                     }
                 }
 
@@ -599,8 +671,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                     mPageIndicator.setLocation(mPageIndicatorPosition);
                     if (mPageListener != null) {
                         int pageNumber = isLayoutRtl() ? mPages.size() - 1 - position : position;
-                        mPageListener.onPageChanged(positionOffsetPixels == 0 &&
-                                (isLayoutRtl() ? position == mPages.size() - 1 : position == 0),
+                        mPageListener.onPageChanged(
+                                positionOffsetPixels == 0 && pageNumber == 0,
                                 // Send only valid page number on integer pages
                                 positionOffsetPixels == 0 ? pageNumber : PageListener.INVALID_PAGE
                         );

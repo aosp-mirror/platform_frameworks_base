@@ -277,7 +277,8 @@ class DisplayWindowSettings {
         final int height = hasSizeOverride ? settings.mForcedHeight : dc.mInitialDisplayHeight;
         final int density = hasDensityOverride ? settings.mForcedDensity
                 : dc.mInitialDisplayDensity;
-        dc.updateBaseDisplayMetrics(width, height, density);
+        dc.updateBaseDisplayMetrics(width, height, density, dc.mBaseDisplayPhysicalXDpi,
+                dc.mBaseDisplayPhysicalYDpi);
 
         final int forcedScalingMode = settings.mForcedScalingMode != null
                 ? settings.mForcedScalingMode : FORCE_SCALING_MODE_AUTO;

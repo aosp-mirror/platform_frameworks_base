@@ -19,7 +19,6 @@ package com.android.settingslib.widget;
 import android.content.Context;
 import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.method.LinkMovementMethod;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.View;
@@ -59,10 +58,6 @@ public class FooterPreference extends Preference {
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         TextView title = holder.itemView.findViewById(android.R.id.title);
-        title.setMovementMethod(new LinkMovementMethod());
-        title.setClickable(false);
-        title.setLongClickable(false);
-        title.setFocusable(false);
         if (!TextUtils.isEmpty(mContentDescription)) {
             title.setContentDescription(mContentDescription);
         }
@@ -86,7 +81,6 @@ public class FooterPreference extends Preference {
             if (!TextUtils.isEmpty(mLearnMoreContentDescription)) {
                 learnMore.setContentDescription(mLearnMoreContentDescription);
             }
-            learnMore.setFocusable(false);
         } else {
             learnMore.setVisibility(View.GONE);
         }
@@ -180,6 +174,7 @@ public class FooterPreference extends Preference {
         if (TextUtils.isEmpty(getKey())) {
             setKey(KEY_FOOTER);
         }
+        setSelectable(false);
     }
 
     /**

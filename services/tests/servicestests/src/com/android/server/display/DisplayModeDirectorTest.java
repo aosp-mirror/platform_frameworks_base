@@ -20,8 +20,8 @@ import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REF
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REFRESH_RATE_HIGH_DISPLAY_BRIGHTNESS_THRESHOLDS;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REFRESH_RATE_LOW_AMBIENT_BRIGHTNESS_THRESHOLDS;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REFRESH_RATE_LOW_DISPLAY_BRIGHTNESS_THRESHOLDS;
-import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HBM_SUNLIGHT;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HBM_HDR;
+import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HBM_SUNLIGHT;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HIGH_ZONE;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_LOW_ZONE;
 
@@ -918,16 +918,6 @@ public class DisplayModeDirectorTest {
 
         // Should be no vote initially
         Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_UDFPS);
-        assertNull(vote);
-
-        // Enabling GHBM votes for 60hz
-        hbmListener.onHbmEnabled(IUdfpsHbmListener.GLOBAL_HBM, DISPLAY_ID);
-        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_UDFPS);
-        assertVoteForRefreshRate(vote, 60.f);
-
-        // Disabling GHBM removes the vote
-        hbmListener.onHbmDisabled(IUdfpsHbmListener.GLOBAL_HBM, DISPLAY_ID);
-        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_UDFPS);
         assertNull(vote);
     }
 

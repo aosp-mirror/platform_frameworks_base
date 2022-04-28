@@ -50,9 +50,12 @@ import com.android.server.usb.descriptors.tree.UsbDescriptorsTree;
 import libcore.io.IoUtils;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Random;
 
 /**
  * UsbHostManager manages USB state in host mode.
@@ -94,10 +97,12 @@ public class UsbHostManager {
     private final ArrayMap<String, ConnectionRecord> mConnected = new ArrayMap<>();
 
     /**
-     * List of connected MIDI devices
+     * List of connected MIDI devices. Key on deviceAddress.
      */
-    private final HashMap<String, UsbUniversalMidiDevice>
-            mMidiDevices = new HashMap<String, UsbUniversalMidiDevice>();
+    private final HashMap<String, ArrayList<UsbDirectMidiDevice>>
+            mMidiDevices = new HashMap<String, ArrayList<UsbDirectMidiDevice>>();
+    private final HashSet<String> mMidiUniqueCodes = new HashSet<String>();
+    private final Random mRandom = new Random();
     private final boolean mHasMidiFeature;
 
     /*
@@ -423,14 +428,34 @@ public class UsbHostManager {
                 mUsbAlsaManager.usbDeviceAdded(deviceAddress, newDevice, parser);
 
                 if (mHasMidiFeature) {
+                    // Use a 3 digit code to associate MIDI devices with one another.
+                    // Each MIDI device already has mId for uniqueness. mId is generated
+                    // sequentially. For clarity, this code is not generated sequentially.
+                    String uniqueUsbDeviceIdentifier = generateNewUsbDeviceIdentifier();
+
+                    ArrayList<UsbDirectMidiDevice> midiDevices =
+                            new ArrayList<UsbDirectMidiDevice>();
                     if (parser.containsUniversalMidiDeviceEndpoint()) {
-                        UsbUniversalMidiDevice midiDevice = UsbUniversalMidiDevice.create(mContext,
-                                newDevice, parser);
+                        UsbDirectMidiDevice midiDevice = UsbDirectMidiDevice.create(mContext,
+                                newDevice, parser, true, uniqueUsbDeviceIdentifier);
                         if (midiDevice != null) {
-                            mMidiDevices.put(deviceAddress, midiDevice);
+                            midiDevices.add(midiDevice);
                         } else {
                             Slog.e(TAG, "Universal Midi Device is null.");
                         }
+                    }
+                    if (parser.containsLegacyMidiDeviceEndpoint()) {
+                        UsbDirectMidiDevice midiDevice = UsbDirectMidiDevice.create(mContext,
+                                newDevice, parser, false, uniqueUsbDeviceIdentifier);
+                        if (midiDevice != null) {
+                            midiDevices.add(midiDevice);
+                        } else {
+                            Slog.e(TAG, "Legacy Midi Device is null.");
+                        }
+                    }
+
+                    if (!midiDevices.isEmpty()) {
+                        mMidiDevices.put(deviceAddress, midiDevices);
                     }
                 }
 
@@ -469,10 +494,15 @@ public class UsbHostManager {
                 mPermissionManager.usbDeviceRemoved(device);
 
                 // MIDI
-                UsbUniversalMidiDevice midiDevice = mMidiDevices.remove(deviceAddress);
-                if (midiDevice != null) {
-                    Slog.i(TAG, "USB Universal MIDI Device Removed: " + deviceAddress);
-                    IoUtils.closeQuietly(midiDevice);
+                ArrayList<UsbDirectMidiDevice> midiDevices =
+                        mMidiDevices.remove(deviceAddress);
+                if (midiDevices != null) {
+                    for (UsbDirectMidiDevice midiDevice : midiDevices) {
+                        if (midiDevice != null) {
+                            IoUtils.closeQuietly(midiDevice);
+                        }
+                    }
+                    Slog.i(TAG, "USB MIDI Devices Removed: " + deviceAddress);
                 }
 
                 getCurrentUserSettings().usbDeviceRemoved(device);
@@ -558,6 +588,12 @@ public class UsbHostManager {
             for (ConnectionRecord rec : mConnections) {
                 rec.dump(dump, "connections", UsbHostManagerProto.CONNECTIONS);
             }
+
+            for (ArrayList<UsbDirectMidiDevice> directMidiDevices : mMidiDevices.values()) {
+                for (UsbDirectMidiDevice directMidiDevice : directMidiDevices) {
+                    directMidiDevice.dump(dump, "midi_devices", UsbHostManagerProto.MIDI_DEVICES);
+                }
+            }
         }
 
         dump.end(token);
@@ -604,6 +640,19 @@ public class UsbHostManager {
             return false;
         }
         return true;
+    }
+
+    // Generate a 3 digit code.
+    private String generateNewUsbDeviceIdentifier() {
+        String code;
+        do {
+            code = "";
+            for (int i = 0; i < 3; i++) {
+                code += mRandom.nextInt(10);
+            }
+        } while (mMidiUniqueCodes.contains(code));
+        mMidiUniqueCodes.add(code);
+        return code;
     }
 
     private native void monitorUsbHostBus();

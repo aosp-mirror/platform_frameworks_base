@@ -3331,7 +3331,7 @@ public class DeviceIdleController extends SystemService
         mNextLightIdleDelay = mConstants.LIGHT_IDLE_TIMEOUT;
         mMaintenanceStartTime = 0;
         mCurLightIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
-        cancelLightAlarmLocked();
+        cancelAllLightAlarmsLocked();
     }
 
     @GuardedBy("this")
@@ -3406,7 +3406,7 @@ public class DeviceIdleController extends SystemService
                     mLightState == LIGHT_STATE_IDLE
                             || mLightState == LIGHT_STATE_WAITING_FOR_NETWORK;
         } else {
-            Slog.wtfStack(TAG, "stepLightIdleStateLocked called in invalid state");
+            Slog.wtfStack(TAG, "stepLightIdleStateLocked called in invalid state: " + mLightState);
             return;
         }
 
@@ -3441,7 +3441,7 @@ public class DeviceIdleController extends SystemService
                 // connectivity...  let's try to wait until the network comes back.
                 // We'll only wait for another full idle period, however, and then give up.
                 scheduleLightMaintenanceAlarmLocked(mNextLightIdleDelay);
-                mNextLightAlarmTime = 0;
+                cancelLightAlarmLocked();
                 if (DEBUG) Slog.d(TAG, "Moved to LIGHT_WAITING_FOR_NETWORK.");
                 mLightState = LIGHT_STATE_WAITING_FOR_NETWORK;
                 EventLogTags.writeDeviceIdleLight(mLightState, reason);
@@ -3467,7 +3467,7 @@ public class DeviceIdleController extends SystemService
             // We're entering IDLE. We may have used less than curLightIdleBudget for the
             // maintenance window, so reschedule the alarm starting from now.
             scheduleLightMaintenanceAlarmLocked(mNextLightIdleDelay);
-            mNextLightAlarmTime = 0;
+            cancelLightAlarmLocked();
             if (DEBUG) Slog.d(TAG, "Moved to LIGHT_STATE_IDLE.");
             mLightState = LIGHT_STATE_IDLE;
             EventLogTags.writeDeviceIdleLight(mLightState, reason);
@@ -3609,7 +3609,7 @@ public class DeviceIdleController extends SystemService
                 moveToStateLocked(STATE_IDLE, reason);
                 if (mLightState != LIGHT_STATE_OVERRIDE) {
                     mLightState = LIGHT_STATE_OVERRIDE;
-                    cancelLightAlarmLocked();
+                    cancelAllLightAlarmsLocked();
                 }
                 addEvent(EVENT_DEEP_IDLE, null);
                 mGoingIdleWakeLock.acquire();
@@ -3950,11 +3950,21 @@ public class DeviceIdleController extends SystemService
     }
 
     @GuardedBy("this")
-    void cancelLightAlarmLocked() {
+    private void cancelAllLightAlarmsLocked() {
+        cancelLightAlarmLocked();
+        cancelLightMaintenanceAlarmLocked();
+    }
+
+    @GuardedBy("this")
+    private void cancelLightAlarmLocked() {
         if (mNextLightAlarmTime != 0) {
             mNextLightAlarmTime = 0;
             mAlarmManager.cancel(mLightAlarmListener);
         }
+    }
+
+    @GuardedBy("this")
+    private void cancelLightMaintenanceAlarmLocked() {
         if (mNextLightMaintenanceAlarmTime != 0) {
             mNextLightMaintenanceAlarmTime = 0;
             mAlarmManager.cancel(mLightMaintenanceAlarmListener);

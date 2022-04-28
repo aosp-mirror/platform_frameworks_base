@@ -134,7 +134,7 @@ public class SoundTriggerMiddlewareImplTest {
     public void setUp() throws Exception {
         clearInvocations(mHalDriver);
         clearInvocations(mAudioSessionProvider);
-        when(mHalDriver.getProperties()).thenReturn(TestUtil.createDefaultProperties(false));
+        when(mHalDriver.getProperties()).thenReturn(TestUtil.createDefaultProperties());
         mService = new SoundTriggerMiddlewareImpl(() -> mHalDriver, mAudioSessionProvider);
     }
 
@@ -156,7 +156,7 @@ public class SoundTriggerMiddlewareImplTest {
         assertEquals(1, allDescriptors.length);
 
         Properties properties = allDescriptors[0].properties;
-        assertEquals(TestUtil.createDefaultProperties(false), properties);
+        assertEquals(TestUtil.createDefaultProperties(), properties);
     }
 
     @Test
@@ -224,6 +224,11 @@ public class SoundTriggerMiddlewareImplTest {
         // Stop the recognition.
         stopRecognition(module, handle, hwHandle);
 
+        ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
+                RecognitionEvent.class);
+        verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
+        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().status);
+
         // Unload the model.
         unloadModel(module, handle, hwHandle);
         module.detach();
@@ -267,6 +272,11 @@ public class SoundTriggerMiddlewareImplTest {
 
         // Stop the recognition.
         stopRecognition(module, handle, hwHandle);
+
+        ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
+                PhraseRecognitionEvent.class);
+        verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
+        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().common.status);
 
         // Unload the model.
         unloadModel(module, handle, hwHandle);

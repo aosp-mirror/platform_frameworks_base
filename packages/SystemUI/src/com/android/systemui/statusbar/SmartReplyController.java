@@ -25,11 +25,10 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Set;
 
@@ -45,7 +44,7 @@ public class SmartReplyController implements Dumpable {
     private Callback mCallback;
 
     /**
-     * Injected constructor. See {@link StatusBarModule}.
+     * Injected constructor. See {@link CentralSurfacesModule}.
      */
     public SmartReplyController(
             DumpManager dumpManager,
@@ -116,7 +115,7 @@ public class SmartReplyController implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("mSendingKeys: " + mSendingKeys.size());
         for (String key : mSendingKeys) {
             pw.println(" * " + key);

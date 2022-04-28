@@ -29,6 +29,7 @@ import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.SensorPrivacyManager.EXTRA_ALL_SENSORS;
 import static android.hardware.SensorPrivacyManager.EXTRA_SENSOR;
@@ -39,8 +40,8 @@ import static android.hardware.SensorPrivacyManager.Sources.OTHER;
 import static android.hardware.SensorPrivacyManager.Sources.QS_TILE;
 import static android.hardware.SensorPrivacyManager.Sources.SETTINGS;
 import static android.hardware.SensorPrivacyManager.Sources.SHELL;
-import static android.hardware.SensorPrivacyManager.ToggleTypes.HARDWARE;
-import static android.hardware.SensorPrivacyManager.ToggleTypes.SOFTWARE;
+import static android.hardware.SensorPrivacyManager.TOGGLE_TYPE_HARDWARE;
+import static android.hardware.SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE;
 import static android.os.UserHandle.USER_NULL;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.UNKNOWN;
 
@@ -77,6 +78,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.graphics.drawable.Icon;
 import android.hardware.ISensorPrivacyListener;
@@ -155,6 +157,7 @@ public final class SensorPrivacyService extends SystemService {
     private final AppOpsManager mAppOpsManager;
     private final AppOpsManagerInternal mAppOpsManagerInternal;
     private final TelephonyManager mTelephonyManager;
+    private final PackageManagerInternal mPackageManagerInternal;
 
     private CameraPrivacyLightController mCameraPrivacyLightController;
 
@@ -178,6 +181,7 @@ public final class SensorPrivacyService extends SystemService {
         mActivityManagerInternal = getLocalService(ActivityManagerInternal.class);
         mActivityTaskManager = context.getSystemService(ActivityTaskManager.class);
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
+        mPackageManagerInternal = getLocalService(PackageManagerInternal.class);
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl();
     }
 
@@ -310,11 +314,12 @@ public final class SensorPrivacyService extends SystemService {
             // Reset sensor privacy when restriction is added
             if (!prevRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)
                     && newRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)) {
-                setToggleSensorPrivacyUnchecked(SOFTWARE, userId, OTHER, CAMERA, false);
+                setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, OTHER, CAMERA, false);
             }
             if (!prevRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)
                     && newRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)) {
-                setToggleSensorPrivacyUnchecked(SOFTWARE, userId, OTHER, MICROPHONE, false);
+                setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, OTHER, MICROPHONE,
+                        false);
             }
         }
 
@@ -555,7 +560,7 @@ public final class SensorPrivacyService extends SystemService {
                         + " sensors");
                 return;
             }
-            mContext.startActivityAsUser(dialogIntent, options.toBundle(), info.mUser);
+            mContext.startActivityAsUser(dialogIntent, options.toBundle(), UserHandle.SYSTEM);
         }
 
         /**
@@ -565,7 +570,7 @@ public final class SensorPrivacyService extends SystemService {
          */
         private String getSensorUseActivityName(ArraySet<Integer> sensors) {
             for (Integer sensor : sensors) {
-                if (isToggleSensorPrivacyEnabled(HARDWARE, sensor)) {
+                if (isToggleSensorPrivacyEnabled(TOGGLE_TYPE_HARDWARE, sensor)) {
                     return mContext.getResources().getString(
                             R.string.config_sensorUseStartedActivity_hwToggle);
                 }
@@ -691,7 +696,7 @@ public final class SensorPrivacyService extends SystemService {
                 return;
             }
 
-            setToggleSensorPrivacyUnchecked(SOFTWARE, userId, source, sensor, enable);
+            setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, source, sensor, enable);
         }
 
         private void setToggleSensorPrivacyUnchecked(int toggleType, int userId, int source,
@@ -827,6 +832,12 @@ public final class SensorPrivacyService extends SystemService {
          * sensor privacy.
          */
         private void enforceObserveSensorPrivacyPermission() {
+            String systemUIPackage = mContext.getString(R.string.config_systemUi);
+            if (Binder.getCallingUid() == mPackageManagerInternal
+                    .getPackageUid(systemUIPackage, MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM)) {
+                // b/221782106, possible race condition with role grant might bootloop device.
+                return;
+            }
             enforcePermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY,
                     "Observing sensor privacy changes requires the following permission: "
                             + android.Manifest.permission.OBSERVE_SENSOR_PRIVACY);
@@ -866,8 +877,8 @@ public final class SensorPrivacyService extends SystemService {
 
         @Override
         public boolean isCombinedToggleSensorPrivacyEnabled(int sensor) {
-            return isToggleSensorPrivacyEnabled(SOFTWARE, sensor) || isToggleSensorPrivacyEnabled(
-                    HARDWARE, sensor);
+            return isToggleSensorPrivacyEnabled(TOGGLE_TYPE_SOFTWARE, sensor)
+                    || isToggleSensorPrivacyEnabled(TOGGLE_TYPE_HARDWARE, sensor);
         }
 
         private boolean isToggleSensorPrivacyEnabledInternal(int userId, int toggleType,
@@ -879,7 +890,7 @@ public final class SensorPrivacyService extends SystemService {
 
         @Override
         public boolean supportsSensorToggle(int toggleType, int sensor) {
-            if (toggleType == SOFTWARE) {
+            if (toggleType == TOGGLE_TYPE_SOFTWARE) {
                 if (sensor == MICROPHONE) {
                     return mContext.getResources()
                             .getBoolean(R.bool.config_supportsMicToggle);
@@ -887,7 +898,7 @@ public final class SensorPrivacyService extends SystemService {
                     return mContext.getResources()
                             .getBoolean(R.bool.config_supportsCamToggle);
                 }
-            } else if (toggleType == SensorPrivacyManager.ToggleTypes.HARDWARE) {
+            } else if (toggleType == TOGGLE_TYPE_HARDWARE) {
                 if (sensor == MICROPHONE) {
                     return mContext.getResources()
                             .getBoolean(R.bool.config_supportsHardwareMicToggle);
@@ -917,7 +928,6 @@ public final class SensorPrivacyService extends SystemService {
          */
         @Override
         public void addToggleSensorPrivacyListener(ISensorPrivacyListener listener) {
-            Log.d("evan", "trying to add from " + Binder.getCallingUid());
             enforceObserveSensorPrivacyPermission();
             if (listener == null) {
                 throw new IllegalArgumentException("listener cannot be null");
@@ -1003,37 +1013,41 @@ public final class SensorPrivacyService extends SystemService {
             final int hwToggleIdx = 1;
             // Get SW toggles state
             mSensorPrivacyStateController.atomic(() -> {
-                prevMicState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(from, SOFTWARE,
-                        MICROPHONE);
-                prevCamState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(from, SOFTWARE,
-                        CAMERA);
-                micState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(to, SOFTWARE,
-                        MICROPHONE);
-                camState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(to, SOFTWARE, CAMERA);
+                prevMicState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(from,
+                        TOGGLE_TYPE_SOFTWARE, MICROPHONE);
+                prevCamState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(from,
+                        TOGGLE_TYPE_SOFTWARE, CAMERA);
+                micState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(to,
+                        TOGGLE_TYPE_SOFTWARE, MICROPHONE);
+                camState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(to,
+                        TOGGLE_TYPE_SOFTWARE, CAMERA);
             });
             // Get HW toggles state
             mSensorPrivacyStateController.atomic(() -> {
-                prevMicState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(from, HARDWARE,
-                        MICROPHONE);
-                prevCamState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(from, HARDWARE,
-                        CAMERA);
-                micState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(to, HARDWARE,
-                        MICROPHONE);
-                camState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(to, HARDWARE, CAMERA);
+                prevMicState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(from,
+                        TOGGLE_TYPE_HARDWARE, MICROPHONE);
+                prevCamState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(from,
+                        TOGGLE_TYPE_HARDWARE, CAMERA);
+                micState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(to,
+                        TOGGLE_TYPE_HARDWARE, MICROPHONE);
+                camState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(to,
+                        TOGGLE_TYPE_HARDWARE, CAMERA);
             });
 
             if (from == USER_NULL || prevMicState[swToggleIdx] != micState[swToggleIdx]
                     || prevMicState[hwToggleIdx] != micState[hwToggleIdx]) {
-                mHandler.handleSensorPrivacyChanged(to, SOFTWARE, MICROPHONE,
+                mHandler.handleSensorPrivacyChanged(to, TOGGLE_TYPE_SOFTWARE, MICROPHONE,
                         micState[swToggleIdx]);
-                mHandler.handleSensorPrivacyChanged(to, HARDWARE, MICROPHONE,
+                mHandler.handleSensorPrivacyChanged(to, TOGGLE_TYPE_HARDWARE, MICROPHONE,
                         micState[hwToggleIdx]);
                 setGlobalRestriction(MICROPHONE, micState[swToggleIdx] || micState[hwToggleIdx]);
             }
             if (from == USER_NULL || prevCamState[swToggleIdx] != camState[swToggleIdx]
                     || prevCamState[hwToggleIdx] != camState[hwToggleIdx]) {
-                mHandler.handleSensorPrivacyChanged(to, SOFTWARE, CAMERA, camState[swToggleIdx]);
-                mHandler.handleSensorPrivacyChanged(to, HARDWARE, CAMERA, camState[hwToggleIdx]);
+                mHandler.handleSensorPrivacyChanged(to, TOGGLE_TYPE_SOFTWARE, CAMERA,
+                        camState[swToggleIdx]);
+                mHandler.handleSensorPrivacyChanged(to, TOGGLE_TYPE_HARDWARE, CAMERA,
+                        camState[hwToggleIdx]);
                 setGlobalRestriction(CAMERA, camState[swToggleIdx] || camState[hwToggleIdx]);
             }
         }
@@ -1437,7 +1451,7 @@ public final class SensorPrivacyService extends SystemService {
         public boolean isSensorPrivacyEnabled(int userId, int sensor) {
             return SensorPrivacyService.this
                     .mSensorPrivacyServiceImpl.isToggleSensorPrivacyEnabledInternal(userId,
-                            SOFTWARE, sensor);
+                            TOGGLE_TYPE_SOFTWARE, sensor);
         }
 
         @Override
@@ -1487,10 +1501,12 @@ public final class SensorPrivacyService extends SystemService {
             userId = (userId == UserHandle.USER_CURRENT ? mCurrentUser : userId);
             final int realUserId = (userId == UserHandle.USER_NULL ? mContext.getUserId() : userId);
 
-            sps.setToggleSensorPrivacyUnchecked(HARDWARE, realUserId, OTHER, sensor, enable);
+            sps.setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_HARDWARE, realUserId, OTHER, sensor,
+                    enable);
             // Also disable the SW toggle when disabling the HW toggle
             if (!enable) {
-                sps.setToggleSensorPrivacyUnchecked(SOFTWARE, realUserId, OTHER, sensor, enable);
+                sps.setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, realUserId, OTHER, sensor,
+                        enable);
             }
         }
     }
@@ -1546,9 +1562,9 @@ public final class SensorPrivacyService extends SystemService {
                 if (!mIsInEmergencyCall) {
                     mIsInEmergencyCall = true;
                     if (mSensorPrivacyServiceImpl
-                            .isToggleSensorPrivacyEnabled(SOFTWARE, MICROPHONE)) {
+                            .isToggleSensorPrivacyEnabled(TOGGLE_TYPE_SOFTWARE, MICROPHONE)) {
                         mSensorPrivacyServiceImpl.setToggleSensorPrivacyUnchecked(
-                                SOFTWARE, mCurrentUser, OTHER, MICROPHONE, false);
+                                TOGGLE_TYPE_SOFTWARE, mCurrentUser, OTHER, MICROPHONE, false);
                         mMicUnmutedForEmergencyCall = true;
                     } else {
                         mMicUnmutedForEmergencyCall = false;
@@ -1574,7 +1590,7 @@ public final class SensorPrivacyService extends SystemService {
                     mIsInEmergencyCall = false;
                     if (mMicUnmutedForEmergencyCall) {
                         mSensorPrivacyServiceImpl.setToggleSensorPrivacyUnchecked(
-                                SOFTWARE, mCurrentUser, OTHER, MICROPHONE, true);
+                                TOGGLE_TYPE_SOFTWARE, mCurrentUser, OTHER, MICROPHONE, true);
                         mMicUnmutedForEmergencyCall = false;
                     }
                 }

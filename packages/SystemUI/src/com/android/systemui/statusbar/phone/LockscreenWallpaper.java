@@ -49,7 +49,6 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 
 import libcore.io.IoUtils;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Objects;
 
@@ -230,7 +229,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println(getClass().getSimpleName() + ":");
         IndentingPrintWriter iPw = new IndentingPrintWriter(pw, "  ").increaseIndent();
         iPw.println("mCached=" + mCached);

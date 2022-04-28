@@ -78,7 +78,9 @@ public class AudioPowerCalculator extends PowerCalculator {
         final double powerMah = mPowerEstimator.calculatePower(durationMs);
         app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AUDIO, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_AUDIO, powerMah);
-        total.durationMs += durationMs;
-        total.powerMah += powerMah;
+        if (!app.isVirtualUid()) {
+            total.durationMs += durationMs;
+            total.powerMah += powerMah;
+        }
     }
 }

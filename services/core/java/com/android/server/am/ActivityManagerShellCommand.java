@@ -34,6 +34,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_COUNT;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -182,6 +183,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mAsync;
     private BroadcastOptions mBroadcastOptions;
     private boolean mShowSplashScreen;
+    private boolean mDismissKeyguardIfInsecure;
 
     final boolean mDumping;
 
@@ -342,6 +344,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetStopUserOnSwitch(pw);
                 case "set-bg-abusive-uids":
                     return runSetBgAbusiveUids(pw);
+                case "list-bg-exemptions-config":
+                    return runListBgExemptionsConfig(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -436,6 +440,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mAsync = true;
                 } else if (opt.equals("--splashscreen-show-icon")) {
                     mShowSplashScreen = true;
+                } else if (opt.equals("--dismiss-keyguard-if-insecure")) {
+                    mDismissKeyguardIfInsecure = true;
                 } else {
                     return false;
                 }
@@ -579,6 +585,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     options = ActivityOptions.makeBasic();
                 }
                 options.setSplashScreenStyle(SplashScreen.SPLASH_SCREEN_STYLE_ICON);
+            }
+            if (mDismissKeyguardIfInsecure) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setDismissKeyguardIfInsecure();
             }
             if (mWaitOption) {
                 result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
@@ -1665,6 +1677,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     StrictMode.setThreadPolicy(oldPolicy);
                 }
             }
+        }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) throws RemoteException {
         }
 
         @Override
@@ -3291,6 +3307,19 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runListBgExemptionsConfig(PrintWriter pw) throws RemoteException {
+        final ArraySet<String> sysConfigs = mInternal.mAppRestrictionController
+                .mBgRestrictionExemptioFromSysConfig;
+        if (sysConfigs != null) {
+            for (int i = 0, size = sysConfigs.size(); i < size; i++) {
+                pw.print(sysConfigs.valueAt(i));
+                pw.print(' ');
+            }
+            pw.println();
+        }
+        return 0;
+    }
+
     private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
         Configuration config = mInterface.getConfiguration();
@@ -3349,7 +3378,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  --checkin: output checkin format, resetting data.");
             pw.println("  --C: output checkin format, not resetting data.");
             pw.println("  --proto: output dump in protocol buffer format.");
-            pw.println("  --autofill: dump just the autofill-related state of an activity");
+            pw.printf("  %s: dump just the DUMPABLE-related state of an activity. Use the %s "
+                    + "option to list the supported DUMPABLEs\n", Activity.DUMP_ARG_DUMP_DUMPABLE,
+                    Activity.DUMP_ARG_LIST_DUMPABLES);
+            pw.printf("  %s: show the available dumpables in an activity\n",
+                    Activity.DUMP_ARG_LIST_DUMPABLES);
         } else {
             pw.println("Activity manager (activity) commands:");
             pw.println("  help");

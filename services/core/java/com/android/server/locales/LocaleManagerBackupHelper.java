@@ -30,11 +30,8 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
-import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.LocaleList;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -45,7 +42,6 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -80,7 +76,7 @@ class LocaleManagerBackupHelper {
     private static final Duration STAGE_DATA_RETENTION_PERIOD = Duration.ofDays(3);
 
     private final LocaleManagerService mLocaleManagerService;
-    private final PackageManagerInternal mPackageManagerInternal;
+    private final PackageManager mPackageManager;
     private final Clock mClock;
     private final Context mContext;
     private final Object mStagedDataLock = new Object();
@@ -89,32 +85,24 @@ class LocaleManagerBackupHelper {
     // SparseArray because it is more memory-efficient than a HashMap.
     private final SparseArray<StagedData> mStagedData;
 
-    private final PackageMonitor mPackageMonitor;
     private final BroadcastReceiver mUserMonitor;
 
     LocaleManagerBackupHelper(LocaleManagerService localeManagerService,
-            PackageManagerInternal pmInternal) {
-        this(localeManagerService.mContext, localeManagerService, pmInternal, Clock.systemUTC(),
-                new SparseArray<>());
+            PackageManager packageManager, HandlerThread broadcastHandlerThread) {
+        this(localeManagerService.mContext, localeManagerService, packageManager, Clock.systemUTC(),
+                new SparseArray<>(), broadcastHandlerThread);
     }
 
     @VisibleForTesting LocaleManagerBackupHelper(Context context,
             LocaleManagerService localeManagerService,
-            PackageManagerInternal pmInternal, Clock clock, SparseArray<StagedData> stagedData) {
+            PackageManager packageManager, Clock clock, SparseArray<StagedData> stagedData,
+            HandlerThread broadcastHandlerThread) {
         mContext = context;
         mLocaleManagerService = localeManagerService;
-        mPackageManagerInternal = pmInternal;
+        mPackageManager = packageManager;
         mClock = clock;
         mStagedData = stagedData;
 
-        HandlerThread broadcastHandlerThread = new HandlerThread(TAG,
-                Process.THREAD_PRIORITY_BACKGROUND);
-        broadcastHandlerThread.start();
-
-        mPackageMonitor = new PackageMonitorImpl();
-        mPackageMonitor.register(context, broadcastHandlerThread.getLooper(),
-                UserHandle.ALL,
-                true);
         mUserMonitor = new UserMonitor();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_REMOVED);
@@ -125,11 +113,6 @@ class LocaleManagerBackupHelper {
     @VisibleForTesting
     BroadcastReceiver getUserMonitor() {
         return mUserMonitor;
-    }
-
-    @VisibleForTesting
-    PackageMonitor getPackageMonitor() {
-        return mPackageMonitor;
     }
 
     /**
@@ -145,8 +128,8 @@ class LocaleManagerBackupHelper {
         }
 
         HashMap<String, String> pkgStates = new HashMap<>();
-        for (ApplicationInfo appInfo : mPackageManagerInternal.getInstalledApplications(/*flags*/0,
-                userId, Binder.getCallingUid())) {
+        for (ApplicationInfo appInfo : mPackageManager.getInstalledApplicationsAsUser(
+                PackageManager.ApplicationInfoFlags.of(0), userId)) {
             try {
                 LocaleList appLocales = mLocaleManagerService.getApplicationLocales(
                         appInfo.packageName,
@@ -265,6 +248,53 @@ class LocaleManagerBackupHelper {
      */
     public void notifyBackupManager() {
         BackupManager.dataChanged(SYSTEM_BACKUP_PACKAGE_KEY);
+    }
+
+    /**
+     * <p><b>Note:</b> This is invoked by service's common monitor
+     * {@link LocaleManagerServicePackageMonitor#onPackageAdded} when a new package is
+     * added on device.
+     */
+    void onPackageAdded(String packageName, int uid) {
+        try {
+            synchronized (mStagedDataLock) {
+                cleanStagedDataForOldEntriesLocked();
+
+                int userId = UserHandle.getUserId(uid);
+                if (mStagedData.contains(userId)) {
+                    // Perform lazy restore only if the staged data exists.
+                    doLazyRestoreLocked(packageName, userId);
+                }
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception in onPackageAdded.", e);
+        }
+    }
+
+    /**
+     * <p><b>Note:</b> This is invoked by service's common monitor
+     * {@link LocaleManagerServicePackageMonitor#onPackageDataCleared} when a package's data
+     * is cleared.
+     */
+    void onPackageDataCleared() {
+        try {
+            notifyBackupManager();
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception in onPackageDataCleared.", e);
+        }
+    }
+
+    /**
+     * <p><b>Note:</b> This is invoked by service's common monitor
+     * {@link LocaleManagerServicePackageMonitor#onPackageRemoved} when a package is removed
+     * from device.
+     */
+    void onPackageRemoved() {
+        try {
+            notifyBackupManager();
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception in onPackageRemoved.", e);
+        }
     }
 
     private boolean isPackageInstalledForUser(String packageName, int userId) {
@@ -390,48 +420,6 @@ class LocaleManagerBackupHelper {
                 }
             } catch (Exception e) {
                 Slog.e(TAG, "Exception in user monitor.", e);
-            }
-        }
-    }
-
-    /**
-     * Helper to monitor package states.
-     *
-     * <p>We're interested in package added, package data cleared and package removed events.
-     */
-    private final class PackageMonitorImpl extends PackageMonitor {
-        @Override
-        public void onPackageAdded(String packageName, int uid) {
-            try {
-                synchronized (mStagedDataLock) {
-                    cleanStagedDataForOldEntriesLocked();
-
-                    int userId = UserHandle.getUserId(uid);
-                    if (mStagedData.contains(userId)) {
-                        // Perform lazy restore only if the staged data exists.
-                        doLazyRestoreLocked(packageName, userId);
-                    }
-                }
-            } catch (Exception e) {
-                Slog.e(TAG, "Exception in onPackageAdded.", e);
-            }
-        }
-
-        @Override
-        public void onPackageDataCleared(String packageName, int uid) {
-            try {
-                notifyBackupManager();
-            } catch (Exception e) {
-                Slog.e(TAG, "Exception in onPackageDataCleared.", e);
-            }
-        }
-
-        @Override
-        public void onPackageRemoved(String packageName, int uid) {
-            try {
-                notifyBackupManager();
-            } catch (Exception e) {
-                Slog.e(TAG, "Exception in onPackageRemoved.", e);
             }
         }
     }

@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
 public final class SmsApplication {
     static final String LOG_TAG = "SmsApplication";
     public static final String PHONE_PACKAGE_NAME = "com.android.phone";
-    public static final String BLUETOOTH_PACKAGE_NAME = "com.android.bluetooth";
+    public static final String BLUETOOTH_PACKAGE_NAME = "com.android.bluetooth.services";
     public static final String MMS_SERVICE_PACKAGE_NAME = "com.android.mms.service";
     public static final String TELEPHONY_PROVIDER_PACKAGE_NAME = "com.android.providers.telephony";
 

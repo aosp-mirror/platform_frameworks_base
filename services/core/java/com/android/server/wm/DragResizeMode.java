@@ -40,8 +40,6 @@ class DragResizeMode {
         switch (mode) {
             case DRAG_RESIZE_MODE_FREEFORM:
                 return rootTask.getWindowingMode() == WINDOWING_MODE_FREEFORM;
-            case DRAG_RESIZE_MODE_DOCKED_DIVIDER:
-                return rootTask.inSplitScreenWindowingMode();
             default:
                 return false;
         }

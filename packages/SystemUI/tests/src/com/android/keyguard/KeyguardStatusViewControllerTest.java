@@ -22,7 +22,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
@@ -50,8 +49,6 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private CommunalStateController mCommunalStateController;
-    @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     ConfigurationController mConfigurationController;
@@ -76,7 +73,6 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mKeyguardClockSwitchController,
                 mKeyguardStateController,
                 mKeyguardUpdateMonitor,
-                mCommunalStateController,
                 mConfigurationController,
                 mDozeParameters,
                 mKeyguardUnlockAnimationController,
@@ -115,5 +111,14 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
 
         mKeyguardUpdateMonitorCallbackCaptor.getValue().onUserSwitchComplete(0);
         verify(mKeyguardClockSwitchController).refreshFormat();
+    }
+
+    @Test
+    public void setTranslationYExcludingMedia_forwardsCallToView() {
+        float translationY = 123f;
+
+        mController.setTranslationYExcludingMedia(translationY);
+
+        verify(mKeyguardStatusView).setChildrenTranslationYExcludingMediaView(translationY);
     }
 }

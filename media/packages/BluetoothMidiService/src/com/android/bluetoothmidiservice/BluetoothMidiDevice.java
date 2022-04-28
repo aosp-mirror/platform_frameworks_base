@@ -150,6 +150,7 @@ public final class BluetoothMidiDevice {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
                 BluetoothGattCharacteristic characteristic,
+                byte[] value,
                 int status) {
             Log.d(TAG, "onCharacteristicRead " + status);
 
@@ -164,8 +165,8 @@ public final class BluetoothMidiDevice {
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
                     CLIENT_CHARACTERISTIC_CONFIG);
             if (descriptor != null) {
-                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                boolean result = mBluetoothGatt.writeDescriptor(descriptor);
+                int result = mBluetoothGatt.writeDescriptor(descriptor,
+                        BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                 Log.d(TAG, "writeDescriptor returned " + result);
             } else {
                 Log.e(TAG, "No CLIENT_CHARACTERISTIC_CONFIG for device " + mBluetoothDevice);
@@ -184,12 +185,13 @@ public final class BluetoothMidiDevice {
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
-                                            BluetoothGattCharacteristic characteristic) {
+                                            BluetoothGattCharacteristic characteristic,
+                                            byte[] value) {
             if (DEBUG) {
-                logByteArray("Received ", characteristic.getValue(), 0,
-                        characteristic.getValue().length);
+                logByteArray("Received BLE packet", value, 0,
+                        value.length);
             }
-            mPacketDecoder.decodePacket(characteristic.getValue(), mOutputReceiver);
+            mPacketDecoder.decodePacket(value, mOutputReceiver);
         }
 
         @Override
@@ -227,17 +229,14 @@ public final class BluetoothMidiDevice {
                 mCachedBuffer = new byte[count];
             }
             System.arraycopy(buffer, 0, mCachedBuffer, 0, count);
-            if (!mCharacteristic.setValue(mCachedBuffer)) {
-                Log.w(TAG, "could not set characteristic value");
-                return false;
-            }
 
             if (DEBUG) {
                 logByteArray("Sent ", mCharacteristic.getValue(), 0,
                        mCharacteristic.getValue().length);
             }
 
-            if (!mBluetoothGatt.writeCharacteristic(mCharacteristic)) {
+            if (mBluetoothGatt.writeCharacteristic(mCharacteristic, mCachedBuffer,
+                    mCharacteristic.getWriteType()) != BluetoothGatt.GATT_SUCCESS) {
                 Log.w(TAG, "could not write characteristic to Bluetooth GATT");
                 return false;
             }

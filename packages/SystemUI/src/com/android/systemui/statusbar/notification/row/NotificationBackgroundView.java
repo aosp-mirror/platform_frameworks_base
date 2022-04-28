@@ -29,8 +29,6 @@ import android.view.View;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 
 /**
  * A view that can be used for both the dimmed and normal background of an notification.
@@ -270,8 +268,8 @@ public class NotificationBackgroundView extends View {
 
     /** Set the current expand animation size. */
     public void setExpandAnimationSize(int width, int height) {
-        mExpandAnimationHeight = width;
-        mExpandAnimationWidth = height;
+        mExpandAnimationHeight = height;
+        mExpandAnimationWidth = width;
         invalidate();
     }
 
