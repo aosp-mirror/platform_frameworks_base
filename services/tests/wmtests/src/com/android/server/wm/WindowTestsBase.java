@@ -87,6 +87,7 @@ import android.view.IDisplayWindowInsetsController;
 import android.view.IWindow;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -793,7 +794,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             @Override
-            public void topFocusedWindowChanged(String packageName) {
+            public void topFocusedWindowChanged(String packageName,
+                    InsetsVisibilities requestedVisibilities) {
             }
         };
     }
@@ -903,7 +905,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         doReturn(100).when(hardwareBuffer).getHeight();
     }
 
-    private static ComponentName getUniqueComponentName() {
+    static ComponentName getUniqueComponentName() {
         return ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
                 DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
     }
@@ -1154,10 +1156,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
             spyOn(activity);
             if (mTask != null) {
-                // fullscreen value is normally read from resources in ctor, so for testing we need
-                // to set it somewhere else since we can't mock resources.
-                doReturn(true).when(activity).occludesParent();
-                doReturn(true).when(activity).fillsParent();
                 mTask.addChild(activity);
                 if (mOnTop) {
                     // Move the task to front after activity is added.
@@ -1264,6 +1262,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                         mOrganizer.getOrganizerToken(), DEFAULT_TASK_FRAGMENT_ORGANIZER_UID,
                         DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
             }
+            spyOn(taskFragment);
             return taskFragment;
         }
     }

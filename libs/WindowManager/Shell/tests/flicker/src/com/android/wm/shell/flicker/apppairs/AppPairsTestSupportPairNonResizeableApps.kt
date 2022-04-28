@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.apppairs
 
 import android.platform.test.annotations.Presubmit
+import android.view.Display
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -24,6 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.wm.shell.flicker.appPairsDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
@@ -60,7 +62,18 @@ class AppPairsTestSupportPairNonResizeableApps(
                 // TODO pair apps through normal UX flow
                 executeShellCommand(
                         composePairsCommand(primaryTaskId, nonResizeableTaskId, pair = true))
-                nonResizeableApp?.run { wmHelper.waitForFullScreenApp(nonResizeableApp.component) }
+                val waitConditions = mutableListOf(
+                    WindowManagerConditionsFactory.isWindowVisible(primaryApp.component),
+                    WindowManagerConditionsFactory.isLayerVisible(primaryApp.component),
+                    WindowManagerConditionsFactory.isAppTransitionIdle(Display.DEFAULT_DISPLAY))
+
+                nonResizeableApp?.let {
+                    waitConditions.add(
+                        WindowManagerConditionsFactory.isWindowVisible(nonResizeableApp.component))
+                    waitConditions.add(
+                        WindowManagerConditionsFactory.isLayerVisible(nonResizeableApp.component))
+                }
+                wmHelper.waitFor(*waitConditions.toTypedArray())
             }
         }
 

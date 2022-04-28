@@ -26,6 +26,7 @@ import android.hardware.display.DisplayManager;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.os.Bundle;
+import android.os.Trace;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -67,11 +68,14 @@ public class KeyguardDisplayManager {
 
         @Override
         public void onDisplayAdded(int displayId) {
+            Trace.beginSection(
+                    "KeyguardDisplayManager#onDisplayAdded(displayId=" + displayId + ")");
             final Display display = mDisplayService.getDisplay(displayId);
             if (mShowing) {
                 updateNavigationBarVisibility(displayId, false /* navBarVisible */);
                 showPresentation(display);
             }
+            Trace.endSection();
         }
 
         @Override
@@ -81,7 +85,10 @@ public class KeyguardDisplayManager {
 
         @Override
         public void onDisplayRemoved(int displayId) {
+            Trace.beginSection(
+                    "KeyguardDisplayManager#onDisplayRemoved(displayId=" + displayId + ")");
             hidePresentation(displayId);
+            Trace.endSection();
         }
     };
 

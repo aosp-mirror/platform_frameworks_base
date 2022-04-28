@@ -1058,11 +1058,6 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Refreshes this info with the latest state of the view it represents.
-     * <p>
-     * <strong>Note:</strong> If this method returns false this info is obsolete
-     * since it represents a view that is no longer in the view tree and should
-     * be recycled.
-     * </p>
      *
      * @param bypassCache Whether to bypass the cache.
      * @return Whether the refresh succeeded.
@@ -1089,8 +1084,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Refreshes this info with the latest state of the view it represents.
      *
      * @return {@code true} if the refresh succeeded. {@code false} if the {@link View} represented
-     * by this node is no longer in the view tree (and thus this node is obsolete and should be
-     * recycled).
+     * by this node is no longer in the view tree (and thus this node is obsolete).
      */
     public boolean refresh() {
         return refresh(null, true);
@@ -1109,8 +1103,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param args A bundle of arguments for the request. These depend on the particular request.
      *
      * @return {@code true} if the refresh succeeded. {@code false} if the {@link View} represented
-     * by this node is no longer in the view tree (and thus this node is obsolete and should be
-     * recycled).
+     * by this node is no longer in the view tree (and thus this node is obsolete).
      */
     public boolean refreshWithExtraData(String extraDataKey, Bundle args) {
         // limits the text location length to make sure the rectangle array allocation avoids
@@ -1823,11 +1816,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * this info is the root of the traversed tree.
      *
      * <p>
-     *   <strong>Note:</strong> It is a client responsibility to recycle the
-     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-     *     to avoid creating of multiple instances.
-     * </p>
-     * <p>
      * <strong>Note:</strong> If this view hierarchy has a {@link SurfaceView} embedding another
      * view hierarchy via {@link SurfaceView#setChildSurfacePackage}, there is a limitation that
      * this API won't be able to find the node for the view on the embedded view hierarchy. It's
@@ -1854,11 +1842,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * For example, if the target application's package is "foo.bar" and the id
      * resource name is "baz", the fully qualified resource id is "foo.bar:id/baz".
      *
-     * <p>
-     *   <strong>Note:</strong> It is a client responsibility to recycle the
-     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-     *     to avoid creating of multiple instances.
-     * </p>
      * <p>
      *   <strong>Note:</strong> The primary usage of this API is for UI test automation
      *   and in order to report the fully qualified view id if an {@link AccessibilityNodeInfo}
@@ -3282,11 +3265,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Gets the node info for which the view represented by this info serves as
      * a label for accessibility purposes.
-     * <p>
-     *   <strong>Note:</strong> It is a client responsibility to recycle the
-     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-     *     to avoid creating of multiple instances.
-     * </p>
      *
      * @return The labeled info.
      */
@@ -3334,11 +3312,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Gets the node info which serves as the label of the view represented by
      * this info for accessibility purposes.
-     * <p>
-     *   <strong>Note:</strong> It is a client responsibility to recycle the
-     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-     *     to avoid creating of multiple instances.
-     * </p>
      *
      * @return The label.
      */
@@ -4487,8 +4460,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             case R.id.accessibilityActionDragDrop:
                 return "ACTION_DROP";
             default: {
-                if (action == R.id.accessibilityActionShowSuggestions) {
-                    return "ACTION_SHOW_SUGGESTIONS";
+                if (action == R.id.accessibilityActionShowTextSuggestions) {
+                    return "ACTION_SHOW_TEXT_SUGGESTIONS";
                 }
                 return "ACTION_UNKNOWN";
             }
@@ -5189,34 +5162,10 @@ public class AccessibilityNodeInfo implements Parcelable {
                 new AccessibilityAction(R.id.accessibilityActionDragCancel);
 
         /**
-         * Action to perform a left swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_LEFT =
-                new AccessibilityAction(R.id.accessibilityActionSwipeLeft);
-
-        /**
-         * Action to perform a right swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_RIGHT =
-            new AccessibilityAction(R.id.accessibilityActionSwipeRight);
-
-        /**
-         * Action to perform an up swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_UP =
-            new AccessibilityAction(R.id.accessibilityActionSwipeUp);
-
-        /**
-         * Action to perform a down swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_DOWN =
-            new AccessibilityAction(R.id.accessibilityActionSwipeDown);
-
-        /**
          * Action to show suggestions for editable text.
          */
-        @NonNull public static final AccessibilityAction ACTION_SHOW_SUGGESTIONS =
-                new AccessibilityAction(R.id.accessibilityActionShowSuggestions);
+        @NonNull public static final AccessibilityAction ACTION_SHOW_TEXT_SUGGESTIONS =
+                new AccessibilityAction(R.id.accessibilityActionShowTextSuggestions);
 
         private final int mActionId;
         private final CharSequence mLabel;
@@ -5336,9 +5285,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Class with information if a node is a range. Use
-     * {@link RangeInfo#obtain(int, float, float, float)} to get an instance. Recycling is
-     * handled by the {@link AccessibilityNodeInfo} to which this object is attached.
+     * Class with information if a node is a range.
      */
     public static final class RangeInfo {
 
@@ -5447,9 +5394,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Class with information if a node is a collection. Use
-     * {@link CollectionInfo#obtain(int, int, boolean)} to get an instance. Recycling is
-     * handled by the {@link AccessibilityNodeInfo} to which this object is attached.
+     * Class with information if a node is a collection.
      * <p>
      * A collection of items has rows and columns and may be hierarchical.
      * For example, a horizontal list is a collection with one column, as
@@ -5615,10 +5560,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Class with information if a node is a collection item. Use
-     * {@link CollectionItemInfo#obtain(int, int, int, int, boolean)}
-     * to get an instance. Recycling is handled by the {@link AccessibilityNodeInfo} to which this
-     * object is attached.
+     * Class with information if a node is a collection item.
      * <p>
      * A collection item is contained in a collection, it starts at
      * a given row and column in the collection, and spans one or
@@ -5706,6 +5648,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param heading Whether the item is a heading. (Prefer
          *                {@link AccessibilityNodeInfo#setHeading(boolean)})
          * @param selected Whether the item is selected.
+         * @removed
          */
         @Deprecated
         @NonNull
@@ -6107,11 +6050,6 @@ public class AccessibilityNodeInfo implements Parcelable {
          * Return the target {@link AccessibilityNodeInfo} for the given {@link Region}.
          * <p>
          *   <strong>Note:</strong> This api can only be called from {@link AccessibilityService}.
-         * </p>
-         * <p>
-         *   <strong>Note:</strong> It is a client responsibility to recycle the
-         *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-         *     to avoid creating of multiple instances.
          * </p>
          *
          * @param region The region retrieved from {@link #getRegionAt(int)}.

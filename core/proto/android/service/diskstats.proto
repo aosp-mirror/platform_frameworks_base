@@ -99,6 +99,8 @@ message DiskStatsFreeSpaceProto {
         FOLDER_CACHE = 1;
         // System folder
         FOLDER_SYSTEM = 2;
+        // Metadata folder
+        FOLDER_METADATA = 3;
     }
     // Which folder?
     optional Folder folder = 1;

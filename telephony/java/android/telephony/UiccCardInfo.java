@@ -17,8 +17,12 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.PackageManager;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.telephony.util.TelephonyUtils;
+import com.android.telephony.Rlog;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -147,9 +151,10 @@ public final class UiccCardInfo implements Parcelable {
      * Note that this field may be omitted if the caller does not have the correct permissions
      * (see {@link TelephonyManager#getUiccCardsInfo()}).
      *
-     * @deprecated with support for MEP(multiple enabled profile), a SIM card can have more than one
-     * ICCID active at the same time.Instead use {@link UiccPortInfo#getIccId()} to retrieve ICCID.
-     * To find {@link UiccPortInfo} use {@link UiccCardInfo#getPorts()}
+     * @deprecated with support for MEP(multiple enabled profile)
+     * {@link PackageManager#FEATURE_TELEPHONY_EUICC_MEP}, a SIM card can have more than one
+     * ICCID active at the same time. Instead use {@link UiccPortInfo#getIccId()} to retrieve ICCID.
+     * To find {@link UiccPortInfo} use {@link UiccCardInfo#getPorts()}.
      *
      * @throws UnsupportedOperationException if the calling app's target SDK is T and beyond.
      */
@@ -192,11 +197,11 @@ public final class UiccCardInfo implements Parcelable {
     }
 
     /*
-     * Whether the UICC card supports multiple enable profile(MEP)
+     * Whether the UICC card supports multiple enabled profile(MEP)
      * UICCs are generally MEP disabled, there can be only one active profile on the physical
      * sim card.
      *
-     * @return {@code true} if the eUICC is supporting multiple enabled profile(MEP).
+     * @return {@code true} if the UICC is supporting multiple enabled profile(MEP).
      */
     public boolean isMultipleEnabledProfilesSupported() {
         return mIsMultipleEnabledProfilesSupported;
@@ -204,6 +209,9 @@ public final class UiccCardInfo implements Parcelable {
 
     /**
      * Get information regarding port, ICCID and its active status.
+     *
+     * For device which support {@link PackageManager#FEATURE_TELEPHONY_EUICC_MEP}, it should return
+     * more than one {@link UiccPortInfo} object if the card is eUICC.
      *
      * @return Collection of {@link UiccPortInfo}
      */
@@ -221,7 +229,6 @@ public final class UiccCardInfo implements Parcelable {
     public void setIccIdAccessRestricted(boolean iccIdAccessRestricted) {
         this.mIccIdAccessRestricted = iccIdAccessRestricted;
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -256,7 +263,7 @@ public final class UiccCardInfo implements Parcelable {
                 + ", mCardId="
                 + mCardId
                 + ", mEid="
-                + mEid
+                + Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, mEid)
                 + ", mPhysicalSlotIndex="
                 + mPhysicalSlotIndex
                 + ", mIsRemovable="

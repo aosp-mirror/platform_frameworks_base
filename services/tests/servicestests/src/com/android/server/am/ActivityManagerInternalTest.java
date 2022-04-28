@@ -129,7 +129,7 @@ public class ActivityManagerInternalTest {
         thread2.assertWaiting("Unexpected state for " + record2);
         thread2.interrupt();
 
-        mAms.mProcessList.mActiveUids.clear();
+        clearActiveUids();
     }
 
     private UidRecord addActiveUidRecord(int uid, long curProcStateSeq,
@@ -137,9 +137,19 @@ public class ActivityManagerInternalTest {
         final UidRecord record = new UidRecord(uid, mAms);
         record.lastNetworkUpdatedProcStateSeq = lastNetworkUpdatedProcStateSeq;
         record.curProcStateSeq = curProcStateSeq;
-        record.waitingForNetwork = true;
-        mAms.mProcessList.mActiveUids.put(uid, record);
+        record.procStateSeqWaitingForNetwork = 1;
+        addActiveUidRecord(uid, record);
         return record;
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private void addActiveUidRecord(int uid, UidRecord record) {
+        mAms.mProcessList.mActiveUids.put(uid, record);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private void clearActiveUids() {
+        mAms.mProcessList.mActiveUids.clear();
     }
 
     static class CustomThread extends Thread {

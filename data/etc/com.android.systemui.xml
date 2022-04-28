@@ -17,6 +17,7 @@
 <permissions>
     <privapp-permissions package="com.android.systemui">
         <permission name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
+        <permission name="android.permission.ALLOW_SLIPPERY_TOUCHES"/>
         <permission name="android.permission.BATTERY_STATS"/>
         <permission name="android.permission.BIND_APPWIDGET"/>
         <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
@@ -75,5 +76,9 @@
         <permission name="android.permission.FORCE_STOP_PACKAGES" />
         <permission name="android.permission.ACCESS_FPS_COUNTER" />
         <permission name="android.permission.CHANGE_CONFIGURATION" />
+        <permission name="android.permission.LOG_COMPAT_CHANGE" />
+        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+        <permission name="android.permission.READ_DEVICE_CONFIG" />
+        <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
     </privapp-permissions>
 </permissions>

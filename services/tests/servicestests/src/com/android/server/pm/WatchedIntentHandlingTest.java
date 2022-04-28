@@ -145,7 +145,7 @@ public class WatchedIntentHandlingTest {
         IntentFilter i = new IntentFilter("TEST_ACTION");
         PreferredActivity a1 = new PreferredActivity(i, 1, components, component, true);
 
-        r.addFilter(a1);
+        r.addFilter(null, a1);
         watcher.verifyChangeReported("addFilter");
         i.setPriority(i.getPriority() + 1);
         watcher.verifyNoChangeReported("indepenent intent");

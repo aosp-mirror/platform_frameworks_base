@@ -473,7 +473,7 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
   }
 
   auto package = FindOrCreatePackage(res.name.package);
-  auto type = package->FindOrCreateType(res.name.type);
+  auto type = package->FindOrCreateType(res.name.type.type);
   auto entry_it = std::equal_range(type->entries.begin(), type->entries.end(), res.name.entry,
                                    NameEqualRange<ResourceEntry>{});
   const size_t entry_count = std::distance(entry_it.first, entry_it.second);
@@ -593,7 +593,7 @@ std::optional<ResourceTable::SearchResult> ResourceTable::FindResource(
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type);
+  ResourceTableType* type = package->FindType(name.type.type);
   if (type == nullptr) {
     return {};
   }
@@ -612,7 +612,7 @@ std::optional<ResourceTable::SearchResult> ResourceTable::FindResource(const Res
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type);
+  ResourceTableType* type = package->FindType(name.type.type);
   if (type == nullptr) {
     return {};
   }
@@ -633,7 +633,7 @@ bool ResourceTable::RemoveResource(const ResourceNameRef& name, ResourceId id) c
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type);
+  ResourceTableType* type = package->FindType(name.type.type);
   if (type == nullptr) {
     return {};
   }

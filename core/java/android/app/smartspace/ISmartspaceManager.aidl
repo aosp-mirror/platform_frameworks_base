@@ -26,7 +26,7 @@ import android.content.pm.ParceledListSlice;
 /**
  * @hide
  */
-interface ISmartspaceManager {
+oneway interface ISmartspaceManager {
 
     void createSmartspaceSession(in SmartspaceConfig config, in SmartspaceSessionId sessionId,
             in IBinder token);

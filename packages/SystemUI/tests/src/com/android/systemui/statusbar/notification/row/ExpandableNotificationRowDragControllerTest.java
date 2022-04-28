@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.row;
 
 import static android.view.DragEvent.ACTION_DRAG_STARTED;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -36,7 +38,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -58,6 +65,7 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
     private NotificationMenuRow mMenuRow = mock(NotificationMenuRow.class);
     private NotificationMenuRowPlugin.MenuItem mMenuItem =
             mock(NotificationMenuRowPlugin.MenuItem.class);
+    private ShadeController mShadeController = mock(ShadeController.class);
 
     @Before
     public void setUp() throws Exception {
@@ -69,11 +77,15 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
                 mContext,
                 mDependency,
                 TestableLooper.get(this));
-        mRow = mNotificationTestHelper.createRow();
+        mRow = spy(mNotificationTestHelper.createRow());
+        Notification notification = mRow.getEntry().getSbn().getNotification();
+        notification.contentIntent = mock(PendingIntent.class);
+        doReturn(true).when(mRow).startDragAndDrop(any(), any(), any(), anyInt());
         mGroupRow = mNotificationTestHelper.createGroup(4);
         when(mMenuRow.getLongpressMenuItem(any(Context.class))).thenReturn(mMenuItem);
 
-        mController = new ExpandableNotificationRowDragController(mContext, mHeadsUpManager);
+        mController = new ExpandableNotificationRowDragController(mContext, mHeadsUpManager,
+                mShadeController);
     }
 
     @Test
@@ -86,10 +98,6 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
         mRow.doLongClickCallback(0, 0);
         mRow.doDragCallback(0, 0);
         verify(controller).startDragAndDrop(mRow);
-
-        // Simulate the drag start
-        mRow.dispatchDragEvent(DragEvent.obtain(ACTION_DRAG_STARTED, 0, 0, 0, 0, null, null, null,
-                null, null, false));
         verify(mHeadsUpManager, times(1)).releaseAllImmediately();
     }
 
@@ -98,14 +106,27 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
         ExpandableNotificationRowDragController controller = createSpyController();
         mRow.setDragController(controller);
 
-        mDependency.get(ShadeController.class).instantExpandNotificationsPanel();
+        mRow.doDragCallback(0, 0);
+        verify(controller).startDragAndDrop(mRow);
+        verify(mShadeController).animateCollapsePanels(eq(0), eq(true),
+                eq(false), anyFloat());
+    }
+
+    @Test
+    public void testDoStartDrag_noLaunchIntent() throws Exception {
+        ExpandableNotificationRowDragController controller = createSpyController();
+        mRow.setDragController(controller);
+
+        // Clear the intents
+        Notification notification = mRow.getEntry().getSbn().getNotification();
+        notification.contentIntent = null;
+        notification.fullScreenIntent = null;
+
         mRow.doDragCallback(0, 0);
         verify(controller).startDragAndDrop(mRow);
 
-        // Simulate the drag start
-        mRow.dispatchDragEvent(DragEvent.obtain(ACTION_DRAG_STARTED, 0, 0, 0, 0, null, null, null,
-                null, null, false));
-        verify(mDependency.get(ShadeController.class)).animateCollapsePanels(0, true);
+        // Verify that we never start the actual drag since there is no content
+        verify(mRow, never()).startDragAndDrop(any(), any(), any(), anyInt());
     }
 
     private ExpandableNotificationRowDragController createSpyController() {

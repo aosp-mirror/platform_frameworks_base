@@ -1328,6 +1328,9 @@
               postScriptName="NotoSerifCJKjp-Regular">NotoSerifCJK-Regular.ttc
         </font>
     </family>
+    <family lang="und-Zsye" ignore="true">
+        <font weight="400" style="normal">NotoColorEmojiLegacy.ttf</font>
+    </family>
     <family lang="und-Zsye">
         <font weight="400" style="normal">NotoColorEmoji.ttf</font>
     </family>

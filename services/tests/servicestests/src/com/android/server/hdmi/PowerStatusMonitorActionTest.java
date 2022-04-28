@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
@@ -68,7 +69,8 @@ public class PowerStatusMonitorActionTest {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         mHdmiControlService = new HdmiControlService(mContextSpy,
-                Collections.singletonList(HdmiDeviceInfo.DEVICE_TV)) {
+                Collections.singletonList(HdmiDeviceInfo.DEVICE_TV),
+                new FakeAudioDeviceVolumeManagerWrapper()) {
             @Override
             AudioManager getAudioManager() {
                 return new AudioManager() {
@@ -110,6 +112,7 @@ public class PowerStatusMonitorActionTest {
                 new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, false);
         mNativeWrapper.setPortInfo(hdmiPortInfo);
         mHdmiControlService.initService();
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
         mPhysicalAddress = 0x0000;

@@ -19,7 +19,6 @@ package android.app;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
-import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
 import android.window.TaskSnapshot;
@@ -32,8 +31,16 @@ import android.window.TaskSnapshot;
  */
 public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
+    /** Whether this listener and the callback dispatcher are in different processes. */
+    private boolean mIsRemote = true;
+
     @UnsupportedAppUsage
     public TaskStackListener() {
+    }
+
+    /** Indicates that this listener lives in system server. */
+    public void setIsLocal() {
+        mIsRemote = false;
     }
 
     @Override
@@ -154,8 +161,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     @Override
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) throws RemoteException {
-        if (Binder.getCallingPid() != android.os.Process.myPid()
-                && snapshot != null && snapshot.getHardwareBuffer() != null) {
+        if (mIsRemote && snapshot != null && snapshot.getHardwareBuffer() != null) {
             // Preemptively clear any reference to the buffer
             snapshot.getHardwareBuffer().close();
         }

@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Wpisz poniżej hasło szyfrowania urządzenia. Służy ono również do szyfrowania archiwum kopii zapasowych."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Wpisz hasło do zaszyfrowania pełnej kopii zapasowej. Jeśli pozostawisz puste pole, zostanie użyte aktualne hasło kopii zapasowej:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Jeśli chcesz zaszyfrować pełną kopię zapasową, wprowadź poniżej hasło:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Ponieważ Twoje urządzenie jest szyfrowane, musisz też zaszyfrować jego kopię zapasową. Wpisz hasło poniżej:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Jeśli przywracane dane są zaszyfrowane, wpisz poniżej hasło:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Tworzenie kopii zapasowej..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Utworzono kopię zapasową"</string>

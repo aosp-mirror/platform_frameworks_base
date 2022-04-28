@@ -34,15 +34,20 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.MathUtils;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
@@ -61,9 +66,10 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.FooterView;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 
 import org.junit.Assert;
@@ -89,7 +95,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     private AmbientState mAmbientState;
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
-    @Mock private StatusBar mBar;
+    @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private SysuiStatusBarStateController mBarState;
     @Mock private NotificationGroupManagerLegacy mGroupMembershipManger;
     @Mock private NotificationGroupManagerLegacy mGroupExpansionManager;
@@ -103,6 +109,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationStackScrollLayoutController mStackScrollLayoutController;
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock private NotificationShelf mNotificationShelf;
+    @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
+    @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Before
     @UiThreadTest
@@ -110,7 +118,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         // Interact with real instance of AmbientState.
-        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController);
+        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController,
+                mStatusBarKeyguardViewManager);
 
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
@@ -138,10 +147,11 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // holds a copy of the CUT's instances of these KeyguardBypassController, so they still
         // refer to the CUT's member variables, not the spy's member variables.
         mStackScrollerInternal = new NotificationStackScrollLayout(getContext(), null);
-        mStackScrollerInternal.initView(getContext(), mNotificationSwipeHelper);
+        mStackScrollerInternal.initView(getContext(), mNotificationSwipeHelper,
+                mNotificationStackSizeCalculator);
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelfController(notificationShelfController);
-        mStackScroller.setStatusBar(mBar);
+        mStackScroller.setCentralSurfaces(mCentralSurfaces);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mStackScrollLayoutController.isHistoryEnabled()).thenReturn(true);
         when(mStackScrollLayoutController.getNoticationRoundessManager())
@@ -149,7 +159,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setController(mStackScrollLayoutController);
 
         // Stub out functionality that isn't necessary to test.
-        doNothing().when(mBar)
+        doNothing().when(mCentralSurfaces)
                 .executeRunnableDismissingKeyguard(any(Runnable.class),
                         any(Runnable.class),
                         anyBoolean(),
@@ -158,17 +168,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         doNothing().when(mGroupExpansionManager).collapseGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(mNotificationShelf).setAnimationsEnabled(anyBoolean());
-    }
-
-    @Test
-    public void testUpdateStackEndHeight_forEndOfStackHeightAnimation() {
-        final float nsslHeight = 10f;
-        final float bottomMargin = 1f;
-        final float topPadding = 1f;
-
-        mStackScroller.updateStackEndHeight(nsslHeight, bottomMargin, topPadding);
-        final float stackEndHeight = nsslHeight - bottomMargin - topPadding;
-        assertTrue(mAmbientState.getStackEndHeight() == stackEndHeight);
     }
 
     @Test
@@ -578,9 +577,70 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         assertEquals(0, mStackScroller.getSpeedBumpIndex());
     }
 
+    @Test
+    public void testInsideQSHeader_noOffset() {
+        ViewGroup qsHeader = mock(ViewGroup.class);
+        Rect boundsOnScreen = new Rect(0, 0, 1000, 1000);
+        mockBoundsOnScreen(qsHeader, boundsOnScreen);
+
+        mStackScroller.setQsHeader(qsHeader);
+        mStackScroller.setLeftTopRightBottom(0, 0, 2000, 2000);
+
+        MotionEvent event1 = transformEventForView(createMotionEvent(100f, 100f), mStackScroller);
+        assertTrue(mStackScroller.isInsideQsHeader(event1));
+
+        MotionEvent event2 = transformEventForView(createMotionEvent(1100f, 100f), mStackScroller);
+        assertFalse(mStackScroller.isInsideQsHeader(event2));
+    }
+
+    @Test
+    public void testInsideQSHeader_Offset() {
+        ViewGroup qsHeader = mock(ViewGroup.class);
+        Rect boundsOnScreen = new Rect(100, 100, 1000, 1000);
+        mockBoundsOnScreen(qsHeader, boundsOnScreen);
+
+        mStackScroller.setQsHeader(qsHeader);
+        mStackScroller.setLeftTopRightBottom(200, 200, 2000, 2000);
+
+        MotionEvent event1 = transformEventForView(createMotionEvent(50f, 50f), mStackScroller);
+        assertFalse(mStackScroller.isInsideQsHeader(event1));
+
+        MotionEvent event2 = transformEventForView(createMotionEvent(150f, 150f), mStackScroller);
+        assertTrue(mStackScroller.isInsideQsHeader(event2));
+
+        MotionEvent event3 = transformEventForView(createMotionEvent(250f, 250f), mStackScroller);
+        assertTrue(mStackScroller.isInsideQsHeader(event2));
+    }
+
     private void setBarStateForTest(int state) {
         // Can't inject this through the listener or we end up on the actual implementation
         // rather than the mock because the spy just coppied the anonymous inner /shruggie.
         mStackScroller.setStatusBarState(state);
+    }
+
+    private static void mockBoundsOnScreen(View view, Rect bounds) {
+        doAnswer(invocation -> {
+            Rect out = invocation.getArgument(0);
+            out.set(bounds);
+            return null;
+        }).when(view).getBoundsOnScreen(any());
+    }
+
+    private static MotionEvent transformEventForView(MotionEvent event, View view) {
+        // From `ViewGroup#dispatchTransformedTouchEvent`
+        MotionEvent transformed = event.copy();
+        transformed.offsetLocation(-view.getTop(), -view.getLeft());
+        return transformed;
+    }
+
+    private static MotionEvent createMotionEvent(float x, float y) {
+        return MotionEvent.obtain(
+                /* downTime= */0,
+                /* eventTime= */0,
+                MotionEvent.ACTION_DOWN,
+                x,
+                y,
+                /* metaState= */0
+        );
     }
 }

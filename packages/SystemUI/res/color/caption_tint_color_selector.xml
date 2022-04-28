@@ -16,8 +16,5 @@
   -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:sysui="http://schemas.android.com/apk/res-auto">
-    <item sysui:optedOut="true"
-          android:color="?android:attr/colorButtonNormal"/>
-
     <item android:color="?android:attr/colorAccent"/>
 </selector>

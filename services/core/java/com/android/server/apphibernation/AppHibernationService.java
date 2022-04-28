@@ -230,7 +230,9 @@ public final class AppHibernationService extends SystemService {
                 "Caller did not have permission while calling " + methodName);
         userId = handleIncomingUser(userId, methodName);
         synchronized (mLock) {
-            if (!checkUserStatesExist(userId, methodName)) {
+            // Don't log as this method can be called before user states exist as part of the
+            // force-stop check.
+            if (!checkUserStatesExist(userId, methodName, /* shouldLog= */ false)) {
                 return false;
             }
             final Map<String, UserLevelState> packageStates = mUserStates.get(userId);
@@ -238,8 +240,6 @@ public final class AppHibernationService extends SystemService {
             if (pkgState == null
                     || !mPackageManagerInternal.canQueryPackage(
                             Binder.getCallingUid(), packageName)) {
-                Slog.e(TAG, TextUtils.formatSimple("Package %s is not installed for user %s",
-                        packageName, userId));
                 return false;
             }
             return pkgState.hibernated;
@@ -289,7 +289,7 @@ public final class AppHibernationService extends SystemService {
                 "Caller does not have MANAGE_APP_HIBERNATION permission.");
         final int realUserId = handleIncomingUser(userId, methodName);
         synchronized (mLock) {
-            if (!checkUserStatesExist(realUserId, methodName)) {
+            if (!checkUserStatesExist(realUserId, methodName, /* shouldLog= */ true)) {
                 return;
             }
             final Map<String, UserLevelState> packageStates = mUserStates.get(realUserId);
@@ -382,7 +382,7 @@ public final class AppHibernationService extends SystemService {
                 "Caller does not have MANAGE_APP_HIBERNATION permission.");
         userId = handleIncomingUser(userId, methodName);
         synchronized (mLock) {
-            if (!checkUserStatesExist(userId, methodName)) {
+            if (!checkUserStatesExist(userId, methodName, /* shouldLog= */ true)) {
                 return hibernatingPackages;
             }
             Map<String, UserLevelState> userStates = mUserStates.get(userId);
@@ -419,7 +419,7 @@ public final class AppHibernationService extends SystemService {
                 "Caller does not have MANAGE_APP_HIBERNATION permission.");
         userId = handleIncomingUser(userId, methodName);
         synchronized (mLock) {
-            if (!checkUserStatesExist(userId, methodName)) {
+            if (!checkUserStatesExist(userId, methodName, /* shouldLog= */ true)) {
                 return statsMap;
             }
             final Map<String, UserLevelState> userPackageStates = mUserStates.get(userId);
@@ -431,7 +431,7 @@ public final class AppHibernationService extends SystemService {
                 }
                 if (!mGlobalHibernationStates.containsKey(pkgName)
                         || !userPackageStates.containsKey(pkgName)) {
-                    Slog.w(TAG, String.format(
+                    Slog.w(TAG, TextUtils.formatSimple(
                             "No hibernation state associated with package %s user %d. Maybe"
                                     + "the package was uninstalled? ", pkgName, userId));
                     continue;
@@ -585,7 +585,7 @@ public final class AppHibernationService extends SystemService {
                 PackageInfo pkgInfo = installedPackages.get(packageName);
                 UserLevelState currentState = diskStates.get(i);
                 if (pkgInfo == null) {
-                    Slog.w(TAG, String.format(
+                    Slog.w(TAG, TextUtils.formatSimple(
                             "No hibernation state associated with package %s user %d. Maybe"
                                     + "the package was uninstalled? ", packageName, userId));
                     continue;
@@ -633,7 +633,7 @@ public final class AppHibernationService extends SystemService {
             for (int i = 0, size = diskStates.size(); i < size; i++) {
                 GlobalLevelState state = diskStates.get(i);
                 if (!installedPackages.contains(state.packageName)) {
-                    Slog.w(TAG, String.format(
+                    Slog.w(TAG, TextUtils.formatSimple(
                             "No hibernation state associated with package %s. Maybe the "
                                     + "package was uninstalled? ", state.packageName));
                     continue;
@@ -742,18 +742,24 @@ public final class AppHibernationService extends SystemService {
      *
      * @param userId user to check
      * @param methodName method name that is calling. Used for logging purposes.
+     * @param shouldLog whether we should log why the user state doesn't exist
      * @return true if user states exist
      */
     @GuardedBy("mLock")
-    private boolean checkUserStatesExist(int userId, String methodName) {
+    private boolean checkUserStatesExist(int userId, String methodName, boolean shouldLog) {
         if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
-            Slog.e(TAG, String.format(
-                    "Attempt to call %s on stopped or nonexistent user %d", methodName, userId));
+            if (shouldLog) {
+                Slog.w(TAG, TextUtils.formatSimple(
+                        "Attempt to call %s on stopped or nonexistent user %d",
+                        methodName, userId));
+            }
             return false;
         }
         if (!mUserStates.contains(userId)) {
-            Slog.w(TAG, String.format(
-                    "Attempt to call %s before states have been read from disk", methodName));
+            if (shouldLog) {
+                Slog.w(TAG, TextUtils.formatSimple(
+                        "Attempt to call %s before states have been read from disk", methodName));
+            }
             return false;
         }
         return true;

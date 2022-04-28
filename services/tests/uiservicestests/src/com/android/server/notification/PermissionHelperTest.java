@@ -88,7 +88,11 @@ public class PermissionHelperTest extends UiServiceTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mPermissionHelper = new PermissionHelper(mPmi, mPackageManager, mPermManager, true);
+        mPermissionHelper = new PermissionHelper(mPmi, mPackageManager, mPermManager, true, false);
+        PackageInfo testPkgInfo = new PackageInfo();
+        testPkgInfo.requestedPermissions = new String[]{ Manifest.permission.POST_NOTIFICATIONS };
+        when(mPackageManager.getPackageInfo(anyString(), anyLong(), anyInt()))
+                .thenReturn(testPkgInfo);
     }
 
     // TODO (b/194833441): Remove when the migration is enabled
@@ -96,7 +100,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
     public void testMethodsThrowIfMigrationDisabled() throws IllegalAccessException,
             InvocationTargetException {
         PermissionHelper permHelper =
-                new PermissionHelper(mPmi, mPackageManager, mPermManager, false);
+                new PermissionHelper(mPmi, mPackageManager, mPermManager, false, false);
 
         Method[] allMethods = PermissionHelper.class.getDeclaredMethods();
         for (Method method : allMethods) {
@@ -298,6 +302,26 @@ public class PermissionHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSetNotificationPermission_pkgPerm_grantedByDefaultPermSet_allUserSet()
+            throws Exception {
+        mPermissionHelper = new PermissionHelper(mPmi, mPackageManager, mPermManager, true, true);
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
+        when(mPermManager.getPermissionFlags(anyString(),
+                eq(Manifest.permission.POST_NOTIFICATIONS),
+                anyInt())).thenReturn(FLAG_PERMISSION_GRANTED_BY_DEFAULT);
+        PermissionHelper.PackagePermission pkgPerm = new PermissionHelper.PackagePermission(
+                "pkg", 10, true, false);
+
+        mPermissionHelper.setNotificationPermission(pkgPerm);
+        verify(mPermManager).grantRuntimePermission(
+                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
+        verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
+                FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_REVIEW_REQUIRED,
+                FLAG_PERMISSION_USER_SET, true, 10);
+    }
+
+    @Test
     public void testSetNotificationPermission_revokeUserSet() throws Exception {
         when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
                 .thenReturn(PERMISSION_GRANTED);
@@ -379,6 +403,22 @@ public class PermissionHelperTest extends UiServiceTestCase {
                 .thenReturn(PERMISSION_DENIED);
         mPermissionHelper.setNotificationPermission("pkg", 10, false, false);
 
+        verify(mPermManager, never()).revokeRuntimePermission(
+                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
+    }
+
+    @Test
+    public void testSetNotificationPermission_doesntRequestNotChanged() throws Exception {
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_GRANTED);
+        PackageInfo testPkgInfo = new PackageInfo();
+        testPkgInfo.requestedPermissions = new String[]{ Manifest.permission.RECORD_AUDIO };
+        when(mPackageManager.getPackageInfo(anyString(), anyLong(), anyInt()))
+                .thenReturn(testPkgInfo);
+        mPermissionHelper.setNotificationPermission("pkg", 10, false, false);
+
+        verify(mPmi, never()).checkPermission(
+                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10));
         verify(mPermManager, never()).revokeRuntimePermission(
                 eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
     }

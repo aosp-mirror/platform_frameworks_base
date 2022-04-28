@@ -32,7 +32,6 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.admin.DevicePolicyManager;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -118,7 +117,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         KeyguardStateController.Callback,
         AccessibilityController.AccessibilityStateChangedCallback {
 
-    final static String TAG = "StatusBar/KeyguardBottomAreaView";
+    final static String TAG = "CentralSurfaces/KeyguardBottomAreaView";
 
     public static final String CAMERA_LAUNCH_SOURCE_AFFORDANCE = "lockscreen_affordance";
     public static final String CAMERA_LAUNCH_SOURCE_WIGGLE = "wiggle_gesture";
@@ -169,7 +168,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private FlashlightController mFlashlightController;
     private PreviewInflater mPreviewInflater;
     private AccessibilityController mAccessibilityController;
-    private StatusBar mStatusBar;
+    private CentralSurfaces mCentralSurfaces;
     private KeyguardAffordanceHelper mAffordanceHelper;
     private FalsingManager mFalsingManager;
     private boolean mUserSetupComplete;
@@ -274,7 +273,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     };
 
     public void initFrom(KeyguardBottomAreaView oldBottomArea) {
-        setStatusBar(oldBottomArea.mStatusBar);
+        setCentralSurfaces(oldBottomArea.mCentralSurfaces);
 
         // if it exists, continue to use the original ambient indication container
         // instead of the newly inflated one
@@ -473,8 +472,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView.setContentDescription(state.contentDescription);
     }
 
-    public void setStatusBar(StatusBar statusBar) {
-        mStatusBar = statusBar;
+    public void setCentralSurfaces(CentralSurfaces centralSurfaces) {
+        mCentralSurfaces = centralSurfaces;
         updateCameraVisibility(); // in case onFinishInflate() was called too early
     }
 
@@ -556,6 +555,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mControlsButton.setImageResource(mControlsComponent.getTileImageId());
         mControlsButton.setContentDescription(getContext()
                 .getString(mControlsComponent.getTileTitleId()));
+        updateAffordanceColors();
 
         boolean hasFavorites = mControlsComponent.getControlsController()
                 .map(c -> c.getFavorites().size() > 0)
@@ -732,7 +732,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         } else {
             boolean dismissShade = !TextUtils.isEmpty(mRightButtonStr)
                     && Dependency.get(TunerService.class).getValue(LOCKSCREEN_RIGHT_UNLOCK, 1) != 0;
-            mStatusBar.executeRunnableDismissingKeyguard(runnable, null /* cancelAction */,
+            mCentralSurfaces.executeRunnableDismissingKeyguard(runnable, null /* cancelAction */,
                     dismissShade, false /* afterKeyguardGone */, true /* deferred */);
         }
     }
@@ -1019,7 +1019,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public IconState getIcon() {
-            boolean isCameraDisabled = (mStatusBar != null) && !mStatusBar.isCameraAllowedByAdmin();
+            boolean isCameraDisabled = (mCentralSurfaces != null)
+                    && !mCentralSurfaces.isCameraAllowedByAdmin();
             mIconState.isVisible = !isCameraDisabled
                     && mShowCameraAffordance
                     && mUserSetupComplete
@@ -1100,7 +1101,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             mIndicationArea.setPadding(mIndicationPadding, 0, mIndicationPadding, 0);
         } else {
             mQRCodeScannerButton.setVisibility(GONE);
-            mIndicationArea.setPadding(0, 0, 0, 0);
+            if (mControlsButton.getVisibility() == GONE) {
+                mIndicationArea.setPadding(0, 0, 0, 0);
+            }
         }
     }
 
@@ -1108,8 +1111,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         Intent intent = mQRCodeScannerController.getIntent();
         if (intent != null) {
             try {
-                mContext.startActivity(intent);
-            } catch (ActivityNotFoundException e) {
+                ActivityTaskManager.getService().startActivityAsUser(
+                                null, getContext().getBasePackageName(),
+                                getContext().getAttributionTag(), intent,
+                                intent.resolveTypeIfNeeded(getContext().getContentResolver()),
+                                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null,
+                                UserHandle.CURRENT.getIdentifier());
+            } catch (RemoteException e) {
                 // This is unexpected. Nonetheless, just log the error and prevent the UI from
                 // crashing
                 Log.e(TAG, "Unexpected intent: " + intent

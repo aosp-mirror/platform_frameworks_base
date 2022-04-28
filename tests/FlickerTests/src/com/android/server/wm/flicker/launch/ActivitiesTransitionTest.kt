@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.launch
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
+import android.view.Display
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.entireScreenCovered
@@ -30,7 +31,9 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.TwoActivitiesAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.server.wm.traces.parser.toFlickerComponent
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -77,14 +80,16 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
             }
             teardown {
                 test {
-                    testApp.exit()
+                    testApp.exit(wmHelper)
                 }
             }
             transitions {
                 testApp.openSecondActivity(device, wmHelper)
                 device.pressBack()
-                wmHelper.waitForAppTransitionIdle()
-                wmHelper.waitForFullScreenApp(testApp.component)
+                val firstActivityVisible = wmHelper.waitFor(
+                    WindowManagerConditionsFactory.isAppTransitionIdle(Display.DEFAULT_DISPLAY),
+                    WindowManagerStateHelper.isAppFullScreen(testApp.component))
+                require(firstActivityVisible) { "Expected ${testApp.component} to be visible" }
             }
         }
     }

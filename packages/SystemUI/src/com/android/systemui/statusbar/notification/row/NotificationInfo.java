@@ -124,6 +124,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private NotificationEntry mEntry;
     private StatusBarNotification mSbn;
     private boolean mIsDeviceProvisioned;
+    private boolean mIsSystemRegisteredCall;
 
     private OnSettingsClickListener mOnSettingsClickListener;
     private OnAppSettingsClickListener mAppSettingsClickListener;
@@ -229,6 +230,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mShowAutomaticSetting = mAssistantFeedbackController.isFeedbackEnabled();
         mUiEventLogger = uiEventLogger;
 
+        mIsSystemRegisteredCall = mSbn.getNotification().isStyle(Notification.CallStyle.class)
+                && mINotificationManager.isInCall(mSbn.getPackageName(), mSbn.getUid());
+
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
         if (mNumUniqueChannelsInRow == 0) {
@@ -252,17 +256,27 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     private void bindInlineControls() {
-        if (mIsNonblockable) {
+        if (mIsSystemRegisteredCall) {
+            findViewById(R.id.non_configurable_call_text).setVisibility(VISIBLE);
+            findViewById(R.id.non_configurable_text).setVisibility(GONE);
+            findViewById(R.id.non_configurable_multichannel_text).setVisibility(GONE);
+            findViewById(R.id.interruptiveness_settings).setVisibility(GONE);
+            ((TextView) findViewById(R.id.done)).setText(R.string.inline_done_button);
+            findViewById(R.id.turn_off_notifications).setVisibility(GONE);
+        } else if (mIsNonblockable) {
             findViewById(R.id.non_configurable_text).setVisibility(VISIBLE);
+            findViewById(R.id.non_configurable_call_text).setVisibility(GONE);
             findViewById(R.id.non_configurable_multichannel_text).setVisibility(GONE);
             findViewById(R.id.interruptiveness_settings).setVisibility(GONE);
             ((TextView) findViewById(R.id.done)).setText(R.string.inline_done_button);
             findViewById(R.id.turn_off_notifications).setVisibility(GONE);
         } else if (mNumUniqueChannelsInRow > 1) {
+            findViewById(R.id.non_configurable_call_text).setVisibility(GONE);
             findViewById(R.id.non_configurable_text).setVisibility(GONE);
             findViewById(R.id.interruptiveness_settings).setVisibility(GONE);
             findViewById(R.id.non_configurable_multichannel_text).setVisibility(VISIBLE);
         } else {
+            findViewById(R.id.non_configurable_call_text).setVisibility(GONE);
             findViewById(R.id.non_configurable_text).setVisibility(GONE);
             findViewById(R.id.non_configurable_multichannel_text).setVisibility(GONE);
             findViewById(R.id.interruptiveness_settings).setVisibility(VISIBLE);
