@@ -288,9 +288,6 @@
     <!-- Enable the default volume level warning dialog -->
     <bool name="enable_safety_warning">true</bool>
 
-    <!-- Whether to show operator name in the status bar -->
-    <bool name="config_showOperatorNameInStatusBar">false</bool>
-
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
 
@@ -446,6 +443,10 @@
          This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_screenshotEditor" translatable="false"></string>
 
+    <!-- Remote copy default activity.  Must handle REMOTE_COPY_ACTION intents.
+     This name is in the ComponentName flattened format (package/class)  -->
+    <string name="config_remoteCopyPackage" translatable="false"></string>
+
     <!-- On debuggable builds, alert the user if SystemUI PSS goes over this number (in kb) -->
     <integer name="watch_heap_limit">256000</integer>
 
@@ -510,9 +511,6 @@
 
     <!--  Flag to turn on the rendering of the above path or not  -->
     <bool name="config_enableDisplayCutoutProtection">false</bool>
-
-    <!-- Respect drawable/rounded.xml intrinsic size for multiple radius corner path customization -->
-    <bool name="config_roundedCornerMultipleRadius">false</bool>
 
     <!-- Controls can query 2 preferred applications for limited number of suggested controls.
          This config value should contain a list of package names of thoses preferred applications.
@@ -658,17 +656,6 @@
     <!-- Flag to activate notification to contents feature -->
     <bool name="config_notificationToContents">true</bool>
 
-    <!-- Respect drawable/rounded_secondary.xml intrinsic size for multiple radius corner path
-         customization for secondary display-->
-    <bool name="config_roundedCornerMultipleRadiusSecondary">false</bool>
-
-    <!-- Whether the rounded corners are multiple radius for each display in a multi-display device.
-         {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
-    <array name="config_roundedCornerMultipleRadiusArray">
-        <item>@bool/config_roundedCornerMultipleRadius</item>
-        <item>@bool/config_roundedCornerMultipleRadiusSecondary</item>
-    </array>
-
     <!-- The rounded corner drawable for each display in a multi-display device.
          {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
     <array name="config_roundedCornerDrawableArray">
@@ -723,5 +710,11 @@
         <item>@*android:string/status_bar_volume</item>
         <item>@*android:string/status_bar_alarm_clock</item>
         <item>@*android:string/status_bar_call_strength</item>
+    </string-array>
+
+    <!-- Packages of SystemUI -->
+    <string-array name="system_ui_packages" translatable="false">
+        <item>com.android.keyguard</item>
+        <item>com.android.systemui</item>
     </string-array>
 </resources>

@@ -49,7 +49,6 @@ import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -72,7 +71,6 @@ import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.concurrency.ThreadFactory;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
@@ -272,7 +270,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         return new MediaSessions(context, looper, callbacks);
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(VolumeDialogControllerImpl.class.getSimpleName() + " state:");
         pw.print("  mDestroyed: "); pw.println(mDestroyed);
         pw.print("  mVolumePolicy: "); pw.println(mVolumePolicy);
@@ -418,41 +416,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onGetCaptionsComponentStateW(boolean fromTooltip) {
-        if (mCaptioningManager.isSystemAudioCaptioningUiEnabled()) {
-            mCallbacks.onCaptionComponentStateChanged(true, fromTooltip);
-            return;
-        }
-
-        // TODO(b/220968335): Remove this check once system captions component migrates
-        // to new CaptioningManager APIs.
-        try {
-            String componentNameString = mContext.getString(
-                    com.android.internal.R.string.config_defaultSystemCaptionsService);
-            if (TextUtils.isEmpty(componentNameString)) {
-                // component doesn't exist
-                mCallbacks.onCaptionComponentStateChanged(false, fromTooltip);
-                return;
-            }
-
-            if (D.BUG) {
-                Log.i(TAG, String.format(
-                        "isCaptionsServiceEnabled componentNameString=%s", componentNameString));
-            }
-
-            ComponentName componentName = ComponentName.unflattenFromString(componentNameString);
-            if (componentName == null) {
-                mCallbacks.onCaptionComponentStateChanged(false, fromTooltip);
-                return;
-            }
-
-            mCallbacks.onCaptionComponentStateChanged(
-                    mPackageManager.getComponentEnabledSetting(componentName)
-                    == PackageManager.COMPONENT_ENABLED_STATE_ENABLED, fromTooltip);
-        } catch (Exception ex) {
-            Log.e(TAG,
-                    "isCaptionsServiceEnabled failed to check for captions component", ex);
-            mCallbacks.onCaptionComponentStateChanged(false, fromTooltip);
-        }
+        mCallbacks.onCaptionComponentStateChanged(
+                mCaptioningManager.isSystemAudioCaptioningUiEnabled(), fromTooltip);
     }
 
     private void onAccessibilityModeChanged(Boolean showA11yStream) {

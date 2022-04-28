@@ -31,17 +31,20 @@ import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
+import javax.inject.Inject
 
 data class ReceiverData(
     val receiver: BroadcastReceiver,
     val filter: IntentFilter,
     val executor: Executor,
-    val user: UserHandle
+    val user: UserHandle,
+    val permission: String? = null
 )
 
 private const val MSG_ADD_RECEIVER = 0
@@ -63,13 +66,15 @@ private const val DEBUG = true
  * Broadcast handling may be asynchronous *without* calling goAsync(), as it's running within sysui
  * and doesn't need to worry about being killed.
  */
-open class BroadcastDispatcher constructor (
+@SysUISingleton
+open class BroadcastDispatcher @Inject constructor(
     private val context: Context,
-    private val bgLooper: Looper,
-    private val bgExecutor: Executor,
+    @Background private val bgLooper: Looper,
+    @Background private val bgExecutor: Executor,
     private val dumpManager: DumpManager,
     private val logger: BroadcastDispatcherLogger,
-    private val userTracker: UserTracker
+    private val userTracker: UserTracker,
+    private val removalPendingStore: PendingRemovalStore
 ) : Dumpable {
 
     // Only modify in BG thread
@@ -96,16 +101,18 @@ open class BroadcastDispatcher constructor (
      *
      */
     @Deprecated(message = "Replacing Handler for Executor in SystemUI",
-            replaceWith = ReplaceWith("registerReceiver(receiver, filter, executor, user)"))
+        replaceWith = ReplaceWith("registerReceiver(receiver, filter, executor, user, permission)")
+    )
     @JvmOverloads
     open fun registerReceiverWithHandler(
         receiver: BroadcastReceiver,
         filter: IntentFilter,
         handler: Handler,
         user: UserHandle = context.user,
-        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED
+        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED,
+        permission: String? = null
     ) {
-        registerReceiver(receiver, filter, HandlerExecutor(handler), user, flags)
+        registerReceiver(receiver, filter, HandlerExecutor(handler), user, flags, permission)
     }
 
     /**
@@ -130,15 +137,17 @@ open class BroadcastDispatcher constructor (
         filter: IntentFilter,
         executor: Executor? = null,
         user: UserHandle? = null,
-        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED
+        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED,
+        permission: String? = null
     ) {
         checkFilter(filter)
         val data = ReceiverData(
                 receiver,
                 filter,
                 executor ?: context.mainExecutor,
-                user ?: context.user
-        )
+                user ?: context.user,
+                permission
+            )
         this.handler
                 .obtainMessage(MSG_ADD_RECEIVER, flags, 0, data)
                 .sendToTarget()
@@ -163,6 +172,7 @@ open class BroadcastDispatcher constructor (
      * @param receiver The receiver to unregister. It will be unregistered for all users.
      */
     open fun unregisterReceiver(receiver: BroadcastReceiver) {
+        removalPendingStore.tagForRemoval(receiver, UserHandle.USER_ALL)
         handler.obtainMessage(MSG_REMOVE_RECEIVER, receiver).sendToTarget()
     }
 
@@ -173,22 +183,32 @@ open class BroadcastDispatcher constructor (
      * @param user The user associated to the registered [receiver]. It can be [UserHandle.ALL].
      */
     open fun unregisterReceiverForUser(receiver: BroadcastReceiver, user: UserHandle) {
+        removalPendingStore.tagForRemoval(receiver, user.identifier)
         handler.obtainMessage(MSG_REMOVE_RECEIVER_FOR_USER, user.identifier, 0, receiver)
                 .sendToTarget()
     }
 
     @VisibleForTesting
     protected open fun createUBRForUser(userId: Int) =
-            UserBroadcastDispatcher(context, userId, bgLooper, bgExecutor, logger)
+            UserBroadcastDispatcher(
+                context,
+                userId,
+                bgLooper,
+                bgExecutor,
+                logger,
+                removalPendingStore
+            )
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Broadcast dispatcher:")
         val ipw = IndentingPrintWriter(pw, "  ")
         ipw.increaseIndent()
         for (index in 0 until receiversByUser.size()) {
             ipw.println("User ${receiversByUser.keyAt(index)}")
-            receiversByUser.valueAt(index).dump(fd, ipw, args)
+            receiversByUser.valueAt(index).dump(ipw, args)
         }
+        ipw.println("Pending removal:")
+        removalPendingStore.dump(ipw, args)
         ipw.decreaseIndent()
     }
 
@@ -219,10 +239,20 @@ open class BroadcastDispatcher constructor (
                     for (it in 0 until receiversByUser.size()) {
                         receiversByUser.valueAt(it).unregisterReceiver(msg.obj as BroadcastReceiver)
                     }
+                    removalPendingStore.clearPendingRemoval(
+                        msg.obj as BroadcastReceiver,
+                        UserHandle.USER_ALL
+                    )
                 }
 
                 MSG_REMOVE_RECEIVER_FOR_USER -> {
-                    receiversByUser.get(msg.arg1)?.unregisterReceiver(msg.obj as BroadcastReceiver)
+                    val userId = if (msg.arg1 == UserHandle.USER_CURRENT) {
+                        userTracker.userId
+                    } else {
+                        msg.arg1
+                    }
+                    receiversByUser.get(userId)?.unregisterReceiver(msg.obj as BroadcastReceiver)
+                    removalPendingStore.clearPendingRemoval(msg.obj as BroadcastReceiver, userId)
                 }
                 else -> super.handleMessage(msg)
             }

@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବ୍ୟାଟେରୀ"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ବ୍ୟାଟେରୀ, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ବ୍ୟାଟେରୀ"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ସକ୍ରିୟ"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"ସକ୍ରିୟ, କେବଳ ବାମ"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"ସକ୍ରିୟ, କେବଳ ଡାହାଣ"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"ସକ୍ରିୟ, ବାମ ଏବଂ ଡାହାଣ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"ମିଡିଆ ଅଡିଓ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ଫୋନ୍‌ କଲ୍‌‌ଗୁଡ଼ିକ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌"</string>
@@ -573,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ସୀମିତ ସୁବିଧା ଥିବା ପ୍ରୋଫାଇଲ୍‌"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"ନୂତନ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବେ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ଅତିରିକ୍ତ ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରି ଆପଣ ଏହି ଡିଭାଇସକୁ ଅନ୍ୟ ଲୋକମାନଙ୍କ ସହିତ ସେୟାର କରିପାରିବେ। ପ୍ରତ୍ୟେକ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ନିଜର ସ୍ପେସ୍ ଅଛି ଯାହାକୁ ସେମାନେ ଆପ, ୱାଲପେପର୍ ଓ ଏପରି ଅନେକ କିଛି ସହିତ କଷ୍ଟମାଇଜ କରିପାରିବେ। ଉପଯୋଗକର୍ତ୍ତା ୱାଇ-ଫାଇ ଭଳି ଡିଭାଇସ ସେଟିଂସକୁ ମଧ୍ୟ ଆଡଜଷ୍ଟ କରିପାରିବେ ଯାହା ସମସ୍ତଙ୍କୁ ପ୍ରଭାବିତ କରିଥାଏ। \n\nଯେତେବେଳେ ଆପଣ ଗୋଟିଏ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବେ, ସେତେବେଳେ ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ନିଜର ସ୍ପେସ୍‌କୁ ସେଟ‌ଅପ କରିବାକୁ ପଡ଼ିବ। \n\nଅନ୍ୟ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପକୁ ଅପଡେଟ କରିପାରିବେ। ଆକ୍ସେସିବିଲିଟୀ ସେଟିଂସ ଏବଂ ସେବାଗୁଡ଼ିକ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ସ୍ଥାନାନ୍ତର ହୋ‌ଇନପାରେ।"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଡ଼ିବାବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ସ୍ଥାନ ସେଟ୍‍ କରିବାକୁ ପଡ଼ିବ।\n\nଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେକୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପ୍‌ଗୁଡ଼ିକୁ ଅପ୍‌ଡେଟ୍‌ କରିପାରିବେ।"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"ଆପଣ ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବା ବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ତାଙ୍କ ସ୍ପେସ ସେଟ ଅପ କରିବାକୁ ପଡ଼ିବ।\n\nଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ, ଆପଗୁଡ଼ିକୁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଅପଡେଟ କରିପାରିବେ।"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ଏବେ ଉପଯୋଗକର୍ତ୍ତା ସେଟଅପ କରିବେ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ସୁନିଶ୍ଚିତ କରନ୍ତୁ ଯେ, ବ୍ୟକ୍ତି ଜଣକ ଡିଭାଇସ୍‌ ଓ ନିଜର ସ୍ଥାନ ସେଟଅପ୍‌ କରିବା ପାଇଁ ଉପଲବ୍ଧ ଅଛନ୍ତି।"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ପ୍ରୋଫାଇଲ୍‌କୁ ଏବେ ସେଟ୍‌ କରିବେ?"</string>
@@ -592,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବାକୁ ବିଫଳ ହେଲା"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"ଜଣେ ନୂଆ ଅତିଥି ତିଆରି କରିବାରେ ବିଫଳ ହୋଇଛି"</string>
     <string name="user_nickname" msgid="262624187455825083">"ଡାକନାମ"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରନ୍ତୁ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ଅତିଥି ଯୋଗ କରନ୍ତୁ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ଅତିଥିଙ୍କୁ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ଅତିଥି ସେସନକୁ ରିସେଟ୍ କରନ୍ତୁ"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"ଅତିଥି ସେସନକୁ ରିସେଟ୍ କରିବେ?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"ଅତିଥିଙ୍କୁ କାଢ଼ିବେ?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ରିସେଟ୍ କରନ୍ତୁ"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ଅତିଥି ସେସନକୁ ରିସେଟ୍ କରାଯାଉଛି…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ଗୋଟିଏ ଫଟୋ ଉଠାନ୍ତୁ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ଏକ ଛବି ବାଛନ୍ତୁ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ଫଟୋ ବାଛନ୍ତୁ"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ଡିଭାଇସର ଡାଟା ଡିଲିଟ ହୋଇଯିବ।"</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଡିଲିଟ କରିଦିଆଯିବ।"</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"ଅନେକଗୁଡ଼ିଏ ଭୁଲ ପ୍ରଚେଷ୍ଟା। ଏହି ୱାର୍କ ପ୍ରୋଫାଇଲ ଏବଂ ଏହାର ଡାଟା ଡିଲିଟ ହୋଇଯିବ।"</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ଡିଭାଇସ୍ ଡିଫଲ୍ଟ"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ସକ୍ଷମ କରାଯାଇଛି"</string>
@@ -660,4 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରିବା ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରିବା ପାଇଁ ଏକ ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଯଦି ଅନୁମତି ଦିଆଯାଏ, ତେବେ ଆପଟି ଆପଣଙ୍କ ସ୍ପଷ୍ଟ ଇଣ୍ଟେଣ୍ଟ ବିନା ଯେ କୌଣସି ସମୟରେ ସ୍କ୍ରିନକୁ ଚାଲୁ କରିପାରେ।"</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR କୋଡ ସ୍କାନ କରନ୍ତୁ"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ଶୁଣିବା ଆରମ୍ଭ କରିବା ପାଇଁ, ନିମ୍ନରେ ଥିବା QR କୋଡକୁ କେନ୍ଦ୍ରରେ ରଖନ୍ତୁ"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR କୋଡ ଏକ ବୈଧ ଫର୍ମାଟ ନୁହେଁ"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବ୍ରଡକାଷ୍ଟ କରିବା ବନ୍ଦ କରିବେ?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ଯଦି ଆପଣ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ବ୍ରଡକାଷ୍ଟ କରନ୍ତି କିମ୍ବା ଆଉଟପୁଟ ବଦଳାନ୍ତି, ତେବେ ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ବ୍ରଡକାଷ୍ଟ ବନ୍ଦ ହୋଇଯିବ"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ବ୍ରଡକାଷ୍ଟ କରନ୍ତୁ"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ଆଉଟପୁଟ ବଦଳାନ୍ତୁ"</string>
 </resources>

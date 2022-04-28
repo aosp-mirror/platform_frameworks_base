@@ -894,8 +894,12 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // Get the list of all dynamic shortcuts in this package.
         final ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
+        // Pass callingLauncher to ensure pinned flag marked by system ui, e.g. ShareSheet, are
+        // included in the result
         findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
-                ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION);
+                ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION,
+                mShortcutUser.mService.mContext.getPackageName(),
+                0, /*getPinnedByAnyLauncher=*/ false);
 
         final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
         for (int i = 0; i < shortcuts.size(); i++) {
@@ -1169,7 +1173,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // This will send a notification to the launcher, and also save .
         // TODO: List changed and removed manifest shortcuts and pass to packageShortcutsChanged()
-        s.packageShortcutsChanged(getPackageName(), getPackageUserId(), null, null);
+        s.packageShortcutsChanged(this, null, null);
 
         return true;
     }
@@ -1446,7 +1450,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             });
         }
         if (!CollectionUtils.isEmpty(changedShortcuts)) {
-            s.packageShortcutsChanged(getPackageName(), getPackageUserId(), changedShortcuts, null);
+            s.packageShortcutsChanged(this, changedShortcuts, null);
         }
     }
 

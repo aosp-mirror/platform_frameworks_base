@@ -2775,6 +2775,8 @@ public class SubscriptionManager {
                 overrideConfig.mnc = Configuration.MNC_ZERO;
                 cacheKey = null;
             }
+        } else {
+            cacheKey = null;
         }
 
         if (useRootLocale) {
@@ -3216,6 +3218,11 @@ public class SubscriptionManager {
      *
      *  @param subId sub id
      *  @param callbackIntent pending intent that will be sent after operation is done.
+     *
+     *  to-be-deprecated this API is a duplicate of {@link EuiccManager#switchToSubscription(int,
+     *  PendingIntent)} and does not support Multiple Enabled Profile(MEP). Apps should use
+     *  {@link EuiccManager#switchToSubscription(int, PendingIntent)} or
+     *  {@link EuiccManager#switchToSubscription(int, int, PendingIntent)} instead.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subId, @NonNull PendingIntent callbackIntent) {

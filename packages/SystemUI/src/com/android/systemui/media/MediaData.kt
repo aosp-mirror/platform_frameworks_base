@@ -20,13 +20,13 @@ import android.app.PendingIntent
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.session.MediaSession
+import com.android.internal.logging.InstanceId
 import com.android.systemui.R
 
 /** State of a media view. */
 data class MediaData(
     val userId: Int,
     val initialized: Boolean = false,
-    val backgroundColor: Int,
     /**
      * App name that will be displayed on the player.
      */
@@ -115,7 +115,17 @@ data class MediaData(
     /**
      * Timestamp when this player was last active.
      */
-    var lastActive: Long = 0L
+    var lastActive: Long = 0L,
+
+    /**
+     * Instance ID for logging purposes
+     */
+    val instanceId: InstanceId,
+
+    /**
+     * The UID of the app, used for logging
+     */
+    val appUid: Int
 ) {
     companion object {
         /** Media is playing on the local device */
@@ -138,23 +148,31 @@ data class MediaButton(
     /**
      * Play/pause button
      */
-    var playOrPause: MediaAction? = null,
+    val playOrPause: MediaAction? = null,
     /**
      * Next button, or custom action
      */
-    var nextOrCustom: MediaAction? = null,
+    val nextOrCustom: MediaAction? = null,
     /**
      * Previous button, or custom action
      */
-    var prevOrCustom: MediaAction? = null,
+    val prevOrCustom: MediaAction? = null,
     /**
      * First custom action space
      */
-    var custom0: MediaAction? = null,
+    val custom0: MediaAction? = null,
     /**
      * Second custom action space
      */
-    var custom1: MediaAction? = null
+    val custom1: MediaAction? = null,
+    /**
+     * Whether to reserve the empty space when the nextOrCustom is null
+     */
+    val reserveNext: Boolean = false,
+    /**
+     * Whether to reserve the empty space when the prevOrCustom is null
+     */
+    val reservePrev: Boolean = false
 ) {
     fun getActionById(id: Int): MediaAction? {
         return when (id) {
@@ -173,7 +191,12 @@ data class MediaAction(
     val icon: Drawable?,
     val action: Runnable?,
     val contentDescription: CharSequence?,
-    val background: Drawable?
+    val background: Drawable?,
+
+    // Rebind Id is used to detect identical rebinds and ignore them. It is intended
+    // to prevent continuously looping animations from restarting due to the arrival
+    // of repeated media notifications that are visually identical.
+    val rebindId: Int? = null
 )
 
 /** State of the media device. */

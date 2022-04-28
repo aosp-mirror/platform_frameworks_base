@@ -232,7 +232,7 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"ಟೆಥರಿಂಗ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ಪ್ರವೇಶ ಬಿಂದು ಹೆಸರಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"USB ಡೀಬಗಿಂಗ್‌"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB ಸಂಪರ್ಕಗೊಂಡಾಗ ಡೀಬಗ್ ಮೋಡ್"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯ ಅಧಿಕೃತಗೊಳಿಸುವಿಕೆಗಳನ್ನು ಹಿಂತೆಗೆದುಕೊಳ್ಳಿ"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗಿಂಗ್"</string>
@@ -260,7 +260,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ಸಾಧನವನ್ನು ಜೋಡಿಸಲು ವಿಫಲವಾಗಿದೆ. QR ಕೋಡ್ ತಪ್ಪಾಗಿದೆ ಅಥವಾ ಸಾಧನವು ಒಂದೇ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಆಗಿಲ್ಲ."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ವಿಳಾಸ ಮತ್ತು ಪೋರ್ಟ್"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡುವ ಮೂಲಕ ವೈ-ಫೈನಲ್ಲಿ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡುವ ಮೂಲಕ ವೈ-ಫೈ ಮೂಲಕ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ಡೀಬಗ್, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ಬಗ್ ವರದಿಯ ಶಾರ್ಟ್‌ಕಟ್‌‌"</string>
@@ -589,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"ಹೊಸ ಅತಿಥಿಯನ್ನು ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ"</string>
     <string name="user_nickname" msgid="262624187455825083">"ಅಡ್ಡ ಹೆಸರು"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ಅತಿಥಿಯನ್ನು ಸೇರಿಸಿ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ಅತಿಥಿಯನ್ನು ಮರುಹೊಂದಿಸಿ"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"ಅತಿಥಿ ಬಳಕೆದಾರರನ್ನು ರೀಸೆಟ್ ಮಾಡಬೇಕೆ?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಬೇಕೇ?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ರೀಸೆಟ್ ಮಾಡಿ"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ತೆಗೆದುಹಾಕಿ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ಅತಿಥಿ ಬಳಕೆದಾರರ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ರೀಸೆಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ಫೋಟೋ ತೆಗೆದುಕೊಳ್ಳಿ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ಚಿತ್ರವನ್ನು ಆರಿಸಿ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ಫೋಟೋ ಆಯ್ಕೆಮಾಡಿ"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"ಹಲವಾರು ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಈ ಸಾಧನದ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"ಹಲವಾರು ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಈ ಬಳಕೆದಾರರನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"ಹಲವಾರು ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಈ ಉದ್ಯೋಗದ ಪ್ರೊಫೈಲ್ ಮತ್ತು ಅದರ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"ವಜಾಗೊಳಿಸಿ"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ಸಾಧನದ ಡೀಫಾಲ್ಟ್"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
@@ -657,4 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಲು ಅನುಮತಿಸಿ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸಿ. ಅನುಮತಿಸಿದರೆ, ನಿಮಗೆ ಅಗತ್ಯವಿಲ್ಲದಿದ್ದಾಗಲೂ ಆ್ಯಪ್ ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಬಹುದು."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ಆಲಿಸುವುದಕ್ಕೆ ಪ್ರಾರಂಭಿಸಲು, ಕ್ಯಾಮರಾವನ್ನು ಕೆಳಗಿನ QR ಕೋಡ್ ಮೇಲೆ ಕೇಂದ್ರೀಕರಿಸಿ"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR ಕೋಡ್ ಮಾನ್ಯ ಫಾರ್ಮ್ಯಾಟ್‌ನಲ್ಲಿಲ್ಲ"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಪ್ರಸಾರವನ್ನು ನಿಲ್ಲಿಸಬೇಕೆ?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ನೀವು <xliff:g id="SWITCHAPP">%1$s</xliff:g> ಅನ್ನು ಪ್ರಸಾರ ಮಾಡಿದರೆ ಅಥವಾ ಔಟ್‌ಪುಟ್ ಅನ್ನು ಬದಲಾಯಿಸಿದರೆ, ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಪ್ರಸಾರವು ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ಅನ್ನು ಪ್ರಸಾರ ಮಾಡಿ"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ಔಟ್‌ಪುಟ್ ಅನ್ನು ಬದಲಾಯಿಸಿ"</string>
 </resources>

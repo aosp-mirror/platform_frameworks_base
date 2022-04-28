@@ -77,7 +77,6 @@ import com.android.systemui.util.settings.SecureSettings;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashSet;
@@ -306,8 +305,9 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
                     Log.d(TAG, "Updating theme setting from "
                             + overlayPackageJson + " to " + jsonObject.toString());
                 }
-                mSecureSettings.putString(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
-                        jsonObject.toString());
+                mSecureSettings.putStringForUser(
+                        Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                        jsonObject.toString(), UserHandle.USER_CURRENT);
             }
         } catch (JSONException e) {
             Log.i(TAG, "Failed to parse THEME_CUSTOMIZATION_OVERLAY_PACKAGES.", e);
@@ -474,7 +474,7 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
             mThemeStyle = fetchThemeStyleFromSetting();
             mSecondaryOverlay = getOverlay(mMainWallpaperColor, ACCENT, mThemeStyle);
             mNeutralOverlay = getOverlay(mMainWallpaperColor, NEUTRAL, mThemeStyle);
-            if (colorSchemeIsApplied()) {
+            if (colorSchemeIsApplied() && !forceReload) {
                 Log.d(TAG, "Skipping overlay creation. Theme was already: " + mColorScheme);
                 return;
             }
@@ -657,7 +657,7 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("mSystemColors=" + mCurrentColors);
         pw.println("mMainWallpaperColor=" + Integer.toHexString(mMainWallpaperColor));
         pw.println("mSecondaryOverlay=" + mSecondaryOverlay);

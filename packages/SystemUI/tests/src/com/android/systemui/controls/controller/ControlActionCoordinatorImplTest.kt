@@ -21,6 +21,7 @@ import android.content.SharedPreferences
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
+import android.os.UserHandle
 import android.provider.Settings
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
@@ -40,6 +41,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
@@ -97,7 +99,8 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         `when`(secureSettings.getUriFor(Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS))
                 .thenReturn(Settings.Secure
                         .getUriFor(Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS))
-        `when`(secureSettings.getInt(Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 0))
+        `when`(secureSettings.getIntForUser(Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
+                0, UserHandle.USER_CURRENT))
                 .thenReturn(1)
 
         coordinator = spy(ControlActionCoordinatorImpl(
@@ -125,8 +128,8 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         `when`(pref.getInt(DeviceControlsControllerImpl.PREFS_SETTINGS_DIALOG_ATTEMPTS, 0))
                 .thenReturn(2)
 
-        verify(secureSettings).registerContentObserver(any(Uri::class.java),
-                anyBoolean(), any(ContentObserver::class.java))
+        verify(secureSettings).registerContentObserverForUser(any(Uri::class.java),
+                anyBoolean(), any(ContentObserver::class.java), anyInt())
 
         `when`(cvh.cws.ci.controlId).thenReturn(ID)
         `when`(cvh.cws.control?.isAuthRequired()).thenReturn(true)

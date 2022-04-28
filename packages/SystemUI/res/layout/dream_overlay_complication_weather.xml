@@ -17,10 +17,6 @@
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/weather_view"
+    style="@style/clock_subtitle"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:paddingHorizontal="@dimen/dream_overlay_complication_shadow_padding"
-    android:textColor="@android:color/white"
-    android:shadowColor="@color/keyguard_shadow_color"
-    android:shadowRadius="?attr/shadowRadius"
-    android:textSize="@dimen/dream_overlay_complication_weather_text_size"/>
+    android:layout_height="wrap_content" />

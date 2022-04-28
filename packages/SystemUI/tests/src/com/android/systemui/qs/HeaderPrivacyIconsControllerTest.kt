@@ -163,7 +163,7 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
         val receiverCaptor = argumentCaptor<BroadcastReceiver>()
         whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(true)
         verify(broadcastDispatcher).registerReceiver(capture(receiverCaptor),
-                any(), any(), nullable(), anyInt())
+                any(), any(), nullable(), anyInt(), nullable())
         receiverCaptor.value.onReceive(
                 context,
                 Intent(SafetyCenterManager.ACTION_SAFETY_CENTER_ENABLED_CHANGED)
@@ -193,8 +193,10 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
         val broadcastReceiverCaptor = argumentCaptor<BroadcastReceiver>()
         val intentFilterCaptor = argumentCaptor<IntentFilter>()
         // Broadcast receiver is registered on init and when privacy chip is attached
-        verify(broadcastDispatcher, times(2)).registerReceiver(capture(broadcastReceiverCaptor),
-                capture(intentFilterCaptor), any(), nullable(), anyInt())
+        verify(broadcastDispatcher, times(2)).registerReceiver(
+            capture(broadcastReceiverCaptor),
+            capture(intentFilterCaptor), any(), nullable(), anyInt(), nullable()
+        )
     }
 
     private fun setPrivacyController(micCamera: Boolean, location: Boolean) {

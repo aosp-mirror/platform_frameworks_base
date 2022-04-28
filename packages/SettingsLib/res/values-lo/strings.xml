@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ແບັດເຕີຣີ, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ແບັດເຕີຣີ"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ອອນລາຍ"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"ນຳໃຊ້ຢູ່, ຊ້າຍເທົ່ານັ້ນ"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"ນຳໃຊ້ຢູ່, ຂວາເທົ່ານັ້ນ"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"ນຳໃຊ້ຢູ່, ຊ້າຍ ແລະ ຂວາ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"ສຽງ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ການໂທ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ການໂອນຍ້າຍໄຟລ໌"</string>
@@ -396,7 +393,7 @@
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ຂະໜາດໜ້າ​ຈໍ​ຂອງອະນິເມຊັນ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ຂະໜາດສະຫຼັບອະນິເມຊັນ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ໄລຍະເວລາອະນິເມຊັນ"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ຈຳລອງຈໍສະແດງຜົນທີ່ສອງ"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ຈຳລອງຈໍສະແດງຜົນທີສອງ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ແອັບ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ບໍ່ຕ້ອງຮັກສາການເຄື່ອນ​ໄຫວ"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ລຶບທຸກການເຄື່ອນໄຫວທັນທີທີ່ຜູ້ໃຊ້ອອກຈາກມັນ"</string>
@@ -573,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ໂປຣໄຟລ໌ທີ່ຖືກຈຳກັດ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"ເພີ່ມຜູ້ໃຊ້ໃໝ່ບໍ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ທ່ານສາມາດໃຊ້ອຸປະກອນນີ້ຮ່ວມກັບຄົນອື່ນໄດ້ໂດຍການສ້າງຜູ້ໃຊ້ເພີ່ມເຕີມ. ຜູ້ໃຊ້ແຕ່ລະຄົນຈະມີພື້ນທີ່ຂອງຕົວເອງ, ເຊິ່ງເຂົາເຈົ້າສາມາດປັບແຕ່ງແອັບ, ຮູບພື້ນຫຼັງ ແລະ ອື່ນໆໄດ້. ຜູ້ໃຊ້ຕ່າງໆ ສາມາດປັບແຕ່ງການຕັ້ງຄ່າອຸປະກອນໄດ້ ເຊັ່ນ: Wi‑Fi ທີ່ມີຜົນກະທົບທຸກຄົນ.\n\nເມື່ອທ່ານເພີ່ມຜູ້ໃຊ້ໃໝ່, ບຸກຄົນນັ້ນຈະຕ້ອງຕັ້ງຄ່າພື້ນທີ່ຂອງເຂົາເຈົ້າກ່ອນ.\n\nຜູ້ໃຊ້ໃດກໍຕາມສາມາດອັບເດດແອັບສຳລັບຜູ້ໃຊ້ຄົນອື່ນທັງໝົດໄດ້. ການຕັ້ງຄ່າການຊ່ວຍເຂົ້າເຖິງອາດບໍ່ຖືກໂອນຍ້າຍໄປໃຫ້ຜູ້ໃຊ້ໃໝ່."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ້​ໃຊ້​ໃໝ່, ຜູ້​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ້​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບຯສຳ​ລັບ​ຜູ້​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ້​ໃຊ້​ໃໝ່, ຜູ້​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ້​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບສຳ​ລັບ​ຜູ້​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ຕັ້ງຄ່າຜູ້ໃຊ້ຕອນນີ້ບໍ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ກວດ​ສອບ​ໃຫ້​ແນ່​ໃຈ​ວ່າ​ບຸກ​ຄົນ​ດັ່ງ​ກ່າວ​ສາ​ມາດ​ຮັບ​ອຸ​ປະ​ກອນ​ ແລະ ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ຂອງ​ພວກ​ເຂົາ​ໄດ້"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ຕັ້ງຄ່າໂປຣໄຟລ໌ດຽວນີ້?"</string>
@@ -592,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"ສ້າງຜູ້ໃຊ້ໃໝ່ບໍ່ສຳເລັດ"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"ສ້າງແຂກໃໝ່ບໍ່ສຳເລັດ"</string>
     <string name="user_nickname" msgid="262624187455825083">"ຊື່ຫຼິ້ນ"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"ເພີ່ມຜູ້ໃຊ້"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ເພີ່ມແຂກ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ລຶບແຂກອອກ"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ຣີເຊັດແຂກ"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"ຣີເຊັດແຂກບໍ?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"ລຶບແຂກອອກບໍ?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ຣີເຊັດ"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ລຶບອອກ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ກຳລັງຣີເຊັດແຂກ…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ຖ່າຍຮູບ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ເລືອກຮູບ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ເລືອກຮູບ"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"ພະຍາຍາມປົດລັອກບໍ່ສຳເລັດຫຼາຍເທື່ອເກີນໄປ. ຂໍ້ມູນຂອງອຸປະກອນນີ້ຈະຖືກລຶບອອກ."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"ພະຍາຍາມປົດລັອກບໍ່ສຳເລັດຫຼາຍເທື່ອເກີນໄປ. ຜູ້ໃຊ້ນີ້ຈະຖືກລຶບຂໍ້ມູນອອກ."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"ພະຍາຍາມປົດລັອກບໍ່ສຳເລັດຫຼາຍເທື່ອເກີນໄປ. ໂປຣໄຟລ໌ບ່ອນເຣັດວຽກ ແລະ ຂໍ້ມູນຂອງມັນຈະຖືກລຶບອອກ."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"ປິດໄວ້"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ຄ່າເລີ່ມຕົ້ນອຸປະກອນ"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ປິດການນຳໃຊ້ແລ້ວ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ເປີດການນຳໃຊ້ແລ້ວ"</string>
@@ -660,4 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ເປີດໜ້າຈໍ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ອະນຸຍາດໃຫ້ເປີດໜ້າຈໍ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ອະນຸຍາດໃຫ້ແອັບເປີດໜ້າຈໍໄດ້. ຫາກອະນຸມັດ, ແອັບຈະສາມາດເປີດໜ້າຈໍຕອນໃດກໍໄດ້ໂດຍທີ່ທ່ານບໍ່ຕ້ອງມີເຈດຕະນາຢ່າງຈະແຈ້ງ."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"ສະແກນລະຫັດ QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ເພື່ອເລີ່ມການຟັງ, ໃຫ້ວາງລະຫັດ QR ທາງລຸ່ມນີ້ໄວ້ທາງກາງ"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"ຮູບແບບລະຫັດ QR ບໍ່ຖືກຕ້ອງ"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"ຢຸດການອອກອາກາດ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ຫາກທ່ານອອກອາກາດ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ຫຼື ປ່ຽນເອົ້າພຸດ, ການອອກອາກາດປັດຈຸບັນຂອງທ່ານຈະຢຸດ"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"ອອກອາກາດ <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ປ່ຽນເອົ້າພຸດ"</string>
 </resources>

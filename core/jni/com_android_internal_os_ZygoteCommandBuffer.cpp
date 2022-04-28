@@ -296,7 +296,7 @@ jlong com_android_internal_os_ZygoteCommandBuffer_getNativeBuffer(JNIEnv* env, j
   ++buffersAllocd;
   // MMap explicitly to get it page aligned.
   void *bufferMem = mmap(NULL, sizeof(NativeCommandBuffer), PROT_READ | PROT_WRITE,
-                         MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0);
+                         MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
   // Currently we mmap and unmap one for every request handled by the Java code.
   // That could be improved, but unclear it matters.
   if (bufferMem == MAP_FAILED) {

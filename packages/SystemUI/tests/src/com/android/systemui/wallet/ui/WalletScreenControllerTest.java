@@ -20,6 +20,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -323,6 +324,7 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         assertEquals(GONE, mWalletView.getCardCarousel().getVisibility());
         assertEquals(VISIBLE, mWalletView.getEmptyStateView().getVisibility());
         assertEquals(GONE, mWalletView.getErrorView().getVisibility());
+        assertTrue(mWalletView.getAppButton().hasOnClickListeners());
     }
 
     @Test

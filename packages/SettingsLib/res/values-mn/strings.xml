@@ -233,7 +233,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Энэ хэрэглэгчид тетеринг тохиргоог ашиглах боломжгүй"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Энэ хэрэглэгчийн хувьд Хандалтын цэгийн нэрийн тохиргоог ашиглах боломжгүй"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB дебаг"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"USB холбодсон үеийн согог засах горим"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"USB холбогдсон үеийн согог засах горим"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB дебагийн зөвшөөрлийг цуцлах"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Wireless debugging"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi холбогдсон үед дебаг хийх горим"</string>
@@ -264,7 +264,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi сүлжээнд холбогдоно уу"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, дебаг хийх, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Алдаа мэдээлэх товчлол"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Цэсэнд алдааны мэдэгдэл авахад зориулсан товчийг харуулах"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Цэсэд алдааны мэдэгдэл авахад зориулсан товчийг харуулах"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Идэвхтэй байлгах"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Цэнэглэж байх үед дэлгэц хэзээ ч амрахгүй"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI снүүп логыг идэвхжүүлэх"</string>
@@ -389,7 +389,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU дебаг хийх давхаргыг идэвхжүүлэх"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дебаг хийх аппад GPU дебаг хийх давхарга ачаалахыг зөвшөөрөх"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Нийлүүлэгчийн дэлгэрэнгүй логийг идэвхжүүлэх"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Төхөөрөмжийн тодорхойосон нийлүүлэгчийн нэвтрэх үеийн алдааны нэмэлт мэдээг оруулах бөгөөд энэ нь хувийн мэдээлэл агуулж, батарейг илүү ашиглах болон/эсвэл хадгалах сан илүү ашиглаж болзошгүй."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Төхөөрөмжийн тодорхойлсон нийлүүлэгчийн нэвтрэх үеийн алдааны нэмэлт мэдээг оруулах бөгөөд энэ нь хувийн мэдээлэл агуулж, батарейг илүү ашиглах болон/эсвэл хадгалах сан илүү ашиглаж болзошгүй."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Цонхны дүрс амилуулалтын далайц"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Шилжилтийн дүрс амилуулалтын далайц"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Дүрс амилуулалт үргэлжлэх далайц"</string>
@@ -408,8 +408,8 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Тодорхойлогч файлын утгыг үл хамааран, бүх үйл ажиллагааны хэмжээг олон цонхонд өөрчилж болохуйц болгоно уу."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Чөлөөт хэлбэрийн цонхыг идэвхжүүлэх"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Туршилтын чөлөөт хэлбэрийн цонхны дэмжлэгийг идэвхжүүлнэ үү."</string>
-    <string name="local_backup_password_title" msgid="4631017948933578709">"Десктоп нөөцлөлтийн нууц үг"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Десктоп бүрэн нөөцлөлт одоогоор хамгаалалтгүй байна"</string>
+    <string name="local_backup_password_title" msgid="4631017948933578709">"Компьютерын нөөцлөлтийн нууц үг"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Компьютерын бүрэн нөөцлөлт одоогоор хамгаалалтгүй байна"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Компьютерийн бүтэн нөөцлөлтийн нууц үгийг өөрчлөх, устгах бол дарна уу"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Нөөцлөлтийн шинэ нууц үг тохирууллаа"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"Шинэ нууц үг болон баталгаажуулалт таарахгүй байна"</string>
@@ -589,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Шинэ хэрэглэгч үүсгэж чадсангүй"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Шинэ зочин үүсгэж чадсангүй"</string>
     <string name="user_nickname" msgid="262624187455825083">"Хоч"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"Хэрэглэгч нэмэх"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Зочин нэмэх"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Зочин хасах"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Зочныг шинэчлэх"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Зочныг шинэчлэх үү?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Зочныг хасах уу?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Шинэчлэх"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Хасах"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Зочныг шинэчилж байна…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зураг авах"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Зураг сонгох"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Зураг сонгох"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Түгжээг хэт олон удаа буруу оруулсан тул энэ төхөөрөмжийн өгөгдлийг устгах болно."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Түгжээг хэт олон удаа буруу оруулсан тул энэ хэрэглэгчийг устгах болно."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Түгжээг хэт олон удаа буруу оруулсан тул энэ ажлын профайл, түүний өгөгдлийн устгах болно."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Хаах"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Төхөөрөмжийн өгөгдмөл"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Идэвхгүй болгосон"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Идэвхжүүлсэн"</string>
@@ -657,4 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Дэлгэцийг асаах"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дэлгэцийг асаахыг зөвшөөрнө үү"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Аппад дэлгэцийг асаахыг зөвшөөрнө үү. Зөвшөөрсөн тохиолдолд тухайн апп таны тодорхой оролцоогүйгээр ямар ч үед дэлгэцийг асааж болно."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR код скан хийх"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Сонсож эхлэхийн тулд доорх QR кодыг голлуулаарай"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR код буруу форматтай байна"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g>-г нэвтрүүлэхээ зогсоох уу?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Хэрэв та <xliff:g id="SWITCHAPP">%1$s</xliff:g>-г нэвтрүүлсэн эсвэл гаралтыг өөрчилсөн бол таны одоогийн нэвтрүүлэлтийг зогсооно"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g>-г нэвтрүүлэх"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Гаралтыг өөрчлөх"</string>
 </resources>

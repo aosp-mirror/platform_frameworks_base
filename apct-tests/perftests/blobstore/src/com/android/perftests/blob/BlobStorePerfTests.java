@@ -95,9 +95,9 @@ public class BlobStorePerfTests {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         mContext.getFilesDir().delete();
-        runShellCommand("cmd package clear " + mContext.getPackageName());
+        mBlobStoreManager.releaseAllLeases();
         runShellCommand("cmd blob_store idle-maintenance");
     }
 

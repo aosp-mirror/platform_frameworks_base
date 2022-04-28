@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"G : charge à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>; D : charge à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Actif"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Active, gauche seulement"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Active, droite seulement"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Active, gauche et droite"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Paramètres audio du support"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Appels téléphoniques"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transfert de fichier"</string>
@@ -154,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annuler"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"L\'association vous permet d\'accéder à vos contacts et à l\'historique des appels lorsque vous êtes connecté."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Impossible d\'associer à <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossible d\'établir l\'association avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. NIP ou d\'une clé d\'accès incorrects."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossible d\'établir l\'association avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g> en raison d\'un NIP ou d\'une clé d\'accès incorrects."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Impossible d\'établir la communication avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Association refusée par <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordinateur"</string>
@@ -510,7 +507,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"La plus grande"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Personnalisée (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Menu"</string>
-    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Entrez m. passe pour réinit. en mode démo"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Entrez m. passe pour réinit. en mode Démo"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Suivant"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Mot de passe obligatoire"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Modes de saisie actifs"</string>
@@ -521,7 +518,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"État d\'enregistrement IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Enregistré"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Non enregistré"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Non accessible"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Non disponible"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Les adresses MAC sont randomisées"</string>
     <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{Aucun appareil connecté}=1{1 appareil connecté}one{# appareil connecté}other{# appareils connectés}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Plus longtemps."</string>
@@ -592,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Impossible de créer un utilisateur"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Impossible de créer un nouvel invité"</string>
     <string name="user_nickname" msgid="262624187455825083">"Pseudo"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"Ajouter un utilisateur"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Ajouter un invité"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Supprimer l\'invité"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Réinitialiser la session Invité"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Réinitialiser la session Invité?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Retirer l\'invité?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Réinitialiser"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Retirer"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Réinitialisation de la session Invité en cours…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Prendre une photo"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Sélectionner une image"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Sélectionnez une photo"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Trop de tentatives incorrectes. Les données de cet appareil seront supprimées."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Trop de tentatives incorrectes. Cet utilisateur sera supprimé."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Trop de tentatives incorrectes. Ce profil professionnel sera supprimé, y compris ses données."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Fermer"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Valeur par défaut de l\'appareil"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Désactivé"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activé"</string>
@@ -660,4 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Activation de l\'écran"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Autoriser l\'activation de l\'écran"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autorisez une application à activer l\'écran. Lorsque vous accordez cette autorisation, l\'application peut activer l\'écran à tout moment sans votre volonté explicite."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Numériser le code QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Pour commencer à écouter, centrez le code QR ci-dessous"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Le format du code QR est incorrect"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou changez la sortie, votre diffusion actuelle s\'arrêtera"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Changer la sortie"</string>
 </resources>

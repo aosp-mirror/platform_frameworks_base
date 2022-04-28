@@ -300,6 +300,10 @@ public class UserManager {
      * When it is set by any of these owners, it prevents all users from using
      * Wi-Fi tethering. Other forms of tethering are not affected.
      *
+     * This user restriction disables only Wi-Fi tethering.
+     * Use {@link #DISALLOW_CONFIG_TETHERING} to limit all forms of tethering.
+     * When {@link #DISALLOW_CONFIG_TETHERING} is set, this user restriction becomes obsolete.
+     *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
@@ -735,7 +739,7 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_DATE_TIME = "no_config_date_time";
 
     /**
-     * Specifies if a user is disallowed from configuring Tethering and portable hotspots
+     * Specifies if a user is disallowed from using and configuring Tethering and portable hotspots
      * via Settings.
      *
      * <p>This restriction can only be set by a device owner, a profile owner on the primary

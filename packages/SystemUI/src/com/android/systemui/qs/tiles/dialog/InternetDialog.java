@@ -24,7 +24,6 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.telephony.ServiceState;
@@ -58,6 +57,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.Utils;
+import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.accessibility.floatingmenu.AnnotationLinkSpan;
@@ -88,8 +88,6 @@ public class InternetDialog extends SystemUIDialog implements
 
     @VisibleForTesting
     protected InternetAdapter mAdapter;
-    @VisibleForTesting
-    protected WifiManager mWifiManager;
     @VisibleForTesting
     protected View mDialogView;
     @VisibleForTesting
@@ -136,6 +134,7 @@ public class InternetDialog extends SystemUIDialog implements
     private Drawable mBackgroundOff = null;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private boolean mCanConfigMobileData;
+    private boolean mCanChangeWifiState;
 
     // Wi-Fi entries
     private int mWifiNetworkHeight;
@@ -177,9 +176,9 @@ public class InternetDialog extends SystemUIDialog implements
         mSubscriptionManager = mInternetDialogController.getSubscriptionManager();
         mDefaultDataSubId = mInternetDialogController.getDefaultDataSubscriptionId();
         mTelephonyManager = mInternetDialogController.getTelephonyManager();
-        mWifiManager = mInternetDialogController.getWifiManager();
         mCanConfigMobileData = canConfigMobileData;
         mCanConfigWifi = canConfigWifi;
+        mCanChangeWifiState = WifiEnterpriseRestrictionUtils.isChangeWifiStateAllowed(context);
         mKeyguard = keyguardStateController;
 
         mUiEventLogger = uiEventLogger;
@@ -329,7 +328,7 @@ public class InternetDialog extends SystemUIDialog implements
 
         showProgressBar();
         final boolean isDeviceLocked = mInternetDialogController.isDeviceLocked();
-        final boolean isWifiEnabled = mWifiManager != null && mWifiManager.isWifiEnabled();
+        final boolean isWifiEnabled = mInternetDialogController.isWifiEnabled();
         final boolean isWifiScanEnabled = mInternetDialogController.isWifiScanEnabled();
         updateWifiToggle(isWifiEnabled, isDeviceLocked);
         updateConnectedWifi(isWifiEnabled, isDeviceLocked);
@@ -359,9 +358,8 @@ public class InternetDialog extends SystemUIDialog implements
         mSeeAllLayout.setOnClickListener(this::onClickSeeMoreButton);
         mWiFiToggle.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {
-                    if (mWifiManager == null) return;
-                    buttonView.setChecked(isChecked);
-                    mWifiManager.setWifiEnabled(isChecked);
+                    if (mInternetDialogController.isWifiEnabled() == isChecked) return;
+                    mInternetDialogController.setWifiEnabled(isChecked);
                 });
         mDoneButton.setOnClickListener(v -> dismiss());
         mAirplaneModeButton.setOnClickListener(v -> {
@@ -385,7 +383,7 @@ public class InternetDialog extends SystemUIDialog implements
             Log.d(TAG, "setMobileDataLayout, isCarrierNetworkActive = " + isCarrierNetworkActive);
         }
 
-        boolean isWifiEnabled = mWifiManager != null && mWifiManager.isWifiEnabled();
+        boolean isWifiEnabled = mInternetDialogController.isWifiEnabled();
         if (!mInternetDialogController.hasActiveSubId()
                 && (!isWifiEnabled || !isCarrierNetworkActive)) {
             mMobileNetworkLayout.setVisibility(View.GONE);
@@ -441,7 +439,9 @@ public class InternetDialog extends SystemUIDialog implements
 
     @MainThread
     private void updateWifiToggle(boolean isWifiEnabled, boolean isDeviceLocked) {
-        mWiFiToggle.setChecked(isWifiEnabled);
+        if (mWiFiToggle.isChecked() != isWifiEnabled) {
+            mWiFiToggle.setChecked(isWifiEnabled);
+        }
         if (isDeviceLocked) {
             mWifiToggleTitleText.setTextAppearance((mConnectedWifiEntry != null)
                     ? R.style.TextAppearance_InternetDialog_Active
@@ -449,6 +449,14 @@ public class InternetDialog extends SystemUIDialog implements
         }
         mTurnWifiOnLayout.setBackground(
                 (isDeviceLocked && mConnectedWifiEntry != null) ? mBackgroundOn : null);
+
+        if (!mCanChangeWifiState && mWiFiToggle.isEnabled()) {
+            mWiFiToggle.setEnabled(false);
+            mWifiToggleTitleText.setEnabled(false);
+            final TextView summaryText = mDialogView.requireViewById(R.id.wifi_toggle_summary);
+            summaryText.setEnabled(false);
+            summaryText.setVisibility(View.VISIBLE);
+        }
     }
 
     @MainThread
@@ -561,7 +569,7 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     protected void showProgressBar() {
-        if (mWifiManager == null || !mWifiManager.isWifiEnabled()
+        if (!mInternetDialogController.isWifiEnabled()
                 || mInternetDialogController.isDeviceLocked()) {
             setProgressBarVisible(false);
             return;

@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -164,7 +165,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         @Override
         public void onVisibilityChanged(boolean isVisible) {
             if (!isVisible) {
-                cancelPostAuthActions();
                 mCentralSurfaces.setBouncerHiddenFraction(KeyguardBouncer.EXPANSION_HIDDEN);
             }
             if (mAlternateAuthInterceptor != null) {
@@ -218,7 +218,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastPulsing;
     private int mLastBiometricMode;
     private boolean mLastScreenOffAnimationPlaying;
-    private boolean mQsExpanded;
+    private float mQsExpansion;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private Runnable mKeyguardGoneCancelAction;
@@ -354,7 +354,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     @Override
-    public void onPanelExpansionChanged(float fraction, boolean expanded, boolean tracking) {
+    public void onPanelExpansionChanged(PanelExpansionChangeEvent event) {
+        float fraction = event.getFraction();
+        boolean tracking = event.getTracking();
+        // Avoid having the shade and the bouncer open at the same time over a dream.
+        final boolean hideBouncerOverDream =
+                mDreamOverlayStateController.isOverlayActive()
+                        && (mNotificationPanelViewController.isExpanded()
+                        || mNotificationPanelViewController.isExpanding());
+
         // We don't want to translate the bounce when:
         // • Keyguard is occluded, because we're in a FLAG_SHOW_WHEN_LOCKED activity and need to
         //   conserve the original animation.
@@ -371,7 +379,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             return;
         } else if (bouncerNeedsScrimming()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
-        } else if (mShowing) {
+        } else if (mShowing && !hideBouncerOverDream) {
             if (!isWakeAndUnlocking()
                     && !mCentralSurfaces.isInLaunchTransition()
                     && !isUnlockCollapsing()) {
@@ -382,6 +390,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     && !mBouncer.isShowing() && !mBouncer.isAnimatingAway()) {
                 mBouncer.show(false /* resetSecuritySelection */, false /* scrimmed */);
             }
+        } else if (!mShowing && mBouncer.inTransit()) {
+            // Keyguard is not visible anymore, but expansion animation was still running.
+            // We need to keep propagating the expansion state to the bouncer, otherwise it will be
+            // stuck in transit.
+            mBouncer.setExpansion(fraction);
         } else if (mPulsing && fraction == KeyguardBouncer.EXPANSION_VISIBLE) {
             // Panel expanded while pulsing but didn't translate the bouncer (because we are
             // unlocked.) Let's simply wake-up to dismiss the lock screen.
@@ -496,42 +509,52 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void dismissWithAction(OnDismissAction r, Runnable cancelAction,
             boolean afterKeyguardGone, String message) {
         if (mShowing) {
-            cancelPendingWakeupAction();
-            // If we're dozing, this needs to be delayed until after we wake up - unless we're
-            // wake-and-unlocking, because there dozing will last until the end of the transition.
-            if (mDozing && !isWakeAndUnlocking()) {
-                mPendingWakeupAction = new DismissWithActionRequest(
-                        r, cancelAction, afterKeyguardGone, message);
-                return;
-            }
+            try {
+                Trace.beginSection("StatusBarKeyguardViewManager#dismissWithAction");
+                cancelPendingWakeupAction();
+                // If we're dozing, this needs to be delayed until after we wake up - unless we're
+                // wake-and-unlocking, because there dozing will last until the end of the
+                // transition.
+                if (mDozing && !isWakeAndUnlocking()) {
+                    mPendingWakeupAction = new DismissWithActionRequest(
+                            r, cancelAction, afterKeyguardGone, message);
+                    return;
+                }
 
-            mAfterKeyguardGoneAction = r;
-            mKeyguardGoneCancelAction = cancelAction;
-            mDismissActionWillAnimateOnKeyguard = r != null && r.willRunAnimationOnKeyguard();
+                mAfterKeyguardGoneAction = r;
+                mKeyguardGoneCancelAction = cancelAction;
+                mDismissActionWillAnimateOnKeyguard = r != null && r.willRunAnimationOnKeyguard();
 
-            // If there is an an alternate auth interceptor (like the UDFPS), show that one instead
-            // of the bouncer.
-            if (shouldShowAltAuth()) {
-                if (!afterKeyguardGone) {
-                    mBouncer.setDismissAction(mAfterKeyguardGoneAction, mKeyguardGoneCancelAction);
+                // If there is an an alternate auth interceptor (like the UDFPS), show that one
+                // instead of the bouncer.
+                if (shouldShowAltAuth()) {
+                    if (!afterKeyguardGone) {
+                        mBouncer.setDismissAction(mAfterKeyguardGoneAction,
+                                mKeyguardGoneCancelAction);
+                        mAfterKeyguardGoneAction = null;
+                        mKeyguardGoneCancelAction = null;
+                    }
+
+                    updateAlternateAuthShowing(
+                            mAlternateAuthInterceptor.showAlternateAuthBouncer());
+                    return;
+                }
+
+                if (afterKeyguardGone) {
+                    // we'll handle the dismiss action after keyguard is gone, so just show the
+                    // bouncer
+                    mBouncer.show(false /* resetSecuritySelection */);
+                } else {
+                    // after authentication success, run dismiss action with the option to defer
+                    // hiding the keyguard based on the return value of the OnDismissAction
+                    mBouncer.showWithDismissAction(mAfterKeyguardGoneAction,
+                            mKeyguardGoneCancelAction);
+                    // bouncer will handle the dismiss action, so we no longer need to track it here
                     mAfterKeyguardGoneAction = null;
                     mKeyguardGoneCancelAction = null;
                 }
-
-                updateAlternateAuthShowing(mAlternateAuthInterceptor.showAlternateAuthBouncer());
-                return;
-            }
-
-            if (afterKeyguardGone) {
-                // we'll handle the dismiss action after keyguard is gone, so just show the bouncer
-                mBouncer.show(false /* resetSecuritySelection */);
-            } else {
-                // after authentication success, run dismiss action with the option to defer
-                // hiding the keyguard based on the return value of the OnDismissAction
-                mBouncer.showWithDismissAction(mAfterKeyguardGoneAction, mKeyguardGoneCancelAction);
-                // bouncer will handle the dismiss action, so we no longer need to track it here
-                mAfterKeyguardGoneAction = null;
-                mKeyguardGoneCancelAction = null;
+            } finally {
+                Trace.endSection();
             }
         }
         updateStates();
@@ -574,9 +597,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
-    /**
-     * Stop showing any alternate auth methods
-     */
+    @Override
     public void resetAlternateAuth(boolean forceUpdateScrim) {
         final boolean updateScrim = (mAlternateAuthInterceptor != null
                 && mAlternateAuthInterceptor.hideAlternateAuthBouncer())
@@ -585,10 +606,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void updateAlternateAuthShowing(boolean updateScrim) {
+        final boolean isShowingAltAuth = isShowingAlternateAuth();
         if (mKeyguardMessageAreaController != null) {
-            mKeyguardMessageAreaController.setAltBouncerShowing(isShowingAlternateAuth());
+            mKeyguardMessageAreaController.setAltBouncerShowing(isShowingAltAuth);
         }
-        mBypassController.setAltBouncerShowing(isShowingAlternateAuth());
+        mBypassController.setAltBouncerShowing(isShowingAltAuth);
+        mKeyguardUpdateManager.setUdfpsBouncerShowing(isShowingAltAuth);
 
         if (updateScrim) {
             mCentralSurfaces.updateScrimController();
@@ -1055,8 +1078,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
             mKeyguardUpdateManager.onKeyguardVisibilityChanged(showing && !occluded);
         }
-        if (bouncerIsOrWillBeShowing != mLastBouncerIsOrWillBeShowing || mFirstUpdate) {
-            mKeyguardUpdateManager.sendKeyguardBouncerChanged(bouncerIsOrWillBeShowing);
+        if (bouncerIsOrWillBeShowing != mLastBouncerIsOrWillBeShowing || mFirstUpdate
+                || bouncerShowing != mLastBouncerShowing) {
+            mKeyguardUpdateManager.sendKeyguardBouncerChanged(bouncerIsOrWillBeShowing,
+                    bouncerShowing);
         }
 
         mFirstUpdate = false;
@@ -1262,6 +1287,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         pw.println("  mAfterKeyguardGoneAction: " + mAfterKeyguardGoneAction);
         pw.println("  mAfterKeyguardGoneRunnables: " + mAfterKeyguardGoneRunnables);
         pw.println("  mPendingWakeupAction: " + mPendingWakeupAction);
+        pw.println("  isBouncerShowing(): " + isBouncerShowing());
+        pw.println("  bouncerIsOrWillBeShowing(): " + bouncerIsOrWillBeShowing());
 
         if (mBouncer != null) {
             mBouncer.dump(pw);
@@ -1288,16 +1315,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     /**
      * Whether qs is currently expanded.
      */
-    public boolean isQsExpanded() {
-        return mQsExpanded;
+    public float getQsExpansion() {
+        return mQsExpansion;
     }
+
     /**
-     * Set whether qs is currently expanded
+     * Update qs expansion.
      */
-    public void setQsExpanded(boolean expanded) {
-        mQsExpanded = expanded;
+    public void setQsExpansion(float qsExpansion) {
+        mQsExpansion = qsExpansion;
         if (mAlternateAuthInterceptor != null) {
-            mAlternateAuthInterceptor.setQsExpanded(expanded);
+            mAlternateAuthInterceptor.setQsExpansion(qsExpansion);
         }
     }
 
@@ -1368,6 +1396,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
+     * Returns if bouncer expansion is between 0 and 1 non-inclusive.
+     */
+    public boolean isBouncerInTransit() {
+        if (mBouncer == null) return false;
+
+        return mBouncer.inTransit();
+    }
+
+    /**
      * Delegate used to send show/reset events to an alternate authentication method instead of the
      * regular pin/pattern/password bouncer.
      */
@@ -1400,9 +1437,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean isAnimating();
 
         /**
-         * Set whether qs is currently expanded.
+         * How much QS is fully expanded where 0f is not showing and 1f is fully expanded.
          */
-        void setQsExpanded(boolean expanded);
+        void setQsExpansion(float qsExpansion);
 
         /**
          * Forward potential touches to authentication interceptor

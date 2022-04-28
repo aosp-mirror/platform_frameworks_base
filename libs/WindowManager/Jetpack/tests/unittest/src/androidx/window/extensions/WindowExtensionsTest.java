@@ -18,6 +18,8 @@ package androidx.window.extensions;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -25,6 +27,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Test class for {@link WindowExtensionsTest}.
+ *
+ * Build/Install/Run:
+ *  atest WMJetpackUnitTests:WindowExtensionsTest
+ */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class WindowExtensionsTest {

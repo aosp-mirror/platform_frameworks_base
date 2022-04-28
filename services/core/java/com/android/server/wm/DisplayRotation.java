@@ -702,17 +702,17 @@ public class DisplayRotation {
     }
 
     boolean canRotateSeamlessly(int oldRotation, int newRotation) {
+        // If the navigation bar can't change sides, then it will jump when we change orientations
+        // and we don't rotate seamlessly - unless that is allowed, eg. with gesture navigation
+        // where the navbar is low-profile enough that this isn't very noticeable.
+        if (mAllowSeamlessRotationDespiteNavBarMoving || mDisplayPolicy.navigationBarCanMove()) {
+            return true;
+        }
         // For the upside down rotation we don't rotate seamlessly as the navigation bar moves
         // position. Note most apps (using orientation:sensor or user as opposed to fullSensor)
         // will not enter the reverse portrait orientation, so actually the orientation won't change
         // at all.
-        if (oldRotation == mUpsideDownRotation || newRotation == mUpsideDownRotation) {
-            return false;
-        }
-        // If the navigation bar can't change sides, then it will jump when we change orientations
-        // and we don't rotate seamlessly - unless that is allowed, eg. with gesture navigation
-        // where the navbar is low-profile enough that this isn't very noticeable.
-        return mAllowSeamlessRotationDespiteNavBarMoving || mDisplayPolicy.navigationBarCanMove();
+        return oldRotation != Surface.ROTATION_180 && newRotation != Surface.ROTATION_180;
     }
 
     void markForSeamlessRotation(WindowState w, boolean seamlesslyRotated) {
@@ -1224,16 +1224,8 @@ public class DisplayRotation {
                 || orientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT) {
             // Otherwise, use sensor only if requested by the application or enabled
             // by default for USER or UNSPECIFIED modes.  Does not apply to NOSENSOR.
-            if (mAllowAllRotations == ALLOW_ALL_ROTATIONS_UNDEFINED) {
-                // Can't read this during init() because the context doesn't have display metrics at
-                // that time so we cannot determine tablet vs. phone then.
-                mAllowAllRotations = mContext.getResources().getBoolean(
-                        R.bool.config_allowAllRotations)
-                                ? ALLOW_ALL_ROTATIONS_ENABLED
-                                : ALLOW_ALL_ROTATIONS_DISABLED;
-            }
             if (sensorRotation != Surface.ROTATION_180
-                    || mAllowAllRotations == ALLOW_ALL_ROTATIONS_ENABLED
+                    || getAllowAllRotations() == ALLOW_ALL_ROTATIONS_ENABLED
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_USER) {
                 preferredRotation = sensorRotation;
@@ -1322,6 +1314,19 @@ public class DisplayRotation {
         }
     }
 
+    private int getAllowAllRotations() {
+        if (mAllowAllRotations == ALLOW_ALL_ROTATIONS_UNDEFINED) {
+            // Can't read this during init() because the context doesn't have display metrics at
+            // that time so we cannot determine tablet vs. phone then.
+            mAllowAllRotations = mContext.getResources().getBoolean(
+                    R.bool.config_allowAllRotations)
+                    ? ALLOW_ALL_ROTATIONS_ENABLED
+                    : ALLOW_ALL_ROTATIONS_DISABLED;
+        }
+
+        return mAllowAllRotations;
+    }
+
     private boolean isLandscapeOrSeascape(int rotation) {
         return rotation == mLandscapeRotation || rotation == mSeascapeRotation;
     }
@@ -1349,6 +1354,11 @@ public class DisplayRotation {
 
             case ActivityInfo.SCREEN_ORIENTATION_USER:
             case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
+                // When all rotations enabled it works with any of the 4 rotations
+                if (getAllowAllRotations() == ALLOW_ALL_ROTATIONS_ENABLED) {
+                    return preferredRotation >= 0;
+                }
+
                 // Works with any rotation except upside down.
                 return (preferredRotation >= 0) && (preferredRotation != Surface.ROTATION_180);
         }
@@ -1683,7 +1693,7 @@ public class DisplayRotation {
                 mSensorRotation = (listener == null || !listener.mEnabled)
                         ? -2 /* disabled */ : dr.mLastSensorRotation;
                 final DisplayContent dc = dr.mDisplayContent;
-                mIgnoreOrientationRequest = dc.mIgnoreOrientationRequest;
+                mIgnoreOrientationRequest = dc.getIgnoreOrientationRequest();
                 final TaskDisplayArea requestingTda = dc.getOrientationRequestingTaskDisplayArea();
                 mNonDefaultRequestingTaskDisplayArea = requestingTda == null
                         ? "none" : requestingTda != dc.getDefaultTaskDisplayArea()

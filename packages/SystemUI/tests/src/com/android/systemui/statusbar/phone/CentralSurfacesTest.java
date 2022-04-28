@@ -786,7 +786,7 @@ public class CentralSurfacesTest extends SysuiTestCase {
 
     @Test
     public void testDump_DoesNotCrash() {
-        mCentralSurfaces.dump(null, new PrintWriter(new ByteArrayOutputStream()), null);
+        mCentralSurfaces.dump(new PrintWriter(new ByteArrayOutputStream()), null);
     }
 
     @Test

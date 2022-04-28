@@ -151,6 +151,9 @@ final class NavigationBarController {
 
         private boolean mDrawLegacyNavigationBarBackground;
 
+        private final Rect mTempRect = new Rect();
+        private final int[] mTempPos = new int[2];
+
         Impl(@NonNull InputMethodService inputMethodService) {
             mService = inputMethodService;
         }
@@ -257,23 +260,29 @@ final class NavigationBarController {
                 switch (originalInsets.touchableInsets) {
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            touchableRegion = new Region(inputFrame.getLeft(),
-                                    inputFrame.getTop(), inputFrame.getRight(),
-                                    inputFrame.getBottom());
+                            inputFrame.getLocationInWindow(mTempPos);
+                            mTempRect.set(mTempPos[0], mTempPos[1],
+                                    mTempPos[0] + inputFrame.getWidth(),
+                                    mTempPos[1] + inputFrame.getHeight());
+                            touchableRegion = new Region(mTempRect);
                         }
                         break;
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            touchableRegion = new Region(inputFrame.getLeft(),
-                                    originalInsets.contentTopInsets, inputFrame.getRight(),
-                                    inputFrame.getBottom());
+                            inputFrame.getLocationInWindow(mTempPos);
+                            mTempRect.set(mTempPos[0], originalInsets.contentTopInsets,
+                                    mTempPos[0] + inputFrame.getWidth() ,
+                                    mTempPos[1] + inputFrame.getHeight());
+                            touchableRegion = new Region(mTempRect);
                         }
                         break;
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            touchableRegion = new Region(inputFrame.getLeft(),
-                                    originalInsets.visibleTopInsets, inputFrame.getRight(),
-                                    inputFrame.getBottom());
+                            inputFrame.getLocationInWindow(mTempPos);
+                            mTempRect.set(mTempPos[0], originalInsets.visibleTopInsets,
+                                    mTempPos[0] + inputFrame.getWidth(),
+                                    mTempPos[1] + inputFrame.getHeight());
+                            touchableRegion = new Region(mTempRect);
                         }
                         break;
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION:
@@ -281,13 +290,13 @@ final class NavigationBarController {
                         touchableRegion.set(originalInsets.touchableRegion);
                         break;
                 }
-                final Rect navBarRect = new Rect(decor.getLeft(),
-                        decor.getBottom() - systemInsets.bottom,
+                // Hereafter "mTempRect" means a navigation bar rect.
+                mTempRect.set(decor.getLeft(), decor.getBottom() - systemInsets.bottom,
                         decor.getRight(), decor.getBottom());
                 if (touchableRegion == null) {
-                    touchableRegion = new Region(navBarRect);
+                    touchableRegion = new Region(mTempRect);
                 } else {
-                    touchableRegion.union(navBarRect);
+                    touchableRegion.union(mTempRect);
                 }
 
                 dest.touchableRegion.set(touchableRegion);

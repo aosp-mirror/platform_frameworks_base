@@ -520,7 +520,7 @@ android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz,
             (audio_flags_mask_t) env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
     ScopedUtfChars opPackageNameStr(env, opPackageName);
     auto soundPool = std::make_shared<SoundPool>(
-            maxChannels, &audioAttributes, opPackageNameStr.c_str());
+            maxChannels, audioAttributes, opPackageNameStr.c_str());
     soundPool->setCallback(android_media_callback, nullptr /* user */);
 
     // register with SoundPoolManager.

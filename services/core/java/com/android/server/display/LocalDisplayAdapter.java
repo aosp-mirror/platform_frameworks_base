@@ -22,6 +22,8 @@ import static android.view.Display.Mode.INVALID_MODE_ID;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Point;
+import android.hardware.display.DisplayManager;
 import android.hardware.sidekick.SidekickInternal;
 import android.os.Build;
 import android.os.Handler;
@@ -75,6 +77,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private final SurfaceControlProxy mSurfaceControlProxy;
 
     private final boolean mIsBootDisplayModeSupported;
+
+    private Context mOverlayContext;
 
     // Called with SyncRoot lock held.
     public LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
@@ -469,12 +473,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         private int getLogicalDensity() {
-            DensityMap densityMap = getDisplayDeviceConfig().getDensityMap();
-            if (densityMap == null) {
+            DensityMapping densityMapping = getDisplayDeviceConfig().getDensityMapping();
+            if (densityMapping == null) {
                 return (int) (mStaticDisplayInfo.density * 160 + 0.5);
             }
 
-            return densityMap.getDensityForResolution(mInfo.width, mInfo.height);
+            return densityMapping.getDensityForResolution(mInfo.width, mInfo.height);
         }
 
         private void loadDisplayDeviceConfig() {
@@ -675,11 +679,16 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 if (DisplayCutout.getMaskBuiltInDisplayCutout(res, mInfo.uniqueId)) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT;
                 }
+
+                final Point stableDisplaySize = getOverlayContext()
+                        .getSystemService(DisplayManager.class).getStableDisplaySize();
                 mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
-                        mInfo.uniqueId, mInfo.width, mInfo.height);
+                        mInfo.uniqueId, stableDisplaySize.x, stableDisplaySize.y, mInfo.width,
+                        mInfo.height);
 
                 mInfo.roundedCorners = RoundedCorners.fromResources(
-                        res, mInfo.uniqueId, mInfo.width, mInfo.height);
+                        res, mInfo.uniqueId, stableDisplaySize.x, stableDisplaySize.y, mInfo.width,
+                        mInfo.height);
                 mInfo.installOrientation = mStaticDisplayInfo.installOrientation;
 
                 if (mStaticDisplayInfo.isInternal) {
@@ -1222,7 +1231,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     /** Supplies a context whose Resources apply runtime-overlays */
     Context getOverlayContext() {
-        return ActivityThread.currentActivityThread().getSystemUiContext();
+        if (mOverlayContext == null) {
+            mOverlayContext = ActivityThread.currentActivityThread().getSystemUiContext();
+        }
+        return mOverlayContext;
     }
 
     /**

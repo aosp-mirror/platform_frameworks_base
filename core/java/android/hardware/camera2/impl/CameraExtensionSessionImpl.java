@@ -475,8 +475,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             mInternalRepeatingRequestEnabled = false;
             try {
                 return setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                        new RepeatingRequestHandler(request, executor, listener,
-                                mRepeatingRequestImageCallback));
+                        new PreviewRequestHandler(request, executor, listener,
+                                mRepeatingRequestImageCallback), request);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to set repeating request! Extension service does not "
                         + "respond");
@@ -530,7 +530,9 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             CaptureRequest request = requestBuilder.build();
             CameraMetadataNative.update(request.getNativeMetadata(), captureStage.parameters);
             ret.add(request);
-            captureMap.put(request, captureStage.id);
+            if (captureMap != null) {
+                captureMap.put(request, captureStage.id);
+            }
         }
 
         return ret;
@@ -583,33 +585,57 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             throw new IllegalStateException("Uninitialized component");
         }
 
-        if (mClientCaptureSurface == null) {
-            throw new IllegalArgumentException("No output surface registered for single requests!");
+        if (request.getTargets().size() != 1) {
+            throw new IllegalArgumentException("Single capture to both preview & still capture " +
+                    "outputs target is not supported!");
         }
 
-        if (!request.containsTarget(mClientCaptureSurface) || (request.getTargets().size() != 1)) {
-            throw new IllegalArgumentException("Invalid single capture output target!");
+        int seqId = -1;
+        if ((mClientCaptureSurface != null) && request.containsTarget(mClientCaptureSurface)) {
+            HashMap<CaptureRequest, Integer> requestMap = new HashMap<>();
+            List<CaptureRequest> burstRequest;
+            try {
+                burstRequest = createBurstRequest(mCameraDevice,
+                        mImageExtender.getCaptureStages(), request, mCameraBurstSurface,
+                        CameraDevice.TEMPLATE_STILL_CAPTURE, requestMap);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to initialize internal burst request! Extension service does"
+                        + " not respond!");
+                throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
+            }
+            if (burstRequest == null) {
+                throw new UnsupportedOperationException(
+                        "Failed to create still capture burst request");
+            }
+
+            seqId =  mCaptureSession.captureBurstRequests(burstRequest,
+                    new CameraExtensionUtils.HandlerExecutor(mHandler),
+                    new BurstRequestHandler(request, executor, listener, requestMap,
+                            mBurstCaptureImageCallback));
+        } else if ((mClientRepeatingRequestSurface != null) &&
+                request.containsTarget(mClientRepeatingRequestSurface)) {
+
+            CaptureRequest captureRequest = null;
+            try {
+                ArrayList<CaptureStageImpl> captureStageList = new ArrayList<>();
+                captureStageList.add(mPreviewExtender.getCaptureStage());
+
+                captureRequest = createRequest(mCameraDevice, captureStageList,
+                        mCameraRepeatingSurface, CameraDevice.TEMPLATE_PREVIEW, request);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to initialize capture request! Extension service does"
+                        + " not respond!");
+                throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
+            }
+
+            seqId = mCaptureSession.capture(captureRequest, new PreviewRequestHandler(request,
+                    executor, listener, mRepeatingRequestImageCallback, true /*singleCapture*/),
+                    mHandler);
+        } else {
+            throw new IllegalArgumentException("Capture request to unknown output surface!");
         }
 
-        HashMap<CaptureRequest, Integer> requestMap = new HashMap<>();
-        List<CaptureRequest> burstRequest;
-        try {
-            burstRequest = createBurstRequest(mCameraDevice,
-                    mImageExtender.getCaptureStages(), request, mCameraBurstSurface,
-                    CameraDevice.TEMPLATE_STILL_CAPTURE, requestMap);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to initialize internal burst request! Extension service does"
-                    + " not respond!");
-            throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
-        }
-        if (burstRequest == null) {
-            throw new UnsupportedOperationException("Failed to create still capture burst request");
-        }
-
-        return mCaptureSession.captureBurstRequests(burstRequest,
-                new CameraExtensionUtils.HandlerExecutor(mHandler),
-                new BurstRequestHandler(request, executor, listener, requestMap,
-                        mBurstCaptureImageCallback));
+        return seqId;
     }
 
     @Override
@@ -847,7 +873,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             } else {
                 try {
                     setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                            new RepeatingRequestHandler(null, null, null,
+                            new PreviewRequestHandler(null, null, null,
                                     mRepeatingRequestImageCallback));
                 } catch (CameraAccessException | RemoteException e) {
                     Log.e(TAG,
@@ -1010,7 +1036,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             if (timestamp != null) {
                 if (mCaptureResultsSupported && (mCaptureResultHandler == null)) {
                     mCaptureResultHandler = new CaptureResultHandler(mClientRequest, mExecutor,
-                            mCallbacks, result.getSessionId());
+                            mCallbacks, result.getSequenceId());
                 }
                 if (mImageProcessor != null) {
                     if (mCapturePendingMap.indexOfKey(timestamp) >= 0) {
@@ -1179,7 +1205,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                  */
                 try {
                     setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                            new RepeatingRequestHandler(null, null, null,
+                            new PreviewRequestHandler(null, null, null,
                                     mImageCallback));
                 } catch (CameraAccessException | RemoteException e) {
                     Log.e(TAG, "Failed to start the internal repeating request!");
@@ -1320,17 +1346,20 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
     }
 
-    // This handler can operate in two modes:
+    // This handler can operate in three modes:
     // 1) Using valid client callbacks, which means camera buffers will be propagated the
     //    registered output surfaces and clients will be notified accordingly.
     // 2) Without any client callbacks where an internal repeating request is kept active
     //    to satisfy the extensions continuous preview/(repeating request) requirement.
-    private class RepeatingRequestHandler extends CameraCaptureSession.CaptureCallback {
+    // 3) Single capture mode, where internal repeating requests are ignored and the preview
+    //    logic is only triggered for the image processor case.
+    private class PreviewRequestHandler extends CameraCaptureSession.CaptureCallback {
         private final Executor mExecutor;
         private final ExtensionCaptureCallback mCallbacks;
         private final CaptureRequest mClientRequest;
         private final boolean mClientNotificationsEnabled;
         private final CameraOutputImageCallback mRepeatingImageCallback;
+        private final boolean mSingleCapture;
         private OnImageAvailableListener mImageCallback = null;
         private LongSparseArray<Pair<Image, TotalCaptureResult>> mPendingResultMap =
                 new LongSparseArray<>();
@@ -1338,15 +1367,22 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
         private boolean mRequestUpdatedNeeded = false;
 
-        public RepeatingRequestHandler(@Nullable CaptureRequest clientRequest,
+        public PreviewRequestHandler(@Nullable CaptureRequest clientRequest,
                 @Nullable Executor executor, @Nullable ExtensionCaptureCallback listener,
                 @NonNull CameraOutputImageCallback imageCallback) {
+            this(clientRequest, executor, listener, imageCallback, false /*singleCapture*/);
+        }
+
+        public PreviewRequestHandler(@Nullable CaptureRequest clientRequest,
+                @Nullable Executor executor, @Nullable ExtensionCaptureCallback listener,
+                @NonNull CameraOutputImageCallback imageCallback, boolean singleCapture) {
             mClientRequest = clientRequest;
             mExecutor = executor;
             mCallbacks = listener;
             mClientNotificationsEnabled =
                     (mClientRequest != null) && (mExecutor != null) && (mCallbacks != null);
             mRepeatingImageCallback = imageCallback;
+            mSingleCapture = singleCapture;
         }
 
         @Override
@@ -1393,7 +1429,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         public void onCaptureSequenceAborted(@NonNull CameraCaptureSession session,
                                              int sequenceId) {
             synchronized (mInterfaceLock) {
-                if (mInternalRepeatingRequestEnabled) {
+                if (mInternalRepeatingRequestEnabled && !mSingleCapture) {
                     resumeInternalRepeatingRequest(true);
                 }
             }
@@ -1420,10 +1456,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                                                long frameNumber) {
 
             synchronized (mInterfaceLock) {
-                if (mRequestUpdatedNeeded) {
+                if (mRequestUpdatedNeeded && !mSingleCapture) {
                     mRequestUpdatedNeeded = false;
                     resumeInternalRepeatingRequest(false);
-                } else if (mInternalRepeatingRequestEnabled) {
+                } else if (mInternalRepeatingRequestEnabled && !mSingleCapture) {
                     resumeInternalRepeatingRequest(true);
                 }
             }
@@ -1471,10 +1507,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     if (mCaptureResultsSupported && mClientNotificationsEnabled &&
                             (mCaptureResultHandler == null)) {
                         mCaptureResultHandler = new CaptureResultHandler(mClientRequest, mExecutor,
-                                mCallbacks, result.getSessionId());
+                                mCallbacks, result.getSequenceId());
                     }
-                    if (mPreviewProcessorType ==
-                            IPreviewExtenderImpl.PROCESSOR_TYPE_REQUEST_UPDATE_ONLY) {
+                    if ((!mSingleCapture) && (mPreviewProcessorType ==
+                            IPreviewExtenderImpl.PROCESSOR_TYPE_REQUEST_UPDATE_ONLY)) {
                         CaptureStageImpl captureStage = null;
                         try {
                             captureStage = mPreviewRequestUpdateProcessor.process(
@@ -1582,10 +1618,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             try {
                 if (internal) {
                     setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                            new RepeatingRequestHandler(null, null, null,
+                            new PreviewRequestHandler(null, null, null,
                                     mRepeatingImageCallback));
                 } else {
-                    setRepeatingRequest(mPreviewExtender.getCaptureStage(), this);
+                    setRepeatingRequest(mPreviewExtender.getCaptureStage(), this, mClientRequest);
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to resume internal repeating request, extension service"
@@ -1733,7 +1769,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     }
 
     private static Size findSmallestAspectMatchedSize(@NonNull List<Size> sizes,
-                                                      @NonNull Size arSize) {
+            @NonNull Size arSize) {
         final float TOLL = .01f;
 
         if (arSize.getHeight() == 0) {

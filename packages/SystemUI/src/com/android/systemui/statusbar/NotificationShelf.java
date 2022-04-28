@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.notification.row.NotificationBackgroundView;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
@@ -84,9 +83,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private float mCornerAnimationDistance;
     private NotificationShelfController mController;
     private float mActualWidth = -1;
-
-    /** Fraction of lockscreen to shade animation (on lockscreen swipe down). */
-    private float mFractionToShade;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -231,13 +227,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
             mShelfIcons.setActualLayoutWidth((int) actualWidth);
         }
         mActualWidth = actualWidth;
-    }
-
-    /**
-     * @param fractionToShade Fraction of lockscreen to shade transition
-     */
-    public void setFractionToShade(float fractionToShade) {
-        mFractionToShade = fractionToShade;
     }
 
     /**
@@ -411,7 +400,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 || !mShowNotificationShelf
                 || numViewsInShelf < 1f;
 
-        final float fractionToShade = Interpolators.STANDARD.getInterpolation(mFractionToShade);
+        final float fractionToShade = Interpolators.STANDARD.getInterpolation(
+                mAmbientState.getFractionToShade());
         final float shortestWidth = mShelfIcons.calculateWidthFor(numViewsInShelf);
         updateActualWidth(fractionToShade, shortestWidth);
 
@@ -420,7 +410,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setBackgroundTop(backgroundTop);
         setFirstElementRoundness(firstElementRoundness);
         mShelfIcons.setSpeedBumpIndex(mHostLayoutController.getSpeedBumpIndex());
-        mShelfIcons.calculateIconTranslations();
+        mShelfIcons.calculateIconXTranslations();
         mShelfIcons.applyIconStates();
         for (int i = 0; i < mHostLayoutController.getChildCount(); i++) {
             View child = mHostLayoutController.getChildAt(i);
@@ -594,16 +584,13 @@ public class NotificationShelf extends ActivatableNotificationView implements
         } else {
             shouldClipOwnTop = view.showingPulsing();
         }
-        if (viewEnd > notificationClipEnd && !shouldClipOwnTop
-                && (mAmbientState.isShadeExpanded() || !isPinned)) {
-            int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
-            if (isPinned) {
-                clipBottomAmount = Math.min(view.getIntrinsicHeight() - view.getCollapsedHeight(),
-                        clipBottomAmount);
+        if (!isPinned) {
+            if (viewEnd > notificationClipEnd && !shouldClipOwnTop) {
+                int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
+                view.setClipBottomAmount(clipBottomAmount);
+            } else {
+                view.setClipBottomAmount(0);
             }
-            view.setClipBottomAmount(clipBottomAmount);
-        } else {
-            view.setClipBottomAmount(0);
         }
         if (shouldClipOwnTop) {
             return (int) (viewEnd - getTranslationY());
@@ -648,7 +635,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         float viewEnd = viewStart + fullHeight;
         float fullTransitionAmount = 0.0f;
         float iconTransitionAmount = 0.0f;
-        float shelfStart = getTranslationY();
+        float shelfStart = getTranslationY() - mPaddingBetweenElements;
         if (mAmbientState.isExpansionChanging() && !mAmbientState.isOnKeyguard()) {
             // TODO(b/172289889) handle icon placement for notification that is clipped by the shelf
             if (mIndexOfFirstViewInShelf != -1 && i >= mIndexOfFirstViewInShelf) {
