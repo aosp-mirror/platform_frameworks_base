@@ -146,10 +146,11 @@ public class PipInputConsumer {
                     "%s: Failed to create input consumer, %s", TAG, e);
         }
         mMainExecutor.execute(() -> {
-            // Choreographer.getInstance() must be called on the thread that the input event
+            // Choreographer.getSfInstance() must be called on the thread that the input event
             // receiver should be receiving events
+            // TODO(b/222697646): remove getSfInstance usage and use vsyncId for transactions
             mInputEventReceiver = new InputEventReceiver(inputChannel,
-                Looper.myLooper(), Choreographer.getInstance());
+                Looper.myLooper(), Choreographer.getSfInstance());
             if (mRegistrationListener != null) {
                 mRegistrationListener.onRegistrationChanged(true /* isRegistered */);
             }

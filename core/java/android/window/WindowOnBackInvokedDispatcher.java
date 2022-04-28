@@ -51,9 +51,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private IWindowSession mWindowSession;
     private IWindow mWindow;
     private static final String TAG = "WindowOnBackDispatcher";
-    private static final String BACK_PREDICTABILITY_PROP = "persist.debug.back_predictability";
-    private static final boolean IS_BACK_PREDICTABILITY_ENABLED = SystemProperties
-            .getInt(BACK_PREDICTABILITY_PROP, 1) > 0;
+    private static final boolean ENABLE_PREDICTIVE_BACK = SystemProperties
+            .getInt("persist.wm.debug.predictive_back", 1) != 0;
+    private static final boolean ALWAYS_ENFORCE_PREDICTIVE_BACK = SystemProperties
+            .getInt("persist.wm.debug.predictive_back_always_enforce", 0) != 0;
 
     /** Convenience hashmap to quickly decide if a callback has been added. */
     private final HashMap<OnBackInvokedCallback, Integer> mAllCallbacks = new HashMap<>();
@@ -160,11 +161,12 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
         try {
             if (callback == null) {
-                mWindowSession.setOnBackInvokedCallback(mWindow, null, PRIORITY_DEFAULT);
+                mWindowSession.setOnBackInvokedCallbackInfo(mWindow, null);
             } else {
                 int priority = mAllCallbacks.get(callback);
-                mWindowSession.setOnBackInvokedCallback(
-                        mWindow, new OnBackInvokedCallbackWrapper(callback), priority);
+                mWindowSession.setOnBackInvokedCallbackInfo(
+                        mWindow, new OnBackInvokedCallbackInfo(
+                                new OnBackInvokedCallbackWrapper(callback), priority));
             }
             if (DEBUG && callback == null) {
                 Log.d(TAG, TextUtils.formatSimple("setTopOnBackInvokedCallback(null) Callers:%s",
@@ -175,7 +177,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
     }
 
-    @Override
     public OnBackInvokedCallback getTopCallback() {
         if (mAllCallbacks.isEmpty()) {
             return null;
@@ -199,36 +200,30 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         @Override
         public void onBackStarted() {
             Handler.getMain().post(() -> {
-                final OnBackInvokedCallback callback = mCallback.get();
-                if (callback == null) {
-                    return;
+                final OnBackAnimationCallback callback = getBackAnimationCallback();
+                if (callback != null) {
+                    callback.onBackStarted();
                 }
-
-                callback.onBackStarted();
             });
         }
 
         @Override
         public void onBackProgressed(BackEvent backEvent) {
             Handler.getMain().post(() -> {
-                final OnBackInvokedCallback callback = mCallback.get();
-                if (callback == null) {
-                    return;
+                final OnBackAnimationCallback callback = getBackAnimationCallback();
+                if (callback != null) {
+                    callback.onBackProgressed(backEvent);
                 }
-
-                callback.onBackProgressed(backEvent);
             });
         }
 
         @Override
         public void onBackCancelled() {
             Handler.getMain().post(() -> {
-                final OnBackInvokedCallback callback = mCallback.get();
-                if (callback == null) {
-                    return;
+                final OnBackAnimationCallback callback = getBackAnimationCallback();
+                if (callback != null) {
+                    callback.onBackCancelled();
                 }
-
-                callback.onBackCancelled();
             });
         }
 
@@ -243,6 +238,13 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 callback.onBackInvoked();
             });
         }
+
+        @Nullable
+        private OnBackAnimationCallback getBackAnimationCallback() {
+            OnBackInvokedCallback callback = mCallback.get();
+            return callback instanceof OnBackAnimationCallback ? (OnBackAnimationCallback) callback
+                    : null;
+        }
     }
 
     /**
@@ -254,18 +256,18 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public static boolean isOnBackInvokedCallbackEnabled(@Nullable Context context) {
         // new back is enabled if the feature flag is enabled AND the app does not explicitly
         // request legacy back.
-        boolean featureFlagEnabled = IS_BACK_PREDICTABILITY_ENABLED;
+        boolean featureFlagEnabled = ENABLE_PREDICTIVE_BACK;
         // If the context is null, we assume true and fallback on the two other conditions.
         boolean appRequestsPredictiveBack =
                 context != null && context.getApplicationInfo().isOnBackInvokedCallbackEnabled();
 
         if (DEBUG) {
             Log.d(TAG, TextUtils.formatSimple("App: %s featureFlagEnabled=%s "
-                            + "appRequestsPredictiveBack=%s",
+                            + "appRequestsPredictiveBack=%s alwaysEnforce=%s",
                     context != null ? context.getApplicationInfo().packageName : "null context",
-                    featureFlagEnabled, appRequestsPredictiveBack));
+                    featureFlagEnabled, appRequestsPredictiveBack, ALWAYS_ENFORCE_PREDICTIVE_BACK));
         }
 
-        return featureFlagEnabled && appRequestsPredictiveBack;
+        return featureFlagEnabled && (appRequestsPredictiveBack || ALWAYS_ENFORCE_PREDICTIVE_BACK);
     }
 }

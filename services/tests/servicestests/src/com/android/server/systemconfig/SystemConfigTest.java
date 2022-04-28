@@ -429,18 +429,40 @@ public class SystemConfigTest {
     public void readPermissions_allowLibs_parsesSimpleLibrary() throws IOException {
         String contents =
                 "<permissions>\n"
-                + "    <library \n"
-                + "        name=\"foo\"\n"
-                + "        file=\"" + mFooJar + "\"\n"
-                + "        on-bootclasspath-before=\"10\"\n"
-                + "        on-bootclasspath-since=\"20\"\n"
-                + "     />\n\n"
-                + " </permissions>";
+                        + "    <library \n"
+                        + "        name=\"foo\"\n"
+                        + "        file=\"" + mFooJar + "\"\n"
+                        + "        on-bootclasspath-before=\"10\"\n"
+                        + "        on-bootclasspath-since=\"20\"\n"
+                        + "     />\n\n"
+                        + " </permissions>";
         parseSharedLibraries(contents);
         assertFooIsOnlySharedLibrary();
         SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
-        assertThat(entry.onBootclasspathBefore).isEqualTo(10);
-        assertThat(entry.onBootclasspathSince).isEqualTo(20);
+        assertThat(entry.onBootclasspathBefore).isEqualTo("10");
+        assertThat(entry.onBootclasspathSince).isEqualTo("20");
+    }
+
+    /**
+     * Tests that readPermissions works correctly for a library with on-bootclasspath-before
+     * and on-bootclasspath-since that uses codenames.
+     */
+    @Test
+    public void readPermissions_allowLibs_parsesSimpleLibraryWithCodenames() throws IOException {
+        String contents =
+                "<permissions>\n"
+                        + "    <library \n"
+                        + "        name=\"foo\"\n"
+                        + "        file=\"" + mFooJar + "\"\n"
+                        + "        on-bootclasspath-before=\"Q\"\n"
+                        + "        on-bootclasspath-since=\"W\"\n"
+                        + "     />\n\n"
+                        + " </permissions>";
+        parseSharedLibraries(contents);
+        assertFooIsOnlySharedLibrary();
+        SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
+        assertThat(entry.onBootclasspathBefore).isEqualTo("Q");
+        assertThat(entry.onBootclasspathSince).isEqualTo("W");
     }
 
     /**
@@ -461,8 +483,8 @@ public class SystemConfigTest {
         parseSharedLibraries(contents);
         assertFooIsOnlySharedLibrary();
         SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
-        assertThat(entry.onBootclasspathBefore).isEqualTo(10);
-        assertThat(entry.onBootclasspathSince).isEqualTo(20);
+        assertThat(entry.onBootclasspathBefore).isEqualTo("10");
+        assertThat(entry.onBootclasspathSince).isEqualTo("20");
     }
 
     /**
@@ -543,12 +565,20 @@ public class SystemConfigTest {
      */
     @Test
     public void readPermissions_allowLibs_allowsCurrentMaxSdk() throws IOException {
+        // depending on whether this test is running before or after finalization, we need to
+        // pass a different parameter
+        String parameter;
+        if ("REL".equals(Build.VERSION.CODENAME)) {
+            parameter = "" + Build.VERSION.SDK_INT;
+        } else {
+            parameter = "ZZZ";
+        }
         String contents =
                 "<permissions>\n"
                 + "    <library \n"
                 + "        name=\"foo\"\n"
                 + "        file=\"" + mFooJar + "\"\n"
-                + "        max-device-sdk=\"" + Build.VERSION.SDK_INT + "\"\n"
+                + "        max-device-sdk=\"" + parameter + "\"\n"
                 + "     />\n\n"
                 + " </permissions>";
         parseSharedLibraries(contents);

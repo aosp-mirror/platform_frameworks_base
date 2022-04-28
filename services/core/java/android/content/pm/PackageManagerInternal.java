@@ -1208,6 +1208,11 @@ public abstract class PackageManagerInternal {
     public abstract SharedUserApi getSharedUserApi(int sharedUserAppId);
 
     /**
+     * Returns if the given uid is privileged or not.
+     */
+    public abstract boolean isUidPrivileged(int uid);
+
+    /**
      * Initiates a package state mutation request, returning the current state as known by
      * PackageManager. This allows the later commit request to compare the initial values and
      * determine if any state was changed or any packages were updated since the whole request

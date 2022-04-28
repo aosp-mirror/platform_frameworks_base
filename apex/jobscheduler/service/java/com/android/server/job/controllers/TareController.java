@@ -528,7 +528,7 @@ public class TareController extends StateController {
     @NonNull
     private ActionBill getRunningBill(JobStatus jobStatus) {
         // TODO: factor in network cost when available
-        if (jobStatus.shouldTreatAsExpeditedJob()) {
+        if (jobStatus.shouldTreatAsExpeditedJob() || jobStatus.startedAsExpeditedJob) {
             if (jobStatus.getEffectivePriority() == JobInfo.PRIORITY_MAX) {
                 return BILL_JOB_RUNNING_MAX_EXPEDITED;
             } else {
@@ -636,10 +636,6 @@ public class TareController extends StateController {
             return true;
         }
         if (mService.isCurrentlyRunningLocked(jobStatus)) {
-            if (jobStatus.isRequestedExpeditedJob()) {
-                return canAffordBillLocked(jobStatus, getRunningBill(jobStatus))
-                        || canAffordBillLocked(jobStatus, BILL_JOB_RUNNING_DEFAULT);
-            }
             return canAffordBillLocked(jobStatus, getRunningBill(jobStatus));
         }
 

@@ -36,7 +36,6 @@ import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.StatsLog;
 import android.view.Choreographer;
 import android.view.FrameMetrics;
 import android.view.SurfaceControl;
@@ -481,6 +480,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         int missedFramesCount = 0;
         int missedAppFramesCount = 0;
         int missedSfFramesCount = 0;
+        int maxSuccessiveMissedFramesCount = 0;
+        int successiveMissedFramesCount = 0;
 
         for (int i = 0; i < mJankInfos.size(); i++) {
             JankInfo info = mJankInfos.valueAt(i);
@@ -510,6 +511,11 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 }
                 if (missedFrame) {
                     missedFramesCount++;
+                    successiveMissedFramesCount++;
+                } else {
+                    maxSuccessiveMissedFramesCount = Math.max(
+                            maxSuccessiveMissedFramesCount, successiveMissedFramesCount);
+                    successiveMissedFramesCount = 0;
                 }
                 // TODO (b/174755489): Early latch currently gets fired way too often, so we have
                 // to ignore it for now.
@@ -524,6 +530,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 }
             }
         }
+        maxSuccessiveMissedFramesCount = Math.max(
+                maxSuccessiveMissedFramesCount, successiveMissedFramesCount);
 
         // Log the frame stats as counters to make them easily accessible in traces.
         Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#missedFrames",
@@ -536,6 +544,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 totalFramesCount);
         Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#maxFrameTimeMillis",
                 (int) (maxFrameTimeNanos / NANOS_IN_MILLISECOND));
+        Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#maxSuccessiveMissedFrames",
+                maxSuccessiveMissedFramesCount);
 
         // Trigger perfetto if necessary.
         if (shouldTriggerPerfetto(missedFramesCount, (int) maxFrameTimeNanos)) {
@@ -549,7 +559,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                     missedFramesCount,
                     maxFrameTimeNanos, /* will be 0 if mSurfaceOnly == true */
                     missedSfFramesCount,
-                    missedAppFramesCount);
+                    missedAppFramesCount,
+                    maxSuccessiveMissedFramesCount);
         }
         if (DEBUG) {
             Log.i(TAG, "finish: CUJ=" + mSession.getName()
@@ -558,7 +569,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                     + " missedAppFrames=" + missedAppFramesCount
                     + " missedSfFrames=" + missedSfFramesCount
                     + " missedFrames=" + missedFramesCount
-                    + " maxFrameTimeMillis=" + maxFrameTimeNanos / NANOS_IN_MILLISECOND);
+                    + " maxFrameTimeMillis=" + maxFrameTimeNanos / NANOS_IN_MILLISECOND
+                    + " maxSuccessiveMissedFramesCount=" + maxSuccessiveMissedFramesCount);
         }
     }
 
@@ -694,8 +706,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
 
     public static class StatsLogWrapper {
         public void write(int code,
-                int arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
-            FrameworkStatsLog.write(code, arg1, arg2, arg3, arg4, arg5, arg6);
+                int arg1, long arg2, long arg3, long arg4, long arg5, long arg6, long arg7) {
+            FrameworkStatsLog.write(code, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
         }
     }
 

@@ -23,11 +23,12 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.provider.DeviceConfig;
+import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.app.ChooserActivity;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityInterceptorCallback;
@@ -35,25 +36,28 @@ import com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 /**
- * Service to register an {@code ActivityInterceptorCallback} that modifies any {@code Intent}
- * that's being used to launch a user-space {@code ChooserActivity} by setting the destination
- * component to the delegated component when appropriate.
+ * Redirects Activity starts for the system bundled {@link ChooserActivity} to an external
+ * Sharesheet implementation by modifying the target component when appropriate.
+ * <p>
+ * Note: config_chooserActivity (Used also by ActivityTaskSupervisor) is already updated to point
+ * to the new instance. This value is read and used for the new target component.
  */
 public final class IntentResolverInterceptor {
     private static final String TAG = "IntentResolverIntercept";
-
     private final Context mContext;
-    private boolean mUseDelegateChooser;
+    private final ComponentName mFrameworkChooserComponent;
+    private final ComponentName mUnbundledChooserComponent;
+    private boolean mUseUnbundledSharesheet;
 
     private final ActivityInterceptorCallback mActivityInterceptorCallback =
             new ActivityInterceptorCallback() {
                 @Nullable
                 @Override
                 public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
-                    if (mUseDelegateChooser && isChooserActivity(info)) {
-                        return new ActivityInterceptResult(
-                                modifyChooserIntent(info.intent),
-                                info.checkedOptions);
+                    if (mUseUnbundledSharesheet && isSystemChooserActivity(info)) {
+                        Slog.d(TAG, "Redirecting to UNBUNDLED Sharesheet");
+                        info.intent.setComponent(mUnbundledChooserComponent);
+                        return new ActivityInterceptResult(info.intent, info.checkedOptions);
                     }
                     return null;
                 }
@@ -61,10 +65,13 @@ public final class IntentResolverInterceptor {
 
     public IntentResolverInterceptor(Context context) {
         mContext = context;
+        mFrameworkChooserComponent = new ComponentName(mContext, ChooserActivity.class);
+        mUnbundledChooserComponent =  ComponentName.unflattenFromString(
+                Resources.getSystem().getString(R.string.config_chooserActivity));
     }
 
     /**
-     * Start listening for intents and USE_DELEGATE_CHOOSER property changes.
+     * Start listening for intents and USE_UNBUNDLED_SHARESHEET property changes.
      */
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public void registerListeners() {
@@ -73,36 +80,25 @@ public final class IntentResolverInterceptor {
                         mActivityInterceptorCallback);
 
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
-                mContext.getMainExecutor(), properties -> updateUseDelegateChooser());
-        updateUseDelegateChooser();
+                mContext.getMainExecutor(), properties -> updateUseUnbundledSharesheet());
+        updateUseUnbundledSharesheet();
     }
 
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
-    private void updateUseDelegateChooser() {
-        mUseDelegateChooser = DeviceConfig.getBoolean(
+    private void updateUseUnbundledSharesheet() {
+        mUseUnbundledSharesheet = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.USE_UNBUNDLED_SHARESHEET,
                 false);
+        if (mUseUnbundledSharesheet) {
+            Slog.d(TAG, "using UNBUNDLED Sharesheet");
+        } else {
+            Slog.d(TAG, "using FRAMEWORK Sharesheet");
+        }
     }
 
-    private Intent modifyChooserIntent(Intent intent) {
-        intent.setComponent(getUnbundledChooserComponentName());
-        return intent;
-    }
-
-    private static boolean isChooserActivity(ActivityInterceptorInfo info) {
-        ComponentName targetComponent = new ComponentName(info.aInfo.packageName, info.aInfo.name);
-
-        return targetComponent.equals(getSystemChooserComponentName())
-                || targetComponent.equals(getUnbundledChooserComponentName());
-    }
-
-    private static ComponentName getSystemChooserComponentName() {
-        return new ComponentName("android", "com.android.internal.app.ChooserActivity");
-    }
-
-    private static ComponentName getUnbundledChooserComponentName() {
-        return ComponentName.unflattenFromString(
-                Resources.getSystem().getString(R.string.config_chooserActivity));
+    private boolean isSystemChooserActivity(ActivityInterceptorInfo info) {
+        return mFrameworkChooserComponent.getPackageName().equals(info.aInfo.packageName)
+                && mFrameworkChooserComponent.getClassName().equals(info.aInfo.name);
     }
 }

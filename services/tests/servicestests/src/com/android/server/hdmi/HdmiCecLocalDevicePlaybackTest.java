@@ -15,6 +15,7 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ABORT_UNRECOGNIZED_OPCODE;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
@@ -92,7 +93,7 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        Collections.emptyList()) {
+                        Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     void wakeUp() {
                         mWokenUp = true;
@@ -151,6 +152,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
         mHdmiControlService.initService();
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.setPowerManagerInternal(mPowerManagerInternal);
@@ -2032,5 +2034,33 @@ public class HdmiCecLocalDevicePlaybackTest {
         mTestLooper.moveTimeForward(HdmiCecLocalDevicePlayback.STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS);
         mTestLooper.dispatchAll();
         assertThat(mPowerManager.isInteractive()).isFalse();
+    }
+
+    @Test
+    public void onHotplugClearsDevices() {
+        mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+        // Add a device to the network and assert that this device is included in the list of
+        // devices.
+        HdmiDeviceInfo infoPlayback = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(Constants.ADDR_PLAYBACK_3)
+                .setPhysicalAddress(0x1000)
+                .setPortId(PORT_1)
+                .setDeviceType(HdmiDeviceInfo.DEVICE_PLAYBACK)
+                .setVendorId(0x1000)
+                .setDisplayName("Playback 3")
+                .build();
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoPlayback);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .hasSize(1);
+
+        // HAL detects a hotplug out. Assert that this device gets removed from the list of devices.
+        mHdmiControlService.onHotplug(PORT_1, false);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
     }
 }

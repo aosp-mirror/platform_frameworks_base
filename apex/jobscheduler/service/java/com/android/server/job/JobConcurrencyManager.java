@@ -1208,7 +1208,7 @@ class JobConcurrencyManager {
             }
             if (highestBiasJob != null) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Running job " + jobStatus + " as preemption");
+                    Slog.d(TAG, "Running job " + highestBiasJob + " as preemption");
                 }
                 mWorkCountTracker.stageJob(highBiasWorkType, highBiasAllWorkTypes);
                 startJobLocked(worker, highestBiasJob, highBiasWorkType);
@@ -1219,7 +1219,7 @@ class JobConcurrencyManager {
                 worker.clearPreferredUid();
                 if (backupJob != null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Running job " + jobStatus + " instead");
+                        Slog.d(TAG, "Running job " + backupJob + " instead");
                     }
                     mWorkCountTracker.stageJob(backupWorkType, backupAllWorkTypes);
                     startJobLocked(worker, backupJob, backupWorkType);
@@ -1263,7 +1263,7 @@ class JobConcurrencyManager {
                 // This slot is free, and we haven't yet hit the limit on
                 // concurrent jobs...  we can just throw the job in to here.
                 if (DEBUG) {
-                    Slog.d(TAG, "About to run job: " + jobStatus);
+                    Slog.d(TAG, "About to run job: " + highestBiasJob);
                 }
                 mWorkCountTracker.stageJob(highBiasWorkType, highBiasAllWorkTypes);
                 startJobLocked(worker, highestBiasJob, highBiasWorkType);

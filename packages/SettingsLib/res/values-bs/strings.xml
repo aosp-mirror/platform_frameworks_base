@@ -264,7 +264,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Povežite se na WiFi mrežu"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, otklanjanje grešaka, programer"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Prečica za izvještaj o greškama"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Prikaz dugmeta za prijavu grešaka u meniju napajanja"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vidite dugme za prijavu grešaka u meniju napajanja"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Ne zaključavaj ekran"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Ekran neće prelaziti u stanje mirovanja tokom punjenja"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Omogući Bluetooth HCI snoop zapis"</string>
@@ -299,8 +299,8 @@
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Aktivirajte Bluetooth Audio Codec\nOdabir: Bitovi po uzorku"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Način Bluetooth audio kanala"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Aktivirajte Bluetooth Audio Codec\nOdabir: Način rada po kanalima"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Bluetooth Audio LDAC kodek: Kvalitet reprodukcije"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Aktivirajte Bluetooth Audio \nOdabir kodeka: Kvalitet reprodukcije"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Bluetooth Audio LDAC kodek: kvalitet reprodukcije"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Aktivirajte Bluetooth Audio \nOdabir kodeka: kvalitet reprodukcije"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Prijenos: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Privatni DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Odaberite način rada privatnog DNS-a"</string>
@@ -336,7 +336,7 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Dopustiti postavke za razvoj?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Ove postavke su namijenjene samo za svrhe razvoja. Mogu izazvati pogrešno ponašanje uređaja i aplikacija na njemu."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Potvrdi aplikacije putem USB-a"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Provjerite da li se u aplikacijama instaliranim putem ADB-a/ADT-a javlja zlonamjerno ponašanje"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Provjerite javlja li se zlonamjerno ponašanje u aplikacijama instaliranim putem ADB-a/ADT-a"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Prikazat će se Bluetooth uređaji bez naziva (samo MAC adrese)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Onemogućava funkciju apsolutne jačine zvuka za Bluetooth u slučaju problema s jačinom zvuka na udaljenim uređajima, kao što je neprihvatljivo glasan zvuk ili nedostatak kontrole."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Omogućava grupisanje funkcije Bluetooth Gabeldorsche."</string>
@@ -448,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalija (crveno-zeleno)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalija (plavo-žuto)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Ispravka boja"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Ispravka boja može biti korisna kada želite da:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;vidite jasnije boje&lt;/li&gt; &lt;li&gt;&amp;nbsp;uklonite boje radi lakšeg fokusiranja&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Ispravka boja može biti korisna kada želite:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;jasnije vidjeti boje&lt;/li&gt; &lt;li&gt;&amp;nbsp;ukloniti boje radi lakšeg fokusiranja&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Zamjenjuje <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Preostalo je još oko <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -589,20 +589,21 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Kreiranje novog korisnika nije uspjelo"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Kreiranje novog gosta nije uspjelo"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nadimak"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"Dodavanje korisnika"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Dodaj gosta"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Dodajte korisnika"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Dodajte gosta"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Poništi sesiju gosta"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Poništiti sesiju gosta?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Ukloniti gosta?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Poništi"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Ukloni"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Poništavanje sesije gosta…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Snimite fotografiju"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Odaberite sliku"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Odabir fotografije"</string>
-    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Previše netočnih pokušaja. S uređaja će se izbrisati podaci."</string>
-    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Previše netočnih pokušaja. Ovaj će se korisnik izbrisati."</string>
-    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Previše netočnih pokušaja. Ovaj će se radni profil izbrisati zajedno sa svim svojim podacima."</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Previše je neispravnih pokušaja. Podaci ovog uređaja će se izbrisati."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Previše je neispravnih pokušaja. Ovaj korisnik će se izbrisati."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Previše je neispravnih pokušaja. Ovaj poslovni profil i njegovi podaci će se izbrisati."</string>
     <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Odbaci"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Zadana postavka uređaja"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Onemogućeno"</string>
@@ -648,7 +649,14 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizička tastatura"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Odaberite raspored tastature"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Zadano"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Uključi ekran"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Uključivanje ekrana"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dozvolite uključivanje ekrana"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dozvolite aplikaciji da uključi ekran. Ako se odobri, aplikacija može uključiti ekran bilo kada bez vaše izričite namjere."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skenirajte QR kôd"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Da pokrenete slušanje, centrirajte QR kôd ispod"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Format QR koda nije važeći"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zaustaviti emitiranje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ako emitirate aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promijenite izlaz, trenutno emitiranje će se zaustaviti"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitiraj aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Promijeni izlaz"</string>
 </resources>

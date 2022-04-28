@@ -61,6 +61,9 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_SCROLL_FLING;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_AVD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLASHSCREEN_EXIT_ANIM;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_ENTER;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_EXIT;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_RESIZE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_SCREEN_FOR_STATUS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_NEXT_FLOW;
@@ -184,6 +187,9 @@ public class InteractionJankMonitor {
     public static final int CUJ_SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS = 46;
     public static final int CUJ_SUW_LOADING_TO_NEXT_FLOW = 47;
     public static final int CUJ_SUW_LOADING_SCREEN_FOR_STATUS = 48;
+    public static final int CUJ_SPLIT_SCREEN_ENTER = 49;
+    public static final int CUJ_SPLIT_SCREEN_EXIT = 50;
+    public static final int CUJ_SPLIT_SCREEN_RESIZE = 51;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -241,6 +247,9 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_NEXT_FLOW,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_SCREEN_FOR_STATUS,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_ENTER,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_EXIT,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_RESIZE,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -309,7 +318,10 @@ public class InteractionJankMonitor {
             CUJ_SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS,
             CUJ_SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS,
             CUJ_SUW_LOADING_TO_NEXT_FLOW,
-            CUJ_SUW_LOADING_SCREEN_FOR_STATUS
+            CUJ_SUW_LOADING_SCREEN_FOR_STATUS,
+            CUJ_SPLIT_SCREEN_ENTER,
+            CUJ_SPLIT_SCREEN_EXIT,
+            CUJ_SPLIT_SCREEN_RESIZE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -726,6 +738,12 @@ public class InteractionJankMonitor {
                 return "SUW_LOADING_TO_NEXT_FLOW";
             case CUJ_SUW_LOADING_SCREEN_FOR_STATUS:
                 return "SUW_LOADING_SCREEN_FOR_STATUS";
+            case CUJ_SPLIT_SCREEN_ENTER:
+                return "SPLIT_SCREEN_ENTER";
+            case CUJ_SPLIT_SCREEN_EXIT:
+                return "SPLIT_SCREEN_EXIT";
+            case CUJ_SPLIT_SCREEN_RESIZE:
+                return "CUJ_SPLIT_SCREEN_RESIZE";
         }
         return "UNKNOWN";
     }

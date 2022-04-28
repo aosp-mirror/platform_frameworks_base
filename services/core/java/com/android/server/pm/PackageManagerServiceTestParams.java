@@ -116,4 +116,5 @@ public final class PackageManagerServiceTestParams {
     public DexOptHelper dexOptHelper;
     public SuspendPackageHelper suspendPackageHelper;
     public StorageEventHelper storageEventHelper;
+    public DistractingPackageHelper distractingPackageHelper;
 }

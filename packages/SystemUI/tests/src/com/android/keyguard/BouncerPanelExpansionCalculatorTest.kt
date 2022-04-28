@@ -29,29 +29,29 @@ import org.junit.runner.RunWith
 class BouncerPanelExpansionCalculatorTest : SysuiTestCase() {
     @Test
     fun testGetHostViewScaledExpansion() {
-        assertThat(BouncerPanelExpansionCalculator.getHostViewScaledExpansion(1f))
+        assertThat(BouncerPanelExpansionCalculator.showBouncerProgress(1f))
                 .isEqualTo(1f)
-        assertThat(BouncerPanelExpansionCalculator.getHostViewScaledExpansion(0.9f))
+        assertThat(BouncerPanelExpansionCalculator.showBouncerProgress(0.9f))
                 .isEqualTo(1f)
-        assertThat(BouncerPanelExpansionCalculator.getHostViewScaledExpansion(0.59f))
+        assertThat(BouncerPanelExpansionCalculator.showBouncerProgress(0.59f))
                 .isEqualTo(0f)
-        assertThat(BouncerPanelExpansionCalculator.getHostViewScaledExpansion(0f))
+        assertThat(BouncerPanelExpansionCalculator.showBouncerProgress(0f))
                 .isEqualTo(0f)
         assertEquals(BouncerPanelExpansionCalculator
-                .getHostViewScaledExpansion(0.8f), 2f / 3f, 0.01f)
+                .showBouncerProgress(0.8f), 2f / 3f, 0.01f)
     }
 
     @Test
     fun testGetBackScrimScaledExpansion() {
-        assertThat(BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(1f))
+        assertThat(BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(1f))
                 .isEqualTo(1f)
         assertEquals(BouncerPanelExpansionCalculator
-                .getBackScrimScaledExpansion(0.95f), 1f / 2f, 0.01f)
-        assertThat(BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(0.9f))
+                .aboutToShowBouncerProgress(0.95f), 1f / 2f, 0.01f)
+        assertThat(BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(0.9f))
                 .isEqualTo(0f)
-        assertThat(BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(0.5f))
+        assertThat(BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(0.5f))
                 .isEqualTo(0f)
-        assertThat(BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(0f))
+        assertThat(BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(0f))
                 .isEqualTo(0f)
     }
 
@@ -63,9 +63,9 @@ class BouncerPanelExpansionCalculatorTest : SysuiTestCase() {
                 .getKeyguardClockScaledExpansion(0.8f), 1f / 3f, 0.01f)
         assertThat(BouncerPanelExpansionCalculator.getKeyguardClockScaledExpansion(0.7f))
                 .isEqualTo(0f)
-        assertThat(BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(0.5f))
+        assertThat(BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(0.5f))
                 .isEqualTo(0f)
-        assertThat(BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(0f))
+        assertThat(BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(0f))
                 .isEqualTo(0f)
     }
 }

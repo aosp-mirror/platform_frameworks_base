@@ -223,6 +223,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_ADVERTISE);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
@@ -296,6 +299,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     private final ArrayList<PermissionManagerServiceInternal
             .OnRuntimePermissionStateChangedListener>
             mRuntimePermissionStateChangedListeners = new ArrayList<>();
+
+    private final boolean mIsLeanback;
 
     @NonNull
     private final OnPermissionChangeListeners mOnPermissionChangeListeners;
@@ -380,6 +385,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         mContext = context;
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         mUserManagerInt = LocalServices.getService(UserManagerInternal.class);
+        mIsLeanback = availableFeatures.containsKey(PackageManager.FEATURE_LEANBACK);
 
         mPrivilegedPermissionAllowlistSourcePackageNames.add(PLATFORM_PACKAGE_NAME);
         // PackageManager.hasSystemFeature() is not used here because PackageManagerService
@@ -761,8 +767,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
             flagValues &= ~PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
-            // REVIEW_REQUIRED can only be set by non-system apps for for POST_NOTIFICATIONS
-            if (!POST_NOTIFICATIONS.equals(permName)) {
+            // REVIEW_REQUIRED can only be set by non-system apps for POST_NOTIFICATIONS, or by the
+            // shell or root UID.
+            if (!POST_NOTIFICATIONS.equals(permName) && callingUid != Process.SHELL_UID
+                    && callingUid != Process.ROOT_UID) {
                 flagValues &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
             }
         }
@@ -2637,12 +2645,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
                     // Cache newImplicitPermissions before modifing permissionsState as for the
                     // shared uids the original and new state are the same object
-                    // TODO(205888750): remove the line for LEGACY_REVIEW once propagated through
-                    // droidfood
                     if (!origState.hasPermissionState(permName)
                             && (pkg.getImplicitPermissions().contains(permName)
-                            || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))
-                            || NOTIFICATION_PERMISSIONS.contains(permName)) {
+                            || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))) {
                         if (pkg.getImplicitPermissions().contains(permName)) {
                             // If permName is an implicit permission, try to auto-grant
                             newImplicitPermissions.add(permName);
@@ -2800,12 +2805,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             }
 
                             // Remove review flag as it is not necessary anymore
-                            if (!NOTIFICATION_PERMISSIONS.contains(perm)) {
+                            // TODO(b/227186603) re-enable check for notification permission once
+                            // droidfood state has been cleared
+                            //if (!NOTIFICATION_PERMISSIONS.contains(perm)) {
                                 if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
                                     flags &= ~FLAG_PERMISSION_REVIEW_REQUIRED;
                                     wasChanged = true;
                                 }
-                            }
+                            //}
 
                             if ((flags & FLAG_PERMISSION_REVOKED_COMPAT) != 0
                                     && !isPermissionSplitFromNonRuntime(permName,
@@ -2818,6 +2825,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                                 if ((origPermState != null && origPermState.isGranted())
                                         || legacyActivityRecognitionPermission != null) {
                                     if (!uidState.grantPermission(bp)) {
+                                        wasChanged = true;
+                                    }
+                                }
+                            }
+                            if (mIsLeanback && NOTIFICATION_PERMISSIONS.contains(permName)) {
+                                uidState.grantPermission(bp);
+                                if (origPermState == null || !origPermState.isGranted()) {
+                                    if (uidState.grantPermission(bp)) {
                                         wasChanged = true;
                                     }
                                 }

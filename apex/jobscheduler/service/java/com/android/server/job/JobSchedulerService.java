@@ -1387,6 +1387,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (mPendingJobQueue.remove(cancelled)) {
             mJobPackageTracker.noteNonpending(cancelled);
         }
+        mChangedJobList.remove(cancelled);
         // Cancel if running.
         mConcurrencyManager.stopJobOnServiceContextLocked(
                 cancelled, reason, internalReasonCode, debugReason);
@@ -1745,7 +1746,13 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         // Remove from store as well as controllers.
         final boolean removed = mJobs.remove(jobStatus, removeFromPersisted);
-        if (removed && mReadyToRock) {
+        if (!removed) {
+            // We never create JobStatus objects for the express purpose of removing them, and this
+            // method is only ever called for jobs that were saved in the JobStore at some point,
+            // so if we can't find it, something went seriously wrong.
+            Slog.wtfStack(TAG, "Job didn't exist in JobStore");
+        }
+        if (mReadyToRock) {
             for (int i = 0; i < mControllers.size(); i++) {
                 StateController controller = mControllers.get(i);
                 controller.maybeStopTrackingJobLocked(jobStatus, incomingJob, false);
@@ -1888,11 +1895,14 @@ public class JobSchedulerService extends com.android.server.SystemService
             // The job ran past its expected run window. Have it count towards the current window
             // and schedule a new job for the next window.
             if (DEBUG) {
-                Slog.i(TAG, "Periodic job ran after its intended window.");
+                Slog.i(TAG, "Periodic job ran after its intended window by " + diffMs + " ms");
             }
             long numSkippedWindows = (diffMs / period) + 1; // +1 to include original window
-            if (period != flex && diffMs > Math.min(PERIODIC_JOB_WINDOW_BUFFER,
-                    (period - flex) / 2)) {
+            // Determine how far into a single period the job ran, and determine if it's too close
+            // to the start of the next period. If the difference between the start of the execution
+            // window and the previous execution time inside of the period is less than the
+            // threshold, then we say that the job ran too close to the next period.
+            if (period != flex && (period - flex - (diffMs % period)) <= flex / 6) {
                 if (DEBUG) {
                     Slog.d(TAG, "Custom flex job ran too close to next window.");
                 }

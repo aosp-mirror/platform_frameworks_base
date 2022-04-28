@@ -355,6 +355,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     int mInitialDisplayWidth = 0;
     int mInitialDisplayHeight = 0;
     int mInitialDisplayDensity = 0;
+    float mInitialPhysicalXDpi = 0.0f;
+    float mInitialPhysicalYDpi = 0.0f;
+
+    private Point mStableDisplaySize;
 
     DisplayCutout mInitialDisplayCutout;
     private final RotationCache<DisplayCutout, WmDisplayCutout> mDisplayCutoutCache
@@ -377,6 +381,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     int mBaseDisplayWidth = 0;
     int mBaseDisplayHeight = 0;
+    DisplayCutout mBaseDisplayCutout;
+    RoundedCorners mBaseRoundedCorners;
     boolean mIsSizeForced = false;
 
     /**
@@ -393,6 +399,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     int mBaseDisplayDensity = 0;
     boolean mIsDensityForced = false;
+
+    /**
+     * Overridden display physical dpi.
+     */
+    float mBaseDisplayPhysicalXDpi = 0.0f;
+    float mBaseDisplayPhysicalYDpi = 0.0f;
 
     /**
      * Whether to disable display scaling. This can be set via shell command "adb shell wm scaling".
@@ -427,7 +439,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /**
      * Compat metrics computed based on {@link #mDisplayMetrics}.
-     * @see #updateDisplayAndOrientation(int)
+     * @see #updateDisplayAndOrientation(int, Configuration)
      */
     private final DisplayMetrics mCompatDisplayMetrics = new DisplayMetrics();
 
@@ -542,6 +554,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     final FixedRotationTransitionListener mFixedRotationTransitionListener =
             new FixedRotationTransitionListener();
+
+    private PhysicalDisplaySwitchTransitionLauncher mDisplaySwitchTransitionLauncher;
 
     /** Windows added since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
     final ArrayList<WindowState> mWinAddedSinceNullFocus = new ArrayList<>();
@@ -840,10 +854,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 w.onResizeHandled();
             }
 
-            if (w.mActivityRecord != null) {
-                w.mActivityRecord.layoutLetterbox(w);
-            }
-
             if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.getFrame()
                     + " mParentFrame=" + w.getParentFrame()
                     + " mDisplayFrame=" + w.getDisplayFrame());
@@ -1039,6 +1049,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mAppTransitionController = new AppTransitionController(mWmService, this);
         mTransitionController.registerLegacyListener(mFixedRotationTransitionListener);
         mUnknownAppVisibilityController = new UnknownAppVisibilityController(mWmService, this);
+        mDisplaySwitchTransitionLauncher = new PhysicalDisplaySwitchTransitionLauncher(this,
+                mTransitionController);
 
         final InputChannel inputChannel = mWmService.mInputManager.monitorInput(
                 "PointerEventDispatcher" + mDisplayId, mDisplayId);
@@ -1477,7 +1489,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     boolean handlesOrientationChangeFromDescendant() {
-        return !mIgnoreOrientationRequest && !getDisplayRotation().isFixedToUserRotation();
+        return !getIgnoreOrientationRequest()
+                && !getDisplayRotation().isFixedToUserRotation();
     }
 
     /**
@@ -1984,7 +1997,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         scheduleAnimation();
 
         forAllWindows(w -> {
-            if (w.mHasSurface && !rotateSeamlessly) {
+            if (!w.mHasSurface) return;
+            if (!rotateSeamlessly) {
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "Set mOrientationChanging of %s", w);
                 w.setOrientationChanging(true);
             }
@@ -2035,6 +2049,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplayInfo.logicalWidth = dw;
         mDisplayInfo.logicalHeight = dh;
         mDisplayInfo.logicalDensityDpi = mBaseDisplayDensity;
+        mDisplayInfo.physicalXDpi = mBaseDisplayPhysicalXDpi;
+        mDisplayInfo.physicalYDpi = mBaseDisplayPhysicalYDpi;
         mDisplayInfo.appWidth = appWidth;
         mDisplayInfo.appHeight = appHeight;
         if (isDefaultDisplay) {
@@ -2067,7 +2083,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     WmDisplayCutout calculateDisplayCutoutForRotation(int rotation) {
-        return mDisplayCutoutCache.getOrCompute(mInitialDisplayCutout, rotation);
+        return mDisplayCutoutCache.getOrCompute(
+                mIsSizeForced ? mBaseDisplayCutout : mInitialDisplayCutout, rotation);
     }
 
     static WmDisplayCutout calculateDisplayCutoutForRotationAndDisplaySizeUncached(
@@ -2090,11 +2107,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private WmDisplayCutout calculateDisplayCutoutForRotationUncached(
             DisplayCutout cutout, int rotation) {
         return calculateDisplayCutoutForRotationAndDisplaySizeUncached(cutout, rotation,
-                mInitialDisplayWidth, mInitialDisplayHeight);
+                mIsSizeForced ? mBaseDisplayWidth : mInitialDisplayWidth,
+                mIsSizeForced ? mBaseDisplayHeight : mInitialDisplayHeight);
     }
 
     RoundedCorners calculateRoundedCornersForRotation(int rotation) {
-        return mRoundedCornerCache.getOrCompute(mInitialRoundedCorners, rotation);
+        return mRoundedCornerCache.getOrCompute(
+                mIsSizeForced ? mBaseRoundedCorners : mInitialRoundedCorners, rotation);
     }
 
     private RoundedCorners calculateRoundedCornersForRotationUncached(
@@ -2107,7 +2126,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return roundedCorners;
         }
 
-        return roundedCorners.rotate(rotation, mInitialDisplayWidth, mInitialDisplayHeight);
+        return roundedCorners.rotate(
+                rotation,
+                mIsSizeForced ? mBaseDisplayWidth : mInitialDisplayWidth,
+                mIsSizeForced ? mBaseDisplayHeight : mInitialDisplayHeight);
     }
 
     PrivacyIndicatorBounds calculatePrivacyIndicatorBoundsForRotation(int rotation) {
@@ -2697,14 +2719,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         updateBaseDisplayMetrics(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight,
-                mDisplayInfo.logicalDensityDpi);
+                mDisplayInfo.logicalDensityDpi, mDisplayInfo.physicalXDpi,
+                mDisplayInfo.physicalYDpi);
         mInitialDisplayWidth = mDisplayInfo.logicalWidth;
         mInitialDisplayHeight = mDisplayInfo.logicalHeight;
         mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;
+        mInitialPhysicalXDpi = mDisplayInfo.physicalXDpi;
+        mInitialPhysicalYDpi = mDisplayInfo.physicalYDpi;
         mInitialDisplayCutout = mDisplayInfo.displayCutout;
         mInitialRoundedCorners = mDisplayInfo.roundedCorners;
         mCurrentPrivacyIndicatorBounds = new PrivacyIndicatorBounds(new Rect[4],
                 mDisplayInfo.rotation);
+        mStableDisplaySize = mWmService.mDisplayManager.getStableDisplaySize();
     }
 
     /**
@@ -2719,6 +2745,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final int newWidth = rotated ? mDisplayInfo.logicalHeight : mDisplayInfo.logicalWidth;
         final int newHeight = rotated ? mDisplayInfo.logicalWidth : mDisplayInfo.logicalHeight;
         final int newDensity = mDisplayInfo.logicalDensityDpi;
+        final float newXDpi = mDisplayInfo.physicalXDpi;
+        final float newYDpi = mDisplayInfo.physicalYDpi;
         final DisplayCutout newCutout = mIgnoreDisplayCutout
                 ? DisplayCutout.NO_CUTOUT : mDisplayInfo.displayCutout;
         final String newUniqueId = mDisplayInfo.uniqueId;
@@ -2726,7 +2754,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         final boolean displayMetricsChanged = mInitialDisplayWidth != newWidth
                 || mInitialDisplayHeight != newHeight
-                || mInitialDisplayDensity != mDisplayInfo.logicalDensityDpi
+                || mInitialDisplayDensity != newDensity
+                || mInitialPhysicalXDpi != newXDpi
+                || mInitialPhysicalYDpi != newYDpi
                 || !Objects.equals(mInitialDisplayCutout, newCutout)
                 || !Objects.equals(mInitialRoundedCorners, newRoundedCorners);
         final boolean physicalDisplayChanged = !newUniqueId.equals(mCurrentUniqueDisplayId);
@@ -2738,12 +2768,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // metrics are updated as rotation settings might depend on them
                 mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(this,
                         /* includeRotationSettings */ false);
+                mDisplaySwitchTransitionLauncher.requestDisplaySwitchTransitionIfNeeded(mDisplayId,
+                        mInitialDisplayWidth, mInitialDisplayHeight, newWidth, newHeight);
             }
 
             // If there is an override set for base values - use it, otherwise use new values.
             updateBaseDisplayMetrics(mIsSizeForced ? mBaseDisplayWidth : newWidth,
                     mIsSizeForced ? mBaseDisplayHeight : newHeight,
-                    mIsDensityForced ? mBaseDisplayDensity : newDensity);
+                    mIsDensityForced ? mBaseDisplayDensity : newDensity,
+                    mIsSizeForced ? mBaseDisplayPhysicalXDpi : newXDpi,
+                    mIsSizeForced ? mBaseDisplayPhysicalYDpi : newYDpi);
 
             configureDisplayPolicy();
 
@@ -2758,10 +2792,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mInitialDisplayWidth = newWidth;
             mInitialDisplayHeight = newHeight;
             mInitialDisplayDensity = newDensity;
+            mInitialPhysicalXDpi = newXDpi;
+            mInitialPhysicalYDpi = newYDpi;
             mInitialDisplayCutout = newCutout;
             mInitialRoundedCorners = newRoundedCorners;
             mCurrentUniqueDisplayId = newUniqueId;
             reconfigureDisplayLocked();
+
+            if (physicalDisplayChanged) {
+                mDisplaySwitchTransitionLauncher.onDisplayUpdated();
+            }
         }
     }
 
@@ -2774,19 +2814,29 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mMaxUiWidth = width;
 
         // Update existing metrics.
-        updateBaseDisplayMetrics(mBaseDisplayWidth, mBaseDisplayHeight, mBaseDisplayDensity);
+        updateBaseDisplayMetrics(mBaseDisplayWidth, mBaseDisplayHeight, mBaseDisplayDensity,
+                mBaseDisplayPhysicalXDpi, mBaseDisplayPhysicalYDpi);
     }
 
     /** Update base (override) display metrics. */
-    void updateBaseDisplayMetrics(int baseWidth, int baseHeight, int baseDensity) {
+    void updateBaseDisplayMetrics(int baseWidth, int baseHeight, int baseDensity, float baseXDpi,
+            float baseYDpi) {
         mBaseDisplayWidth = baseWidth;
         mBaseDisplayHeight = baseHeight;
         mBaseDisplayDensity = baseDensity;
+        mBaseDisplayPhysicalXDpi = baseXDpi;
+        mBaseDisplayPhysicalYDpi = baseYDpi;
+        if (mIsSizeForced) {
+            mBaseDisplayCutout = loadDisplayCutout(baseWidth, baseHeight);
+            mBaseRoundedCorners = loadRoundedCorners(baseWidth, baseHeight);
+        }
 
         if (mMaxUiWidth > 0 && mBaseDisplayWidth > mMaxUiWidth) {
             final float ratio = mMaxUiWidth / (float) mBaseDisplayWidth;
             mBaseDisplayHeight = (int) (mBaseDisplayHeight * ratio);
             mBaseDisplayWidth = mMaxUiWidth;
+            mBaseDisplayPhysicalXDpi = mBaseDisplayPhysicalXDpi * ratio;
+            mBaseDisplayPhysicalYDpi = mBaseDisplayPhysicalYDpi * ratio;
             if (!mIsDensityForced) {
                 // Update the density proportionally so the size of the UI elements won't change
                 // from the user's perspective.
@@ -2860,13 +2910,32 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
-        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity);
+        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity, mBaseDisplayPhysicalXDpi,
+                mBaseDisplayPhysicalYDpi);
         reconfigureDisplayLocked();
 
         if (!mIsSizeForced) {
             width = height = 0;
         }
         mWmService.mDisplayWindowSettings.setForcedSize(this, width, height);
+    }
+
+    DisplayCutout loadDisplayCutout(int displayWidth, int displayHeight) {
+        if (mDisplayPolicy == null) {
+            return null;
+        }
+        return DisplayCutout.fromResourcesRectApproximation(
+                mDisplayPolicy.getSystemUiContext().getResources(), mDisplayInfo.uniqueId,
+                mStableDisplaySize.x, mStableDisplaySize.y, displayWidth, displayHeight);
+    }
+
+    RoundedCorners loadRoundedCorners(int displayWidth, int displayHeight) {
+        if (mDisplayPolicy == null) {
+            return null;
+        }
+        return RoundedCorners.fromResources(
+                mDisplayPolicy.getSystemUiContext().getResources(),  mDisplayInfo.uniqueId,
+                mStableDisplaySize.x, mStableDisplaySize.y, displayWidth, displayHeight);
     }
 
     @Override
@@ -3081,6 +3150,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mTransitionController.unregisterLegacyListener(mFixedRotationTransitionListener);
             handleAnimatingStoppedAndTransition();
             mWmService.stopFreezingDisplayLocked();
+            mDisplaySwitchTransitionLauncher.destroy();
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
             mPointerEventDispatcher.dispose();
@@ -4012,10 +4082,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     void setImeInputTarget(InputTarget target) {
         mImeInputTarget = target;
-        boolean canScreenshot = mImeInputTarget == null || mImeInputTarget.canScreenshotIme();
-        if (mImeWindowsContainer.setCanScreenshot(canScreenshot)) {
+        if (refreshImeSecureFlag(getPendingTransaction())) {
             mWmService.requestTraversal();
         }
+    }
+
+    /**
+     * Re-check the IME target's SECURE flag since it's possible to have changed after the target
+     * was set.
+     */
+    boolean refreshImeSecureFlag(Transaction t) {
+        boolean canScreenshot = mImeInputTarget == null || mImeInputTarget.canScreenshotIme();
+        return mImeWindowsContainer.setCanScreenshot(t, canScreenshot);
     }
 
     @VisibleForTesting
@@ -4815,7 +4893,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         @Override
         int getOrientation(int candidate) {
-            if (mIgnoreOrientationRequest) {
+            if (getIgnoreOrientationRequest()) {
                 return SCREEN_ORIENTATION_UNSET;
             }
 
@@ -6054,11 +6132,26 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     boolean setIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
-        if (mIgnoreOrientationRequest == ignoreOrientationRequest) return false;
+        if (mSetIgnoreOrientationRequest == ignoreOrientationRequest) return false;
         final boolean rotationChanged = super.setIgnoreOrientationRequest(ignoreOrientationRequest);
         mWmService.mDisplayWindowSettings.setIgnoreOrientationRequest(
-                this, mIgnoreOrientationRequest);
+                this, mSetIgnoreOrientationRequest);
         return rotationChanged;
+    }
+
+    /**
+     * Updates orientation if necessary after ignore orientation request override logic in {@link
+     * WindowManagerService#isIgnoreOrientationRequestDisabled} changes at runtime.
+     */
+    void onIsIgnoreOrientationRequestDisabledChanged() {
+        if (mFocusedApp != null) {
+            // We record the last focused TDA that respects orientation request, check if this
+            // change may affect it.
+            onLastFocusedTaskDisplayAreaChanged(mFocusedApp.getDisplayArea());
+        }
+        if (mSetIgnoreOrientationRequest) {
+            updateOrientation();
+        }
     }
 
     /**
@@ -6334,10 +6427,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
          * Notifies the remote insets controller that the top focused window has changed.
          *
          * @param packageName The name of the package that is open in the top focused window.
+         * @param requestedVisibilities The insets visibilities requested by the focussed window.
          */
-        void topFocusedWindowChanged(String packageName) {
+        void topFocusedWindowChanged(String packageName, InsetsVisibilities requestedVisibilities) {
             try {
-                mRemoteInsetsController.topFocusedWindowChanged(packageName);
+                mRemoteInsetsController.topFocusedWindowChanged(packageName, requestedVisibilities);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver package in top focused window change", e);
             }

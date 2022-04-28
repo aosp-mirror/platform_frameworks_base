@@ -78,6 +78,9 @@
          WindowConfiguration#PINNED_WINDOWING_MODE_ELEVATION_IN_DIP -->
     <dimen name="pip_shadow_radius">5dp</dimen>
 
+    <!-- The width and height of the background for custom action in PiP menu. -->
+    <dimen name="pip_custom_close_bg_size">32dp</dimen>
+
     <dimen name="dismiss_target_x_size">24dp</dimen>
     <dimen name="floating_dismiss_bottom_margin">50dp</dimen>
 

@@ -17,36 +17,73 @@
 package androidx.window.extensions.embedding;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+
+import android.app.Activity;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Rect;
+import android.platform.test.annotations.Presubmit;
+import android.window.TaskFragmentInfo;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.window.extensions.embedding.SplitController.TaskContainer;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+/**
+ * Test class for {@link SplitController}.
+ *
+ * Build/Install/Run:
+ *  atest WMJetpackUnitTests:SplitControllerTest
+ */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SplitControllerTest {
     private static final int TASK_ID = 10;
+    private static final Rect TASK_BOUNDS = new Rect(0, 0, 600, 1200);
 
+    @Mock
+    private Activity mActivity;
+    @Mock
+    private Resources mActivityResources;
+    @Mock
+    private TaskFragmentInfo mInfo;
     private SplitController mSplitController;
+    private SplitPresenter mSplitPresenter;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         mSplitController = new SplitController();
+        mSplitPresenter = mSplitController.mPresenter;
         spyOn(mSplitController);
+        spyOn(mSplitPresenter);
+        final Configuration activityConfig = new Configuration();
+        activityConfig.windowConfiguration.setBounds(TASK_BOUNDS);
+        activityConfig.windowConfiguration.setMaxBounds(TASK_BOUNDS);
+        doReturn(mActivityResources).when(mActivity).getResources();
+        doReturn(activityConfig).when(mActivityResources).getConfiguration();
     }
 
     @Test
     public void testGetTopActiveContainer() {
-        TaskContainer taskContainer = new TaskContainer();
+        TaskContainer taskContainer = new TaskContainer(TASK_ID);
         // tf3 is finished so is not active.
         TaskFragmentContainer tf3 = mock(TaskFragmentContainer.class);
         doReturn(true).when(tf3).isFinished();
@@ -73,5 +110,34 @@ public class SplitControllerTest {
 
         assertWithMessage("Must return null because tf1 has no running activity.")
                 .that(mSplitController.getTopActiveContainer(TASK_ID)).isNull();
+    }
+
+    @Test
+    public void testOnTaskFragmentVanished() {
+        final TaskFragmentContainer tf = mSplitController.newContainer(mActivity, TASK_ID);
+        doReturn(tf.getTaskFragmentToken()).when(mInfo).getFragmentToken();
+
+        // The TaskFragment has been removed in the server, we only need to cleanup the reference.
+        mSplitController.onTaskFragmentVanished(mInfo);
+
+        verify(mSplitPresenter, never()).deleteTaskFragment(any(), any());
+        verify(mSplitController).removeContainer(tf);
+        verify(mActivity, never()).finish();
+    }
+
+    @Test
+    public void testNewContainer() {
+        // Must pass in a valid activity.
+        assertThrows(IllegalArgumentException.class, () ->
+                mSplitController.newContainer(null /* activity */, TASK_ID));
+        assertThrows(IllegalArgumentException.class, () ->
+                mSplitController.newContainer(mActivity, null /* launchingActivity */, TASK_ID));
+
+        final TaskFragmentContainer tf = mSplitController.newContainer(null, mActivity, TASK_ID);
+        final TaskContainer taskContainer = mSplitController.getTaskContainer(TASK_ID);
+
+        assertNotNull(tf);
+        assertNotNull(taskContainer);
+        assertEquals(TASK_BOUNDS, taskContainer.getTaskBounds());
     }
 }

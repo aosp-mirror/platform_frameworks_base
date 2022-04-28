@@ -854,12 +854,13 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(mAtm.mActiveUids.hasNonAppVisibleWindow(uid));
     }
 
-    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
     @Test
     public void testNeedsRelativeLayeringToIme_notAttached() {
         WindowState sameTokenWindow = createWindow(null, TYPE_BASE_APPLICATION, mAppWindow.mToken,
                 "SameTokenWindow");
         mDisplayContent.setImeLayeringTarget(mAppWindow);
+        makeWindowVisible(mImeWindow);
         sameTokenWindow.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         assertTrue(sameTokenWindow.needsRelativeLayeringToIme());
         sameTokenWindow.removeImmediately();
@@ -872,6 +873,7 @@ public class WindowStateTests extends WindowTestsBase {
         WindowState sameTokenWindow = createWindow(null, TYPE_APPLICATION_STARTING,
                 mAppWindow.mToken, "SameTokenWindow");
         mDisplayContent.setImeLayeringTarget(mAppWindow);
+        makeWindowVisible(mImeWindow);
         sameTokenWindow.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
     }

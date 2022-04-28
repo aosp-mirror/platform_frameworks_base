@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip.tv
 
+import android.graphics.Insets
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.util.Size
@@ -24,6 +25,7 @@ import org.junit.runner.RunWith
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_BOTTOM
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT
+import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_TOP
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement
 import org.junit.Before
 import org.junit.Test
@@ -430,6 +432,86 @@ class TvPipKeepClearAlgorithmTest {
         assertEquals(STASH_TYPE_RIGHT, placement.stashType)
         assertEquals(expectedUnstashBounds, placement.unstashDestinationBounds)
         assertEquals(currentTime + algorithm.stashDuration, placement.unstashTime)
+    }
+
+    @Test
+    fun test_ExpandedPiPHeightExceedsMovementBounds_AtAnchor() {
+        gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
+        pipSize = Size(DEFAULT_PIP_SIZE.width, SCREEN_SIZE.height)
+        testAnchorPosition()
+    }
+
+    @Test
+    fun test_ExpandedPiPHeightExceedsMovementBounds_BottomBar_StashedUp() {
+        gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
+        pipSize = Size(DEFAULT_PIP_SIZE.width, SCREEN_SIZE.height)
+        val bottomBar = makeBottomBar(96)
+        unrestrictedAreas.add(bottomBar)
+
+        val expectedBounds = getExpectedAnchorBounds()
+        expectedBounds.offset(0, -bottomBar.height() - PADDING)
+        val placement = getActualPlacement()
+        assertEquals(expectedBounds, placement.bounds)
+        assertEquals(STASH_TYPE_TOP, placement.stashType)
+        assertEquals(getExpectedAnchorBounds(), placement.unstashDestinationBounds)
+    }
+
+    @Test
+    fun test_PipInsets() {
+        val permInsets = Insets.of(-1, -2, -3, -4)
+        algorithm.setPipPermanentDecorInsets(permInsets)
+        testInsetsForAllPositions(permInsets)
+
+        val tempInsets = Insets.of(-4, -3, -2, -1)
+        algorithm.setPipPermanentDecorInsets(Insets.NONE)
+        algorithm.setPipTemporaryDecorInsets(tempInsets)
+        testInsetsForAllPositions(tempInsets)
+
+        algorithm.setPipPermanentDecorInsets(permInsets)
+        algorithm.setPipTemporaryDecorInsets(tempInsets)
+        testInsetsForAllPositions(Insets.add(permInsets, tempInsets))
+    }
+
+    private fun testInsetsForAllPositions(insets: Insets) {
+        gravity = Gravity.BOTTOM or Gravity.RIGHT
+        testAnchorPositionWithInsets(insets)
+
+        gravity = Gravity.BOTTOM or Gravity.LEFT
+        testAnchorPositionWithInsets(insets)
+
+        gravity = Gravity.TOP or Gravity.LEFT
+        testAnchorPositionWithInsets(insets)
+
+        gravity = Gravity.TOP or Gravity.RIGHT
+        testAnchorPositionWithInsets(insets)
+
+        pipSize = EXPANDED_WIDE_PIP_SIZE
+
+        gravity = Gravity.BOTTOM
+        testAnchorPositionWithInsets(insets)
+
+        gravity = Gravity.TOP
+        testAnchorPositionWithInsets(insets)
+
+        pipSize = Size(pipSize.height, pipSize.width)
+
+        gravity = Gravity.LEFT
+        testAnchorPositionWithInsets(insets)
+
+        gravity = Gravity.RIGHT
+        testAnchorPositionWithInsets(insets)
+    }
+
+    private fun testAnchorPositionWithInsets(insets: Insets) {
+        var pipRect = Rect(0, 0, pipSize.width, pipSize.height)
+        pipRect.inset(insets)
+        var expectedBounds = Rect()
+        Gravity.apply(gravity, pipRect.width(), pipRect.height(), movementBounds, expectedBounds)
+        val reverseInsets = Insets.subtract(Insets.NONE, insets)
+        expectedBounds.inset(reverseInsets)
+
+        var placement = getActualPlacement()
+        assertEquals(expectedBounds, placement.bounds)
     }
 
     private fun makeSideBar(width: Int, @Gravity.GravityFlags side: Int): Rect {

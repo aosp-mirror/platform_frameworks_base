@@ -2013,6 +2013,15 @@ public final class Settings {
             "android.settings.ALL_APPS_NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show app settings specifically for sending notifications. Same as
+     * ALL_APPS_NOTIFICATION_SETTINGS but meant for internal use.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW =
+            "android.settings.ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW";
+
+    /**
      * Activity Action: Show notification settings for a single app.
      * <p>
      *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
@@ -4517,13 +4526,6 @@ public final class Settings {
          */
         @Readable
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
-
-        /**
-         * The amount of time in milliseconds before the device goes to sleep or begins to dream
-         * after a period of inactivity while it is docked.
-         * @hide
-         */
-        public static final String SCREEN_OFF_TIMEOUT_DOCKED = "screen_off_timeout_docked";
 
         /**
          * The screen backlight brightness between 0 and 255.
@@ -7084,7 +7086,7 @@ public final class Settings {
          *
          * @hide
          */
-        @Readable
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
         public static final String ALWAYS_ON_VPN_LOCKDOWN_WHITELIST =
                 "always_on_vpn_lockdown_whitelist";
 
@@ -7230,6 +7232,13 @@ public final class Settings {
          */
         public static final String LOCATION_SHOW_SYSTEM_OPS = "locationShowSystemOps";
 
+
+        /**
+         * Whether or not an indicator experiment has started.
+         * @hide
+         */
+        public static final String LOCATION_INDICATOR_EXPERIMENT_STARTED =
+                "locationIndicatorExperimentStarted";
         /**
          * A flag containing settings used for biometric weak
          * @hide
@@ -7668,6 +7677,20 @@ public final class Settings {
         @Readable
         public static final String ZEN_SETTINGS_SUGGESTION_VIEWED =
                 "zen_settings_suggestion_viewed";
+
+        /**
+         * State of whether review notification permissions notification needs to
+         * be shown the user, and whether the user has interacted.
+         *
+         * Valid values:
+         *   -1 = UNKNOWN
+         *    0 = SHOULD_SHOW
+         *    1 = USER_INTERACTED
+         *    2 = DISMISSED
+         * @hide
+         */
+        public static final String REVIEW_PERMISSIONS_NOTIFICATION_STATE =
+                "review_permissions_notification_state";
 
         /**
          * Whether the in call notification is enabled to play sound during calls.  The value is
@@ -14264,6 +14287,14 @@ public final class Settings {
                 "emergency_gesture_power_button_cooldown_period_ms";
 
         /**
+         * The minimum time in milliseconds to perform the emergency gesture.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS =
+                "emergency_gesture_tap_detection_min_time_ms";
+
+        /**
          * Whether to enable automatic system server heap dumps. This only works on userdebug or
          * eng builds, not on user builds. This is set by the user and overrides the config value.
          * 1 means enable, 0 means disable.
@@ -15358,16 +15389,6 @@ public final class Settings {
         @SystemApi
         @Readable
         public static final String DEVICE_DEMO_MODE = "device_demo_mode";
-
-        /**
-         * Indicates the maximum time that an app is blocked for the network rules to get updated.
-         *
-         * Type: long
-         *
-         * @hide
-         */
-        @Readable
-        public static final String NETWORK_ACCESS_TIMEOUT_MS = "network_access_timeout_ms";
 
         /**
          * The reason for the settings database being downgraded. This is only for

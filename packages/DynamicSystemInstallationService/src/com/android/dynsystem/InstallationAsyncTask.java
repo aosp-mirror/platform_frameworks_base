@@ -16,17 +16,20 @@
 
 package com.android.dynsystem;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.gsi.AvbPublicKey;
+import android.gsi.IGsiService;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.MemoryFile;
-import android.os.ParcelFileDescriptor;
+import android.os.SharedMemory;
 import android.os.SystemProperties;
 import android.os.image.DynamicSystemManager;
 import android.service.persistentdata.PersistentDataBlockManager;
+import android.system.ErrnoException;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Range;
 import android.webkit.URLUtil;
 
@@ -37,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -106,8 +110,15 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
         }
     }
 
+    static class InsufficientSpaceException extends IOException {
+        InsufficientSpaceException(String message) {
+            super(message);
+        }
+    }
+
     /** UNSET means the installation is not completed */
     static final int RESULT_UNSET = 0;
+
     static final int RESULT_OK = 1;
     static final int RESULT_CANCELLED = 2;
     static final int RESULT_ERROR_IO = 3;
@@ -145,6 +156,22 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
         void onResult(int resultCode, Throwable detail);
     }
 
+    private static class MappedMemoryBuffer implements AutoCloseable {
+        public ByteBuffer mBuffer;
+
+        MappedMemoryBuffer(@NonNull ByteBuffer buffer) {
+            mBuffer = buffer;
+        }
+
+        @Override
+        public void close() {
+            if (mBuffer != null) {
+                SharedMemory.unmap(mBuffer);
+                mBuffer = null;
+            }
+        }
+    }
+
     private final int mSharedMemorySize;
     private final String mUrl;
     private final String mDsuSlot;
@@ -157,6 +184,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
     private final boolean mIsNetworkUrl;
     private final boolean mIsDeviceBootloaderUnlocked;
     private final boolean mWantScratchPartition;
+    private int mCreatePartitionStatus;
     private DynamicSystemManager.Session mInstallationSession;
     private KeyRevocationList mKeyRevocationList;
 
@@ -364,7 +392,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             mIsZip = true;
         } else {
             throw new UnsupportedFormatException(
-                String.format(Locale.US, "Unsupported file format: %s", mUrl));
+                    String.format(Locale.US, "Unsupported file format: %s", mUrl));
         }
 
         if (mIsNetworkUrl) {
@@ -435,14 +463,19 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             throws IOException {
         Log.d(TAG, "Creating writable partition: " + partitionName + ", size: " + partitionSize);
 
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                mInstallationSession =
-                        mDynSystem.createPartition(
-                                partitionName, partitionSize, /* readOnly= */ false);
-            }
-        };
+        mCreatePartitionStatus = 0;
+        mInstallationSession = null;
+        Thread thread =
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Pair<Integer, DynamicSystemManager.Session> result =
+                                mDynSystem.createPartition(
+                                        partitionName, partitionSize, /* readOnly = */ false);
+                        mCreatePartitionStatus = result.first;
+                        mInstallationSession = result.second;
+                    }
+                };
 
         initPartitionProgress(partitionName, partitionSize, /* readonly = */ false);
         publishProgress(/* installedSize = */ 0L);
@@ -468,19 +501,28 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             }
         }
 
-        if (prevInstalledSize != partitionSize) {
-            publishProgress(partitionSize);
-        }
-
         if (mInstallationSession == null) {
-            throw new IOException(
-                    "Failed to start installation with requested size: " + partitionSize);
+            if (mCreatePartitionStatus == IGsiService.INSTALL_ERROR_NO_SPACE
+                    || mCreatePartitionStatus == IGsiService.INSTALL_ERROR_FILE_SYSTEM_CLUTTERED) {
+                throw new InsufficientSpaceException(
+                        "Failed to create "
+                                + partitionName
+                                + " partition: storage media has insufficient free space");
+            } else {
+                throw new IOException(
+                        "Failed to start installation with requested size: " + partitionSize);
+            }
         }
 
         // Reset installation session and verify that installation completes successfully.
         mInstallationSession = null;
         if (!mDynSystem.closePartition()) {
             throw new IOException("Failed to complete partition installation: " + partitionName);
+        }
+
+        // Ensure a 100% mark is published.
+        if (prevInstalledSize != partitionSize) {
+            publishProgress(partitionSize);
         }
     }
 
@@ -606,10 +648,19 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             throw new IOException("Cannot get raw size for " + partitionName);
         }
 
-        Thread thread = new Thread(() -> {
-            mInstallationSession =
-                    mDynSystem.createPartition(partitionName, partitionSize, true);
-        });
+        mCreatePartitionStatus = 0;
+        mInstallationSession = null;
+        Thread thread =
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Pair<Integer, DynamicSystemManager.Session> result =
+                                mDynSystem.createPartition(
+                                        partitionName, partitionSize, /* readOnly = */ true);
+                        mCreatePartitionStatus = result.first;
+                        mInstallationSession = result.second;
+                    }
+                };
 
         Log.d(TAG, "Start creating partition: " + partitionName);
         thread.start();
@@ -627,70 +678,80 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
         }
 
         if (mInstallationSession == null) {
-            throw new IOException(
-                    "Failed to start installation with requested size: " + partitionSize);
+            if (mCreatePartitionStatus == IGsiService.INSTALL_ERROR_NO_SPACE
+                    || mCreatePartitionStatus == IGsiService.INSTALL_ERROR_FILE_SYSTEM_CLUTTERED) {
+                throw new InsufficientSpaceException(
+                        "Failed to create "
+                                + partitionName
+                                + " partition: storage media has insufficient free space");
+            } else {
+                throw new IOException(
+                        "Failed to start installation with requested size: " + partitionSize);
+            }
         }
 
         Log.d(TAG, "Start installing: " + partitionName);
 
-        MemoryFile memoryFile = new MemoryFile("dsu_" + partitionName, mSharedMemorySize);
-        ParcelFileDescriptor pfd = new ParcelFileDescriptor(memoryFile.getFileDescriptor());
-
-        mInstallationSession.setAshmem(pfd, memoryFile.length());
-
-        initPartitionProgress(partitionName, partitionSize, /* readonly = */ true);
-        publishProgress(/* installedSize = */ 0L);
-
         long prevInstalledSize = 0;
-        long installedSize = 0;
-        byte[] bytes = new byte[memoryFile.length()];
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<Boolean> submitPromise = null;
+        try (SharedMemory sharedMemory =
+                        SharedMemory.create("dsu_buffer_" + partitionName, mSharedMemorySize);
+                MappedMemoryBuffer mappedBuffer =
+                        new MappedMemoryBuffer(sharedMemory.mapReadWrite())) {
+            mInstallationSession.setAshmem(sharedMemory.getFdDup(), sharedMemory.getSize());
 
-        while (true) {
-            final int numBytesRead = sis.read(bytes, 0, bytes.length);
+            initPartitionProgress(partitionName, partitionSize, /* readonly = */ true);
+            publishProgress(/* installedSize = */ 0L);
 
-            if (submitPromise != null) {
-                // Wait until the previous submit task is complete.
-                while (true) {
-                    try {
-                        if (!submitPromise.get()) {
-                            throw new IOException("Failed submitFromAshmem() to DynamicSystem");
+            long installedSize = 0;
+            byte[] readBuffer = new byte[sharedMemory.getSize()];
+            ByteBuffer buffer = mappedBuffer.mBuffer;
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<Boolean> submitPromise = null;
+
+            while (true) {
+                final int numBytesRead = sis.read(readBuffer, 0, readBuffer.length);
+
+                if (submitPromise != null) {
+                    // Wait until the previous submit task is complete.
+                    while (true) {
+                        try {
+                            if (!submitPromise.get()) {
+                                throw new IOException("Failed submitFromAshmem() to DynamicSystem");
+                            }
+                            break;
+                        } catch (InterruptedException e) {
+                            // Ignore.
                         }
-                        break;
-                    } catch (InterruptedException e) {
-                        // Ignore.
+                    }
+
+                    // Publish the progress of the previous submit task.
+                    if (installedSize > prevInstalledSize + MIN_PROGRESS_TO_PUBLISH) {
+                        publishProgress(installedSize);
+                        prevInstalledSize = installedSize;
                     }
                 }
 
-                // Publish the progress of the previous submit task.
-                if (installedSize > prevInstalledSize + MIN_PROGRESS_TO_PUBLISH) {
-                    publishProgress(installedSize);
-                    prevInstalledSize = installedSize;
+                // Ensure the previous submit task (submitPromise) is complete before exiting the
+                // loop.
+                if (numBytesRead < 0) {
+                    break;
                 }
+
+                if (isCancelled()) {
+                    return;
+                }
+
+                buffer.position(0);
+                buffer.put(readBuffer, 0, numBytesRead);
+                submitPromise =
+                        executor.submit(() -> mInstallationSession.submitFromAshmem(numBytesRead));
+
+                // Even though we update the bytes counter here, the actual progress is updated only
+                // after the submit task (submitPromise) is complete.
+                installedSize += numBytesRead;
             }
-
-            // Ensure the previous submit task (submitPromise) is complete before exiting the loop.
-            if (numBytesRead < 0) {
-                break;
-            }
-
-            if (isCancelled()) {
-                return;
-            }
-
-            memoryFile.writeBytes(bytes, 0, 0, numBytesRead);
-            submitPromise =
-                    executor.submit(() -> mInstallationSession.submitFromAshmem(numBytesRead));
-
-            // Even though we update the bytes counter here, the actual progress is updated only
-            // after the submit task (submitPromise) is complete.
-            installedSize += numBytesRead;
-        }
-
-        // Ensure a 100% mark is published.
-        if (prevInstalledSize != partitionSize) {
-            publishProgress(partitionSize);
+        } catch (ErrnoException e) {
+            e.rethrowAsIOException();
         }
 
         AvbPublicKey avbPublicKey = new AvbPublicKey();
@@ -707,6 +768,11 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
         mInstallationSession = null;
         if (!mDynSystem.closePartition()) {
             throw new IOException("Failed to complete partition installation: " + partitionName);
+        }
+
+        // Ensure a 100% mark is published.
+        if (prevInstalledSize != partitionSize) {
+            publishProgress(partitionSize);
         }
     }
 

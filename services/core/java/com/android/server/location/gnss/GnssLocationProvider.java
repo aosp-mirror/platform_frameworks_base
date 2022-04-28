@@ -660,6 +660,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             byte[] data = psdsDownloader.downloadPsdsData(psdsType);
             if (data != null) {
                 mHandler.post(() -> {
+                    FrameworkStatsLog.write(FrameworkStatsLog.GNSS_PSDS_DOWNLOAD_REPORTED,
+                            psdsType);
                     if (DEBUG) Log.d(TAG, "calling native_inject_psds_data");
                     mGnssNative.injectPsdsData(data, data.length, psdsType);
                     synchronized (mLock) {
@@ -1571,6 +1573,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         pw.println("mFixInterval=" + mFixInterval);
         pw.print(mGnssMetrics.dumpGnssMetricsAsText());
         if (dumpAll) {
+            pw.println("mSupportsPsds=" + mSupportsPsds);
+            pw.println(
+                    "PsdsServerConfigured=" + mGnssConfiguration.isLongTermPsdsServerConfigured());
             pw.println("native internal state: ");
             pw.println("  " + mGnssNative.getInternalState());
         }

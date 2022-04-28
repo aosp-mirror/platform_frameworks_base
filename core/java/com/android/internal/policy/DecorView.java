@@ -22,7 +22,7 @@ import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.N;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.clearCompatInsets;
+import static android.view.InsetsState.clearsCompatInsets;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
@@ -1120,11 +1120,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     : controller.getSystemBarsAppearance();
 
             if (insets != null) {
-                final boolean clearCompatInsets = clearCompatInsets(attrs.type, attrs.flags,
+                final boolean clearsCompatInsets = clearsCompatInsets(attrs.type, attrs.flags,
                         getResources().getConfiguration().windowConfiguration.getWindowingMode());
                 final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
                         WindowInsets.Type.systemBars());
-                final Insets systemInsets = clearCompatInsets
+                final Insets systemInsets = clearsCompatInsets
                         ? Insets.NONE
                         : Insets.min(insets.getInsets(WindowInsets.Type.systemBars()
                                 | WindowInsets.Type.displayCutout()), stableBarInsets);

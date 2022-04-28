@@ -74,8 +74,7 @@ import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowManager;
 import android.window.ClientWindowFrames;
-import android.window.IOnBackInvokedCallback;
-import android.window.OnBackInvokedDispatcher;
+import android.window.OnBackInvokedCallbackInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
@@ -937,18 +936,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void setOnBackInvokedCallback(
+    public void setOnBackInvokedCallbackInfo(
             IWindow window,
-            IOnBackInvokedCallback onBackInvokedCallback,
-            @OnBackInvokedDispatcher.Priority int priority) {
+            OnBackInvokedCallbackInfo callbackInfo) {
         synchronized (mService.mGlobalLock) {
             WindowState windowState = mService.windowForClientLocked(this, window, false);
             if (windowState == null) {
                 Slog.e(TAG_WM,
-                        "setOnBackInvokedCallback(): No window state for package:"
-                                + mPackageName);
+                        "setOnBackInvokedCallback(): No window state for package:" + mPackageName);
             } else {
-                windowState.setOnBackInvokedCallback(onBackInvokedCallback, priority);
+                windowState.setOnBackInvokedCallbackInfo(callbackInfo);
             }
         }
     }

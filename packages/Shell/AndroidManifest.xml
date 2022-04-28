@@ -575,6 +575,9 @@
     <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
     <uses-permission android:name="android.permission.TRUST_LISTENER" />
 
+    <!-- Permission required for CTS test - CtsTaskFpsCallbackTestCases -->
+    <uses-permission android:name="android.permission.ACCESS_FPS_COUNTER" />
+
     <!-- Permission required for CTS test - CtsGameManagerTestCases -->
     <uses-permission android:name="android.permission.MANAGE_GAME_MODE" />
 
@@ -682,6 +685,9 @@
 
     <!-- Permission required for CTS test - CtsKeystoreTestCases -->
     <uses-permission android:name="android.permission.REQUEST_UNIQUE_ID_ATTESTATION" />
+
+    <!-- Permission required for CTS test - CtsDevicePolicyManagerTestCases -->
+    <uses-permission android:name="android.permission.READ_NEARBY_STREAMING_POLICY" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

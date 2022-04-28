@@ -109,8 +109,9 @@ public final class StorageEventHelper extends StorageEventListener {
 
         // Remove any apps installed on the forgotten volume
         synchronized (mPm.mLock) {
-            final List<PackageSetting> packages = mPm.mSettings.getVolumePackagesLPr(fsUuid);
-            for (PackageSetting ps : packages) {
+            final List<? extends PackageStateInternal> packages =
+                    mPm.mSettings.getVolumePackagesLPr(fsUuid);
+            for (PackageStateInternal ps : packages) {
                 Slog.d(TAG, "Destroying " + ps.getPackageName()
                         + " because volume was forgotten");
                 mPm.deletePackageVersioned(new VersionedPackage(ps.getPackageName(),
@@ -145,14 +146,14 @@ public final class StorageEventHelper extends StorageEventListener {
         final int parseFlags = mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_EXTERNAL_STORAGE;
 
         final Settings.VersionInfo ver;
-        final List<PackageSetting> packages;
+        final List<? extends PackageStateInternal> packages;
         final InstallPackageHelper installPackageHelper = new InstallPackageHelper(mPm);
         synchronized (mPm.mLock) {
             ver = mPm.mSettings.findOrCreateVersion(volumeUuid);
             packages = mPm.mSettings.getVolumePackagesLPr(volumeUuid);
         }
 
-        for (PackageSetting ps : packages) {
+        for (PackageStateInternal ps : packages) {
             freezers.add(mPm.freezePackage(ps.getPackageName(), "loadPrivatePackagesInner"));
             synchronized (mPm.mInstallLock) {
                 final AndroidPackage pkg;
@@ -243,9 +244,9 @@ public final class StorageEventHelper extends StorageEventListener {
         final ArrayList<AndroidPackage> unloaded = new ArrayList<>();
         synchronized (mPm.mInstallLock) {
             synchronized (mPm.mLock) {
-                final List<PackageSetting> packages =
+                final List<? extends PackageStateInternal> packages =
                         mPm.mSettings.getVolumePackagesLPr(volumeUuid);
-                for (PackageSetting ps : packages) {
+                for (PackageStateInternal ps : packages) {
                     if (ps.getPkg() == null) continue;
 
                     final AndroidPackage pkg = ps.getPkg();

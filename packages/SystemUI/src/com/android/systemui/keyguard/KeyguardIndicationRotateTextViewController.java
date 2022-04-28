@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -347,7 +346,7 @@ public class KeyguardIndicationRotateTextViewController extends
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardIndicationRotatingTextViewController:");
         pw.println("    currentMessage=" + mView.getText());
         pw.println("    dozing:" + mIsDozing);

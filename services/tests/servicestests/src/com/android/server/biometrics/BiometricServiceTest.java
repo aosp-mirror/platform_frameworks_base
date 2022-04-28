@@ -192,7 +192,7 @@ public class BiometricServiceTest {
         waitForIdle();
 
         assertNull(mBiometricService.mAuthSession);
-        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog();
+        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog(eq(TEST_REQUEST_ID));
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
     }
 
@@ -211,7 +211,8 @@ public class BiometricServiceTest {
         waitForIdle();
 
         assertNotNull(mBiometricService.mAuthSession);
-        verify(mBiometricService.mStatusBarService, never()).hideAuthenticationDialog();
+        verify(mBiometricService.mStatusBarService, never())
+                .hideAuthenticationDialog(eq(TEST_REQUEST_ID));
         assertEquals(STATE_CLIENT_DIED_CANCELLING,
                 mBiometricService.mAuthSession.getState());
 
@@ -225,7 +226,7 @@ public class BiometricServiceTest {
                 BiometricConstants.BIOMETRIC_ERROR_CANCELED,
                 0 /* vendorCode */);
         waitForIdle();
-        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog();
+        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog(eq(TEST_REQUEST_ID));
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
         assertNull(mBiometricService.mAuthSession);
     }
@@ -666,7 +667,7 @@ public class BiometricServiceTest {
                 eq(BiometricAuthenticator.TYPE_FACE),
                 eq(BiometricPrompt.BIOMETRIC_ERROR_CANCELED),
                 eq(0) /* vendorCode */);
-        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog();
+        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog(eq(TEST_REQUEST_ID));
 
         verify(mReceiver2, never()).onError(anyInt(), anyInt(), anyInt());
     }
@@ -745,7 +746,7 @@ public class BiometricServiceTest {
                 eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED),
                 eq(0 /* vendorCode */));
         // Dialog is hidden immediately
-        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog();
+        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog(eq(TEST_REQUEST_ID));
         // Auth session is over
         assertNull(mBiometricService.mAuthSession);
     }
@@ -773,7 +774,8 @@ public class BiometricServiceTest {
                 eq(TYPE_FINGERPRINT),
                 eq(BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS),
                 eq(0 /* vendorCode */));
-        verify(mBiometricService.mStatusBarService, never()).hideAuthenticationDialog();
+        verify(mBiometricService.mStatusBarService, never())
+                .hideAuthenticationDialog(eq(TEST_REQUEST_ID));
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
 
         // SystemUI animation completed, client is notified, auth session is over
@@ -1152,7 +1154,7 @@ public class BiometricServiceTest {
         verify(mReceiver1).onError(eq(TYPE_FINGERPRINT),
                 eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED),
                 eq(0 /* vendorCode */));
-        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog();
+        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog(eq(TEST_REQUEST_ID));
     }
 
     @Test

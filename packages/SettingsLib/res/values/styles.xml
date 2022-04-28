@@ -39,4 +39,49 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textDirection">locale</item>
     </style>
+
+    <style name="BroadcastDialogTitleStyle">
+        <item name="android:textAppearance">@style/TextAppearanceBroadcastDialogTitle</item>
+        <item name="android:layout_marginStart">@dimen/broadcast_dialog_title_text_margin</item>
+        <item name="android:layout_marginEnd">@dimen/broadcast_dialog_title_text_margin</item>
+        <item name="android:layout_marginTop">@dimen/broadcast_dialog_title_text_margin_top</item>
+        <item name="android:layout_marginBottom">18dp</item>
+    </style>
+
+    <style name="TextAppearanceBroadcastDialogTitle" parent="@android:TextAppearance.DeviceDefault.Headline">
+        <item name="android:textSize">@dimen/broadcast_dialog_title_text_size</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="BroadcastDialogBodyStyle">
+        <item name="android:textAppearance">@style/TextAppearanceBroadcastDialogSubTitle</item>
+        <item name="android:layout_margin">@dimen/broadcast_dialog_title_text_margin</item>
+    </style>
+
+    <style name="TextAppearanceBroadcastDialogSubTitle" parent="@android:TextAppearance.DeviceDefault.Headline">
+        <item name="android:textSize">@dimen/broadcast_dialog_subtitle_text_size</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="BroadcastDialogButtonStyle">
+        <item name="android:textAppearance">@style/TextAppearanceBroadcastDialogButton</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:elevation">0dp</item>
+        <item name="android:minHeight">@dimen/broadcast_dialog_btn_minHeight</item>
+        <item name="android:background">@drawable/broadcast_dialog_btn_bg</item>
+    </style>
+
+    <style name="TextAppearanceBroadcastDialogButton" parent="@android:TextAppearance.DeviceDefault.Headline">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">@dimen/broadcast_dialog_btn_text_size</item>
+    </style>
+
 </resources>

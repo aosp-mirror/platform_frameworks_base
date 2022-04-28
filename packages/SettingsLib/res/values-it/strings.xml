@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annulla"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"L\'accoppiamento consente l\'accesso ai tuoi contatti e alla cronologia chiamate quando i dispositivi sono connessi."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. La passkey o il PIN sono errati."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. La password o il PIN sono errati."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Impossibile comunicare con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Accoppiamento rifiutato da <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -312,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra opzioni per la certificazione display wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta livello di logging Wi-Fi, mostra SSID RSSI nel selettore Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Riduce il consumo della batteria e migliora le prestazioni della rete"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quando questa modalità è attiva, l\'indirizzo MAC del dispositivo potrebbe cambiare ogni volta che il dispositivo si connette a una rete con randomizzazione degli indirizzi MAC attiva."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quando questa modalità è attiva, l\'indirizzo MAC del dispositivo potrebbe cambiare ogni volta che il dispositivo si connette a una rete con randomizzazione degli indirizzi MAC attiva"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"A consumo"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non a consumo"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensioni buffer logger"</string>
@@ -359,17 +359,17 @@
     <string name="media_category" msgid="8122076702526144053">"Contenuti multimediali"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Monitoraggio"</string>
     <string name="strict_mode" msgid="889864762140862437">"Attiva StrictMode"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Schermo lampeggia per operazioni lunghe su thread principale"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Fai lampeggiare lo schermo per operazioni lunghe sul thread principale"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Posizione puntatore"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Overlay schermo che mostra i dati touch correnti"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostra tocchi"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Mostra feedback visivi per i tocchi"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Aggiornamenti superficie"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Superfici delle finestre lampeggiano se aggiornate"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Fai lampeggiare le superfici delle finestre quando si aggiornano"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Aggiornam. visualizzazione"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Visualizz. lampeggiano dentro finestre se disegnate"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Fai lampeggiare gli elementi nelle finestre se disegnati"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Aggiornam. livelli hardware"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Livelli hardware lampeggiano in verde se aggiornati"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Fai lampeggiare in verde i livelli hardware se aggiornati"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Debug overdraw GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Disabilita overlay HW"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Usa sempre GPU per la composizione dello schermo"</string>
@@ -405,9 +405,9 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forza autorizzazione app su memoria esterna"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Consente l\'installazione di qualsiasi app su memoria esterna, indipendentemente dai valori manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Imponi formato modificabile alle attività"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Rendi il formato di tutte le attività modificabile per la modalità multi-finestra, indipendentemente dai valori manifest."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Rendi il formato di tutte le attività modificabile per la modalità multi-finestra, indipendentemente dai valori manifest"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Attiva finestre a forma libera"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Attiva il supporto delle finestre a forma libera sperimentali."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Attiva il supporto delle finestre a forma libera sperimentali"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Password di backup desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"I backup desktop completi non sono attualmente protetti"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tocca per modificare o rimuovere la password per i backup desktop completi"</string>
@@ -448,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalìa (rosso-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalìa (blu-giallo)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Correzione del colore"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"La correzione del colore può essere utile quando vuoi:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Vedere i colori con più precisione&lt;/li&gt; &lt;li&gt;&amp;nbsp;Rimuovere colori per mettere meglio a fuoco&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"La correzione del colore può essere utile quando vuoi:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Vedere i colori con più precisione&lt;/li&gt; &lt;li&gt;&amp;nbsp;Rimuovere i colori per mettere meglio a fuoco&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Valore sostituito da <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Tempo rimanente: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> circa"</string>
@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profilo con limitazioni"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Aggiungere un nuovo utente?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. I servizi e le impostazioni di accessibilità non potranno essere trasferiti al nuovo utente."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve impostare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurare l\'utente ora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assicurati che la persona sia disponibile a prendere il dispositivo e configurare il suo spazio"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurare il profilo ora?"</string>
@@ -589,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Creazione nuovo utente non riuscita"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Impossibile creare un nuovo ospite"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nickname"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"Aggiungi utente"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Aggiungi ospite"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Rimuovi ospite"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Reimposta sessione Ospite"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Reimpostare sessione Ospite?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Vuoi rimuovere l\'ospite?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Reimposta"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Rimuovi"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Reimpostazione sessione Ospite in corso…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Scatta una foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Scegli un\'immagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleziona la foto"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Troppi tentativi sbagliati. I dati del dispositivo verranno eliminati."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Troppi tentativi sbagliati. Questo utente verrà eliminato."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Troppi tentativi sbagliati. Questo profilo di lavoro e i relativi dati verranno eliminati."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Ignora"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Parametro predefinito"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Non attivo"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Attivo"</string>
@@ -657,4 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Attiva lo schermo"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Consenti l\'attivazione dello schermo"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Consenti a un\'app di attivare lo schermo. Se la autorizzi, l\'app può attivare lo schermo in qualsiasi momento senza la tua autorizzazione esplicita."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scansiona codice QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Per iniziare ad ascoltare, centra il codice QR qui sotto"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Il formato del codice QR non è valido"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vuoi interrompere la trasmissione dell\'app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se trasmetti l\'app <xliff:g id="SWITCHAPP">%1$s</xliff:g> o cambi l\'uscita, la trasmissione attuale viene interrotta"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Trasmetti l\'app <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Cambia uscita"</string>
 </resources>

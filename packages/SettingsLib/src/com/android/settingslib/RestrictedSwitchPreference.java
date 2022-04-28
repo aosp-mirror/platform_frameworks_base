@@ -230,7 +230,9 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         final int mode = mAppOpsManager.noteOpNoThrow(
                 AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
                 uid, packageName);
-        final boolean appOpsAllowed = mode == AppOpsManager.MODE_ALLOWED;
+        final boolean ecmEnabled = getContext().getResources().getBoolean(
+                com.android.internal.R.bool.config_enhancedConfirmationModeEnabled);
+        final boolean appOpsAllowed = !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
         if (appOpsAllowed || isEnabled) {
             setEnabled(true);
         } else {

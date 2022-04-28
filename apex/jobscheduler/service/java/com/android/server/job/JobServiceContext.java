@@ -992,6 +992,10 @@ public final class JobServiceContext implements ServiceConnection {
         if (mVerb == VERB_FINISHED) {
             return;
         }
+        if (DEBUG) {
+            Slog.d(TAG, "Cleaning up " + mRunningJob.toShortString()
+                    + " reschedule=" + reschedule + " reason=" + reason);
+        }
         applyStoppedReasonLocked(reason);
         completedJob = mRunningJob;
         final int internalStopReason = mParams.getInternalStopReasonCode();

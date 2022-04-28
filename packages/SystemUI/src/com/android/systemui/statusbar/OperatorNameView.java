@@ -21,8 +21,6 @@ import android.widget.TextView;
 
 import com.android.settingslib.WirelessUtils;
 
-import java.util.List;
-
 /** Shows the operator name */
 public class OperatorNameView extends TextView {
     private boolean mDemoMode;
@@ -43,8 +41,10 @@ public class OperatorNameView extends TextView {
         mDemoMode = demoMode;
     }
 
-    void update(boolean showOperatorName, boolean hasMobile,
-            List<OperatorNameViewController.SubInfo> subs) {
+    void update(boolean showOperatorName,
+            boolean hasMobile,
+            OperatorNameViewController.SubInfo sub
+    ) {
         setVisibility(showOperatorName ? VISIBLE : GONE);
 
         boolean airplaneMode = WirelessUtils.isAirplaneModeOn(mContext);
@@ -55,24 +55,21 @@ public class OperatorNameView extends TextView {
         }
 
         if (!mDemoMode) {
-            updateText(subs);
+            updateText(sub);
         }
     }
 
-    void updateText(List<OperatorNameViewController.SubInfo> subs) {
+    void updateText(OperatorNameViewController.SubInfo subInfo) {
+        CharSequence carrierName = null;
         CharSequence displayText = null;
-        final int N = subs.size();
-        for (int i = 0; i < N; i++) {
-            OperatorNameViewController.SubInfo subInfo = subs.get(i);
-            CharSequence carrierName = subs.get(i).getCarrierName();
-            if (!TextUtils.isEmpty(carrierName) && subInfo.simReady()) {
-                if (subInfo.stateInService()) {
-                    displayText = subInfo.getCarrierName();
-                    break;
-                }
+        if (subInfo != null) {
+            carrierName = subInfo.getCarrierName();
+        }
+        if (!TextUtils.isEmpty(carrierName) && subInfo.simReady()) {
+            if (subInfo.stateInService()) {
+                displayText = carrierName;
             }
         }
-
         setText(displayText);
     }
 }

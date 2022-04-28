@@ -68,6 +68,8 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
     private lateinit var mockContext: Context
     @Mock
     private lateinit var logger: BroadcastDispatcherLogger
+    @Mock
+    private lateinit var removalPendingStore: PendingRemovalStore
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var userBroadcastDispatcher: UserBroadcastDispatcher
@@ -84,8 +86,18 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
 
         userBroadcastDispatcher = object : UserBroadcastDispatcher(
-                mockContext, USER_ID, testableLooper.looper, mock(Executor::class.java), logger) {
-            override fun createActionReceiver(action: String, flags: Int): ActionReceiver {
+                mockContext,
+                USER_ID,
+                testableLooper.looper,
+                mock(Executor::class.java),
+                logger,
+                removalPendingStore
+        ) {
+            override fun createActionReceiver(
+                action: String,
+                permission: String?,
+                flags: Int
+            ): ActionReceiver {
                 return mock(ActionReceiver::class.java)
             }
         }
@@ -119,6 +131,24 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         assertNotSame(
                 userBroadcastDispatcher.getActionReceiver(ACTION_1, flag1),
                 userBroadcastDispatcher.getActionReceiver(ACTION_1, flag2)
+        )
+    }
+
+    @Test
+    fun testDifferentActionReceiversForDifferentPermissions() {
+        intentFilter = IntentFilter(ACTION_1)
+        val receiverData1 =
+            ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE, "PERMISSION1")
+        val receiverData2 =
+            ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE, "PERMISSION2")
+
+        userBroadcastDispatcher.registerReceiver(receiverData1, 0)
+        userBroadcastDispatcher.registerReceiver(receiverData2, 0)
+        testableLooper.processAllMessages()
+
+        assertNotSame(
+            userBroadcastDispatcher.getActionReceiver(ACTION_1, 0, "PERMISSION1"),
+            userBroadcastDispatcher.getActionReceiver(ACTION_1, 0, "PERMISSION2")
         )
     }
 
@@ -194,7 +224,8 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
                 USER_ID,
                 testableLooper.looper,
                 fakeExecutor,
-                logger
+                logger,
+                removalPendingStore
         )
         uBR.registerReceiver(
                 ReceiverData(
@@ -213,8 +244,46 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
                 any(), any(), any(), nullable(String::class.java), any(), eq(FLAG))
     }
 
-    private fun UserBroadcastDispatcher
-            .getActionReceiver(action: String, flags: Int): ActionReceiver? {
-        return actionsToActionsReceivers.get(action to flags)
+    @Test
+    fun testCreateActionReceiver_registerWithPermission() {
+        val permission = "CUSTOM_PERMISSION"
+        val uBR = UserBroadcastDispatcher(
+            mockContext,
+            USER_ID,
+            testableLooper.looper,
+            fakeExecutor,
+            logger,
+            removalPendingStore
+        )
+        uBR.registerReceiver(
+            ReceiverData(
+                broadcastReceiver,
+                IntentFilter(ACTION_1),
+                fakeExecutor,
+                USER_HANDLE,
+                permission
+            ),
+            FLAG
+        )
+
+        testableLooper.processAllMessages()
+        fakeExecutor.runAllReady()
+
+        verify(mockContext).registerReceiverAsUser(
+            any(), any(), any(), eq(permission), any(), eq(FLAG))
+    }
+
+    private fun UserBroadcastDispatcher.getActionReceiver(
+        action: String,
+        flags: Int,
+        permission: String? = null
+    ): ActionReceiver? {
+        return actionsToActionsReceivers.get(
+            UserBroadcastDispatcher.ReceiverProperties(
+                action,
+                flags,
+                permission
+            )
+        )
     }
 }
