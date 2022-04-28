@@ -1748,6 +1748,23 @@ public class CentralSurfaces extends CoreStartable implements
                 }
 
                 @Override
+                public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
+                    super.onLaunchAnimationStart(isExpandingFullyAbove);
+
+                    // Double check that the keyguard is still showing and not going away, but if so
+                    // set the keyguard occluded. Typically, WM will let KeyguardViewMediator know
+                    // directly, but we're overriding that to play the custom launch animation, so
+                    // we need to take care of that here. The unocclude animation is not overridden,
+                    // so WM will call KeyguardViewMediator's unocclude animation runner when the
+                    // activity is exited.
+                    if (mKeyguardStateController.isShowing()
+                            && !mKeyguardStateController.isKeyguardGoingAway()) {
+                        mKeyguardViewMediator.setOccluded(true /* isOccluded */,
+                                true /* animate */);
+                    }
+                }
+
+                @Override
                 public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
                     // Set mIsLaunchingActivityOverLockscreen to false before actually finishing the
                     // animation so that we can assume that mIsLaunchingActivityOverLockscreen
@@ -4514,9 +4531,12 @@ public class CentralSurfaces extends CoreStartable implements
      * @return UserHandle
      */
     private UserHandle getActivityUserHandle(Intent intent) {
-        if (intent.getComponent() != null
-                && mContext.getPackageName().equals(intent.getComponent().getPackageName())) {
-            return new UserHandle(UserHandle.myUserId());
+        String[] packages = mContext.getResources().getStringArray(R.array.system_ui_packages);
+        for (String pkg : packages) {
+            if (intent.getComponent() == null) break;
+            if (pkg.equals(intent.getComponent().getPackageName())) {
+                return new UserHandle(UserHandle.myUserId());
+            }
         }
         return UserHandle.CURRENT;
     }

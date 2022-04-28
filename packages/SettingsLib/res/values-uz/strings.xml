@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Uzilyapti…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Ulanmoqda…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ulandi"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Biriktirilmoqda"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Juftlanmoqda…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ulandi (telefondan tashqari)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ulandi (mediadan tashqari)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ulandi (xabarlarga ruxsatsiz)"</string>
@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Bekor qilish"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Agar ulanishga ruxsat bersangiz, ulangan vaqtda kontakt va qo‘ng‘iroqlaringiz tarixiga kirishi mumkin."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> bilan biriktirib bo‘lmadi."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga ulanilmadi, chunki PIN kod yoki parol xato kiritildi."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN kod yoki parol xato kiritilgani sababli <xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga juftlanmadi."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>” qurilmasi bilan aloqa o‘rnatib bo‘lmayapti."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> biriktirish so‘rovini rad qildi."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Kompyuter"</string>
@@ -255,12 +255,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi ulanish kodi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Ulanmadi"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Qurilma bir xil tarmoqqa ulanganini tekshiring."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR kodni skanerlab, Wi-Fi orqali qurilmani ulang"</string>
-    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Qurilma ulanmoqda…"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR kodni skanerlab, Wi-Fi orqali qurilmani juftlang"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Qurilma juftlanmoqda…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Qurilma ulanmadi. QR kod xato yoki qurilma bir xil tarmoqqa ulanmagan."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP manzil va port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR kodni skanerlash"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR kodni skanerlab, Wi-Fi orqali qurilmani ulang"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR kodni skanerlab, Wi-Fi orqali qurilmani juftlang"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi tarmoqqa ulaning"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debag, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Xatoliklar hisoboti"</string>
