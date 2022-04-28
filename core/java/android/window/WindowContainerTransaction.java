@@ -650,6 +650,26 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Requests focus on the top running Activity in the given TaskFragment. This will only take
+     * effect if there is no focus, or if the current focus is in the same Task as the requested
+     * TaskFragment.
+     * @param fragmentToken client assigned unique token to create TaskFragment with specified in
+     *                      {@link TaskFragmentCreationParams#getFragmentToken()}.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction requestFocusOnTaskFragment(@NonNull IBinder fragmentToken) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(
+                        HierarchyOp.HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT)
+                        .setContainer(fragmentToken)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+
+    }
+
+    /**
      * When this {@link WindowContainerTransaction} failed to finish on the server side, it will
      * trigger callback with this {@param errorCallbackToken}.
      * @param errorCallbackToken    client provided token that will be passed back as parameter in
@@ -1057,6 +1077,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER = 15;
         public static final int HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER = 16;
         public static final int HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER = 17;
+        public static final int HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT = 18;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1368,6 +1389,8 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER:
                     return "{removeLocalInsetsProvider: container=" + mContainer
                             + " insetsType=" + Arrays.toString(mInsetsTypes) + "}";
+                case HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT:
+                    return "{requestFocusOnTaskFragment: container=" + mContainer + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
                             + " mToTop=" + mToTop

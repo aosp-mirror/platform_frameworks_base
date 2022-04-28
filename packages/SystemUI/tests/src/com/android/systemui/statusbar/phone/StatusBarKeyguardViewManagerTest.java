@@ -61,7 +61,9 @@ import com.google.common.truth.Truth;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
@@ -97,6 +99,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private LatencyTracker mLatencyTracker;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private KeyguardBouncer.BouncerExpansionCallback mBouncerExpansionCallback;
 
     @Before
     public void setUp() {
@@ -136,6 +139,11 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mBypassController);
         when(mKeyguardStateController.isOccluded()).thenReturn(false);
         mStatusBarKeyguardViewManager.show(null);
+        ArgumentCaptor<KeyguardBouncer.BouncerExpansionCallback> callbackArgumentCaptor =
+                ArgumentCaptor.forClass(KeyguardBouncer.BouncerExpansionCallback.class);
+        verify(mKeyguardBouncerFactory).create(any(ViewGroup.class),
+                callbackArgumentCaptor.capture());
+        mBouncerExpansionCallback = callbackArgumentCaptor.getValue();
     }
 
     @Test
@@ -189,6 +197,15 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     public void onPanelExpansionChanged_propagatesToBouncer() {
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
         verify(mBouncer).setExpansion(eq(0.5f));
+    }
+
+    @Test
+    public void onPanelExpansionChanged_propagatesToBouncer_evenAfterHidden() {
+        mStatusBarKeyguardViewManager.hide(0, 0);
+        when(mBouncer.inTransit()).thenReturn(true);
+
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
+        verify(mBouncer).setExpansion(eq(EXPANSION_EVENT.getFraction()));
     }
 
     @Test
@@ -416,5 +433,25 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
             float fraction, boolean expanded, boolean tracking) {
         return new PanelExpansionChangeEvent(
                 fraction, expanded, tracking, /* dragDownPxAmount= */ 0f);
+    }
+
+    @Test
+    public void testReportBouncerOnDreamWhenVisible() {
+        mBouncerExpansionCallback.onVisibilityChanged(true);
+        verify(mCentralSurfaces).setBouncerShowingOverDream(false);
+        Mockito.clearInvocations(mCentralSurfaces);
+        when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
+        mBouncerExpansionCallback.onVisibilityChanged(true);
+        verify(mCentralSurfaces).setBouncerShowingOverDream(true);
+    }
+
+    @Test
+    public void testReportBouncerOnDreamWhenNotVisible() {
+        mBouncerExpansionCallback.onVisibilityChanged(false);
+        verify(mCentralSurfaces).setBouncerShowingOverDream(false);
+        Mockito.clearInvocations(mCentralSurfaces);
+        when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
+        mBouncerExpansionCallback.onVisibilityChanged(false);
+        verify(mCentralSurfaces).setBouncerShowingOverDream(false);
     }
 }
