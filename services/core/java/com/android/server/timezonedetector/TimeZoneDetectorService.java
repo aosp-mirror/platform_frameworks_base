@@ -336,13 +336,13 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     boolean isTelephonyTimeZoneDetectionSupported() {
         enforceManageTimeZoneDetectorPermission();
 
-        return mServiceConfigAccessor.isTelephonyTimeZoneDetectionFeatureSupported();
+        return mTimeZoneDetectorStrategy.isTelephonyTimeZoneDetectionSupported();
     }
 
     boolean isGeoTimeZoneDetectionSupported() {
         enforceManageTimeZoneDetectorPermission();
 
-        return mServiceConfigAccessor.isGeoTimeZoneDetectionFeatureSupported();
+        return mTimeZoneDetectorStrategy.isGeoTimeZoneDetectionSupported();
     }
 
     /**

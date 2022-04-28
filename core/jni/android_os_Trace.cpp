@@ -82,6 +82,26 @@ static void android_os_Trace_nativeAsyncTraceEnd(JNIEnv* env, jclass,
     });
 }
 
+static void android_os_Trace_nativeAsyncTraceForTrackBegin(JNIEnv* env, jclass, jlong tag,
+                                                           jstring trackStr, jstring nameStr,
+                                                           jint cookie) {
+    withString(env, trackStr, [env, tag, nameStr, cookie](char* track) {
+        withString(env, nameStr, [tag, track, cookie](char* name) {
+            atrace_async_for_track_begin(tag, track, name, cookie);
+        });
+    });
+}
+
+static void android_os_Trace_nativeAsyncTraceForTrackEnd(JNIEnv* env, jclass, jlong tag,
+                                                         jstring trackStr, jstring nameStr,
+                                                         jint cookie) {
+    withString(env, trackStr, [env, tag, nameStr, cookie](char* track) {
+        withString(env, nameStr, [tag, track, cookie](char* name) {
+            atrace_async_for_track_end(tag, track, name, cookie);
+        });
+    });
+}
+
 static void android_os_Trace_nativeSetAppTracingAllowed(JNIEnv*, jclass, jboolean allowed) {
     atrace_update_tags();
 }
@@ -132,6 +152,12 @@ static const JNINativeMethod gTraceMethods[] = {
     { "nativeAsyncTraceEnd",
             "(JLjava/lang/String;I)V",
             (void*)android_os_Trace_nativeAsyncTraceEnd },
+    { "nativeAsyncTraceForTrackBegin",
+            "(JLjava/lang/String;Ljava/lang/String;I)V",
+            (void*)android_os_Trace_nativeAsyncTraceForTrackBegin },
+    { "nativeAsyncTraceForTrackEnd",
+            "(JLjava/lang/String;Ljava/lang/String;I)V",
+            (void*)android_os_Trace_nativeAsyncTraceForTrackEnd },
     { "nativeInstant",
             "(JLjava/lang/String;)V",
             (void*)android_os_Trace_nativeInstant },

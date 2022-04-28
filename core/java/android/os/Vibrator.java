@@ -212,7 +212,9 @@ public abstract class Vibrator {
      *
      * @return True if the hardware can control the frequency of the vibrations independently of
      * the vibration amplitude, false otherwise.
+     * @hide
      */
+    @TestApi
     public boolean hasFrequencyControl() {
         // We currently can only control frequency of the vibration using the compose PWLE method.
         return getInfo().hasCapability(
@@ -236,7 +238,9 @@ public abstract class Vibrator {
      * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown, not
      * applicable, or if this vibrator is a composite of multiple physical devices with different
      * frequencies.
+     * @hide
      */
+    @TestApi
     public float getResonantFrequency() {
         return getInfo().getResonantFrequencyHz();
     }
@@ -247,7 +251,9 @@ public abstract class Vibrator {
      * @return the Q factor of the vibrator, or {@link Float#NaN NaN} if it's unknown, not
      * applicable, or if this vibrator is a composite of multiple physical devices with different
      * Q factors.
+     * @hide
      */
+    @TestApi
     public float getQFactor() {
         return getInfo().getQFactor();
     }
@@ -262,7 +268,9 @@ public abstract class Vibrator {
      * frequency control. If this vibrator is a composite of multiple physical devices then this
      * will return a profile supported in all devices, or null if the intersection is empty or not
      * available.
+     * @hide
      */
+    @TestApi
     @Nullable
     public VibratorFrequencyProfile getFrequencyProfile() {
         VibratorInfo.FrequencyProfile frequencyProfile = getInfo().getFrequencyProfile();

@@ -25,9 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.rules.WMFlickerServiceRuleForTestSpec
 import org.junit.FixMethodOrder
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -57,8 +55,6 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
 class ExitPipWithDismissButtonTest(testSpec: FlickerTestParameter) : ExitPipTransition(testSpec) {
-    @get:Rule
-    val flickerRule = WMFlickerServiceRuleForTestSpec(testSpec)
 
     override val transition: FlickerBuilder.() -> Unit
         get() = {

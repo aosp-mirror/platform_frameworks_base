@@ -49,9 +49,11 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.scrim.ScrimView;
@@ -119,7 +121,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
     @Mock
     private PanelExpansionStateManager mPanelExpansionStateManager;
-
+    @Mock
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private static class AnimatorListener implements Animator.AnimatorListener {
         private int mNumStarts;
@@ -233,7 +236,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
                 mScreenOffAnimationController,
                 mPanelExpansionStateManager,
-                mKeyguardUnlockAnimationController);
+                mKeyguardUnlockAnimationController,
+                mStatusBarKeyguardViewManager);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -1233,33 +1237,117 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNotificationTransparency_followsPanelExpansionInShadeLockedState() {
+    public void expansionNotificationAlpha_shadeLocked_bouncerActive_usesBouncerInterpolator() {
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
+
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
 
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 0.8f);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 0.2f);
+        float expansion = 0.8f;
+        float expectedAlpha =
+                BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, expectedAlpha, expansion);
+
+        expansion = 0.2f;
+        expectedAlpha = BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, expectedAlpha, expansion);
     }
 
     @Test
-    public void testNotificationTransparency_unnocclusion() {
+    public void expansionNotificationAlpha_shadeLocked_bouncerNotActive_usesShadeInterpolator() {
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
+
+        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+
+        float expansion = 0.8f;
+        float expectedAlpha = ShadeInterpolation.getNotificationScrimAlpha(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, expectedAlpha, expansion);
+
+        expansion = 0.2f;
+        expectedAlpha = ShadeInterpolation.getNotificationScrimAlpha(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, expectedAlpha, expansion);
+    }
+
+    @Test
+    public void notificationAlpha_unnocclusionAnimating_bouncerActive_usesKeyguardNotifAlpha() {
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
+        mScrimController.setClipsQsScrim(true);
+
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.setUnocclusionAnimationRunning(true);
 
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 0f);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 0f, /* expansion */ 1.0f);
+        assertAlphaAfterExpansion(
+                mNotificationsScrim, ScrimState.KEYGUARD.getNotifAlpha(), /* expansion */ 0f);
+        assertAlphaAfterExpansion(
+                mNotificationsScrim, ScrimState.KEYGUARD.getNotifAlpha(), /* expansion */ 0.4f);
+        assertAlphaAfterExpansion(
+                mNotificationsScrim, ScrimState.KEYGUARD.getNotifAlpha(), /* expansion */ 1.0f);
 
         // Verify normal behavior after
         mScrimController.setUnocclusionAnimationRunning(false);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.4f);
+        float expansion = 0.4f;
+        float alpha = 1 - BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
     }
 
     @Test
-    public void testNotificationTransparency_inKeyguardState() {
+    public void notificationAlpha_unnocclusionAnimating_bouncerNotActive_usesKeyguardNotifAlpha() {
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
+
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        mScrimController.setUnocclusionAnimationRunning(true);
+
+        assertAlphaAfterExpansion(
+                mNotificationsScrim, ScrimState.KEYGUARD.getNotifAlpha(), /* expansion */ 0f);
+        assertAlphaAfterExpansion(
+                mNotificationsScrim, ScrimState.KEYGUARD.getNotifAlpha(), /* expansion */ 0.4f);
+        assertAlphaAfterExpansion(
+                mNotificationsScrim, ScrimState.KEYGUARD.getNotifAlpha(), /* expansion */ 1.0f);
+
+        // Verify normal behavior after
+        mScrimController.setUnocclusionAnimationRunning(false);
+        float expansion = 0.4f;
+        float alpha = 1 - ShadeInterpolation.getNotificationScrimAlpha(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
+    }
+
+    @Test
+    public void notificationAlpha_inKeyguardState_bouncerActive_usesInvertedBouncerInterpolator() {
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
+        mScrimController.setClipsQsScrim(true);
+
         mScrimController.transitionTo(ScrimState.KEYGUARD);
 
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.8f);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.4f);
-        assertAlphaAfterExpansion(mNotificationsScrim, /* alpha */ 1f, /* expansion */ 0.2f);
+        float expansion = 0.8f;
+        float alpha = 1 - BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
+
+        expansion = 0.4f;
+        alpha = 1 - BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
+
+        expansion = 0.2f;
+        alpha = 1 - BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
+    }
+
+    @Test
+    public void notificationAlpha_inKeyguardState_bouncerNotActive_usesInvertedShadeInterpolator() {
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
+        mScrimController.setClipsQsScrim(true);
+
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+
+        float expansion = 0.8f;
+        float alpha = 1 - ShadeInterpolation.getNotificationScrimAlpha(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
+
+        expansion = 0.4f;
+        alpha = 1 - ShadeInterpolation.getNotificationScrimAlpha(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
+
+        expansion = 0.2f;
+        alpha = 1 - ShadeInterpolation.getNotificationScrimAlpha(expansion);
+        assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
     }
 
     @Test
@@ -1351,11 +1439,62 @@ public class ScrimControllerTest extends SysuiTestCase {
         ));
     }
 
+    @Test
+    public void keyguardGoingAwayUpdateScrims() {
+        when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(true);
+        mScrimController.updateScrims();
+        finishAnimationsImmediately();
+        assertThat(mNotificationsScrim.getViewAlpha()).isEqualTo(TRANSPARENT);
+    }
+
+
+    @Test
+    public void setUnOccludingAnimationKeyguard() {
+        mScrimController.setUnocclusionAnimationRunning(true);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        finishAnimationsImmediately();
+        assertThat(mNotificationsScrim.getViewAlpha())
+                .isWithin(0.01f).of(ScrimState.KEYGUARD.getNotifAlpha());
+        assertThat(mNotificationsScrim.getTint())
+                .isEqualTo(ScrimState.KEYGUARD.getNotifTint());
+        assertThat(mScrimBehind.getViewAlpha())
+                .isWithin(0.01f).of(ScrimState.KEYGUARD.getBehindAlpha());
+        assertThat(mScrimBehind.getTint())
+                .isEqualTo(ScrimState.KEYGUARD.getBehindTint());
+    }
+
+    @Test
+    public void testHidesScrimFlickerInActivity() {
+        mScrimController.setKeyguardOccluded(true);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        finishAnimationsImmediately();
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mScrimBehind, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT));
+
+        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        finishAnimationsImmediately();
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mScrimBehind, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT));
+    }
+
+    @Test
+    public void notificationAlpha_inKeyguardState_bouncerNotActive_clipsQsScrimFalse() {
+        mScrimController.setClipsQsScrim(false);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+
+        float expansion = 0.8f;
+        assertAlphaAfterExpansion(mNotificationsScrim, 0f, expansion);
+    }
+
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
         mScrimController.setRawPanelExpansionFraction(expansion);
         finishAnimationsImmediately();
         // alpha is not changing linearly thus 0.2 of leeway when asserting
-        assertEquals(expectedAlpha, mNotificationsScrim.getViewAlpha(), 0.2);
+        assertEquals(expectedAlpha, scrim.getViewAlpha(), 0.2);
     }
 
     private void assertScrimTinted(Map<ScrimView, Boolean> scrimToTint) {

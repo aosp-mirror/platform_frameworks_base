@@ -842,7 +842,7 @@ public class AccessibilityInteractionControllerNodeRequestsTest {
                 null, interactionId,
                 callback, prefetchFlags,
                 processAndThreadId,
-                processAndThreadId, null, null);
+                processAndThreadId, null, null, null);
 
     }
 

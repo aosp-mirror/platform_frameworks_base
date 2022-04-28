@@ -41,7 +41,7 @@ public class SettingsSpinnerAdapter<T> extends ArrayAdapter<T> {
      *                access the current theme, resources, etc.
      */
     public SettingsSpinnerAdapter(Context context) {
-        super(context, DEFAULT_RESOURCE);
+        super(context, getDefaultResource());
 
         setDropDownViewResource(getDropdownResource());
         mDefaultInflater = LayoutInflater.from(context);
@@ -51,7 +51,7 @@ public class SettingsSpinnerAdapter<T> extends ArrayAdapter<T> {
      * In overridded {@link #getView(int, View, ViewGroup)}, use this method to get default view.
      */
     public View getDefaultView(int position, View convertView, ViewGroup parent) {
-        return mDefaultInflater.inflate(DEFAULT_RESOURCE, parent, false /* attachToRoot */);
+        return mDefaultInflater.inflate(getDefaultResource(), parent, false /* attachToRoot */);
     }
 
     /**
@@ -62,8 +62,12 @@ public class SettingsSpinnerAdapter<T> extends ArrayAdapter<T> {
         return mDefaultInflater.inflate(getDropdownResource(), parent, false /* attachToRoot */);
     }
 
-    private int getDropdownResource() {
-        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+    private static int getDefaultResource() {
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                ? DEFAULT_RESOURCE : android.R.layout.simple_spinner_dropdown_item;
+    }
+    private static int getDropdownResource() {
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                 ? DFAULT_DROPDOWN_RESOURCE : android.R.layout.simple_spinner_dropdown_item;
     }
 }

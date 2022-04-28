@@ -53,6 +53,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
@@ -73,6 +75,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * Build/Install/Run:
@@ -586,6 +589,48 @@ public class TransitionTests extends WindowTestsBase {
         };
         t.startCollecting(10 /* timeoutMs */);
         assertTrue(awaitInWmLock(() -> latch.await(3, TimeUnit.SECONDS)));
+    }
+
+    @Test
+    public void testTransitionBounds() {
+        registerTestTransitionPlayer();
+        final int offset = 10;
+        final Function<WindowContainer<?>, TransitionInfo.Change> test = wc -> {
+            final Transition transition = wc.mTransitionController.createTransition(TRANSIT_OPEN);
+            transition.collect(wc);
+            final int nextRotation = (wc.getWindowConfiguration().getRotation() + 1) % 4;
+            wc.getWindowConfiguration().setRotation(nextRotation);
+            wc.getWindowConfiguration().setDisplayRotation(nextRotation);
+            final Rect bounds = wc.getWindowConfiguration().getBounds();
+            // Flip the bounds with offset.
+            wc.getWindowConfiguration().setBounds(
+                    new Rect(offset, offset, bounds.height(), bounds.width()));
+            final int flags = 0;
+            final TransitionInfo info = Transition.calculateTransitionInfo(transition.mType, flags,
+                    Transition.calculateTargets(transition.mParticipants, transition.mChanges),
+                    transition.mChanges);
+            transition.abort();
+            return info.getChanges().get(0);
+        };
+
+        final ActivityRecord app = createActivityRecord(mDisplayContent);
+        final TransitionInfo.Change changeOfActivity = test.apply(app);
+        // There will be letterbox if the activity bounds don't match parent, so always use its
+        // parent bounds for animation.
+        assertEquals(app.getParent().getBounds(), changeOfActivity.getEndAbsBounds());
+        final int endRotation = app.mTransitionController.useShellTransitionsRotation()
+                ? app.getWindowConfiguration().getRotation()
+                // Without shell rotation, fixed rotation is done by core so the info should not
+                // contain rotation change.
+                : app.getParent().getWindowConfiguration().getRotation();
+        assertEquals(endRotation, changeOfActivity.getEndRotation());
+
+        // Non-activity target always uses its configuration for end info.
+        final Task task = app.getTask();
+        final TransitionInfo.Change changeOfTask = test.apply(task);
+        assertEquals(task.getBounds(), changeOfTask.getEndAbsBounds());
+        assertEquals(new Point(offset, offset), changeOfTask.getEndRelOffset());
+        assertEquals(task.getWindowConfiguration().getRotation(), changeOfTask.getEndRotation());
     }
 
     @Test

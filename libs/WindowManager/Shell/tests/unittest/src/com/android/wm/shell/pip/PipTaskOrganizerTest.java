@@ -242,6 +242,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mPipBoundsState.setDisplayLayout(new DisplayLayout(info,
                 mContext.getResources(), true, true));
         mSpiedPipTaskOrganizer.setOneShotAnimationType(PipAnimationController.ANIM_TYPE_ALPHA);
+        mSpiedPipTaskOrganizer.setSurfaceControlTransactionFactory(PipDummySurfaceControlTx::new);
         doNothing().when(mSpiedPipTaskOrganizer).enterPipWithAlphaAnimation(any(), anyLong());
         doNothing().when(mSpiedPipTaskOrganizer).scheduleAnimateResizePip(any(), anyInt(), any());
     }

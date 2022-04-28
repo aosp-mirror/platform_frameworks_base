@@ -39,6 +39,7 @@ import android.compat.annotation.EnabledSince;
 import android.content.pm.ApplicationInfo;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.window.SplashScreenView;
 import android.window.TaskSnapshot;
 
 import java.util.ArrayList;
@@ -51,8 +52,10 @@ public class StartingSurfaceController {
     private static final String TAG = TAG_WITH_CLASS_NAME
             ? StartingSurfaceController.class.getSimpleName() : TAG_WM;
     /**
-     * Allow the solid color style splash screen view can be copy and transfer to another process if
-     * the app targeting to {@link android.os.Build.VERSION_CODES#TIRAMISU} or higher.
+     * Application is allowed to receive the
+     * {@link
+     * android.window.SplashScreen.OnExitAnimationListener#onSplashScreenExit(SplashScreenView)}
+     * callback, even when the splash screen only shows a solid color.
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)

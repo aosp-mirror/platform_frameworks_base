@@ -53,6 +53,14 @@ public class IpcDataCacheTest {
             return value(x);
         }
 
+        // A single query but this can throw an exception.
+        boolean query(int x, boolean y) throws RemoteException {
+            if (y) {
+                throw new RemoteException();
+            }
+            return query(x);
+        }
+
         // Return the expected value of an input, without incrementing the query count.
         boolean value(int x) {
             return x % 3 == 0;
@@ -136,6 +144,47 @@ public class IpcDataCacheTest {
         assertEquals(tester.value(13), testCache.query(13));
         assertEquals(tester.value(14), testCache.query(14));
         tester.verify(9);
+    }
+
+    // This test is disabled pending an sepolicy change that allows any app to set the
+    // test property.
+    @Test
+    public void testRemoteCall() {
+
+        // A stand-in for the binder.  The test verifies that calls are passed through to
+        // this class properly.
+        ServerProxy tester = new ServerProxy();
+
+        // Create a cache that uses simple arithmetic to computer its values.
+        IpcDataCache.Config config = new IpcDataCache.Config(4, MODULE, API, "testCache2");
+        IpcDataCache<Integer, Boolean> testCache =
+                new IpcDataCache<>(config, (x) -> tester.query(x, x % 10 == 9));
+
+        IpcDataCache.setTestMode(true);
+        testCache.testPropertyName();
+
+        tester.verify(0);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(1);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(2);
+        testCache.invalidateCache();
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(3);
+        assertEquals(tester.value(5), testCache.query(5));
+        tester.verify(4);
+        assertEquals(tester.value(5), testCache.query(5));
+        tester.verify(4);
+        assertEquals(tester.value(3), testCache.query(3));
+        tester.verify(4);
+
+        try {
+            testCache.query(9);
+            assertEquals(false, true);          // The code should not reach this point.
+        } catch (RuntimeException e) {
+            assertEquals(e.getCause() instanceof RemoteException, true);
+        }
+        tester.verify(4);
     }
 
     @Test
@@ -225,6 +274,17 @@ public class IpcDataCacheTest {
             testPropertyName();
         }
 
+        TestCache(IpcDataCache.Config c) {
+            this(c, new TestQuery());
+        }
+
+        TestCache(IpcDataCache.Config c, TestQuery query) {
+            super(c, query);
+            mQuery = query;
+            setTestMode(true);
+            testPropertyName();
+        }
+
         int getRecomputeCount() {
             return mQuery.getRecomputeCount();
         }
@@ -308,5 +368,49 @@ public class IpcDataCacheTest {
         assertEquals("foo5", cache.query(5));
         assertEquals("foo5", cache.query(5));
         assertEquals(3, cache.getRecomputeCount());
+    }
+
+    @Test
+    public void testConfig() {
+        IpcDataCache.Config a = new IpcDataCache.Config(8, MODULE, "apiA");
+        TestCache ac = new TestCache(a);
+        assertEquals(8, a.maxEntries());
+        assertEquals(MODULE, a.module());
+        assertEquals("apiA", a.api());
+        assertEquals("apiA", a.name());
+        IpcDataCache.Config b = new IpcDataCache.Config(a, "apiB");
+        TestCache bc = new TestCache(b);
+        assertEquals(8, b.maxEntries());
+        assertEquals(MODULE, b.module());
+        assertEquals("apiB", b.api());
+        assertEquals("apiB", b.name());
+        IpcDataCache.Config c = new IpcDataCache.Config(a, "apiC", "nameC");
+        TestCache cc = new TestCache(c);
+        assertEquals(8, c.maxEntries());
+        assertEquals(MODULE, c.module());
+        assertEquals("apiC", c.api());
+        assertEquals("nameC", c.name());
+        IpcDataCache.Config d = a.child("nameD");
+        TestCache dc = new TestCache(d);
+        assertEquals(8, d.maxEntries());
+        assertEquals(MODULE, d.module());
+        assertEquals("apiA", d.api());
+        assertEquals("nameD", d.name());
+
+        a.disableForCurrentProcess();
+        assertEquals(ac.isDisabled(), true);
+        assertEquals(bc.isDisabled(), false);
+        assertEquals(cc.isDisabled(), false);
+        assertEquals(dc.isDisabled(), false);
+
+        a.disableAllForCurrentProcess();
+        assertEquals(ac.isDisabled(), true);
+        assertEquals(bc.isDisabled(), false);
+        assertEquals(cc.isDisabled(), false);
+        assertEquals(dc.isDisabled(), true);
+
+        IpcDataCache.Config e = a.child("nameE");
+        TestCache ec = new TestCache(e);
+        assertEquals(ec.isDisabled(), true);
     }
 }

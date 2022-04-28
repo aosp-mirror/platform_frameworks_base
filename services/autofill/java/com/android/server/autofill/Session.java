@@ -21,6 +21,7 @@ import static android.service.autofill.AutofillService.EXTRA_FILL_RESPONSE;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_DIALOG;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_MENU;
+import static android.service.autofill.FillEventHistory.Event.UI_TYPE_UNKNOWN;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
@@ -1406,7 +1407,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // AutoFillUiCallback
     @Override
-    public void fill(int requestId, int datasetIndex, Dataset dataset) {
+    public void fill(int requestId, int datasetIndex, Dataset dataset, int uiType) {
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#fill() rejected - session: "
@@ -1416,7 +1417,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         mHandler.sendMessage(obtainMessage(
                 Session::autoFill,
-                this, requestId, datasetIndex, dataset, true));
+                this, requestId, datasetIndex, dataset, true, uiType));
     }
 
     // AutoFillUiCallback
@@ -1657,7 +1658,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (!isAuthResultDatasetEphemeral(oldDataset, data)) {
                     authenticatedResponse.getDatasets().set(datasetIdx, dataset);
                 }
-                autoFill(requestId, datasetIdx, dataset, false);
+                autoFill(requestId, datasetIdx, dataset, false, UI_TYPE_UNKNOWN);
             } else {
                 Slog.w(TAG, "invalid index (" + datasetIdx + ") for authentication id "
                         + authenticationId);
@@ -3182,7 +3183,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @Override
     public void onFillReady(@NonNull FillResponse response, @NonNull AutofillId filledId,
-            @Nullable AutofillValue value) {
+            @Nullable AutofillValue value, int flags) {
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onFillReady() rejected - session: "
@@ -3207,7 +3208,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
-        if (requestShowFillDialog(response, filledId, filterText)) {
+        if (requestShowFillDialog(response, filledId, filterText, flags)) {
             synchronized (mLock) {
                 final ViewState currentView = mViewStates.get(mCurrentViewId);
                 currentView.setState(ViewState.STATE_FILL_DIALOG_SHOWN);
@@ -3312,9 +3313,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private boolean requestShowFillDialog(FillResponse response,
-            AutofillId filledId, String filterText) {
+            AutofillId filledId, String filterText, int flags) {
         if (!isFillDialogUiEnabled()) {
             // Unsupported fill dialog UI
+            return false;
+        }
+
+        if ((flags & FillRequest.FLAG_IME_SHOWING) != 0) {
+            // IME is showing, fallback to normal suggestions UI
             return false;
         }
 
@@ -3371,7 +3377,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 new InlineFillUi.InlineSuggestionUiCallback() {
                     @Override
                     public void autofill(@NonNull Dataset dataset, int datasetIndex) {
-                        fill(response.getRequestId(), datasetIndex, dataset);
+                        fill(response.getRequestId(), datasetIndex, dataset, UI_TYPE_INLINE);
                     }
 
                     @Override
@@ -3890,7 +3896,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return viewState;
     }
 
-    void autoFill(int requestId, int datasetIndex, Dataset dataset, boolean generateEvent) {
+    void autoFill(int requestId, int datasetIndex, Dataset dataset, boolean generateEvent,
+            int uiType) {
         if (sDebug) {
             Slog.d(TAG, "autoFill(): requestId=" + requestId  + "; datasetIdx=" + datasetIndex
                     + "; dataset=" + dataset);
@@ -3904,7 +3911,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             // Autofill it directly...
             if (dataset.getAuthentication() == null) {
                 if (generateEvent) {
-                    mService.logDatasetSelected(dataset.getId(), id, mClientState);
+                    mService.logDatasetSelected(dataset.getId(), id, mClientState, uiType);
                 }
                 if (mCurrentViewId != null) {
                     mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);

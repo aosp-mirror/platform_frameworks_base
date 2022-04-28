@@ -79,7 +79,7 @@ class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestPar
     /**
      * Checks that [FlickerComponentName.IME] layer is visible at the end of the transition
      */
-    @Presubmit
+    @FlakyTest(bugId = 227142436)
     @Test
     fun imeLayerExistsEnd() {
         testSpec.assertLayersEnd {

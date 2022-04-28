@@ -33,7 +33,7 @@ private const val TAG = "TrustTestUtils"
  */
 internal fun wait(
     description: String? = null,
-    maxWait: Long = 1500L,
+    maxWait: Long = 30000L,
     rate: Long = 50L,
     conditionFunction: (count: Int) -> Boolean
 ) {

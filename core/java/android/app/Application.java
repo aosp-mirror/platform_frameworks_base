@@ -30,11 +30,9 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Slog;
 import android.view.autofill.AutofillManager;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Base class for maintaining global application state. You can provide your own
@@ -56,9 +54,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Application extends ContextWrapper implements ComponentCallbacks2 {
     private static final String TAG = "Application";
 
-    /** Whether to enable the check to detect "duplicate application instances". */
-    private static final boolean DEBUG_DUP_APP_INSTANCES = true;
-
     @UnsupportedAppUsage
     private ArrayList<ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
             new ArrayList<ActivityLifecycleCallbacks>();
@@ -71,9 +66,6 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     /** @hide */
     @UnsupportedAppUsage
     public LoadedApk mLoadedApk;
-
-    private static final AtomicReference<StackTrace> sConstructorStackTrace =
-            new AtomicReference<>();
 
     public interface ActivityLifecycleCallbacks {
 
@@ -240,26 +232,6 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
 
     public Application() {
         super(null);
-        if (DEBUG_DUP_APP_INSTANCES) {
-            checkDuplicateInstances();
-        }
-    }
-
-    private void checkDuplicateInstances() {
-        // STOPSHIP: Delete this check b/221248960
-        // Only run this check for gms-core.
-        if (!"com.google.android.gms".equals(ActivityThread.currentOpPackageName())) {
-            return;
-        }
-
-        final StackTrace previousStackTrace = sConstructorStackTrace.getAndSet(
-                new StackTrace("Previous stack trace"));
-        if (previousStackTrace == null) {
-            // This is the first call.
-            return;
-        }
-        Slog.wtf(TAG, "Application ctor called twice for " + this.getClass(),
-                new StackTrace("Current stack trace", previousStackTrace));
     }
 
     private String getLoadedApkInfo() {
