@@ -206,9 +206,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * {@link BackAnimationController}
      */
     public void onMotionEvent(MotionEvent event, int action, @BackEvent.SwipeEdge int swipeEdge) {
-        if (action == MotionEvent.ACTION_DOWN) {
-            initAnimation(event);
-        } else if (action == MotionEvent.ACTION_MOVE) {
+        if (action == MotionEvent.ACTION_MOVE) {
+            if (!mBackGestureStarted) {
+                // Let the animation initialized here to make sure the onPointerDownOutsideFocus
+                // could be happened when ACTION_DOWN, it may change the current focus that we
+                // would access it when startBackNavigation.
+                initAnimation(event);
+            }
             onMove(event, swipeEdge);
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             ProtoLog.d(WM_SHELL_BACK_PREVIEW,
