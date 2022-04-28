@@ -170,6 +170,7 @@ abstract class InsetsSourceProvider {
         if (windowContainer == null) {
             setServerVisible(false);
             mSource.setVisibleFrame(null);
+            mSource.setInsetsRoundedCornerFrame(false);
             mSourceFrame.setEmpty();
         } else {
             mWindowContainer.getProvidedInsetsSources().put(mSource.getType(), mSource);
