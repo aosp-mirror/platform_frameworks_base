@@ -188,7 +188,7 @@ class SidefpsControllerTest : SysuiTestCase() {
         overlayController.show(SENSOR_ID, REASON_UNKNOWN)
         executor.runAllReady()
 
-        verify(displayManager).registerDisplayListener(any(), eq(handler))
+        verify(displayManager).registerDisplayListener(any(), eq(handler), anyLong())
 
         overlayController.hide(SENSOR_ID)
         executor.runAllReady()

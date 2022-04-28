@@ -17,6 +17,7 @@
 package com.android.server.utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -860,6 +861,54 @@ public class WatcherTest {
         }
     }
 
+    @Test
+    public void testWatchedSparseSetArray() {
+        final String name = "WatchedSparseSetArray";
+        WatchableTester tester;
+
+        // Test WatchedSparseSetArray
+        WatchedSparseSetArray array = new WatchedSparseSetArray();
+        tester = new WatchableTester(array, name);
+        tester.verify(0, "Initial array - no registration");
+        array.add(INDEX_A, 1);
+        tester.verify(0, "Updates with no registration");
+        tester.register();
+        tester.verify(0, "Updates with no registration");
+        array.add(INDEX_B, 2);
+        tester.verify(1, "Updates with registration");
+        array.add(INDEX_B, 4);
+        array.add(INDEX_C, 5);
+        tester.verify(3, "Updates with registration");
+        // Special methods
+        assertTrue(array.remove(INDEX_C, 5));
+        tester.verify(4, "Removed 5 from key 3");
+        array.remove(INDEX_B);
+        tester.verify(5, "Removed everything for key 2");
+
+        // Snapshot
+        {
+            WatchedSparseSetArray arraySnap = (WatchedSparseSetArray) array.snapshot();
+            tester.verify(5, "Generate snapshot");
+            // Verify that the snapshot is a proper copy of the source.
+            assertEquals("WatchedSparseSetArray snap same size",
+                    array.size(), arraySnap.size());
+            for (int i = 0; i < array.size(); i++) {
+                ArraySet set = array.get(array.keyAt(i));
+                ArraySet setSnap = arraySnap.get(arraySnap.keyAt(i));
+                assertNotNull(set);
+                assertTrue(set.equals(setSnap));
+            }
+            array.add(INDEX_D, 9);
+            tester.verify(6, "Tick after snapshot");
+            // Verify that the array is sealed
+            verifySealed(name, ()->arraySnap.add(INDEX_D, 10));
+            assertTrue(!array.isSealed());
+            assertTrue(arraySnap.isSealed());
+        }
+        array.clear();
+        tester.verify(7, "Cleared all entries");
+    }
+
     private static class IndexGenerator {
         private final int mSeed;
         private final Random mRandom;
@@ -1084,6 +1133,18 @@ public class WatcherTest {
         assertEquals(a.equals(s), true);
         a.put(rowIndex, colIndex, !a.get(rowIndex, colIndex));
         assertEquals(a.equals(s), false);
+
+        // Verify copy-in/out
+        {
+            final String msg = name + " copy";
+            WatchedSparseBooleanMatrix copy = new WatchedSparseBooleanMatrix();
+            copy.copyFrom(matrix);
+            final int end = copy.size();
+            assertTrue(msg + " size mismatch " + end + " " + matrix.size(), end == matrix.size());
+            for (int i = 0; i < end; i++) {
+                assertEquals(copy.keyAt(i), keys[i]);
+            }
+        }
     }
 
     @Test

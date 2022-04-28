@@ -168,7 +168,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
         controller.auxiliaryPersistenceWrapper = auxiliaryPersistenceWrapper
 
         verify(broadcastDispatcher).registerReceiver(
-                capture(broadcastReceiverCaptor), any(), any(), eq(UserHandle.ALL), anyInt())
+            capture(broadcastReceiverCaptor), any(), any(), eq(UserHandle.ALL), anyInt(), any()
+        )
 
         verify(listingController).addCallback(capture(listingCallbackCaptor))
     }

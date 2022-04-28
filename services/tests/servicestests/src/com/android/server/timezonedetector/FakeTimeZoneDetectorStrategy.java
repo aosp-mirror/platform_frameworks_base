@@ -61,6 +61,16 @@ class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
     }
 
     @Override
+    public boolean isTelephonyTimeZoneDetectionSupported() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isGeoTimeZoneDetectionSupported() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void dump(IndentingPrintWriter pw, String[] args) {
         mDumpCalled = true;
     }

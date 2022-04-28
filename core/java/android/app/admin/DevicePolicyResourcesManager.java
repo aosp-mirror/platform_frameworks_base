@@ -70,6 +70,7 @@ public class DevicePolicyResourcesManager {
      *
      * <p>Important notes to consider when using this API:
      * <ul>
+     * <li> Updated resources are persisted over reboots.
      * <li>{@link #getDrawable} references the resource
      * {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()} in the
      * calling package each time it gets called. You have to ensure that the resource is always
@@ -381,7 +382,9 @@ public class DevicePolicyResourcesManager {
      *
      * <p>Important notes to consider when using this API:
      * <ul>
-     * <li> {@link #getString} references the resource {@code callingPackageResourceId} in the
+     * <li> Updated resources are persisted over reboots.
+     * <li> {@link #getString} references the resource
+     * {@link DevicePolicyStringResource#getResourceIdInCallingPackage()} in the
      * calling package each time it gets called. You have to ensure that the resource is always
      * available in the calling package as long as it is used as an updated resource.
      * <li> You still have to re-call {@code setStrings} even if you only make changes to the

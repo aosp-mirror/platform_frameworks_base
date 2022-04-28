@@ -114,12 +114,6 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
         mView.setKeyguardShowing();
     }
 
-    /** */
-    @Override
-    public void setExpandClickListener(View.OnClickListener onClickListener) {
-        mView.setExpandClickListener(onClickListener);
-    }
-
     @Override
     public void disable(int state1, int state2, boolean animate) {
         mView.disable(state2);

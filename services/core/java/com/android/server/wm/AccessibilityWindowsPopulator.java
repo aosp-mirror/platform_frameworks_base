@@ -596,33 +596,33 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
      * surface flinger to the accessibility framework.
      */
     public static class AccessibilityWindow {
-        private static final Region TEMP_REGION = new Region();
-        private static final RectF TEMP_RECTF = new RectF();
         // Data
         private IWindow mWindow;
         private int mDisplayId;
-        private int mFlags;
+        @WindowManager.LayoutParams.WindowType
         private int mType;
+        @InputWindowHandle.InputConfigFlags
+        private int mInputConfig;
         private int mPrivateFlags;
         private boolean mIsPIPMenu;
         private boolean mIsFocused;
         private boolean mShouldMagnify;
         private boolean mIgnoreDuetoRecentsAnimation;
-        private boolean mIsTrustedOverlay;
         private final Region mTouchableRegionInScreen = new Region();
         private final Region mTouchableRegionInWindow = new Region();
         private final Region mLetterBoxBounds = new Region();
         private WindowInfo mWindowInfo;
 
+
         /**
          * Returns the instance after initializing the internal data.
          * @param service The window manager service.
          * @param inputWindowHandle The window from the surface flinger.
-         * @param inverseMatrix The magnification spec inverse matrix.
+         * @param magnificationInverseMatrix The magnification spec inverse matrix.
          */
         public static AccessibilityWindow initializeData(WindowManagerService service,
-                InputWindowHandle inputWindowHandle, Matrix inverseMatrix, IBinder pipIBinder,
-                Matrix displayMatrix) {
+                InputWindowHandle inputWindowHandle, Matrix magnificationInverseMatrix,
+                IBinder pipIBinder, Matrix displayMatrix) {
             final IWindow window = inputWindowHandle.getWindow();
             final WindowState windowState = window != null ? service.mWindowMap.get(
                     window.asBinder()) : null;
@@ -631,7 +631,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
             instance.mWindow = inputWindowHandle.getWindow();
             instance.mDisplayId = inputWindowHandle.displayId;
-            instance.mFlags = inputWindowHandle.layoutParamsFlags;
+            instance.mInputConfig = inputWindowHandle.inputConfig;
             instance.mType = inputWindowHandle.layoutParamsType;
             instance.mIsPIPMenu = inputWindowHandle.getWindow().asBinder().equals(pipIBinder);
 
@@ -644,8 +644,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             final RecentsAnimationController controller = service.getRecentsAnimationController();
             instance.mIgnoreDuetoRecentsAnimation = windowState != null && controller != null
                     && controller.shouldIgnoreForAccessibility(windowState);
-            instance.mIsTrustedOverlay =
-                    (inputWindowHandle.inputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
 
             // TODO (b/199358388) : gets the letterbox bounds of the window from other way.
             if (windowState != null && windowState.areAppWindowBoundsLetterboxed()) {
@@ -656,13 +654,35 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                     inputWindowHandle.frameTop, inputWindowHandle.frameRight,
                     inputWindowHandle.frameBottom);
             getTouchableRegionInWindow(instance.mShouldMagnify, inputWindowHandle.touchableRegion,
-                    instance.mTouchableRegionInWindow, windowFrame, inverseMatrix, displayMatrix);
+                    instance.mTouchableRegionInWindow, windowFrame, magnificationInverseMatrix,
+                    displayMatrix);
             getUnMagnifiedTouchableRegion(instance.mShouldMagnify,
                     inputWindowHandle.touchableRegion, instance.mTouchableRegionInScreen,
-                    inverseMatrix, displayMatrix);
+                    magnificationInverseMatrix, displayMatrix);
             instance.mWindowInfo = windowState != null
                     ? windowState.getWindowInfo() : getWindowInfoForWindowlessWindows(instance);
 
+            // Compute the transform matrix that will transform bounds from the window
+            // coordinates to screen coordinates.
+            final Matrix inverseTransform = new Matrix();
+            inputWindowHandle.transform.invert(inverseTransform);
+            inverseTransform.postConcat(displayMatrix);
+            inverseTransform.getValues(instance.mWindowInfo.mTransformMatrix);
+
+            // Compute the magnification spec matrix.
+            final Matrix magnificationSpecMatrix = new Matrix();
+            if (instance.shouldMagnify() && magnificationInverseMatrix != null
+                    && !magnificationInverseMatrix.isIdentity()) {
+                if (magnificationInverseMatrix.invert(magnificationSpecMatrix)) {
+                    magnificationSpecMatrix.getValues(sTempFloats);
+                    final MagnificationSpec spec = instance.mWindowInfo.mMagnificationSpec;
+                    spec.scale = sTempFloats[Matrix.MSCALE_X];
+                    spec.offsetX = sTempFloats[Matrix.MTRANS_X];
+                    spec.offsetY = sTempFloats[Matrix.MTRANS_Y];
+                } else {
+                    Slog.w(TAG, "can't find spec");
+                }
+            }
             return instance;
         }
 
@@ -680,13 +700,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
          */
         public void getTouchableRegionInWindow(Region outRegion) {
             outRegion.set(mTouchableRegionInWindow);
-        }
-
-        /**
-         * @return the layout parameter flag {@link android.view.WindowManager.LayoutParams#flags}.
-         */
-        public int getFlags() {
-            return mFlags;
         }
 
         /**
@@ -751,7 +764,14 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
          * @return true if this window is the trusted overlay.
          */
         public boolean isTrustedOverlay() {
-            return mIsTrustedOverlay;
+            return (mInputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
+        }
+
+        /**
+         * @return true if this window is touchable.
+         */
+        public boolean isTouchable() {
+            return (mInputConfig & InputConfig.NOT_TOUCHABLE) == 0;
         }
 
         /**
@@ -780,7 +800,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             // for the consistency and match developers expectation.
             // So we need to make the intersection between the frame and touchable region to
             // obtain the real touch region in the screen.
-            Region touchRegion = TEMP_REGION;
+            Region touchRegion = new Region();
             touchRegion.set(inRegion);
             touchRegion.op(frame, Region.Op.INTERSECT);
 
@@ -808,8 +828,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
             forEachRect(inRegion, rect -> {
                 // Move to origin as all transforms are captured by the matrix.
-                RectF windowFrame = TEMP_RECTF;
-                windowFrame.set(rect);
+                RectF windowFrame = new RectF(rect);
 
                 displayMatrix.mapRect(windowFrame);
                 inverseMatrix.mapRect(windowFrame);
@@ -824,8 +843,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             windowInfo.displayId = window.mDisplayId;
             windowInfo.type = window.mType;
             windowInfo.token = window.mWindow.asBinder();
-            windowInfo.hasFlagWatchOutsideTouch = (window.mFlags
-                    & WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH) != 0;
+            windowInfo.hasFlagWatchOutsideTouch = (window.mInputConfig
+                    & InputConfig.WATCH_OUTSIDE_TOUCH) != 0;
             windowInfo.inPictureInPicture = false;
 
             // There only are two windowless windows now, one is split window, and the other
@@ -851,13 +870,13 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         public String toString() {
             String builder = "A11yWindow=[" + mWindow.asBinder()
                     + ", displayId=" + mDisplayId
-                    + ", flag=0x" + Integer.toHexString(mFlags)
+                    + ", inputConfig=0x" + Integer.toHexString(mInputConfig)
                     + ", type=" + mType
                     + ", privateFlag=0x" + Integer.toHexString(mPrivateFlags)
                     + ", focused=" + mIsFocused
                     + ", shouldMagnify=" + mShouldMagnify
                     + ", ignoreDuetoRecentsAnimation=" + mIgnoreDuetoRecentsAnimation
-                    + ", isTrustedOverlay=" + mIsTrustedOverlay
+                    + ", isTrustedOverlay=" + isTrustedOverlay()
                     + ", regionInScreen=" + mTouchableRegionInScreen
                     + ", touchableRegion=" + mTouchableRegionInWindow
                     + ", letterBoxBounds=" + mLetterBoxBounds

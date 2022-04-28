@@ -85,6 +85,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
+import com.android.server.pm.KnownPackages;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.vr.VrManagerInternal;
@@ -627,7 +628,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             return true;
         }
         final String[] installerNames = pm.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
+                KnownPackages.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
         return installerNames.length > 0 && callingPkg.getPackageName().equals(installerNames[0]);
     }
 
@@ -1189,10 +1190,29 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
+    /**
+     * Removes the outdated home task snapshot.
+     *
+     * @param token The token of the home task, or null if you have the
+     *              {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}
+     *              permission and want us to find the home task token for you.
+     */
     @Override
     public void invalidateHomeTaskSnapshot(IBinder token) {
+        if (token == null) {
+            ActivityTaskManagerService.enforceTaskPermission("invalidateHomeTaskSnapshot");
+        }
+
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+            final ActivityRecord r;
+            if (token == null) {
+                final Task rootTask =
+                        mService.mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask();
+                r = rootTask != null ? rootTask.topRunningActivity() : null;
+            } else {
+                r = ActivityRecord.isInRootTaskLocked(token);
+            }
+
             if (r != null && r.isActivityTypeHome()) {
                 mService.mWindowManager.mTaskSnapshotController.removeSnapshotCache(
                         r.getTask().mTaskId);

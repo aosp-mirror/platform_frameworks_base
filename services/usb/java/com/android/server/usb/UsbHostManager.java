@@ -588,6 +588,12 @@ public class UsbHostManager {
             for (ConnectionRecord rec : mConnections) {
                 rec.dump(dump, "connections", UsbHostManagerProto.CONNECTIONS);
             }
+
+            for (ArrayList<UsbDirectMidiDevice> directMidiDevices : mMidiDevices.values()) {
+                for (UsbDirectMidiDevice directMidiDevice : directMidiDevices) {
+                    directMidiDevice.dump(dump, "midi_devices", UsbHostManagerProto.MIDI_DEVICES);
+                }
+            }
         }
 
         dump.end(token);

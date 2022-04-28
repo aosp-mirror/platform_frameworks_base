@@ -580,7 +580,6 @@ class WindowToken extends WindowContainer<WindowState> {
                 .setParent(getParentSurfaceControl())
                 .setName(getSurfaceControl() + " - rotation-leash")
                 .setHidden(false)
-                .setEffectLayer()
                 .setCallsite("WindowToken.getOrCreateFixedRotationLeash")
                 .build();
         t.setPosition(leash, mLastSurfacePosition.x, mLastSurfacePosition.y);

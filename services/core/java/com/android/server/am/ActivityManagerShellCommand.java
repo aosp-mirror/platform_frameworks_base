@@ -1680,6 +1680,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
+        public void onUidProcAdjChanged(int uid) throws RemoteException {
+        }
+
+        @Override
         public void onOomAdjMessage(String msg) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();

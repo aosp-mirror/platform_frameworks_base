@@ -74,7 +74,7 @@ class ExitPipViaExpandButtonClickTest(
                 // This will bring PipApp to fullscreen
                 pipApp.expandPipWindowToApp(wmHelper)
                 // Wait until the other app is no longer visible
-                wmHelper.waitForSurfaceAppeared(testApp.component)
+                wmHelper.waitForWindowSurfaceDisappeared(testApp.component)
             }
         }
 
