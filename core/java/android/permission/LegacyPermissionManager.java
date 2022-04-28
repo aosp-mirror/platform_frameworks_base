@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.RemoteException;
@@ -242,6 +243,22 @@ public final class LegacyPermissionManager {
             executor.execute(() -> callback.accept(true));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Grant permissions to a newly set Carrier Services app.
+     * @param packageName The newly set Carrier Services app
+     * @param userId The user for which to grant the permissions.
+     * @hide
+     */
+    public void grantDefaultPermissionsToCarrierServiceApp(@NonNull String packageName,
+            @UserIdInt int userId) {
+        try {
+            mLegacyPermissionManager.grantDefaultPermissionsToCarrierServiceApp(packageName,
+                    userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }
