@@ -111,8 +111,7 @@ public class DropZoneView extends FrameLayout {
         mColorDrawable = new ColorDrawable();
         setBackgroundDrawable(mColorDrawable);
 
-        final int iconSize = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.starting_surface_icon_size);
+        final int iconSize = context.getResources().getDimensionPixelSize(R.dimen.split_icon_size);
         mSplashScreenView = new ImageView(context);
         mSplashScreenView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         addView(mSplashScreenView,
