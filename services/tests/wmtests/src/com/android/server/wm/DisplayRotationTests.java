@@ -721,14 +721,20 @@ public class DisplayRotationTests {
         doReturn(true).when(mMockDisplayPolicy).navigationBarCanMove();
         doReturn(win).when(mMockDisplayPolicy).getTopFullscreenOpaqueWindow();
         mMockDisplayContent.mCurrentFocus = win;
-        mTarget.mUpsideDownRotation = Surface.ROTATION_180;
+        // This should not affect the condition of shouldRotateSeamlessly.
+        mTarget.mUpsideDownRotation = Surface.ROTATION_90;
 
         doReturn(true).when(win.mActivityRecord).matchParentBounds();
         // The focused fullscreen opaque window without override bounds should be able to be
         // rotated seamlessly.
         assertTrue(mTarget.shouldRotateSeamlessly(
                 Surface.ROTATION_0, Surface.ROTATION_90, false /* forceUpdate */));
+        // Reject any 180 degree because non-movable navbar will be placed in a different position.
+        doReturn(false).when(mMockDisplayPolicy).navigationBarCanMove();
+        assertFalse(mTarget.shouldRotateSeamlessly(
+                Surface.ROTATION_90, Surface.ROTATION_180, false /* forceUpdate */));
 
+        doReturn(true).when(mMockDisplayPolicy).navigationBarCanMove();
         doReturn(false).when(win.mActivityRecord).matchParentBounds();
         // No seamless rotation if the window may be positioned with offset after rotation.
         assertFalse(mTarget.shouldRotateSeamlessly(
