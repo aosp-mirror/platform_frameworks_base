@@ -1512,6 +1512,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 handleFingerprintAuthenticated(userId, isStrongBiometric);
             };
 
+    /**
+     * Propagates a pointer down event to keyguard.
+     */
+    public void onUdfpsPointerDown(int sensorId) {
+        mFingerprintAuthenticationCallback.onUdfpsPointerDown(sensorId);
+    }
+
+    /**
+     * Propagates a pointer up event to keyguard.
+     */
+    public void onUdfpsPointerUp(int sensorId) {
+        mFingerprintAuthenticationCallback.onUdfpsPointerUp(sensorId);
+    }
+
     @VisibleForTesting
     final FingerprintManager.AuthenticationCallback mFingerprintAuthenticationCallback
             = new AuthenticationCallback() {
@@ -1553,6 +1567,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     Trace.endSection();
                 }
 
+                /**
+                 * Note, this is currently called from UdfpsController.
+                 */
                 @Override
                 public void onUdfpsPointerDown(int sensorId) {
                     Log.d(TAG, "onUdfpsPointerDown, sensorId: " + sensorId);
@@ -1562,6 +1579,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     }
                 }
 
+                /**
+                 * Note, this is currently called from UdfpsController.
+                 */
                 @Override
                 public void onUdfpsPointerUp(int sensorId) {
                     Log.d(TAG, "onUdfpsPointerUp, sensorId: " + sensorId);
