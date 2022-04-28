@@ -19,6 +19,7 @@ package android.service.dreams;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.android.internal.R;
 
@@ -44,12 +45,18 @@ import com.android.internal.R;
  */
 public class DreamActivity extends Activity {
     static final String EXTRA_CALLBACK = "binder";
+    static final String EXTRA_DREAM_TITLE = "title";
 
     public DreamActivity() {}
 
     @Override
     public void onCreate(@Nullable Bundle bundle) {
         super.onCreate(bundle);
+
+        final String title = getIntent().getStringExtra(EXTRA_DREAM_TITLE);
+        if (!TextUtils.isEmpty(title)) {
+            setTitle(title);
+        }
 
         DreamService.DreamServiceWrapper callback =
                 (DreamService.DreamServiceWrapper) getIntent().getIBinderExtra(EXTRA_CALLBACK);

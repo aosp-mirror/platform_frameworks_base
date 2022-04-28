@@ -220,10 +220,16 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
             return;
         }
 
+        final SurfaceControl targetViewLeash =
+                mTargetViewContainer.getViewRootImpl().getSurfaceControl();
+        if (!targetViewLeash.isValid()) {
+            // The surface of mTargetViewContainer is somehow not ready, bail early
+            return;
+        }
+
         // Put the dismiss target behind the task
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        t.setRelativeLayer(mTargetViewContainer.getViewRootImpl().getSurfaceControl(),
-                mTaskLeash, -1);
+        t.setRelativeLayer(targetViewLeash, mTaskLeash, -1);
         t.apply();
     }
 

@@ -28,6 +28,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -110,10 +111,12 @@ public class DropZoneView extends FrameLayout {
         mColorDrawable = new ColorDrawable();
         setBackgroundDrawable(mColorDrawable);
 
+        final int iconSize = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.starting_surface_icon_size);
         mSplashScreenView = new ImageView(context);
-        mSplashScreenView.setScaleType(ImageView.ScaleType.CENTER);
-        addView(mSplashScreenView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
+        mSplashScreenView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        addView(mSplashScreenView,
+                new FrameLayout.LayoutParams(iconSize, iconSize, Gravity.CENTER));
         mSplashScreenView.setAlpha(0f);
 
         mMarginView = new MarginView(context);

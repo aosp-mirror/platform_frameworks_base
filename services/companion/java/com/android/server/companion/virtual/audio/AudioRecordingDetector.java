@@ -51,8 +51,10 @@ final class AudioRecordingDetector extends AudioManager.AudioRecordingCallback {
     }
 
     void unregister() {
-        mAudioRecordingCallback = null;
-        mAudioManager.unregisterAudioRecordingCallback(/* cb= */ this);
+        if (mAudioRecordingCallback != null) {
+            mAudioRecordingCallback = null;
+            mAudioManager.unregisterAudioRecordingCallback(/* cb= */ this);
+        }
     }
 
     @Override

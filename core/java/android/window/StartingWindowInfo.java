@@ -142,7 +142,11 @@ public final class StartingWindowInfo implements Parcelable {
      */
     public static final int TYPE_PARAMETER_ACTIVITY_DRAWN = 0x00000040;
     /**
-     * Application is allowed to handle solid color splash screen.
+     * Application will receive the
+     * {@link
+     * android.window.SplashScreen.OnExitAnimationListener#onSplashScreenExit(SplashScreenView)}
+     * callback, even when the splash screen only shows a solid color.
+     *
      * @hide
      */
     public static final int TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN = 0x00000080;

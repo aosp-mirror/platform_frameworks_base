@@ -83,38 +83,6 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testStateChange_isPreviewMode() {
-        final DreamOverlayStateController stateController = new DreamOverlayStateController(
-                mExecutor);
-        stateController.addCallback(mCallback);
-        stateController.setPreviewMode(true);
-        mExecutor.runAllReady();
-
-        verify(mCallback).onStateChanged();
-        assertThat(stateController.isPreviewMode()).isTrue();
-
-        Mockito.clearInvocations(mCallback);
-        stateController.setPreviewMode(true);
-        mExecutor.runAllReady();
-        verify(mCallback, never()).onStateChanged();
-    }
-
-    @Test
-    public void testPreviewModeFalseByDefault() {
-        final DreamOverlayStateController stateController = new DreamOverlayStateController(
-                mExecutor);
-        assertThat(stateController.isPreviewMode()).isFalse();
-    }
-
-    @Test
-    public void testPreviewModeSetToTrue() {
-        final DreamOverlayStateController stateController = new DreamOverlayStateController(
-                mExecutor);
-        stateController.setPreviewMode(true);
-        assertThat(stateController.isPreviewMode()).isTrue();
-    }
-
-    @Test
     public void testCallback() {
         final DreamOverlayStateController stateController = new DreamOverlayStateController(
                 mExecutor);

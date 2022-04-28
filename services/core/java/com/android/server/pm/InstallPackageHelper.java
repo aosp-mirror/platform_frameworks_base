@@ -266,8 +266,11 @@ final class InstallPackageHelper {
                 // Prune unused SharedUserSetting
                 if (mPm.mSettings.checkAndPruneSharedUserLPw(requestSharedUserSetting, false)) {
                     // Set the app ID in removed info for UID_REMOVED broadcasts
-                    reconciledPkg.mInstallResult.mRemovedInfo.mRemovedAppId =
-                            requestSharedUserSetting.mAppId;
+                    if (reconciledPkg.mInstallResult != null
+                            && reconciledPkg.mInstallResult.mRemovedInfo != null) {
+                        reconciledPkg.mInstallResult.mRemovedInfo.mRemovedAppId =
+                                requestSharedUserSetting.mAppId;
+                    }
                 }
             }
         }
@@ -427,7 +430,7 @@ final class InstallPackageHelper {
         } else {
             // We're doing major surgery on this package, so it better be frozen
             // right now to keep it from launching
-            mPm.checkPackageFrozen(pkgName);
+            mPm.snapshotComputer().checkPackageFrozen(pkgName);
         }
 
         final boolean isReplace =
@@ -461,9 +464,9 @@ final class InstallPackageHelper {
             KeySetManagerService ksms = mPm.mSettings.getKeySetManagerService();
             ksms.addScannedPackageLPw(pkg);
 
-            mPm.mComponentResolver.addAllComponents(pkg, chatty, mPm.mSetupWizardPackage,
-                    mPm.snapshotComputer());
-            mPm.mAppsFilter.addPackage(pkgSetting, isReplace);
+            final Computer snapshot = mPm.snapshotComputer();
+            mPm.mComponentResolver.addAllComponents(pkg, chatty, mPm.mSetupWizardPackage, snapshot);
+            mPm.mAppsFilter.addPackage(snapshot, pkgSetting, isReplace);
             mPm.addAllPackageProperties(pkg);
 
             if (oldPkgSetting == null || oldPkgSetting.getPkg() == null) {
@@ -1913,7 +1916,7 @@ final class InstallPackageHelper {
                         .setLastUpdateTime(System.currentTimeMillis());
 
                 res.mRemovedInfo.mBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
-                        reconciledPkg.mPkgSetting, request.mAllUsers,
+                        mPm.snapshotComputer(), reconciledPkg.mPkgSetting, request.mAllUsers,
                         mPm.mSettings.getPackagesLocked());
                 if (reconciledPkg.mPrepareResult.mSystem) {
                     // Remove existing system package
@@ -2709,9 +2712,9 @@ final class InstallPackageHelper {
                 // Send to all running apps.
                 final SparseArray<int[]> newBroadcastAllowList;
                 synchronized (mPm.mLock) {
-                    newBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
-                            mPm.snapshotComputer()
-                                    .getPackageStateInternal(packageName, Process.SYSTEM_UID),
+                    final Computer snapshot = mPm.snapshotComputer();
+                    newBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(snapshot,
+                            snapshot.getPackageStateInternal(packageName, Process.SYSTEM_UID),
                             updateUserIds, mPm.mSettings.getPackagesLocked());
                 }
                 mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,

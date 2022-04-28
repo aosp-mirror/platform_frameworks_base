@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -164,58 +165,66 @@ public class KeyguardBouncer {
             // In split system user mode, we never unlock system user.
             return;
         }
-        ensureView();
-        mIsScrimmed = isScrimmed;
 
-        // On the keyguard, we want to show the bouncer when the user drags up, but it's
-        // not correct to end the falsing session. We still need to verify if those touches
-        // are valid.
-        // Later, at the end of the animation, when the bouncer is at the top of the screen,
-        // onFullyShown() will be called and FalsingManager will stop recording touches.
-        if (isScrimmed) {
-            setExpansion(EXPANSION_VISIBLE);
-        }
+        try {
+            Trace.beginSection("KeyguardBouncer#show");
 
-        if (resetSecuritySelection) {
-            // showPrimarySecurityScreen() updates the current security method. This is needed in
-            // case we are already showing and the current security method changed.
-            showPrimarySecurityScreen();
-        }
+            ensureView();
+            mIsScrimmed = isScrimmed;
 
-        if (mContainer.getVisibility() == View.VISIBLE || mShowingSoon) {
-            return;
-        }
+            // On the keyguard, we want to show the bouncer when the user drags up, but it's
+            // not correct to end the falsing session. We still need to verify if those touches
+            // are valid.
+            // Later, at the end of the animation, when the bouncer is at the top of the screen,
+            // onFullyShown() will be called and FalsingManager will stop recording touches.
+            if (isScrimmed) {
+                setExpansion(EXPANSION_VISIBLE);
+            }
 
-        final int activeUserId = KeyguardUpdateMonitor.getCurrentUser();
-        final boolean isSystemUser =
+            if (resetSecuritySelection) {
+                // showPrimarySecurityScreen() updates the current security method. This is needed
+                // in case we are already showing and the current security method changed.
+                showPrimarySecurityScreen();
+            }
+
+            if (mContainer.getVisibility() == View.VISIBLE || mShowingSoon) {
+                return;
+            }
+
+            final int activeUserId = KeyguardUpdateMonitor.getCurrentUser();
+            final boolean isSystemUser =
                 UserManager.isSplitSystemUser() && activeUserId == UserHandle.USER_SYSTEM;
-        final boolean allowDismissKeyguard = !isSystemUser && activeUserId == keyguardUserId;
+            final boolean allowDismissKeyguard = !isSystemUser && activeUserId == keyguardUserId;
 
-        // If allowed, try to dismiss the Keyguard. If no security auth (password/pin/pattern) is
-        // set, this will dismiss the whole Keyguard. Otherwise, show the bouncer.
-        if (allowDismissKeyguard && mKeyguardViewController.dismiss(activeUserId)) {
-            return;
-        }
+            // If allowed, try to dismiss the Keyguard. If no security auth (password/pin/pattern)
+            // is set, this will dismiss the whole Keyguard. Otherwise, show the bouncer.
+            if (allowDismissKeyguard && mKeyguardViewController.dismiss(activeUserId)) {
+                return;
+            }
 
-        // This condition may indicate an error on Android, so log it.
-        if (!allowDismissKeyguard) {
-            Log.w(TAG, "User can't dismiss keyguard: " + activeUserId + " != " + keyguardUserId);
-        }
+            // This condition may indicate an error on Android, so log it.
+            if (!allowDismissKeyguard) {
+                Log.w(TAG, "User can't dismiss keyguard: " + activeUserId + " != "
+                        + keyguardUserId);
+            }
 
-        mShowingSoon = true;
+            mShowingSoon = true;
 
-        // Split up the work over multiple frames.
-        DejankUtils.removeCallbacks(mResetRunnable);
-        if (mKeyguardStateController.isFaceAuthEnabled() && !needsFullscreenBouncer()
+            // Split up the work over multiple frames.
+            DejankUtils.removeCallbacks(mResetRunnable);
+            if (mKeyguardStateController.isFaceAuthEnabled() && !needsFullscreenBouncer()
                 && !mKeyguardUpdateMonitor.userNeedsStrongAuth()
                 && !mKeyguardBypassController.getBypassEnabled()) {
-            mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
-        } else {
-            DejankUtils.postAfterTraversal(mShowRunnable);
-        }
+                mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
+            } else {
+                DejankUtils.postAfterTraversal(mShowRunnable);
+            }
 
-        mCallback.onBouncerVisiblityChanged(true /* shown */);
-        dispatchStartingToShow();
+            mCallback.onBouncerVisiblityChanged(true /* shown */);
+            dispatchStartingToShow();
+        } finally {
+            Trace.endSection();
+        }
     }
 
     public boolean isScrimmed() {
@@ -317,6 +326,7 @@ public class KeyguardBouncer {
     }
 
     public void hide(boolean destroyView) {
+        Trace.beginSection("KeyguardBouncer#hide");
         if (isShowing()) {
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
                     SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__HIDDEN);
@@ -338,6 +348,7 @@ public class KeyguardBouncer {
             // be slow because of AM lock contention during unlocking. We can delay it a bit.
             mHandler.postDelayed(mRemoveViewRunnable, 50);
         }
+        Trace.endSection();
     }
 
     /**

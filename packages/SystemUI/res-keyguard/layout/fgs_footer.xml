@@ -16,8 +16,9 @@
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="0dp"
     android:layout_height="@dimen/qs_security_footer_single_line_height"
+    android:layout_weight="1"
     android:gravity="center"
     android:clickable="true"
     android:visibility="gone">
@@ -26,7 +27,7 @@
         android:id="@+id/fgs_text_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginEnd="@dimen/new_qs_footer_action_inset"
+        android:layout_marginEnd="@dimen/qs_footer_action_inset"
         android:background="@drawable/qs_security_footer_background"
         android:layout_gravity="end"
         android:gravity="center"
@@ -86,7 +87,7 @@
             android:layout_height="12dp"
             android:scaleType="fitCenter"
             android:layout_gravity="bottom|end"
-            android:src="@drawable/new_fgs_dot"
+            android:src="@drawable/fgs_dot"
             android:contentDescription="@string/fgs_dot_content_description"
             />
     </FrameLayout>

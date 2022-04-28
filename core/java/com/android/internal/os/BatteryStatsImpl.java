@@ -719,7 +719,7 @@ public class BatteryStatsImpl extends BatteryStats {
     int mNumHistoryItems;
 
     private static final int HISTORY_TAG_INDEX_LIMIT = 0x7ffe;
-    private static final int MAX_HISTORY_TAG_STRING_LENGTH = 256;
+    private static final int MAX_HISTORY_TAG_STRING_LENGTH = 1024;
 
     final HashMap<HistoryTag, Integer> mHistoryTagPool = new HashMap<>();
     private SparseArray<HistoryTag> mHistoryTags;
@@ -3970,6 +3970,12 @@ public class BatteryStatsImpl extends BatteryStats {
             Slog.wtfStack(TAG, "writeHistoryTag called with null name");
         }
 
+        final int stringLength = tag.string.length();
+        if (stringLength > MAX_HISTORY_TAG_STRING_LENGTH) {
+            Slog.e(TAG, "Long battery history tag: " + tag.string);
+            tag.string = tag.string.substring(0, MAX_HISTORY_TAG_STRING_LENGTH);
+        }
+
         Integer idxObj = mHistoryTagPool.get(tag);
         int idx;
         if (idxObj != null) {
@@ -3986,11 +3992,6 @@ public class BatteryStatsImpl extends BatteryStats {
             tag.poolIdx = idx;
             mHistoryTagPool.put(key, idx);
             mNextHistoryTagIdx++;
-            final int stringLength = key.string.length();
-
-            if (stringLength > MAX_HISTORY_TAG_STRING_LENGTH) {
-                Slog.wtf(TAG, "Long battery history tag: " + key.string);
-            }
 
             mNumHistoryTagChars += stringLength + 1;
             if (mHistoryTags != null) {

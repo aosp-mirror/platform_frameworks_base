@@ -441,6 +441,7 @@ public class BinaryTransparencyService extends SystemService {
             final JobInfo jobInfo = new JobInfo.Builder(COMPUTE_APEX_MODULE_SHA256_JOB_ID,
                     new ComponentName(context, UpdateMeasurementsJobService.class))
                     .setRequiresDeviceIdle(true)
+                    .setRequiresCharging(true)
                     .build();
             if (jobScheduler.schedule(jobInfo) != JobScheduler.RESULT_SUCCESS) {
                 Slog.e(TAG, "Failed to schedule job to update binary measurements.");

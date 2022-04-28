@@ -685,7 +685,7 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
-    public boolean resetUsbPort(String portId, int operationId,
+    public void resetUsbPort(String portId, int operationId,
             IUsbOperationInternal callback) {
         Objects.requireNonNull(portId, "resetUsbPort: portId must not be null. opId:"
                 + operationId);
@@ -694,13 +694,11 @@ public class UsbService extends IUsbManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
         final long ident = Binder.clearCallingIdentity();
-        boolean wait;
 
         try {
             if (mPortManager != null) {
-                wait = mPortManager.resetUsbPort(portId, operationId, callback, null);
+                mPortManager.resetUsbPort(portId, operationId, callback, null);
             } else {
-                wait = false;
                 try {
                     callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
                 } catch (RemoteException e) {
@@ -710,7 +708,6 @@ public class UsbService extends IUsbManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-        return wait;
     }
 
     @Override

@@ -26,7 +26,7 @@ import java.text.SimpleDateFormat;
 import java.time.Clock;
 
 class TareUtils {
-    private static final long NARC_IN_ARC = 1_000_000_000L;
+    private static final long CAKE_IN_ARC = 1_000_000_000L;
 
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat sDumpDateFormat =
@@ -35,8 +35,8 @@ class TareUtils {
     @VisibleForTesting
     static Clock sSystemClock = Clock.systemUTC();
 
-    static long arcToNarc(int arcs) {
-        return arcs * NARC_IN_ARC;
+    static long arcToCake(int arcs) {
+        return arcs * CAKE_IN_ARC;
     }
 
     static void dumpTime(IndentingPrintWriter pw, long time) {
@@ -47,26 +47,26 @@ class TareUtils {
         return sSystemClock.millis();
     }
 
-    static int narcToArc(long narcs) {
-        return (int) (narcs / NARC_IN_ARC);
+    static int cakeToArc(long cakes) {
+        return (int) (cakes / CAKE_IN_ARC);
     }
 
     @NonNull
-    static String narcToString(long narcs) {
-        if (narcs == 0) {
+    static String cakeToString(long cakes) {
+        if (cakes == 0) {
             return "0 ARCs";
         }
-        final long sub = Math.abs(narcs) % NARC_IN_ARC;
-        final long arcs = narcToArc(narcs);
+        final long sub = Math.abs(cakes) % CAKE_IN_ARC;
+        final long arcs = cakeToArc(cakes);
         if (arcs == 0) {
             return sub == 1
-                    ? sub + " narc"
-                    : sub + " narcs";
+                    ? sub + " cake"
+                    : sub + " cakes";
         }
         StringBuilder sb = new StringBuilder();
         sb.append(arcs);
         if (sub > 0) {
-            sb.append(".").append(sub / (NARC_IN_ARC / 1000));
+            sb.append(".").append(sub / (CAKE_IN_ARC / 1000));
         }
         sb.append(" ARC");
         if (arcs != 1 || sub > 0) {

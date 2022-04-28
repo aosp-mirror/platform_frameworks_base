@@ -228,12 +228,6 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
      */
     abstract float getScore(ComponentName name);
 
-    /**
-     * Returns the list of top K component names which have highest
-     * {@link #getScore(ComponentName)}
-     */
-    abstract List<ComponentName> getTopComponentNames(int topK);
-
     /** Handles result message sent to mHandler. */
     abstract void handleResultMessage(Message message);
 

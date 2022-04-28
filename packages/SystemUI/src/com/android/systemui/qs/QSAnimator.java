@@ -81,8 +81,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private final QSPanelController mQsPanelController;
     private final QuickQSPanelController mQuickQSPanelController;
     private final QuickStatusBarHeader mQuickStatusBarHeader;
-    private final QSFgsManagerFooter mFgsManagerFooter;
-    private final QSSecurityFooter mSecurityFooter;
     private final QS mQs;
 
     @Nullable
@@ -105,7 +103,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private TouchAnimator mNonfirstPageAlphaAnimator;
     // TranslatesY the QS Tile layout using QS.getHeightDiff()
     private TouchAnimator mQSTileLayoutTranslatorAnimator;
-    // This animates fading of SecurityFooter and media divider
+    // This animates fading of media player
     private TouchAnimator mAllPagesDelayedAnimator;
     // Animator for brightness slider(s)
     @Nullable
@@ -146,7 +144,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     public QSAnimator(QS qs, QuickQSPanel quickPanel, QuickStatusBarHeader quickStatusBarHeader,
             QSPanelController qsPanelController,
             QuickQSPanelController quickQSPanelController, QSTileHost qsTileHost,
-            QSFgsManagerFooter fgsManagerFooter, QSSecurityFooter securityFooter,
             @Main Executor executor, TunerService tunerService,
             QSExpansionPathInterpolator qsExpansionPathInterpolator) {
         mQs = qs;
@@ -154,8 +151,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         mQsPanelController = qsPanelController;
         mQuickQSPanelController = quickQSPanelController;
         mQuickStatusBarHeader = quickStatusBarHeader;
-        mFgsManagerFooter = fgsManagerFooter;
-        mSecurityFooter = securityFooter;
         mHost = qsTileHost;
         mExecutor = executor;
         mTunerService = tunerService;
@@ -472,10 +467,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     .setListener(this)
                     .build();
 
-            // Fade in the security footer and the divider as we reach the final position
+            // Fade in the media player as we reach the final position
             Builder builder = new Builder().setStartDelay(EXPANDED_TILE_DELAY);
-            builder.addFloat(mFgsManagerFooter.getView(), "alpha", 0, 1);
-            builder.addFloat(mSecurityFooter.getView(), "alpha", 0, 1);
             if (mQsPanelController.shouldUseHorizontalLayout()
                     && mQsPanelController.mMediaHost.hostView != null) {
                 builder.addFloat(mQsPanelController.mMediaHost.hostView, "alpha", 0, 1);
@@ -484,8 +477,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 mQsPanelController.mMediaHost.hostView.setAlpha(1.0f);
             }
             mAllPagesDelayedAnimator = builder.build();
-            mAllViews.add(mFgsManagerFooter.getView());
-            mAllViews.add(mSecurityFooter.getView());
             translationYBuilder.setInterpolator(mQSExpansionPathInterpolator.getYInterpolator());
             qqsTranslationYBuilder.setInterpolator(mQSExpansionPathInterpolator.getYInterpolator());
             translationXBuilder.setInterpolator(mQSExpansionPathInterpolator.getXInterpolator());

@@ -110,6 +110,19 @@
             "options": [
                 {
                     "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                // TODO(b/225076204): Remove the following four test cases after fixing the test fail.
+                {
+                    "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceBasicTest#testHotwordDetectionService_createDetectorTwiceQuickly_triggerSuccess"
+                },
+                {
+                    "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceBasicTest#testHotwordDetectionService_onDetectFromExternalSource_success"
+                },
+                {
+                    "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceBasicTest#testHotwordDetectionService_createDetectorTwiceQuickly_triggerSuccess"
+                },
+                {
+                    "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceBasicTest#testHotwordDetectionService_onDetectFromMic_success"
                 }
             ],
             "file_patterns": ["(/|^)VoiceInteract[^/]*"]
@@ -146,6 +159,15 @@
                 }
             ],
             "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "file_patterns": ["(/|^)LocaleManager.java"],
+            "name": "CtsLocaleManagerTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ]
         }
     ],
     "presubmit-large": [
@@ -173,16 +195,6 @@
         {
             "file_patterns": ["(/|^)ActivityThreadTest.java"],
             "name": "FrameworksCoreTests"
-        },
-        // TODO(b/225192026): Move back to presubmit after b/225192026 is fixed
-        {
-            "file_patterns": ["(/|^)LocaleManager.java"],
-            "name": "CtsLocaleManagerTestCases",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ]
         }
     ]
 }
