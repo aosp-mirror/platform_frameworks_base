@@ -1177,38 +1177,40 @@ static void relabelAllDirs(const char* path, const char* context, fail_fn_t fail
 }
 
 /**
- * Make other apps data directory not visible in CE, DE storage.
+ * Hide the CE and DE data directories of non-related apps.
  *
- * Apps without app data isolation can detect if another app is installed on system,
- * by "touching" other apps data directory like /data/data/com.whatsapp, if it returns
- * "Permission denied" it means apps installed, otherwise it returns "File not found".
- * Traditional file permissions or SELinux can only block accessing those directories but
- * can't fix fingerprinting like this.
- * We fix it by "overlaying" data directory, and only relevant app data packages exists
- * in data directories.
+ * Without this, apps can detect if any app is installed by trying to "touch" the app's CE
+ * or DE data directory, e.g. /data/data/com.whatsapp.  This fails with EACCES if the app
+ * is installed, or ENOENT if it's not.  Traditional file permissions or SELinux can only
+ * block accessing those directories but can't fix fingerprinting like this.
+ *
+ * Instead, we hide non-related apps' data directories from the filesystem entirely by
+ * mounting tmpfs instances over their parent directories and bind-mounting in just the
+ * needed app data directories.  This is done in a private mount namespace.
  *
  * Steps:
- * 1). Collect a list of all related apps (apps with same uid and allowlisted apps) data info
- * (package name, data stored volume uuid, and inode number of its CE data directory)
- * 2). Mount tmpfs on /data/data, /data/user(_de) and /mnt/expand, so apps no longer
- * able to access apps data directly.
- * 3). For each related app, create its app data directory and bind mount the actual content
- * from apps data mirror directory. This works on both CE and DE storage, as DE storage
- * is always available even storage is FBE locked, while we use inode number to find
- * the encrypted DE directory in mirror so we can still bind mount it successfully.
+ * (1) Collect a list of all related apps (apps with same uid and allowlisted apps) data info
+ *     (package name, data stored volume uuid, and inode number of its CE data directory)
+ * (2) Mount tmpfs on /data/data and /data/user{,_de}, and on /mnt/expand/$volume/user{,_de}
+ *     for all adoptable storage volumes.  This hides all app data directories.
+ * (3) For each related app, create stubs for its data directories in the relevant tmpfs
+ *     instances, then bind mount in the actual directories from /data_mirror.  This works
+ *     for both the CE and DE directories.  DE storage is always unlocked, whereas the
+ *     app's CE directory can be found via inode number if CE storage is locked.
  *
- * Example:
- * 0). Assuming com.android.foo CE data is stored in /data/data and no shared uid
- * 1). Mount a tmpfs on /data/data, /data/user, /data/user_de, /mnt/expand
- * List = ["com.android.foo", "null" (volume uuid "null"=default),
- * 123456 (inode number)]
- * 2). On DE storage, we create a directory /data/user_de/0/com.com.android.foo, and bind
- * mount (in the app's mount namespace) it from /data_mirror/data_de/0/com.android.foo.
- * 3). We do similar for CE storage. But in direct boot mode, as /data_mirror/data_ce/0/ is
- * encrypted, we can't find a directory with name com.android.foo on it, so we will
- * use the inode number to find the right directory instead, which that directory content will
- * be decrypted after storage is decrypted.
- *
+ * Example assuming user 0, app "com.android.foo", no shared uid, and no adoptable storage:
+ * (1) Info = ["com.android.foo", "null" (volume uuid "null"=default), "123456" (inode number)]
+ * (2) Mount tmpfs on /data/data, /data/user, and /data/user_de.
+ * (3) For DE storage, create a directory /data/user_de/0/com.android.foo and bind mount
+ *     /data_mirror/data_de/0/com.android.foo onto it.
+ * (4) Do similar for CE storage.  But if the device is in direct boot mode, then CE
+ *     storage will be locked, so the app's CE data directory won't exist at the usual
+ *     path /data_mirror/data_ce/0/com.android.foo.  It will still exist in
+ *     /data_mirror/data_ce/0, but its filename will be an unpredictable no-key name.  In
+ *     this case, we use the inode number to find the right directory instead.  Note that
+ *     the bind-mounted app CE data directory will remain locked.  It will be unlocked
+ *     automatically if/when the user's CE storage is unlocked, since adding an encryption
+ *     key takes effect on a whole filesystem instance including all its mounts.
  */
 static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_data_info_list,
     uid_t uid, const char* process_name,
