@@ -425,10 +425,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Uygulamaya tabletinizin çağrı günlüğünde (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak çağrı günlüğünüzü silebilir veya değiştirebilir."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Uygulamaya, Android TV cihazınızın arama günlüğünde (gelen ve giden aramalarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak arama günlüğünüzü silebilir veya değiştirebilir."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Uygulamaya telefonunuzun arama günlüğünde (gelen ve giden aramalarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak arama günlüğünüzü silebilir veya değiştirebilir."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"vücut sensörlerine erişme (nabız takip cihazları gibi)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="3208940894182188063">"Nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörlerinden gelen verilere erişim."</string>
-    <string name="permlab_bodySensors_background" msgid="4352831883331744370">"arka plandayken vücut sensörlerine erişim (nabız takip cihazları gibi)"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8512392249166660872">"Arka plandayken nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörlerinden gelen verilere erişim."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Kullanımdayken nabız gibi vücut sensörü verilerine erişme"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Kullanımdaki uygulamanın nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörü verilerine erişmesine izin verir."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Arka plandayken nabız gibi vücut sensörü verilerine erişme"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Arka plandaki uygulamanın nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörü verilerine erişmesine izin verir."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Takvim etkinlikleri ve ayrıntılarını okuma"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Bu uygulama, tabletinizde kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Bu uygulama, Android TV cihazınızda kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Kimlik doğrulama sırasında hata oluştu"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekran kilidi kullan"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Devam etmek için ekran kilidinizi girin"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Parmak izinin tümü algılanamadı"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Sensöre sıkıca bastırın"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Parmak izi işlenemedi. Lütfen tekrar deneyin."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Parmak izi sensörünü temizleyip tekrar deneyin"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Sensörü temizleyip tekrar deneyin"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Parmak izi tanınmadı"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Sensöre sıkıca bastırın"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Parmak izi tanınmadı"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Parmak izi kimlik doğrulaması yapıldı"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Yüz kimliği doğrulandı"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Yüz kimliği doğrulandı, lütfen onayla\'ya basın"</string>
@@ -689,8 +689,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Uygulamaya, paylaşılan depolama alanınızdaki ses dosyalarını okuma izni verir."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"paylaşılan depolama alanınızdaki video dosyalarını okuma"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Uygulamaya, paylaşılan depolama alanınızdaki video dosyalarını okuma izni verir."</string>
-    <string name="permlab_readMediaImage" msgid="1507059005825769856">"paylaşılan depolama alanınızdaki resim dosyalarını okuma"</string>
-    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Uygulamaya, paylaşılan depolama alanınızdaki resim dosyalarını okuma izni verir."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"paylaşılan depolama alanınızdaki resim dosyalarını okuma"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Uygulamaya, paylaşılan depolama alanınızdaki resim dosyalarını okuma izni verir."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"paylaşılan depolama alanımın içeriğini değiştir veya sil"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Uygulamanın paylaşılan depolama alanınıza içerik yazmasına izin verir."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP aramaları yapma/alma"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Kilidi açmak veya acil çağrı yapmak için Menü\'ye basın."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Kilidi açmak için Menü\'ye basın."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Kilit açmak için deseni çizin"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Acil durum araması"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Acil durum çağrısı"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Çağrıya dön"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Doğru!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tekrar deneyin"</string>
@@ -1051,7 +1051,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Hiçbir zaman"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Bu sayfayı açma izniniz yok."</string>
     <string name="text_copied" msgid="2531420577879738860">"Metin panoya kopyalandı."</string>
-    <string name="copied" msgid="4675902854553014676">"Kopyalandı"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> uygulaması <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> kaynağından yapıştırdı"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>, panonuzdakini yapıştırdı"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>, kopyaladığınız metni yapıştırdı"</string>
@@ -1452,8 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Bir uygulamanın, kendisi için pil optimizasyonlarını göz ardı etme izni istemesine olanak sağlar."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"tüm paketleri sorgulama"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Uygulamaya tüm yüklü paketleri görme izni verir."</string>
-    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis\'e erişim"</string>
-    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Bir uygulamanın SupplementalApis\'e erişimine izin verir."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Zum denetimi için iki kez dokun"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widget eklenemedi."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Git"</string>
@@ -1682,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AÇIK"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"KAPALI"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> hizmetinin cihazınızı tamamen kontrol etmesine izin veriyor musunuz?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> hizmetini açarsanız cihazınız veri şifrelemeyi geliştirmek için ekran kilidinizi kullanmaz."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Erişebilirlik ihtiyaçlarınıza yardımcı olan uygulamalara tam kontrol verilmesi uygundur ancak diğer pek çok uygulama için uygun değildir."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekranı görüntüleme ve kontrol etme"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ekrandaki tüm içeriği okuyabilir ve içeriği diğer uygulamaların üzerinde gösterebilir."</string>
@@ -1716,6 +1712,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> adlı kullanıcıya geçiliyor…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> hesabından çıkış yapılıyor…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Sahip"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Misafir"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Hata"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Yöneticiniz bu değişikliğe izin vermiyor"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Bu eylemi gerçekleştirecek bir uygulama bulunamadı"</string>
@@ -1935,9 +1932,22 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Uygulama kullanılamıyor"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulaması şu anda kullanılamıyor."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> kullanılamıyor"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine Android TV cihazınızı kullanmayı deneyin."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine tabletinizi kullanmayı deneyin."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"İzin gerekli"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera kullanılamıyor"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"İşleme telefonda devam edin"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon kullanılamıyor"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV ayarları kullanılamıyor"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tablet ayarları kullanılamıyor"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Telefon ayarları kullanılamıyor"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine Android TV cihazınızı kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine tabletinizi kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine Android TV cihazınızı kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine tabletinizi kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Bu uygulama daha fazla güvenlik istiyor. Bunun yerine Android TV cihazınızı kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Bu uygulama daha fazla güvenlik istiyor. Bunun yerine tabletinizi kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Bu uygulama daha fazla güvenlik istiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Bu uygulama Android\'in daha eski bir sürümü için oluşturuldu ve düzgün çalışmayabilir. Güncellemeleri kontrol etmeyi deneyin veya geliştiriciyle iletişime geçin."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Güncellemeleri denetle"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Yeni mesajlarınız var"</string>
@@ -2027,10 +2037,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"YÜKLEMEYİ KALDIR"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"YİNE DE AÇ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zararlı uygulama tespit edildi"</string>
-    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Sistem günlük kayıtlarına erişim isteği"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Yalnız bu sefer"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> uygulamasının tüm cihaz günlüklerine erişmesine izin verilsin mi?"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Tek seferlik erişim izni ver"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"İzin verme"</string>
-    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> uygulaması işlevsel hata ayıklama için sistem günlük kayıtlarını istiyor. Bu günlükler, cihazınızdaki uygulama ve hizmetler tarafından yazılan bilgileri içerebilir."</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Cihaz günlükleri, cihazınızda olanları kaydeder. Uygulamalar, sorunları bulup düzeltmek için bu günlükleri kullanabilir.\n\nBazı günlükler hassas bilgiler içerebileceği için yalnızca güvendiğiniz uygulamaların tüm cihaz günlüklerine erişmesine izin verin. \n\nBu uygulamanın tüm cihaz günlüklerine erişmesine izin vermeseniz de kendi günlüklerine erişmeye devam edebilir. Ayrıca, cihaz üreticiniz de cihazınızdaki bazı günlüklere veya bilgilere erişmeye devam edebilir. Daha fazla bilgi"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Bir daha gösterme"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> uygulaması, <xliff:g id="APP_2">%2$s</xliff:g> dilimlerini göstermek istiyor"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Düzenle"</string>
@@ -2042,6 +2052,11 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Daha fazla bilgi edinmek ve değiştirmek için dokunun."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Rahatsız Etmeyin modu değişti"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nelerin engellendiğini kontrol etmek için dokunun."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Bildirim ayarlarını inceleyin"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Sonra hatırlat"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Kapat"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ayarlar"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
@@ -2260,9 +2275,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Çevrildi."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mesajın, <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>-<xliff:g id="TO_LANGUAGE">%2$s</xliff:g> çevirisi yapıldı."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Arka Plan Etkinliği"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Arka Plan Etkinliği"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> arka planda çalışıyor ve pil tüketiyor. İncelemek için dokunun."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> uzun süredir arka planda çalışıyor. İncelemek için dokunun."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Bir uygulama, pili hızlı tüketiyor"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Hâlâ etkin olan bir uygulama var"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> arka planda çalışıyor. Pil kullanımını yönetmek için dokunun."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> uygulaması pil ömrünü etkileyebilir. Etkin uygulamaları incelemek için dokunun."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Etkin uygulamaları kontrol edin"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Bu cihazdan kameraya erişilemiyor"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan telefonun kamerasına erişilemiyor"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan tabletin kamerasına erişilemiyor"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"Sistem dili"</string>
 </resources>

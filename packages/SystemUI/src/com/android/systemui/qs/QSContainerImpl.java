@@ -30,7 +30,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -138,12 +137,8 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     }
 
     void updateResources(QSPanelController qsPanelController,
-            QuickStatusBarHeaderController quickStatusBarHeaderController,
-            boolean newFooter) {
-        int bottomPadding = 0;
-        if (newFooter) {
-            bottomPadding = getResources().getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
-        }
+            QuickStatusBarHeaderController quickStatusBarHeaderController) {
+        int bottomPadding = getResources().getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
         mQSPanelContainer.setPaddingRelative(
                 mQSPanelContainer.getPaddingStart(),
                 QSUtils.getQsHeaderSystemIconsAreaHeight(mContext),
@@ -277,7 +272,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(getClass().getSimpleName() + " updateClippingPath: top("
                 + mFancyClippingTop + ") bottom(" + mFancyClippingBottom  + ") mClippingEnabled("
                 + mClippingEnabled + ")");

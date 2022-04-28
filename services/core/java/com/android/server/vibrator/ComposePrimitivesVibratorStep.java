@@ -32,6 +32,11 @@ import java.util.List;
  * {@link PrimitiveSegment} starting at the current index.
  */
 final class ComposePrimitivesVibratorStep extends AbstractVibratorStep {
+    /**
+     * Default limit to the number of primitives in a composition, if none is defined by the HAL,
+     * to prevent repeating effects from generating an infinite list.
+     */
+    private static final int DEFAULT_COMPOSITION_SIZE_LIMIT = 100;
 
     ComposePrimitivesVibratorStep(VibrationStepConductor conductor, long startTime,
             VibratorController controller, VibrationEffect.Composed effect, int index,
@@ -49,18 +54,8 @@ final class ComposePrimitivesVibratorStep extends AbstractVibratorStep {
             // Load the next PrimitiveSegments to create a single compose call to the vibrator,
             // limited to the vibrator composition maximum size.
             int limit = controller.getVibratorInfo().getCompositionSizeMax();
-            int segmentCount = limit > 0
-                    ? Math.min(effect.getSegments().size(), segmentIndex + limit)
-                    : effect.getSegments().size();
-            List<PrimitiveSegment> primitives = new ArrayList<>();
-            for (int i = segmentIndex; i < segmentCount; i++) {
-                VibrationEffectSegment segment = effect.getSegments().get(i);
-                if (segment instanceof PrimitiveSegment) {
-                    primitives.add((PrimitiveSegment) segment);
-                } else {
-                    break;
-                }
-            }
+            List<PrimitiveSegment> primitives = unrollPrimitiveSegments(effect, segmentIndex,
+                    limit > 0 ? limit : DEFAULT_COMPOSITION_SIZE_LIMIT);
 
             if (primitives.isEmpty()) {
                 Slog.w(VibrationThread.TAG, "Ignoring wrong segment for a ComposePrimitivesStep: "
@@ -80,5 +75,45 @@ final class ComposePrimitivesVibratorStep extends AbstractVibratorStep {
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
+    }
+
+    /**
+     * Get the primitive segments to be played by this step as a single composition, starting at
+     * {@code startIndex} until:
+     *
+     * <ol>
+     *     <li>There are no more segments in the effect;
+     *     <li>The first non-primitive segment is found;
+     *     <li>The given limit to the composition size is reached.
+     * </ol>
+     *
+     * <p>If the effect is repeating then this method will generate the largest composition within
+     * given limit.
+     */
+    private List<PrimitiveSegment> unrollPrimitiveSegments(VibrationEffect.Composed effect,
+            int startIndex, int limit) {
+        List<PrimitiveSegment> segments = new ArrayList<>(limit);
+        int segmentCount = effect.getSegments().size();
+        int repeatIndex = effect.getRepeatIndex();
+
+        for (int i = startIndex; segments.size() < limit; i++) {
+            if (i == segmentCount) {
+                if (repeatIndex >= 0) {
+                    i = repeatIndex;
+                } else {
+                    // Non-repeating effect, stop collecting primitives.
+                    break;
+                }
+            }
+            VibrationEffectSegment segment = effect.getSegments().get(i);
+            if (segment instanceof PrimitiveSegment) {
+                segments.add((PrimitiveSegment) segment);
+            } else {
+                // First non-primitive segment, stop collecting primitives.
+                break;
+            }
+        }
+
+        return segments;
     }
 }

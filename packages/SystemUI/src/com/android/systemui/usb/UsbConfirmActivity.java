@@ -16,7 +16,10 @@
 
 package com.android.systemui.usb;
 
-import com.android.systemui.R;
+import android.content.res.Resources;
+import android.os.Bundle;
+
+import javax.inject.Inject;
 
 /**
  * Dialog shown to confirm the package to start when a USB device or accessory is attached and there
@@ -24,23 +27,35 @@ import com.android.systemui.R;
  */
 public class UsbConfirmActivity extends UsbDialogActivity {
 
+    private UsbAudioWarningDialogMessage mUsbConfirmMessageHandler;
+
+    @Inject
+    public UsbConfirmActivity(UsbAudioWarningDialogMessage usbAudioWarningDialogMessage) {
+        mUsbConfirmMessageHandler = usbAudioWarningDialogMessage;
+    }
+
+    @Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        mUsbConfirmMessageHandler.init(UsbAudioWarningDialogMessage.TYPE_CONFIRM, mDialogHelper);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        final int strId;
-        boolean useRecordWarning = false;
-        if (mDialogHelper.isUsbDevice()) {
-            useRecordWarning = mDialogHelper.deviceHasAudioCapture()
-                    && !mDialogHelper.packageHasAudioRecordingPermission();
-            strId = useRecordWarning
-                    ? R.string.usb_device_confirm_prompt_warn
-                    : R.string.usb_device_confirm_prompt;
-        } else {
-            // UsbAccessory case
-            strId = R.string.usb_accessory_confirm_prompt;
-        }
-        setAlertParams(strId);
         // Only show the "always use" checkbox if there is no USB/Record warning
+        final boolean useRecordWarning = mDialogHelper.isUsbDevice()
+                && (mDialogHelper.deviceHasAudioCapture()
+                && !mDialogHelper.packageHasAudioRecordingPermission());
+
+        final int titleId = mUsbConfirmMessageHandler.getPromptTitleId();
+        final String title = getString(titleId, mDialogHelper.getAppName(),
+                mDialogHelper.getDeviceDescription());
+        final int messageId = mUsbConfirmMessageHandler.getMessageId();
+        String message = (messageId != Resources.ID_NULL)
+                ? getString(messageId, mDialogHelper.getAppName(),
+                mDialogHelper.getDeviceDescription()) : null;
+        setAlertParams(title, message);
         if (!useRecordWarning) {
             addAlwaysUseCheckbox();
         }

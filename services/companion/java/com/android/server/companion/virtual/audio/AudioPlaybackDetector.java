@@ -51,8 +51,10 @@ final class AudioPlaybackDetector extends AudioManager.AudioPlaybackCallback {
     }
 
     void unregister() {
-        mAudioPlaybackCallback = null;
-        mAudioManager.unregisterAudioPlaybackCallback(/* cb= */ this);
+        if (mAudioPlaybackCallback != null) {
+            mAudioPlaybackCallback = null;
+            mAudioManager.unregisterAudioPlaybackCallback(/* cb= */ this);
+        }
     }
 
     @Override

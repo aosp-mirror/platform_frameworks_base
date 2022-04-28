@@ -27,19 +27,17 @@ import static org.mockito.Mockito.verify;
 
 import android.app.admin.ConnectEvent;
 import android.app.admin.DeviceAdminReceiver;
-import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DnsEvent;
 import android.app.admin.NetworkEvent;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.IpcDataCache;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import com.android.server.LocalServices;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,12 +54,15 @@ public class NetworkEventTest extends DpmTestBase {
 
     @Before
     public void setUp() throws Exception {
+        // Disable caches in this test process. This must happen early, since some of the
+        // following initialization steps invalidate caches.
+        IpcDataCache.disableForTestMode();
+
         mSpiedDpmMockContext = spy(mMockContext);
         mSpiedDpmMockContext.callerPermissions.add(
                 android.Manifest.permission.MANAGE_DEVICE_ADMINS);
         doNothing().when(mSpiedDpmMockContext).sendBroadcastAsUser(any(Intent.class),
                 any(UserHandle.class));
-        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
         mDpmTestable = new DevicePolicyManagerServiceTestable(getServices(), mSpiedDpmMockContext);
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_UID);
         mDpmTestable.setActiveAdmin(admin1, true, DpmMockContext.CALLER_USER_HANDLE);

@@ -446,20 +446,6 @@ final class AccessibilityController {
         // Not relevant for the window observer.
     }
 
-    MagnificationSpec getMagnificationSpecForWindow(WindowState windowState) {
-        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-            mAccessibilityTracing.logTrace(TAG + ".getMagnificationSpecForWindow",
-                    FLAGS_MAGNIFICATION_CALLBACK,
-                    "windowState={" + windowState + "}");
-        }
-        final int displayId = windowState.getDisplayId();
-        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
-        if (displayMagnifier != null) {
-            return displayMagnifier.getMagnificationSpecForWindow(windowState);
-        }
-        return null;
-    }
-
     boolean hasCallbacks() {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
                 | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
@@ -1598,7 +1584,7 @@ final class AccessibilityController {
             // Do not account space of trusted non-touchable windows, except the split-screen
             // divider.
             // If it's not trusted, touch events are not sent to the windows behind it.
-            if (((a11yWindow.getFlags() & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0)
+            if (!a11yWindow.isTouchable()
                     && (a11yWindow.getType() != TYPE_DOCK_DIVIDER)
                     && a11yWindow.isTrustedOverlay()) {
                 return false;
@@ -1623,8 +1609,7 @@ final class AccessibilityController {
             // Ignore non-touchable windows, except the split-screen divider, which is
             // occasionally non-touchable but still useful for identifying split-screen
             // mode and the PIP menu.
-            if (((a11yWindow.getFlags()
-                    & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0)
+            if (!a11yWindow.isTouchable()
                     && (a11yWindow.getType() != TYPE_DOCK_DIVIDER
                     && !a11yWindow.isPIPMenu())) {
                 return false;

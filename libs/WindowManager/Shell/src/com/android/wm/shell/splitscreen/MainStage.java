@@ -52,9 +52,6 @@ class MainStage extends StageTaskListener {
         if (mIsActive) return;
 
         final WindowContainerToken rootToken = mRootTaskInfo.token;
-        // Moving the root task to top after the child tasks were re-parented , or the root
-        // task cannot be visible and focused.
-        wct.reorder(rootToken, true /* onTop */);
         if (includingTopTask) {
             wct.reparentTasks(
                     null /* currentParent */,
@@ -83,9 +80,6 @@ class MainStage extends StageTaskListener {
                         null /* newParent */,
                         CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
                         CONTROLLED_ACTIVITY_TYPES,
-                        toTop)
-                // We want this re-order to the bottom regardless since we are re-parenting
-                // all its tasks.
-                .reorder(rootToken, false /* onTop */);
+                        toTop);
     }
 }

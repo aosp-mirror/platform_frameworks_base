@@ -848,7 +848,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 }
             }
             applyTransactionOnVriDraw(surfaceUpdateTransaction);
-            updateEmbeddedAccessibilityMatrix();
+            updateEmbeddedAccessibilityMatrix(false);
 
             mSurfaceFrame.left = 0;
             mSurfaceFrame.top = 0;
@@ -966,13 +966,16 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
                 final boolean redrawNeeded = sizeChanged || creating || hintChanged
                         || (mVisible && !mDrawFinished);
-                final TransactionCallback transactionCallback =
-                        redrawNeeded ? new TransactionCallback() : null;
-                if (redrawNeeded && viewRoot.wasRelayoutRequested() && viewRoot.isInSync()) {
+                boolean shouldSyncBuffer =
+                        redrawNeeded && viewRoot.wasRelayoutRequested() && viewRoot.isInLocalSync();
+                SyncBufferTransactionCallback syncBufferTransactionCallback = null;
+                if (shouldSyncBuffer) {
+                    syncBufferTransactionCallback = new SyncBufferTransactionCallback();
                     mBlastBufferQueue.syncNextTransaction(
                             false /* acquireSingleBuffer */,
-                            transactionCallback::onTransactionReady);
+                            syncBufferTransactionCallback::onTransactionReady);
                 }
+
                 final boolean realSizeChanged = performSurfaceTransaction(viewRoot,
                         translator, creating, sizeChanged, hintChanged, surfaceUpdateTransaction);
 
@@ -1011,7 +1014,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             }
                         }
                         if (redrawNeeded) {
-                            redrawNeeded(callbacks, transactionCallback);
+                            if (DEBUG) {
+                                Log.i(TAG, System.identityHashCode(this) + " surfaceRedrawNeeded");
+                            }
+                            if (callbacks == null) {
+                                callbacks = getSurfaceCallbacks();
+                            }
+
+                            if (shouldSyncBuffer) {
+                                handleSyncBufferCallback(callbacks, syncBufferTransactionCallback);
+                            } else {
+                                redrawNeededAsync(callbacks, this::onDrawFinished);
+                            }
                         }
                     }
                 } finally {
@@ -1030,38 +1044,30 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
-    private void redrawNeeded(SurfaceHolder.Callback[] callbacks,
-            @Nullable TransactionCallback transactionCallback) {
-        if (DEBUG) {
-            Log.i(TAG, System.identityHashCode(this) + " surfaceRedrawNeeded");
-        }
-        final SurfaceHolder.Callback[] capturedCallbacks =
-                callbacks == null ? getSurfaceCallbacks() : callbacks;
+    /**
+     * If SV is trying to be part of the VRI sync, we need to add SV to the VRI sync before
+     * invoking the redrawNeeded call to the owner. This is to ensure we can set up the SV in
+     * the sync before the SV owner knows it needs to draw a new frame.
+     * Once the redrawNeeded callback is invoked, we can stop the continuous sync transaction
+     * call which will invoke the syncTransaction callback that contains the buffer. The
+     * code waits until we can retrieve the transaction that contains the buffer before
+     * notifying the syncer that the buffer is ready.
+     */
+    private void handleSyncBufferCallback(SurfaceHolder.Callback[] callbacks,
+            SyncBufferTransactionCallback syncBufferTransactionCallback) {
 
-        ViewRootImpl viewRoot = getViewRootImpl();
-        boolean isVriSync = viewRoot.addToSync(syncBufferCallback ->
-                redrawNeededAsync(capturedCallbacks, () -> {
+        getViewRootImpl().addToSync(syncBufferCallback ->
+                redrawNeededAsync(callbacks, () -> {
+                    Transaction t = null;
                     if (mBlastBufferQueue != null) {
                         mBlastBufferQueue.stopContinuousSyncTransaction();
+                        t = syncBufferTransactionCallback.waitForTransaction();
                     }
 
-                    Transaction t = null;
-                    if (transactionCallback != null && mBlastBufferQueue != null) {
-                        t = transactionCallback.waitForTransaction();
-                    }
-                    // If relayout was requested, then a callback from BBQ will
-                    // be invoked with the sync transaction. onDrawFinished will be
-                    // called in there
                     syncBufferCallback.onBufferReady(t);
                     onDrawFinished();
                 }));
 
-        // If isVriSync, then everything was setup in the addToSync.
-        if (isVriSync) {
-            return;
-        }
-
-        redrawNeededAsync(capturedCallbacks, this::onDrawFinished);
     }
 
     private void redrawNeededAsync(SurfaceHolder.Callback[] callbacks,
@@ -1070,7 +1076,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
     }
 
-    private static class TransactionCallback {
+    private static class SyncBufferTransactionCallback {
         private final CountDownLatch mCountDownLatch = new CountDownLatch(1);
         private Transaction mTransaction;
 
@@ -1268,6 +1274,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private class SurfaceViewPositionUpdateListener implements RenderNode.PositionUpdateListener {
         private final int mRtSurfaceWidth;
         private final int mRtSurfaceHeight;
+        private boolean mRtFirst = true;
         private final SurfaceControl.Transaction mPositionChangedTransaction =
                 new SurfaceControl.Transaction();
 
@@ -1278,14 +1285,15 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         @Override
         public void positionChanged(long frameNumber, int left, int top, int right, int bottom) {
-            if (mRTLastReportedPosition.left == left
+            if (!mRtFirst && (mRTLastReportedPosition.left == left
                     && mRTLastReportedPosition.top == top
                     && mRTLastReportedPosition.right == right
                     && mRTLastReportedPosition.bottom == bottom
                     && mRTLastReportedSurfaceSize.x == mRtSurfaceWidth
-                    && mRTLastReportedSurfaceSize.y == mRtSurfaceHeight) {
+                    && mRTLastReportedSurfaceSize.y == mRtSurfaceHeight)) {
                 return;
             }
+            mRtFirst = false;
             try {
                 if (DEBUG_POSITION) {
                     Log.d(TAG, String.format(
@@ -1742,7 +1750,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         mRemoteAccessibilityController.assosciateHierarchy(connection,
             getViewRootImpl().mLeashToken, getAccessibilityViewId());
 
-        updateEmbeddedAccessibilityMatrix();
+        updateEmbeddedAccessibilityMatrix(true);
     }
 
     private void notifySurfaceDestroyed() {
@@ -1770,16 +1778,21 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
-    void updateEmbeddedAccessibilityMatrix() {
+    void updateEmbeddedAccessibilityMatrix(boolean force) {
         if (!mRemoteAccessibilityController.connected()) {
             return;
         }
         getBoundsOnScreen(mTmpRect);
+
+        // To compute the node bounds of the node on the embedded window,
+        // apply this matrix to get the bounds in host window-relative coordinates,
+        // then using the global transform to get the actual bounds on screen.
+        mTmpRect.offset(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
         mTmpMatrix.reset();
         mTmpMatrix.setTranslate(mTmpRect.left, mTmpRect.top);
         mTmpMatrix.postScale(mScreenRect.width() / (float) mSurfaceWidth,
                 mScreenRect.height() / (float) mSurfaceHeight);
-        mRemoteAccessibilityController.setScreenMatrix(mTmpMatrix);
+        mRemoteAccessibilityController.setWindowMatrix(mTmpMatrix, force);
     }
 
     @Override

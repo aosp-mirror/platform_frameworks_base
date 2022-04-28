@@ -88,6 +88,7 @@ public class QSCustomizer extends LinearLayout {
         LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
         lp.height = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
         mTransparentView.setLayoutParams(lp);
+        mRecyclerView.getAdapter().notifyItemChanged(0);
     }
 
     void updateNavBackDrop(Configuration newConfig, LightBarController lightBarController) {

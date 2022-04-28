@@ -134,6 +134,13 @@ public class UsbDialogHelper {
     }
 
     /**
+     * @return True if the intent contains a UsbDevice which can play audio.
+     */
+    public boolean deviceHasAudioPlayback() {
+        return mDevice != null && mDevice.getHasAudioPlayback();
+    }
+
+    /**
      * @return True if the package has RECORD_AUDIO permission specified in its manifest.
      */
     public boolean packageHasAudioRecordingPermission() {
@@ -272,15 +279,15 @@ public class UsbDialogHelper {
         return desc;
     }
 
-     /**
-      * Whether the calling package can set as default handler of the USB device or accessory.
-      * In case of a UsbAccessory this is the case if the calling package has an intent filter for
-      * {@link UsbManager#ACTION_USB_ACCESSORY_ATTACHED} with a usb-accessory filter matching the
-      * attached accessory. In case of a UsbDevice this is the case if the calling package has an
-      * intent filter for {@link UsbManager#ACTION_USB_DEVICE_ATTACHED} with a usb-device filter
-      * matching the attached device.
-      *
-      *  @return True if the package can be default for the USB device.
+    /**
+     * Whether the calling package can set as default handler of the USB device or accessory.
+     * In case of a UsbAccessory this is the case if the calling package has an intent filter for
+     * {@link UsbManager#ACTION_USB_ACCESSORY_ATTACHED} with a usb-accessory filter matching the
+     * attached accessory. In case of a UsbDevice this is the case if the calling package has an
+     * intent filter for {@link UsbManager#ACTION_USB_DEVICE_ATTACHED} with a usb-device filter
+     * matching the attached device.
+     *
+     * @return True if the package can be default for the USB device.
      */
     public boolean canBeDefault() {
         return mCanBeDefault;

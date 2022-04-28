@@ -164,6 +164,38 @@ public final class InputWindowHandle {
         this.displayId = displayId;
     }
 
+    public InputWindowHandle(InputWindowHandle other) {
+        // Do not copy ptr to prevent this copy from sharing the same native object.
+        ptr = 0;
+        inputApplicationHandle = new InputApplicationHandle(other.inputApplicationHandle);
+        token = other.token;
+        windowToken = other.windowToken;
+        window = other.window;
+        name = other.name;
+        layoutParamsFlags = other.layoutParamsFlags;
+        layoutParamsType = other.layoutParamsType;
+        dispatchingTimeoutMillis = other.dispatchingTimeoutMillis;
+        frameLeft = other.frameLeft;
+        frameTop = other.frameTop;
+        frameRight = other.frameRight;
+        frameBottom = other.frameBottom;
+        surfaceInset = other.surfaceInset;
+        scaleFactor = other.scaleFactor;
+        touchableRegion.set(other.touchableRegion);
+        inputConfig = other.inputConfig;
+        touchOcclusionMode = other.touchOcclusionMode;
+        ownerPid = other.ownerPid;
+        ownerUid = other.ownerUid;
+        packageName = other.packageName;
+        displayId = other.displayId;
+        touchableRegionSurfaceControl = other.touchableRegionSurfaceControl;
+        replaceTouchableRegionWithCrop = other.replaceTouchableRegionWithCrop;
+        if (other.transform != null) {
+            transform = new Matrix();
+            transform.set(other.transform);
+        }
+    }
+
     @Override
     public String toString() {
         return new StringBuilder(name != null ? name : "")

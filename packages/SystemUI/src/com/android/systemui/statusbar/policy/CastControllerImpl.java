@@ -40,7 +40,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.Utils;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +81,7 @@ public class CastControllerImpl implements CastController {
         if (DEBUG) Log.d(TAG, "new CastController()");
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("CastController state:");
         pw.print("  mDiscovering="); pw.println(mDiscovering);
         pw.print("  mCallbackRegistered="); pw.println(mCallbackRegistered);

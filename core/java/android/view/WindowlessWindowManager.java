@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.WindowCallbacks.RESIZE_MODE_INVALID;
+
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
@@ -29,7 +31,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.window.ClientWindowFrames;
-import android.window.IOnBackInvokedCallback;
+import android.window.OnBackInvokedCallbackInfo;
 
 import java.util.HashMap;
 import java.util.List;
@@ -82,9 +84,8 @@ public class WindowlessWindowManager implements IWindowSession {
     private final IBinder mHostInputToken;
     private final IBinder mFocusGrantToken = new Binder();
     private InsetsState mInsetsState;
-
-    private int mForceHeight = -1;
-    private int mForceWidth = -1;
+    private final ClientWindowFrames mTmpFrames = new ClientWindowFrames();
+    private final MergedConfiguration mTmpConfig = new MergedConfiguration();
 
     public WindowlessWindowManager(Configuration c, SurfaceControl rootSurface,
             IBinder hostInputToken) {
@@ -528,8 +529,8 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void setOnBackInvokedCallback(IWindow iWindow,
-            IOnBackInvokedCallback iOnBackInvokedCallback, int priority) throws RemoteException { }
+    public void setOnBackInvokedCallbackInfo(IWindow iWindow,
+            OnBackInvokedCallbackInfo callbackInfo) throws RemoteException { }
 
     @Override
     public boolean dropForAccessibility(IWindow window, int x, int y) {
@@ -540,7 +541,12 @@ public class WindowlessWindowManager implements IWindowSession {
         mInsetsState = state;
         for (State s : mStateForWindow.values()) {
             try {
-                s.mClient.insetsChanged(state, false, false);
+                mTmpFrames.frame.set(0, 0, s.mParams.width, s.mParams.height);
+                mTmpFrames.displayFrame.set(mTmpFrames.frame);
+                mTmpConfig.setConfiguration(mConfiguration, mConfiguration);
+                s.mClient.resized(mTmpFrames, false /* reportDraw */, mTmpConfig, state,
+                        false /* forceLayout */, false /* alwaysConsumeSystemBars */, s.mDisplayId,
+                        Integer.MAX_VALUE, RESIZE_MODE_INVALID);
             } catch (RemoteException e) {
                 // Too bad
             }

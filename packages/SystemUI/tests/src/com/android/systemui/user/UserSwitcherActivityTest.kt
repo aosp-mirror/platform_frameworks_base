@@ -24,7 +24,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.statusbar.phone.ShadeController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -50,7 +50,7 @@ class UserSwitcherActivityTest : SysuiTestCase() {
     @Mock
     private lateinit var userManager: UserManager
     @Mock
-    private lateinit var shadeController: ShadeController
+    private lateinit var userTracker: UserTracker
 
     @Before
     fun setUp() {
@@ -61,7 +61,7 @@ class UserSwitcherActivityTest : SysuiTestCase() {
             layoutInflater,
             falsingManager,
             userManager,
-            shadeController
+            userTracker
         )
     }
 

@@ -21,7 +21,7 @@ import static com.android.server.tare.Modifier.COST_MODIFIER_DEVICE_IDLE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_PROCESS_STATE;
 import static com.android.server.tare.Modifier.NUM_COST_MODIFIERS;
-import static com.android.server.tare.TareUtils.narcToString;
+import static com.android.server.tare.TareUtils.cakeToString;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
@@ -203,7 +203,7 @@ public abstract class EconomicPolicy {
     abstract long getMaxSatiatedBalance();
 
     /**
-     * Returns the maximum number of narcs that should be consumed during a full 100% discharge
+     * Returns the maximum number of cakes that should be consumed during a full 100% discharge
      * cycle. This is the initial limit. The system may choose to increase the limit over time,
      * but the increased limit should never exceed the value returned from
      * {@link #getHardSatiatedConsumptionLimit()}.
@@ -211,7 +211,7 @@ public abstract class EconomicPolicy {
     abstract long getInitialSatiatedConsumptionLimit();
 
     /**
-     * Returns the maximum number of narcs that should be consumed during a full 100% discharge
+     * Returns the maximum number of cakes that should be consumed during a full 100% discharge
      * cycle. This is the hard limit that should never be exceeded.
      */
     abstract long getHardSatiatedConsumptionLimit();
@@ -430,9 +430,9 @@ public abstract class EconomicPolicy {
         pw.print(actionToString(action.id));
         pw.print(": ");
         pw.print("ctp=");
-        pw.print(narcToString(action.costToProduce));
+        pw.print(cakeToString(action.costToProduce));
         pw.print(", basePrice=");
-        pw.print(narcToString(action.basePrice));
+        pw.print(cakeToString(action.basePrice));
         pw.println();
     }
 
@@ -440,11 +440,11 @@ public abstract class EconomicPolicy {
         pw.print(rewardToString(reward.id));
         pw.print(": ");
         pw.print("instant=");
-        pw.print(narcToString(reward.instantReward));
+        pw.print(cakeToString(reward.instantReward));
         pw.print(", ongoing/sec=");
-        pw.print(narcToString(reward.ongoingRewardPerSecond));
+        pw.print(cakeToString(reward.ongoingRewardPerSecond));
         pw.print(", maxDaily=");
-        pw.print(narcToString(reward.maxDailyReward));
+        pw.print(cakeToString(reward.maxDailyReward));
         pw.println();
     }
 }
