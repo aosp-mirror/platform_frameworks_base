@@ -712,28 +712,28 @@ public final class PowerManager {
      * @hide
      */
     public static class WakeData {
-        public WakeData(long wakeTime, @WakeReason int wakeReason, long sleepDuration) {
+        public WakeData(long wakeTime, @WakeReason int wakeReason, long sleepDurationRealtime) {
             this.wakeTime = wakeTime;
             this.wakeReason = wakeReason;
-            this.sleepDuration = sleepDuration;
+            this.sleepDurationRealtime = sleepDurationRealtime;
         }
         public final long wakeTime;
         public final @WakeReason int wakeReason;
-        public final long sleepDuration;
+        public final long sleepDurationRealtime;
 
         @Override
         public boolean equals(@Nullable Object o) {
             if (o instanceof WakeData) {
                 final WakeData other = (WakeData) o;
                 return wakeTime == other.wakeTime && wakeReason == other.wakeReason
-                        && sleepDuration == other.sleepDuration;
+                        && sleepDurationRealtime == other.sleepDurationRealtime;
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(wakeTime, wakeReason, sleepDuration);
+            return Objects.hash(wakeTime, wakeReason, sleepDurationRealtime);
         }
     }
 

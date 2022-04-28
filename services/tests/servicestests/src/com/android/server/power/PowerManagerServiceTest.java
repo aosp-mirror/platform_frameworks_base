@@ -154,6 +154,7 @@ public class PowerManagerServiceTest {
     private UserSwitchedReceiver mUserSwitchedReceiver;
     private Resources mResourcesSpy;
     private OffsettableClock mClock;
+    private long mLastElapsedRealtime;
     private TestLooper mTestLooper;
 
     private static class IntentFilterMatcher implements ArgumentMatcher<IntentFilter> {
@@ -282,7 +283,18 @@ public class PowerManagerServiceTest {
 
             @Override
             PowerManagerService.Clock createClock() {
-                return () -> mClock.now();
+                return new PowerManagerService.Clock() {
+                    @Override
+                    public long uptimeMillis() {
+                        return mClock.now();
+                    }
+
+                    @Override
+                    public long elapsedRealtime() {
+                        mLastElapsedRealtime = mClock.now();
+                        return mLastElapsedRealtime;
+                    }
+                };
             }
 
             @Override
@@ -1629,6 +1641,7 @@ public class PowerManagerServiceTest {
 
         mService.setWakefulnessLocked(nonDefaultPowerGroupId, WAKEFULNESS_DOZING, eventTime2,
                 0, PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0, null, null);
+        long eventElapsedRealtime1 = mLastElapsedRealtime;
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
         assertThat(mService.getBinderServiceInstance().getLastSleepReason()).isEqualTo(
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION);
@@ -1636,19 +1649,20 @@ public class PowerManagerServiceTest {
         mService.setWakefulnessLocked(Display.DEFAULT_DISPLAY_GROUP, WAKEFULNESS_AWAKE,
                 eventTime3, /* uid= */ 0, PowerManager.WAKE_REASON_PLUGGED_IN, /* opUid= */
                 0, /* opPackageName= */ null, /* details= */ null);
+        long eventElapsedRealtime2 = mLastElapsedRealtime;
         PowerManager.WakeData wakeData = mService.getLocalServiceInstance().getLastWakeup();
         assertThat(wakeData.wakeTime).isEqualTo(eventTime3);
         assertThat(wakeData.wakeReason).isEqualTo(PowerManager.WAKE_REASON_PLUGGED_IN);
-        assertThat(wakeData.sleepDuration).isEqualTo(eventTime3 - eventTime2);
+        assertThat(wakeData.sleepDurationRealtime)
+                .isEqualTo(eventElapsedRealtime2 - eventElapsedRealtime1);
 
         // The global wake time and reason as well as sleep duration shouldn't change when another
         // PowerGroup wakes up.
         mService.setWakefulnessLocked(nonDefaultPowerGroupId, WAKEFULNESS_AWAKE,
                 eventTime4, /* uid= */ 0, PowerManager.WAKE_REASON_CAMERA_LAUNCH, /* opUid= */
                 0, /* opPackageName= */ null, /* details= */ null);
-        assertThat(wakeData.wakeTime).isEqualTo(eventTime3);
-        assertThat(wakeData.wakeReason).isEqualTo(PowerManager.WAKE_REASON_PLUGGED_IN);
-        assertThat(wakeData.sleepDuration).isEqualTo(eventTime3 - eventTime2);
+        PowerManager.WakeData wakeData2 = mService.getLocalServiceInstance().getLastWakeup();
+        assertThat(wakeData2).isEqualTo(wakeData);
     }
 
     @Test
