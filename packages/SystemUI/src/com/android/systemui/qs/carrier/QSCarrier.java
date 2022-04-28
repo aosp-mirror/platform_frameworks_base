@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.carrier;
 
+import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.text.TextUtils;
@@ -30,6 +31,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 
 import java.util.Objects;
@@ -145,5 +147,9 @@ public class QSCarrier extends LinearLayout {
 
     public void setCarrierText(CharSequence text) {
         mCarrierText.setText(text);
+    }
+
+    public void updateTextAppearance(@StyleRes int resId) {
+        FontSizeUtils.updateFontSizeFromStyle(mCarrierText, resId);
     }
 }
