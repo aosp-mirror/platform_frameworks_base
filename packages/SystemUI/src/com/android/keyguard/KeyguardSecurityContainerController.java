@@ -232,12 +232,12 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             new ConfigurationController.ConfigurationListener() {
                 @Override
                 public void onThemeChanged() {
-                    mSecurityViewFlipperController.reloadColors();
+                    reloadColors();
                 }
 
                 @Override
                 public void onUiModeChanged() {
-                    mSecurityViewFlipperController.reloadColors();
+                    reloadColors();
                 }
             };
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
@@ -633,6 +633,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     /** Update keyguard position based on a tapped X coordinate. */
     public void updateKeyguardPosition(float x) {
         mView.updatePositionByTouchX(x);
+    }
+
+    private void reloadColors() {
+        mSecurityViewFlipperController.reloadColors();
+        mView.reloadColors();
     }
 
     static class Factory {
