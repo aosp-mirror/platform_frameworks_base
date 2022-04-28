@@ -51,13 +51,17 @@ class AppLocaleStore {
                         appSupportedLocales.add(packageLocaleList.get(i));
                     }
                 } else {
-                    localeStatus = LocaleStatus.NO_SUPPORTED_LANGUAGE;
+                    localeStatus = LocaleStatus.NO_SUPPORTED_LANGUAGE_IN_APP;
                 }
             } else if (localeConfig.getStatus() == LocaleConfig.STATUS_NOT_SPECIFIED) {
-                localeStatus = LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_ASSET;
                 String[] languages = getAssetLocales(context, packageName);
-                for (String language : languages) {
-                    appSupportedLocales.add(Locale.forLanguageTag(language));
+                if (languages.length > 0) {
+                    localeStatus = LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_ASSET;
+                    for (String language : languages) {
+                        appSupportedLocales.add(Locale.forLanguageTag(language));
+                    }
+                } else {
+                    localeStatus = LocaleStatus.ASSET_LOCALE_IS_EMPTY;
                 }
             }
         }
@@ -89,7 +93,8 @@ class AppLocaleStore {
     static class AppLocaleResult {
         enum LocaleStatus {
             UNKNOWN_FAILURE,
-            NO_SUPPORTED_LANGUAGE,
+            NO_SUPPORTED_LANGUAGE_IN_APP,
+            ASSET_LOCALE_IS_EMPTY,
             GET_SUPPORTED_LANGUAGE_FROM_LOCAL_CONFIG,
             GET_SUPPORTED_LANGUAGE_FROM_ASSET,
         }
