@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.annotation.IntDef;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.SystemProperties;
 
@@ -59,22 +60,15 @@ public final class SharedUidMigration {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Strategy {}
 
-    private static final int DEFAULT = BEST_EFFORT;
-
-    /**
-     * All shared UID migration is disabled.
-     * This is not a strategy that can be set with system properties.
-     * To disable shared UID migration, change {@link #DEFAULT} to this value.
-     */
-    private static final int DISABLED = 0;
+    @Strategy
+    private static final int DEFAULT = NEW_INSTALL_ONLY;
 
     /**
      * Whether shared UID migration is fully disabled. Disabled means the sharedUserMaxSdkVersion
      * attribute will be directly ignored in the parsing phase.
      */
-    @SuppressWarnings("ConstantConditions")
     public static boolean isDisabled() {
-        return DEFAULT == DISABLED;
+        return !PackageManager.ENABLE_SHARED_UID_MIGRATION;
     }
 
     /**
@@ -88,7 +82,7 @@ public final class SharedUidMigration {
 
         final int s = SystemProperties.getInt(PROPERTY_KEY, DEFAULT);
         // No transition strategies can be used (http://b/221088088)
-        if (s > BEST_EFFORT || s <= DISABLED) {
+        if (s > BEST_EFFORT || s < NEW_INSTALL_ONLY) {
             return DEFAULT;
         }
         return s;

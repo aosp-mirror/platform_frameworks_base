@@ -55,19 +55,31 @@ public final class PermissionHelper {
     private final PermissionManagerServiceInternal mPmi;
     private final IPackageManager mPackageManager;
     private final IPermissionManager mPermManager;
-    // TODO (b/194833441): Remove when the migration is enabled
+    // TODO (b/194833441): Remove this boolean (but keep the isMigrationEnabled() method)
+    //  when the migration is enabled
     private final boolean mMigrationEnabled;
+    private final boolean mIsTv;
+    private final boolean mForceUserSetOnUpgrade;
 
     public PermissionHelper(PermissionManagerServiceInternal pmi, IPackageManager packageManager,
-            IPermissionManager permManager, boolean migrationEnabled) {
+            IPermissionManager permManager, boolean migrationEnabled,
+            boolean forceUserSetOnUpgrade) {
         mPmi = pmi;
         mPackageManager = packageManager;
         mPermManager = permManager;
         mMigrationEnabled = migrationEnabled;
+        mForceUserSetOnUpgrade = forceUserSetOnUpgrade;
+        boolean isTv;
+        try {
+            isTv = mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK, 0);
+        } catch (RemoteException e) {
+            isTv = false;
+        }
+        mIsTv = isTv;
     }
 
     public boolean isMigrationEnabled() {
-        return mMigrationEnabled;
+        return mMigrationEnabled && !mIsTv;
     }
 
     /**
@@ -223,8 +235,9 @@ public final class PermissionHelper {
             return;
         }
         if (!isPermissionFixed(pkgPerm.packageName, pkgPerm.userId)) {
+            boolean userSet = mForceUserSetOnUpgrade ? true : pkgPerm.userModifiedSettings;
             setNotificationPermission(pkgPerm.packageName, pkgPerm.userId, pkgPerm.granted,
-                    pkgPerm.userSet, !pkgPerm.userSet);
+                    userSet, !userSet);
         }
     }
 
@@ -305,13 +318,13 @@ public final class PermissionHelper {
         public final String packageName;
         public final @UserIdInt int userId;
         public final boolean granted;
-        public final boolean userSet;
+        public final boolean userModifiedSettings;
 
         public PackagePermission(String pkg, int userId, boolean granted, boolean userSet) {
             this.packageName = pkg;
             this.userId = userId;
             this.granted = granted;
-            this.userSet = userSet;
+            this.userModifiedSettings = userSet;
         }
 
         @Override
@@ -319,13 +332,14 @@ public final class PermissionHelper {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             PackagePermission that = (PackagePermission) o;
-            return userId == that.userId && granted == that.granted && userSet == that.userSet
+            return userId == that.userId && granted == that.granted && userModifiedSettings
+                    == that.userModifiedSettings
                     && Objects.equals(packageName, that.packageName);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(packageName, userId, granted, userSet);
+            return Objects.hash(packageName, userId, granted, userModifiedSettings);
         }
 
         @Override
@@ -334,7 +348,7 @@ public final class PermissionHelper {
                     "packageName='" + packageName + '\'' +
                     ", userId=" + userId +
                     ", granted=" + granted +
-                    ", userSet=" + userSet +
+                    ", userSet=" + userModifiedSettings +
                     '}';
         }
     }

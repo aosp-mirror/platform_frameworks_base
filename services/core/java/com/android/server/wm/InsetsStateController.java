@@ -30,7 +30,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.Rect;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -178,7 +177,7 @@ class InsetsStateController {
         }
     }
 
-    void onDisplayInfoUpdated(boolean notifyInsetsChange) {
+    void onDisplayFramesUpdated(boolean notifyInsetsChange) {
         final ArrayList<WindowState> insetsChangedWindows = new ArrayList<>();
         mDisplayContent.forAllWindows(w -> {
             w.mAboveInsetsState.set(mState, displayCutout());
@@ -201,23 +200,6 @@ class InsetsStateController {
             mDisplayContent.updateSystemGestureExclusion();
             mDisplayContent.updateKeepClearAreas();
             mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
-        }
-    }
-
-    /**
-     * Computes insets state of the insets provider window in the display frames.
-     *
-     * @param win The owner window of insets provider.
-     * @param displayFrames The display frames to create insets source.
-     * @param winFrame The frame of the insets source window.
-     */
-    void computeSimulatedState(WindowState win, DisplayFrames displayFrames, Rect winFrame) {
-        final InsetsState state = displayFrames.mInsetsState;
-        for (int i = mProviders.size() - 1; i >= 0; i--) {
-            final WindowContainerInsetsSourceProvider provider = mProviders.valueAt(i);
-            if (provider.mWindowContainer == win) {
-                state.addSource(provider.createSimulatedSource(displayFrames, winFrame));
-            }
         }
     }
 

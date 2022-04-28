@@ -127,11 +127,4 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
             }
         });
     }
-
-    @Override
-    public void onSessionEnd(TouchSession session) {
-        if (DEBUG) {
-            Log.d(TAG, "onSessionEnd");
-        }
-    }
 }

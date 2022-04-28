@@ -50,6 +50,7 @@ import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import com.android.internal.view.SurfaceCallbackHelper;
 
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
@@ -203,18 +204,11 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private int mSurfaceFlags = SurfaceControl.HIDDEN;
 
-    private int mPendingReportDraws;
-
     /**
      * Transaction that should be used from the render thread. This transaction is only thread safe
      * with other calls directly from the render thread.
      */
     private final SurfaceControl.Transaction mRtTransaction = new SurfaceControl.Transaction();
-
-    /**
-     * Used on the main thread to set the transaction that will be synced with the main window.
-     */
-    private final Transaction mSyncTransaction = new Transaction();
 
     /**
      * Transaction that should be used whe
@@ -391,31 +385,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
-    private void performDrawFinished(@Nullable Transaction t) {
-        if (t != null) {
-            mSyncTransaction.merge(t);
+    private void performDrawFinished() {
+        mDrawFinished = true;
+        if (mAttachedToWindow) {
+            mParent.requestTransparentRegion(SurfaceView.this);
+            invalidate();
         }
-
-        if (mPendingReportDraws > 0) {
-            mDrawFinished = true;
-            if (mAttachedToWindow) {
-                mParent.requestTransparentRegion(SurfaceView.this);
-                notifyDrawFinished();
-                invalidate();
-            }
-        } else {
-            Log.e(TAG, System.identityHashCode(this) + "finished drawing"
-                    + " but no pending report draw (extra call"
-                    + " to draw completion runnable?)");
-        }
-    }
-
-    void notifyDrawFinished() {
-        ViewRootImpl viewRoot = getViewRootImpl();
-        if (viewRoot != null) {
-            viewRoot.pendingDrawFinished(mSyncTransaction);
-        }
-        mPendingReportDraws--;
     }
 
     @Override
@@ -436,10 +411,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             observer.removeOnScrollChangedListener(mScrollChangedListener);
             observer.removeOnPreDrawListener(mDrawListener);
             mGlobalListenersAdded = false;
-        }
-
-        while (mPendingReportDraws > 0) {
-            notifyDrawFinished();
         }
 
         mRequestedVisible = false;
@@ -877,7 +848,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 }
             }
             applyTransactionOnVriDraw(surfaceUpdateTransaction);
-            updateEmbeddedAccessibilityMatrix();
+            updateEmbeddedAccessibilityMatrix(false);
 
             mSurfaceFrame.left = 0;
             mSurfaceFrame.top = 0;
@@ -993,10 +964,20 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     return;
                 }
 
-                final boolean realSizeChanged = performSurfaceTransaction(viewRoot,
-                        translator, creating, sizeChanged, hintChanged, surfaceUpdateTransaction);
                 final boolean redrawNeeded = sizeChanged || creating || hintChanged
                         || (mVisible && !mDrawFinished);
+                boolean shouldSyncBuffer =
+                        redrawNeeded && viewRoot.wasRelayoutRequested() && viewRoot.isInLocalSync();
+                SyncBufferTransactionCallback syncBufferTransactionCallback = null;
+                if (shouldSyncBuffer) {
+                    syncBufferTransactionCallback = new SyncBufferTransactionCallback();
+                    mBlastBufferQueue.syncNextTransaction(
+                            false /* acquireSingleBuffer */,
+                            syncBufferTransactionCallback::onTransactionReady);
+                }
+
+                final boolean realSizeChanged = performSurfaceTransaction(viewRoot,
+                        translator, creating, sizeChanged, hintChanged, surfaceUpdateTransaction);
 
                 try {
                     SurfaceHolder.Callback[] callbacks = null;
@@ -1015,9 +996,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             mIsCreating = true;
                             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
                                     + "visibleChanged -- surfaceCreated");
-                            if (callbacks == null) {
-                                callbacks = getSurfaceCallbacks();
-                            }
+                            callbacks = getSurfaceCallbacks();
                             for (SurfaceHolder.Callback c : callbacks) {
                                 c.surfaceCreated(mSurfaceHolder);
                             }
@@ -1035,32 +1014,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             }
                         }
                         if (redrawNeeded) {
-                            if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
-                                    + "surfaceRedrawNeeded");
+                            if (DEBUG) {
+                                Log.i(TAG, System.identityHashCode(this) + " surfaceRedrawNeeded");
+                            }
                             if (callbacks == null) {
                                 callbacks = getSurfaceCallbacks();
                             }
 
-                            final boolean wasRelayoutRequested = viewRoot.wasRelayoutRequested();
-                            if (wasRelayoutRequested && (mBlastBufferQueue != null)) {
-                                mBlastBufferQueue.syncNextTransaction(
-                                        false /* acquireSingleBuffer */,
-                                        this::onDrawFinished);
+                            if (shouldSyncBuffer) {
+                                handleSyncBufferCallback(callbacks, syncBufferTransactionCallback);
+                            } else {
+                                redrawNeededAsync(callbacks, this::onDrawFinished);
                             }
-                            mPendingReportDraws++;
-                            viewRoot.drawPending();
-                            SurfaceCallbackHelper sch = new SurfaceCallbackHelper(() -> {
-                                if (mBlastBufferQueue != null) {
-                                    mBlastBufferQueue.stopContinuousSyncTransaction();
-                                }
-                                // If relayout was requested, then a callback from BBQ will
-                                // be invoked with the sync transaction. onDrawFinished will be
-                                // called in there
-                                if (!wasRelayoutRequested) {
-                                    onDrawFinished(null);
-                                }
-                            });
-                            sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
                         }
                     }
                 } finally {
@@ -1076,6 +1041,56 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 TAG, "Layout: x=" + mScreenRect.left + " y=" + mScreenRect.top
                 + " w=" + mScreenRect.width() + " h=" + mScreenRect.height()
                 + ", frame=" + mSurfaceFrame);
+        }
+    }
+
+    /**
+     * If SV is trying to be part of the VRI sync, we need to add SV to the VRI sync before
+     * invoking the redrawNeeded call to the owner. This is to ensure we can set up the SV in
+     * the sync before the SV owner knows it needs to draw a new frame.
+     * Once the redrawNeeded callback is invoked, we can stop the continuous sync transaction
+     * call which will invoke the syncTransaction callback that contains the buffer. The
+     * code waits until we can retrieve the transaction that contains the buffer before
+     * notifying the syncer that the buffer is ready.
+     */
+    private void handleSyncBufferCallback(SurfaceHolder.Callback[] callbacks,
+            SyncBufferTransactionCallback syncBufferTransactionCallback) {
+
+        getViewRootImpl().addToSync(syncBufferCallback ->
+                redrawNeededAsync(callbacks, () -> {
+                    Transaction t = null;
+                    if (mBlastBufferQueue != null) {
+                        mBlastBufferQueue.stopContinuousSyncTransaction();
+                        t = syncBufferTransactionCallback.waitForTransaction();
+                    }
+
+                    syncBufferCallback.onBufferReady(t);
+                    onDrawFinished();
+                }));
+
+    }
+
+    private void redrawNeededAsync(SurfaceHolder.Callback[] callbacks,
+            Runnable callbacksCollected) {
+        SurfaceCallbackHelper sch = new SurfaceCallbackHelper(callbacksCollected);
+        sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
+    }
+
+    private static class SyncBufferTransactionCallback {
+        private final CountDownLatch mCountDownLatch = new CountDownLatch(1);
+        private Transaction mTransaction;
+
+        Transaction waitForTransaction() {
+            try {
+                mCountDownLatch.await();
+            } catch (InterruptedException e) {
+            }
+            return mTransaction;
+        }
+
+        void onTransactionReady(Transaction t) {
+            mTransaction = t;
+            mCountDownLatch.countDown();
         }
     }
 
@@ -1189,13 +1204,13 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, mFormat);
     }
 
-    private void onDrawFinished(@Nullable Transaction t) {
+    private void onDrawFinished() {
         if (DEBUG) {
             Log.i(TAG, System.identityHashCode(this) + " "
                     + "finishedDrawing");
         }
 
-        runOnUiThread(() -> performDrawFinished(t));
+        runOnUiThread(this::performDrawFinished);
     }
 
     /**
@@ -1259,6 +1274,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private class SurfaceViewPositionUpdateListener implements RenderNode.PositionUpdateListener {
         private final int mRtSurfaceWidth;
         private final int mRtSurfaceHeight;
+        private boolean mRtFirst = true;
         private final SurfaceControl.Transaction mPositionChangedTransaction =
                 new SurfaceControl.Transaction();
 
@@ -1269,14 +1285,15 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         @Override
         public void positionChanged(long frameNumber, int left, int top, int right, int bottom) {
-            if (mRTLastReportedPosition.left == left
+            if (!mRtFirst && (mRTLastReportedPosition.left == left
                     && mRTLastReportedPosition.top == top
                     && mRTLastReportedPosition.right == right
                     && mRTLastReportedPosition.bottom == bottom
                     && mRTLastReportedSurfaceSize.x == mRtSurfaceWidth
-                    && mRTLastReportedSurfaceSize.y == mRtSurfaceHeight) {
+                    && mRTLastReportedSurfaceSize.y == mRtSurfaceHeight)) {
                 return;
             }
+            mRtFirst = false;
             try {
                 if (DEBUG_POSITION) {
                     Log.d(TAG, String.format(
@@ -1733,7 +1750,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         mRemoteAccessibilityController.assosciateHierarchy(connection,
             getViewRootImpl().mLeashToken, getAccessibilityViewId());
 
-        updateEmbeddedAccessibilityMatrix();
+        updateEmbeddedAccessibilityMatrix(true);
     }
 
     private void notifySurfaceDestroyed() {
@@ -1761,16 +1778,21 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
-    void updateEmbeddedAccessibilityMatrix() {
+    void updateEmbeddedAccessibilityMatrix(boolean force) {
         if (!mRemoteAccessibilityController.connected()) {
             return;
         }
         getBoundsOnScreen(mTmpRect);
+
+        // To compute the node bounds of the node on the embedded window,
+        // apply this matrix to get the bounds in host window-relative coordinates,
+        // then using the global transform to get the actual bounds on screen.
+        mTmpRect.offset(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
         mTmpMatrix.reset();
         mTmpMatrix.setTranslate(mTmpRect.left, mTmpRect.top);
         mTmpMatrix.postScale(mScreenRect.width() / (float) mSurfaceWidth,
                 mScreenRect.height() / (float) mSurfaceHeight);
-        mRemoteAccessibilityController.setScreenMatrix(mTmpMatrix);
+        mRemoteAccessibilityController.setWindowMatrix(mTmpMatrix, force);
     }
 
     @Override

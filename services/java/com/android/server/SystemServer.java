@@ -164,6 +164,7 @@ import com.android.server.pm.OtaDexoptService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
+import com.android.server.pm.dex.OdsignStatsLogger;
 import com.android.server.pm.dex.SystemServerDexLoadReporter;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.policy.AppOpsPolicy;
@@ -293,8 +294,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String LOWPAN_SERVICE_CLASS =
             "com.android.server.lowpan.LowpanService";
-    private static final String ETHERNET_SERVICE_CLASS =
-            "com.android.server.ethernet.EthernetService";
     private static final String JOB_SCHEDULER_SERVICE_CLASS =
             "com.android.server.job.JobSchedulerService";
     private static final String LOCK_SETTINGS_SERVICE_CLASS =
@@ -423,6 +422,8 @@ public final class SystemServer implements Dumpable {
 
     private static final String SDK_SANDBOX_MANAGER_SERVICE_CLASS =
             "com.android.server.sdksandbox.SdkSandboxManagerService$Lifecycle";
+    private static final String AD_SERVICES_MANAGER_SERVICE_CLASS =
+            "com.android.server.adservices.AdServicesManagerService$Lifecycle";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -1458,8 +1459,9 @@ public final class SystemServer implements Dumpable {
                     Slog.i(TAG, SECONDARY_ZYGOTE_PRELOAD);
                     TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
                     traceLog.traceBegin(SECONDARY_ZYGOTE_PRELOAD);
-                    if (!Process.ZYGOTE_PROCESS.preloadDefault(Build.SUPPORTED_32_BIT_ABIS[0])) {
-                        Slog.e(TAG, "Unable to preload default resources");
+                    String[] abis32 = Build.SUPPORTED_32_BIT_ABIS;
+                    if (abis32.length > 0 && !Process.ZYGOTE_PROCESS.preloadDefault(abis32[0])) {
+                        Slog.e(TAG, "Unable to preload default resources for secondary");
                     }
                     traceLog.traceEnd();
                 } catch (Exception ex) {
@@ -1486,8 +1488,9 @@ public final class SystemServer implements Dumpable {
 
             // TelecomLoader hooks into classes with defined HFP logic,
             // so check for either telephony or microphone.
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE) ||
-                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)
+                    || mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)
+                    || mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
                 t.traceBegin("StartTelecomLoaderService");
                 mSystemServiceManager.startService(TelecomLoaderService.class);
                 t.traceEnd();
@@ -1990,13 +1993,6 @@ public final class SystemServer implements Dumpable {
                     PackageManager.FEATURE_LOWPAN)) {
                 t.traceBegin("StartLowpan");
                 mSystemServiceManager.startService(LOWPAN_SERVICE_CLASS);
-                t.traceEnd();
-            }
-
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_ETHERNET) ||
-                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)) {
-                t.traceBegin("StartEthernet");
-                mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
                 t.traceEnd();
             }
 
@@ -2608,6 +2604,11 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(SDK_SANDBOX_MANAGER_SERVICE_CLASS);
         t.traceEnd();
 
+        // AdServicesManagerService (PP API service)
+        t.traceBegin("StartAdServicesManagerService");
+        mSystemServiceManager.startService(AD_SERVICES_MANAGER_SERVICE_CLASS);
+        t.traceEnd();
+
         if (safeMode) {
             mActivityManagerService.enterSafeMode();
         }
@@ -3043,6 +3044,14 @@ public final class SystemServer implements Dumpable {
                 setIncrementalServiceSystemReady(mIncrementalServiceHandle);
                 t.traceEnd();
             }
+
+            t.traceBegin("OdsignStatsLogger");
+            try {
+                OdsignStatsLogger.triggerStatsWrite();
+            } catch (Throwable e) {
+                reportWtf("Triggering OdsignStatsLogger", e);
+            }
+            t.traceEnd();
         }, t);
 
         t.traceBegin("StartSystemUI");

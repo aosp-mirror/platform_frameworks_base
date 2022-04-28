@@ -2322,7 +2322,9 @@
         <attr name="windowSplashScreenAnimatedIcon" format="reference"/>
         <!-- The duration, in milliseconds, of the window splash screen icon animation duration
              when playing the splash screen starting window. The maximum animation duration should
-             be limited below 1000ms. -->
+             be limited below 1000ms.
+              @deprecated Not used by framework starting from API level 33. The system estimates the
+               duration of the vector animation automatically. -->
         <attr name="windowSplashScreenAnimationDuration" format="integer"/>
 
         <!-- Place an drawable image in the bottom of the starting window, it can be used to
@@ -5479,9 +5481,9 @@
             <enum name="none" value="0" />
             <!-- Use the least restrictive rule for line-breaking. -->
             <enum name="loose" value="1" />
-            <!-- Indicate breaking text with the most comment set of line-breaking rules. -->
+            <!-- Indicates breaking text with the most comment set of line-breaking rules. -->
             <enum name="normal" value="2" />
-            <!-- ndicates breaking text with the most strictest line-breaking rules. -->
+            <!-- Indicates breaking text with the most strictest line-breaking rules. -->
             <enum name="strict" value="3" />
         </attr>
         <!-- Specify the phrase-based line break can be used when calculating the text wrapping.-->
@@ -6958,9 +6960,13 @@
         <!-- Special option for window animations: whether window should have rounded corners.
              @see ScreenDecorationsUtils#getWindowCornerRadius(Resources) -->
         <attr name="hasRoundedCorners" format="boolean" />
+        <!-- Special option for window animations: whether to show a background behind the animating
+             windows. By default the window's background is used unless overridden by the
+             animation. -->
+        <attr name="showBackdrop" format="boolean" />
         <!-- Special option for window animations: whether the window's background should be used as
              a background to the animation. -->
-        <attr name="showBackground" format="boolean" />
+        <attr name="backdropColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="AnimationSet">
@@ -8869,8 +8875,6 @@
         <attr name="shortcutLongLabel"/>
         <!-- Text shown on the button that takes users to the wallet application -->
         <attr name="shortcutShortLabel"/>
-        <!-- When true, launch the component specified in targetActivity for quick access -->
-        <attr name="useTargetActivityForQuickAccess" format="boolean"/>
     </declare-styleable>
 
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that
@@ -9806,5 +9810,13 @@
         <!-- The <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 language tag</a>
         of the supported locale. {@link android.app.LocaleConfig} -->
         <attr name="name" />
+    </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="CachingIconView">
+        <!-- Maximum width of displayed drawable. Drawables exceeding this size will be downsampled. -->
+        <attr name="maxDrawableWidth" format="dimension"/>
+        <!-- Maximum width of height drawable. Drawables exceeding this size will be downsampled. -->
+        <attr name="maxDrawableHeight" format="dimension"/>
     </declare-styleable>
     </resources>

@@ -28,7 +28,6 @@ import androidx.core.graphics.ColorUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Set;
 
@@ -113,19 +112,35 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
+    /** Sets a translationY value on every child view except for the media view. */
+    public void setChildrenTranslationYExcludingMediaView(float translationY) {
+        setChildrenTranslationYExcluding(translationY, Set.of(mMediaHostContainer));
+    }
+
+    /** Sets a translationY value on every view except for the views in the provided set. */
+    private void setChildrenTranslationYExcluding(float translationY, Set<View> excludedViews) {
+        for (int i = 0; i < mStatusViewContainer.getChildCount(); i++) {
+            final View child = mStatusViewContainer.getChildAt(i);
+
+            if (!excludedViews.contains(child)) {
+                child.setTranslationY(translationY);
+            }
+        }
+    }
+
     public float getChildrenAlphaExcludingSmartSpace() {
         return mChildrenAlphaExcludingSmartSpace;
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusView:");
         pw.println("  mDarkAmount: " + mDarkAmount);
         pw.println("  mTextColor: " + Integer.toHexString(mTextColor));
         if (mClockView != null) {
-            mClockView.dump(fd, pw, args);
+            mClockView.dump(pw, args);
         }
         if (mKeyguardSlice != null) {
-            mKeyguardSlice.dump(fd, pw, args);
+            mKeyguardSlice.dump(pw, args);
         }
     }
 }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2022 The Android Open Source Project
   ~
@@ -17,6 +18,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/helper_confirmation"
               android:theme="@style/ChooserActivity"
+              android:padding="12dp"
               style="@style/ContainerLayout">
 
     <ImageView
@@ -24,8 +26,8 @@
         android:layout_width="match_parent"
         android:layout_height="32dp"
         android:gravity="center"
-        android:layout_marginBottom="12dp"
-        android:layout_marginTop="1dp"/>
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"/>
 
     <TextView
         android:id="@+id/helper_title"
@@ -33,17 +35,18 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingHorizontal="12dp"
-        style="@*android:style/TextAppearance.Widget.Toolbar.Title"
-        android:textSize="20sp" />
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="22sp" />
 
     <TextView
         android:id="@+id/helper_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
         android:layout_marginTop="12dp"
-        android:layout_marginLeft="20dp"
         android:layout_marginBottom="24dp"
-        android:gravity="start"
+        android:gravity="center"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp" />
 
@@ -51,12 +54,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_marginRight="12dp"
+        android:layout_marginBottom="12dp"
         android:gravity="end">
 
         <Button
-            android:id="@+id/btn_ok"
-            style="@style/VendorHelperOkButton"
-            android:text="@string/consent_ok" />
+            android:id="@+id/btn_back"
+            style="@style/VendorHelperBackButton"
+            android:text="@string/consent_back" />
 
     </LinearLayout>
 

@@ -254,8 +254,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         mMirrorViewGeometryVsyncCallback =
                 l -> {
-                    if (isWindowVisible() && mMirrorSurface != null) {
-                        calculateSourceBounds(mMagnificationFrame, mScale);
+                    if (isWindowVisible() && mMirrorSurface != null && calculateSourceBounds(
+                            mMagnificationFrame, mScale)) {
                         // The final destination for the magnification surface should be at 0,0
                         // since the ViewRootImpl's position will change
                         mTmpRect.set(0, 0, mMagnificationFrame.width(),
@@ -350,8 +350,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             mMirrorWindowControl.destroyControl();
         }
         mMirrorViewBounds.setEmpty();
+        mSourceBounds.setEmpty();
         updateSystemUIStateIfNeeded();
         mContext.unregisterComponentCallbacks(this);
+        // Notify source bounds empty when magnification is deleted.
+        mWindowMagnifierCallback.onSourceBoundsChanged(mDisplayId, new Rect());
     }
 
     @Override
@@ -728,8 +731,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     /**
      * Calculates the desired source bounds. This will be the area under from the center of  the
      * displayFrame, factoring in scale.
+     *
+     * @return {@code true} if the source bounds is changed.
      */
-    private void calculateSourceBounds(Rect displayFrame, float scale) {
+    private boolean calculateSourceBounds(Rect displayFrame, float scale) {
+        final Rect oldSourceBounds = mTmpRect;
+        oldSourceBounds.set(mSourceBounds);
         int halfWidth = displayFrame.width() / 2;
         int halfHeight = displayFrame.height() / 2;
         int left = displayFrame.left + (halfWidth - (int) (halfWidth / scale));
@@ -757,6 +764,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             mSourceBounds.offsetTo(mSourceBounds.left,
                     mWindowBounds.height() - mSourceBounds.height());
         }
+        return !mSourceBounds.equals(oldSourceBounds);
     }
 
     private void calculateMagnificationFrameBoundary() {
@@ -1079,7 +1087,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         pw.println("      mMagnificationFrame:"
                 + (isWindowVisible() ? mMagnificationFrame : "empty"));
         pw.println("      mSourceBounds:"
-                 + (isWindowVisible() ? mSourceBounds : "empty"));
+                 + (mSourceBounds.isEmpty() ? "empty" : mSourceBounds));
         pw.println("      mSystemGestureTop:" + mSystemGestureTop);
         pw.println("      mMagnificationFrameOffsetX:" + mMagnificationFrameOffsetX);
         pw.println("      mMagnificationFrameOffsetY:" + mMagnificationFrameOffsetY);

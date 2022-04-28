@@ -50,7 +50,6 @@ class TrustAgentRule<T : BaseTrustAgentService>(
             verifyTrustServiceRunning()
             unlockDeviceWithCredential()
             enableTrustAgent()
-            waitForEnablement()
 
             try {
                 verifyAgentIsRunning()
@@ -80,15 +79,10 @@ class TrustAgentRule<T : BaseTrustAgentService>(
         lockPatternUtils.setEnabledTrustAgents(agents, userId)
     }
 
-    private fun waitForEnablement() {
-        Log.d(TAG, "Waiting for $WAIT_TIME ms")
-        Thread.sleep(WAIT_TIME)
-        Log.d(TAG, "Done waiting")
-    }
-
     private fun verifyAgentIsRunning() {
-        assertWithMessage("${serviceClass.simpleName} should be running")
-            .that(BaseTrustAgentService.instance(serviceClass)).isNotNull()
+        wait("${serviceClass.simpleName} to be running") {
+            BaseTrustAgentService.instance(serviceClass) != null
+        }
     }
 
     private fun disableTrustAgent() {
@@ -112,6 +106,5 @@ class TrustAgentRule<T : BaseTrustAgentService>(
             TrustAgentRule(T::class)
 
         private const val TAG = "TrustAgentRule"
-        private val WAIT_TIME = 1000L
     }
 }

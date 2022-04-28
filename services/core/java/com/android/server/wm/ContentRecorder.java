@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
+import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONTENT_RECORDING;
 
@@ -26,6 +27,7 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.provider.DeviceConfig;
 import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.SurfaceControl;
@@ -39,6 +41,11 @@ import com.android.internal.protolog.common.ProtoLog;
 final class ContentRecorder {
 
     /**
+     * The key for accessing the device config that controls if task recording is supported.
+     */
+    @VisibleForTesting static final String KEY_RECORD_TASK_FEATURE = "record_task_content";
+
+    /**
      * The display content this class is handling recording for.
      */
     @NonNull
@@ -48,7 +55,7 @@ final class ContentRecorder {
      * The session for content recording, or null if this DisplayContent is not being used for
      * recording.
      */
-    @VisibleForTesting private ContentRecordingSession mContentRecordingSession = null;
+    private ContentRecordingSession mContentRecordingSession = null;
 
     /**
      * The WindowContainer for the level of the hierarchy to record.
@@ -187,6 +194,8 @@ final class ContentRecorder {
             mDisplayContent.mWmService.mTransactionFactory.get().remove(mRecordedSurface).apply();
             mRecordedSurface = null;
             clearContentRecordingSession();
+            // Do not need to force remove the VirtualDisplay; this is handled by the media
+            // projection service.
         }
     }
 
@@ -215,46 +224,12 @@ final class ContentRecorder {
             return;
         }
 
-        final int contentToRecord = mContentRecordingSession.getContentToRecord();
-        if (contentToRecord != RECORD_CONTENT_DISPLAY) {
-            // TODO(b/216625226) handle task-based recording
-            // Not a valid region, or recording is disabled, so fall back to prior MediaProjection
-            // approach.
-            clearContentRecordingSession();
-            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Unable to start recording due to invalid region for display %d",
-                    mDisplayContent.getDisplayId());
+        mRecordedWindowContainer = retrieveRecordedWindowContainer();
+        if (mRecordedWindowContainer == null) {
+            // Either the token is missing, or the window associated with the token is missing.
+            // Error has already been handled, so just leave.
             return;
         }
-        // Given the WindowToken of the DisplayArea to record, retrieve the associated
-        // SurfaceControl.
-        IBinder tokenToRecord = mContentRecordingSession.getTokenToRecord();
-        if (tokenToRecord == null) {
-            // Unexpectedly missing token. Fall back to prior MediaProjection approach.
-            clearContentRecordingSession();
-            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Unable to start recording due to null token for display %d",
-                    mDisplayContent.getDisplayId());
-            return;
-        }
-
-        final WindowContainer wc =
-                mDisplayContent.mWmService.mWindowContextListenerController.getContainer(
-                        tokenToRecord);
-        if (wc == null) {
-            // Un-set the window token to record for this VirtualDisplay. Fall back to the
-            // original MediaProjection approach.
-            mDisplayContent.mWmService.mDisplayManagerInternal.setWindowManagerMirroring(
-                    mDisplayContent.getDisplayId(), false);
-            clearContentRecordingSession();
-            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Unable to retrieve window container to start recording for "
-                            + "display %d",
-                    mDisplayContent.getDisplayId());
-            return;
-        }
-        // TODO(206461622) Migrate to using the RootDisplayArea
-        mRecordedWindowContainer = wc.getDisplayContent();
 
         final Point surfaceSize = fetchSurfaceSizeIfPresent();
         if (surfaceSize == null) {
@@ -293,6 +268,107 @@ final class ContentRecorder {
         // mirrored SurfaceControl is alive since the parent DisplayContent SurfaceControl is
         // holding a reference to it. Therefore, the mirrored SurfaceControl will be cleaned up
         // when the VirtualDisplay is destroyed - which will clean up this DisplayContent.
+    }
+
+    /**
+     * Retrieves the {@link WindowContainer} for the level of the hierarchy to start recording,
+     * indicated by the {@link #mContentRecordingSession}. Performs any error handling and state
+     * updates necessary if the {@link WindowContainer} could not be retrieved.
+     * {@link #mContentRecordingSession} must be non-null.
+     *
+     * @return a {@link WindowContainer} to record, or {@code null} if an error was encountered. The
+     * error is logged and any cleanup is handled.
+     */
+    @Nullable
+    private WindowContainer retrieveRecordedWindowContainer() {
+        final int contentToRecord = mContentRecordingSession.getContentToRecord();
+        // Given the WindowToken of the region to record, retrieve the associated
+        // SurfaceControl.
+        final IBinder tokenToRecord = mContentRecordingSession.getTokenToRecord();
+        if (tokenToRecord == null) {
+            handleStartRecordingFailed();
+            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                    "Unable to start recording due to null token for display %d",
+                    mDisplayContent.getDisplayId());
+            return null;
+        }
+        switch (contentToRecord) {
+            case RECORD_CONTENT_DISPLAY:
+                final WindowContainer wc =
+                        mDisplayContent.mWmService.mWindowContextListenerController.getContainer(
+                                tokenToRecord);
+                if (wc == null) {
+                    // Un-set the window token to record for this VirtualDisplay. Fall back to
+                    // Display stack capture for the entire display.
+                    mDisplayContent.mWmService.mDisplayManagerInternal.setWindowManagerMirroring(
+                            mDisplayContent.getDisplayId(), false);
+                    handleStartRecordingFailed();
+                    ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                            "Unable to retrieve window container to start recording for "
+                                    + "display %d", mDisplayContent.getDisplayId());
+                    return null;
+                }
+                // TODO(206461622) Migrate to using the RootDisplayArea
+                return wc.getDisplayContent();
+            case RECORD_CONTENT_TASK:
+                if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                        KEY_RECORD_TASK_FEATURE, false)) {
+                    handleStartRecordingFailed();
+                    ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                            "Unable to record task since feature is disabled %d",
+                            mDisplayContent.getDisplayId());
+                    return null;
+                }
+                Task taskToRecord = WindowContainer.fromBinder(tokenToRecord).asTask();
+                if (taskToRecord == null) {
+                    handleStartRecordingFailed();
+                    ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                            "Unable to retrieve task to start recording for "
+                                    + "display %d", mDisplayContent.getDisplayId());
+                }
+                return taskToRecord;
+            default:
+                // Not a valid region, or recording is disabled, so fall back to Display stack
+                // capture for the entire display.
+                handleStartRecordingFailed();
+                ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                        "Unable to start recording due to invalid region for display %d",
+                        mDisplayContent.getDisplayId());
+                return null;
+        }
+    }
+
+    /**
+     * Exit this recording session.
+     * <p>
+     * If this is a task session, tear down the recording entirely. Do not fall back
+     * to recording the entire display on the display stack; this would surprise the user
+     * given they selected task capture.
+     * </p><p>
+     * If this is a display session, just stop recording by layer mirroring. Fall back to recording
+     * from the display stack.
+     * </p>
+     */
+    private void handleStartRecordingFailed() {
+        final boolean shouldExitTaskRecording = mContentRecordingSession != null
+                && mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK;
+        if (shouldExitTaskRecording) {
+            // Clean up the cached session first, since tearing down the display will generate
+            // display
+            // events which will trickle back to here.
+            clearContentRecordingSession();
+            tearDownVirtualDisplay();
+        } else {
+            clearContentRecordingSession();
+        }
+    }
+
+    /**
+     * Ensure recording does not fall back to the display stack; ensure the recording is stopped
+     * and the client notified by tearing down the virtual display.
+     */
+    private void tearDownVirtualDisplay() {
+        // TODO(b/219761722) Clean up the VirtualDisplay if task mirroring fails
     }
 
     /**

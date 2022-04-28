@@ -544,6 +544,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             override fun setPrimaryTextColor(color: Int) {
             }
 
+            override fun setIsDreaming(isDreaming: Boolean) {
+            }
+
             override fun setDozeAmount(amount: Float) {
             }
 

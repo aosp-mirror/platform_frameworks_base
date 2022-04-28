@@ -17,44 +17,76 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
-import static android.content.pm.PackageManagerInternal.LAST_KNOWN_PACKAGE;
 
+import static com.android.server.pm.KnownPackages.LAST_KNOWN_PACKAGE;
 import static com.android.server.pm.PackageManagerServiceUtils.dumpCriticalInfo;
 
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.os.incremental.PerUidReadTimeouts;
 import android.service.pm.PackageServiceDumpProto;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.resolution.ComponentResolverApi;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 
 import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.function.BiConsumer;
 
 /**
  * Dumps PackageManagerService internal states.
  */
 final class DumpHelper {
-    final PackageManagerService mPm;
+    private final PermissionManagerServiceInternal mPermissionManager;
+    private final ApexManager mApexManager;
+    private final StorageEventHelper mStorageEventHelper;
+    private final DomainVerificationManagerInternal mDomainVerificationManager;
+    private final PackageInstallerService mInstallerService;
+    private final String mRequiredVerifierPackage;
+    private final KnownPackages mKnownPackages;
+    private final ChangedPackagesTracker mChangedPackagesTracker;
+    private final ArrayMap<String, FeatureInfo> mAvailableFeatures;
+    private final ArraySet<String> mProtectedBroadcasts;
+    private final PerUidReadTimeouts[] mPerUidReadTimeouts;
 
-    DumpHelper(PackageManagerService pm) {
-        mPm = pm;
+    DumpHelper(
+            PermissionManagerServiceInternal permissionManager, ApexManager apexManager,
+            StorageEventHelper storageEventHelper,
+            DomainVerificationManagerInternal domainVerificationManager,
+            PackageInstallerService installerService, String requiredVerifierPackage,
+            KnownPackages knownPackages,
+            ChangedPackagesTracker changedPackagesTracker,
+            ArrayMap<String, FeatureInfo> availableFeatures,
+            ArraySet<String> protectedBroadcasts,
+            PerUidReadTimeouts[] perUidReadTimeouts) {
+        mPermissionManager = permissionManager;
+        mApexManager = apexManager;
+        mStorageEventHelper = storageEventHelper;
+        mDomainVerificationManager = domainVerificationManager;
+        mInstallerService = installerService;
+        mRequiredVerifierPackage = requiredVerifierPackage;
+        mKnownPackages = knownPackages;
+        mChangedPackagesTracker = changedPackagesTracker;
+        mAvailableFeatures = availableFeatures;
+        mProtectedBroadcasts = protectedBroadcasts;
+        mPerUidReadTimeouts = perUidReadTimeouts;
     }
 
     @NeverCompile // Avoid size overhead of debugging code.
-    public void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void doDump(Computer snapshot, FileDescriptor fd, PrintWriter pw, String[] args) {
         DumpState dumpState = new DumpState();
         ArraySet<String> permissionNames = null;
 
@@ -78,7 +110,7 @@ final class DumpHelper {
             } else if ("-f".equals(opt)) {
                 dumpState.setOptionEnabled(DumpState.OPTION_SHOW_FILTERS);
             } else if ("--proto".equals(opt)) {
-                dumpProto(fd);
+                dumpProto(snapshot, fd);
                 return;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
@@ -121,9 +153,10 @@ final class DumpHelper {
                 }
 
                 // Normalize package name to handle renamed packages and static libs
-                pkg = mPm.resolveInternalPackageName(pkg, PackageManager.VERSION_CODE_HIGHEST);
+                pkg = snapshot.resolveInternalPackageName(pkg,
+                        PackageManager.VERSION_CODE_HIGHEST);
 
-                pw.println(mPm.checkPermission(perm, pkg, user));
+                pw.println(mPermissionManager.checkPermission(perm, pkg, user));
                 return;
             } else if ("l".equals(cmd) || "libraries".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_LIBS);
@@ -229,12 +262,6 @@ final class DumpHelper {
                 }
             } else if ("protected-broadcasts".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PROTECTED_BROADCASTS);
-            } else if ("write".equals(cmd)) {
-                synchronized (mPm.mLock) {
-                    mPm.writeSettingsLPrTEMP();
-                    pw.println("Settings written.");
-                    return;
-                }
             }
         }
 
@@ -243,8 +270,8 @@ final class DumpHelper {
 
         // Return if the package doesn't exist.
         if (packageName != null
-                && mPm.getPackageStateInternal(packageName) == null
-                && !mPm.mApexManager.isApexPackage(packageName)) {
+                && snapshot.getPackageStateInternal(packageName) == null
+                && !mApexManager.isApexPackage(packageName)) {
             pw.println("Unable to find package: " + packageName);
             return;
         }
@@ -257,7 +284,7 @@ final class DumpHelper {
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_VERSION)
                 && packageName == null) {
-            mPm.dumpComputer(DumpState.DUMP_VERSION, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_VERSION, fd, pw, dumpState);
         }
 
         if (!checkin
@@ -270,11 +297,11 @@ final class DumpHelper {
             ipw.println("Known Packages:");
             ipw.increaseIndent();
             for (int i = 0; i <= LAST_KNOWN_PACKAGE; i++) {
-                final String knownPackage = PackageManagerInternal.knownPackageToString(i);
+                final String knownPackage = KnownPackages.knownPackageToString(i);
                 ipw.print(knownPackage);
                 ipw.println(":");
-                final String[] pkgNames = mPm.getKnownPackageNamesInternal(i,
-                        UserHandle.USER_SYSTEM);
+                final String[] pkgNames = mKnownPackages.getKnownPackageNames(snapshot,
+                        i, UserHandle.USER_SYSTEM);
                 ipw.increaseIndent();
                 if (ArrayUtils.isEmpty(pkgNames)) {
                     ipw.println("none");
@@ -288,11 +315,9 @@ final class DumpHelper {
             ipw.decreaseIndent();
         }
 
-        final Computer snapshot = mPm.snapshotComputer();
-
         if (dumpState.isDumping(DumpState.DUMP_VERIFIERS)
                 && packageName == null) {
-            final String requiredVerifierPackage = mPm.mRequiredVerifierPackage;
+            final String requiredVerifierPackage = mRequiredVerifierPackage;
             if (!checkin) {
                 if (dumpState.onTitlePrinted()) {
                     pw.println();
@@ -305,7 +330,8 @@ final class DumpHelper {
                         MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
                 pw.println(")");
             } else if (requiredVerifierPackage != null) {
-                pw.print("vrfy,"); pw.print(requiredVerifierPackage);
+                pw.print("vrfy,");
+                pw.print(requiredVerifierPackage);
                 pw.print(",");
                 pw.println(snapshot.getPackageUid(requiredVerifierPackage,
                         MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
@@ -314,7 +340,7 @@ final class DumpHelper {
 
         if (dumpState.isDumping(DumpState.DUMP_DOMAIN_VERIFIER)
                 && packageName == null) {
-            final DomainVerificationProxy proxy = mPm.mDomainVerificationManager.getProxy();
+            final DomainVerificationProxy proxy = mDomainVerificationManager.getProxy();
             final ComponentName verifierComponent = proxy.getComponentName();
             if (verifierComponent != null) {
                 String verifierPackageName = verifierComponent.getPackageName();
@@ -330,7 +356,8 @@ final class DumpHelper {
                             MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
                     pw.println(")");
                 } else if (verifierPackageName != null) {
-                    pw.print("dv,"); pw.print(verifierPackageName);
+                    pw.print("dv,");
+                    pw.print(verifierPackageName);
                     pw.print(",");
                     pw.println(snapshot.getPackageUid(verifierPackageName,
                             MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
@@ -343,7 +370,7 @@ final class DumpHelper {
 
         if (dumpState.isDumping(DumpState.DUMP_LIBS)
                 && packageName == null) {
-            mPm.dumpComputer(DumpState.DUMP_LIBS, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_LIBS, fd, pw, dumpState);
         }
 
         if (dumpState.isDumping(DumpState.DUMP_FEATURES)
@@ -355,90 +382,85 @@ final class DumpHelper {
                 pw.println("Features:");
             }
 
-            synchronized (mPm.mAvailableFeatures) {
-                for (FeatureInfo feat : mPm.mAvailableFeatures.values()) {
-                    if (!checkin) {
-                        pw.print("  ");
-                        pw.print(feat.name);
-                        if (feat.version > 0) {
-                            pw.print(" version=");
-                            pw.print(feat.version);
-                        }
-                        pw.println();
-                    } else {
-                        pw.print("feat,");
-                        pw.print(feat.name);
-                        pw.print(",");
-                        pw.println(feat.version);
+            for (FeatureInfo feat : mAvailableFeatures.values()) {
+                if (!checkin) {
+                    pw.print("  ");
+                    pw.print(feat.name);
+                    if (feat.version > 0) {
+                        pw.print(" version=");
+                        pw.print(feat.version);
                     }
+                    pw.println();
+                } else {
+                    pw.print("feat,");
+                    pw.print(feat.name);
+                    pw.print(",");
+                    pw.println(feat.version);
                 }
             }
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_ACTIVITY_RESOLVERS)) {
-            mPm.mComponentResolver.dumpActivityResolvers(pw, dumpState, packageName);
+        final ComponentResolverApi componentResolver = snapshot.getComponentResolver();
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_ACTIVITY_RESOLVERS)) {
+            componentResolver.dumpActivityResolvers(pw, dumpState, packageName);
         }
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_RECEIVER_RESOLVERS)) {
-            mPm.mComponentResolver.dumpReceiverResolvers(pw, dumpState, packageName);
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_RECEIVER_RESOLVERS)) {
+            componentResolver.dumpReceiverResolvers(pw, dumpState, packageName);
         }
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_RESOLVERS)) {
-            mPm.mComponentResolver.dumpServiceResolvers(pw, dumpState, packageName);
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_SERVICE_RESOLVERS)) {
+            componentResolver.dumpServiceResolvers(pw, dumpState, packageName);
         }
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_CONTENT_RESOLVERS)) {
-            mPm.mComponentResolver.dumpProviderResolvers(pw, dumpState, packageName);
-        }
-
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
-            mPm.dumpComputer(DumpState.DUMP_PREFERRED, fd, pw, dumpState);
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_CONTENT_RESOLVERS)) {
+            componentResolver.dumpProviderResolvers(pw, dumpState, packageName);
         }
 
         if (!checkin
-                && dumpState.isDumping(DumpState.DUMP_PREFERRED_XML)
-                && packageName == null) {
-            mPm.dumpComputer(DumpState.DUMP_PREFERRED_XML, fd, pw, dumpState);
+                && dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
+            snapshot.dump(DumpState.DUMP_PREFERRED, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
-            mPm.dumpComputer(DumpState.DUMP_DOMAIN_PREFERRED, fd, pw, dumpState);
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PREFERRED_XML) && packageName == null) {
+            snapshot.dump(DumpState.DUMP_PREFERRED_XML, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
-            mPm.mSettings.dumpPermissions(pw, packageName, permissionNames, dumpState);
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
+            snapshot.dump(DumpState.DUMP_DOMAIN_PREFERRED, fd, pw, dumpState);
         }
 
-        if (!checkin && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
-            mPm.mComponentResolver.dumpContentProviders(snapshot, pw, dumpState,
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
+            snapshot.dumpPermissions(pw, packageName, permissionNames, dumpState);
+        }
+
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
+            componentResolver.dumpContentProviders(snapshot, pw, dumpState,
                     packageName);
         }
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_KEYSETS)) {
-            synchronized (mPm.mLock) {
-                mPm.mSettings.getKeySetManagerService().dumpLPr(pw, packageName, dumpState);
-            }
+            snapshot.dumpKeySet(pw, packageName, dumpState);
         }
 
         if (dumpState.isDumping(DumpState.DUMP_PACKAGES)) {
-            // This cannot be moved to ComputerEngine since some variables of the collections
-            // in PackageUserState such as suspendParams, disabledComponents and enabledComponents
-            // do not have a copy.
-            synchronized (mPm.mLock) {
-                mPm.mSettings.dumpPackagesLPr(pw, packageName, permissionNames, dumpState, checkin);
-            }
+            snapshot.dumpPackages(pw, packageName, permissionNames, dumpState, checkin);
         }
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_QUERIES)) {
-            mPm.dumpComputer(DumpState.DUMP_QUERIES, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_QUERIES, fd, pw, dumpState);
         }
 
         if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
-            // This cannot be moved to ComputerEngine since the set of packages in the
-            // SharedUserSetting do not have a copy.
-            synchronized (mPm.mLock) {
-                mPm.mSettings.dumpSharedUsersLPr(pw, packageName, permissionNames, dumpState,
-                        checkin);
-            }
+            snapshot.dumpSharedUsers(pw, packageName, permissionNames, dumpState,
+                    checkin);
         }
 
         if (!checkin
@@ -448,15 +470,19 @@ final class DumpHelper {
                 pw.println();
             }
             pw.println("Package Changes:");
-            mPm.mChangedPackagesTracker.iterateAll((sequenceNumber, values) -> {
-                pw.print("  Sequence number="); pw.println(sequenceNumber);
+            mChangedPackagesTracker.iterateAll((sequenceNumber, values) -> {
+                pw.print("  Sequence number=");
+                pw.println(sequenceNumber);
                 final int numChangedPackages = values.size();
                 for (int i = 0; i < numChangedPackages; i++) {
                     final SparseArray<String> changes = values.valueAt(i);
-                    pw.print("  User "); pw.print(values.keyAt(i)); pw.println(":");
+                    pw.print("  User ");
+                    pw.print(values.keyAt(i));
+                    pw.println(":");
                     final int numChanges = changes.size();
                     if (numChanges == 0) {
-                        pw.print("    "); pw.println("No packages changed");
+                        pw.print("    ");
+                        pw.println("No packages changed");
                     } else {
                         for (int j = 0; j < numChanges; j++) {
                             final String pkgName = changes.valueAt(j);
@@ -475,66 +501,29 @@ final class DumpHelper {
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_FROZEN)
                 && packageName == null) {
-            // XXX should handle packageName != null by dumping only install data that
-            // the given package is involved with.
-            if (dumpState.onTitlePrinted()) {
-                pw.println();
-            }
-            final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
-            ipw.println();
-            ipw.println("Frozen packages:");
-            ipw.increaseIndent();
-            synchronized (mPm.mLock) {
-                if (mPm.mFrozenPackages.size() == 0) {
-                    ipw.println("(none)");
-                } else {
-                    for (int i = 0; i < mPm.mFrozenPackages.size(); i++) {
-                        ipw.print("package=");
-                        ipw.print(mPm.mFrozenPackages.keyAt(i));
-                        ipw.print(", refCounts=");
-                        ipw.println(mPm.mFrozenPackages.valueAt(i));
-                    }
-                }
-            }
-            ipw.decreaseIndent();
+            snapshot.dump(DumpState.DUMP_FROZEN, fd, pw, dumpState);
         }
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_VOLUMES)
                 && packageName == null) {
-            if (dumpState.onTitlePrinted()) {
-                pw.println();
-            }
-            final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
-            ipw.println();
-            ipw.println("Loaded volumes:");
-            ipw.increaseIndent();
-            synchronized (mPm.mLoadedVolumes) {
-                if (mPm.mLoadedVolumes.size() == 0) {
-                    ipw.println("(none)");
-                } else {
-                    for (int i = 0; i < mPm.mLoadedVolumes.size(); i++) {
-                        ipw.println(mPm.mLoadedVolumes.valueAt(i));
-                    }
-                }
-            }
-            ipw.decreaseIndent();
+            mStorageEventHelper.dumpLoadedVolumes(pw, dumpState);
         }
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_SERVICE_PERMISSIONS)
                 && packageName == null) {
-            mPm.mComponentResolver.dumpServicePermissions(pw, dumpState);
+            componentResolver.dumpServicePermissions(pw, dumpState);
         }
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_DEXOPT)) {
-            mPm.dumpComputer(DumpState.DUMP_DEXOPT, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_DEXOPT, fd, pw, dumpState);
         }
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_COMPILER_STATS)) {
-            mPm.dumpComputer(DumpState.DUMP_COMPILER_STATS, fd, pw, dumpState);
+            snapshot.dump(DumpState.DUMP_COMPILER_STATS, fd, pw, dumpState);
         }
 
         if (dumpState.isDumping(DumpState.DUMP_MESSAGES)
@@ -543,7 +532,7 @@ final class DumpHelper {
                 if (dumpState.onTitlePrinted()) {
                     pw.println();
                 }
-                mPm.mSettings.dumpReadMessages(pw, dumpState);
+                snapshot.dump(DumpState.DUMP_MESSAGES, fd, pw, dumpState);
                 pw.println();
                 pw.println("Package warning messages:");
                 dumpCriticalInfo(pw, null);
@@ -561,13 +550,13 @@ final class DumpHelper {
             if (dumpState.onTitlePrinted()) {
                 pw.println();
             }
-            mPm.mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
+            mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
         }
 
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_APEX)
-                && (packageName == null || mPm.mApexManager.isApexPackage(packageName))) {
-            mPm.mApexManager.dump(pw, packageName);
+                && (packageName == null || mApexManager.isApexPackage(packageName))) {
+            mApexManager.dump(pw, packageName);
         }
 
         if (!checkin
@@ -581,9 +570,8 @@ final class DumpHelper {
             pw.println("    Known digesters list flag: "
                     + PackageManagerService.getKnownDigestersList());
 
-            PerUidReadTimeouts[] items = mPm.getPerUidReadTimeouts();
-            pw.println("    Timeouts (" + items.length + "):");
-            for (PerUidReadTimeouts item : items) {
+            pw.println("    Timeouts (" + mPerUidReadTimeouts.length + "):");
+            for (PerUidReadTimeouts item : mPerUidReadTimeouts) {
                 pw.print("        (");
                 pw.print("uid=" + item.uid + ", ");
                 pw.print("minTimeUs=" + item.minTimeUs + ", ");
@@ -599,8 +587,6 @@ final class DumpHelper {
             if (dumpState.onTitlePrinted()) {
                 pw.println();
             }
-            pw.println("Snapshot statistics");
-            mPm.dumpSnapshotStats(pw, dumpState.isBrief());
         }
 
         if (!checkin
@@ -610,11 +596,9 @@ final class DumpHelper {
                 pw.println();
             }
             pw.println("Protected broadcast actions:");
-            synchronized (mPm.mProtectedBroadcasts) {
-                for (int i = 0; i < mPm.mProtectedBroadcasts.size(); i++) {
-                    pw.print("  ");
-                    pw.println(mPm.mProtectedBroadcasts.valueAt(i));
-                }
+            for (int i = 0; i < mProtectedBroadcasts.size(); i++) {
+                pw.print("  ");
+                pw.println(mProtectedBroadcasts.valueAt(i));
             }
 
         }
@@ -659,55 +643,50 @@ final class DumpHelper {
         pw.println("    <package.name>: info about given package");
     }
 
-    private void dumpProto(FileDescriptor fd) {
+    private void dumpProto(Computer snapshot, FileDescriptor fd) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
 
-        synchronized (mPm.mLock) {
-            final Computer snapshot = mPm.snapshotComputer();
-            final long requiredVerifierPackageToken =
-                    proto.start(PackageServiceDumpProto.REQUIRED_VERIFIER_PACKAGE);
-            proto.write(PackageServiceDumpProto.PackageShortProto.NAME,
-                    mPm.mRequiredVerifierPackage);
+        final long requiredVerifierPackageToken =
+                proto.start(PackageServiceDumpProto.REQUIRED_VERIFIER_PACKAGE);
+        proto.write(PackageServiceDumpProto.PackageShortProto.NAME,
+                mRequiredVerifierPackage);
+        proto.write(
+                PackageServiceDumpProto.PackageShortProto.UID,
+                snapshot.getPackageUid(
+                        mRequiredVerifierPackage,
+                        MATCH_DEBUG_TRIAGED_MISSING,
+                        UserHandle.USER_SYSTEM));
+        proto.end(requiredVerifierPackageToken);
+
+        DomainVerificationProxy proxy = mDomainVerificationManager.getProxy();
+        ComponentName verifierComponent = proxy.getComponentName();
+        if (verifierComponent != null) {
+            String verifierPackageName = verifierComponent.getPackageName();
+            final long verifierPackageToken =
+                    proto.start(PackageServiceDumpProto.VERIFIER_PACKAGE);
+            proto.write(PackageServiceDumpProto.PackageShortProto.NAME, verifierPackageName);
             proto.write(
                     PackageServiceDumpProto.PackageShortProto.UID,
                     snapshot.getPackageUid(
-                            mPm.mRequiredVerifierPackage,
+                            verifierPackageName,
                             MATCH_DEBUG_TRIAGED_MISSING,
                             UserHandle.USER_SYSTEM));
-            proto.end(requiredVerifierPackageToken);
-
-            DomainVerificationProxy proxy = mPm.mDomainVerificationManager.getProxy();
-            ComponentName verifierComponent = proxy.getComponentName();
-            if (verifierComponent != null) {
-                String verifierPackageName = verifierComponent.getPackageName();
-                final long verifierPackageToken =
-                        proto.start(PackageServiceDumpProto.VERIFIER_PACKAGE);
-                proto.write(PackageServiceDumpProto.PackageShortProto.NAME, verifierPackageName);
-                proto.write(
-                        PackageServiceDumpProto.PackageShortProto.UID,
-                        snapshot.getPackageUid(
-                                verifierPackageName,
-                                MATCH_DEBUG_TRIAGED_MISSING,
-                                UserHandle.USER_SYSTEM));
-                proto.end(verifierPackageToken);
-            }
-
-            mPm.mInjector.getSharedLibrariesImpl().dumpProto(proto);
-            dumpFeaturesProto(proto);
-            mPm.mSettings.dumpPackagesProto(proto);
-            mPm.mSettings.dumpSharedUsersProto(proto);
-            dumpCriticalInfo(proto);
+            proto.end(verifierPackageToken);
         }
+
+        snapshot.dumpSharedLibrariesProto(proto);
+        dumpAvailableFeaturesProto(proto);
+        snapshot.dumpPackagesProto(proto);
+        snapshot.dumpSharedUsersProto(proto);
+        dumpCriticalInfo(proto);
         proto.flush();
     }
 
-    private void dumpFeaturesProto(ProtoOutputStream proto) {
-        synchronized (mPm.mAvailableFeatures) {
-            final int count = mPm.mAvailableFeatures.size();
-            for (int i = 0; i < count; i++) {
-                mPm.mAvailableFeatures.valueAt(i).dumpDebug(proto,
-                        PackageServiceDumpProto.FEATURES);
-            }
+
+    private void dumpAvailableFeaturesProto(@NonNull ProtoOutputStream proto) {
+        final int count = mAvailableFeatures.size();
+        for (int i = 0; i < count; i++) {
+            mAvailableFeatures.valueAt(i).dumpDebug(proto, PackageServiceDumpProto.FEATURES);
         }
     }
 }

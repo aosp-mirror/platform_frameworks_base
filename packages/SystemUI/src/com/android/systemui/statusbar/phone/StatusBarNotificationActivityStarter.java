@@ -370,6 +370,8 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             mLogger.logExpandingBubble(notificationKey);
             removeHunAfterClick(row);
             expandBubbleStackOnMainThread(entry);
+            mMainThreadHandler.post(
+                    () -> mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry));
         } else {
             startNotificationIntent(intent, fillInIntent, entry, row, animate, isActivityIntent);
         }
@@ -395,17 +397,23 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             mMainThreadHandler.post(() -> {
                 final Runnable removeNotification = () -> {
                     mOnUserInteractionCallback.onDismiss(entry, REASON_CLICK, summaryToRemove);
-                    mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry);
+                    if (!animate) {
+                        // If we're animating, this would be invoked after the activity launch
+                        // animation completes. Since we're not animating, the launch already
+                        // happened synchronously, so we notify the launch is complete here after
+                        // onDismiss.
+                        mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry);
+                    }
                 };
                 if (mPresenter.isCollapsing()) {
-                    // To avoid lags we're only performing the remove
-                    // after the shade is collapsed
+                    // To avoid lags we're only performing the remove after the shade is collapsed
                     mShadeController.addPostCollapseAction(removeNotification);
                 } else {
                     removeNotification.run();
                 }
             });
-        } else {
+        } else if (!canBubble && !animate) {
+            // Not animating, this is the end of the launch flow (see above comment for more info).
             mMainThreadHandler.post(
                     () -> mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry));
         }
@@ -481,16 +489,22 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             ExpandableNotificationRow row,
             boolean animate,
             boolean isActivityIntent) {
-        mLogger.logStartNotificationIntent(entry.getKey(), intent);
+        mLogger.logStartNotificationIntent(entry.getKey());
         try {
+            Runnable onFinishAnimationCallback = animate
+                    ? () -> mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry)
+                    : null;
             ActivityLaunchAnimator.Controller animationController =
                     new StatusBarLaunchAnimatorController(
-                            mNotificationAnimationProvider.getAnimatorController(row),
+                            mNotificationAnimationProvider
+                                    .getAnimatorController(row, onFinishAnimationCallback),
                             mCentralSurfaces,
                             isActivityIntent);
-
-            mActivityLaunchAnimator.startPendingIntentWithAnimation(animationController,
-                    animate, intent.getCreatorPackage(), (adapter) -> {
+            mActivityLaunchAnimator.startPendingIntentWithAnimation(
+                    animationController,
+                    animate,
+                    intent.getCreatorPackage(),
+                    (adapter) -> {
                         long eventTime = row.getAndResetLastActionUpTime();
                         Bundle options = eventTime > 0
                                 ? getActivityOptions(
@@ -499,8 +513,10 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                                 mKeyguardStateController.isShowing(),
                                 eventTime)
                                 : getActivityOptions(mCentralSurfaces.getDisplayId(), adapter);
-                        return intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
+                        int result = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
                                 null, null, options);
+                        mLogger.logSendPendingIntent(entry.getKey(), intent, result);
+                        return result;
                     });
         } catch (PendingIntent.CanceledException e) {
             // the stack trace isn't very helpful here.

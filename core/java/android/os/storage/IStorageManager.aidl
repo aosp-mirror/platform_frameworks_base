@@ -78,36 +78,9 @@ interface IStorageManager {
      */
     String getMountedObbPath(in String rawPath) = 24;
     /**
-     * Decrypts any encrypted volumes.
-     */
-    int decryptStorage(in String password) = 26;
-    /**
-     * Encrypts storage.
-     */
-    int encryptStorage(int type, in String password) = 27;
-    /**
-     * Changes the encryption password.
-     */
-    int changeEncryptionPassword(int type, in String password) = 28;
-    /**
      * Returns list of all mountable volumes for the specified userId
      */
     StorageVolume[] getVolumeList(int userId, in String callingPackage, int flags) = 29;
-    /**
-     * Determines the encryption state of the volume.
-     * @return a numerical value. See {@code ENCRYPTION_STATE_*} for possible
-     * values.
-     * Note that this has been replaced in most cases by the APIs in
-     * StorageManager (see isEncryptable and below)
-     * This is still useful to get the error state when encryption has failed
-     * and CryptKeeper needs to throw up a screen advising the user what to do
-     */
-    int getEncryptionState() = 31;
-    /**
-     * Verify the encryption password against the stored volume.  This method
-     * may only be called by the system process.
-     */
-    int verifyEncryptionPassword(in String password) = 32;
     /**
      * Ensure that all directories along given path exist, creating parent
      * directories as needed. Validates that given path is absolute and that it
@@ -116,32 +89,6 @@ interface IStorageManager {
      * external storage data or OBB directory belonging to calling app.
      */
     void mkdirs(in String callingPkg, in String path) = 34;
-    /**
-     * Determines the type of the encryption password
-     * @return PasswordType
-     */
-    int getPasswordType() = 35;
-    /**
-     * Get password from vold
-     * @return password or empty string
-     */
-    String getPassword() = 36;
-    /**
-     * Securely clear password from vold
-     */
-    oneway void clearPassword() = 37;
-    /**
-     * Set a field in the crypto header.
-     * @param field field to set
-     * @param contents contents to set in field
-     */
-    oneway void setField(in String field, in String contents) = 38;
-    /**
-     * Gets a field from the crypto header.
-     * @param field field to get
-     * @return contents of field
-     */
-    String getField(in String field) = 39;
     /**
      * Report the time of the last maintenance operation such as fstrim.
      * @return Timestamp of the last maintenance operation, in the
@@ -178,7 +125,6 @@ interface IStorageManager {
     boolean isUserKeyUnlocked(int userId) = 65;
     void prepareUserStorage(in String volumeUuid, int userId, int serialNumber, int flags) = 66;
     void destroyUserStorage(in String volumeUuid, int userId, int flags) = 67;
-    boolean isConvertibleToFBE() = 68;
     void addUserKeyAuth(int userId, int serialNumber, in byte[] secret) = 70;
     void fixateNewestUserKeyAuth(int userId) = 71;
     void fstrim(int flags, IVoldTaskListener listener) = 72;

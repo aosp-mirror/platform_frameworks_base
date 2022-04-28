@@ -143,6 +143,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::getLogo,
         AndroidPackage::getLocaleConfigRes,
         AndroidPackage::getManageSpaceActivityName,
+        AndroidPackage::getMaxSdkVersion,
         AndroidPackage::getMemtagMode,
         AndroidPackage::getMinSdkVersion,
         AndroidPackage::getNativeHeapZeroInitialized,
@@ -504,11 +505,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                     PackageManager.Property::getString
                 )
             }
-        ),
-        getSetByValue(
-            AndroidPackage::shouldInheritKeyStoreKeys,
-            ParsingPackage::setInheritKeyStoreKeys,
-            true
         ),
         getter(AndroidPackage::getKnownActivityEmbeddingCerts, setOf("TESTEMBEDDINGCERT")),
         getSetByValue(

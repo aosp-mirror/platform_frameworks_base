@@ -18,6 +18,7 @@ package android.app.wallpapereffectsgeneration;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.Size;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -117,6 +118,7 @@ public final class CameraAttributes implements Parcelable {
     /**
      * Get the camera yaw orbit rotation.
      */
+    @FloatRange(from = -180.0f, to = 180.0f)
     public float getCameraOrbitYawDegrees() {
         return mCameraOrbitYawDegrees;
     }
@@ -124,6 +126,7 @@ public final class CameraAttributes implements Parcelable {
     /**
      * Get the camera pitch orbit rotation.
      */
+    @FloatRange(from = -90.0f, to = 90.0f)
     public float getCameraOrbitPitchDegrees() {
         return mCameraOrbitPitchDegrees;
     }
@@ -138,6 +141,7 @@ public final class CameraAttributes implements Parcelable {
     /**
      * Get the camera vertical fov degrees.
      */
+    @FloatRange(from = 0.0f, to = 180.0f, fromInclusive = false)
     public float getVerticalFovDegrees() {
         return mVerticalFovDegrees;
     }
@@ -145,6 +149,7 @@ public final class CameraAttributes implements Parcelable {
     /**
      * Get the frustum in near plane.
      */
+    @FloatRange(from = 0.0f)
     public float getFrustumNearInWorldSpace() {
         return mFrustumNearInWorldSpace;
     }
@@ -152,6 +157,7 @@ public final class CameraAttributes implements Parcelable {
     /**
      * Get the frustum in far plane.
      */
+    @FloatRange(from = 0.0f)
     public float getFrustumFarInWorldSpace() {
         return mFrustumFarInWorldSpace;
     }
@@ -217,8 +223,8 @@ public final class CameraAttributes implements Parcelable {
          * @hide
          */
         @SystemApi
-        public Builder(@NonNull float[] anchorPointInWorldSpace,
-                @NonNull float[] anchorPointInOutputUvSpace) {
+        public Builder(@NonNull @Size(3) float[] anchorPointInWorldSpace,
+                @NonNull @Size(2) float[] anchorPointInOutputUvSpace) {
             mAnchorPointInWorldSpace = anchorPointInWorldSpace;
             mAnchorPointInOutputUvSpace = anchorPointInOutputUvSpace;
         }

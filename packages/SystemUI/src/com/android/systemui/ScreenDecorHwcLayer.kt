@@ -60,6 +60,8 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
     private val debugTransparentRegionPaint: Paint?
     private val tempRect: Rect = Rect()
 
+    private var hasTopRoundedCorner = false
+    private var hasBottomRoundedCorner = false
     private var roundedCornerTopSize = 0
     private var roundedCornerBottomSize = 0
     private var roundedCornerDrawableTop: Drawable? = null
@@ -101,10 +103,10 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        parent.requestTransparentRegion(this)
         if (!DEBUG_COLOR) {
-            parent.requestTransparentRegion(this)
+            viewRootImpl.setDisplayDecoration(true)
         }
-        viewRootImpl.setDisplayDecoration(true)
 
         if (useInvertedAlphaColor) {
             paint.set(clearPaint)
@@ -114,17 +116,24 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
         }
     }
 
+    override fun onUpdate() {
+        parent.requestTransparentRegion(this)
+    }
+
     override fun onDraw(canvas: Canvas) {
         // If updating onDraw, also update gatherTransparentRegion
         if (useInvertedAlphaColor) {
             canvas.drawColor(bgColor)
         }
+
+        // We may clear the color(if useInvertedAlphaColor is true) of the rounded corner rects
+        // before drawing rounded corners. If the cutout happens to be inside one of these rects, it
+        // will be cleared, so we have to draw rounded corners before cutout.
+        drawRoundedCorners(canvas)
         // Cutouts are drawn in DisplayCutoutBaseView.onDraw()
         super.onDraw(canvas)
-        drawRoundedCorners(canvas)
 
         debugTransparentRegionPaint?.let {
-            calculateTransparentRect()
             canvas.drawRect(transparentRect, it)
         }
     }
@@ -132,7 +141,16 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
     override fun gatherTransparentRegion(region: Region?): Boolean {
         region?.let {
             calculateTransparentRect()
-            region.op(transparentRect, Region.Op.INTERSECT)
+            if (DEBUG_COLOR) {
+                // Since we're going to draw a rectangle where the layer would
+                // normally be transparent, treat the transparent region as
+                // empty. We still want this method to be called, though, so
+                // that it calculates the transparent rect at the right time
+                // to match !DEBUG_COLOR.
+                region.setEmpty()
+            } else {
+                region.op(transparentRect, Region.Op.INTERSECT)
+            }
         }
         // Always return false - views underneath this should always be visible.
         return false
@@ -284,7 +302,7 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
     }
 
     private fun drawRoundedCorners(canvas: Canvas) {
-        if (roundedCornerTopSize == 0 && roundedCornerBottomSize == 0) {
+        if (!hasTopRoundedCorner && !hasBottomRoundedCorner) {
             return
         }
         var degree: Int
@@ -296,9 +314,11 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
             canvas.translate(
                     getRoundedCornerTranslationX(degree).toFloat(),
                     getRoundedCornerTranslationY(degree).toFloat())
-            if (i == RoundedCorner.POSITION_TOP_LEFT || i == RoundedCorner.POSITION_TOP_RIGHT) {
+            if (hasTopRoundedCorner && (i == RoundedCorner.POSITION_TOP_LEFT ||
+                            i == RoundedCorner.POSITION_TOP_RIGHT)) {
                 drawRoundedCorner(canvas, roundedCornerDrawableTop, roundedCornerTopSize)
-            } else {
+            } else if (hasBottomRoundedCorner && (i == RoundedCorner.POSITION_BOTTOM_LEFT ||
+                            i == RoundedCorner.POSITION_BOTTOM_RIGHT)) {
                 drawRoundedCorner(canvas, roundedCornerDrawableBottom, roundedCornerBottomSize)
             }
             canvas.restore()
@@ -350,13 +370,28 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
     }
 
     /**
-     * Update the rounded corner size.
+     * Update the rounded corner existence and size.
      */
-    fun updateRoundedCornerSize(top: Int, bottom: Int) {
-        roundedCornerTopSize = top
-        roundedCornerBottomSize = bottom
+    fun updateRoundedCornerExistenceAndSize(
+        hasTop: Boolean,
+        hasBottom: Boolean,
+        topSize: Int,
+        bottomSize: Int
+    ) {
+        if (hasTopRoundedCorner == hasTop &&
+                hasBottomRoundedCorner == hasBottom &&
+                roundedCornerTopSize == topSize &&
+                roundedCornerBottomSize == bottomSize) {
+            return
+        }
+        hasTopRoundedCorner = hasTop
+        hasBottomRoundedCorner = hasBottom
+        roundedCornerTopSize = topSize
+        roundedCornerBottomSize = bottomSize
         updateRoundedCornerDrawableBounds()
-        invalidate()
+
+        // Use requestLayout() to trigger transparent region recalculated
+        requestLayout()
     }
 
     private fun updateRoundedCornerDrawableBounds() {

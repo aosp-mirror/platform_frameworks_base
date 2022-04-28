@@ -30,6 +30,7 @@ import android.net.TetheringManager;
 import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -41,6 +42,7 @@ import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
@@ -50,6 +52,7 @@ import com.android.launcher3.icons.BaseIconFactory.IconOptions;
 import com.android.launcher3.icons.IconFactory;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.fuelgauge.BatteryStatus;
+import com.android.settingslib.utils.BuildCompatUtils;
 
 import java.text.NumberFormat;
 
@@ -127,10 +130,11 @@ public class Utils {
         String name = info != null ? info.name : null;
         if (info.isManagedProfile()) {
             // We use predefined values for managed profiles
-            return context.getSystemService(DevicePolicyManager.class).getString(
-                    WORK_PROFILE_USER_LABEL, () -> context.getString(R.string.managed_user_title));
+            return  BuildCompatUtils.isAtLeastT()
+                    ? getUpdatableManagedUserTitle(context)
+                    : context.getString(R.string.managed_user_title);
         } else if (info.isGuest()) {
-            name = context.getString(R.string.user_guest);
+            name = context.getString(com.android.internal.R.string.guest_name);
         }
         if (name == null && info != null) {
             name = Integer.toString(info.id);
@@ -138,6 +142,13 @@ public class Utils {
             name = context.getString(R.string.unknown);
         }
         return context.getResources().getString(R.string.running_process_item_user_label, name);
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private static String getUpdatableManagedUserTitle(Context context) {
+        return context.getSystemService(DevicePolicyManager.class).getResources().getString(
+                WORK_PROFILE_USER_LABEL,
+                () -> context.getString(R.string.managed_user_title));
     }
 
     /**

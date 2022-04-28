@@ -107,6 +107,10 @@ public class CloudSearchPerUserService extends
     @GuardedBy("mLock")
     public void onSearchLocked(@NonNull SearchRequest searchRequest,
             @NonNull ICloudSearchManagerCallback callback) {
+        if (mRemoteComponentName == null) {
+            return;
+        }
+
         String filterList = searchRequest.getSearchConstraints().containsKey(
                 SearchRequest.CONSTRAINT_SEARCH_PROVIDER_FILTER)
                 ? searchRequest.getSearchConstraints().getString(
@@ -193,7 +197,9 @@ public class CloudSearchPerUserService extends
             Slog.d(TAG, "onDestroyLocked(): requestId=" + requestId);
         }
         final CloudSearchCallbackInfo sessionInfo = mCallbackQueue.removeElement(requestId);
-        sessionInfo.destroy();
+        if (sessionInfo != null) {
+            sessionInfo.destroy();
+        }
     }
 
     @Override

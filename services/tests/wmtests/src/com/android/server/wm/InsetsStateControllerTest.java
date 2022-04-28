@@ -280,6 +280,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 rect.set(0, 1, 2, 3)));
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(ime, null, null);
         statusBar.setControllableInsetProvider(statusBarProvider);
+        statusBar.updateSourceFrame(statusBar.getFrame());
 
         statusBarProvider.onPostLayout();
 

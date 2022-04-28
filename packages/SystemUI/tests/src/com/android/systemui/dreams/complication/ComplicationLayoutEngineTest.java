@@ -18,6 +18,7 @@ package com.android.systemui.dreams.complication;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,7 +40,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -413,5 +417,104 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
             assertThat(lp.topToTop == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
             assertThat(lp.endToEnd == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
         });
+    }
+
+    /**
+     * Ensures a second removal of a complication is a no-op.
+     */
+    @Test
+    public void testDoubleRemoval() {
+        final ComplicationLayoutEngine engine =
+                new ComplicationLayoutEngine(mLayout, 0, mTouchSession, 0, 0);
+
+        final ViewInfo firstViewInfo = new ViewInfo(
+                new ComplicationLayoutParams(
+                        100,
+                        100,
+                        ComplicationLayoutParams.POSITION_TOP
+                                | ComplicationLayoutParams.POSITION_END,
+                        ComplicationLayoutParams.DIRECTION_DOWN,
+                        0),
+                Complication.CATEGORY_STANDARD,
+                mLayout);
+
+        engine.addComplication(firstViewInfo.id, firstViewInfo.view, firstViewInfo.lp,
+                firstViewInfo.category);
+        verify(mLayout).addView(firstViewInfo.view);
+
+        assertThat(engine.removeComplication(firstViewInfo.id)).isTrue();
+        verify(firstViewInfo.view).getParent();
+        verify(mLayout).removeView(firstViewInfo.view);
+
+        Mockito.clearInvocations(mLayout, firstViewInfo.view);
+        assertThat(engine.removeComplication(firstViewInfo.id)).isFalse();
+        verify(firstViewInfo.view, never()).getParent();
+        verify(mLayout, never()).removeView(firstViewInfo.view);
+    }
+
+    @Test
+    public void testGetViews() {
+        final ComplicationLayoutEngine engine =
+                new ComplicationLayoutEngine(mLayout, 0, mTouchSession, 0, 0);
+
+        final ViewInfo topEndView = new ViewInfo(
+                new ComplicationLayoutParams(
+                        100,
+                        100,
+                        ComplicationLayoutParams.POSITION_TOP
+                                | ComplicationLayoutParams.POSITION_END,
+                        ComplicationLayoutParams.DIRECTION_DOWN,
+                        0),
+                Complication.CATEGORY_STANDARD,
+                mLayout);
+
+        addComplication(engine, topEndView);
+
+        final ViewInfo topStartView = new ViewInfo(
+                new ComplicationLayoutParams(
+                        100,
+                        100,
+                        ComplicationLayoutParams.POSITION_TOP
+                                | ComplicationLayoutParams.POSITION_START,
+                        ComplicationLayoutParams.DIRECTION_DOWN,
+                        0),
+                Complication.CATEGORY_SYSTEM,
+                mLayout);
+
+        addComplication(engine, topStartView);
+
+        final ViewInfo bottomEndView = new ViewInfo(
+                new ComplicationLayoutParams(
+                        100,
+                        100,
+                        ComplicationLayoutParams.POSITION_BOTTOM
+                                | ComplicationLayoutParams.POSITION_END,
+                        ComplicationLayoutParams.DIRECTION_START,
+                        1),
+                Complication.CATEGORY_SYSTEM,
+                mLayout);
+
+        addComplication(engine, bottomEndView);
+
+        verifyViewsAtPosition(engine, ComplicationLayoutParams.POSITION_TOP, topStartView,
+                topEndView);
+        verifyViewsAtPosition(engine,
+                ComplicationLayoutParams.POSITION_TOP | ComplicationLayoutParams.POSITION_START,
+                topStartView);
+        verifyViewsAtPosition(engine,
+                ComplicationLayoutParams.POSITION_BOTTOM,
+                bottomEndView);
+    }
+
+    private void verifyViewsAtPosition(ComplicationLayoutEngine engine, int position,
+            ViewInfo... views) {
+        final List<Integer> idList = engine.getViewsAtPosition(position).stream()
+                .map(View::getId)
+                .collect(Collectors.toList());
+
+        assertThat(idList).containsExactlyElementsIn(
+                Arrays.stream(views)
+                        .map(viewInfo -> viewInfo.view.getId())
+                        .collect(Collectors.toList()));
     }
 }

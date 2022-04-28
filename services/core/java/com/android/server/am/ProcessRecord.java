@@ -27,6 +27,7 @@ import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProcessInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.CompatibilityInfo;
@@ -84,6 +85,8 @@ class ProcessRecord implements WindowProcessListener {
     final int uid;              // uid of process; may be different from 'info' if isolated
     final int userId;           // user of process.
     final String processName;   // name of the process
+    final String sdkSandboxClientAppPackage; // if this is an sdk sandbox process, name of the
+                                             // app package for which it is running
 
     /**
      * Overall state of process's uid.
@@ -493,11 +496,12 @@ class ProcessRecord implements WindowProcessListener {
 
     ProcessRecord(ActivityManagerService _service, ApplicationInfo _info, String _processName,
             int _uid) {
-        this(_service, _info, _processName, _uid, -1, null);
+        this(_service, _info, _processName, _uid, null, -1, null);
     }
 
     ProcessRecord(ActivityManagerService _service, ApplicationInfo _info, String _processName,
-            int _uid, int _definingUid, String _definingProcessName) {
+            int _uid, String _sdkSandboxClientAppPackage, int _definingUid,
+            String _definingProcessName) {
         mService = _service;
         mProcLock = _service.mProcLock;
         info = _info;
@@ -530,6 +534,7 @@ class ProcessRecord implements WindowProcessListener {
         uid = _uid;
         userId = UserHandle.getUserId(_uid);
         processName = _processName;
+        sdkSandboxClientAppPackage = _sdkSandboxClientAppPackage;
         mPersistent = false;
         mRemoved = false;
         mProfile = new ProcessProfileRecord(this);
@@ -859,6 +864,29 @@ class ProcessRecord implements WindowProcessListener {
     @GuardedBy("mService")
     boolean isDebugging() {
         return mDebugging;
+    }
+
+    @Nullable
+    public ApplicationInfo getClientInfoForSdkSandbox() {
+        if (!isSdkSandbox || sdkSandboxClientAppPackage == null) {
+            throw new IllegalStateException(
+                    "getClientInfoForSdkSandbox called for non-sandbox process"
+            );
+        }
+        PackageManagerInternal pm = mService.getPackageManagerInternal();
+        return pm.getApplicationInfo(
+                sdkSandboxClientAppPackage, /* flags */0, Process.SYSTEM_UID, userId);
+    }
+
+    public boolean isDebuggable() {
+        if ((info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            return true;
+        }
+        if (isSdkSandbox) {
+            ApplicationInfo clientInfo = getClientInfoForSdkSandbox();
+            return clientInfo != null && (clientInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        }
+        return false;
     }
 
     @GuardedBy("mService")

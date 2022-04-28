@@ -23,9 +23,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.eq;
@@ -37,6 +39,7 @@ import static org.mockito.Mockito.when;
 import android.Manifest;
 import android.app.ActivityManagerInternal;
 import android.app.StatusBarManager;
+import android.compat.testing.PlatformCompatChangeRule;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.om.IOverlayManager;
@@ -62,10 +65,13 @@ import com.android.server.LocalServices;
 import com.android.server.policy.GlobalActionsProvider;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import libcore.junit.util.compat.CoreCompatChangeRule;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
@@ -73,6 +79,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
 @RunWith(JUnit4.class)
 public class StatusBarManagerServiceTest {
@@ -87,6 +94,9 @@ public class StatusBarManagerServiceTest {
     @Rule
     public final TestableContext mContext =
             new NoBroadcastContextWrapper(InstrumentationRegistry.getContext());
+
+    @Rule
+    public TestRule mCompatChangeRule = new PlatformCompatChangeRule();
 
     @Mock
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
@@ -127,6 +137,7 @@ public class StatusBarManagerServiceTest {
 
         when(mMockStatusBar.asBinder()).thenReturn(mMockStatusBar);
         when(mApplicationInfo.loadLabel(any())).thenReturn(APP_NAME);
+        mockHandleIncomingUser();
 
         mStatusBarManagerService = new StatusBarManagerService(mContext);
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
@@ -139,6 +150,80 @@ public class StatusBarManagerServiceTest {
         mStatusBarManagerService.registerOverlayManager(mOverlayManager);
 
         mIcon = Icon.createWithResource(mContext, android.R.drawable.btn_plus);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges(
+            {StatusBarManagerService.REQUEST_LISTENING_MUST_MATCH_PACKAGE})
+    public void testRequestActive_changeEnabled_OKCall() throws RemoteException {
+        int user = 0;
+        mockEverything(user);
+        mStatusBarManagerService.requestTileServiceListeningState(TEST_COMPONENT, user);
+
+        verify(mMockStatusBar).requestTileServiceListeningState(TEST_COMPONENT);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges(
+            {StatusBarManagerService.REQUEST_LISTENING_MUST_MATCH_PACKAGE})
+    public void testRequestActive_changeEnabled_differentPackage_fail() throws RemoteException {
+        when(mPackageManagerInternal.getPackageUid(TEST_PACKAGE, 0L, mContext.getUserId()))
+                .thenReturn(Binder.getCallingUid() + 1);
+        try {
+            mStatusBarManagerService.requestTileServiceListeningState(TEST_COMPONENT, 0);
+            fail("Should cause security exception");
+        } catch (SecurityException e) { }
+        verify(mMockStatusBar, never()).requestTileServiceListeningState(TEST_COMPONENT);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges(
+            {StatusBarManagerService.REQUEST_LISTENING_MUST_MATCH_PACKAGE})
+    public void testRequestActive_changeEnabled_notCurrentUser_fail() throws RemoteException {
+        mockUidCheck();
+        int user = 0;
+        mockCurrentUserCheck(user);
+        try {
+            mStatusBarManagerService.requestTileServiceListeningState(TEST_COMPONENT, user + 1);
+            fail("Should cause illegal argument exception");
+        } catch (IllegalArgumentException e) { }
+
+        // Do not call into SystemUI
+        verify(mMockStatusBar, never()).requestTileServiceListeningState(TEST_COMPONENT);
+    }
+
+    @Test
+    @CoreCompatChangeRule.DisableCompatChanges(
+            {StatusBarManagerService.REQUEST_LISTENING_MUST_MATCH_PACKAGE})
+    public void testRequestActive_changeDisabled_pass() throws RemoteException {
+        int user = 0;
+        mockEverything(user);
+        mStatusBarManagerService.requestTileServiceListeningState(TEST_COMPONENT, user);
+
+        verify(mMockStatusBar).requestTileServiceListeningState(TEST_COMPONENT);
+    }
+
+    @Test
+    @CoreCompatChangeRule.DisableCompatChanges(
+            {StatusBarManagerService.REQUEST_LISTENING_MUST_MATCH_PACKAGE})
+    public void testRequestActive_changeDisabled_differentPackage_pass() throws RemoteException {
+        when(mPackageManagerInternal.getPackageUid(TEST_PACKAGE, 0L, mContext.getUserId()))
+                .thenReturn(Binder.getCallingUid() + 1);
+        mStatusBarManagerService.requestTileServiceListeningState(TEST_COMPONENT, 0);
+
+        verify(mMockStatusBar).requestTileServiceListeningState(TEST_COMPONENT);
+    }
+
+    @Test
+    @CoreCompatChangeRule.DisableCompatChanges(
+            {StatusBarManagerService.REQUEST_LISTENING_MUST_MATCH_PACKAGE})
+    public void testRequestActive_changeDisabled_notCurrentUser_pass() throws RemoteException {
+        mockUidCheck();
+        int user = 0;
+        mockCurrentUserCheck(user);
+        mStatusBarManagerService.requestTileServiceListeningState(TEST_COMPONENT, user + 1);
+
+        verify(mMockStatusBar).requestTileServiceListeningState(TEST_COMPONENT);
     }
 
     @Test
@@ -252,7 +337,7 @@ public class StatusBarManagerServiceTest {
         mockCurrentUserCheck(user);
         IntentMatcher im = new IntentMatcher(
                 new Intent(TileService.ACTION_QS_TILE).setComponent(TEST_COMPONENT));
-        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0),
+        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0L),
                 eq(user), anyInt())).thenReturn(null);
 
         Callback callback = new Callback();
@@ -272,7 +357,7 @@ public class StatusBarManagerServiceTest {
 
         IntentMatcher im = new IntentMatcher(
                 new Intent(TileService.ACTION_QS_TILE).setComponent(TEST_COMPONENT));
-        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0),
+        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0L),
                 eq(user), anyInt())).thenReturn(r);
         when(mPackageManagerInternal.getComponentEnabledSetting(TEST_COMPONENT,
                 Binder.getCallingUid(), user)).thenReturn(
@@ -294,7 +379,7 @@ public class StatusBarManagerServiceTest {
 
         IntentMatcher im = new IntentMatcher(
                 new Intent(TileService.ACTION_QS_TILE).setComponent(TEST_COMPONENT));
-        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0),
+        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0L),
                 eq(user), anyInt())).thenReturn(r);
         when(mPackageManagerInternal.getComponentEnabledSetting(TEST_COMPONENT,
                 Binder.getCallingUid(), user)).thenReturn(
@@ -318,7 +403,7 @@ public class StatusBarManagerServiceTest {
 
         IntentMatcher im = new IntentMatcher(
                 new Intent(TileService.ACTION_QS_TILE).setComponent(TEST_COMPONENT));
-        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0),
+        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0L),
                 eq(user), anyInt())).thenReturn(r);
         when(mPackageManagerInternal.getComponentEnabledSetting(TEST_COMPONENT,
                 Binder.getCallingUid(), user)).thenReturn(
@@ -342,7 +427,7 @@ public class StatusBarManagerServiceTest {
 
         IntentMatcher im = new IntentMatcher(
                 new Intent(TileService.ACTION_QS_TILE).setComponent(TEST_COMPONENT));
-        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0),
+        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0L),
                 eq(user), anyInt())).thenReturn(r);
         when(mPackageManagerInternal.getComponentEnabledSetting(TEST_COMPONENT,
                 Binder.getCallingUid(), user)).thenReturn(
@@ -607,19 +692,8 @@ public class StatusBarManagerServiceTest {
     public void testSetNavBarMode_invalidInputThrowsError() throws RemoteException {
         int navBarModeInvalid = -1;
 
-        assertThrows(UnsupportedOperationException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> mStatusBarManagerService.setNavBarMode(navBarModeInvalid));
-        verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
-    }
-
-    @Test
-    public void testSetNavBarMode_noOverlayManagerDoesNotEnable() throws RemoteException {
-        mOverlayManager = null;
-        int navBarModeKids = StatusBarManager.NAV_BAR_MODE_KIDS;
-
-        mStatusBarManagerService.setNavBarMode(navBarModeKids);
-
-        assertEquals(navBarModeKids, mStatusBarManagerService.getNavBarMode());
         verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
     }
 
@@ -641,7 +715,7 @@ public class StatusBarManagerServiceTest {
     }
 
     private void mockUidCheck(String packageName) {
-        when(mPackageManagerInternal.getPackageUid(eq(packageName), anyInt(), anyInt()))
+        when(mPackageManagerInternal.getPackageUid(eq(packageName), anyLong(), anyInt()))
                 .thenReturn(Binder.getCallingUid());
     }
 
@@ -667,7 +741,7 @@ public class StatusBarManagerServiceTest {
 
         IntentMatcher im = new IntentMatcher(
                 new Intent(TileService.ACTION_QS_TILE).setComponent(componentName));
-        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0),
+        when(mPackageManagerInternal.resolveService(argThat(im), nullable(String.class), eq(0L),
                 eq(user), anyInt())).thenReturn(r);
         when(mPackageManagerInternal.getComponentEnabledSetting(componentName,
                 Binder.getCallingUid(), user)).thenReturn(
@@ -677,6 +751,15 @@ public class StatusBarManagerServiceTest {
     private void mockProcessState() {
         when(mActivityManagerInternal.getUidProcessState(Binder.getCallingUid())).thenReturn(
                 PROCESS_STATE_TOP);
+    }
+
+    private void mockHandleIncomingUser() {
+        when(mActivityManagerInternal.handleIncomingUser(anyInt(), anyInt(), anyInt(), anyBoolean(),
+                anyInt(), anyString(), anyString())).thenAnswer(
+                    (Answer<Integer>) invocation -> {
+                        return invocation.getArgument(2); // same user
+                    }
+        );
     }
 
     private void mockEverything(int user) {

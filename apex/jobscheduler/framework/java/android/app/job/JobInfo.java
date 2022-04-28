@@ -18,6 +18,7 @@ package android.app.job;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
@@ -240,7 +241,7 @@ public class JobInfo implements Parcelable {
 
     /**
      * Default value for all regular jobs. As noted in {@link JobScheduler},
-     * these jobs have a general maximum execution time of 10 minutes.
+     * these jobs have a general execution time of 10 minutes.
      * Receives the standard job management policy.
      */
     public static final int PRIORITY_DEFAULT = 300;
@@ -249,7 +250,7 @@ public class JobInfo implements Parcelable {
      * This task should be ordered ahead of most other tasks. It may be
      * deferred a little, but if it doesn't run at some point, the user may think
      * something is wrong. Assuming all constraints remain satisfied
-     * (including ideal system load conditions), these jobs will have a maximum
+     * (including ideal system load conditions), these jobs can have an
      * execution time of at least 4 minutes. Setting all of your jobs to high
      * priority will not be beneficial to your app and in fact may hurt its
      * performance in the long run.
@@ -259,7 +260,7 @@ public class JobInfo implements Parcelable {
     /**
      * This task should be run ahead of all other tasks. Only Expedited Jobs
      * {@link Builder#setExpedited(boolean)} can have this priority and as such,
-     * are subject to the same maximum execution time details noted in
+     * are subject to the same execution time details noted in
      * {@link Builder#setExpedited(boolean)}.
      * A sample task of max priority: receiving a text message and processing it to
      * show a notification
@@ -1332,6 +1333,7 @@ public class JobInfo implements Parcelable {
                 builder.addCapability(NET_CAPABILITY_INTERNET);
                 builder.addCapability(NET_CAPABILITY_VALIDATED);
                 builder.removeCapability(NET_CAPABILITY_NOT_VPN);
+                builder.removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
 
                 if (networkType == NETWORK_TYPE_ANY) {
                     // No other capabilities
@@ -1411,6 +1413,15 @@ public class JobInfo implements Parcelable {
          * performed by the base job; if you're using {@link JobWorkItem} then
          * you also need to define the network traffic used by each work item
          * when constructing them.
+         *
+         * <p class="note">
+         * Prior to Android version {@link Build.VERSION_CODES#TIRAMISU}, JobScheduler used the
+         * estimated transfer numbers in a similar fashion to
+         * {@link #setMinimumNetworkChunkBytes(long)} (to estimate if the work would complete
+         * within the time available to job). In other words, JobScheduler treated the transfer as
+         * all-or-nothing. Starting from Android version {@link Build.VERSION_CODES#TIRAMISU},
+         * JobScheduler will only use the estimated transfer numbers in this manner if minimum
+         * chunk sizes have not been provided via {@link #setMinimumNetworkChunkBytes(long)}.
          *
          * @param downloadBytes The estimated size of network traffic that will
          *            be downloaded by this job, in bytes.
@@ -1754,14 +1765,19 @@ public class JobInfo implements Parcelable {
          *
          * <p>
          * Assuming all constraints remain satisfied (including ideal system load conditions),
-         * expedited jobs will have a maximum execution time of at least 1 minute. If your
+         * expedited jobs can have an execution time of at least 1 minute. If your
          * app has remaining expedited job quota, then the expedited job <i>may</i> potentially run
          * longer until remaining quota is used up. Just like with regular jobs, quota is not
          * consumed while the app is on top and visible to the user.
          *
-         * <p>
+         * <p class="note">
          * Note: Even though expedited jobs are meant to run as soon as possible, they may be
          * deferred if the system is under heavy load or requested constraints are not satisfied.
+         * This delay may be true for expedited jobs of the foreground app on Android version
+         * {@link Build.VERSION_CODES#S}, but starting from Android version
+         * {@link Build.VERSION_CODES#TIRAMISU}, expedited jobs for the foreground app are
+         * guaranteed to be started before {@link JobScheduler#schedule(JobInfo)} returns (assuming
+         * all requested constraints are satisfied), similar to foreground services.
          *
          * @see JobInfo#isExpedited()
          */
@@ -1797,6 +1813,9 @@ public class JobInfo implements Parcelable {
          * and in the background, or the job failed due to unsatisfied constraints,
          * this job should be expected to behave like other jobs without this flag.
          *
+         * <p>
+         * Jobs marked as important-while-foreground are given {@link #PRIORITY_HIGH} by default.
+         *
          * @param importantWhileForeground whether to relax doze restrictions for this job when the
          *                                 app is in the foreground. False by default.
          * @see JobInfo#isImportantWhileForeground()
@@ -1829,8 +1848,9 @@ public class JobInfo implements Parcelable {
          * the specific user of this device. For example, fetching top headlines
          * of interest to the current user.
          * <p>
-         * Starting with Android version {@link Build.VERSION_CODES#TIRAMISU}, prefetch jobs are
-         * not allowed to have deadlines (set via {@link #setOverrideDeadline(long)}.
+         * Apps targeting Android version {@link Build.VERSION_CODES#TIRAMISU} or later are
+         * not allowed to have deadlines (set via {@link #setOverrideDeadline(long)} on their
+         * prefetch jobs.
          * <p>
          * The system may use this signal to relax the network constraints you
          * originally requested, such as allowing a

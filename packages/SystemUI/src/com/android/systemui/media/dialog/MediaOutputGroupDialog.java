@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastSender;
 
 /**
  * Dialog for media output group.
@@ -32,9 +33,9 @@ import com.android.systemui.R;
 // TODO(b/203073091): Remove this class once group logic been implemented.
 public class MediaOutputGroupDialog extends MediaOutputBaseDialog {
 
-    MediaOutputGroupDialog(Context context, boolean aboveStatusbar, MediaOutputController
-            mediaOutputController) {
-        super(context, mediaOutputController);
+    MediaOutputGroupDialog(Context context, boolean aboveStatusbar, BroadcastSender broadcastSender,
+            MediaOutputController mediaOutputController) {
+        super(context, broadcastSender, mediaOutputController);
         mMediaOutputController.resetGroupMediaDevices();
         mAdapter = new MediaOutputGroupAdapter(mMediaOutputController);
         if (!aboveStatusbar) {

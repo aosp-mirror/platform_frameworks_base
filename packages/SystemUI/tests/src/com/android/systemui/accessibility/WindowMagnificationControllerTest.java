@@ -172,15 +172,24 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @Test
     public void enableWindowMagnification_notifySourceBoundsChanged() {
-        mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
-                    Float.NaN, /* magnificationFrameOffsetRatioX= */ 0,
-                    /* magnificationFrameOffsetRatioY= */ 0, null);
-        });
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                        Float.NaN, /* magnificationFrameOffsetRatioX= */ 0,
+                /* magnificationFrameOffsetRatioY= */ 0, null));
 
         // Waits for the surface created
         verify(mWindowMagnifierCallback, timeout(LAYOUT_CHANGE_TIMEOUT_MS)).onSourceBoundsChanged(
                 (eq(mContext.getDisplayId())), any());
+    }
+
+    @Test
+    public void enableWindowMagnification_disabled_notifySourceBoundsChanged() {
+        enableWindowMagnification_notifySourceBoundsChanged();
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.deleteWindowMagnification(null));
+        Mockito.reset(mWindowMagnifierCallback);
+
+        enableWindowMagnification_notifySourceBoundsChanged();
     }
 
     @Test
@@ -280,6 +289,22 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
         verify(mMirrorWindowControl).destroyControl();
         assertFalse(hasMagnificationOverlapFlag());
+    }
+
+    @Test
+    public void deleteWindowMagnification_notifySourceBoundsChanged() {
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                        Float.NaN,
+                        Float.NaN));
+
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.deleteWindowMagnification());
+
+        // The first time is for notifying magnification enabled and the second time is for
+        // notifying magnification disabled.
+        verify(mWindowMagnifierCallback, times(2)).onSourceBoundsChanged(
+                (eq(mContext.getDisplayId())), any());
     }
 
     @Test

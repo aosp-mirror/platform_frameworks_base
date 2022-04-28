@@ -23,6 +23,7 @@ import com.android.internal.graphics.ColorUtils
 import com.android.internal.graphics.cam.Cam
 import com.android.internal.graphics.cam.CamUtils.lstarFromInt
 import kotlin.math.absoluteValue
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 const val TAG = "ColorScheme"
@@ -31,37 +32,127 @@ const val ACCENT1_CHROMA = 48.0f
 const val GOOGLE_BLUE = 0xFF1b6ef3.toInt()
 const val MIN_CHROMA = 5
 
-internal enum class ChromaStrategy {
-    EQ, GTE
-}
+internal interface Hue {
+    fun get(sourceColor: Cam): Double
 
-internal enum class HueStrategy {
-    SOURCE, ADD, SUBTRACT
-}
-
-internal class Chroma(val strategy: ChromaStrategy, val value: Double) {
-    fun get(sourceChroma: Double): Double {
-        return when (strategy) {
-            ChromaStrategy.EQ -> value
-            ChromaStrategy.GTE -> sourceChroma.coerceAtLeast(value)
+    /**
+     * Given a hue, and a mapping of hues to hue rotations, find which hues in the mapping the
+     * hue fall betweens, and use the hue rotation of the lower hue.
+     *
+     * @param sourceHue hue of source color
+     * @param hueAndRotations list of pairs, where the first item in a pair is a hue, and the
+     *    second item in the pair is a hue rotation that should be applied
+     */
+    fun getHueRotation(sourceHue: Float, hueAndRotations: List<Pair<Int, Int>>): Double {
+        for (i in 0..hueAndRotations.size) {
+            val previousIndex = if (i == 0) hueAndRotations.size - 1 else i - 1
+            val thisHue = hueAndRotations[i].first
+            val previousHue = hueAndRotations[previousIndex].first
+            if (ColorScheme.angleIsBetween(sourceHue, thisHue, previousHue)) {
+                return ColorScheme.wrapDegreesDouble(sourceHue.toDouble() +
+                        hueAndRotations[previousIndex].first)
+            }
         }
+
+        // If this statement executes, something is wrong, there should have been a rotation
+        // found using the arrays.
+        return sourceHue.toDouble()
     }
 }
 
-internal class Hue(val strategy: HueStrategy = HueStrategy.SOURCE, val value: Double = 0.0) {
-    fun get(sourceHue: Double): Double {
-        return when (strategy) {
-            HueStrategy.SOURCE -> sourceHue
-            HueStrategy.ADD -> ColorScheme.wrapDegreesDouble(sourceHue + value)
-            HueStrategy.SUBTRACT -> ColorScheme.wrapDegreesDouble(sourceHue - value)
-        }
+internal class HueSource : Hue {
+    override fun get(sourceColor: Cam): Double {
+        return sourceColor.hue.toDouble()
     }
 }
 
-internal class TonalSpec(val hue: Hue = Hue(), val chroma: Chroma) {
+internal class HueAdd(val amountDegrees: Double) : Hue {
+    override fun get(sourceColor: Cam): Double {
+        return ColorScheme.wrapDegreesDouble(sourceColor.hue.toDouble() + amountDegrees)
+    }
+}
+
+internal class HueSubtract(val amountDegrees: Double) : Hue {
+    override fun get(sourceColor: Cam): Double {
+        return ColorScheme.wrapDegreesDouble(sourceColor.hue.toDouble() - amountDegrees)
+    }
+}
+
+internal class HueVibrantSecondary() : Hue {
+    val hueToRotations = listOf(Pair(0, 18), Pair(41, 15), Pair(61, 10), Pair(101, 12),
+            Pair(131, 15), Pair(181, 18), Pair(251, 15), Pair(301, 12))
+    override fun get(sourceColor: Cam): Double {
+        return getHueRotation(sourceColor.hue, hueToRotations)
+    }
+}
+
+internal class HueVibrantTertiary() : Hue {
+    val hueToRotations = listOf(Pair(0, 35), Pair(41, 30), Pair(61, 20), Pair(101, 25),
+            Pair(131, 30), Pair(181, 35), Pair(251, 30), Pair(301, 25))
+    override fun get(sourceColor: Cam): Double {
+        return getHueRotation(sourceColor.hue, hueToRotations)
+    }
+}
+
+internal class HueExpressiveSecondary() : Hue {
+    val hueToRotations = listOf(Pair(0, 45), Pair(21, 95), Pair(51, 45), Pair(121, 20),
+            Pair(141, 45), Pair(191, 90), Pair(271, 45), Pair(321, 45))
+    override fun get(sourceColor: Cam): Double {
+        return getHueRotation(sourceColor.hue, hueToRotations)
+    }
+}
+
+internal class HueExpressiveTertiary() : Hue {
+    val hueToRotations = listOf(Pair(0, 120), Pair(21, 120), Pair(51, 20), Pair(121, 45),
+            Pair(141, 20), Pair(191, 15), Pair(271, 20), Pair(321, 120))
+    override fun get(sourceColor: Cam): Double {
+        return getHueRotation(sourceColor.hue, hueToRotations)
+    }
+}
+
+internal interface Chroma {
+    fun get(sourceColor: Cam): Double
+
+    /**
+     * Given a hue, and a mapping of hues to hue rotations, find which hues in the mapping the
+     * hue fall betweens, and use the hue rotation of the lower hue.
+     *
+     * @param sourceHue hue of source color
+     * @param hueAndChromas list of pairs, where the first item in a pair is a hue, and the
+     *    second item in the pair is a chroma that should be applied
+     */
+    fun getSpecifiedChroma(sourceHue: Float, hueAndChromas: List<Pair<Int, Int>>): Double {
+        for (i in 0..hueAndChromas.size) {
+            val previousIndex = if (i == 0) hueAndChromas.size - 1 else i - 1
+            val thisHue = hueAndChromas[i].first
+            val previousHue = hueAndChromas[previousIndex].first
+            if (ColorScheme.angleIsBetween(sourceHue, thisHue, previousHue)) {
+                return hueAndChromas[i].second.toDouble()
+            }
+        }
+
+        // If this statement executes, something is wrong, there should have been a rotation
+        // found using the arrays.
+        return sourceHue.toDouble()
+    }
+}
+
+internal class ChromaMinimum(val chroma: Double) : Chroma {
+    override fun get(sourceColor: Cam): Double {
+        return max(sourceColor.chroma.toDouble(), chroma)
+    }
+}
+
+internal class ChromaConstant(val chroma: Double) : Chroma {
+    override fun get(sourceColor: Cam): Double {
+        return chroma
+    }
+}
+
+internal class TonalSpec(val hue: Hue = HueSource(), val chroma: Chroma) {
     fun shades(sourceColor: Cam): List<Int> {
-        val hue = hue.get(sourceColor.hue.toDouble())
-        val chroma = chroma.get(sourceColor.chroma.toDouble())
+        val hue = hue.get(sourceColor)
+        val chroma = chroma.get(sourceColor)
         return Shades.of(hue.toFloat(), chroma.toFloat()).toList()
     }
 }
@@ -76,46 +167,46 @@ internal class CoreSpec(
 
 enum class Style(internal val coreSpec: CoreSpec) {
     SPRITZ(CoreSpec(
-            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 12.0)),
-            a2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 8.0)),
-            a3 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0)),
-            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
-            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 8.0))
+            a1 = TonalSpec(HueSource(), ChromaConstant(12.0)),
+            a2 = TonalSpec(HueSource(), ChromaConstant(8.0)),
+            a3 = TonalSpec(HueSource(), ChromaConstant(16.0)),
+            n1 = TonalSpec(HueSource(), ChromaConstant(2.0)),
+            n2 = TonalSpec(HueSource(), ChromaConstant(2.0))
     )),
     TONAL_SPOT(CoreSpec(
-            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 32.0)),
-            a2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0)),
-            a3 = TonalSpec(Hue(HueStrategy.ADD, 60.0), Chroma(ChromaStrategy.EQ, 24.0)),
-            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
-            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 8.0))
+            a1 = TonalSpec(HueSource(), ChromaConstant(36.0)),
+            a2 = TonalSpec(HueSource(), ChromaConstant(16.0)),
+            a3 = TonalSpec(HueAdd(60.0), ChromaConstant(24.0)),
+            n1 = TonalSpec(HueSource(), ChromaConstant(4.0)),
+            n2 = TonalSpec(HueSource(), ChromaConstant(8.0))
     )),
     VIBRANT(CoreSpec(
-            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 48.0)),
-            a2 = TonalSpec(Hue(HueStrategy.ADD, 15.0), Chroma(ChromaStrategy.EQ, 24.0)),
-            a3 = TonalSpec(Hue(HueStrategy.ADD, 30.0), Chroma(ChromaStrategy.GTE, 32.0)),
-            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 8.0)),
-            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0))
+            a1 = TonalSpec(HueSource(), ChromaMinimum(48.0)),
+            a2 = TonalSpec(HueVibrantSecondary(), ChromaConstant(24.0)),
+            a3 = TonalSpec(HueVibrantTertiary(), ChromaConstant(32.0)),
+            n1 = TonalSpec(HueSource(), ChromaConstant(10.0)),
+            n2 = TonalSpec(HueSource(), ChromaConstant(12.0))
     )),
     EXPRESSIVE(CoreSpec(
-            a1 = TonalSpec(Hue(HueStrategy.SUBTRACT, 60.0), Chroma(ChromaStrategy.GTE, 64.0)),
-            a2 = TonalSpec(Hue(HueStrategy.SUBTRACT, 30.0), Chroma(ChromaStrategy.EQ, 24.0)),
-            a3 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 48.0)),
-            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 12.0)),
-            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0))
+            a1 = TonalSpec(HueAdd(240.0), ChromaConstant(40.0)),
+            a2 = TonalSpec(HueExpressiveSecondary(), ChromaConstant(24.0)),
+            a3 = TonalSpec(HueExpressiveTertiary(), ChromaConstant(32.0)),
+            n1 = TonalSpec(HueAdd(15.0), ChromaConstant(8.0)),
+            n2 = TonalSpec(HueAdd(15.0), ChromaConstant(12.0))
     )),
     RAINBOW(CoreSpec(
-            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 48.0)),
-            a2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0)),
-            a3 = TonalSpec(Hue(HueStrategy.ADD, 60.0), Chroma(ChromaStrategy.EQ, 24.0)),
-            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 0.0)),
-            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 0.0))
+            a1 = TonalSpec(HueSource(), ChromaConstant(48.0)),
+            a2 = TonalSpec(HueSource(), ChromaConstant(16.0)),
+            a3 = TonalSpec(HueAdd(60.0), ChromaConstant(24.0)),
+            n1 = TonalSpec(HueSource(), ChromaConstant(0.0)),
+            n2 = TonalSpec(HueSource(), ChromaConstant(0.0))
     )),
     FRUIT_SALAD(CoreSpec(
-            a1 = TonalSpec(Hue(HueStrategy.SUBTRACT, 50.0), Chroma(ChromaStrategy.GTE, 48.0)),
-            a2 = TonalSpec(Hue(HueStrategy.SUBTRACT, 50.0), Chroma(ChromaStrategy.EQ, 36.0)),
-            a3 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 36.0)),
-            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 10.0)),
-            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0))
+            a1 = TonalSpec(HueSubtract(50.0), ChromaConstant(48.0)),
+            a2 = TonalSpec(HueSubtract(50.0), ChromaConstant(36.0)),
+            a3 = TonalSpec(HueSource(), ChromaConstant(36.0)),
+            n1 = TonalSpec(HueSource(), ChromaConstant(10.0)),
+            n2 = TonalSpec(HueSource(), ChromaConstant(16.0))
     )),
 }
 
@@ -134,8 +225,13 @@ class ColorScheme(
     constructor(@ColorInt seed: Int, darkTheme: Boolean):
             this(seed, darkTheme, Style.TONAL_SPOT)
 
-    constructor(wallpaperColors: WallpaperColors, darkTheme: Boolean):
-            this(getSeedColor(wallpaperColors), darkTheme)
+    @JvmOverloads
+    constructor(
+        wallpaperColors: WallpaperColors,
+        darkTheme: Boolean,
+        style: Style = Style.TONAL_SPOT
+    ):
+            this(getSeedColor(wallpaperColors), darkTheme, style)
 
     val allAccentColors: List<Int>
         get() {
@@ -294,6 +390,13 @@ class ColorScheme(
             }
 
             return seeds
+        }
+
+        internal fun angleIsBetween(angle: Float, a: Int, b: Int): Boolean {
+            if (a < b) {
+                return a <= angle && angle <= b
+            }
+            return a <= angle || angle <= b
         }
 
         private fun wrapDegrees(degrees: Int): Int {

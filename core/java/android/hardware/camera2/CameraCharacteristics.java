@@ -3563,8 +3563,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    public static final Key<int[]> SCALER_AVAILABLE_STREAM_USE_CASES =
-            new Key<int[]>("android.scaler.availableStreamUseCases", int[].class);
+    public static final Key<long[]> SCALER_AVAILABLE_STREAM_USE_CASES =
+            new Key<long[]>("android.scaler.availableStreamUseCases", long[].class);
 
     /**
      * <p>An array of mandatory stream combinations with stream use cases.

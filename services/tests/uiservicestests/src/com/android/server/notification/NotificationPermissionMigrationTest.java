@@ -97,6 +97,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.StatusBarNotification;
+import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -379,7 +380,7 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
                 mAppUsageStats, mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
                 mAppOpsManager, mock(IAppOpsService.class), mUm, mHistoryManager, mStatsManager,
                 mock(TelephonyManager.class), mAmi, mToastRateLimiter, mPermissionHelper,
-                mock(UsageStatsManagerInternal.class));
+                mock(UsageStatsManagerInternal.class), mock(TelecomManager.class));
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
@@ -606,9 +607,9 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
 
     @Test
     public void testUpdateAppNotifyCreatorBlock() throws Exception {
-        when(mAppOpsManager.checkOpNoThrow(anyInt(), eq(mUid), eq(PKG))).thenReturn(MODE_IGNORED);
+        when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
 
-        mService.mAppOpsCallback.opChanged(0, mUid, PKG);
+        mBinderService.setNotificationsEnabledForPackage(PKG, mUid, false);
         Thread.sleep(500);
         waitForIdle();
 
@@ -618,14 +619,14 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         assertEquals(NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED,
                 captor.getValue().getAction());
         assertEquals(PKG, captor.getValue().getPackage());
-        assertFalse(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, true));
+        assertTrue(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, true));
     }
 
     @Test
     public void testUpdateAppNotifyCreatorUnblock() throws Exception {
-        when(mAppOpsManager.checkOpNoThrow(anyInt(), eq(mUid), eq(PKG))).thenReturn(MODE_ALLOWED);
+        when(mPermissionHelper.hasPermission(mUid)).thenReturn(false);
 
-        mService.mAppOpsCallback.opChanged(0, mUid, PKG);
+        mBinderService.setNotificationsEnabledForPackage(PKG, mUid, true);
         Thread.sleep(500);
         waitForIdle();
 
@@ -722,7 +723,7 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         when(mPermissionHelper.isPermissionFixed(PKG, temp.getUserId())).thenReturn(true);
 
         NotificationRecord r = mService.createAutoGroupSummary(
-                temp.getUserId(), temp.getSbn().getPackageName(), temp.getKey());
+                temp.getUserId(), temp.getSbn().getPackageName(), temp.getKey(), false);
 
         assertThat(r.isImportanceFixed()).isTrue();
     }

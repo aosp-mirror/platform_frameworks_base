@@ -384,6 +384,7 @@ message ActivityRecordProto {
     optional float min_aspect_ratio = 33;
     optional bool provides_max_bounds = 34;
     optional bool enable_recents_screenshot = 35;
+    optional int32 last_drop_input_mode = 36;
 }
 
 /* represents WindowToken */

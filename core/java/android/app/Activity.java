@@ -148,7 +148,6 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
-import android.window.OnBackInvokedDispatcherOwner;
 import android.window.SplashScreen;
 import android.window.WindowOnBackInvokedDispatcher;
 
@@ -749,8 +748,7 @@ public class Activity extends ContextThemeWrapper
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
         Window.OnWindowDismissedCallback,
-        ContentCaptureManager.ContentCaptureClient,
-        OnBackInvokedDispatcherOwner {
+        ContentCaptureManager.ContentCaptureClient {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -872,7 +870,7 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage
     /*package*/ int mConfigChangeFlags;
     @UnsupportedAppUsage
-    /*package*/ Configuration mCurrentConfig;
+    /*package*/ Configuration mCurrentConfig = Configuration.EMPTY;
     private SearchManager mSearchManager;
     private MenuInflater mMenuInflater;
 
@@ -983,6 +981,8 @@ public class Activity extends ContextThemeWrapper
 
     private boolean mIsInMultiWindowMode;
     private boolean mIsInPictureInPictureMode;
+
+    private boolean mShouldDockBigOverlays;
 
     private UiTranslationController mUiTranslationController;
 
@@ -1661,12 +1661,7 @@ public class Activity extends ContextThemeWrapper
                 .isOnBackInvokedCallbackEnabled(this);
         if (aheadOfTimeBack) {
             // Add onBackPressed as default back behavior.
-            mDefaultBackCallback = new OnBackInvokedCallback() {
-                @Override
-                public void onBackInvoked() {
-                    navigateBack();
-                }
-            };
+            mDefaultBackCallback = this::navigateBack;
             getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(mDefaultBackCallback);
         }
     }
@@ -2977,13 +2972,28 @@ public class Activity extends ContextThemeWrapper
      * <p> If specified, the system will try to respect the preference, but it may be
      * overridden by a user preference.
      *
-     * @param preferDockBigOverlays indicates that the activity prefers big overlays to be
-     *                              docked next to it instead of overlaying its content
+     * @param shouldDockBigOverlays indicates that big overlays should be docked next to the
+     *                              activity instead of overlay its content
      *
      * @see PictureInPictureParams.Builder#setExpandedAspectRatio
+     * @see #shouldDockBigOverlays
      */
-    public void setPreferDockBigOverlays(boolean preferDockBigOverlays) {
-        ActivityClient.getInstance().setPreferDockBigOverlays(mToken, preferDockBigOverlays);
+    public void setShouldDockBigOverlays(boolean shouldDockBigOverlays) {
+        ActivityClient.getInstance().setShouldDockBigOverlays(mToken, shouldDockBigOverlays);
+        mShouldDockBigOverlays = shouldDockBigOverlays;
+    }
+
+    /**
+     * Returns whether big overlays should be docked next to the activity as set by
+     * {@link #setShouldDockBigOverlays}.
+     *
+     * @return {@code true} if big overlays should be docked next to the activity instead
+     *         of overlay its content
+     *
+     * @see #setShouldDockBigOverlays
+     */
+    public boolean shouldDockBigOverlays() {
+        return mShouldDockBigOverlays;
     }
 
     void dispatchMovedToDisplay(int displayId, Configuration config) {
@@ -3921,7 +3931,11 @@ public class Activity extends ContextThemeWrapper
      * </ul>
      *
      * @see #moveTaskToBack(boolean)
+     *
+     * @deprecated Use {@link OnBackInvokedCallback} or
+     * {@code androidx.activity.OnBackPressedCallback} to handle back navigation instead.
      */
+    @Deprecated
     public void onBackPressed() {
         if (mActionBar != null && mActionBar.collapseActionView()) {
             return;
@@ -5663,7 +5677,6 @@ public class Activity extends ContextThemeWrapper
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    @SystemApi
     @RequiresPermission(anyOf = {INTERACT_ACROSS_USERS, INTERACT_ACROSS_USERS_FULL})
     public void startActivityAsUser(@NonNull Intent intent,
             @Nullable Bundle options, @NonNull UserHandle user) {
@@ -5691,7 +5704,6 @@ public class Activity extends ContextThemeWrapper
      * their launch had come from the original activity.
      * @param intent The Intent to start.
      * @param options ActivityOptions or null.
-     * @param permissionToken Token received from the system that permits this call to be made.
      * @param ignoreTargetSecurity If true, the activity manager will not check whether the
      * caller it is doing the start is, is actually allowed to start the target activity.
      * If you set this to true, you must set an explicit component in the Intent and do any
@@ -5700,18 +5712,18 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
-            IBinder permissionToken, boolean ignoreTargetSecurity, int userId) {
-        startActivityAsCaller(intent, options, permissionToken, ignoreTargetSecurity, userId, -1);
+            boolean ignoreTargetSecurity, int userId) {
+        startActivityAsCaller(intent, options, ignoreTargetSecurity, userId, -1);
     }
 
     /**
-     * @see #startActivityAsCaller(Intent, Bundle, IBinder, boolean, int)
+     * @see #startActivityAsCaller(Intent, Bundle, boolean, int)
      * @param requestCode The request code used for returning a result or -1 if no result should be
      *                    returned.
      * @hide
      */
     public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
-            IBinder permissionToken, boolean ignoreTargetSecurity, int userId, int requestCode) {
+            boolean ignoreTargetSecurity, int userId, int requestCode) {
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
@@ -5719,8 +5731,7 @@ public class Activity extends ContextThemeWrapper
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivityAsCaller(
                         this, mMainThread.getApplicationThread(), mToken, this,
-                        intent, requestCode, options, permissionToken, ignoreTargetSecurity,
-                        userId);
+                        intent, requestCode, options, ignoreTargetSecurity, userId);
         if (ar != null) {
             mMainThread.sendActivityResult(
                     mToken, mEmbeddedID, requestCode, ar.getResultCode(), ar.getResultData());
@@ -8249,6 +8260,7 @@ public class Activity extends ContextThemeWrapper
                 .getWindowingMode();
         mIsInMultiWindowMode = inMultiWindowMode(windowingMode);
         mIsInPictureInPictureMode = windowingMode == WINDOWING_MODE_PINNED;
+        mShouldDockBigOverlays = getResources().getBoolean(R.bool.config_dockBigOverlayWindows);
         restoreHasCurrentPermissionRequest(icicle);
         if (persistentState != null) {
             onCreate(icicle, persistentState);
@@ -8979,12 +8991,11 @@ public class Activity extends ContextThemeWrapper
      * @throws IllegalStateException if this Activity is not visual.
      */
     @NonNull
-    @Override
     public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
         if (mWindow == null) {
             throw new IllegalStateException("OnBackInvokedDispatcher are not available on "
                     + "non-visual activities");
         }
-        return ((OnBackInvokedDispatcherOwner) mWindow).getOnBackInvokedDispatcher();
+        return mWindow.getOnBackInvokedDispatcher();
     }
 }

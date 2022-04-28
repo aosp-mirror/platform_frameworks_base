@@ -22,6 +22,7 @@ import static com.android.wifitrackerlib.WifiEntry.CONNECTED_STATE_CONNECTED;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.AnyThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -112,7 +113,6 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             "android.settings.NETWORK_PROVIDER_SETTINGS";
     private static final String ACTION_WIFI_SCANNING_SETTINGS =
             "android.settings.WIFI_SCANNING_SETTINGS";
-    private static final String EXTRA_CHOSEN_WIFI_ENTRY_KEY = "key_chosen_wifientry_key";
     public static final Drawable EMPTY_DRAWABLE = new ColorDrawable(Color.TRANSPARENT);
     public static final int NO_CELL_DATA_TYPE_ICON = 0;
     private static final int SUBTITLE_TEXT_WIFI_IS_OFF = R.string.wifi_is_off;
@@ -158,6 +158,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private LocationController mLocationController;
     private DialogLaunchAnimator mDialogLaunchAnimator;
     private boolean mHasWifiEntries;
+    private WifiStateWorker mWifiStateWorker;
 
     @VisibleForTesting
     static final float TOAST_PARAMS_HORIZONTAL_WEIGHT = 1.0f;
@@ -211,7 +212,9 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             @Background Handler workerHandler,
             CarrierConfigTracker carrierConfigTracker,
             LocationController locationController,
-            DialogLaunchAnimator dialogLaunchAnimator) {
+            DialogLaunchAnimator dialogLaunchAnimator,
+            WifiStateWorker wifiStateWorker
+    ) {
         if (DEBUG) {
             Log.d(TAG, "Init InternetDialogController");
         }
@@ -242,6 +245,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mLocationController = locationController;
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mConnectedWifiInternetMonitor = new ConnectedWifiInternetMonitor();
+        mWifiStateWorker = wifiStateWorker;
     }
 
     void onStart(@NonNull InternetDialogCallback callback, boolean canConfigWifi) {
@@ -324,7 +328,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
 
     @Nullable
     CharSequence getSubtitleText(boolean isProgressBarVisible) {
-        if (mCanConfigWifi && !mWifiManager.isWifiEnabled()) {
+        if (mCanConfigWifi && !isWifiEnabled()) {
             // When Wi-Fi is disabled.
             //   Sub-Title: Wi-Fi is off
             if (DEBUG) {
@@ -636,7 +640,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         startActivity(getSettingsIntent(), view);
     }
 
-    void launchWifiNetworkDetailsSetting(String key, View view) {
+    void launchWifiDetailsSetting(String key, View view) {
         Intent intent = getWifiDetailsSettingsIntent(key);
         if (intent != null) {
             startActivity(intent, view);
@@ -647,6 +651,27 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         final Intent intent = new Intent(ACTION_WIFI_SCANNING_SETTINGS);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent, view);
+    }
+
+    /**
+     * Enable or disable Wi-Fi.
+     *
+     * @param enabled {@code true} to enable, {@code false} to disable.
+     */
+    @AnyThread
+    public void setWifiEnabled(boolean enabled) {
+        mWifiStateWorker.setWifiEnabled(enabled);
+    }
+
+    /**
+     * Return whether Wi-Fi is enabled or disabled.
+     *
+     * @return {@code true} if Wi-Fi is enabled or enabling
+     * @see WifiManager#getWifiState()
+     */
+    @AnyThread
+    public boolean isWifiEnabled() {
+        return mWifiStateWorker.isWifiEnabled();
     }
 
     void connectCarrierNetwork() {
@@ -853,8 +878,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             }
 
             if (status == WifiEntry.ConnectCallback.CONNECT_STATUS_FAILURE_NO_CONFIG) {
-                final Intent intent = new Intent("com.android.settings.WIFI_DIALOG")
-                        .putExtra(EXTRA_CHOSEN_WIFI_ENTRY_KEY, mWifiEntry.getKey());
+                final Intent intent = WifiUtils.getWifiDialogIntent(mWifiEntry.getKey(),
+                        true /* connectForCaller */);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mActivityStarter.startActivity(intent, false /* dismissShade */);
             } else if (status == CONNECT_STATUS_FAILURE_UNKNOWN) {

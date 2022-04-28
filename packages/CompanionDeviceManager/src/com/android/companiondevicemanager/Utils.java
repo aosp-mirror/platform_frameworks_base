@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -109,6 +108,18 @@ class Utils {
         return appInfo.metaData.getCharSequence(COMPANION_DEVICE_ACTIVITY_VENDOR_NAME, "");
     }
 
+    static boolean hasVendorIcon(@NonNull Context context,
+            @NonNull String packageName, int userId) throws PackageManager.NameNotFoundException {
+        final ApplicationInfo appInfo = getApplicationInfo(context, packageName, userId);
+        final Bundle bundle = appInfo.metaData;
+
+        if (bundle == null) {
+            return false;
+        } else {
+            return bundle.getInt(COMPANION_DEVICE_ACTIVITY_VENDOR_ICON) != 0;
+        }
+    }
+
     /**
      * Getting ApplicationInfo from meta-data.
      */
@@ -124,7 +135,6 @@ class Utils {
 
     static @NonNull Drawable getIcon(@NonNull Context context, int resId) {
         Drawable icon = context.getResources().getDrawable(resId, null);
-        icon.setTint(Color.DKGRAY);
         return icon;
     }
 

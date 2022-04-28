@@ -1,4 +1,6 @@
 // Baseline format: 1.0
+SamShouldBeLast: android.app.Activity#convertToTranslucent(android.app.Activity.TranslucentConversionListener, android.app.ActivityOptions):
+    SAM-compatible parameters (such as parameter 1, "callback", in android.app.Activity.convertToTranslucent) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.app.ActivityManager#addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int):
     SAM-compatible parameters (such as parameter 1, "listener", in android.app.ActivityManager.addOnUidImportanceListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.app.PendingIntent#send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler):
@@ -9,6 +11,24 @@ SamShouldBeLast: android.app.PendingIntent#send(android.content.Context, int, an
     SAM-compatible parameters (such as parameter 4, "onFinished", in android.app.PendingIntent.send) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.app.PendingIntent#send(int, android.app.PendingIntent.OnFinished, android.os.Handler):
     SAM-compatible parameters (such as parameter 2, "onFinished", in android.app.PendingIntent.send) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.content.pm.ApplicationInfo#dump(android.util.Printer, String):
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.ApplicationInfo.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.content.pm.PackageItemInfo#dumpBack(android.util.Printer, String):
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.PackageItemInfo.dumpBack) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.content.pm.PackageItemInfo#dumpFront(android.util.Printer, String):
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.PackageItemInfo.dumpFront) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.location.LocationManager.addNmeaListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener, android.os.Looper):
+    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper):
+    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper):
+    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(String, android.location.LocationListener, android.os.Looper):
+    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper):
+    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioManager#abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes):
     SAM-compatible parameters (such as parameter 1, "l", in android.media.AudioManager.abandonAudioFocus) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int):

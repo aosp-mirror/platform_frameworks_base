@@ -53,6 +53,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
@@ -73,6 +75,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * Build/Install/Run:
@@ -589,6 +592,48 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTransitionBounds() {
+        registerTestTransitionPlayer();
+        final int offset = 10;
+        final Function<WindowContainer<?>, TransitionInfo.Change> test = wc -> {
+            final Transition transition = wc.mTransitionController.createTransition(TRANSIT_OPEN);
+            transition.collect(wc);
+            final int nextRotation = (wc.getWindowConfiguration().getRotation() + 1) % 4;
+            wc.getWindowConfiguration().setRotation(nextRotation);
+            wc.getWindowConfiguration().setDisplayRotation(nextRotation);
+            final Rect bounds = wc.getWindowConfiguration().getBounds();
+            // Flip the bounds with offset.
+            wc.getWindowConfiguration().setBounds(
+                    new Rect(offset, offset, bounds.height(), bounds.width()));
+            final int flags = 0;
+            final TransitionInfo info = Transition.calculateTransitionInfo(transition.mType, flags,
+                    Transition.calculateTargets(transition.mParticipants, transition.mChanges),
+                    transition.mChanges);
+            transition.abort();
+            return info.getChanges().get(0);
+        };
+
+        final ActivityRecord app = createActivityRecord(mDisplayContent);
+        final TransitionInfo.Change changeOfActivity = test.apply(app);
+        // There will be letterbox if the activity bounds don't match parent, so always use its
+        // parent bounds for animation.
+        assertEquals(app.getParent().getBounds(), changeOfActivity.getEndAbsBounds());
+        final int endRotation = app.mTransitionController.useShellTransitionsRotation()
+                ? app.getWindowConfiguration().getRotation()
+                // Without shell rotation, fixed rotation is done by core so the info should not
+                // contain rotation change.
+                : app.getParent().getWindowConfiguration().getRotation();
+        assertEquals(endRotation, changeOfActivity.getEndRotation());
+
+        // Non-activity target always uses its configuration for end info.
+        final Task task = app.getTask();
+        final TransitionInfo.Change changeOfTask = test.apply(task);
+        assertEquals(task.getBounds(), changeOfTask.getEndAbsBounds());
+        assertEquals(new Point(offset, offset), changeOfTask.getEndRelOffset());
+        assertEquals(task.getWindowConfiguration().getRotation(), changeOfTask.getEndRotation());
+    }
+
+    @Test
     public void testDisplayRotationChange() {
         final Task task = createActivityRecord(mDisplayContent).getTask();
         final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
@@ -617,8 +662,8 @@ public class TransitionTests extends WindowTestsBase {
         }
         player.startTransition();
 
-        assertFalse(statusBar.mToken.inTransition());
-        assertFalse(decorToken.inTransition());
+        assertFalse(mDisplayContent.mTransitionController.isCollecting(statusBar.mToken));
+        assertFalse(mDisplayContent.mTransitionController.isCollecting(decorToken));
         assertTrue(ime.mToken.inTransition());
         assertTrue(task.inTransition());
         assertTrue(asyncRotationController.isTargetToken(decorToken));
@@ -692,7 +737,8 @@ public class TransitionTests extends WindowTestsBase {
         statusBar.mWinAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
         final SurfaceControl.Transaction postDrawTransaction =
                 mock(SurfaceControl.Transaction.class);
-        final boolean layoutNeeded = statusBar.finishDrawing(postDrawTransaction);
+        final boolean layoutNeeded = statusBar.finishDrawing(postDrawTransaction,
+                Integer.MAX_VALUE);
         assertFalse(layoutNeeded);
 
         transactionCommittedListener.onTransactionCommitted();
@@ -734,7 +780,7 @@ public class TransitionTests extends WindowTestsBase {
         statusBar.setOrientationChanging(true);
         player.startTransition();
         // Non-app windows should not be collected.
-        assertFalse(statusBar.mToken.inTransition());
+        assertFalse(mDisplayContent.mTransitionController.isCollecting(statusBar.mToken));
 
         onRotationTransactionReady(player, mWm.mTransactionFactory.get()).onTransactionCommitted();
         assertEquals(ROTATION_ANIMATION_SEAMLESS, player.mLastReady.getChange(
@@ -742,7 +788,7 @@ public class TransitionTests extends WindowTestsBase {
         player.finish();
 
         // The controller should be cleared if the target windows are drawn.
-        statusBar.finishDrawing(mWm.mTransactionFactory.get());
+        statusBar.finishDrawing(mWm.mTransactionFactory.get(), Integer.MAX_VALUE);
         statusBar.setOrientationChanging(false);
         assertNull(mDisplayContent.getAsyncRotationController());
     }

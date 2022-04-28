@@ -28,7 +28,6 @@ import com.android.systemui.statusbar.notification.collection.render.NotifGutsVi
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager
 import com.android.systemui.statusbar.notification.row.NotificationGuts
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -63,7 +62,7 @@ class GutsCoordinator @Inject constructor(
         pipeline.addNotificationLifetimeExtender(mLifetimeExtender)
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+    override fun dump(pw: PrintWriter, args: Array<String>) {
         pw.println("  notifsWithOpenGuts: ${notifsWithOpenGuts.size}")
         for (key in notifsWithOpenGuts) {
             pw.println("   * $key")

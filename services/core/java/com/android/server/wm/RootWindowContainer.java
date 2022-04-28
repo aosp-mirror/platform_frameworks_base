@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
+import static android.content.res.Configuration.EMPTY;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -642,9 +643,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    void setSecureSurfaceState(int userId) {
+    void refreshSecureSurfaceState() {
         forAllWindows((w) -> {
-            if (w.mHasSurface && userId == w.mShowUserId) {
+            if (w.mHasSurface) {
                 w.mWinAnimator.setSecureLocked(w.isSecureLocked());
             }
         }, true /* traverseTopToBottom */);
@@ -2005,7 +2006,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // of the activity entering PIP
             r.getDisplayContent().prepareAppTransition(TRANSIT_NONE);
 
-            final boolean singleActivity = task.getChildCount() == 1;
+            final TaskFragment organizedTf = r.getOrganizedTaskFragment();
+            final boolean singleActivity = task.getNonFinishingActivityCount() == 1;
             final Task rootTask;
             if (singleActivity) {
                 rootTask = task;
@@ -2039,6 +2041,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                             task.mLastRecentsAnimationTransaction,
                             task.mLastRecentsAnimationOverlay);
                     task.clearLastRecentsAnimationTransaction(false /* forceRemoveOverlay */);
+                }
+
+                // The organized TaskFragment is becoming empty because this activity is reparented
+                // to a new PIP Task. In this case, we should notify the organizer about why the
+                // TaskFragment becomes empty.
+                if (organizedTf != null && organizedTf.getNonFinishingActivityCount() == 1
+                        && organizedTf.getTopNonFinishingActivity() == r) {
+                    organizedTf.mClearedTaskFragmentForPip = true;
                 }
 
                 // There are multiple activities in the task and moving the top activity should
@@ -2086,6 +2096,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // TODO(task-org): Figure-out more structured way to do this long term.
             r.setWindowingMode(intermediateWindowingMode);
             r.mWaitForEnteringPinnedMode = true;
+            rootTask.forAllTaskFragments(tf -> {
+                if (!tf.isOrganizedTaskFragment()) {
+                    return;
+                }
+                tf.resetAdjacentTaskFragment();
+                if (tf.getTopNonFinishingActivity() != null) {
+                    // When the Task is entering picture-in-picture, we should clear all override
+                    // from the client organizer, so the PIP activity can get the correct config
+                    // from the Task, and prevent conflict with the PipTaskOrganizer.
+                    tf.updateRequestedOverrideConfiguration(EMPTY);
+                }
+            });
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
             // Set the launch bounds for launch-into-pip Activity on the root task.
             if (r.getOptions() != null && r.getOptions().isLaunchIntoPip()) {
@@ -2096,6 +2118,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the root pinned task
             r.supportsEnterPipOnTaskSwitch = false;
+
+            if (organizedTf != null && organizedTf.mClearedTaskFragmentForPip
+                    && organizedTf.isTaskVisibleRequested()) {
+                // Dispatch the pending info to TaskFragmentOrganizer before PIP animation.
+                // Otherwise, it will keep waiting for the empty TaskFragment to be non-empty.
+                mService.mTaskFragmentOrganizerController.dispatchPendingInfoChangedEvent(
+                        organizedTf);
+            }
         } finally {
             mService.continueWindowLayout();
         }
@@ -2754,7 +2784,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // First preference goes to the launch root task set in the activity options.
         if (options != null) {
             final Task candidateRoot = Task.fromWindowContainerToken(options.getLaunchRootTask());
-            if (canLaunchOnDisplay(r, candidateRoot)) {
+            if (candidateRoot != null && canLaunchOnDisplay(r, candidateRoot)) {
                 return candidateRoot;
             }
         }
@@ -3376,11 +3406,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 return new ArrayList<>();
             }
         } else {
+            final RecentTasks recentTasks = mWindowManager.mAtmService.getRecentTasks();
+            final int recentsComponentUid = recentTasks != null
+                    ? recentTasks.getRecentsComponentUid()
+                    : -1;
             final ArrayList<ActivityRecord> activities = new ArrayList<>();
-            forAllRootTasks(rootTask -> {
-                if (!dumpVisibleRootTasksOnly || rootTask.shouldBeVisible(null)) {
-                    activities.addAll(rootTask.getDumpActivitiesLocked(name, userId));
+            forAllLeafTasks(task -> {
+                final boolean isRecents = (task.effectiveUid == recentsComponentUid);
+                if (!dumpVisibleRootTasksOnly || task.shouldBeVisible(null) || isRecents) {
+                    activities.addAll(task.getDumpActivitiesLocked(name, userId));
                 }
+                return false;
             });
             return activities;
         }

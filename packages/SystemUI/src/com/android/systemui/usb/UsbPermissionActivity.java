@@ -16,7 +16,10 @@
 
 package com.android.systemui.usb;
 
-import com.android.systemui.R;
+import android.content.res.Resources;
+import android.os.Bundle;
+
+import javax.inject.Inject;
 
 /**
  * Dialog shown when a package requests access to a USB device or accessory.
@@ -24,23 +27,36 @@ import com.android.systemui.R;
 public class UsbPermissionActivity extends UsbDialogActivity {
 
     private boolean mPermissionGranted = false;
+    private UsbAudioWarningDialogMessage mUsbPermissionMessageHandler;
+
+    @Inject
+    public UsbPermissionActivity(UsbAudioWarningDialogMessage usbAudioWarningDialogMessage) {
+        mUsbPermissionMessageHandler = usbAudioWarningDialogMessage;
+    }
+
+    @Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        mUsbPermissionMessageHandler.init(UsbAudioWarningDialogMessage.TYPE_PERMISSION,
+                mDialogHelper);
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        final int strId;
-        boolean useRecordWarning = false;
-        if (mDialogHelper.isUsbDevice()) {
-            useRecordWarning = mDialogHelper.deviceHasAudioCapture()
-                    && !mDialogHelper.packageHasAudioRecordingPermission();
-            strId = useRecordWarning
-                    ? R.string.usb_device_permission_prompt_warn
-                    : R.string.usb_device_permission_prompt;
-        } else {
-            // UsbAccessory case
-            strId = R.string.usb_accessory_permission_prompt;
-        }
-        setAlertParams(strId);
+        final boolean useRecordWarning = mDialogHelper.isUsbDevice()
+                && (mDialogHelper.deviceHasAudioCapture()
+                && !mDialogHelper.packageHasAudioRecordingPermission());
+
+        final int titleId = mUsbPermissionMessageHandler.getPromptTitleId();
+        final String title = getString(titleId, mDialogHelper.getAppName(),
+                mDialogHelper.getDeviceDescription());
+        final int messageId = mUsbPermissionMessageHandler.getMessageId();
+        String message = (messageId != Resources.ID_NULL)
+                ? getString(messageId, mDialogHelper.getAppName(),
+                mDialogHelper.getDeviceDescription()) : null;
+        setAlertParams(title, message);
+
         // Only show the "always use" checkbox if there is no USB/Record warning
         if (!useRecordWarning && mDialogHelper.canBeDefault()) {
             addAlwaysUseCheckbox();

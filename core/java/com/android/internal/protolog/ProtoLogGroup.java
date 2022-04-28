@@ -60,6 +60,7 @@ public enum ProtoLogGroup implements IProtoLogGroup {
             Consts.TAG_WM),
     WM_DEBUG_APP_TRANSITIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM),
+    WM_DEBUG_ANIM(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false, Consts.TAG_WM),
     WM_DEBUG_APP_TRANSITIONS_ANIM(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM),
     WM_DEBUG_RECENTS_ANIMATIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,

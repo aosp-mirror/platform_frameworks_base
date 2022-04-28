@@ -6901,6 +6901,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     }
 
     public void testGetShareTargets_permission() {
+        addPackage(CHOOSER_ACTIVITY_PACKAGE, CHOOSER_ACTIVITY_UID, 10, "sig1");
+        mInjectedChooserActivity =
+                ComponentName.createRelative(CHOOSER_ACTIVITY_PACKAGE, ".ChooserActivity");
         IntentFilter filter = new IntentFilter();
 
         assertExpectException(SecurityException.class, "Missing permission", () ->
@@ -6909,6 +6912,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Has permission, now it should pass.
         mCallerPermissions.add(permission.MANAGE_APP_PREDICTIONS);
         mManager.getShareTargets(filter);
+
+        runWithCaller(CHOOSER_ACTIVITY_PACKAGE, USER_0, () -> {
+            // Access is allowed when called from the configured system ChooserActivity
+            mManager.getShareTargets(filter);
+        });
     }
 
     public void testHasShareTargets_permission() {

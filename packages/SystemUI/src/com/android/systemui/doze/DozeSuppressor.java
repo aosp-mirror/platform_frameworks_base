@@ -166,6 +166,8 @@ public class DozeSuppressor implements DozeMachine.Part {
     private DozeHost.Callback mHostCallback = new DozeHost.Callback() {
         @Override
         public void onPowerSaveChanged(boolean active) {
+            // handles suppression changes, while DozeMachine#transitionPolicy handles gating
+            // transitions to DOZE_AOD
             DozeMachine.State nextState = null;
             if (mDozeHost.isPowerSaveActive()) {
                 nextState = DozeMachine.State.DOZE;
@@ -182,6 +184,8 @@ public class DozeSuppressor implements DozeMachine.Part {
 
         @Override
         public void onAlwaysOnSuppressedChanged(boolean suppressed) {
+            // handles suppression changes, while DozeMachine#transitionPolicy handles gating
+            // transitions to DOZE_AOD
             final DozeMachine.State nextState;
             if (mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT) && !suppressed) {
                 nextState = DozeMachine.State.DOZE_AOD;

@@ -19,6 +19,7 @@ package com.android.server.media.metrics;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaMetrics;
+import android.media.metrics.BundleSession;
 import android.media.metrics.IMediaMetricsManager;
 import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
@@ -187,11 +188,33 @@ public final class MediaMetricsManagerService extends SystemService {
                 return;
             }
 
-            int atomid = metrics.getInt("KEY_STATSD_ATOM_NUMBER");
+            int atomid = metrics.getInt(BundleSession.KEY_STATSD_ATOM);
             switch (atomid) {
                 default:
                     return;
                 // to be extended as we define statsd atoms
+                case 322: // MediaPlaybackStateEvent
+                    // pattern for the keys:
+                    // <statsd event> - <fieldname>
+                    // match types to what stats will want
+                    String _sessionId = metrics.getString("playbackstateevent-sessionid");
+                    int _state = metrics.getInt("playbackstateevent-state", -1);
+                    long _lifetime = metrics.getLong("playbackstateevent-lifetime", -1);
+                    if (_sessionId == null || _state < 0 || _lifetime < 0) {
+                        Slog.d(TAG, "dropping incomplete data for atom 322: _sessionId: "
+                                        + _sessionId + " _state: " + _state
+                                        + " _lifetime: " + _lifetime);
+                        return;
+                    }
+                    StatsEvent statsEvent = StatsEvent.newBuilder()
+                            .setAtomId(322)
+                            .writeString(_sessionId)
+                            .writeInt(_state)
+                            .writeLong(_lifetime)
+                            .usePooledBuffer()
+                            .build();
+                    StatsLog.write(statsEvent);
+                    return;
             }
         }
 
@@ -224,6 +247,13 @@ public final class MediaMetricsManagerService extends SystemService {
                     .set(MediaMetrics.Property.LOG_SESSION_ID, id)
                     .record();
             return id;
+        }
+
+        @Override
+        public void releaseSessionId(String sessionId, int userId) {
+            // De-authorize this session-id in the native mediametrics service.
+            // TODO: plumbing to the native mediametrics service
+            Slog.v(TAG, "Releasing sessionId " + sessionId + " for userId " + userId + " [NOP]");
         }
 
         @Override

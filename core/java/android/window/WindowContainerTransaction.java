@@ -269,6 +269,20 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Used in conjunction with a shell-transition call (usually finishTransition). This is
+     * basically a message to the transition system that a particular task should NOT go into
+     * PIP even though it normally would. This is to deal with some edge-case situations where
+     * Recents will "commit" the transition to go home, but then not actually go-home.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setDoNotPip(@NonNull WindowContainerToken container) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mChangeMask |= Change.CHANGE_FORCE_NO_PIP;
+        return this;
+    }
+
+    /**
      * Reparents a container into another one. The effect of a {@code null} parent can vary. For
      * example, reparenting a stack to {@code null} will reparent it to its display.
      *
@@ -382,8 +396,6 @@ public final class WindowContainerTransaction implements Parcelable {
     /**
      * Sets the container as launch adjacent flag root. Task starting with
      * {@link FLAG_ACTIVITY_LAUNCH_ADJACENT} will be launching to.
-     *
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction setLaunchAdjacentFlagRoot(
@@ -395,8 +407,6 @@ public final class WindowContainerTransaction implements Parcelable {
 
     /**
      * Clears launch adjacent flag root for the display area of passing container.
-     *
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction clearLaunchAdjacentFlagRoot(
@@ -640,6 +650,26 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Requests focus on the top running Activity in the given TaskFragment. This will only take
+     * effect if there is no focus, or if the current focus is in the same Task as the requested
+     * TaskFragment.
+     * @param fragmentToken client assigned unique token to create TaskFragment with specified in
+     *                      {@link TaskFragmentCreationParams#getFragmentToken()}.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction requestFocusOnTaskFragment(@NonNull IBinder fragmentToken) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(
+                        HierarchyOp.HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT)
+                        .setContainer(fragmentToken)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+
+    }
+
+    /**
      * When this {@link WindowContainerTransaction} failed to finish on the server side, it will
      * trigger callback with this {@param errorCallbackToken}.
      * @param errorCallbackToken    client provided token that will be passed back as parameter in
@@ -790,6 +820,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int CHANGE_HIDDEN = 1 << 3;
         public static final int CHANGE_BOUNDS_TRANSACTION_RECT = 1 << 4;
         public static final int CHANGE_IGNORE_ORIENTATION_REQUEST = 1 << 5;
+        public static final int CHANGE_FORCE_NO_PIP = 1 << 6;
 
         private final Configuration mConfiguration = new Configuration();
         private boolean mFocusable = true;
@@ -1046,6 +1077,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER = 15;
         public static final int HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER = 16;
         public static final int HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER = 17;
+        public static final int HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT = 18;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1357,6 +1389,8 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER:
                     return "{removeLocalInsetsProvider: container=" + mContainer
                             + " insetsType=" + Arrays.toString(mInsetsTypes) + "}";
+                case HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT:
+                    return "{requestFocusOnTaskFragment: container=" + mContainer + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
                             + " mToTop=" + mToTop

@@ -211,6 +211,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_SEED_ACCOUNT_OPTIONS = "seedAccountOptions";
     private static final String TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL =
             "lastRequestQuietModeEnabledCall";
+    private static final String TAG_IGNORE_PREPARE_STORAGE_ERRORS =
+            "ignorePrepareStorageErrors";
     private static final String ATTR_KEY = "key";
     private static final String ATTR_VALUE_TYPE = "type";
     private static final String ATTR_MULTIPLE = "m";
@@ -320,12 +322,39 @@ public class UserManagerService extends IUserManager.Stub {
 
         private long mLastRequestQuietModeEnabledMillis;
 
+        /**
+         * {@code true} if the system should ignore errors when preparing the
+         * storage directories for this user. This is {@code false} for all new
+         * users; it will only be {@code true} for users that already existed
+         * on-disk from an older version of Android.
+         */
+        private boolean mIgnorePrepareStorageErrors;
+
         void setLastRequestQuietModeEnabledMillis(long millis) {
             mLastRequestQuietModeEnabledMillis = millis;
         }
 
         long getLastRequestQuietModeEnabledMillis() {
             return mLastRequestQuietModeEnabledMillis;
+        }
+
+        boolean getIgnorePrepareStorageErrors() {
+            return mIgnorePrepareStorageErrors;
+        }
+
+        @SuppressWarnings("AndroidFrameworkCompatChange")  // This is not an app-visible API.
+        void setIgnorePrepareStorageErrors() {
+            // This method won't be called for new users.  But to fully rule out
+            // the possibility of mIgnorePrepareStorageErrors ever being true
+            // for any user on any device that launched with T or later, we also
+            // explicitly check that DEVICE_INITIAL_SDK_INT is below T before
+            // honoring the request to set mIgnorePrepareStorageErrors to true.
+            if (Build.VERSION.DEVICE_INITIAL_SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                mIgnorePrepareStorageErrors = true;
+                return;
+            }
+            Slog.w(LOG_TAG, "Not setting mIgnorePrepareStorageErrors to true"
+                    + " since this is a new device");
         }
 
         void clearSeedAccountData() {
@@ -1358,7 +1387,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @Override
     public boolean isUserOfType(@UserIdInt int userId, String userType) {
-        checkManageUsersPermission("check user type");
+        checkQueryOrCreateUsersPermission("check user type");
         return userType != null && userType.equals(getUserTypeNoChecks(userId));
     }
 
@@ -1564,13 +1593,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean isCredentialSharedWithParent(@UserIdInt int userId) {
+    public boolean isCredentialSharableWithParent(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
-                "isCredentialSharedWithParent");
+                "isCredentialSharableWithParent");
         synchronized (mUsersLock) {
             UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
             return userTypeDetails != null && userTypeDetails.isProfile()
-                    && userTypeDetails.isCredentialSharedWithParent();
+                    && userTypeDetails.isCredentialSharableWithParent();
         }
     }
 
@@ -1614,7 +1643,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (!hasQueryOrCreateUsersPermission()
                 && !hasPermissionGranted(
                         android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, callingUid)) {
-            throw new SecurityException("You need MANAGE_USERS or CREATE_USERS or "
+            throw new SecurityException("You need MANAGE_USERS, CREATE_USERS, QUERY_USERS, or "
                     + "GET_ACCOUNTS_PRIVILEGED permissions to: get user name");
         }
         final int userId = UserHandle.getUserId(callingUid);
@@ -3408,6 +3437,10 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.endTag(/* namespace */ null, TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL);
         }
 
+        serializer.startTag(/* namespace */ null, TAG_IGNORE_PREPARE_STORAGE_ERRORS);
+        serializer.text(String.valueOf(userData.getIgnorePrepareStorageErrors()));
+        serializer.endTag(/* namespace */ null, TAG_IGNORE_PREPARE_STORAGE_ERRORS);
+
         serializer.endTag(null, TAG_USER);
 
         serializer.endDocument();
@@ -3517,6 +3550,7 @@ public class UserManagerService extends IUserManager.Stub {
         Bundle legacyLocalRestrictions = null;
         RestrictionsSet localRestrictions = null;
         Bundle globalRestrictions = null;
+        boolean ignorePrepareStorageErrors = true; // default is true for old users
 
         final TypedXmlPullParser parser = Xml.resolvePullParser(is);
         int type;
@@ -3595,6 +3629,11 @@ public class UserManagerService extends IUserManager.Stub {
                     if (type == XmlPullParser.TEXT) {
                         lastRequestQuietModeEnabledTimestamp = Long.parseLong(parser.getText());
                     }
+                } else if (TAG_IGNORE_PREPARE_STORAGE_ERRORS.equals(tag)) {
+                    type = parser.next();
+                    if (type == XmlPullParser.TEXT) {
+                        ignorePrepareStorageErrors = Boolean.parseBoolean(parser.getText());
+                    }
                 }
             }
         }
@@ -3622,6 +3661,9 @@ public class UserManagerService extends IUserManager.Stub {
         userData.persistSeedData = persistSeedData;
         userData.seedAccountOptions = seedAccountOptions;
         userData.setLastRequestQuietModeEnabledMillis(lastRequestQuietModeEnabledTimestamp);
+        if (ignorePrepareStorageErrors) {
+            userData.setIgnorePrepareStorageErrors();
+        }
 
         synchronized (mRestrictionsLock) {
             if (baseRestrictions != null) {
@@ -4106,11 +4148,11 @@ public class UserManagerService extends IUserManager.Stub {
                 continue;
             }
             if (filter.direction == DefaultCrossProfileIntentFilter.Direction.TO_PARENT) {
-                mPm.addCrossProfileIntentFilter(
+                mPm.addCrossProfileIntentFilter(mPm.snapshotComputer(),
                         filter.filter, mContext.getOpPackageName(), profileUserId, parentUserId,
                         filter.flags);
             } else {
-                mPm.addCrossProfileIntentFilter(
+                mPm.addCrossProfileIntentFilter(mPm.snapshotComputer(),
                         filter.filter, mContext.getOpPackageName(), parentUserId, profileUserId,
                         filter.flags);
             }
@@ -4249,7 +4291,7 @@ public class UserManagerService extends IUserManager.Stub {
         for (int i = 0; i < userSize; i++) {
             final UserData user = mUsers.valueAt(i);
             if (DBG) Slog.d(LOG_TAG, i + ":" + user.info.toFullString());
-            if (user.info.preCreated && user.info.userType.equals(userType)) {
+            if (user.info.preCreated && !user.info.partial && user.info.userType.equals(userType)) {
                 if (!user.info.isInitialized()) {
                     Slog.w(LOG_TAG, "found pre-created user of type " + userType
                             + ", but it's not initialized yet: " + user.info.toFullString());
@@ -4275,16 +4317,9 @@ public class UserManagerService extends IUserManager.Stub {
 
     private long logUserCreateJourneyBegin(@UserIdInt int userId, String userType,
             @UserInfoFlag int flags) {
-        final long sessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
-        // log the journey atom with the user metadata
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, sessionId,
+        return logUserJourneyBegin(
                 FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE,
-                /* origin_user= */ -1, userId, UserManager.getUserTypeForStatsd(userType), flags);
-        // log the event atom to indicate the event start
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__BEGIN);
-        return sessionId;
+                userId, userType, flags);
     }
 
     private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId, boolean finish) {
@@ -4292,6 +4327,46 @@ public class UserManagerService extends IUserManager.Stub {
                 FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
                 finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
                         : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
+    }
+
+    private long logUserRemoveJourneyBegin(@UserIdInt int userId, String userType,
+            @UserInfoFlag int flags) {
+        return logUserJourneyBegin(
+                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_REMOVE,
+                userId, userType, flags);
+    }
+
+    private void logUserRemoveJourneyFinish(long sessionId, @UserIdInt int userId, boolean finish) {
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
+                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__REMOVE_USER,
+                finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
+                        : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
+    }
+
+    private long logUserJourneyBegin(int journey, @UserIdInt int userId, String userType,
+            @UserInfoFlag int flags) {
+        final long sessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
+        // log the journey atom with the user metadata
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, sessionId,
+                journey, /* origin_user= */ -1, userId,
+                UserManager.getUserTypeForStatsd(userType), flags);
+
+        // log the event atom to indicate the event start
+        int event;
+        switch (journey) {
+            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE:
+                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER;
+                break;
+            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_REMOVE:
+                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__REMOVE_USER;
+                break;
+            default:
+                throw new IllegalArgumentException("Journey " + journey + " not expected.");
+        }
+
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
+                event, FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__BEGIN);
+        return sessionId;
     }
 
     /** Register callbacks for statsd pulled atoms. */
@@ -4536,6 +4611,10 @@ public class UserManagerService extends IUserManager.Stub {
                 userData.info.flags |= UserInfo.FLAG_DISABLED;
                 writeUserLP(userData);
             }
+
+            final long sessionId = logUserRemoveJourneyBegin(
+                    userId, userData.info.userType, userData.info.flags);
+
             try {
                 mAppOpsService.removeUser(userId);
             } catch (RemoteException e) {
@@ -4558,9 +4637,11 @@ public class UserManagerService extends IUserManager.Stub {
                             @Override
                             public void userStopped(int userIdParam) {
                                 finishRemoveUser(userIdParam);
+                                logUserRemoveJourneyFinish(sessionId, userIdParam, true);
                             }
                             @Override
                             public void userStopAborted(int userIdParam) {
+                                logUserRemoveJourneyFinish(sessionId, userIdParam, false);
                             }
                         });
             } catch (RemoteException e) {
@@ -4596,12 +4677,12 @@ public class UserManagerService extends IUserManager.Stub {
             final String restriction = getUserRemovalRestriction(userId);
             if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
                 Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
-                return UserManager.REMOVE_RESULT_ERROR;
+                return UserManager.REMOVE_RESULT_ERROR_USER_RESTRICTION;
             }
         }
         if (userId == UserHandle.USER_SYSTEM) {
             Slog.e(LOG_TAG, "System user cannot be removed.");
-            return UserManager.REMOVE_RESULT_ERROR;
+            return UserManager.REMOVE_RESULT_ERROR_SYSTEM_USER;
         }
 
         final long ident = Binder.clearCallingIdentity();
@@ -4613,7 +4694,7 @@ public class UserManagerService extends IUserManager.Stub {
                     if (userData == null) {
                         Slog.e(LOG_TAG,
                                 "Cannot remove user " + userId + ", invalid user id provided.");
-                        return UserManager.REMOVE_RESULT_ERROR;
+                        return UserManager.REMOVE_RESULT_ERROR_USER_NOT_FOUND;
                     }
 
                     if (mRemovingUserIds.get(userId)) {
@@ -5022,9 +5103,13 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean isUserNameSet(@UserIdInt int userId) {
-        if (!hasManageUsersOrPermission(android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
-            throw new SecurityException("You need MANAGE_USERS or GET_ACCOUNTS_PRIVILEGED "
-                    + "permissions to: get whether user name is set");
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (!hasQueryOrCreateUsersPermission()
+                && !(callingUserId == userId && hasPermissionGranted(
+                android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, callingUid))) {
+            throw new SecurityException("You need MANAGE_USERS, CREATE_USERS, QUERY_USERS, or "
+                    + "GET_ACCOUNTS_PRIVILEGED permissions to: get whether user name is set");
         }
         synchronized (mUsersLock) {
             final UserInfo userInfo = getUserInfoLU(userId);
@@ -5367,142 +5452,170 @@ public class UserManagerService extends IUserManager.Stub {
         (new Shell()).exec(this, in, out, err, args, callback, resultReceiver);
     }
 
-    private int onShellCommand(Shell shell, String cmd) {
-        if (cmd == null) {
-            return shell.handleDefaultCommands(cmd);
+    private final class Shell extends ShellCommand {
+
+        @Override
+        public void onHelp() {
+            final PrintWriter pw = getOutPrintWriter();
+            pw.println("User manager (user) commands:");
+            pw.println("  help");
+            pw.println("    Prints this help text.");
+            pw.println();
+            pw.println("  list [-v | --verbose] [--all]");
+            pw.println("    Prints all users on the system.");
+            pw.println();
+            pw.println("  report-system-user-package-whitelist-problems [-v | --verbose] "
+                    + "[--critical-only] [--mode MODE]");
+            pw.println("    Reports all issues on user-type package allowlist XML files. Options:");
+            pw.println("    -v | --verbose: shows extra info, like number of issues");
+            pw.println("    --critical-only: show only critical issues, excluding warnings");
+            pw.println("    --mode MODE: shows what errors would be if device used mode MODE");
+            pw.println("      (where MODE is the allowlist mode integer as defined by "
+                    + "config_userTypePackageWhitelistMode)");
         }
 
-        final PrintWriter pw = shell.getOutPrintWriter();
-        try {
-            switch(cmd) {
-                case "list":
-                    return runList(pw, shell);
-                case "report-system-user-package-whitelist-problems":
-                    return runReportPackageWhitelistProblems(pw, shell);
-                default:
-                    return shell.handleDefaultCommands(cmd);
+        @Override
+        public int onCommand(String cmd) {
+            if (cmd == null) {
+                return handleDefaultCommands(cmd);
             }
-        } catch (RemoteException e) {
-            pw.println("Remote exception: " + e);
-        }
-        return -1;
-    }
 
-    private int runList(PrintWriter pw, Shell shell) throws RemoteException {
-        boolean all = false;
-        boolean verbose = false;
-        String opt;
-        while ((opt = shell.getNextOption()) != null) {
-            switch (opt) {
-                case "-v":
-                    verbose = true;
-                    break;
-                case "--all":
-                    all = true;
-                    break;
-                default:
-                    pw.println("Invalid option: " + opt);
-                    return -1;
+            try {
+                switch(cmd) {
+                    case "list":
+                        return runList();
+                    case "report-system-user-package-whitelist-problems":
+                        return runReportPackageAllowlistProblems();
+                    default:
+                        return handleDefaultCommands(cmd);
+                }
+            } catch (RemoteException e) {
+                getOutPrintWriter().println("Remote exception: " + e);
             }
+            return -1;
         }
-        final IActivityManager am = ActivityManager.getService();
-        final List<UserInfo> users = getUsers(/* excludePartial= */ !all,
-                /* excludingDying=*/ false, /* excludePreCreated= */ !all);
-        if (users == null) {
-            pw.println("Error: couldn't get users");
-            return 1;
-        } else {
-            final int size = users.size();
-            int currentUser = UserHandle.USER_NULL;
-            if (verbose) {
-                pw.printf("%d users:\n\n", size);
-                currentUser = am.getCurrentUser().id;
+
+        private int runList() throws RemoteException {
+            final PrintWriter pw = getOutPrintWriter();
+            boolean all = false;
+            boolean verbose = false;
+            String opt;
+            while ((opt = getNextOption()) != null) {
+                switch (opt) {
+                    case "-v":
+                    case "--verbose":
+                        verbose = true;
+                        break;
+                    case "--all":
+                        all = true;
+                        break;
+                    default:
+                        pw.println("Invalid option: " + opt);
+                        return -1;
+                }
+            }
+            final IActivityManager am = ActivityManager.getService();
+            final List<UserInfo> users = getUsers(/* excludePartial= */ !all,
+                    /* excludeDying= */ false, /* excludePreCreated= */ !all);
+            if (users == null) {
+                pw.println("Error: couldn't get users");
+                return 1;
             } else {
-                // NOTE: the standard "list users" command is used by integration tests and
-                // hence should not be changed. If you need to add more info, use the
-                // verbose option.
-                pw.println("Users:");
-            }
-            for (int i = 0; i < size; i++) {
-                final UserInfo user = users.get(i);
-                final boolean running = am.isUserRunning(user.id, 0);
-                final boolean current = user.id == currentUser;
-                final boolean hasParent = user.profileGroupId != user.id
-                        && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
+                final int size = users.size();
+                int currentUser = UserHandle.USER_NULL;
                 if (verbose) {
-                    final DevicePolicyManagerInternal dpm = getDevicePolicyManagerInternal();
-                    String deviceOwner = "";
-                    String profileOwner = "";
-                    if (dpm != null) {
-                        final long ident = Binder.clearCallingIdentity();
-                        // NOTE: dpm methods below CANNOT be called while holding the mUsersLock
-                        try {
-                            if (dpm.getDeviceOwnerUserId() == user.id) {
-                                deviceOwner = " (device-owner)";
-                            }
-                            if (dpm.getProfileOwnerAsUser(user.id) != null) {
-                                profileOwner = " (profile-owner)";
-                            }
-                        } finally {
-                            Binder.restoreCallingIdentity(ident);
-                        }
-                    }
-                    pw.printf("%d: id=%d, name=%s, type=%s, flags=%s%s%s%s%s%s%s%s%s\n",
-                            i,
-                            user.id,
-                            user.name,
-                            user.userType.replace("android.os.usertype.", ""),
-                            UserInfo.flagsToString(user.flags),
-                            hasParent ? " (parentId=" + user.profileGroupId + ")" : "",
-                            running ? " (running)" : "",
-                            user.partial ? " (partial)" : "",
-                            user.preCreated ? " (pre-created)" : "",
-                            user.convertedFromPreCreated ? " (converted)" : "",
-                            deviceOwner, profileOwner,
-                            current ? " (current)" : "");
+                    pw.printf("%d users:\n\n", size);
+                    currentUser = am.getCurrentUser().id;
                 } else {
                     // NOTE: the standard "list users" command is used by integration tests and
                     // hence should not be changed. If you need to add more info, use the
                     // verbose option.
-                    pw.printf("\t%s%s\n", user, running ? " running" : "");
+                    pw.println("Users:");
                 }
+                for (int i = 0; i < size; i++) {
+                    final UserInfo user = users.get(i);
+                    final boolean running = am.isUserRunning(user.id, 0);
+                    final boolean current = user.id == currentUser;
+                    final boolean hasParent = user.profileGroupId != user.id
+                            && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
+                    if (verbose) {
+                        final DevicePolicyManagerInternal dpm = getDevicePolicyManagerInternal();
+                        String deviceOwner = "";
+                        String profileOwner = "";
+                        if (dpm != null) {
+                            final long ident = Binder.clearCallingIdentity();
+                            // NOTE: dpm methods below CANNOT be called while holding the mUsersLock
+                            try {
+                                if (dpm.getDeviceOwnerUserId() == user.id) {
+                                    deviceOwner = " (device-owner)";
+                                }
+                                if (dpm.getProfileOwnerAsUser(user.id) != null) {
+                                    profileOwner = " (profile-owner)";
+                                }
+                            } finally {
+                                Binder.restoreCallingIdentity(ident);
+                            }
+                        }
+                        pw.printf("%d: id=%d, name=%s, type=%s, flags=%s%s%s%s%s%s%s%s%s\n",
+                                i,
+                                user.id,
+                                user.name,
+                                user.userType.replace("android.os.usertype.", ""),
+                                UserInfo.flagsToString(user.flags),
+                                hasParent ? " (parentId=" + user.profileGroupId + ")" : "",
+                                running ? " (running)" : "",
+                                user.partial ? " (partial)" : "",
+                                user.preCreated ? " (pre-created)" : "",
+                                user.convertedFromPreCreated ? " (converted)" : "",
+                                deviceOwner, profileOwner,
+                                current ? " (current)" : "");
+                    } else {
+                        // NOTE: the standard "list users" command is used by integration tests and
+                        // hence should not be changed. If you need to add more info, use the
+                        // verbose option.
+                        pw.printf("\t%s%s\n", user, running ? " running" : "");
+                    }
+                }
+                return 0;
+            }
+        }
+
+        private int runReportPackageAllowlistProblems() {
+            final PrintWriter pw = getOutPrintWriter();
+            boolean verbose = false;
+            boolean criticalOnly = false;
+            int mode = UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_NONE;
+            String opt;
+            while ((opt = getNextOption()) != null) {
+                switch (opt) {
+                    case "-v":
+                    case "--verbose":
+                        verbose = true;
+                        break;
+                    case "--critical-only":
+                        criticalOnly = true;
+                        break;
+                    case "--mode":
+                        mode = Integer.parseInt(getNextArgRequired());
+                        break;
+                    default:
+                        pw.println("Invalid option: " + opt);
+                        return -1;
+                }
+            }
+
+            Slog.d(LOG_TAG, "runReportPackageAllowlistProblems(): verbose=" + verbose
+                    + ", criticalOnly=" + criticalOnly
+                    + ", mode=" + UserSystemPackageInstaller.modeToString(mode));
+
+            try (IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ")) {
+                mSystemPackageInstaller.dumpPackageWhitelistProblems(ipw, mode, verbose,
+                        criticalOnly);
             }
             return 0;
         }
-    }
 
-    private int runReportPackageWhitelistProblems(PrintWriter pw, Shell shell) {
-        boolean verbose = false;
-        boolean criticalOnly = false;
-        int mode = UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_NONE;
-        String opt;
-        while ((opt = shell.getNextOption()) != null) {
-            switch (opt) {
-                case "-v":
-                case "--verbose":
-                    verbose = true;
-                    break;
-                case "--critical-only":
-                    criticalOnly = true;
-                    break;
-                case "--mode":
-                    mode = Integer.parseInt(shell.getNextArgRequired());
-                    break;
-                default:
-                    pw.println("Invalid option: " + opt);
-                    return -1;
-            }
-        }
-
-        Slog.d(LOG_TAG, "runReportPackageWhitelistProblems(): verbose=" + verbose
-                + ", criticalOnly=" + criticalOnly
-                + ", mode=" + UserSystemPackageInstaller.modeToString(mode));
-
-        try (IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ")) {
-            mSystemPackageInstaller.dumpPackageWhitelistProblems(ipw, mode, verbose, criticalOnly);
-        }
-        return 0;
-    }
+    } // class Shell
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -5732,6 +5845,9 @@ public class UserManagerService extends IUserManager.Stub {
                 pw.println();
             }
         }
+
+        pw.println("    Ignore errors preparing storage: "
+                + userData.getIgnorePrepareStorageErrors());
     }
 
     private static void dumpTimeAgo(PrintWriter pw, StringBuilder sb, long nowTime, long time) {
@@ -5781,33 +5897,6 @@ public class UserManagerService extends IUserManager.Stub {
                 boolean isDeviceOwner) {
             UserManagerService.this.setDevicePolicyUserRestrictionsInner(originatingUserId,
                     global, local, isDeviceOwner);
-        }
-
-        @Override
-        public Bundle getBaseUserRestrictions(@UserIdInt int userId) {
-            synchronized (mRestrictionsLock) {
-                return mBaseUserRestrictions.getRestrictions(userId);
-            }
-        }
-
-        @Override
-        public void setBaseUserRestrictionsByDpmsForMigration(
-                @UserIdInt int userId, Bundle baseRestrictions) {
-            synchronized (mRestrictionsLock) {
-                if (mBaseUserRestrictions.updateRestrictions(userId,
-                        new Bundle(baseRestrictions))) {
-                    invalidateEffectiveUserRestrictionsLR(userId);
-                }
-            }
-
-            final UserData userData = getUserDataNoChecks(userId);
-            synchronized (mPackagesLock) {
-                if (userData != null) {
-                    writeUserLP(userData);
-                } else {
-                    Slog.w(LOG_TAG, "UserInfo not found for " + userId);
-                }
-            }
         }
 
         @Override
@@ -6135,6 +6224,14 @@ public class UserManagerService extends IUserManager.Stub {
             UserManagerService.this.setDefaultCrossProfileIntentFilters(
                     profileUserId, userTypeDetails, restrictions, parentUserId);
         }
+
+        @Override
+        public boolean shouldIgnorePrepareStorageErrors(int userId) {
+            synchronized (mUsersLock) {
+                UserData userData = mUsers.get(userId);
+                return userData != null && userData.getIgnorePrepareStorageErrors();
+            }
+        }
     }
 
     /**
@@ -6183,32 +6280,6 @@ public class UserManagerService extends IUserManager.Stub {
         }
         for (UserInfo ui: usersToRemove) {
             removeUser(ui.id);
-        }
-    }
-
-    private class Shell extends ShellCommand {
-        @Override
-        public int onCommand(String cmd) {
-            return onShellCommand(this, cmd);
-        }
-
-        @Override
-        public void onHelp() {
-            final PrintWriter pw = getOutPrintWriter();
-            pw.println("User manager (user) commands:");
-            pw.println("  help");
-            pw.println("    Prints this help text.");
-            pw.println("");
-            pw.println("  list [-v] [-all]");
-            pw.println("    Prints all users on the system.");
-            pw.println("  report-system-user-package-whitelist-problems [-v | --verbose] "
-                    + "[--critical-only] [--mode MODE]");
-            pw.println("    Reports all issues on user-type package whitelist XML files. Options:");
-            pw.println("    -v | --verbose : shows extra info, like number of issues");
-            pw.println("    --critical-only: show only critical issues, excluding warnings");
-            pw.println("    --mode MODE: shows what errors would be if device used mode MODE (where"
-                    + " MODE is the whitelist mode integer as defined by "
-                    + "config_userTypePackageWhitelistMode)");
         }
     }
 

@@ -33,4 +33,14 @@
     <!-- The default gravity for the picture-in-picture window.
          Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
     <integer name="config_defaultPictureInPictureGravity">0x55</integer>
+
+    <!-- Fraction of screen width/height restricted keep clear areas can move the PiP. -->
+    <fraction name="config_pipMaxRestrictedMoveDistance">15%</fraction>
+
+    <!-- Duration (in milliseconds) the PiP stays stashed before automatically unstashing. -->
+    <integer name="config_pipStashDuration">5000</integer>
+
+    <!-- Time (duration in milliseconds) that the shell waits for an app to close the PiP by itself
+    if a custom action is present before closing it. -->
+    <integer name="config_pipForceCloseDelay">5000</integer>
 </resources>

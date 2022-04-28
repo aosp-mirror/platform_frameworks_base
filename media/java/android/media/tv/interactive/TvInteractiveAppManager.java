@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
-import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
 import android.net.Uri;
@@ -249,7 +248,7 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
-     * @see android.media.tv.interactive.TvInteractiveAppInfo#getId()
+     * @see TvInteractiveAppServiceInfo#getId()
      */
     public static final String INTENT_KEY_INTERACTIVE_APP_SERVICE_ID = "interactive_app_id";
 
@@ -269,7 +268,7 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
-     * @see android.media.tv.interactive.TvInteractiveAppInfo#getSupportedTypes()
+     * @see android.media.tv.interactive.TvInteractiveAppServiceInfo#getSupportedTypes()
      * @see android.media.tv.interactive.TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
      */
     public static final String INTENT_KEY_BI_INTERACTIVE_APP_TYPE = "bi_interactive_app_type";
@@ -284,6 +283,16 @@ public final class TvInteractiveAppManager {
      * @see android.media.tv.interactive.TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
      */
     public static final String INTENT_KEY_BI_INTERACTIVE_APP_URI = "bi_interactive_app_uri";
+
+    /**
+     * Intent key for command type. It's used to send app command to TV app. The value of this key
+     * could vary according to TV apps.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @see #ACTION_APP_LINK_COMMAND
+     */
+    public static final String INTENT_KEY_COMMAND_TYPE = "command_type";
 
     private final ITvInteractiveAppManager mService;
     private final int mUserId;
@@ -478,6 +487,19 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
+            public void onRequestSigning(
+                    String id, String algorithm, String alias, byte[] data, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestSigning(id, algorithm, alias, data);
+                }
+            }
+
+            @Override
             public void onSessionStateChanged(int state, int err, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
@@ -543,11 +565,11 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
-            public void onTvInteractiveAppInfoUpdated(TvInteractiveAppInfo iAppInfo) {
+            public void onTvInteractiveAppServiceInfoUpdated(TvInteractiveAppServiceInfo iAppInfo) {
                 // TODO: add public API updateInteractiveAppInfo()
                 synchronized (mLock) {
                     for (TvInteractiveAppCallbackRecord record : mCallbackRecords) {
-                        record.postTvInteractiveAppInfoUpdated(iAppInfo);
+                        record.postTvInteractiveAppServiceInfoUpdated(iAppInfo);
                     }
                 }
             }
@@ -611,21 +633,23 @@ public final class TvInteractiveAppManager {
          * This is called when the information about an existing TV Interactive App service has been
          * updated.
          *
-         * <p>Because the system automatically creates a <code>TvInteractiveAppInfo</code> object
-         * for each TV Interactive App service based on the information collected from the
+         * <p>Because the system automatically creates a <code>TvInteractiveAppServiceInfo</code>
+         * object for each TV Interactive App service based on the information collected from the
          * <code>AndroidManifest.xml</code>, this method is only called back when such information
          * has changed dynamically.
          *
-         * @param iAppInfo The <code>TvInteractiveAppInfo</code> object that contains new
+         * @param iAppInfo The <code>TvInteractiveAppServiceInfo</code> object that contains new
          *                 information.
          * @hide
          */
-        public void onTvInteractiveAppInfoUpdated(@NonNull TvInteractiveAppInfo iAppInfo) {
+        public void onTvInteractiveAppServiceInfoUpdated(
+                @NonNull TvInteractiveAppServiceInfo iAppInfo) {
         }
 
         /**
          * This is called when the state of the interactive app service is changed.
          *
+         * @param iAppServiceId The ID of the TV Interactive App service.
          * @param type the interactive app type
          * @param state the current state of the service of the given type
          * @param err the error code for error state. {@link #ERROR_NONE} is used when the state is
@@ -633,7 +657,7 @@ public final class TvInteractiveAppManager {
          */
         public void onTvInteractiveAppServiceStateChanged(
                 @NonNull String iAppServiceId,
-                @TvInteractiveAppInfo.InteractiveAppType int type,
+                @TvInteractiveAppServiceInfo.InteractiveAppType int type,
                 @ServiceState int state,
                 @ErrorCode int err) {
         }
@@ -679,11 +703,12 @@ public final class TvInteractiveAppManager {
             });
         }
 
-        public void postTvInteractiveAppInfoUpdated(final TvInteractiveAppInfo iAppInfo) {
+        public void postTvInteractiveAppServiceInfoUpdated(
+                final TvInteractiveAppServiceInfo iAppInfo) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onTvInteractiveAppInfoUpdated(iAppInfo);
+                    mCallback.onTvInteractiveAppServiceInfoUpdated(iAppInfo);
                 }
             });
         }
@@ -736,11 +761,11 @@ public final class TvInteractiveAppManager {
     /**
      * Returns the complete list of TV Interactive App service on the system.
      *
-     * @return List of {@link TvInteractiveAppInfo} for each TV Interactive App service that
+     * @return List of {@link TvInteractiveAppServiceInfo} for each TV Interactive App service that
      *         describes its meta information.
      */
     @NonNull
-    public List<TvInteractiveAppInfo> getTvInteractiveAppServiceList() {
+    public List<TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList() {
         try {
             return mService.getTvInteractiveAppServiceList(mUserId);
         } catch (RemoteException e) {
@@ -749,18 +774,12 @@ public final class TvInteractiveAppManager {
     }
 
     /**
-     * Prepares TV Interactive App service environment for the given type.
-     */
-    public void prepare(@NonNull String tvIAppServiceId, int type) {
-        try {
-            mService.prepare(tvIAppServiceId, type, mUserId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Registers app link info.
+     * Registers an Android application link info record which can be used to launch the specific
+     * Android application by TV interactive App RTE.
+     *
+     * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
+     *                        ID can be found in {@link TvInteractiveAppServiceInfo#getId()}.
+     * @param appLinkInfo The Android application link info record to be registered.
      */
     public void registerAppLinkInfo(
             @NonNull String tvIAppServiceId, @NonNull AppLinkInfo appLinkInfo) {
@@ -772,7 +791,12 @@ public final class TvInteractiveAppManager {
     }
 
     /**
-     * Unregisters app link info.
+     * Unregisters an Android application link info record which can be used to launch the specific
+     * Android application by TV interactive App RTE.
+     *
+     * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
+     *                        ID can be found in {@link TvInteractiveAppServiceInfo#getId()}.
+     * @param appLinkInfo The Android application link info record to be unregistered.
      */
     public void unregisterAppLinkInfo(
             @NonNull String tvIAppServiceId, @NonNull AppLinkInfo appLinkInfo) {
@@ -787,7 +811,7 @@ public final class TvInteractiveAppManager {
      * Sends app link command.
      *
      * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
-     *                        ID can be found in {@link TvInputInfo#getId()}.
+     *                        ID can be found in {@link TvInteractiveAppServiceInfo#getId()}.
      * @param command The command to be sent.
      */
     public void sendAppLinkCommand(@NonNull String tvIAppServiceId, @NonNull Bundle command) {
@@ -805,8 +829,8 @@ public final class TvInteractiveAppManager {
      * @param executor A {@link Executor} that the status change will be delivered to.
      */
     public void registerCallback(
-            @NonNull TvInteractiveAppCallback callback,
-            @CallbackExecutor @NonNull Executor executor) {
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull TvInteractiveAppCallback callback) {
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(executor);
         synchronized (mLock) {
@@ -1006,6 +1030,30 @@ public final class TvInteractiveAppManager {
             }
             try {
                 mService.sendCurrentTvInputId(mToken, inputId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendSigningResult(@NonNull String signingId, @NonNull byte[] result) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendSigningResult(mToken, signingId, result, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyError(@NonNull String errMsg, @NonNull Bundle params) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyError(mToken, errMsg, params, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1644,6 +1692,15 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestSigning(String id, String algorithm, String alias, byte[] data) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestSigning(mSession, id, algorithm, alias, data);
+                }
+            });
+        }
+
         void postAdRequest(final AdRequest request) {
             mHandler.post(new Runnable() {
                 @Override
@@ -1781,9 +1838,24 @@ public final class TvInteractiveAppManager {
          * called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
-         * @hide
          */
         public void onRequestCurrentTvInputId(Session session) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestSigning(String, String, String, byte[])} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param signingId the ID to identify the request.
+         * @param algorithm the standard name of the signature algorithm requested, such as
+         *                  MD5withRSA, SHA256withDSA, etc.
+         * @param alias the alias of the corresponding {@link java.security.KeyStore}.
+         * @param data the original bytes to be signed.
+         */
+        public void onRequestSigning(
+                Session session, String signingId, String algorithm, String alias, byte[] data) {
         }
 
         /**
@@ -1813,8 +1885,8 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#notifyTeletextAppStateChanged} is
-         * called.
+         * This is called when {@link TvInteractiveAppService.Session#notifyTeletextAppStateChanged}
+         * is called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          * @param state the current state.

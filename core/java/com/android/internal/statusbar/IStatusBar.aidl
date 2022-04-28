@@ -169,7 +169,7 @@ oneway interface IStatusBar
     /**
     * Used to hide the authentication dialog, e.g. when the application cancels authentication.
     */
-    void hideAuthenticationDialog();
+    void hideAuthenticationDialog(long requestId);
     /* Used to notify the biometric service of events that occur outside of an operation. */
     void setBiometicContextListener(in IBiometricContextListener listener);
 
@@ -296,6 +296,11 @@ oneway interface IStatusBar
      * Triggers a GC in the system and status bar.
      */
     void runGcForTest();
+
+    /**
+     * Send a request to SystemUI to put a given active tile in listening state
+     */
+    void requestTileServiceListeningState(in ComponentName componentName);
 
     void requestAddTile(in ComponentName componentName, in CharSequence appName, in CharSequence label, in Icon icon, in IAddTileResultCallback callback);
     void cancelRequestAddTile(in String packageName);

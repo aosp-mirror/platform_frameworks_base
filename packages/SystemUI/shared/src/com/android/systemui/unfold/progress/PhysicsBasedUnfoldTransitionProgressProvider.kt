@@ -33,7 +33,7 @@ import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 
 /** Maps fold updates to unfold transition progress using DynamicAnimation. */
-internal class PhysicsBasedUnfoldTransitionProgressProvider(
+class PhysicsBasedUnfoldTransitionProgressProvider(
     private val foldStateProvider: FoldStateProvider
 ) : UnfoldTransitionProgressProvider, FoldUpdatesListener, DynamicAnimation.OnAnimationEndListener {
 
@@ -77,7 +77,7 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
 
                 // Stop the animation if the device has already opened by the time when
                 // the display is available as we won't receive the full open event anymore
-                if (foldStateProvider.isFullyOpened) {
+                if (foldStateProvider.isFinishedOpening) {
                     cancelTransition(endValue = 1f, animate = true)
                 }
             }
@@ -97,7 +97,17 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
             FOLD_UPDATE_START_CLOSING -> {
                 // The transition might be already running as the device might start closing several
                 // times before reaching an end state.
-                if (!isTransitionRunning) {
+                if (isTransitionRunning) {
+                    // If we are cancelling the animation, reset that so we can resume it normally.
+                    // The animation could be 'cancelled' when the user stops folding/unfolding
+                    // for some period of time or fully unfolds the device. In this case,
+                    // it is forced to run to the end ignoring all further hinge angle events.
+                    // By resetting this flag we allow reacting to hinge angle events again, so
+                    // the transition continues running.
+                    if (isAnimatedCancelRunning) {
+                        isAnimatedCancelRunning = false
+                    }
+                } else {
                     startTransition(startValue = 1f)
                 }
             }

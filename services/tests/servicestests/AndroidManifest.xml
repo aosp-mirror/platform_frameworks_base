@@ -100,8 +100,9 @@
         android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"/>
     <uses-permission android:name="android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY" />
     <uses-permission android:name="android.permission.READ_NEARBY_STREAMING_POLICY" />
-
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
     <uses-permission android:name="android.permission.PACKAGE_VERIFICATION_AGENT" />
+    <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS" />
 
     <queries>
         <package android:name="com.android.servicestests.apps.suspendtestapp" />

@@ -196,6 +196,17 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /**
+     * Called when the display is going to rotate.
+     *
+     * @return {@code true} if it was handled, otherwise the existing pip logic
+     *                      will deal with rotation.
+     */
+    public boolean handleRotateDisplay(int startRotation, int endRotation,
+            WindowContainerTransaction wct) {
+        return false;
+    }
+
+    /**
      * Callback interface for PiP transitions (both from and to PiP mode)
      */
     public interface PipTransitionCallback {

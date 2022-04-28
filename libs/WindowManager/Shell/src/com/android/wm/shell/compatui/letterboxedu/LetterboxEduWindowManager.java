@@ -36,6 +36,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIWindowManagerAbstract;
+import com.android.wm.shell.transition.Transitions;
 
 /**
  * Window manager for the Letterbox Education.
@@ -50,7 +51,7 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     /**
      * The name of the {@link SharedPreferences} that holds which user has seen the Letterbox
-     * Education for specific packages and which user has seen the full dialog for any package.
+     * Education dialog.
      */
     @VisibleForTesting
     static final String HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME =
@@ -62,6 +63,15 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     private final SharedPreferences mSharedPreferences;
 
     private final LetterboxEduAnimationController mAnimationController;
+
+    private final Transitions mTransitions;
+
+    /**
+     * The id of the current user, to associate with a boolean in {@link
+     * #HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME}, indicating whether that user has already seen the
+     * Letterbox Education dialog.
+     */
+    private final int mUserId;
 
     // Remember the last reported state in case visibility changes due to keyguard or IME updates.
     private boolean mEligibleForLetterboxEducation;
@@ -80,19 +90,22 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     public LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
-            DisplayLayout displayLayout, Runnable onDismissCallback) {
-        this(context, taskInfo, syncQueue, taskListener, displayLayout, onDismissCallback,
-                new LetterboxEduAnimationController(context));
+            DisplayLayout displayLayout, Transitions transitions,
+            Runnable onDismissCallback) {
+        this(context, taskInfo, syncQueue, taskListener, displayLayout, transitions,
+                onDismissCallback, new LetterboxEduAnimationController(context));
     }
 
     @VisibleForTesting
     LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
-            DisplayLayout displayLayout, Runnable onDismissCallback,
+            DisplayLayout displayLayout, Transitions transitions, Runnable onDismissCallback,
             LetterboxEduAnimationController animationController) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
+        mTransitions = transitions;
         mOnDismissCallback = onDismissCallback;
         mAnimationController = animationController;
+        mUserId = taskInfo.userId;
         mEligibleForLetterboxEducation = taskInfo.topActivityEligibleForLetterboxEducation;
         mSharedPreferences = mContext.getSharedPreferences(HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME,
                 Context.MODE_PRIVATE);
@@ -128,12 +141,11 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected View createLayout() {
-        setSeenLetterboxEducation();
         mLayout = inflateLayout();
         updateDialogMargins();
 
-        mAnimationController.startEnterAnimation(mLayout, /* endCallback= */
-                this::onDialogEnterAnimationEnded);
+        // startEnterAnimation will be called immediately if shell-transitions are disabled.
+        mTransitions.runOnIdle(this::startEnterAnimation);
 
         return mLayout;
     }
@@ -158,10 +170,21 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
                 R.layout.letterbox_education_dialog_layout, null);
     }
 
-    private void onDialogEnterAnimationEnded() {
+    private void startEnterAnimation() {
         if (mLayout == null) {
+            // Dialog has already been released.
             return;
         }
+        mAnimationController.startEnterAnimation(mLayout, /* endCallback= */
+                this::onDialogEnterAnimationEnded);
+    }
+
+    private void onDialogEnterAnimationEnded() {
+        if (mLayout == null) {
+            // Dialog has already been released.
+            return;
+        }
+        setSeenLetterboxEducation();
         mLayout.setDismissOnClickListener(this::onDismiss);
         // Focus on the dialog title for accessibility.
         mLayout.getDialogTitle().sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
@@ -226,7 +249,7 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     }
 
     private String getPrefKey() {
-        return String.valueOf(mContext.getUserId());
+        return String.valueOf(mUserId);
     }
 
     @VisibleForTesting

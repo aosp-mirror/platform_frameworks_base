@@ -23,11 +23,11 @@ import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
-import static android.view.WindowInsets.Type.isVisibleInsetsType;
 import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
@@ -257,7 +257,7 @@ public class InsetsState implements Parcelable {
         if ((legacyWindowFlags & FLAG_FULLSCREEN) != 0) {
             compatInsetsTypes &= ~statusBars();
         }
-        if (clearCompatInsets(windowType, legacyWindowFlags, windowingMode)) {
+        if (clearsCompatInsets(windowType, legacyWindowFlags, windowingMode)) {
             compatInsetsTypes = 0;
         }
 
@@ -294,9 +294,16 @@ public class InsetsState implements Parcelable {
             return RoundedCorners.NO_ROUNDED_CORNERS;
         }
         // If mRoundedCornerFrame is set, we should calculate the new RoundedCorners based on this
-        // frame. It's used for split-screen mode and devices with a task bar.
-        if (!mRoundedCornerFrame.isEmpty() && !mRoundedCornerFrame.equals(mDisplayFrame)) {
-            return mRoundedCorners.insetWithFrame(frame, mRoundedCornerFrame);
+        // frame.
+        final Rect roundedCornerFrame = new Rect(mRoundedCornerFrame);
+        for (InsetsSource source : mSources) {
+            if (source != null && source.getInsetsRoundedCornerFrame()) {
+                final Insets insets = source.calculateInsets(roundedCornerFrame, false);
+                roundedCornerFrame.inset(insets);
+            }
+        }
+        if (!roundedCornerFrame.isEmpty() && !roundedCornerFrame.equals(mDisplayFrame)) {
+            return mRoundedCorners.insetWithFrame(frame, roundedCornerFrame);
         }
         if (mDisplayFrame.equals(frame)) {
             return mRoundedCorners;
@@ -358,17 +365,23 @@ public class InsetsState implements Parcelable {
         return insets;
     }
 
-    public Insets calculateVisibleInsets(Rect frame, @SoftInputModeFlags int softInputMode) {
+    public Insets calculateVisibleInsets(Rect frame, int windowType, int windowingMode,
+            @SoftInputModeFlags int softInputMode, int windowFlags) {
+        if (clearsCompatInsets(windowType, windowFlags, windowingMode)) {
+            return Insets.NONE;
+        }
+        final int softInputAdjustMode = softInputMode & SOFT_INPUT_MASK_ADJUST;
+        final int visibleInsetsTypes = softInputAdjustMode != SOFT_INPUT_ADJUST_NOTHING
+                ? systemBars() | ime()
+                : systemBars();
         Insets insets = Insets.NONE;
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources[type];
             if (source == null) {
                 continue;
             }
-
-            // Ignore everything that's not a system bar or IME.
-            int publicType = InsetsState.toPublicType(type);
-            if (!isVisibleInsetsType(publicType, softInputMode)) {
+            final int publicType = InsetsState.toPublicType(type);
+            if ((publicType & visibleInsetsTypes) == 0) {
                 continue;
             }
             insets = Insets.max(source.calculateVisibleInsets(frame), insets);
@@ -431,6 +444,17 @@ public class InsetsState implements Parcelable {
             //       mandatorySystemGestureInsets() in the Builder.
             processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
                     insets, Type.SYSTEM_GESTURES);
+        }
+        if (type == Type.CAPTION_BAR) {
+            // Caption should also be gesture and tappable elements. This should not be needed when
+            // the caption is added from the shell, as the shell can add other types at the same
+            // time.
+            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+                    insets, Type.SYSTEM_GESTURES);
+            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+                    insets, Type.MANDATORY_SYSTEM_GESTURES);
+            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+                    insets, Type.TAPPABLE_ELEMENT);
         }
     }
 
@@ -665,7 +689,7 @@ public class InsetsState implements Parcelable {
         mSources[source.getType()] = source;
     }
 
-    public static boolean clearCompatInsets(int windowType, int windowFlags, int windowingMode) {
+    public static boolean clearsCompatInsets(int windowType, int windowFlags, int windowingMode) {
         return (windowFlags & FLAG_LAYOUT_NO_LIMITS) != 0
                 && windowType != TYPE_WALLPAPER && windowType != TYPE_SYSTEM_ERROR
                 && !WindowConfiguration.inMultiWindowMode(windowingMode);

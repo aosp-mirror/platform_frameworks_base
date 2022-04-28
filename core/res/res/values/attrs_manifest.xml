@@ -401,15 +401,6 @@
          and before. -->
     <attr name="sharedUserMaxSdkVersion" format="integer" />
 
-    <!-- Whether the application should inherit all AndroidKeyStore keys of its shared user
-         group in the case of leaving its shared user ID in an upgrade.  If set to false, all
-         AndroidKeyStore keys will remain in the shared user group, and the application will no
-         longer have access to those keys after the upgrade. If set to true, all AndroidKeyStore
-         keys owned by the shared user group will be transferred to the upgraded application;
-         other applications in the shared user group will no longer have access to those keys
-         after the migration. The default value is false if not explicitly set. -->
-    <attr name="inheritKeyStoreKeys" format="boolean" />
-
     <!-- Internal version code.  This is the number used to determine whether
          one version is more recent than another: it has no other meaning than
          that higher numbers are more recent.  You could use this number to
@@ -1704,7 +1695,6 @@
         <attr name="sharedUserId" />
         <attr name="sharedUserLabel" />
         <attr name="sharedUserMaxSdkVersion" />
-        <attr name="inheritKeyStoreKeys" />
         <attr name="installLocation" />
         <attr name="isolatedSplits" />
         <attr name="isFeatureSplit" />

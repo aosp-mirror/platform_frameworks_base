@@ -248,9 +248,6 @@ public class DreamBackend {
     }
 
     public @WhenToDream int getWhenToDreamSetting() {
-        if (!isEnabled()) {
-            return NEVER;
-        }
         return isActivatedOnDock() && isActivatedOnSleep() ? EITHER
                 : isActivatedOnDock() ? WHILE_DOCKED
                 : isActivatedOnSleep() ? WHILE_CHARGING

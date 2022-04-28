@@ -126,6 +126,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.pm.ApexManager;
+import com.android.server.pm.KnownPackages;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -222,6 +223,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_ADVERTISE);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
@@ -295,6 +299,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     private final ArrayList<PermissionManagerServiceInternal
             .OnRuntimePermissionStateChangedListener>
             mRuntimePermissionStateChangedListeners = new ArrayList<>();
+
+    private final boolean mIsLeanback;
 
     @NonNull
     private final OnPermissionChangeListeners mOnPermissionChangeListeners;
@@ -379,6 +385,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         mContext = context;
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         mUserManagerInt = LocalServices.getService(UserManagerInternal.class);
+        mIsLeanback = availableFeatures.containsKey(PackageManager.FEATURE_LEANBACK);
 
         mPrivilegedPermissionAllowlistSourcePackageNames.add(PLATFORM_PACKAGE_NAME);
         // PackageManager.hasSystemFeature() is not used here because PackageManagerService
@@ -760,8 +767,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
             flagValues &= ~PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
-            // REVIEW_REQUIRED can only be set by non-system apps for for POST_NOTIFICATIONS
-            if (!POST_NOTIFICATIONS.equals(permName)) {
+            // REVIEW_REQUIRED can be set on any permission by the shell or the root uid, or by
+            // any app for the POST_NOTIFICATIONS permission specifically.
+            if (!POST_NOTIFICATIONS.equals(permName) && callingUid != Process.SHELL_UID
+                    && callingUid != Process.ROOT_UID) {
                 flagValues &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
             }
         }
@@ -1595,25 +1604,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         if (isRuntimePermission) {
             notifyRuntimePermissionStateChanged(packageName, userId);
         }
-    }
-
-    @Override
-    public void revokeOwnPermissionsOnKill(String packageName, List<String> permissions) {
-        final int callingUid = Binder.getCallingUid();
-        int callingUserId = UserHandle.getUserId(callingUid);
-        int targetPackageUid = mPackageManagerInt.getPackageUid(packageName, 0, callingUserId);
-        if (targetPackageUid != callingUid) {
-            throw new SecurityException("uid " + callingUid
-                    + " cannot revoke permissions for package " + packageName + " with uid "
-                    + targetPackageUid);
-        }
-        for (String permName : permissions) {
-            if (!checkCallingOrSelfPermission(permName)) {
-                throw new SecurityException("uid " + callingUid + " cannot revoke permission "
-                        + permName + " because it does not hold that permission");
-            }
-        }
-        mPermissionControllerManager.revokeOwnPermissionsOnKill(packageName, permissions);
     }
 
     private boolean mayManageRolePermission(int uid) {
@@ -2655,12 +2645,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
                     // Cache newImplicitPermissions before modifing permissionsState as for the
                     // shared uids the original and new state are the same object
-                    // TODO(205888750): remove the line for LEGACY_REVIEW once propagated through
-                    // droidfood
                     if (!origState.hasPermissionState(permName)
                             && (pkg.getImplicitPermissions().contains(permName)
-                            || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))
-                            || NOTIFICATION_PERMISSIONS.contains(permName)) {
+                            || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))) {
                         if (pkg.getImplicitPermissions().contains(permName)) {
                             // If permName is an implicit permission, try to auto-grant
                             newImplicitPermissions.add(permName);
@@ -2818,12 +2805,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             }
 
                             // Remove review flag as it is not necessary anymore
-                            if (!NOTIFICATION_PERMISSIONS.contains(perm)) {
+                            // TODO(b/227186603) re-enable check for notification permission once
+                            // droidfood state has been cleared
+                            //if (!NOTIFICATION_PERMISSIONS.contains(perm)) {
                                 if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
                                     flags &= ~FLAG_PERMISSION_REVIEW_REQUIRED;
                                     wasChanged = true;
                                 }
-                            }
+                            //}
 
                             if ((flags & FLAG_PERMISSION_REVOKED_COMPAT) != 0
                                     && !isPermissionSplitFromNonRuntime(permName,
@@ -2836,6 +2825,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                                 if ((origPermState != null && origPermState.isGranted())
                                         || legacyActivityRecognitionPermission != null) {
                                     if (!uidState.grantPermission(bp)) {
+                                        wasChanged = true;
+                                    }
+                                }
+                            }
+                            if (mIsLeanback && NOTIFICATION_PERMISSIONS.contains(permName)) {
+                                uidState.grantPermission(bp);
+                                if (origPermState == null || !origPermState.isGranted()) {
+                                    if (uidState.grantPermission(bp)) {
                                         wasChanged = true;
                                     }
                                 }
@@ -3291,10 +3288,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         } else if (pkg.isSystemExt()) {
             permissions = systemConfig.getSystemExtPrivAppPermissions(pkg.getPackageName());
         } else if (containingApexPackageName != null) {
+            final ApexManager apexManager = ApexManager.getInstance();
+            final String apexName = apexManager.getApexModuleNameForPackageName(
+                    containingApexPackageName);
             final Set<String> privAppPermissions = systemConfig.getPrivAppPermissions(
                     pkg.getPackageName());
             final Set<String> apexPermissions = systemConfig.getApexPrivAppPermissions(
-                    containingApexPackageName, pkg.getPackageName());
+                    apexName, pkg.getPackageName());
             if (privAppPermissions != null) {
                 // TODO(andreionea): Remove check as soon as all apk-in-apex
                 // permission allowlists are migrated.
@@ -3339,7 +3339,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             @NonNull Permission bp) {
         // expect single system package
         String systemPackageName = ArrayUtils.firstOrNull(mPackageManagerInt.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_SYSTEM, UserHandle.USER_SYSTEM));
+                KnownPackages.PACKAGE_SYSTEM, UserHandle.USER_SYSTEM));
         final AndroidPackage systemPackage =
                 mPackageManagerInt.getPackage(systemPackageName);
         // check if the package is allow to use this signature permission.  A package is allowed to
@@ -3414,10 +3414,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         //                  permissions are needed by the permission controller
         if (!allowed && bp.isInstaller()
                 && (ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM),
+                        KnownPackages.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM),
                 pkg.getPackageName()) || ArrayUtils.contains(
                         mPackageManagerInt.getKnownPackageNames(
-                                PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER,
+                                KnownPackages.PACKAGE_PERMISSION_CONTROLLER,
                 UserHandle.USER_SYSTEM), pkg.getPackageName()))) {
             // If this permission is to be granted to the system installer and
             // this app is an installer, then it gets the permission.
@@ -3425,7 +3425,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
         if (!allowed && bp.isVerifier()
                 && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM),
+                        KnownPackages.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM),
                 pkg.getPackageName())) {
             // If this permission is to be granted to the system verifier and
             // this app is a verifier, then it gets the permission.
@@ -3449,7 +3449,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         //}
         if (!allowed && bp.isSetup()
                 && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM),
+                        KnownPackages.PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM),
                 pkg.getPackageName())) {
             // If this permission is to be granted to the system setup wizard and
             // this app is a setup wizard, then it gets the permission.
@@ -3457,21 +3457,21 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
         if (!allowed && bp.isSystemTextClassifier()
                 && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER,
+                KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER,
                 UserHandle.USER_SYSTEM), pkg.getPackageName())) {
             // Special permissions for the system default text classifier.
             allowed = true;
         }
         if (!allowed && bp.isConfigurator()
                 && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_CONFIGURATOR,
+                KnownPackages.PACKAGE_CONFIGURATOR,
                 UserHandle.USER_SYSTEM), pkg.getPackageName())) {
             // Special permissions for the device configurator.
             allowed = true;
         }
         if (!allowed && bp.isIncidentReportApprover()
                 && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER,
+                KnownPackages.PACKAGE_INCIDENT_REPORT_APPROVER,
                 UserHandle.USER_SYSTEM), pkg.getPackageName())) {
             // If this permission is to be granted to the incident report approver and
             // this app is the incident report approver, then it gets the permission.
@@ -3479,28 +3479,28 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
         if (!allowed && bp.isAppPredictor()
                 && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_APP_PREDICTOR, UserHandle.USER_SYSTEM),
+                        KnownPackages.PACKAGE_APP_PREDICTOR, UserHandle.USER_SYSTEM),
                 pkg.getPackageName())) {
             // Special permissions for the system app predictor.
             allowed = true;
         }
         if (!allowed && bp.isCompanion()
                 && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                    PackageManagerInternal.PACKAGE_COMPANION, UserHandle.USER_SYSTEM),
+                        KnownPackages.PACKAGE_COMPANION, UserHandle.USER_SYSTEM),
                 pkg.getPackageName())) {
             // Special permissions for the system companion device manager.
             allowed = true;
         }
         if (!allowed && bp.isRetailDemo()
                 && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_RETAIL_DEMO, UserHandle.USER_SYSTEM),
+                        KnownPackages.PACKAGE_RETAIL_DEMO, UserHandle.USER_SYSTEM),
                 pkg.getPackageName()) && isProfileOwner(pkg.getUid())) {
             // Special permission granted only to the OEM specified retail demo app
             allowed = true;
         }
         if (!allowed && bp.isRecents()
                 && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_RECENTS, UserHandle.USER_SYSTEM),
+                        KnownPackages.PACKAGE_RECENTS, UserHandle.USER_SYSTEM),
                 pkg.getPackageName())) {
             // Special permission for the recents app.
             allowed = true;

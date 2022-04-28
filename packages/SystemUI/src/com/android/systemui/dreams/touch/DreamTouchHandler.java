@@ -96,11 +96,4 @@ public interface DreamTouchHandler {
      * @param session
      */
     void onSessionStart(TouchSession session);
-
-    /**
-     * Invoked when a session has ended. This will be invoked for every session completion, even
-     * those that are removed through {@link TouchSession#pop()}.
-     * @param session
-     */
-    default void onSessionEnd(TouchSession session) { }
 }

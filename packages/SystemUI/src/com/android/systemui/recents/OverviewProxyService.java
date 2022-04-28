@@ -101,8 +101,8 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.wm.shell.back.BackAnimation;
@@ -114,7 +114,6 @@ import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.transition.ShellTransitions;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -507,6 +506,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     backAnimation.createExternalInterface().asBinder()));
 
             try {
+                Log.d(TAG_OPS, "OverviewProxyService connected, initializing overview proxy");
                 mOverviewProxy.onInitialize(params);
             } catch (RemoteException e) {
                 mCurrentBoundedUserId = -1;
@@ -675,7 +675,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             navBarFragment.updateSystemUiStateFlags();
         }
         if (navBarView != null) {
-            navBarView.updateDisabledSystemUiStateFlags();
+            navBarView.updateDisabledSystemUiStateFlags(mSysUiState);
         }
         if (panelController != null) {
             panelController.updateSystemUiStateFlags();
@@ -1014,7 +1014,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG_OPS + " state:");
         pw.print("  isConnected="); pw.println(mOverviewProxy != null);
         pw.print("  mIsEnabled="); pw.println(isEnabled());
@@ -1031,7 +1031,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         pw.print("  mNavBarButtonAlpha="); pw.println(mNavBarButtonAlpha);
         pw.print("  mActiveNavBarRegion="); pw.println(mActiveNavBarRegion);
         pw.print("  mNavBarMode="); pw.println(mNavBarMode);
-        mSysUiState.dump(fd, pw, args);
+        mSysUiState.dump(pw, args);
     }
 
     public interface OverviewProxyListener {

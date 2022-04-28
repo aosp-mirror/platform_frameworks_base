@@ -257,6 +257,14 @@ public class Process {
     public static final int UWB_UID = 1083;
 
     /**
+     * Defines a virtual UID that is used to aggregate data related to SDK sandbox UIDs.
+     * {@see SdkSandboxManager}
+     * @hide
+     */
+    @TestApi
+    public static final int SDK_SANDBOX_VIRTUAL_UID = 1090;
+
+    /**
      * GID that corresponds to the INTERNET permission.
      * Must match the value of AID_INET.
      * @hide
@@ -920,7 +928,7 @@ public class Process {
      */
     @SystemApi(client = MODULE_LIBRARIES)
     @TestApi
-    public static final int sdkSandboxToAppUid(int uid) {
+    public static final int getAppUidForSdkSandboxUid(int uid) {
         return uid - (FIRST_SDK_SANDBOX_UID - FIRST_APPLICATION_UID);
     }
 

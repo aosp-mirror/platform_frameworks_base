@@ -133,8 +133,8 @@
     <!-- The color of the seekbar track background in SeekbarListItem. This color is assumed to be
          on a light-colored background. -->
     <color name="car_seekbar_track_background">@color/car_seekbar_track_background_dark</color>
-    <!-- background is car_grey_868 with .9 alpha -->
-    <color name="car_toast_background">#E6282a2d</color>
+    <!-- background is car_grey_868 with -->
+    <color name="car_toast_background">@color/car_grey_868</color>
 
     <!-- Misc colors -->
     <color name="car_highlight_light">#ff66b5ff</color>

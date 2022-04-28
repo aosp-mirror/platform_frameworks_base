@@ -106,15 +106,6 @@ final class InputMethodSessionWrapper {
     }
 
     @AnyThread
-    void notifyImeHidden() {
-        try {
-            mSession.notifyImeHidden();
-        } catch (RemoteException e) {
-            Log.w(TAG, "IME died", e);
-        }
-    }
-
-    @AnyThread
     void viewClicked(boolean focusChanged) {
         try {
             mSession.viewClicked(focusChanged);

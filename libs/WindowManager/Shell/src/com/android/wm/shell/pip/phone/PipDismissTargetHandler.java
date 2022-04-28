@@ -220,10 +220,16 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
             return;
         }
 
+        final SurfaceControl targetViewLeash =
+                mTargetViewContainer.getViewRootImpl().getSurfaceControl();
+        if (!targetViewLeash.isValid()) {
+            // The surface of mTargetViewContainer is somehow not ready, bail early
+            return;
+        }
+
         // Put the dismiss target behind the task
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        t.setRelativeLayer(mTargetViewContainer.getViewRootImpl().getSurfaceControl(),
-                mTaskLeash, -1);
+        t.setRelativeLayer(targetViewLeash, mTaskLeash, -1);
         t.apply();
     }
 
@@ -253,11 +259,11 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
     private WindowManager.LayoutParams getDismissTargetLayoutParams() {
         final Point windowSize = new Point();
         mWindowManager.getDefaultDisplay().getRealSize(windowSize);
-
+        int height = Math.min(windowSize.y, mDismissAreaHeight);
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
-                mDismissAreaHeight,
-                0, windowSize.y - mDismissAreaHeight,
+                height,
+                0, windowSize.y - height,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE

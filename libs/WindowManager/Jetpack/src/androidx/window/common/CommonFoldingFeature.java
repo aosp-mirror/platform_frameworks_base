@@ -236,7 +236,8 @@ public final class CommonFoldingFeature {
     }
 
     private static void assertValidState(@Nullable Integer state) {
-        if (state != null && state != COMMON_STATE_FLAT && state != COMMON_STATE_HALF_OPENED) {
+        if (state != null && state != COMMON_STATE_FLAT
+                && state != COMMON_STATE_HALF_OPENED && state != COMMON_STATE_UNKNOWN) {
             throw new IllegalArgumentException("Invalid state: " + state
                     + "must be either COMMON_STATE_FLAT or COMMON_STATE_HALF_OPENED");
         }

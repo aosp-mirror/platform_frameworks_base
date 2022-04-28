@@ -16,6 +16,7 @@
 
 package android.app.usage;
 
+import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -1446,7 +1447,7 @@ public final class UsageStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
     @UserHandleAware
     @NonNull
     public List<BroadcastResponseStats> queryBroadcastResponseStats(
@@ -1479,7 +1480,7 @@ public final class UsageStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
     @UserHandleAware
     public void clearBroadcastResponseStats(@Nullable String packageName,
             @IntRange(from = 0) long id) {
@@ -1496,11 +1497,22 @@ public final class UsageStatsManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
     @UserHandleAware
     public void clearBroadcastEvents() {
         try {
             mService.clearBroadcastEvents(mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    @Nullable
+    public String getAppStandbyConstant(@NonNull String key) {
+        try {
+            return mService.getAppStandbyConstant(key);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

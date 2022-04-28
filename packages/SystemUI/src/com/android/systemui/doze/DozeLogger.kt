@@ -267,11 +267,12 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logAlwaysOnSuppressed(state: DozeMachine.State) {
+    fun logAlwaysOnSuppressed(state: DozeMachine.State, reason: String) {
         buffer.log(TAG, INFO, {
             str1 = state.name
+            str2 = reason
         }, {
-            "Always-on state suppressed, suppressed state=$str1"
+            "Always-on state suppressed, suppressed state=$str1 reason=$str2"
         })
     }
 

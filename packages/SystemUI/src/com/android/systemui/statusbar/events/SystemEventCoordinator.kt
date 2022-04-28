@@ -70,11 +70,11 @@ class SystemEventCoordinator @Inject constructor(
     fun notifyPrivacyItemsChanged(showAnimation: Boolean = true) {
         val event = PrivacyEvent(showAnimation)
         event.privacyItems = privacyStateListener.currentPrivacyItems
-        event.contentDescription = {
+        event.contentDescription = run {
             val items = PrivacyChipBuilder(context, event.privacyItems).joinTypes()
             context.getString(
                     R.string.ongoing_privacy_chip_content_multiple_apps, items)
-        }()
+        }
         scheduler.onStatusEvent(event)
     }
 

@@ -1173,6 +1173,29 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testStabilizeGroupsAlwaysAllowsGroupChangeFromDeletedGroupToRoot() {
+        // GIVEN a group w/ summary and two children
+        addGroupSummary(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+        dispatchBuild();
+
+        // GIVEN visual stability manager doesn't allow any group changes
+        mStabilityManager.setAllowGroupChanges(false);
+
+        // WHEN we run the pipeline with the summary and one child removed
+        mEntrySet.remove(2);
+        mEntrySet.remove(0);
+        dispatchBuild();
+
+        // THEN all that remains is the one child at top-level, despite no group change allowed by
+        // visual stability manager.
+        verifyBuiltList(
+                notif(0)
+        );
+    }
+
+    @Test
     public void testStabilizeGroupsDoesNotAllowGroupingExistingNotifications() {
         // GIVEN one group child without a summary yet
         addGroupChild(0, PACKAGE_1, GROUP_1);
@@ -1428,6 +1451,25 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testGroupWithChildRemovedByFilterIsPrunedWhenOtherwiseEmpty() {
+        // GIVEN a group with only one child
+        addGroupSummary(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+        dispatchBuild();
+        // NOTICE that the group is pruned and the child is moved to the top level
+        verifyBuiltList(
+                notif(1)  // group with only one child is promoted
+        );
+
+        // WHEN the only child is filtered
+        mFinalizeFilter.mIndicesToFilter.add(1);
+        dispatchBuild();
+
+        // THEN the new list should be empty (the group summary should not be promoted)
+        verifyBuiltList();
+    }
+
+    @Test
     public void testFinalizeFilteredSummaryPromotesChildren() {
         // GIVEN a group with only one child was already drawn
         addGroupSummary(0, PACKAGE_1, GROUP_1);
@@ -1443,25 +1485,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         verifyBuiltList(
                 notif(1),
                 notif(2)
-        );
-    }
-
-    @Test
-    public void testFinalizeFilteredChildrenPromotesSummary() {
-        // GIVEN a group with only one child was already drawn
-        addGroupSummary(0, PACKAGE_1, GROUP_1);
-        addGroupChild(1, PACKAGE_1, GROUP_1);
-        addGroupChild(2, PACKAGE_1, GROUP_1);
-
-        // WHEN the parent is filtered out at the finalize step
-        mFinalizeFilter.mIndicesToFilter.add(1);
-        mFinalizeFilter.mIndicesToFilter.add(2);
-
-        dispatchBuild();
-
-        // THEN the children should be promoted to the top level
-        verifyBuiltList(
-                notif(0)
         );
     }
 

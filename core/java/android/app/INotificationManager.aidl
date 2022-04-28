@@ -57,6 +57,7 @@ interface INotificationManager
     @UnsupportedAppUsage
     void cancelNotificationWithTag(String pkg, String opPkg, String tag, int id, int userId);
 
+    boolean isInCall(String pkg, int uid);
     void setShowBadge(String pkg, int uid, boolean showBadge);
     boolean canShowBadge(String pkg, int uid);
     boolean hasSentValidMsg(String pkg, int uid);

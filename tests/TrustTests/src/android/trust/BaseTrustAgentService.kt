@@ -41,7 +41,7 @@ abstract class BaseTrustAgentService : TrustAgentService() {
         private const val TAG = "BaseTrustAgentService"
 
         fun instance(serviceClass: KClass<out BaseTrustAgentService>): BaseTrustAgentService? {
-            return instances[serviceClass]!!
+            return instances[serviceClass]
         }
     }
 }

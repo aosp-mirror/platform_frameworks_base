@@ -22,6 +22,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.WorkSource;
 import android.util.Slog;
@@ -176,7 +177,7 @@ final class VibrationThread extends Thread {
      * @return true if the vibration completed, or false if waiting timed out.
      */
     public boolean waitForThreadIdle(long maxWaitMillis) {
-        long now = System.currentTimeMillis();
+        long now = SystemClock.elapsedRealtime();
         long deadline = now + maxWaitMillis;
         synchronized (mLock) {
             while (true) {
@@ -191,7 +192,7 @@ final class VibrationThread extends Thread {
                 } catch (InterruptedException e) {
                     Slog.w(TAG, "VibrationThread interrupted waiting to stop, continuing");
                 }
-                now = System.currentTimeMillis();
+                now = SystemClock.elapsedRealtime();
             }
         }
     }

@@ -24,8 +24,6 @@ import android.trust.test.lib.TrustAgentRule
 import android.util.Log
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.common.truth.Truth.assertThat
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -49,19 +47,16 @@ class LockUserTest {
         .around(lockStateTrackingRule)
         .around(trustAgentRule)
 
-    @Ignore("Causes issues with subsequent tests") // TODO: Enable test
     @Test
     fun lockUser_locksTheDevice() {
         Log.i(TAG, "Locking user")
         trustAgentRule.agent.lockUser()
-        await()
 
-        assertThat(lockStateTrackingRule.lockState.locked).isTrue()
+        lockStateTrackingRule.assertLocked()
     }
 
     companion object {
         private const val TAG = "LockUserTest"
-        private fun await() = Thread.sleep(250)
     }
 }
 

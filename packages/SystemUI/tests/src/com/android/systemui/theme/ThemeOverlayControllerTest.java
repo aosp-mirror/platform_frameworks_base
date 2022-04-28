@@ -39,6 +39,7 @@ import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.om.FabricatedOverlay;
 import android.content.om.OverlayIdentifier;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Color;
 import android.os.Handler;
@@ -56,6 +57,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.monet.Style;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -108,6 +110,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     @Mock
     private FeatureFlags mFeatureFlags;
     @Mock
+    private Resources mResources;
+    @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Captor
     private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiver;
@@ -129,10 +133,20 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         when(mFeatureFlags.isEnabled(Flags.MONET)).thenReturn(true);
         when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
         when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
-        mThemeOverlayController = new ThemeOverlayController(null /* context */,
+        when(mResources.getColor(eq(android.R.color.system_accent1_500), any()))
+                .thenReturn(Color.RED);
+        when(mResources.getColor(eq(android.R.color.system_accent2_500), any()))
+                .thenReturn(Color.GREEN);
+        when(mResources.getColor(eq(android.R.color.system_accent3_500), any()))
+                .thenReturn(Color.BLUE);
+        when(mResources.getColor(eq(android.R.color.system_neutral1_500), any()))
+                .thenReturn(Color.YELLOW);
+        when(mResources.getColor(eq(android.R.color.system_neutral2_500), any()))
+                .thenReturn(Color.BLACK);
+        mThemeOverlayController = new ThemeOverlayController(mContext,
                 mBroadcastDispatcher, mBgHandler, mMainExecutor, mBgExecutor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
-                mUserTracker, mDumpManager, mFeatureFlags, mWakefulnessLifecycle) {
+                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle) {
             @Nullable
             @Override
             protected FabricatedOverlay getOverlay(int color, int type, Style style) {
@@ -140,6 +154,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 when(overlay.getIdentifier())
                         .thenReturn(new OverlayIdentifier(Integer.toHexString(color | 0xff000000)));
                 mCurrentStyle = style;
+                mColorScheme = new ColorScheme(color, false /* nightMode */, style);
                 return overlay;
             }
         };
@@ -277,8 +292,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
-        verify(mSecureSettings).putString(
-                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture());
+        verify(mSecureSettings).putStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture(),
+                anyInt());
 
         assertThat(updatedSetting.getValue().contains("android.theme.customization.accent_color"))
                 .isFalse();
@@ -315,8 +331,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
-        verify(mSecureSettings).putString(
-                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture());
+        verify(mSecureSettings).putStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture(),
+                anyInt());
 
         assertThat(updatedSetting.getValue().contains(
                 "android.theme.customization.color_both\":\"0")).isTrue();
@@ -381,8 +398,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK, USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
-        verify(mSecureSettings).putString(
-                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture());
+        verify(mSecureSettings).putStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture(),
+                anyInt());
 
         assertThat(updatedSetting.getValue().contains(
                 "android.theme.customization.color_both\":\"1")).isTrue();
@@ -411,8 +429,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
-        verify(mSecureSettings).putString(
-                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture());
+        verify(mSecureSettings).putStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture(),
+                anyInt());
         assertThat(updatedSetting.getValue().contains(
                 "android.theme.customization.color_source\":\"lock_wallpaper")).isTrue();
         assertThat(updatedSetting.getValue().contains("android.theme.customization.color_index"))
@@ -441,8 +460,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
-        verify(mSecureSettings).putString(
-                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture());
+        verify(mSecureSettings).putStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture(),
+                anyInt());
         assertThat(updatedSetting.getValue().contains(
                 "android.theme.customization.color_source\":\"home_wallpaper")).isTrue();
         assertThat(updatedSetting.getValue().contains("android.theme.customization.color_index"))
@@ -476,8 +496,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 USER_SYSTEM);
 
         ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
-        verify(mSecureSettings).putString(
-                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture());
+        verify(mSecureSettings).putStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture(),
+                anyInt());
 
         verify(mThemeOverlayApplier)
                 .applyCurrentUserOverlays(any(), any(), anyInt(), any());
@@ -643,16 +664,17 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
         Executor executor = MoreExecutors.directExecutor();
 
-        mThemeOverlayController = new ThemeOverlayController(null /* context */,
+        mThemeOverlayController = new ThemeOverlayController(mContext,
                 mBroadcastDispatcher, mBgHandler, executor, executor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
-                mUserTracker, mDumpManager, mFeatureFlags, mWakefulnessLifecycle) {
+                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle) {
             @Nullable
             @Override
             protected FabricatedOverlay getOverlay(int color, int type, Style style) {
                 FabricatedOverlay overlay = mock(FabricatedOverlay.class);
                 when(overlay.getIdentifier())
                         .thenReturn(new OverlayIdentifier("com.thebest.livewallpaperapp.ever"));
+                mColorScheme = new ColorScheme(color, false /* nightMode */, style);
                 return overlay;
             }
 
@@ -679,16 +701,17 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 .thenReturn(new WallpaperColors(Color.valueOf(Color.GRAY), null, null));
 
         Executor executor = MoreExecutors.directExecutor();
-        mThemeOverlayController = new ThemeOverlayController(null /* context */,
+        mThemeOverlayController = new ThemeOverlayController(mContext,
                 mBroadcastDispatcher, mBgHandler, executor, executor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
-                mUserTracker, mDumpManager, mFeatureFlags, mWakefulnessLifecycle) {
+                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle) {
             @Nullable
             @Override
             protected FabricatedOverlay getOverlay(int color, int type, Style style) {
                 FabricatedOverlay overlay = mock(FabricatedOverlay.class);
                 when(overlay.getIdentifier())
                         .thenReturn(new OverlayIdentifier(Integer.toHexString(color | 0xff000000)));
+                mColorScheme = new ColorScheme(color, false /* nightMode */, style);
                 return overlay;
             }
         };
@@ -705,6 +728,18 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 Color.valueOf(Color.BLUE), null);
         mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
                 USER_SYSTEM);
+
+        reset(mResources);
+        when(mResources.getColor(eq(android.R.color.system_accent1_500), any()))
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent1().get(6));
+        when(mResources.getColor(eq(android.R.color.system_accent2_500), any()))
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent2().get(6));
+        when(mResources.getColor(eq(android.R.color.system_accent3_500), any()))
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent3().get(6));
+        when(mResources.getColor(eq(android.R.color.system_neutral1_500), any()))
+                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral1().get(6));
+        when(mResources.getColor(eq(android.R.color.system_neutral2_500), any()))
+                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral2().get(6));
 
         // Defers event because we already have initial colors.
         verify(mThemeOverlayApplier, never())

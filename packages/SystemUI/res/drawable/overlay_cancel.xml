@@ -21,7 +21,7 @@
         android:viewportWidth="32.0"
         android:viewportHeight="32.0">
     <path
-        android:fillColor="?androidprv:attr/colorAccentSecondary"
+        android:fillColor="?androidprv:attr/colorAccentTertiary"
         android:pathData="M16,16m-16,0a16,16 0,1 1,32 0a16,16 0,1 1,-32 0"/>
     <path
         android:fillColor="?android:attr/textColorPrimary"

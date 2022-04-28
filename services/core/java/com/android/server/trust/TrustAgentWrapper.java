@@ -40,11 +40,15 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.service.trust.GrantTrustResult;
 import android.service.trust.ITrustAgentService;
 import android.service.trust.ITrustAgentServiceCallback;
 import android.service.trust.TrustAgentService;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
+
+import com.android.internal.infra.AndroidFuture;
 
 import java.util.Collections;
 import java.util.List;
@@ -156,7 +160,9 @@ public class TrustAgentWrapper {
                     }
                     mTrusted = true;
                     mTrustable = false;
-                    mMessage = (CharSequence) msg.obj;
+                    Pair<CharSequence, AndroidFuture<GrantTrustResult>> pair = (Pair) msg.obj;
+                    mMessage = pair.first;
+                    AndroidFuture<GrantTrustResult> resultCallback = pair.second;
                     int flags = msg.arg1;
                     mDisplayTrustGrantedMessage = (flags & FLAG_GRANT_TRUST_DISPLAY_MESSAGE) != 0;
                     if ((flags & FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0) {
@@ -189,7 +195,7 @@ public class TrustAgentWrapper {
                     mTrustManagerService.mArchive.logGrantTrust(mUserId, mName,
                             (mMessage != null ? mMessage.toString() : null),
                             durationMs, flags);
-                    mTrustManagerService.updateTrust(mUserId, flags);
+                    mTrustManagerService.updateTrust(mUserId, flags, resultCallback);
                     break;
                 case MSG_TRUST_TIMEOUT:
                     if (DEBUG) Slog.d(TAG, "Trust timed out : " + mName.flattenToShortString());
@@ -198,6 +204,8 @@ public class TrustAgentWrapper {
                     // Fall through.
                 case MSG_REVOKE_TRUST:
                     mTrusted = false;
+                    mTrustable = false;
+                    mWaitingForTrustableDowngrade = false;
                     mDisplayTrustGrantedMessage = false;
                     mMessage = null;
                     mHandler.removeMessages(MSG_TRUST_TIMEOUT);
@@ -312,13 +320,18 @@ public class TrustAgentWrapper {
     private ITrustAgentServiceCallback mCallback = new ITrustAgentServiceCallback.Stub() {
 
         @Override
-        public void grantTrust(CharSequence message, long durationMs, int flags) {
+        public void grantTrust(
+                CharSequence message,
+                long durationMs,
+                int flags,
+                AndroidFuture resultCallback) {
             if (DEBUG) {
                 Slog.d(TAG, "enableTrust(" + message + ", durationMs = " + durationMs
                         + ", flags = " + flags + ")");
             }
 
-            Message msg = mHandler.obtainMessage(MSG_GRANT_TRUST, flags, 0, message);
+            Message msg = mHandler.obtainMessage(
+                    MSG_GRANT_TRUST, flags, 0, Pair.create(message, resultCallback));
             msg.getData().putLong(DATA_DURATION, durationMs);
             msg.sendToTarget();
         }
@@ -512,12 +525,23 @@ public class TrustAgentWrapper {
     }
 
     /**
-     * @see android.service.trust.TrustAgentService#onUserRequestedUnlock()
+     * @see android.service.trust.TrustAgentService#onUserRequestedUnlock(boolean)
      */
-    public void onUserRequestedUnlock() {
+    public void onUserRequestedUnlock(boolean dismissKeyguard) {
         try {
             if (mTrustAgentService != null) {
-                mTrustAgentService.onUserRequestedUnlock();
+                mTrustAgentService.onUserRequestedUnlock(dismissKeyguard);
+            }
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
+
+    /** @see android.service.trust.TrustAgentService#onUserMayRequestUnlock() */
+    public void onUserMayRequestUnlock() {
+        try {
+            if (mTrustAgentService != null) {
+                mTrustAgentService.onUserMayRequestUnlock();
             }
         } catch (RemoteException e) {
             onError(e);

@@ -38,9 +38,9 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dreams.complication.DreamPreviewComplication;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -99,10 +99,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     DreamOverlayStateController mStateController;
 
     @Mock
-    DreamPreviewComplication mPreviewComplication;
+    ViewGroup mDreamOverlayContainerViewParent;
 
     @Mock
-    ViewGroup mDreamOverlayContainerViewParent;
+    UiEventLogger mUiEventLogger;
 
     DreamOverlayService mService;
 
@@ -129,7 +129,21 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mDreamOverlayComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
-                mPreviewComplication);
+                mUiEventLogger);
+    }
+
+    @Test
+    public void testOnStartMetricsLogged() throws Exception {
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        mMainExecutor.runAllReady();
+
+        verify(mUiEventLogger).log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_ENTER_START);
+        verify(mUiEventLogger).log(
+                DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START);
     }
 
     @Test
@@ -174,44 +188,19 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldShowComplicationsTrueByDefault() {
+    public void testShouldShowComplicationsFalseByDefault() {
         mService.onBind(new Intent());
-
-        assertThat(mService.shouldShowComplications()).isTrue();
-    }
-
-    @Test
-    public void testShouldShowComplicationsSetByIntentExtra() {
-        final Intent intent = new Intent();
-        intent.putExtra(DreamService.EXTRA_SHOW_COMPLICATIONS, false);
-        mService.onBind(intent);
 
         assertThat(mService.shouldShowComplications()).isFalse();
     }
 
     @Test
-    public void testPreviewModeFalseByDefault() {
-        mService.onBind(new Intent());
-
-        assertThat(mService.isPreviewMode()).isFalse();
-    }
-
-    @Test
-    public void testPreviewModeSetByIntentExtra() {
+    public void testShouldShowComplicationsSetByIntentExtra() {
         final Intent intent = new Intent();
-        intent.putExtra(DreamService.EXTRA_IS_PREVIEW, true);
+        intent.putExtra(DreamService.EXTRA_SHOW_COMPLICATIONS, true);
         mService.onBind(intent);
 
-        assertThat(mService.isPreviewMode()).isTrue();
-    }
-
-    @Test
-    public void testDreamLabel() {
-        final Intent intent = new Intent();
-        intent.putExtra(DreamService.EXTRA_DREAM_LABEL, "TestDream");
-        mService.onBind(intent);
-
-        assertThat(mService.getDreamLabel()).isEqualTo("TestDream");
+        assertThat(mService.shouldShowComplications()).isTrue();
     }
 
     @Test

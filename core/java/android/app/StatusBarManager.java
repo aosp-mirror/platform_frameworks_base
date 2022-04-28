@@ -24,6 +24,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,6 +42,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.View;
@@ -520,6 +524,27 @@ public class StatusBarManager {
     private final Map<NearbyMediaDevicesProvider, NearbyMediaDevicesProviderWrapper>
             nearbyMediaDevicesProviderMap = new HashMap<>();
 
+    /**
+     * Media controls based on {@link android.app.Notification.MediaStyle} notifications will have
+     * actions based on the media session's {@link android.media.session.PlaybackState}, rather than
+     * the notification's actions.
+     *
+     * These actions will be:
+     * - Play/Pause (depending on whether the current state is a playing state)
+     * - Previous (if declared), or a custom action if the slot is not reserved with
+     *   {@code SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_PREV}
+     * - Next (if declared), or a custom action if the slot is not reserved with
+     *   {@code SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_NEXT}
+     * - Custom action
+     * - Custom action
+     *
+     * @see androidx.media.utils.MediaConstants#SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_PREV
+     * @see androidx.media.utils.MediaConstants#SESSION_EXTRAS_KEY_SLOT_RESERVATION_SKIP_TO_NEXT
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long MEDIA_CONTROL_SESSION_ACTIONS = 203800354L;
+
     @UnsupportedAppUsage
     private Context mContext;
     private IStatusBarService mService;
@@ -844,6 +869,24 @@ public class StatusBarManager {
     }
 
     /**
+     * Sets an active {@link android.service.quicksettings.TileService} to listening state
+     *
+     * The {@code componentName}'s package must match the calling package.
+     *
+     * @param componentName the tile to set into listening state
+     * @see android.service.quicksettings.TileService#requestListeningState
+     * @hide
+     */
+    public void requestTileServiceListeningState(@NonNull ComponentName componentName) {
+        Objects.requireNonNull(componentName);
+        try {
+            getService().requestTileServiceListeningState(componentName, mContext.getUserId());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Request to the user to add a {@link android.service.quicksettings.TileService}
      * to the set of current QS tiles.
      * <p>
@@ -1107,6 +1150,21 @@ public class StatusBarManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Checks whether the given package should use session-based actions for its media controls.
+     *
+     * @param packageName App posting media controls
+     * @param user Current user handle
+     * @return true if the app supports session actions
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG,
+            android.Manifest.permission.LOG_COMPAT_CHANGE})
+    public static boolean useMediaSessionActionsForApp(String packageName, UserHandle user) {
+        return CompatChanges.isChangeEnabled(MEDIA_CONTROL_SESSION_ACTIONS, packageName, user);
     }
 
     /** @hide */

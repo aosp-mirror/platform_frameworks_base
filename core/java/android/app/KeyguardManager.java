@@ -261,8 +261,10 @@ public class KeyguardManager {
             CharSequence title, CharSequence description, int userId,
             boolean disallowBiometricsIfPolicyExists) {
         Intent intent = this.createConfirmDeviceCredentialIntent(title, description, userId);
-        intent.putExtra(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
-                disallowBiometricsIfPolicyExists);
+        if (intent != null) {
+            intent.putExtra(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
+                    disallowBiometricsIfPolicyExists);
+        }
         return intent;
     }
 
@@ -1103,9 +1105,12 @@ public class KeyguardManager {
     }
 
     /**
-     * Registers a listener to execute when the keyguard visibility changes.
+     * Registers a listener to execute when the keyguard locked state changes.
      *
-     * @param listener The listener to add to receive keyguard visibility changes.
+     * @param listener The listener to add to receive keyguard locked state changes.
+     *
+     * @see #isKeyguardLocked()
+     * @see #removeKeyguardLockedStateListener(KeyguardLockedStateListener)
      */
     @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
     public void addKeyguardLockedStateListener(@NonNull @CallbackExecutor Executor executor,
@@ -1124,7 +1129,12 @@ public class KeyguardManager {
     }
 
     /**
-     * Unregisters a listener that executes when the keyguard visibility changes.
+     * Unregisters a listener that executes when the keyguard locked state changes.
+     *
+     * @param listener The listener to remove.
+     *
+     * @see #isKeyguardLocked()
+     * @see #addKeyguardLockedStateListener(Executor, KeyguardLockedStateListener)
      */
     @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
     public void removeKeyguardLockedStateListener(@NonNull KeyguardLockedStateListener listener) {
