@@ -105,6 +105,7 @@ public final class GameSessionTrampolineActivity extends Activity {
                     FUTURE_KEY);
             future.completeExceptionally(e);
             finish();
+            overridePendingTransition(0, 0);
         }
     }
 
@@ -125,5 +126,6 @@ public final class GameSessionTrampolineActivity extends Activity {
                 FUTURE_KEY);
         future.complete(new GameSessionActivityResult(resultCode, data));
         finish();
+        overridePendingTransition(0, 0);
     }
 }
