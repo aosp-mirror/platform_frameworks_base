@@ -253,6 +253,24 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     /**
+     * Controls whether ignore orientation request logic in {@link
+     * com.android.server.wm.DisplayArea} is disabled at runtime.
+     *
+     * @param isDisabled when {@code true}, the system always ignores the value of {@link
+     *                   com.android.server.wm.DisplayArea#getIgnoreOrientationRequest} and app
+     *                   requested orientation is respected.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void setIsIgnoreOrientationRequestDisabled(boolean isDisabled) {
+        try {
+            mTaskOrganizerController.setIsIgnoreOrientationRequestDisabled(isDisabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the executor to run callbacks on.
      * @hide
      */

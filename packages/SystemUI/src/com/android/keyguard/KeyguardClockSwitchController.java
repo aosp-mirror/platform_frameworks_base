@@ -25,6 +25,7 @@ import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import android.app.WallpaperManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
@@ -56,7 +57,6 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Locale;
@@ -130,6 +130,24 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
     };
 
+    private final KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener
+            mKeyguardUnlockAnimationListener =
+            new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
+                @Override
+                public void onSmartspaceSharedElementTransitionStarted() {
+                    // The smartspace needs to be able to translate out of bounds in order to
+                    // end up where the launcher's smartspace is, while its container is being
+                    // swiped off the top of the screen.
+                    setClipChildrenForUnlock(false);
+                }
+
+                @Override
+                public void onUnlockAnimationFinished() {
+                    // For performance reasons, reset this once the unlock animation ends.
+                    setClipChildrenForUnlock(true);
+                }
+            };
+
     @Inject
     public KeyguardClockSwitchController(
             KeyguardClockSwitch keyguardClockSwitch,
@@ -162,22 +180,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mUiExecutor = uiExecutor;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mDumpManager = dumpManager;
-        mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
-                new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
-                    @Override
-                    public void onSmartspaceSharedElementTransitionStarted() {
-                        // The smartspace needs to be able to translate out of bounds in order to
-                        // end up where the launcher's smartspace is, while its container is being
-                        // swiped off the top of the screen.
-                        setClipChildrenForUnlock(false);
-                    }
-
-                    @Override
-                    public void onUnlockAnimationFinished() {
-                        // For performance reasons, reset this once the unlock animation ends.
-                        setClipChildrenForUnlock(true);
-                    }
-                });
     }
 
     /**
@@ -264,13 +266,17 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             mKeyguardUnlockAnimationController.setLockscreenSmartspace(mSmartspaceView);
         }
 
-        mSecureSettings.registerContentObserver(
+        mSecureSettings.registerContentObserverForUser(
                 Settings.Secure.getUriFor(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK),
                 false, /* notifyForDescendants */
-                mDoubleLineClockObserver
+                mDoubleLineClockObserver,
+                UserHandle.USER_ALL
         );
 
         updateDoubleLineClock();
+
+        mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
+                mKeyguardUnlockAnimationListener);
     }
 
     int getNotificationIconAreaHeight() {
@@ -286,6 +292,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mView.setClockPlugin(null, mStatusBarStateController.getState());
 
         mSecureSettings.unregisterContentObserver(mDoubleLineClockObserver);
+
+        mKeyguardUnlockAnimationController.removeKeyguardUnlockAnimationListener(
+                mKeyguardUnlockAnimationListener);
     }
 
     /**
@@ -476,8 +485,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void updateDoubleLineClock() {
-        mCanShowDoubleLineClock = mSecureSettings.getInt(
-            Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1) != 0;
+        mCanShowDoubleLineClock = mSecureSettings.getIntForUser(
+            Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1,
+                UserHandle.USER_CURRENT) != 0;
 
         if (!mCanShowDoubleLineClock) {
             mUiExecutor.execute(() -> displayClock(KeyguardClockSwitch.SMALL, /* animate */ true));
@@ -497,7 +507,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("currentClockSizeLarge=" + (mCurrentClockSize == LARGE));
         pw.println("mCanShowDoubleLineClock=" + mCanShowDoubleLineClock);
         mClockViewController.dump(pw);

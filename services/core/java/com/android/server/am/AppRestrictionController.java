@@ -27,6 +27,7 @@ import static android.app.ActivityManager.RESTRICTION_LEVEL_HIBERNATION;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_MAX;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_UNKNOWN;
+import static android.app.ActivityManager.RESTRICTION_LEVEL_UNRESTRICTED;
 import static android.app.ActivityManager.UID_OBSERVER_ACTIVE;
 import static android.app.ActivityManager.UID_OBSERVER_GONE;
 import static android.app.ActivityManager.UID_OBSERVER_IDLE;
@@ -60,6 +61,8 @@ import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
 import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.PowerExemptionManager.REASON_DEVICE_DEMO_MODE;
 import static android.os.PowerExemptionManager.REASON_DEVICE_OWNER;
+import static android.os.PowerExemptionManager.REASON_DISALLOW_APPS_CONTROL;
+import static android.os.PowerExemptionManager.REASON_DPO_PROTECTED_APP;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT;
@@ -70,6 +73,7 @@ import static android.os.PowerExemptionManager.REASON_ROLE_EMERGENCY;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
+import static android.os.PowerExemptionManager.getExemptionReasonForStatsd;
 import static android.os.PowerExemptionManager.reasonCodeToString;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -114,6 +118,8 @@ import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.AppBackgroundRestrictionsInfo;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -134,6 +140,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseArrayMap;
@@ -147,6 +154,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.TriConsumer;
 import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
@@ -216,6 +224,11 @@ public final class AppRestrictionController {
     private static final String ATTR_CUR_LEVEL = "curlevel";
     private static final String ATTR_LEVEL_TS = "levelts";
     private static final String ATTR_REASON = "reason";
+
+    private static final String[] ROLES_IN_INTEREST = {
+        RoleManager.ROLE_DIALER,
+        RoleManager.ROLE_EMERGENCY,
+    };
 
     private final Context mContext;
     private final HandlerThread mBgHandlerThread;
@@ -296,6 +309,28 @@ public final class AppRestrictionController {
     private final AtomicBoolean mRestrictionSettingsXmlLoaded = new AtomicBoolean();
 
     final ActivityManagerService mActivityManagerService;
+
+    static final int TRACKER_TYPE_UNKNOWN = 0;
+    static final int TRACKER_TYPE_BATTERY = 1;
+    static final int TRACKER_TYPE_BATTERY_EXEMPTION = 2;
+    static final int TRACKER_TYPE_FGS = 3;
+    static final int TRACKER_TYPE_MEDIA_SESSION = 4;
+    static final int TRACKER_TYPE_PERMISSION = 5;
+    static final int TRACKER_TYPE_BROADCAST_EVENTS = 6;
+    static final int TRACKER_TYPE_BIND_SERVICE_EVENTS = 7;
+    @IntDef(prefix = { "TRACKER_TYPE_" }, value = {
+            TRACKER_TYPE_UNKNOWN,
+            TRACKER_TYPE_BATTERY,
+            TRACKER_TYPE_BATTERY_EXEMPTION,
+            TRACKER_TYPE_FGS,
+            TRACKER_TYPE_MEDIA_SESSION,
+            TRACKER_TYPE_PERMISSION,
+            TRACKER_TYPE_BROADCAST_EVENTS,
+            TRACKER_TYPE_BIND_SERVICE_EVENTS,
+    })
+    @interface TrackerType {}
+
+    private final TrackerInfo mEmptyTrackerInfo = new TrackerInfo();
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -883,8 +918,8 @@ public final class AppRestrictionController {
                 final int curBucket = mInjector.getAppStandbyInternal().getAppStandbyBucket(
                         packageName, UserHandle.getUserId(uid), now, false);
                 if (applyLevel) {
-                    applyRestrictionLevel(packageName, uid, curLevel, curBucket, true,
-                            reason & REASON_MAIN_MASK, reason & REASON_SUB_MASK);
+                    applyRestrictionLevel(packageName, uid, curLevel, mEmptyTrackerInfo,
+                            curBucket, true, reason & REASON_MAIN_MASK, reason & REASON_SUB_MASK);
                 } else {
                     pkgSettings.update(curLevel,
                             reason & REASON_MAIN_MASK, reason & REASON_SUB_MASK);
@@ -1028,6 +1063,13 @@ public final class AppRestrictionController {
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "auto_restricted_bucket_on_bg_restricted";
 
         /**
+         * Whether or not to move the app to restricted standby level automatically
+         * when system detects it's abusive.
+         */
+        static final String KEY_BG_AUTO_RESTRICT_ABUSIVE_APPS =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "auto_restrict_abusive_apps";
+
+        /**
          * The minimal interval in ms before posting a notification again on abusive behaviors
          * of a certain package.
          */
@@ -1064,6 +1106,19 @@ public final class AppRestrictionController {
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "restriction_exempted_packages";
 
         /**
+         * Whether or not to show the notification for abusive apps, i.e. when the system
+         * detects it's draining significant amount of battery in the background.
+         * {@code true} - we'll show the prompt to user, {@code false} - we'll not show it.
+         */
+        static final String KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "prompt_abusive_apps_to_bg_restricted";
+
+        /**
+         * Default value to {@link #mBgAutoRestrictAbusiveApps}.
+         */
+        static final boolean DEFAULT_BG_AUTO_RESTRICT_ABUSIVE_APPS = true;
+
+        /**
          * Default value to {@link #mBgAutoRestrictedBucket}.
          */
         static final boolean DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION = false;
@@ -1088,7 +1143,14 @@ public final class AppRestrictionController {
          */
         final boolean mDefaultBgPromptFgsWithNotiToBgRestricted;
 
+        /**
+         * Default value to {@link #mBgPromptAbusiveAppsToBgRestricted}.
+         */
+        final boolean mDefaultBgPromptAbusiveAppToBgRestricted;
+
         volatile boolean mBgAutoRestrictedBucket;
+
+        volatile boolean mBgAutoRestrictAbusiveApps;
 
         volatile boolean mRestrictedBucketEnabled;
 
@@ -1113,10 +1175,17 @@ public final class AppRestrictionController {
          */
         volatile boolean mBgPromptFgsWithNotiOnLongRunning;
 
+        /**
+         * @see #KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED.
+         */
+        volatile boolean mBgPromptAbusiveAppsToBgRestricted;
+
         ConstantsObserver(Handler handler, Context context) {
             super(handler);
             mDefaultBgPromptFgsWithNotiToBgRestricted = context.getResources().getBoolean(
                     com.android.internal.R.bool.config_bg_prompt_fgs_with_noti_to_bg_restricted);
+            mDefaultBgPromptAbusiveAppToBgRestricted = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_bg_prompt_abusive_apps_to_bg_restricted);
         }
 
         @Override
@@ -1129,6 +1198,9 @@ public final class AppRestrictionController {
                     case KEY_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION:
                         updateBgAutoRestrictedBucketChanged();
                         break;
+                    case KEY_BG_AUTO_RESTRICT_ABUSIVE_APPS:
+                        updateBgAutoRestrictAbusiveApps();
+                        break;
                     case KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL:
                         updateBgAbusiveNotificationMinimalInterval();
                         break;
@@ -1140,6 +1212,9 @@ public final class AppRestrictionController {
                         break;
                     case KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING:
                         updateBgPromptFgsWithNotiOnLongRunning();
+                        break;
+                    case KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED:
+                        updateBgPromptAbusiveAppToBgRestricted();
                         break;
                     case KEY_BG_RESTRICTION_EXEMPTED_PACKAGES:
                         updateBgRestrictionExemptedPackages();
@@ -1174,10 +1249,12 @@ public final class AppRestrictionController {
 
         void updateDeviceConfig() {
             updateBgAutoRestrictedBucketChanged();
+            updateBgAutoRestrictAbusiveApps();
             updateBgAbusiveNotificationMinimalInterval();
             updateBgLongFgsNotificationMinimalInterval();
             updateBgPromptFgsWithNotiToBgRestricted();
             updateBgPromptFgsWithNotiOnLongRunning();
+            updateBgPromptAbusiveAppToBgRestricted();
             updateBgRestrictionExemptedPackages();
         }
 
@@ -1190,6 +1267,13 @@ public final class AppRestrictionController {
             if (oldValue != mBgAutoRestrictedBucket) {
                 dispatchAutoRestrictedBucketFeatureFlagChanged(mBgAutoRestrictedBucket);
             }
+        }
+
+        private void updateBgAutoRestrictAbusiveApps() {
+            mBgAutoRestrictAbusiveApps = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_AUTO_RESTRICT_ABUSIVE_APPS,
+                    DEFAULT_BG_AUTO_RESTRICT_ABUSIVE_APPS);
         }
 
         private void updateBgAbusiveNotificationMinimalInterval() {
@@ -1220,6 +1304,13 @@ public final class AppRestrictionController {
                     DEFAULT_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING);
         }
 
+        private void updateBgPromptAbusiveAppToBgRestricted() {
+            mBgPromptAbusiveAppsToBgRestricted = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED,
+                    mDefaultBgPromptAbusiveAppToBgRestricted);
+        }
+
         private void updateBgRestrictionExemptedPackages() {
             final String settings = DeviceConfig.getString(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1247,6 +1338,10 @@ public final class AppRestrictionController {
             pw.print('=');
             pw.println(mBgAutoRestrictedBucket);
             pw.print(prefix);
+            pw.print(KEY_BG_AUTO_RESTRICT_ABUSIVE_APPS);
+            pw.print('=');
+            pw.println(mBgAutoRestrictAbusiveApps);
+            pw.print(prefix);
             pw.print(KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL);
             pw.print('=');
             pw.println(mBgAbusiveNotificationMinIntervalMs);
@@ -1259,9 +1354,32 @@ public final class AppRestrictionController {
             pw.print('=');
             pw.println(mBgPromptFgsWithNotiToBgRestricted);
             pw.print(prefix);
+            pw.print(KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED);
+            pw.print('=');
+            pw.println(mBgPromptAbusiveAppsToBgRestricted);
+            pw.print(prefix);
             pw.print(KEY_BG_RESTRICTION_EXEMPTED_PACKAGES);
             pw.print('=');
             pw.println(mBgRestrictionExemptedPackages.toString());
+        }
+    }
+
+    /**
+     * A helper object which holds an app state tracker's type and its relevant info used for
+     * logging atoms to statsd.
+     */
+    private class TrackerInfo {
+        final int mType; // tracker type
+        final byte[] mInfo; // tracker info proto object for statsd
+
+        TrackerInfo() {
+            mType = TRACKER_TYPE_UNKNOWN;
+            mInfo = null;
+        }
+
+        TrackerInfo(int type, byte[] info) {
+            mType = type;
+            mInfo = info;
         }
     }
 
@@ -1360,6 +1478,7 @@ public final class AppRestrictionController {
         initBgRestrictionExemptioFromSysConfig();
         initRestrictionStates();
         initSystemModuleNames();
+        initRolesInInterest();
         registerForUidObservers();
         registerForSystemBroadcasts();
         mNotificationHelper.onSystemReady();
@@ -1413,11 +1532,13 @@ public final class AppRestrictionController {
             refreshAppRestrictionLevelForUser(userId, REASON_MAIN_FORCED_BY_USER,
                     REASON_SUB_FORCED_USER_FLAG_INTERACTION);
         }
-        // Load the previously saved levels and update the current levels if needed.
-        mRestrictionSettings.scheduleLoadFromXml();
-        // Also save the current levels right away.
-        for (int userId : allUsers) {
-            mRestrictionSettings.schedulePersistToXml(userId);
+        if (!mInjector.isTest()) {
+            // Load the previously saved levels and update the current levels if needed.
+            mRestrictionSettings.scheduleLoadFromXml();
+            // Also save the current levels right away.
+            for (int userId : allUsers) {
+                mRestrictionSettings.schedulePersistToXml(userId);
+            }
         }
     }
 
@@ -1509,15 +1630,15 @@ public final class AppRestrictionController {
                 Slog.e(TAG, "Unable to find " + info.mPackageName + "/u" + userId);
                 continue;
             }
-            final @RestrictionLevel int level = calcAppRestrictionLevel(
+            final Pair<Integer, TrackerInfo> levelTypePair = calcAppRestrictionLevel(
                     userId, uid, info.mPackageName, info.mStandbyBucket, false, false);
             if (DEBUG_BG_RESTRICTION_CONTROLLER) {
                 Slog.i(TAG, "Proposed restriction level of " + info.mPackageName + "/"
                         + UserHandle.formatUid(uid) + ": "
-                        + ActivityManager.restrictionLevelToName(level)
+                        + ActivityManager.restrictionLevelToName(levelTypePair.first)
                         + " " + info.mStandbyBucket);
             }
-            applyRestrictionLevel(info.mPackageName, uid, level,
+            applyRestrictionLevel(info.mPackageName, uid, levelTypePair.first, levelTypePair.second,
                     info.mStandbyBucket, true, reason, subReason);
         }
     }
@@ -1533,24 +1654,26 @@ public final class AppRestrictionController {
         final long now = SystemClock.elapsedRealtime();
         for (String pkg: packages) {
             final int curBucket = appStandbyInternal.getAppStandbyBucket(pkg, userId, now, false);
-            final @RestrictionLevel int level = calcAppRestrictionLevel(userId, uid, pkg,
-                    curBucket, allowRequestBgRestricted, true);
+            final Pair<Integer, TrackerInfo> levelTypePair = calcAppRestrictionLevel(userId, uid,
+                    pkg, curBucket, allowRequestBgRestricted, true);
             if (DEBUG_BG_RESTRICTION_CONTROLLER) {
                 Slog.i(TAG, "Proposed restriction level of " + pkg + "/"
                         + UserHandle.formatUid(uid) + ": "
-                        + ActivityManager.restrictionLevelToName(level));
+                        + ActivityManager.restrictionLevelToName(levelTypePair.first));
             }
-            applyRestrictionLevel(pkg, uid, level, curBucket, true, reason, subReason);
+            applyRestrictionLevel(pkg, uid, levelTypePair.first, levelTypePair.second,
+                    curBucket, true, reason, subReason);
         }
     }
 
-    private @RestrictionLevel int calcAppRestrictionLevel(@UserIdInt int userId, int uid,
+    private Pair<Integer, TrackerInfo> calcAppRestrictionLevel(@UserIdInt int userId, int uid,
             String packageName, @UsageStatsManager.StandbyBuckets int standbyBucket,
             boolean allowRequestBgRestricted, boolean calcTrackers) {
         if (mInjector.getAppHibernationInternal().isHibernatingForUser(packageName, userId)) {
-            return RESTRICTION_LEVEL_HIBERNATION;
+            return new Pair<>(RESTRICTION_LEVEL_HIBERNATION, mEmptyTrackerInfo);
         }
         @RestrictionLevel int level;
+        TrackerInfo trackerInfo = null;
         switch (standbyBucket) {
             case STANDBY_BUCKET_EXEMPTED:
                 level = RESTRICTION_LEVEL_EXEMPTED;
@@ -1566,19 +1689,23 @@ public final class AppRestrictionController {
             default:
                 if (mInjector.getAppStateTracker()
                         .isAppBackgroundRestricted(uid, packageName)) {
-                    return RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
+                    return new Pair<>(RESTRICTION_LEVEL_BACKGROUND_RESTRICTED, mEmptyTrackerInfo);
                 }
                 level = mConstantsObserver.mRestrictedBucketEnabled
                         && standbyBucket == STANDBY_BUCKET_RESTRICTED
                         ? RESTRICTION_LEVEL_RESTRICTED_BUCKET
                         : RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
                 if (calcTrackers) {
-                    @RestrictionLevel int l = calcAppRestrictionLevelFromTackers(uid, packageName,
-                            RESTRICTION_LEVEL_MAX);
+                    Pair<Integer, TrackerInfo> levelTypePair = calcAppRestrictionLevelFromTackers(
+                            uid, packageName, RESTRICTION_LEVEL_MAX);
+                    @RestrictionLevel int l = levelTypePair.first;
                     if (l == RESTRICTION_LEVEL_EXEMPTED) {
-                        return RESTRICTION_LEVEL_EXEMPTED;
+                        return new Pair<>(RESTRICTION_LEVEL_EXEMPTED, levelTypePair.second);
                     }
-                    level = Math.max(l, level);
+                    if (l > level) {
+                        level = l;
+                        trackerInfo = levelTypePair.second;
+                    }
                     if (level == RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
                         // This level can't be entered without user consent
                         if (allowRequestBgRestricted) {
@@ -1586,27 +1713,32 @@ public final class AppRestrictionController {
                                     uid, 0, packageName).sendToTarget();
                         }
                         // Lower the level.
-                        level = calcAppRestrictionLevelFromTackers(uid, packageName,
+                        levelTypePair = calcAppRestrictionLevelFromTackers(uid, packageName,
                                 RESTRICTION_LEVEL_BACKGROUND_RESTRICTED);
+                        level = levelTypePair.first;
+                        trackerInfo = levelTypePair.second;
                     }
                 }
                 break;
         }
-        return level;
+        return new Pair<>(level, trackerInfo);
     }
 
     /**
      * Ask each of the trackers for their proposed restriction levels for the given uid/package,
-     * and return the most restrictive level.
+     * and return the most restrictive level along with the type of tracker and its relevant info
+     * which applied this restriction level as a {@code Pair<@RestrictionLevel, TrackerInfo>}.
      *
      * <p>Note, it's different from the {@link #getRestrictionLevel} where it returns the least
      * restrictive level. We're returning the most restrictive level here because each tracker
      * monitors certain dimensions of the app, the abusive behaviors could be detected in one or
      * more of these dimensions, but not necessarily all of them. </p>
      */
-    private @RestrictionLevel int calcAppRestrictionLevelFromTackers(int uid, String packageName,
-            @RestrictionLevel int maxLevel) {
+    private Pair<Integer, TrackerInfo> calcAppRestrictionLevelFromTackers(int uid,
+            String packageName, @RestrictionLevel int maxLevel) {
         @RestrictionLevel int level = RESTRICTION_LEVEL_UNKNOWN;
+        @RestrictionLevel int prevLevel = level;
+        BaseAppStateTracker resultTracker = null;
         final boolean isRestrictedBucketEnabled = mConstantsObserver.mRestrictedBucketEnabled;
         for (int i = mAppStateTrackers.size() - 1; i >= 0; i--) {
             @RestrictionLevel int l = mAppStateTrackers.get(i).getPolicy()
@@ -1615,8 +1747,16 @@ public final class AppRestrictionController {
                 l = RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
             }
             level = Math.max(level, l);
+            if (level != prevLevel) {
+                resultTracker = mAppStateTrackers.get(i);
+                prevLevel = level;
+            }
         }
-        return level;
+        final TrackerInfo trackerInfo = resultTracker == null
+                                            ? mEmptyTrackerInfo
+                                            : new TrackerInfo(resultTracker.getType(),
+                                                    resultTracker.getTrackerInfoForStatsd(uid));
+        return new Pair<>(level, trackerInfo);
     }
 
     private static @RestrictionLevel int standbyBucketToRestrictionLevel(
@@ -1658,6 +1798,14 @@ public final class AppRestrictionController {
      */
     @RestrictionLevel int getRestrictionLevel(String packageName, @UserIdInt int userId) {
         return mRestrictionSettings.getRestrictionLevel(packageName, userId);
+    }
+
+    /**
+     * @return Whether or not to move the app to restricted level automatically
+     * when system detects it's abusive.
+     */
+    boolean isAutoRestrictAbusiveAppEnabled() {
+        return mConstantsObserver.mBgAutoRestrictAbusiveApps;
     }
 
     /**
@@ -1829,7 +1977,111 @@ public final class AppRestrictionController {
         }
     }
 
-    private void applyRestrictionLevel(String pkgName, int uid, @RestrictionLevel int level,
+    private int getRestrictionLevelStatsd(@RestrictionLevel int level) {
+        switch (level) {
+            case RESTRICTION_LEVEL_UNKNOWN:
+                return AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN;
+            case RESTRICTION_LEVEL_UNRESTRICTED:
+                return AppBackgroundRestrictionsInfo.LEVEL_UNRESTRICTED;
+            case RESTRICTION_LEVEL_EXEMPTED:
+                return AppBackgroundRestrictionsInfo.LEVEL_EXEMPTED;
+            case RESTRICTION_LEVEL_ADAPTIVE_BUCKET:
+                return AppBackgroundRestrictionsInfo.LEVEL_ADAPTIVE_BUCKET;
+            case RESTRICTION_LEVEL_RESTRICTED_BUCKET:
+                return AppBackgroundRestrictionsInfo.LEVEL_RESTRICTED_BUCKET;
+            case RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
+                return AppBackgroundRestrictionsInfo.LEVEL_BACKGROUND_RESTRICTED;
+            case RESTRICTION_LEVEL_HIBERNATION:
+                return AppBackgroundRestrictionsInfo.LEVEL_HIBERNATION;
+            default:
+                return AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN;
+        }
+    }
+
+    private int getThresholdStatsd(int reason) {
+        switch (reason) {
+            case REASON_MAIN_FORCED_BY_SYSTEM:
+                return AppBackgroundRestrictionsInfo.THRESHOLD_RESTRICTED;
+            case REASON_MAIN_FORCED_BY_USER:
+                return AppBackgroundRestrictionsInfo.THRESHOLD_USER;
+            default:
+                return AppBackgroundRestrictionsInfo.THRESHOLD_UNKNOWN;
+        }
+    }
+
+    private int getTrackerTypeStatsd(@TrackerType int type) {
+        switch (type) {
+            case TRACKER_TYPE_BATTERY:
+                return AppBackgroundRestrictionsInfo.BATTERY_TRACKER;
+            case TRACKER_TYPE_BATTERY_EXEMPTION:
+                return AppBackgroundRestrictionsInfo.BATTERY_EXEMPTION_TRACKER;
+            case TRACKER_TYPE_FGS:
+                return AppBackgroundRestrictionsInfo.FGS_TRACKER;
+            case TRACKER_TYPE_MEDIA_SESSION:
+                return AppBackgroundRestrictionsInfo.MEDIA_SESSION_TRACKER;
+            case TRACKER_TYPE_PERMISSION:
+                return AppBackgroundRestrictionsInfo.PERMISSION_TRACKER;
+            case TRACKER_TYPE_BROADCAST_EVENTS:
+                return AppBackgroundRestrictionsInfo.BROADCAST_EVENTS_TRACKER;
+            case TRACKER_TYPE_BIND_SERVICE_EVENTS:
+                return AppBackgroundRestrictionsInfo.BIND_SERVICE_EVENTS_TRACKER;
+            default:
+                return AppBackgroundRestrictionsInfo.UNKNOWN_TRACKER;
+        }
+    }
+
+    private int getExemptionReasonStatsd(int uid, @RestrictionLevel int level) {
+        if (level != RESTRICTION_LEVEL_EXEMPTED) {
+            return AppBackgroundRestrictionsInfo.REASON_DENIED;
+        }
+
+        @ReasonCode final int reasonCode = getBackgroundRestrictionExemptionReason(uid);
+        return getExemptionReasonForStatsd(reasonCode);
+    }
+
+    private int getOptimizationLevelStatsd(@RestrictionLevel int level) {
+        switch (level) {
+            case RESTRICTION_LEVEL_UNKNOWN:
+                return AppBackgroundRestrictionsInfo.UNKNOWN;
+            case RESTRICTION_LEVEL_UNRESTRICTED:
+                return AppBackgroundRestrictionsInfo.NOT_OPTIMIZED;
+            case RESTRICTION_LEVEL_ADAPTIVE_BUCKET:
+                return AppBackgroundRestrictionsInfo.OPTIMIZED;
+            case RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
+                return AppBackgroundRestrictionsInfo.BACKGROUND_RESTRICTED;
+            default:
+                return AppBackgroundRestrictionsInfo.UNKNOWN;
+        }
+    }
+
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private int getTargetSdkStatsd(String packageName) {
+        final PackageManager pm = mInjector.getPackageManager();
+        if (pm == null) {
+            return AppBackgroundRestrictionsInfo.SDK_UNKNOWN;
+        }
+        try {
+            final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
+            if (pkg == null || pkg.applicationInfo == null) {
+                return AppBackgroundRestrictionsInfo.SDK_UNKNOWN;
+            }
+            final int targetSdk = pkg.applicationInfo.targetSdkVersion;
+            if (targetSdk < Build.VERSION_CODES.S) {
+                return AppBackgroundRestrictionsInfo.SDK_PRE_S;
+            } else if (targetSdk < Build.VERSION_CODES.TIRAMISU) {
+                return AppBackgroundRestrictionsInfo.SDK_S;
+            } else if (targetSdk == Build.VERSION_CODES.TIRAMISU) {
+                return AppBackgroundRestrictionsInfo.SDK_T;
+            } else {
+                return AppBackgroundRestrictionsInfo.SDK_UNKNOWN;
+            }
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
+        return AppBackgroundRestrictionsInfo.SDK_UNKNOWN;
+    }
+
+    private void applyRestrictionLevel(String pkgName, int uid,
+            @RestrictionLevel int level, TrackerInfo trackerInfo,
             int curBucket, boolean allowUpdateBucket, int reason, int subReason) {
         int curLevel;
         int prevReason;
@@ -1909,6 +2161,22 @@ public final class AppRestrictionController {
                     prevReason & REASON_MAIN_MASK, prevReason & REASON_SUB_MASK,
                     reason, subReason);
         }
+
+        if (trackerInfo == null) {
+            trackerInfo = mEmptyTrackerInfo;
+        }
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO, uid,
+                getRestrictionLevelStatsd(level),
+                getThresholdStatsd(reason),
+                getTrackerTypeStatsd(trackerInfo.mType),
+                trackerInfo.mType == TRACKER_TYPE_FGS ? trackerInfo.mInfo : null,
+                trackerInfo.mType == TRACKER_TYPE_BATTERY ? trackerInfo.mInfo : null,
+                trackerInfo.mType == TRACKER_TYPE_BROADCAST_EVENTS ? trackerInfo.mInfo : null,
+                trackerInfo.mType == TRACKER_TYPE_BIND_SERVICE_EVENTS ? trackerInfo.mInfo : null,
+                getExemptionReasonStatsd(uid, level),
+                getOptimizationLevelStatsd(level),
+                getTargetSdkStatsd(pkgName),
+                ActivityManager.isLowRamDeviceStatic());
     }
 
     private void handleBackgroundRestrictionChanged(int uid, String pkgName, boolean restricted) {
@@ -1926,7 +2194,7 @@ public final class AppRestrictionController {
             // The app could fall into the background restricted with user consent only,
             // so set the reason to it.
             applyRestrictionLevel(pkgName, uid, RESTRICTION_LEVEL_BACKGROUND_RESTRICTED,
-                    curBucket, true, REASON_MAIN_FORCED_BY_USER,
+                    mEmptyTrackerInfo, curBucket, true, REASON_MAIN_FORCED_BY_USER,
                     REASON_SUB_FORCED_USER_FLAG_INTERACTION);
             mBgHandler.obtainMessage(BgHandler.MSG_CANCEL_REQUEST_BG_RESTRICTED, uid, 0, pkgName)
                     .sendToTarget();
@@ -1939,11 +2207,11 @@ public final class AppRestrictionController {
                     ? STANDBY_BUCKET_EXEMPTED
                     : (lastLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET
                             ? STANDBY_BUCKET_RESTRICTED : STANDBY_BUCKET_RARE);
-            final @RestrictionLevel int level = calcAppRestrictionLevel(
+            final Pair<Integer, TrackerInfo> levelTypePair = calcAppRestrictionLevel(
                     UserHandle.getUserId(uid), uid, pkgName, tentativeBucket, false, true);
 
-            applyRestrictionLevel(pkgName, uid, level, curBucket, true,
-                    REASON_MAIN_USAGE, REASON_SUB_USAGE_USER_INTERACTION);
+            applyRestrictionLevel(pkgName, uid, levelTypePair.first, levelTypePair.second,
+                    curBucket, true, REASON_MAIN_USAGE, REASON_SUB_USAGE_USER_INTERACTION);
         }
     }
 
@@ -1983,10 +2251,10 @@ public final class AppRestrictionController {
             @UserIdInt int userId) {
         final int uid = mInjector.getPackageManagerInternal().getPackageUid(
                 packageName, STOCK_PM_FLAGS, userId);
-        final @RestrictionLevel int level = calcAppRestrictionLevel(
+        final Pair<Integer, TrackerInfo> levelTypePair = calcAppRestrictionLevel(
                 userId, uid, packageName, bucket, false, false);
-        applyRestrictionLevel(packageName, uid, level, bucket, false,
-                REASON_MAIN_DEFAULT, REASON_SUB_DEFAULT_UNDEFINED);
+        applyRestrictionLevel(packageName, uid, levelTypePair.first, levelTypePair.second,
+                bucket, false, REASON_MAIN_DEFAULT, REASON_SUB_DEFAULT_UNDEFINED);
     }
 
     void handleRequestBgRestricted(String packageName, int uid) {
@@ -2112,11 +2380,19 @@ public final class AppRestrictionController {
         }
 
         void postRequestBgRestrictedIfNecessary(String packageName, int uid) {
+            if (!mBgController.mConstantsObserver.mBgPromptAbusiveAppsToBgRestricted) {
+                if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+                    Slog.i(TAG, "Not requesting bg-restriction due to config");
+                }
+                return;
+            }
+
             final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
             intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
             final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
-                    intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE, null,
+                    intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE, null,
                     UserHandle.of(UserHandle.getUserId(uid)));
             Notification.Action[] actions = null;
             final boolean hasForegroundServices =
@@ -2159,6 +2435,21 @@ public final class AppRestrictionController {
         }
 
         void postLongRunningFgsIfNecessary(String packageName, int uid) {
+            // Log the event in statsd.
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO,
+                    uid,
+                    mBgController.getRestrictionLevel(uid),
+                    AppBackgroundRestrictionsInfo.THRESHOLD_UNKNOWN,
+                    AppBackgroundRestrictionsInfo.FGS_TRACKER,
+                    mInjector.getAppFGSTracker().getTrackerInfoForStatsd(uid),
+                    null, // BatteryTrackerInfo
+                    null, // BroadcastEventsTrackerInfo
+                    null, // BindServiceEventsTrackerInfo
+                    getExemptionReasonForStatsd(
+                            mBgController.getBackgroundRestrictionExemptionReason(uid)),
+                    AppBackgroundRestrictionsInfo.UNKNOWN, // OptimizationLevel
+                    AppBackgroundRestrictionsInfo.SDK_UNKNOWN, // TargetSdk
+                    ActivityManager.isLowRamDeviceStatic());
             PendingIntent pendingIntent;
             if (!mBgController.mConstantsObserver.mBgPromptFgsWithNotiOnLongRunning
                     && mBgController.hasForegroundServiceNotifications(packageName, uid)) {
@@ -2172,13 +2463,14 @@ public final class AppRestrictionController {
                 intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
                 // Task manager runs in SystemUI, which is SYSTEM user only.
                 pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0,
-                        intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
                         UserHandle.SYSTEM);
             } else {
                 final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
                 intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 pendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
-                        intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
                         null, UserHandle.of(UserHandle.getUserId(uid)));
             }
 
@@ -2406,6 +2698,11 @@ public final class AppRestrictionController {
         if (UserManager.isDeviceInDemoMode(mContext)) {
             return REASON_DEVICE_DEMO_MODE;
         }
+        final int userId = UserHandle.getUserId(uid);
+        if (mInjector.getUserManagerInternal()
+                .hasUserRestriction(UserManager.DISALLOW_APPS_CONTROL, userId)) {
+            return REASON_DISALLOW_APPS_CONTROL;
+        }
         if (am.isDeviceOwner(uid)) {
             return REASON_DEVICE_OWNER;
         }
@@ -2421,6 +2718,7 @@ public final class AppRestrictionController {
         final String[] packages = mInjector.getPackageManager().getPackagesForUid(uid);
         if (packages != null) {
             final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
+            final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
             for (String pkg : packages) {
                 if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN,
                         uid, pkg) == AppOpsManager.MODE_ALLOWED) {
@@ -2436,6 +2734,8 @@ public final class AppRestrictionController {
                     return REASON_SYSTEM_ALLOW_LISTED;
                 } else if (mConstantsObserver.mBgRestrictionExemptedPackages.contains(pkg)) {
                     return REASON_ALLOWLISTED_PACKAGE;
+                } else if (pm.isPackageStateProtected(pkg, userId)) {
+                    return REASON_DPO_PROTECTED_APP;
                 }
             }
         }
@@ -2483,6 +2783,18 @@ public final class AppRestrictionController {
         synchronized (mLock) {
             final ArrayList<String> roles = mUidRolesMapping.get(uid);
             return roles != null && roles.indexOf(roleName) >= 0;
+        }
+    }
+
+    private void initRolesInInterest() {
+        final int[] allUsers = mInjector.getUserManagerInternal().getUserIds();
+        for (String role : ROLES_IN_INTEREST) {
+            if (mInjector.getRoleManager().isRoleAvailable(role)) {
+                for (int userId : allUsers) {
+                    final UserHandle user = UserHandle.of(userId);
+                    onRoleHoldersChanged(role, user);
+                }
+            }
         }
     }
 
@@ -2821,6 +3133,10 @@ public final class AppRestrictionController {
 
         @CurrentTimeMillisLong long currentTimeMillis() {
             return System.currentTimeMillis();
+        }
+
+        boolean isTest() {
+            return false;
         }
     }
 

@@ -23,6 +23,7 @@ import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
+import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_NONE;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
 
 import static com.android.internal.util.FrameworkStatsLog.AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_FINGERPRINT_MANAGER_AUTHENTICATE;
@@ -41,8 +42,10 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.BiometricTestSession;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.SensorProperties;
@@ -916,13 +919,13 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
 
 
     /**
-     * Forwards FingerprintStateListener to FingerprintService
-     * @param listener new FingerprintStateListener being added
+     * Forwards BiometricStateListener to FingerprintService
+     * @param listener new BiometricStateListener being added
      * @hide
      */
-    public void registerFingerprintStateListener(@NonNull FingerprintStateListener listener) {
+    public void registerBiometricStateListener(@NonNull BiometricStateListener listener) {
         try {
-            mService.registerFingerprintStateListener(listener);
+            mService.registerBiometricStateListener(listener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1092,6 +1095,22 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         } else {
             Slog.w(TAG, "addProvidersAvailableCallback(): Service not connected!");
         }
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    @BiometricConstants.LockoutMode
+    public int getLockoutModeForUser(int sensorId, int userId) {
+        if (mService != null) {
+            try {
+                return mService.getLockoutModeForUser(sensorId, userId);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+        return BIOMETRIC_LOCKOUT_NONE;
     }
 
     /**

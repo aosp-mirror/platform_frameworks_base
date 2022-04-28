@@ -266,6 +266,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         public void sendIntentSender(IntentSender intent) {
             // Placeholder for spying.
         }
+
+        @Override
+        public String getPackageName() {
+            return SYSTEM_PACKAGE_NAME;
+        }
     }
 
     /** ShortcutService with injection override methods. */
@@ -538,6 +543,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        ComponentName injectChooserActivity() {
+            return mInjectedChooserActivity;
+        }
+
+        @Override
         void wtf(String message, Throwable th) {
             // During tests, WTF is fatal.
             fail(message + "  exception: " + th + "\n" + Log.getStackTraceString(th));
@@ -678,6 +688,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected int mInjectedCallingUid;
     protected String mInjectedClientPackage;
+    protected ComponentName mInjectedChooserActivity;
 
     protected Map<String, PackageInfo> mInjectedPackages;
 
@@ -698,6 +709,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected UriPermissionOwner mUriPermissionOwner;
 
+    protected static final String SYSTEM_PACKAGE_NAME = "android";
 
     protected static final String CALLING_PACKAGE_1 = "com.android.test.1";
     protected static final int CALLING_UID_1 = 10001;
@@ -722,6 +734,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected static final String LAUNCHER_4 = "com.android.launcher.4";
     protected static final int LAUNCHER_UID_4 = 10014;
+
+    protected static final String CHOOSER_ACTIVITY_PACKAGE = "com.android.intentresolver";
+    protected static final int CHOOSER_ACTIVITY_UID = 10015;
 
     protected static final int USER_0 = UserHandle.USER_SYSTEM;
     protected static final int USER_10 = 10;

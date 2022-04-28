@@ -85,7 +85,6 @@ import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleEntry;
 import com.android.wm.shell.bubbles.Bubbles;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -576,7 +575,9 @@ public class BubblesManager implements Dumpable {
             @Override
             public void onEntryRemoved(NotificationEntry entry,
                     @NotifCollection.CancellationReason int reason) {
-                BubblesManager.this.onEntryRemoved(entry);
+                if (reason == REASON_APP_CANCEL || reason == REASON_APP_CANCEL_ALL) {
+                    BubblesManager.this.onEntryRemoved(entry);
+                }
             }
 
             @Override
@@ -795,8 +796,8 @@ public class BubblesManager implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
-        mBubbles.dump(fd, pw, args);
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        mBubbles.dump(pw, args);
     }
 
     /** Checks whether bubbles are enabled for this user, handles negative userIds. */

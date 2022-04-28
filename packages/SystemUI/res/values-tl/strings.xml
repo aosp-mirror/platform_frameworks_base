@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Na-authenticate ang mukha"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Nakumpirma"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"I-tap ang Kumpirmahin para kumpletuhin"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Na-unlock gamit ang mukha. Pindutin ang icon ng unlock para magpatuloy."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Na-authenticate"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Gumamit ng PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Gumamit ng pattern"</string>
@@ -292,24 +291,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong mikropono."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera o mikropono."</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Naka-block ang mikropono"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Naka-block ang camera"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Naka-block ang mic at camera"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Para i-unblock, ilipat sa naka-on na posisyon ang switch ng privacy sa iyong device sa mikropono para payagan ang access sa mikropono. Sumangguni sa manual ng device para mahanap ang switch ng privacy sa iyong device."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Para i-unblock, ilipat sa naka-on na posisyon ang switch ng privacy sa iyong device sa camera para payagan ang access sa camera. Sumangguni sa manual ng device para mahanap ang switch ng privacy sa iyong device."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Para i-unblock ang mga ito, ilipat sa naka-unblock na posisyon ang switch ng privacy sa iyong device para payagan ang access. Sumangguni sa manual ng device para mahanap ang switch ng privacy sa iyong device."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Available ang mikropono"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Available ang camera"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Available ang mikropono at camera"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Iba pang device"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"I-toggle ang Overview"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Hindi ka maiistorbo ng mga tunog at pag-vibrate, maliban mula sa mga alarm, paalala, event, at tumatawag na tutukuyin mo. Maririnig mo pa rin ang kahit na anong piliin mong i-play kabilang ang mga musika, video, at laro."</string>
@@ -320,7 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"I-tap ulit upang buksan"</string>
     <string name="tap_again" msgid="1315420114387908655">"I-tap ulit"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Mag-swipe pataas para buksan"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Pindutin para buksan"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pindutin ang icon ng unlock para buksan"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Na-unlock gamit ang mukha. Pindutin ang icon ng unlock para buksan."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Mag-swipe pataas para subukan ulit"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"I-unlock para magamit ang NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Pagmamay-ari ng iyong organisasyon ang device na ito"</string>
@@ -374,20 +365,28 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Pagmamay-ari ng organisasyon mo ang device na ito at puwede nitong subaybayan ang trapiko sa network"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito at puwede nitong subaybayan ang trapiko sa network"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Nagmula sa <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ang device na ito"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Pagmamay-ari ng iyong organisasyon ang device na ito at nakakonekta ito sa <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito at nakakonekta ito sa <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (4137564460025113168) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (2169227918166358741) -->
+    <skip />
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Pagmamay-ari ng iyong organisasyon ang device na ito"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Pagmamay-ari ng iyong organisasyon ang device na ito nakakonekta ito sa mga VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito at nakakonekta ito sa mga VPN"</string>
+    <!-- no translation found for quick_settings_disclosure_management_vpns (929181757984262902) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (3312645578322079185) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Maaaring sumubaybay ang iyong organisasyon ng trapiko sa network sa profile sa trabaho mo"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Maaaring subaybayan ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang trapiko sa network sa iyong profile sa trabaho"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Nakikita ng IT admin ang aktibidad sa network"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Maaaring sinusubaybayan ang network"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Nakakonekta sa mga VPN ang device na ito"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong profile sa trabaho"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong personal na profile"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang device na ito"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (3586175303518266301) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (153393105176944100) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (451254750289172191) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (6191822916936028208) -->
+    <skip />
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Nagmula sa <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ang device na ito"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Pamamahala ng device"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +402,14 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"May naka-install sa device na ito na isang awtoridad sa certificate. Maaaring subaybayan o baguhin ang iyong ligtas na trapiko sa network."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Na-on ng iyong admin ang pag-log sa network, na sumusubaybay sa trapiko sa device mo."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Na-on ng iyong admin ang pag-log sa network, na sumusubaybay sa trapiko sa profile mo sa trabaho pero hindi sa iyong personal na profile."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Nakakonekta ka sa <xliff:g id="VPN_APP">%1$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kabilang ang mga email, app, at website."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Nakakonekta ka sa <xliff:g id="VPN_APP_0">%1$s</xliff:g> at <xliff:g id="VPN_APP_1">%2$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kabilang ang mga email, app, at website."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong profile sa trabaho, na maaaring sumubaybay sa aktibidad sa iyong network, kasama ang mga email, app, at website."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong personal na profile, na maaaring sumubaybay sa aktibidad mo sa network, kasama ang mga email, app at website."</string>
+    <!-- no translation found for monitoring_description_named_vpn (7502657784155456414) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (6726394451199620634) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_named_vpn (7254359257263069766) -->
+    <skip />
+    <!-- no translation found for monitoring_description_personal_profile_named_vpn (5083909710727365452) -->
+    <skip />
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Buksan ang mga setting ng VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Pinapamahalaan ng iyong magulang ang device na ito. Makikita at mapapamahalaan ng iyong magulang ang impormasyon tulad ng mga app na ginagamit mo, iyong lokasyon, at tagal ng paggamit mo sa device."</string>
@@ -463,7 +466,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"I-enable ang demo mode"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Ipakita ang demo mode"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"I-set up para makapagsagawa ng mas mabibilis, mas secure na pagbili gamit ang telepono mo"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Ipakita lahat"</string>
@@ -515,6 +518,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Priyoridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Hindi sinusuportahan ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang mga feature ng pag-uusap"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hindi puwedeng baguhin ang mga notification na ito."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Hindi mabago ang mga notification ng tawag."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Hindi mako-configure dito ang pangkat na ito ng mga notification"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Na-proxy na notification"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Lahat ng notification ng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -814,6 +818,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"I-pause"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Nakaraang track"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Susunod na track"</string>
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Kumokonekta"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"I-play"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Buksan ang <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"I-play ang <xliff:g id="SONG_NAME">%1$s</xliff:g> ni/ng <xliff:g id="ARTIST_NAME">%2$s</xliff:g> mula sa <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -843,19 +848,16 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para ma-cast ang session na ito, buksan ang app."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Hindi kilalang app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Ihinto ang pag-cast"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Paano gumagana ang pag-broadcast"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Broadcast"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Makakapakinig ang mga taong malapit sa iyo na may mga compatible na Bluetooth device sa media na bino-broadcast mo"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Para makinig sa iyong broadcast, puwedeng i-scan ng mga tao sa malapit na may mga compatible na Bluetooth device ang QR code mo o puwede nilang gamitin ang pangalan at password ng iyong broadcast"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Pangalan ng Broadcast"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Password"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"I-save"</string>
+    <!-- no translation found for media_output_broadcast_starting (8130153654166235557) -->
     <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
+    <!-- no translation found for media_output_broadcast_start_failed (3670835946856129775) -->
     <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numero ng build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nakopya sa clipboard ang numero ng build."</string>
@@ -925,12 +927,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Idagdag ang tile"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Huwag idagdag"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Pumili ng user"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> aktibong app</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> na aktibong app</item>
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> app ang aktibo</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> na app ang aktibo</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Bagong impormasyon"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Mga aktibong app"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Kahit na hindi mo ginagamit ang mga app na ito, aktibo pa rin ang mga ito at posibleng maapektuhan ng mga ito ang tagal ng baterya"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Ihinto"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Inihinto"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Tapos na"</string>

@@ -198,6 +198,11 @@ public class LocalImageResolver {
                 }
 
                 final Size size = info.getSize();
+                if (size.getWidth() <= maxWidth && size.getHeight() <= maxHeight) {
+                    // We don't want to upscale images needlessly.
+                    return;
+                }
+
                 if (size.getWidth() > size.getHeight()) {
                     if (size.getWidth() > maxWidth) {
                         final int targetHeight = size.getHeight() * maxWidth / size.getWidth();

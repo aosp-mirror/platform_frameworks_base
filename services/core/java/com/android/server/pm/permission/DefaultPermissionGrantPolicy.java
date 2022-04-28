@@ -207,6 +207,9 @@ final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
     }
 
     private static final Set<String> NEARBY_DEVICES_PERMISSIONS = new ArraySet<>();
@@ -610,6 +613,10 @@ final class DefaultPermissionGrantPolicy {
                     pm, setupWizardPackage, userId, NEARBY_DEVICES_PERMISSIONS);
         }
 
+        // SearchSelector
+        grantPermissionsToSystemPackage(pm, getDefaultSearchSelectorPackage(), userId,
+                NOTIFICATION_PERMISSIONS);
+
         // Camera
         grantPermissionsToSystemPackage(pm,
                 getDefaultSystemHandlerActivityPackage(pm, MediaStore.ACTION_IMAGE_CAPTURE, userId),
@@ -896,15 +903,6 @@ final class DefaultPermissionGrantPolicy {
                     COARSE_BACKGROUND_LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
         }
 
-        // Content capture
-        String contentCapturePackageName =
-                mContext.getPackageManager().getContentCaptureServicePackageName();
-        if (!TextUtils.isEmpty(contentCapturePackageName)) {
-            grantPermissionsToSystemPackage(pm, contentCapturePackageName, userId,
-                    PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
-                    CONTACTS_PERMISSIONS, STORAGE_PERMISSIONS);
-        }
-
         // Attention Service
         String attentionServicePackageName =
                 mContext.getPackageManager().getAttentionServicePackageName();
@@ -936,6 +934,10 @@ final class DefaultPermissionGrantPolicy {
             String category, int userId) {
         return getDefaultSystemHandlerActivityPackage(pm,
                 new Intent(Intent.ACTION_MAIN).addCategory(category), userId);
+    }
+
+    private String getDefaultSearchSelectorPackage() {
+        return mContext.getString(R.string.config_defaultSearchSelectorPackageName);
     }
 
     @SafeVarargs
@@ -1022,7 +1024,8 @@ final class DefaultPermissionGrantPolicy {
         }
         for (String packageName : packageNames) {
             grantPermissionsToSystemPackage(NO_PM_CACHE, packageName, userId,
-                    PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, SMS_PERMISSIONS,
+                    PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, SMS_PERMISSIONS);
+            grantPermissionsToPackage(NO_PM_CACHE, packageName, userId, false, false,
                     NOTIFICATION_PERMISSIONS);
         }
     }

@@ -75,6 +75,8 @@ public class VirtualAudioControllerTest {
                 FLAG_SECURE,
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                 /* allowedUsers= */ new ArraySet<>(),
+                /* allowedCrossTaskNavigations= */ new ArraySet<>(),
+                /* blockedCrossTaskNavigations= */ new ArraySet<>(),
                 /* allowedActivities= */ new ArraySet<>(),
                 /* blockedActivities= */ new ArraySet<>(),
                 VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED,

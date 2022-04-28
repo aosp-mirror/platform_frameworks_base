@@ -225,7 +225,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Избор на потребителски профил"</string>
     <string name="category_personal" msgid="6236798763159385225">"Лични"</string>
     <string name="category_work" msgid="4014193632325996115">"Служебни"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Опции на програмиста"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Опции за програмисти"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Активиране на опциите за програмисти"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Задаване на опции за програмиране на приложения"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Опциите за програмисти не са налице за този потребител"</string>
@@ -364,7 +364,7 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Насл. на екран показва текущи данни при докосване"</string>
     <string name="show_touches" msgid="8437666942161289025">"Показване на докосванията"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Показване на визуална обр. връзка за докосванията"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"Актуал. на повърхн: Показв."</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"Актуализации на повърхн."</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Примигв. на целите повърхности на прозорците при актуализирането им"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Актуализации на изгледите"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Примигв. на изгледите в прозорците при начертаване"</string>
@@ -568,7 +568,7 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Можете да ограничите достъпа до приложенията и съдържанието от профила си"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Потребител"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Ограничен потр. профил"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"Да се добави ли нов потреб.?"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Добавяне на нов потребител?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Можете да споделите това устройство с други хора, като създадете допълнителни потребители. Всеки от тях има собствено работно пространство, което може да персонализира с приложения, тапет и др. Потребителите могат също да коригират настройки на устройството, които засягат всички – например за Wi‑Fi.\n\nКогато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители. Настройките и услугите за достъпност може да не се прехвърлят за новия потребител."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Когато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Настройване на потребителя?"</string>
@@ -596,8 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Да се нулира ли сесията като гост?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Да се премахне ли гостът?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Нулиране"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Премахване"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Сесията като гост се нулира…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Правене на снимка"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Избиране на изображение"</string>
@@ -653,10 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Включване на екрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Разрешаване на включването на екрана"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Разрешете на дадено приложение да включва екрана. Ако го направите, то може да включва екрана по всяко време без явното ви намерение."</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Сканиране на QR код"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"За да започнете да слушате, центрирайте QR кода по-долу"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Невалиден формат на QR кода"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Да се спре ли предаването на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ако предавате <xliff:g id="SWITCHAPP">%1$s</xliff:g> или промените изхода, текущото ви предаване ще бъде прекратено"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Предаване на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Промяна на изхода"</string>
 </resources>

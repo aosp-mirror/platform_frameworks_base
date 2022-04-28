@@ -29,7 +29,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Callback to intercept activity starts and possibly block/redirect them.
+ * Callback to intercept activity starts and possibly block/redirect them. The callback methods will
+ * be called with the WindowManagerGlobalLock held.
  */
 public abstract class ActivityInterceptorCallback {
     /**

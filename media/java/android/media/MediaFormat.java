@@ -1247,7 +1247,7 @@ public final class MediaFormat {
      * A key describing the per-frame average block QP (Quantization Parameter).
      * This is a part of a video 'Encoding Statistics' export feature.
      * This value is emitted from video encoder for a video frame.
-     * The average value is rounded down (using floor()) to integer value.
+     * The average value is rounded to the nearest integer value.
      *
      * The associated value is an integer.
      */

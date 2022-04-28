@@ -18,10 +18,13 @@ package com.android.systemui.media.dialog;
 
 import static android.provider.Settings.ACTION_BLUETOOTH_PAIRING_SETTINGS;
 
+import android.annotation.CallbackExecutor;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.WallpaperColors;
+import android.bluetooth.BluetoothLeBroadcast;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -58,7 +61,7 @@ import androidx.mediarouter.media.MediaRouterParams;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
-import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.BluetoothMediaDevice;
 import com.android.settingslib.media.InfoMediaManager;
@@ -83,6 +86,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -642,17 +646,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void launchLeBroadcastNotifyDialog(View mediaOutputDialog, BroadcastSender broadcastSender,
-            BroadcastNotifyDialog action) {
+            BroadcastNotifyDialog action, final DialogInterface.OnClickListener listener) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         switch (action) {
             case ACTION_FIRST_LAUNCH:
                 builder.setTitle(R.string.media_output_first_broadcast_title);
                 builder.setMessage(R.string.media_output_first_notify_broadcast_message);
                 builder.setNegativeButton(android.R.string.cancel, null);
-                builder.setPositiveButton(R.string.media_output_broadcast,
-                        (d, w) -> {
-                            launchMediaOutputBroadcastDialog(mediaOutputDialog, broadcastSender);
-                        });
+                builder.setPositiveButton(R.string.media_output_broadcast, listener);
                 break;
             case ACTION_BROADCAST_INFO_ICON:
                 builder.setTitle(R.string.media_output_broadcast);
@@ -685,18 +686,64 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 || features.contains(MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK));
     }
 
-    boolean isBluetoothLeDevice(@NonNull MediaDevice device) {
-        if (device instanceof BluetoothMediaDevice) {
-            final CachedBluetoothDevice cachedDevice =
-                    ((BluetoothMediaDevice) device).getCachedDevice();
-            boolean isConnectedLeAudioDevice =
-                    (cachedDevice != null) ? cachedDevice.isConnectedLeAudioDevice() : false;
-            if (DEBUG) {
-                Log.d(TAG, "isConnectedLeAudioDevice=" + isConnectedLeAudioDevice);
-            }
-            return isConnectedLeAudioDevice;
+    boolean isBroadcastSupported() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        return broadcast != null ? true : false;
+    }
+
+    boolean isBluetoothLeBroadcastEnabled() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            return false;
         }
-        return false;
+        return broadcast.isEnabled(null);
+    }
+
+    boolean startBluetoothLeBroadcast() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "The broadcast profile is null");
+            return false;
+        }
+        broadcast.startBroadcast(getAppSourceName(), /*language*/ null);
+        return true;
+    }
+
+    boolean stopBluetoothLeBroadcast() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "The broadcast profile is null");
+            return false;
+        }
+        broadcast.stopLatestBroadcast();
+        return true;
+    }
+
+    void registerLeBroadcastServiceCallBack(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BluetoothLeBroadcast.Callback callback) {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "The broadcast profile is null");
+            return;
+        }
+        broadcast.registerServiceCallBack(executor, callback);
+    }
+
+    void unregisterLeBroadcastServiceCallBack(
+            @NonNull BluetoothLeBroadcast.Callback callback) {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "The broadcast profile is null");
+            return;
+        }
+        broadcast.unregisterServiceCallBack(callback);
     }
 
     private boolean isPlayBackInfoLocal() {
@@ -721,7 +768,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
         return isPlayBackInfoLocal()
-                || mLocalMediaManager.isMediaSessionAvailableForVolumeControl();
+                || device.getDeviceType() != MediaDevice.MediaDeviceType.TYPE_CAST_GROUP_DEVICE;
     }
 
     @Override

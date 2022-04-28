@@ -382,8 +382,6 @@ import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.Slogf;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
-import com.google.android.collect.Sets;
-
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
@@ -1544,23 +1542,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return StorageManager.isFileEncryptedNativeOnly();
         }
 
-        boolean storageManagerIsNonDefaultBlockEncrypted() {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                return StorageManager.isNonDefaultBlockEncrypted();
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        boolean storageManagerIsEncrypted() {
-            return StorageManager.isEncrypted();
-        }
-
-        boolean storageManagerIsEncryptable() {
-            return StorageManager.isEncryptable();
-        }
-
         Looper getMyLooper() {
             return Looper.myLooper();
         }
@@ -1798,7 +1779,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @VisibleForTesting
     DevicePolicyManagerService(Injector injector) {
-        DevicePolicyManager.disableGetKeyguardDisabledFeaturesCache();
+        DevicePolicyManager.disableLocalCaches();
 
         mInjector = injector;
         mContext = Objects.requireNonNull(injector.mContext);
@@ -1982,6 +1963,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             mOwners.removeProfileOwner(userHandle);
             mOwners.writeProfileOwner(userHandle);
+            pushScreenCapturePolicy(userHandle);
 
             DevicePolicyData policy = mUserData.get(userHandle);
             if (policy != null) {
@@ -2019,7 +2001,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             mOwners.load();
             setDeviceOwnershipSystemPropertyLocked();
-            findOwnerComponentIfNecessaryLocked();
         }
     }
 
@@ -2404,139 +2385,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void findOwnerComponentIfNecessaryLocked() {
-        if (!mOwners.hasDeviceOwner()) {
-            return;
-        }
-        final ComponentName doComponentName = mOwners.getDeviceOwnerComponent();
-
-        if (!TextUtils.isEmpty(doComponentName.getClassName())) {
-            return; // Already a full component name.
-        }
-
-        final ComponentName doComponent = findAdminComponentWithPackageLocked(
-                doComponentName.getPackageName(),
-                mOwners.getDeviceOwnerUserId());
-        if (doComponent == null) {
-            Slogf.e(LOG_TAG, "Device-owner isn't registered as device-admin");
-        } else {
-            mOwners.setDeviceOwnerWithRestrictionsMigrated(
-                    doComponent,
-                    mOwners.getDeviceOwnerName(),
-                    mOwners.getDeviceOwnerUserId(),
-                    !mOwners.getDeviceOwnerUserRestrictionsNeedsMigration());
-            mOwners.writeDeviceOwner();
-            if (VERBOSE_LOG) {
-                Slogf.v(LOG_TAG, "Device owner component filled in");
-            }
-        }
-    }
-
-    /**
-     * We didn't use to persist user restrictions for each owners but only persisted in user
-     * manager.
-     */
-    private void migrateUserRestrictionsIfNecessaryLocked() {
-        boolean migrated = false;
-        // Migrate for the DO.  Basically all restrictions should be considered to be set by DO,
-        // except for the "system controlled" ones.
-        if (mOwners.getDeviceOwnerUserRestrictionsNeedsMigration()) {
-            if (VERBOSE_LOG) {
-                Slogf.v(LOG_TAG, "Migrating DO user restrictions");
-            }
-            migrated = true;
-
-            // Migrate user 0 restrictions to DO.
-            final ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
-
-            migrateUserRestrictionsForUser(UserHandle.SYSTEM, deviceOwnerAdmin,
-                    /* exceptionList =*/ null, /* isDeviceOwner =*/ true);
-
-            // Push DO user restrictions to user manager.
-            pushUserRestrictions(UserHandle.USER_SYSTEM);
-
-            mOwners.setDeviceOwnerUserRestrictionsMigrated();
-        }
-
-        // Migrate for POs.
-
-        // The following restrictions can be set on secondary users by the device owner, so we
-        // assume they're not from the PO.
-        final Set<String> secondaryUserExceptionList = Sets.newArraySet(
-                UserManager.DISALLOW_OUTGOING_CALLS,
-                UserManager.DISALLOW_SMS);
-
-        for (UserInfo ui : mUserManager.getUsers()) {
-            final int userId = ui.id;
-            if (mOwners.getProfileOwnerUserRestrictionsNeedsMigration(userId)) {
-                if (VERBOSE_LOG) {
-                    Slogf.v(LOG_TAG, "Migrating PO user restrictions for user %d", userId);
-                }
-                migrated = true;
-
-                final ActiveAdmin profileOwnerAdmin = getProfileOwnerAdminLocked(userId);
-
-                final Set<String> exceptionList =
-                        (userId == UserHandle.USER_SYSTEM) ? null : secondaryUserExceptionList;
-
-                migrateUserRestrictionsForUser(ui.getUserHandle(), profileOwnerAdmin,
-                        exceptionList, /* isDeviceOwner =*/ false);
-
-                // Note if a secondary user has no PO but has a DA that disables camera, we
-                // don't get here and won't push the camera user restriction to UserManager
-                // here.  That's okay because we'll push user restrictions anyway when a user
-                // starts.  But we still do it because we want to let user manager persist
-                // upon migration.
-                pushUserRestrictions(userId);
-
-                mOwners.setProfileOwnerUserRestrictionsMigrated(userId);
-            }
-        }
-        if (VERBOSE_LOG && migrated) {
-            Slogf.v(LOG_TAG, "User restrictions migrated.");
-        }
-    }
-
-    private void migrateUserRestrictionsForUser(UserHandle user, ActiveAdmin admin,
-            Set<String> exceptionList, boolean isDeviceOwner) {
-        final Bundle origRestrictions = mUserManagerInternal.getBaseUserRestrictions(
-                user.getIdentifier());
-
-        final Bundle newBaseRestrictions = new Bundle();
-        final Bundle newOwnerRestrictions = new Bundle();
-
-        for (String key : origRestrictions.keySet()) {
-            if (!origRestrictions.getBoolean(key)) {
-                continue;
-            }
-            final boolean canOwnerChange = isDeviceOwner
-                    ? UserRestrictionsUtils.canDeviceOwnerChange(key)
-                    : UserRestrictionsUtils.canProfileOwnerChange(key, user.getIdentifier());
-
-            if (!canOwnerChange || (exceptionList!= null && exceptionList.contains(key))) {
-                newBaseRestrictions.putBoolean(key, true);
-            } else {
-                newOwnerRestrictions.putBoolean(key, true);
-            }
-        }
-
-        if (VERBOSE_LOG) {
-            Slogf.v(LOG_TAG, "origRestrictions=%s", origRestrictions);
-            Slogf.v(LOG_TAG, "newBaseRestrictions=%s", newBaseRestrictions);
-            Slogf.v(LOG_TAG, "newOwnerRestrictions=%s", newOwnerRestrictions);
-        }
-        mUserManagerInternal.setBaseUserRestrictionsByDpmsForMigration(user.getIdentifier(),
-                newBaseRestrictions);
-
-        if (admin != null) {
-            admin.ensureUserRestrictions().clear();
-            admin.ensureUserRestrictions().putAll(newOwnerRestrictions);
-        } else {
-            Slogf.w(LOG_TAG, "ActiveAdmin for DO/PO not found. user=" + user.getIdentifier());
-        }
-        saveSettingsLocked(user.getIdentifier());
-    }
-
     /**
      * Fix left-over restrictions and auto-time policy during COMP -> COPE migration.
      *
@@ -2570,27 +2418,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             }
         }
-    }
-
-    private ComponentName findAdminComponentWithPackageLocked(String packageName, int userId) {
-        final DevicePolicyData policy = getUserData(userId);
-        final int n = policy.mAdminList.size();
-        ComponentName found = null;
-        int nFound = 0;
-        for (int i = 0; i < n; i++) {
-            final ActiveAdmin admin = policy.mAdminList.get(i);
-            if (packageName.equals(admin.info.getPackageName())) {
-                // Found!
-                if (nFound == 0) {
-                    found = admin.info.getComponent();
-                }
-                nFound++;
-            }
-        }
-        if (nFound > 1) {
-            Slogf.w(LOG_TAG, "Multiple DA found; assume the first one is DO.");
-        }
-        return found;
     }
 
     /**
@@ -3214,7 +3041,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void onLockSettingsReady() {
         synchronized (getLockObject()) {
-            migrateUserRestrictionsIfNecessaryLocked();
             fixupAutoTimeRestrictionDuringOrganizationOwnedDeviceMigration();
         }
         getUserData(UserHandle.USER_SYSTEM);
@@ -3358,8 +3184,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     void handleStartUser(int userId) {
-        updateScreenCaptureDisabled(userId,
-                getScreenCaptureDisabled(null, userId, false));
+        synchronized (getLockObject()) {
+            pushScreenCapturePolicy(userId);
+        }
         pushUserRestrictions(userId);
         // When system user is started (device boot), load cache for all users.
         // This is to mitigate the potential race between loading the cache and keyguard
@@ -7094,7 +6921,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             notifyResetProtectionPolicyChanged(frpAgentUid);
         }
         mLockSettingsInternal.refreshStrongAuthTimeout(parentId);
-        updateScreenCaptureDisabled(parentId, getScreenCaptureDisabled(null, parentId, false));
 
         Slogf.i(LOG_TAG, "Cleaning up device-wide policies done.");
     }
@@ -7823,21 +7649,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * Hook to low-levels:  Reporting the current status of encryption.
-     * @return A value such as {@link DevicePolicyManager#ENCRYPTION_STATUS_UNSUPPORTED},
-     * {@link DevicePolicyManager#ENCRYPTION_STATUS_INACTIVE},
-     * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY},
-     * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_PER_USER}, or
-     * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE}.
+     * @return Either {@link DevicePolicyManager#ENCRYPTION_STATUS_UNSUPPORTED}
+     * or {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_PER_USER}.
      */
     private int getEncryptionStatus() {
         if (mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
             return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
-        } else if (mInjector.storageManagerIsNonDefaultBlockEncrypted()) {
-            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE;
-        } else if (mInjector.storageManagerIsEncrypted()) {
-            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY;
-        } else if (mInjector.storageManagerIsEncryptable()) {
-            return DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
         } else {
             return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
         }
@@ -7870,10 +7687,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (ap.disableScreenCapture != disabled) {
                 ap.disableScreenCapture = disabled;
                 saveSettingsLocked(caller.getUserId());
-                final int affectedUserId = parent
-                        ? getProfileParentId(caller.getUserId())
-                        : caller.getUserId();
-                updateScreenCaptureDisabled(affectedUserId, disabled);
+                pushScreenCapturePolicy(caller.getUserId());
             }
         }
         DevicePolicyEventLogger
@@ -7881,6 +7695,38 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .setAdmin(caller.getComponentName())
                 .setBoolean(disabled)
                 .write();
+    }
+
+    // Push the screen capture policy for a given userId. If screen capture is disabled by the
+    // DO or COPE PO on the parent profile, then this takes precedence as screen capture will
+    // be disabled device-wide.
+    private void pushScreenCapturePolicy(int adminUserId) {
+        // Update screen capture device-wide if disabled by the DO or COPE PO on the parent profile.
+        ActiveAdmin admin =
+                getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(
+                        UserHandle.USER_SYSTEM);
+        if (admin != null && admin.disableScreenCapture) {
+            setScreenCaptureDisabled(UserHandle.USER_ALL);
+        } else {
+            // Otherwise, update screen capture only for the calling user.
+            admin = getProfileOwnerAdminLocked(adminUserId);
+            if (admin != null && admin.disableScreenCapture) {
+                setScreenCaptureDisabled(adminUserId);
+            } else {
+                setScreenCaptureDisabled(UserHandle.USER_NULL);
+            }
+        }
+    }
+
+    // Set the latest screen capture policy, overriding any existing ones.
+    // userHandle can be one of USER_ALL, USER_NULL or a concrete userId.
+    private void setScreenCaptureDisabled(int userHandle) {
+        int current = mPolicyCache.getScreenCaptureDisallowedUser();
+        if (userHandle == current) {
+            return;
+        }
+        mPolicyCache.setScreenCaptureDisallowedUser(userHandle);
+        updateScreenCaptureDisabled();
     }
 
     /**
@@ -7892,7 +7738,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return false;
         }
-
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
@@ -7900,29 +7745,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Preconditions.checkCallAuthorization(
                     isProfileOwnerOfOrganizationOwnedDevice(getCallerIdentity().getUserId()));
         }
-
-        synchronized (getLockObject()) {
-            if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return (admin != null) && admin.disableScreenCapture;
-            }
-
-            final int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
-            List<ActiveAdmin> admins = getActiveAdminsForAffectedUserLocked(affectedUserId);
-            for (ActiveAdmin admin: admins) {
-                if (admin.disableScreenCapture) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        return !mPolicyCache.isScreenCaptureAllowed(userHandle);
     }
 
-    private void updateScreenCaptureDisabled(int userHandle, boolean disabled) {
-        mPolicyCache.setScreenCaptureAllowed(userHandle, !disabled);
+    private void updateScreenCaptureDisabled() {
         mHandler.post(() -> {
             try {
-                mInjector.getIWindowManager().refreshScreenCaptureDisabled(userHandle);
+                mInjector.getIWindowManager().refreshScreenCaptureDisabled();
             } catch (RemoteException e) {
                 Slogf.w(LOG_TAG, "Unable to notify WindowManager.", e);
             }
@@ -8874,11 +8703,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     ActiveAdmin getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(int userId) {
+        ensureLocked();
         ActiveAdmin admin = getDeviceOwnerAdminLocked();
         if (admin == null) {
             admin = getProfileOwnerOfOrganizationOwnedDeviceLocked(userId);
         }
         return admin;
+    }
+
+    ActiveAdmin getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(int userId) {
+        ensureLocked();
+        ActiveAdmin admin = getDeviceOwnerAdminLocked();
+        if (admin != null) {
+            return admin;
+        }
+        admin = getProfileOwnerOfOrganizationOwnedDeviceLocked(userId);
+        return admin != null ? admin.getParentActiveAdmin() : null;
     }
 
     @Override
@@ -13354,8 +13194,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (receivers.isEmpty()) {
                     return;
                 }
-                packageIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                mContext.sendBroadcastAsUser(packageIntent, userHandle);
+                for (ResolveInfo receiver : receivers) {
+                    final Intent componentIntent = new Intent(packageIntent)
+                            .setComponent(receiver.getComponentInfo().getComponentName())
+                            .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                    mContext.sendBroadcastAsUser(componentIntent, userHandle);
+                }
             } catch (RemoteException ex) {
                 Slogf.w(LOG_TAG, "Cannot get list of broadcast receivers for %s because: %s.",
                         intent.getAction(), ex);
@@ -14805,6 +14649,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new SecurityException(
                     "Only the system can mark a profile owner of organization-owned device.");
         }
+        // Only a test admin can be unmarked as a profile owner on an organization-owned device.
+        synchronized (getLockObject()) {
+            if (!isProfileOwnerOnOrganizationOwnedDevice && !isAdminTestOnlyLocked(who, userId)) {
+                throw new SecurityException("Only a test admin can be unmarked as a "
+                        + "profile owner of organization-owned device.");
+            }
+        }
 
         if (isAdb(caller)) {
             if (hasIncompatibleAccountsOrNonAdbNoLock(caller, userId, who)) {
@@ -15331,6 +15182,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             saveSettingsLocked(userHandle);
             updateMaximumTimeToLockLocked(userHandle);
             policy.mRemovingAdmins.remove(adminReceiver);
+            pushScreenCapturePolicy(userHandle);
 
             Slogf.i(LOG_TAG, "Device admin " + adminReceiver + " removed from user " + userHandle);
         }
@@ -18431,16 +18283,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     preferenceBuilder.setPreference(
                             PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK);
                 }
+                preferenceBuilder.setIncludedUids(
+                        preferentialNetworkServiceConfig.getIncludedUids());
+                preferenceBuilder.setExcludedUids(
+                        preferentialNetworkServiceConfig.getExcludedUids());
+                preferenceBuilder.setPreferenceEnterpriseId(
+                        preferentialNetworkServiceConfig.getNetworkId());
             } else {
                 preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_DEFAULT);
             }
-            preferenceBuilder.setIncludedUids(preferentialNetworkServiceConfig.getIncludedUids());
-            preferenceBuilder.setExcludedUids(preferentialNetworkServiceConfig.getExcludedUids());
-            preferenceBuilder.setPreferenceEnterpriseId(
-                    preferentialNetworkServiceConfig.getNetworkId());
+
 
             preferences.add(preferenceBuilder.build());
         }
+        Slogf.d(LOG_TAG, "updateNetworkPreferenceForUser to " + preferences);
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.getConnectivityManager().setProfileNetworkPreferences(
                         UserHandle.of(userId), preferences,

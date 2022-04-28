@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +21,8 @@ import android.os.Bundle;
 
 import androidx.fragment.app.FragmentManager;
 
-import com.android.settingslib.core.lifecycle.ObservableActivity;
 import com.android.settingslib.R;
+import com.android.settingslib.core.lifecycle.ObservableActivity;
 
 public abstract class QrCodeScanModeBaseActivity extends ObservableActivity {
 

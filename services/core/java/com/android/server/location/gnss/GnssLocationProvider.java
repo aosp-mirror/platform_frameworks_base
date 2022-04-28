@@ -1573,6 +1573,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         pw.println("mFixInterval=" + mFixInterval);
         pw.print(mGnssMetrics.dumpGnssMetricsAsText());
         if (dumpAll) {
+            pw.println("mSupportsPsds=" + mSupportsPsds);
+            pw.println(
+                    "PsdsServerConfigured=" + mGnssConfiguration.isLongTermPsdsServerConfigured());
             pw.println("native internal state: ");
             pw.println("  " + mGnssNative.getInternalState());
         }

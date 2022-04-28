@@ -140,6 +140,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * The power manager service is responsible for coordinating power management
@@ -292,6 +293,7 @@ public final class PowerManagerService extends SystemService
     private final Clock mClock;
     private final Injector mInjector;
 
+    private AppOpsManager mAppOpsManager;
     private LightsManager mLightsManager;
     private BatteryManagerInternal mBatteryManagerInternal;
     private DisplayManagerInternal mDisplayManagerInternal;
@@ -523,9 +525,6 @@ public final class PowerManagerService extends SystemService
 
     // The screen off timeout setting value in milliseconds.
     private long mScreenOffTimeoutSetting;
-
-    // The screen off timeout setting value in milliseconds to apply while device is docked.
-    private long mScreenOffTimeoutDockedSetting;
 
     // Default for attentive warning duration.
     private long mAttentiveWarningDurationConfig;
@@ -908,10 +907,11 @@ public final class PowerManagerService extends SystemService
     static class Injector {
         Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
                 SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
-                FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector) {
+                FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector,
+                Executor backgroundExecutor) {
             return new Notifier(
                     looper, context, batteryStats, suspendBlocker, policy, faceDownDetector,
-                    screenUndimDetector);
+                    screenUndimDetector, backgroundExecutor);
         }
 
         SuspendBlocker createSuspendBlocker(PowerManagerService service, String name) {
@@ -991,6 +991,10 @@ public final class PowerManagerService extends SystemService
         LowPowerStandbyController createLowPowerStandbyController(Context context, Looper looper) {
             return new LowPowerStandbyController(context, looper, SystemClock::elapsedRealtime);
         }
+
+        AppOpsManager createAppOpsManager(Context context) {
+            return context.getSystemService(AppOpsManager.class);
+        }
     }
 
     final Constants mConstants;
@@ -1044,6 +1048,8 @@ public final class PowerManagerService extends SystemService
                 Looper.getMainLooper());
         mInattentiveSleepWarningOverlayController =
                 mInjector.createInattentiveSleepWarningController();
+
+        mAppOpsManager = injector.createAppOpsManager(mContext);
 
         mPowerGroupWakefulnessChangeListener = new PowerGroupWakefulnessChangeListener();
 
@@ -1230,7 +1236,8 @@ public final class PowerManagerService extends SystemService
             mBatteryStats = BatteryStatsService.getService();
             mNotifier = mInjector.createNotifier(Looper.getMainLooper(), mContext, mBatteryStats,
                     mInjector.createSuspendBlocker(this, "PowerManagerService.Broadcasts"),
-                    mPolicy, mFaceDownDetector, mScreenUndimDetector);
+                    mPolicy, mFaceDownDetector, mScreenUndimDetector,
+                    BackgroundThread.getExecutor());
 
             mPowerGroups.append(Display.DEFAULT_DISPLAY_GROUP,
                     new PowerGroup(WAKEFULNESS_AWAKE, mPowerGroupWakefulnessChangeListener,
@@ -1288,9 +1295,6 @@ public final class PowerManagerService extends SystemService
                 false, mSettingsObserver, UserHandle.USER_ALL);
         resolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.SCREEN_OFF_TIMEOUT),
-                false, mSettingsObserver, UserHandle.USER_ALL);
-        resolver.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.SCREEN_OFF_TIMEOUT_DOCKED),
                 false, mSettingsObserver, UserHandle.USER_ALL);
         resolver.registerContentObserver(Settings.Secure.getUriFor(
                 Settings.Secure.SLEEP_TIMEOUT),
@@ -1413,9 +1417,6 @@ public final class PowerManagerService extends SystemService
                 UserHandle.USER_CURRENT) != 0);
         mScreenOffTimeoutSetting = Settings.System.getIntForUser(resolver,
                 Settings.System.SCREEN_OFF_TIMEOUT, DEFAULT_SCREEN_OFF_TIMEOUT,
-                UserHandle.USER_CURRENT);
-        mScreenOffTimeoutDockedSetting = Settings.System.getLongForUser(resolver,
-                Settings.System.SCREEN_OFF_TIMEOUT_DOCKED, mScreenOffTimeoutSetting,
                 UserHandle.USER_CURRENT);
         mSleepTimeoutSetting = Settings.Secure.getIntForUser(resolver,
                 Settings.Secure.SLEEP_TIMEOUT, DEFAULT_SLEEP_TIMEOUT,
@@ -1568,8 +1569,7 @@ public final class PowerManagerService extends SystemService
             }
             return true;
         }
-        if (mContext.getSystemService(AppOpsManager.class).checkOpNoThrow(
-                AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName)
+        if (mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName)
                 == AppOpsManager.MODE_ALLOWED) {
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "Allowing device wake-up for app with special access " + opPackageName);
@@ -2999,9 +2999,7 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     private long getScreenOffTimeoutLocked(long sleepTimeout, long attentiveTimeout) {
-        long timeout = mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED
-                ? mScreenOffTimeoutSetting
-                : mScreenOffTimeoutDockedSetting;
+        long timeout = mScreenOffTimeoutSetting;
         if (isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked()) {
             timeout = Math.min(timeout, mMaximumScreenOffTimeoutFromDeviceAdmin);
         }
@@ -4946,8 +4944,7 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    @VisibleForTesting
-    final class DockReceiver extends BroadcastReceiver {
+    private final class DockReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             synchronized (mLock) {

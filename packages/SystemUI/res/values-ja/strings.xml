@@ -21,8 +21,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"システム UI"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"バッテリー セーバーを ON にしますか？"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"バッテリー残量は <xliff:g id="PERCENTAGE">%s</xliff:g> です。バッテリー セーバーを有効にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
-    <string name="battery_low_intro" msgid="5148725009653088790">"バッテリー セーバーを有効にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"バッテリー残量は <xliff:g id="PERCENTAGE">%s</xliff:g> です。バッテリー セーバーを ON にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"バッテリー セーバーを ON にすると、ダークモードが ON になります。また、バックグラウンド アクティビティが制限され、通知が届くのが遅くなります。"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"残量が<xliff:g id="PERCENTAGE">%s</xliff:g>です"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB 経由では充電できません"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"デバイスに付属の充電器を使用してください"</string>
@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"顔を認証しました"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"確認しました"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"完了するには [確認] をタップしてください"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"顔でロック解除しました。ロック解除アイコンを押して続行します。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"認証済み"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN を使用"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"パターンを使用"</string>
@@ -292,24 +291,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"マイクの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"カメラの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"カメラやマイクの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"マイクがブロックされています"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"カメラがブロックされています"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"マイクとカメラがブロックされています"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"ブロックを解除するには、デバイスのプライバシー スイッチをマイクオンの位置に移動し、マイクへのアクセスを許可してください。デバイスのプライバシー スイッチの場所については、デバイスのマニュアルを参照してください。"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"ブロックを解除するには、デバイスのプライバシー スイッチをカメラオンの位置に移動し、カメラへのアクセスを許可してください。デバイスのプライバシー スイッチの場所については、デバイスのマニュアルを参照してください。"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"ブロックを解除するには、デバイスのプライバシー スイッチをブロック解除の位置に移動し、アクセスを許可してください。デバイスのプライバシー スイッチの場所については、デバイスのマニュアルを参照してください。"</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"マイクを利用できます"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"カメラを利用できます"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"マイクとカメラを利用できます"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"その他のデバイス"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"概要を切り替え"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"アラーム、リマインダー、予定、指定した人からの着信以外の音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
@@ -320,7 +310,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"開くにはもう一度タップしてください"</string>
     <string name="tap_again" msgid="1315420114387908655">"もう一度タップしてください"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"開くには上にスワイプします"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"押すと開きます"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"ロック解除アイコンを押して開きます"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"顔でロック解除しました。ロック解除アイコンを押して開きます。"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"上にスワイプしてもう一度お試しください"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC を使用するには、ロックを解除してください"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"これは組織が所有するデバイスです"</string>
@@ -356,7 +347,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"このユーザーのアプリとデータがすべて削除されます。"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"削除"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、画面上に表示される情報またはキャスト先に転送する情報すべてに、録画中またはキャスト中にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、録画中またはキャスト中に画面上に表示される情報、またはキャスト先に転送される情報すべてにアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"すべて消去"</string>
@@ -374,20 +365,28 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"これは組織が所有するデバイスで、ネットワーク トラフィックが監視されることもあります"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスで、ネットワーク トラフィックが監視されることもあります"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"このデバイスは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> から提供されています"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"これは組織が所有するデバイスで、<xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスで、<xliff:g id="VPN_APP">%2$s</xliff:g> に接続しています"</string>
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (4137564460025113168) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (2169227918166358741) -->
+    <skip />
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"これは組織が所有するデバイスです"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスです"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"これは組織が所有するデバイスで、VPN に接続しています"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスで、VPN に接続しています"</string>
+    <!-- no translation found for quick_settings_disclosure_management_vpns (929181757984262902) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (3312645578322079185) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"組織は仕事用プロファイルのネットワーク トラフィックを監視することがあります"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> によってこの仕事用プロファイルのネットワーク トラフィックが監視されることもあります"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"仕事用プロファイルのネットワーク アクティビティは IT 管理者に公開されます"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ネットワークが監視されることもあります"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"このデバイスは VPN に接続しています"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"この仕事用プロファイルは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"この個人用プロファイルは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"このデバイスは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (3586175303518266301) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (153393105176944100) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (451254750289172191) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (6191822916936028208) -->
+    <skip />
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"このデバイスは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> から提供されています"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"デバイス管理"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +402,14 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"このデバイスには認証局がインストールされています。保護されたネットワーク トラフィックが監視、変更される可能性があります。"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"管理者がネットワーク ログを有効にしているため、このデバイスのトラフィックが監視されています。"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"管理者がネットワーク ログを有効にしているため、仕事用プロファイルのトラフィックは監視されています（個人用プロファイルは対象外）。"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"<xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています。このアプリはあなたのネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> と <xliff:g id="VPN_APP_1">%2$s</xliff:g> に接続しています。これらのアプリは、あなたのネットワーク アクティビティ（メール、アプリ、ウェブサイト）を監視できます。"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"この仕事用プロファイルは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています。このアプリはあなたのネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"この個人用プロファイルは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています。このアプリはあなたのネットワーク アクティビティ（メール、アプリ、ウェブサイト）を監視できます。"</string>
+    <!-- no translation found for monitoring_description_named_vpn (7502657784155456414) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (6726394451199620634) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_named_vpn (7254359257263069766) -->
+    <skip />
+    <!-- no translation found for monitoring_description_personal_profile_named_vpn (5083909710727365452) -->
+    <skip />
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN 設定を開く"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"このデバイスは保護者によって管理されています。保護者は、あなたが使用するアプリ、あなたの現在地、デバイスの利用時間などの情報を確認したり、管理したりできます。"</string>
@@ -515,6 +518,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>は会話機能に対応していません"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"着信通知は変更できません。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"このグループの通知はここでは設定できません"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g> のすべての通知"</string>
@@ -814,6 +818,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"一時停止"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"前のトラック"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"次のトラック"</string>
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"接続中"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"再生"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> を開く"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g>（アーティスト名: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>）を <xliff:g id="APP_LABEL">%3$s</xliff:g> で再生"</string>
@@ -843,19 +848,16 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"このセッションをキャストするには、アプリを開いてください。"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"不明なアプリ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"キャストを停止"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ブロードキャストの仕組み"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"ブロードキャスト"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Bluetooth 対応デバイスを持っている付近のユーザーは、あなたがブロードキャストしているメディアを聴けます"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Bluetooth 対応デバイスを持っている付近のユーザーは、QR コードをスキャンしたり、ブロードキャストの名前とパスワードを使用したりすることで、あなたのブロードキャストを聴けます。"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"ブロードキャストの名前"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"パスワード"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"保存"</string>
+    <!-- no translation found for media_output_broadcast_starting (8130153654166235557) -->
     <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
+    <!-- no translation found for media_output_broadcast_start_failed (3670835946856129775) -->
     <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ビルド番号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ビルド番号をクリップボードにコピーしました。"</string>
@@ -925,12 +927,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"タイルを追加"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"タイルを追加しない"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ユーザーの選択"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other">有効なアプリ: <xliff:g id="COUNT_1">%s</xliff:g> 個</item>
-      <item quantity="one">有効なアプリ: <xliff:g id="COUNT_0">%s</xliff:g> 個</item>
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 個のアプリがアクティブです</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 個のアプリがアクティブです</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"最新情報"</string>
-    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"有効なアプリ"</string>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"実行中のアプリ"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"これらのアプリは、使用していない場合でもアクティブのままになるため、バッテリー駆動時間に影響する可能性があります"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"停止中"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完了"</string>

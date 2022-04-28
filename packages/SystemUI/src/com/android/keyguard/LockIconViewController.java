@@ -66,7 +66,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Objects;
 
@@ -115,7 +114,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mIsBouncerShowing;
     private boolean mRunningFPS;
     private boolean mCanDismissLockScreen;
-    private boolean mQsExpanded;
     private int mStatusBarState;
     private boolean mIsKeyguardShowing;
     private boolean mUserUnlockedWithBiometric;
@@ -246,14 +244,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         return mView.getLocationTop();
     }
 
-    /**
-     * Set whether qs is expanded. When QS is expanded, don't show a DisabledUdfps affordance.
-     */
-    public void setQsExpanded(boolean expanded) {
-        mQsExpanded = expanded;
-        updateVisibility();
-    }
-
     private void updateVisibility() {
         if (mCancelDelayedUpdateVisibilityRunnable != null) {
             mCancelDelayedUpdateVisibilityRunnable.run();
@@ -332,7 +322,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean isLockScreen() {
         return !mIsDozing
                 && !mIsBouncerShowing
-                && !mQsExpanded
                 && mStatusBarState == StatusBarState.KEYGUARD;
     }
 
@@ -377,7 +366,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("mUdfpsSupported: " + mUdfpsSupported);
         pw.println("mUdfpsEnrolled: " + mUdfpsEnrolled);
         pw.println("mIsKeyguardShowing: " + mIsKeyguardShowing);
@@ -395,11 +384,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println("  mRunningFPS: " + mRunningFPS);
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
         pw.println("  mStatusBarState: " + StatusBarState.toString(mStatusBarState));
-        pw.println("  mQsExpanded: " + mQsExpanded);
         pw.println("  mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
 
         if (mView != null) {
-            mView.dump(fd, pw, args);
+            mView.dump(pw, args);
         }
     }
 
@@ -468,7 +456,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 }
 
                 @Override
-                public void onKeyguardBouncerChanged(boolean bouncer) {
+                public void onKeyguardBouncerStateChanged(boolean bouncer) {
                     mIsBouncerShowing = bouncer;
                     updateVisibility();
                 }

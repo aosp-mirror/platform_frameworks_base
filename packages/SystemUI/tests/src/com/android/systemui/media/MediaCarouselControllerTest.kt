@@ -19,6 +19,7 @@ package com.android.systemui.media
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.qualifiers.Main
@@ -28,6 +29,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
@@ -52,6 +54,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var panel: MediaControlPanel
     @Mock lateinit var visualStabilityProvider: VisualStabilityProvider
     @Mock lateinit var mediaHostStatesManager: MediaHostStatesManager
+    @Mock lateinit var mediaHostState: MediaHostState
     @Mock lateinit var activityStarter: ActivityStarter
     @Mock @Main private lateinit var executor: DelayableExecutor
     @Mock lateinit var mediaDataManager: MediaDataManager
@@ -142,7 +145,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         expected.forEach {
             clock.setCurrentTimeMillis(it.third)
             MediaPlayerData.addMediaPlayer(it.first, it.second.copy(notificationKey = it.first),
-                panel, clock)
+                panel, clock, isSsReactivated = false)
         }
 
         for ((index, key) in MediaPlayerData.playerKeys().withIndex()) {
@@ -187,5 +190,56 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         mediaCarouselController.settingsButton.callOnClick()
 
         verify(logger).logCarouselSettings()
+    }
+
+    @Test
+    fun testLocationChangeQs_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_QS,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QS)
+    }
+
+    @Test
+    fun testLocationChangeQqs_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_QQS,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QQS)
+    }
+
+    @Test
+    fun testLocationChangeLockscreen_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_LOCKSCREEN,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_LOCKSCREEN)
+    }
+
+    @Test
+    fun testLocationChangeDream_logged() {
+        mediaCarouselController.onDesiredLocationChanged(
+            MediaHierarchyManager.LOCATION_DREAM_OVERLAY,
+            mediaHostState,
+            animate = false)
+        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_DREAM_OVERLAY)
+    }
+
+    @Test
+    fun testRecommendationRemoved_logged() {
+        val packageName = "smartspace package"
+        val instanceId = InstanceId.fakeInstanceId(123)
+
+        val smartspaceData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+            packageName = packageName,
+            instanceId = instanceId
+        )
+        MediaPlayerData.addMediaRecommendation(SMARTSPACE_KEY, smartspaceData, panel, true, clock)
+        mediaCarouselController.removePlayer(SMARTSPACE_KEY)
+
+        verify(logger).logRecommendationRemoved(eq(packageName), eq(instanceId!!))
     }
 }

@@ -32,11 +32,10 @@ import com.android.systemui.statusbar.SmartReplyController
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
-import com.android.systemui.statusbar.notification.collection.notifcollection.SelfTrackingLifetimeExtender
 import com.android.systemui.statusbar.notification.collection.notifcollection.InternalNotifUpdater
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender
-import java.io.FileDescriptor
+import com.android.systemui.statusbar.notification.collection.notifcollection.SelfTrackingLifetimeExtender
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -121,8 +120,8 @@ class RemoteInputCoordinator @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
-        mRemoteInputLifetimeExtenders.forEach { it.dump(fd, pw, args) }
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        mRemoteInputLifetimeExtenders.forEach { it.dump(pw, args) }
     }
 
     override fun onRemoteInputSent(entry: NotificationEntry) {

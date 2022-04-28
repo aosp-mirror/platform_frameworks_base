@@ -37,7 +37,8 @@ class FakeBroadcastDispatcher(
     dumpManager: DumpManager,
     logger: BroadcastDispatcherLogger,
     userTracker: UserTracker
-) : BroadcastDispatcher(context, looper, executor, dumpManager, logger, userTracker) {
+) : BroadcastDispatcher(
+    context, looper, executor, dumpManager, logger, userTracker, PendingRemovalStore(logger)) {
 
     private val registeredReceivers = ArraySet<BroadcastReceiver>()
 

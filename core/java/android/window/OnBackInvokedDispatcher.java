@@ -19,7 +19,6 @@ package android.window;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.os.Build;
 
@@ -91,15 +90,6 @@ public interface OnBackInvokedDispatcher {
      *                 registered.
      */
     void unregisterOnBackInvokedCallback(@NonNull OnBackInvokedCallback callback);
-
-    /**
-     * Returns the most prioritized callback to receive back dispatch next.
-     * @hide
-     */
-    @Nullable
-    default OnBackInvokedCallback getTopCallback() {
-        return null;
-    }
 
     /**
      * Registers a {@link OnBackInvokedCallback} with system priority.

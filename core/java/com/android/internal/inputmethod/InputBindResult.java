@@ -186,7 +186,7 @@ public final class InputBindResult implements Parcelable {
     /**
      * The accessibility services.
      */
-    public SparseArray<IInputMethodSession> accessibilitySessions;
+    public SparseArray<IAccessibilityInputMethodSession> accessibilitySessions;
 
     /**
      * The input channel used to send input events to this IME.
@@ -231,8 +231,8 @@ public final class InputBindResult implements Parcelable {
      *
      * @param result A result code defined in {@link ResultCode}.
      * @param method {@link IInputMethodSession} to interact with the IME.
-     * @param accessibilitySessions {@link IInputMethodSession} to interact with accessibility
-     *                              services.
+     * @param accessibilitySessions {@link IAccessibilityInputMethodSession} to interact with
+     *                              accessibility services.
      * @param channel {@link InputChannel} to forward input events to the IME.
      * @param id The {@link String} representations of the IME, which is the same as
      *           {@link android.view.inputmethod.InputMethodInfo#getId()} and
@@ -242,7 +242,8 @@ public final class InputBindResult implements Parcelable {
      *                                             {@code suppressesSpellChecker="true"}.
      */
     public InputBindResult(@ResultCode int result,
-            IInputMethodSession method, SparseArray<IInputMethodSession> accessibilitySessions,
+            IInputMethodSession method,
+            SparseArray<IAccessibilityInputMethodSession> accessibilitySessions,
             InputChannel channel, String id, int sequence,
             @Nullable Matrix virtualDisplayToScreenMatrix,
             boolean isInputMethodSuppressingSpellChecker) {
@@ -271,8 +272,9 @@ public final class InputBindResult implements Parcelable {
             accessibilitySessions = new SparseArray<>(n);
             while (n > 0) {
                 int key = source.readInt();
-                IInputMethodSession value =
-                        IInputMethodSession.Stub.asInterface(source.readStrongBinder());
+                IAccessibilityInputMethodSession value =
+                        IAccessibilityInputMethodSession.Stub.asInterface(
+                                source.readStrongBinder());
                 accessibilitySessions.append(key, value);
                 n--;
             }

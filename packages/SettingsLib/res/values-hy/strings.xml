@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Չեղարկել"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Զուգակցում է մուտքի թույլտվությունը դեպի ձեր կոնտակտները և զանգերի պատմությունը, երբ միացված է:"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Հնարավոր չեղավ զուգակցվել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ սխալ PIN-ի կամ անցաբառի պատճառով:."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ սխալ PIN-ի կամ անցաբառի պատճառով:"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Հնարավոր չէ կապ հաստատել  <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Զուգավորումը մերժվեց <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի կողմից:"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Համակարգիչ"</string>
@@ -595,9 +595,8 @@
     <string name="guest_reset_guest" msgid="6110013010356013758">"Վերակայել հյուրի աշխատաշրջանը"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Վերակայե՞լ հյուրի աշխատաշրջանը"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Հեռացնե՞լ հյուրին"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Վերակայել"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Զրոյացնել"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Հեռացնել"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Հյուրի աշխատաշրջանը վերակայվում է…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Լուսանկարել"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Ընտրել պատկեր"</string>
@@ -653,10 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Էկրանի միացում"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Թույլատրել հավելվածին միացնել էկրանը"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Եթե թույլ տաք, հավելվածը ցանկացած ժամանակ կկարողանա միացնել էկրանը՝ առանց ձեր բացահայտ համաձայնության։"</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR կոդի սկանավորում"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Լսելու համար տեսախցիկը պահեք QR կոդի վրա"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR կոդի ձևաչափն անվավեր է"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Կանգնեցնել <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի հեռարձակումը"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Եթե հեռարձակեք <xliff:g id="SWITCHAPP">%1$s</xliff:g> հավելվածը կամ փոխեք աուդիո ելքը, ձեր ընթացիկ հեռարձակումը կկանգնեցվի։"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Հեռարձակել <xliff:g id="SWITCHAPP">%1$s</xliff:g> հավելվածը"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Փոխել աուդիո ելքը"</string>
 </resources>

@@ -162,7 +162,8 @@ public class FrameTrackerTest {
                 eq(0L) /* missedFrames */,
                 eq(5000000L) /* maxFrameTimeNanos */,
                 eq(0L) /* missedSfFramesCount */,
-                eq(0L) /* missedAppFramesCount */);
+                eq(0L) /* missedAppFramesCount */,
+                eq(0L) /* maxSuccessiveMissedFramesCount */);
     }
 
     @Test
@@ -196,7 +197,8 @@ public class FrameTrackerTest {
                 eq(1L) /* missedFrames */,
                 eq(40000000L) /* maxFrameTimeNanos */,
                 eq(1L) /* missedSfFramesCount */,
-                eq(0L) /* missedAppFramesCount */);
+                eq(0L) /* missedAppFramesCount */,
+                eq(1L) /* maxSuccessiveMissedFramesCount */);
     }
 
     @Test
@@ -230,7 +232,8 @@ public class FrameTrackerTest {
                 eq(0L) /* missedFrames */,
                 eq(4000000L) /* maxFrameTimeNanos */,
                 eq(0L) /* missedSfFramesCount */,
-                eq(0L) /* missedAppFramesCount */);
+                eq(0L) /* missedAppFramesCount */,
+                eq(0L) /* maxSuccessiveMissedFramesCount */);
     }
 
     @Test
@@ -264,7 +267,8 @@ public class FrameTrackerTest {
                 eq(1L) /* missedFrames */,
                 eq(40000000L) /* maxFrameTimeNanos */,
                 eq(0L) /* missedSfFramesCount */,
-                eq(1L) /* missedAppFramesCount */);
+                eq(1L) /* missedAppFramesCount */,
+                eq(1L) /* maxSuccessiveMissedFramesCount */);
     }
 
     @Test
@@ -301,7 +305,8 @@ public class FrameTrackerTest {
                 eq(1L) /* missedFrames */,
                 eq(50000000L) /* maxFrameTimeNanos */,
                 eq(0L) /* missedSfFramesCount */,
-                eq(1L) /* missedAppFramesCount */);
+                eq(1L) /* missedAppFramesCount */,
+                eq(1L) /* maxSuccessiveMissedFramesCount */);
     }
 
     /**
@@ -340,7 +345,8 @@ public class FrameTrackerTest {
                 eq(0L) /* missedFrames */,
                 eq(4000000L) /* maxFrameTimeNanos */,
                 eq(0L) /* missedSfFramesCount */,
-                eq(0L) /* missedAppFramesCount */);
+                eq(0L) /* missedAppFramesCount */,
+                eq(0L) /* maxSuccessiveMissedFramesCount */);
     }
 
     @Test
@@ -462,7 +468,8 @@ public class FrameTrackerTest {
                 eq(1L) /* missedFrames */,
                 eq(0L) /* maxFrameTimeNanos */,
                 eq(0L) /* missedSfFramesCount */,
-                eq(1L) /* missedAppFramesCount */);
+                eq(1L) /* missedAppFramesCount */,
+                eq(1L) /* maxSuccessiveMissedFramesCount */);
     }
 
     @Test
@@ -496,7 +503,8 @@ public class FrameTrackerTest {
                 eq(0L) /* missedFrames */,
                 eq(0L) /* maxFrameTimeNanos */,
                 eq(0L) /* missedSfFramesCount */,
-                eq(0L) /* missedAppFramesCount */);
+                eq(0L) /* missedAppFramesCount */,
+                eq(0L) /* maxSuccessiveMissedFramesCount */);
     }
 
     @Test
@@ -530,7 +538,37 @@ public class FrameTrackerTest {
                 eq(0L) /* missedFrames */,
                 eq(0L) /* maxFrameTimeNanos */,
                 eq(0L) /* missedSfFramesCount */,
-                eq(0L) /* missedAppFramesCount */);
+                eq(0L) /* missedAppFramesCount */,
+                eq(0L) /* maxSuccessiveMissedFramesCount */);
+    }
+
+    @Test
+    public void testMaxSuccessiveMissedFramesCount() {
+        FrameTracker tracker = spyFrameTracker(
+                CUJ_WALLPAPER_TRANSITION, CUJ_POSTFIX, /* surfaceOnly= */ true);
+        when(mChoreographer.getVsyncId()).thenReturn(100L);
+        tracker.begin();
+        verify(mSurfaceControlWrapper).addJankStatsListener(any(), any());
+        sendFrame(tracker, JANK_SURFACEFLINGER_DEADLINE_MISSED, 100L);
+        sendFrame(tracker, JANK_SURFACEFLINGER_DEADLINE_MISSED, 101L);
+        sendFrame(tracker, JANK_APP_DEADLINE_MISSED, 102L);
+        sendFrame(tracker, JANK_NONE, 103L);
+        sendFrame(tracker, JANK_APP_DEADLINE_MISSED, 104L);
+        sendFrame(tracker, JANK_APP_DEADLINE_MISSED, 105L);
+        when(mChoreographer.getVsyncId()).thenReturn(106L);
+        tracker.end(FrameTracker.REASON_END_NORMAL);
+        sendFrame(tracker, JANK_SURFACEFLINGER_DEADLINE_MISSED, 106L);
+        sendFrame(tracker, JANK_SURFACEFLINGER_DEADLINE_MISSED, 107L);
+        verify(mSurfaceControlWrapper).removeJankStatsListener(any());
+        verify(tracker).triggerPerfetto();
+        verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
+                eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_WALLPAPER_TRANSITION]),
+                eq(6L) /* totalFrames */,
+                eq(5L) /* missedFrames */,
+                eq(0L) /* maxFrameTimeNanos */,
+                eq(2L) /* missedSfFramesCount */,
+                eq(3L) /* missedAppFramesCount */,
+                eq(3L) /* maxSuccessiveMissedFramesCount */);
     }
 
     private void sendFirstWindowFrame(FrameTracker tracker, long durationMillis,

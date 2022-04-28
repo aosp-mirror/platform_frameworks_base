@@ -113,6 +113,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private SessionTracker mSessionTracker;
     @Mock
     private LatencyTracker mLatencyTracker;
+    @Mock
+    private ScreenOffAnimationController mScreenOffAnimationController;
     private BiometricUnlockController mBiometricUnlockController;
 
     @Before
@@ -134,7 +136,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mMetricsLogger, mDumpManager, mPowerManager,
                 mNotificationMediaManager, mWakefulnessLifecycle, mScreenLifecycle,
                 mAuthController, mStatusBarStateController, mKeyguardUnlockAnimationController,
-                mSessionTracker, mLatencyTracker);
+                mSessionTracker, mLatencyTracker, mScreenOffAnimationController);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setBiometricModeListener(mBiometricModeListener);
     }

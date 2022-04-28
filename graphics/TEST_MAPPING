@@ -1,7 +1,12 @@
 {
   "presubmit": [
     {
-      "name": "CtsGraphicsTestCases"
+      "name": "CtsGraphicsTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
     }
   ]
 }

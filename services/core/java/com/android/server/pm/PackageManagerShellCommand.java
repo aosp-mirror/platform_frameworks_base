@@ -17,6 +17,11 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 
 import android.accounts.IAccountManager;
 import android.annotation.NonNull;
@@ -92,6 +97,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.PrintWriterPrinter;
@@ -150,6 +156,17 @@ class PackageManagerShellCommand extends ShellCommand {
             "--multi-package"
     );
     private static final Set<String> UNSUPPORTED_SESSION_CREATE_OPTS = Collections.emptySet();
+    private static final Map<String, Integer> SUPPORTED_PERMISSION_FLAGS = new ArrayMap<>();
+    private static final List<String> SUPPORTED_PERMISSION_FLAGS_LIST;
+    static {
+        SUPPORTED_PERMISSION_FLAGS.put("user-set", FLAG_PERMISSION_USER_SET);
+        SUPPORTED_PERMISSION_FLAGS.put("user-fixed", FLAG_PERMISSION_USER_FIXED);
+        SUPPORTED_PERMISSION_FLAGS.put("revoked-compat", FLAG_PERMISSION_REVOKED_COMPAT);
+        SUPPORTED_PERMISSION_FLAGS.put("review-required", FLAG_PERMISSION_REVIEW_REQUIRED);
+        SUPPORTED_PERMISSION_FLAGS.put("revoke-when-requested",
+                FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
+        SUPPORTED_PERMISSION_FLAGS_LIST = new ArrayList<>(SUPPORTED_PERMISSION_FLAGS.keySet());
+    }
 
     final IPackageManager mInterface;
     final LegacyPermissionManagerInternal mLegacyPermissionManager;
@@ -276,6 +293,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runGrantRevokePermission(false);
                 case "reset-permissions":
                     return runResetPermissions();
+                case "set-permission-flags":
+                    return setOrClearPermissionFlags(true);
+                case "clear-permission-flags":
+                    return setOrClearPermissionFlags(false);
                 case "set-permission-enforced":
                     return runSetPermissionEnforced();
                 case "get-privapp-permissions":
@@ -1973,8 +1994,23 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runDumpProfiles() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        boolean dumpClassesAndMethods = false;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--dump-classes-and-methods":
+                    dumpClassesAndMethods = true;
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
         String packageName = getNextArg();
-        mInterface.dumpProfiles(packageName);
+        mInterface.dumpProfiles(packageName, dumpClassesAndMethods);
         return 0;
     }
 
@@ -2497,6 +2533,50 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runResetPermissions() throws RemoteException {
         mLegacyPermissionManager.resetRuntimePermissions();
+        return 0;
+    }
+
+    private int setOrClearPermissionFlags(boolean setFlags) {
+        int userId = UserHandle.USER_SYSTEM;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            }
+        }
+
+        String pkg = getNextArg();
+        if (pkg == null) {
+            getErrPrintWriter().println("Error: no package specified");
+            return 1;
+        }
+        String perm = getNextArg();
+        if (perm == null) {
+            getErrPrintWriter().println("Error: no permission specified");
+            return 1;
+        }
+
+        int flagMask = 0;
+        String flagName = getNextArg();
+        if (flagName == null) {
+            getErrPrintWriter().println("Error: no permission flags specified");
+            return 1;
+        }
+        while (flagName != null) {
+            if (!SUPPORTED_PERMISSION_FLAGS.containsKey(flagName)) {
+                getErrPrintWriter().println("Error: specified flag " + flagName + " is not one of "
+                        + SUPPORTED_PERMISSION_FLAGS_LIST);
+                return 1;
+            }
+            flagMask |= SUPPORTED_PERMISSION_FLAGS.get(flagName);
+            flagName = getNextArg();
+        }
+
+        final UserHandle translatedUser = UserHandle.of(translateUserId(userId,
+                UserHandle.USER_NULL, "runGrantRevokePermission"));
+        int flagSet = setFlags ? flagMask : 0;
+        mPermissionManager.updatePermissionFlags(pkg, perm, flagMask, flagSet, translatedUser);
         return 0;
     }
 
@@ -3694,7 +3774,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             List<PermissionInfo> ps = mPermissionManager
                     .queryPermissionsByGroup(groupList.get(i), 0 /*flags*/);
-            final int count = ps.size();
+            final int count = (ps == null ? 0 : ps.size());
             boolean first = true;
             for (int p = 0 ; p < count ; p++) {
                 PermissionInfo pi = ps.get(p);
@@ -3997,6 +4077,13 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    must be declared as used in the app's manifest, be runtime permissions");
         pw.println("    (protection level dangerous), and the app targeting SDK greater than Lollipop MR1.");
         pw.println("");
+        pw.println("  set-permission-flags [--user USER_ID] PACKAGE PERMISSION [FLAGS..]");
+        pw.println("  clear-permission-flags [--user USER_ID] PACKAGE PERMISSION [FLAGS..]");
+        pw.println("    These commands either set or clear permission flags on apps.  The permissions");
+        pw.println("    must be declared as used in the app's manifest, be runtime permissions");
+        pw.println("    (protection level dangerous), and the app targeting SDK greater than Lollipop MR1.");
+        pw.println("    The flags must be one or more of " + SUPPORTED_PERMISSION_FLAGS_LIST);
+        pw.println("");
         pw.println("  reset-permissions");
         pw.println("    Revert all runtime permissions to their default state.");
         pw.println("");
@@ -4092,9 +4179,12 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  reconcile-secondary-dex-files TARGET-PACKAGE");
         pw.println("    Reconciles the package secondary dex files with the generated oat files.");
         pw.println("");
-        pw.println("  dump-profiles TARGET-PACKAGE");
+        pw.println("  dump-profiles [--dump-classes-and-methods] TARGET-PACKAGE");
         pw.println("    Dumps method/class profile files to");
-        pw.println("    " + ART_PROFILE_SNAPSHOT_DEBUG_LOCATION + "TARGET-PACKAGE.txt");
+        pw.println("    " + ART_PROFILE_SNAPSHOT_DEBUG_LOCATION
+                + "TARGET-PACKAGE-primary.prof.txt.");
+        pw.println("      --dump-classes-and-methods: passed along to the profman binary to");
+        pw.println("        switch to the format used by 'profman --create-profile-from'.");
         pw.println("");
         pw.println("  snapshot-profile TARGET-PACKAGE [--code-path path]");
         pw.println("    Take a snapshot of the package profiles to");

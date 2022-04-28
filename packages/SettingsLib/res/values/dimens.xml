@@ -120,4 +120,18 @@
     <dimen name="qrcode_preview_margin">40dp</dimen>
     <dimen name="qrcode_preview_radius">30dp</dimen>
     <dimen name="qrcode_icon_size">27dp</dimen>
+
+    <!-- Broadcast dialog -->
+    <dimen name="broadcast_dialog_title_img_margin_top">18dp</dimen>
+    <dimen name="broadcast_dialog_title_text_size">24sp</dimen>
+    <dimen name="broadcast_dialog_title_text_margin">16dp</dimen>
+    <dimen name="broadcast_dialog_title_text_margin_top">18dp</dimen>
+    <dimen name="broadcast_dialog_subtitle_text_size">14sp</dimen>
+    <dimen name="broadcast_dialog_icon_size">24dp</dimen>
+    <dimen name="broadcast_dialog_icon_margin_top">25dp</dimen>
+    <dimen name="broadcast_dialog_btn_radius">100dp</dimen>
+    <dimen name="broadcast_dialog_btn_margin_bottom">4dp</dimen>
+    <dimen name="broadcast_dialog_btn_text_size">16sp</dimen>
+    <dimen name="broadcast_dialog_btn_minHeight">44dp</dimen>
+    <dimen name="broadcast_dialog_margin">16dp</dimen>
 </resources>

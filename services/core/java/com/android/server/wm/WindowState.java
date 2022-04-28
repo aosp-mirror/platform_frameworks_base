@@ -249,7 +249,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.window.ClientWindowFrames;
-import android.window.IOnBackInvokedCallback;
+import android.window.OnBackInvokedCallbackInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
@@ -820,12 +820,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     };
 
     /**
-     * @see #setOnBackInvokedCallback(IOnBackInvokedCallback)
+     * @see #setOnBackInvokedCallbackInfo(OnBackInvokedCallbackInfo)
      */
-    // TODO(b/224856664): Consolidate application and system callback into one.
-    private IOnBackInvokedCallback mApplicationOnBackInvokedCallback;
-    private IOnBackInvokedCallback mSystemOnBackInvokedCallback;
-
+    private OnBackInvokedCallbackInfo mOnBackInvokedCallbackInfo;
     @Override
     WindowState asWindowState() {
         return this;
@@ -1082,27 +1079,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * called when a back navigation action is initiated.
      * @see BackNavigationController
      */
-    void setOnBackInvokedCallback(
-            @Nullable IOnBackInvokedCallback onBackInvokedCallback, int priority) {
-        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "%s: Setting back callback %s. Client IWindow %s",
-                this, onBackInvokedCallback, mClient);
-        if (priority >= 0) {
-            mApplicationOnBackInvokedCallback = onBackInvokedCallback;
-            mSystemOnBackInvokedCallback = null;
-        } else {
-            mApplicationOnBackInvokedCallback = null;
-            mSystemOnBackInvokedCallback = onBackInvokedCallback;
-        }
+    void setOnBackInvokedCallbackInfo(
+            @Nullable OnBackInvokedCallbackInfo callbackInfo) {
+        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "%s: Setting back callback %s",
+                this, callbackInfo);
+        mOnBackInvokedCallbackInfo = callbackInfo;
     }
 
     @Nullable
-    IOnBackInvokedCallback getApplicationOnBackInvokedCallback() {
-        return mApplicationOnBackInvokedCallback;
-    }
-
-    @Nullable
-    IOnBackInvokedCallback getSystemOnBackInvokedCallback() {
-        return mSystemOnBackInvokedCallback;
+    OnBackInvokedCallbackInfo getOnBackInvokedCallbackInfo() {
+        return mOnBackInvokedCallbackInfo;
     }
 
     interface PowerManagerWrapper {
@@ -1865,7 +1851,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         bounds.set(mWindowFrames.mFrame);
         bounds.inset(getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                bounds, mAttrs.softInputMode));
+                bounds, mAttrs.type, getWindowingMode(), mAttrs.softInputMode, mAttrs.flags));
         if (intersectWithRootTaskBounds) {
             bounds.intersect(mTmpRect);
         }
@@ -2054,8 +2040,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if ((mAttrs.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
             return true;
         }
-        return !DevicePolicyCache.getInstance().isScreenCaptureAllowed(mShowUserId,
-                mOwnerCanAddInternalSystemWindow);
+        return !DevicePolicyCache.getInstance().isScreenCaptureAllowed(mShowUserId);
     }
 
     /**
@@ -2494,8 +2479,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         dc.getDisplayPolicy().removeWindowLw(this);
 
         disposeInputChannel();
-        mSystemOnBackInvokedCallback = null;
-        mApplicationOnBackInvokedCallback = null;
+        mOnBackInvokedCallbackInfo = null;
 
         mSession.windowRemovedLocked();
         try {
@@ -2549,8 +2533,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         try {
             disposeInputChannel();
-            mSystemOnBackInvokedCallback = null;
-            mApplicationOnBackInvokedCallback = null;
+            mOnBackInvokedCallbackInfo = null;
 
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b "
@@ -2604,11 +2587,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     return;
                 }
 
+                // Remove immediately if there is display transition because the animation is
+                // usually unnoticeable (e.g. covered by rotation animation) and the animation
+                // bounds could be inconsistent, such as depending on when the window applies
+                // its draw transaction with new rotation.
+                final boolean allowExitAnimation = !getDisplayContent().inTransition();
+
                 if (wasVisible) {
                     final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
 
                     // Try starting an animation.
-                    if (mWinAnimator.applyAnimationLocked(transit, false)) {
+                    if (allowExitAnimation && mWinAnimator.applyAnimationLocked(transit, false)) {
                         ProtoLog.v(WM_DEBUG_ANIM,
                                 "Set animatingExit: reason=remove/applyAnimation win=%s", this);
                         mAnimatingExit = true;
@@ -2622,7 +2611,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController.onWindowTransition(this, transit);
                     }
                 }
-                final boolean isAnimating = mAnimatingExit || isExitAnimationRunningSelfOrParent();
+                final boolean isAnimating = allowExitAnimation
+                        && (mAnimatingExit || isExitAnimationRunningSelfOrParent());
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
                 // We delay the removal of a window if it has a showing surface that can be used to run
@@ -2796,7 +2786,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Move the touch gesture from the currently touched window on this display to this window.
      */
     public boolean transferTouch() {
-        return mWmService.mInputManager.transferTouch(mInputChannelToken);
+        return mWmService.mInputManager.transferTouch(mInputChannelToken, getDisplayId());
     }
 
     void disposeInputChannel() {
@@ -3510,6 +3500,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     "Setting visibility of " + this + ": " + clientVisible);
             mClient.dispatchAppVisibility(clientVisible);
         } catch (RemoteException e) {
+            Slog.w(TAG, "Exception thrown during dispatchAppVisibility " + this, e);
         }
     }
 
@@ -3599,6 +3590,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // if the surface is saved, to outside world the surface is still NO_SURFACE.)
         mAnimatingExit = false;
         ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=destroySurface win=%s", this);
+
+        // Clear the flag so the buffer requested for the next new surface won't be dropped by
+        // mistaking the surface size needs to update.
+        mReportOrientationChanged = false;
 
         if (useBLASTSync()) {
             immediatelyNotifyBlastSync();
@@ -5282,12 +5277,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mControllableInsetProvider != null) {
             return;
         }
-        if (getDisplayContent().inTransition()) {
-            // Skip because the animation is usually unnoticeable (e.g. covered by rotation
-            // animation) and the animation bounds could be inconsistent, such as depending
-            // on when the window applies its draw transaction with new rotation.
-            return;
-        }
 
         final DisplayInfo displayInfo = getDisplayInfo();
         anim.initialize(mWindowFrames.mFrame.width(), mWindowFrames.mFrame.height(),
@@ -6123,13 +6112,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             applyHere = true;
         }
 
-        for (int i = mDrawHandlers.size() - 1; i >= 0; i--) {
-            DrawHandler h = mDrawHandlers.get(i);
+        final List<DrawHandler> handlersToRemove = new ArrayList<>();
+        // Iterate forwards to ensure we process in the same order
+        // we added.
+        for (int i = 0; i < mDrawHandlers.size(); i++) {
+            final DrawHandler h = mDrawHandlers.get(i);
             if (h.mSeqId <= seqId) {
                 h.mConsumer.accept(t);
-                mDrawHandlers.remove(h);
+                handlersToRemove.add(h);
                 hadHandlers = true;
             }
+        }
+        for (int i = 0; i < handlersToRemove.size(); i++) {
+            final DrawHandler h = handlersToRemove.get(i);
+            mDrawHandlers.remove(h);
         }
 
         if (hadHandlers) {

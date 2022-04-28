@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static com.android.internal.app.AppLocaleStore.AppLocaleResult.LocaleStatus;
+
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
@@ -61,6 +63,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     private int mFirstVisiblePosition = 0;
     private int mTopDistance = 0;
     private String mAppPackageName;
+    private CharSequence mTitle = null;
 
     /**
      * Other classes can register to be notified when a locale was selected.
@@ -126,6 +129,12 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         boolean isForCountryMode = parent != null;
 
         if (!TextUtils.isEmpty(appPackageName) && !isForCountryMode) {
+            // Filter current system locale to add them into suggestion
+            LocaleList systemLangList = LocaleList.getDefault();
+            for(int i = 0; i < systemLangList.size(); i++) {
+                langTagsToIgnore.add(systemLangList.get(i).toLanguageTag());
+            }
+
             if (appCurrentLocale != null) {
                 Log.d(TAG, "appCurrentLocale: " + appCurrentLocale.getLocale().toLanguageTag());
                 langTagsToIgnore.add(appCurrentLocale.getLocale().toLanguageTag());
@@ -158,30 +167,50 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             if (appCurrentLocale != null && !isForCountryMode) {
                 mLocaleList.add(appCurrentLocale);
             }
-            filterTheLanguagesNotSupportedInApp(context, appPackageName);
 
-            if (!isForCountryMode) {
-                mLocaleList.add(LocaleStore.getSystemDefaultLocaleInfo());
+            AppLocaleStore.AppLocaleResult result =
+                    AppLocaleStore.getAppSupportedLocales(context, appPackageName);
+            boolean shouldShowList =
+                    result.mLocaleStatus == LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_LOCAL_CONFIG
+                    || result.mLocaleStatus == LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_ASSET;
+
+            // Add current system language into suggestion list
+            for(LocaleStore.LocaleInfo localeInfo: LocaleStore.getSystemCurrentLocaleInfo()) {
+                boolean isNotCurrentLocale = appCurrentLocale == null
+                        || !localeInfo.getLocale().equals(appCurrentLocale.getLocale());
+                if (!isForCountryMode && isNotCurrentLocale) {
+                    mLocaleList.add(localeInfo);
+                }
+            }
+
+            // Filter the language not support in app
+            mLocaleList = filterTheLanguagesNotSupportedInApp(
+                    shouldShowList, result.mAppSupportedLocales);
+
+            Log.d(TAG, "mLocaleList after app-supported filter:  " + mLocaleList.size());
+
+            // Add "system language"
+            if (!isForCountryMode && shouldShowList) {
+                mLocaleList.add(LocaleStore.getSystemDefaultLocaleInfo(appCurrentLocale == null));
             }
         }
         return true;
     }
 
-    private void filterTheLanguagesNotSupportedInApp(Context context, String appPackageName) {
-        ArrayList<Locale> supportedLocales =
-                AppLocaleStore.getAppSupportedLocales(context, appPackageName);
-
+    private Set<LocaleStore.LocaleInfo> filterTheLanguagesNotSupportedInApp(
+            boolean shouldShowList, ArrayList<Locale> supportedLocales) {
         Set<LocaleStore.LocaleInfo> filteredList = new HashSet<>();
-        for(LocaleStore.LocaleInfo li: mLocaleList) {
-            for(Locale l: supportedLocales) {
-                if(LocaleList.matchesLanguageAndScript(li.getLocale(), l)) {
-                    filteredList.add(li);
+        if (shouldShowList) {
+            for(LocaleStore.LocaleInfo li: mLocaleList) {
+                for(Locale l: supportedLocales) {
+                    if(LocaleList.matchesLanguageAndScript(li.getLocale(), l)) {
+                        filteredList.add(li);
+                    }
                 }
             }
         }
-        Log.d(TAG, "mLocaleList after app-supported filter:  " + filteredList.size());
 
-        mLocaleList = filteredList;
+        return filteredList;
     }
 
     private void returnToParentFrame() {
@@ -202,6 +231,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             return;
         }
 
+        mTitle = getActivity().getTitle();
         final boolean countryMode = mParentLocale != null;
         final Locale sortingLocale = countryMode ? mParentLocale.getLocale() : Locale.getDefault();
         mAdapter = new SuggestedLocaleAdapter(mLocaleList, countryMode, mAppPackageName);
@@ -237,7 +267,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         if (mParentLocale != null) {
             getActivity().setTitle(mParentLocale.getFullNameNative());
         } else {
-            getActivity().setTitle(R.string.language_selection_title);
+            getActivity().setTitle(mTitle);
         }
 
         getListView().requestFocus();

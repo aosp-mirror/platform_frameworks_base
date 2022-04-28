@@ -80,8 +80,6 @@ public class AccessibilitySecurityPolicy {
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
             | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
 
-    public static final boolean POLICY_WARNING_ENABLED = true;
-
     /**
      * Methods that should find their way into separate modules, but are still in AMS
      * TODO (b/111889696): Refactoring UserState to AccessibilityUserManager.
@@ -106,6 +104,7 @@ public class AccessibilitySecurityPolicy {
     private AppWidgetManagerInternal mAppWidgetService;
     private AccessibilityWindowManager mAccessibilityWindowManager;
     private int mCurrentUserId = UserHandle.USER_NULL;
+    private boolean mSendNonA11yToolNotificationEnabled = false;
 
     /**
      * Constructor for AccessibilityManagerService.
@@ -119,7 +118,25 @@ public class AccessibilitySecurityPolicy {
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mPolicyWarningUIController = policyWarningUIController;
-        mPolicyWarningUIController.setAccessibilityPolicyManager(this);
+    }
+
+    /**
+     * Enables sending the notification for non-AccessibilityTool services with the given state.
+     *
+     */
+    public void setSendingNonA11yToolNotificationLocked(boolean enable) {
+        if (enable == mSendNonA11yToolNotificationEnabled) {
+            return;
+        }
+
+        mSendNonA11yToolNotificationEnabled = enable;
+        mPolicyWarningUIController.enableSendingNonA11yToolNotification(enable);
+        if (enable) {
+            for (int i = 0; i < mNonA11yCategoryServices.size(); i++) {
+                final ComponentName service = mNonA11yCategoryServices.valueAt(i);
+                mPolicyWarningUIController.onNonA11yCategoryServiceBound(mCurrentUserId, service);
+            }
+        }
     }
 
     /**
@@ -725,9 +742,6 @@ public class AccessibilitySecurityPolicy {
      */
     public void onBoundServicesChangedLocked(int userId,
             ArrayList<AccessibilityServiceConnection> boundServices) {
-        if (!POLICY_WARNING_ENABLED) {
-            return;
-        }
         if (mAccessibilityUserManager.getCurrentUserIdLocked() != userId) {
             return;
         }
@@ -742,7 +756,9 @@ public class AccessibilitySecurityPolicy {
                 if (mNonA11yCategoryServices.contains(service)) {
                     mNonA11yCategoryServices.remove(service);
                 } else {
-                    mPolicyWarningUIController.onNonA11yCategoryServiceBound(userId, service);
+                    if (mSendNonA11yToolNotificationEnabled) {
+                        mPolicyWarningUIController.onNonA11yCategoryServiceBound(userId, service);
+                    }
                 }
             }
         }
@@ -763,14 +779,11 @@ public class AccessibilitySecurityPolicy {
      * @param enabledServices The enabled services
      */
     public void onSwitchUserLocked(int userId, Set<ComponentName> enabledServices) {
-        if (!POLICY_WARNING_ENABLED) {
-            return;
-        }
         if (mCurrentUserId == userId) {
             return;
         }
-
-        mPolicyWarningUIController.onSwitchUserLocked(userId, enabledServices);
+        mPolicyWarningUIController.onSwitchUser(userId,
+                new ArraySet<>(enabledServices));
 
         for (int i = 0; i < mNonA11yCategoryServices.size(); i++) {
             mPolicyWarningUIController.onNonA11yCategoryServiceUnbound(mCurrentUserId,
@@ -786,15 +799,11 @@ public class AccessibilitySecurityPolicy {
      * @param userId          The user id
      * @param enabledServices The enabled services
      */
-    public void onEnabledServicesChangedLocked(int userId,
-            Set<ComponentName> enabledServices) {
-        if (!POLICY_WARNING_ENABLED) {
-            return;
-        }
+    public void onEnabledServicesChangedLocked(int userId, Set<ComponentName> enabledServices) {
         if (mAccessibilityUserManager.getCurrentUserIdLocked() != userId) {
             return;
         }
-
-        mPolicyWarningUIController.onEnabledServicesChangedLocked(userId, enabledServices);
+        mPolicyWarningUIController.onEnabledServicesChanged(userId,
+                new ArraySet<>(enabledServices));
     }
 }

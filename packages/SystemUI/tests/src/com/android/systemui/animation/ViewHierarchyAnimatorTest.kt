@@ -21,7 +21,8 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
-class ViewHierarchyAnimatorTest : SysuiTestCase() {
+class
+ViewHierarchyAnimatorTest : SysuiTestCase() {
     companion object {
         private const val TEST_DURATION = 1000L
         private val TEST_INTERPOLATOR = Interpolators.LINEAR
@@ -522,6 +523,38 @@ class ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun cleansUpListenersCorrectly() {
+        val firstChild = View(mContext)
+        firstChild.layoutParams = LinearLayout.LayoutParams(50 /* width */, 100 /* height */)
+        rootView.addView(firstChild)
+        val secondChild = View(mContext)
+        secondChild.layoutParams = LinearLayout.LayoutParams(50 /* width */, 100 /* height */)
+        rootView.addView(secondChild)
+        rootView.measure(
+            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+        )
+        rootView.layout(0 /* l */, 0 /* t */, 100 /* r */, 100 /* b */)
+
+        val success = ViewHierarchyAnimator.animateNextUpdate(rootView)
+        // Change all bounds.
+        rootView.measure(
+            View.MeasureSpec.makeMeasureSpec(150, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+        )
+        rootView.layout(0 /* l */, 0 /* t */, 150 /* r */, 100 /* b */)
+
+        assertTrue(success)
+        assertNotNull(rootView.getTag(R.id.tag_layout_listener))
+        assertNotNull(firstChild.getTag(R.id.tag_layout_listener))
+        assertNotNull(secondChild.getTag(R.id.tag_layout_listener))
+        endAnimation(rootView)
+        assertNull(rootView.getTag(R.id.tag_layout_listener))
+        assertNull(firstChild.getTag(R.id.tag_layout_listener))
+        assertNull(secondChild.getTag(R.id.tag_layout_listener))
+    }
+
+    @Test
     fun doesNotAnimateInvisibleViews() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
@@ -622,27 +655,6 @@ class ViewHierarchyAnimatorTest : SysuiTestCase() {
         endAnimation(rootView)
         assertNull(rootView.getTag(R.id.tag_animator))
         checkBounds(rootView, l = 10, t = 10, r = 70, b = 80)
-    }
-
-    @Test
-    fun doesNotAnimateExcludedBounds() {
-        rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
-
-        val success = ViewHierarchyAnimator.animate(
-            rootView,
-            bounds = setOf(ViewHierarchyAnimator.Bound.LEFT, ViewHierarchyAnimator.Bound.TOP),
-            interpolator = TEST_INTERPOLATOR
-        )
-        // Change all bounds.
-        rootView.layout(0 /* l */, 20 /* t */, 70 /* r */, 80 /* b */)
-
-        assertTrue(success)
-        assertNotNull(rootView.getTag(R.id.tag_animator))
-        advanceAnimation(rootView, 0.5f)
-        checkBounds(rootView, l = 5, t = 15, r = 70, b = 80)
-        endAnimation(rootView)
-        assertNull(rootView.getTag(R.id.tag_animator))
-        checkBounds(rootView, l = 0, t = 20, r = 70, b = 80)
     }
 
     @Test

@@ -585,6 +585,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Float> bgCurrentDrainRestrictedBucketThreshold = null;
         DeviceConfigSession<Float> bgCurrentDrainBgRestrictedThreshold = null;
         DeviceConfigSession<Boolean> bgPromptFgsWithNotiToBgRestricted = null;
+        DeviceConfigSession<Boolean> bgPromptAbusiveAppToBgRestricted = null;
         DeviceConfigSession<Long> bgNotificationMinInterval = null;
         DeviceConfigSession<Integer> bgBatteryExemptionTypes = null;
         DeviceConfigSession<Boolean> bgCurrentDrainDecoupleThresholds = null;
@@ -642,6 +643,14 @@ public final class BackgroundRestrictionTest {
                             R.bool.config_bg_prompt_fgs_with_noti_to_bg_restricted));
             bgPromptFgsWithNotiToBgRestricted.set(true);
 
+            bgPromptAbusiveAppToBgRestricted = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ConstantsObserver.KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED,
+                    DeviceConfig::getBoolean,
+                    mContext.getResources().getBoolean(
+                            R.bool.config_bg_prompt_abusive_apps_to_bg_restricted));
+            bgPromptAbusiveAppToBgRestricted.set(true);
+
             bgNotificationMinInterval = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     ConstantsObserver.KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL,
@@ -671,7 +680,7 @@ public final class BackgroundRestrictionTest {
             mAppFGSTracker.onForegroundServiceStateChanged(testPkgName, testUid,
                     testPid, true);
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    testPkgName, testUid, notificationId);
+                    testPkgName, testUid, notificationId, false);
             mAppFGSTracker.mNotificationListener.onNotificationPosted(new StatusBarNotification(
                     testPkgName, null, notificationId, null, testUid, testPid,
                     new Notification(), UserHandle.of(testUser), null, mCurrentTimeMillis), null);
@@ -848,7 +857,7 @@ public final class BackgroundRestrictionTest {
 
             // Pretend we have the notification dismissed.
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    testPkgName, testUid, -notificationId);
+                    testPkgName, testUid, notificationId, true);
             clearInvocations(mInjector.getAppStandbyInternal());
             clearInvocations(mInjector.getNotificationManager());
             clearInvocations(mBgRestrictionController);
@@ -885,7 +894,7 @@ public final class BackgroundRestrictionTest {
 
             // Pretend notification is back on.
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    testPkgName, testUid, notificationId);
+                    testPkgName, testUid, notificationId, false);
             // Now we'll prompt the user even it has a FGS with notification.
             bgPromptFgsWithNotiToBgRestricted.set(true);
             clearInvocations(mInjector.getAppStandbyInternal());
@@ -1055,6 +1064,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(bgCurrentDrainRestrictedBucketThreshold);
             closeIfNotNull(bgCurrentDrainBgRestrictedThreshold);
             closeIfNotNull(bgPromptFgsWithNotiToBgRestricted);
+            closeIfNotNull(bgPromptAbusiveAppToBgRestricted);
             closeIfNotNull(bgNotificationMinInterval);
             closeIfNotNull(bgBatteryExemptionTypes);
             closeIfNotNull(bgCurrentDrainDecoupleThresholds);
@@ -1224,7 +1234,7 @@ public final class BackgroundRestrictionTest {
             mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
                     testPid1, true);
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    testPkgName1, testUid1, fgsNotificationId);
+                    testPkgName1, testUid1, fgsNotificationId, false);
             mAppFGSTracker.mNotificationListener.onNotificationPosted(new StatusBarNotification(
                     testPkgName1, null, fgsNotificationId, null, testUid1, testPid1,
                     new Notification(), UserHandle.of(testUser1), null, mCurrentTimeMillis), null);
@@ -1235,7 +1245,7 @@ public final class BackgroundRestrictionTest {
 
             // Pretend we have the notification dismissed.
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    testPkgName1, testUid1, -fgsNotificationId);
+                    testPkgName1, testUid1, fgsNotificationId, true);
 
             // Verify we have the notification.
             notificationId = checkNotificationShown(
@@ -1500,7 +1510,7 @@ public final class BackgroundRestrictionTest {
         if (withNotification) {
             final int notificationId = 1000;
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
-                    packageName, uid, notificationId);
+                    packageName, uid, notificationId, false);
             final StatusBarNotification noti = new StatusBarNotification(
                     packageName, null, notificationId, null, uid, pid,
                     new Notification(), UserHandle.of(UserHandle.getUserId(uid)),
@@ -1613,6 +1623,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<String> bgPermissionsInMonitor = null;
         DeviceConfigSession<Boolean> bgCurrentDrainHighThresholdByBgLocation = null;
         DeviceConfigSession<Boolean> bgCurrentDrainDecoupleThresholds = null;
+        DeviceConfigSession<Boolean> bgPromptAbusiveAppToBgRestricted = null;
 
         mBgRestrictionController.addAppBackgroundRestrictionListener(listener);
 
@@ -1750,6 +1761,14 @@ public final class BackgroundRestrictionTest {
                     DeviceConfig::getBoolean,
                     AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLD);
             bgCurrentDrainDecoupleThresholds.set(true);
+
+            bgPromptAbusiveAppToBgRestricted = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ConstantsObserver.KEY_BG_PROMPT_ABUSIVE_APPS_TO_BG_RESTRICTED,
+                    DeviceConfig::getBoolean,
+                    mContext.getResources().getBoolean(
+                            R.bool.config_bg_prompt_abusive_apps_to_bg_restricted));
+            bgPromptAbusiveAppToBgRestricted.set(true);
 
             mCurrentTimeMillis = 10_000L;
             doReturn(mCurrentTimeMillis - windowMs).when(stats).getStatsStartTimestamp();
@@ -2168,6 +2187,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(bgBatteryExemptionTypes);
             closeIfNotNull(bgPermissionMonitorEnabled);
             closeIfNotNull(bgPermissionsInMonitor);
+            closeIfNotNull(bgPromptAbusiveAppToBgRestricted);
             closeIfNotNull(bgCurrentDrainHighThresholdByBgLocation);
             closeIfNotNull(bgCurrentDrainDecoupleThresholds);
         }
@@ -3055,6 +3075,11 @@ public final class BackgroundRestrictionTest {
         @Override
         long currentTimeMillis() {
             return mCurrentTimeMillis;
+        }
+
+        @Override
+        boolean isTest() {
+            return true;
         }
     }
 

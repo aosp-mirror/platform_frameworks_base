@@ -233,8 +233,6 @@ final class LogicalDisplay {
                 info.displayCutout = mOverrideDisplayInfo.displayCutout;
                 info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
                 info.roundedCorners = mOverrideDisplayInfo.roundedCorners;
-                info.shouldConstrainMetricsForLauncher =
-                        mOverrideDisplayInfo.shouldConstrainMetricsForLauncher;
             }
             mInfo.set(info);
         }

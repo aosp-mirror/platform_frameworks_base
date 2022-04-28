@@ -903,11 +903,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void hideAuthenticationDialog() {
+    public void hideAuthenticationDialog(long requestId) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
-                mBar.hideAuthenticationDialog();
+                mBar.hideAuthenticationDialog(requestId);
             } catch (RemoteException ex) {
             }
         }

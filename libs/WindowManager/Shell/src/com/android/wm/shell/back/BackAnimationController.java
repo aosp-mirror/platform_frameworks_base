@@ -48,18 +48,16 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
  * Controls the window animation run when a user initiates a back gesture.
  */
 public class BackAnimationController implements RemoteCallable<BackAnimationController> {
-
-    private static final String BACK_PREDICTABILITY_PROGRESS_THRESHOLD_PROP =
-            "persist.debug.back_predictability_progress_threshold";
-    // By default, enable new back dispatching without any animations.
-    private static final int BACK_PREDICTABILITY_PROP =
-            SystemProperties.getInt("persist.debug.back_predictability", 1);
-    public static final boolean IS_ENABLED = BACK_PREDICTABILITY_PROP > 0;
-    private static final int PROGRESS_THRESHOLD = SystemProperties
-            .getInt(BACK_PREDICTABILITY_PROGRESS_THRESHOLD_PROP, -1);
     private static final String TAG = "BackAnimationController";
+    private static final String PREDICTIVE_BACK_PROGRESS_THRESHOLD_PROP =
+            "persist.wm.debug.predictive_back_progress_threshold";
+    public static final boolean IS_ENABLED =
+            SystemProperties.getInt("persist.wm.debug.predictive_back", 1) != 0;
+    private static final int PROGRESS_THRESHOLD = SystemProperties
+            .getInt(PREDICTIVE_BACK_PROGRESS_THRESHOLD_PROP, -1);
     @VisibleForTesting
-    boolean mEnableAnimations = (BACK_PREDICTABILITY_PROP & (1 << 1)) != 0;
+    boolean mEnableAnimations = SystemProperties.getInt(
+            "persist.wm.debug.predictive_back_anim", 0) != 0;
 
     /**
      * Location of the initial touch event of the back gesture.
@@ -213,7 +211,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         } else if (action == MotionEvent.ACTION_MOVE) {
             onMove(event, swipeEdge);
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Finishing gesture with event: %s", event);
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW,
+                    "Finishing gesture with event action: %d", action);
             onGestureFinished();
         }
     }
@@ -303,7 +302,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         int backType = mBackNavigationInfo.getType();
         RemoteAnimationTarget animationTarget = mBackNavigationInfo.getDepartingAnimationTarget();
 
-        BackEvent backEvent = new BackEvent(0, 0, progress, swipeEdge, animationTarget);
+        BackEvent backEvent = new BackEvent(
+                event.getX(), event.getY(), progress, swipeEdge, animationTarget);
         IOnBackInvokedCallback targetCallback = null;
         if (shouldDispatchToLauncher(backType)) {
             targetCallback = mBackToLauncherCallback;

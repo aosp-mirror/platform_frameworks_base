@@ -26,7 +26,7 @@
     <xs:element name="displayConfiguration">
         <xs:complexType>
             <xs:sequence>
-                <xs:element type="densityMap" name="densityMap" minOccurs="0" maxOccurs="1">
+                <xs:element type="densityMapping" name="densityMapping" minOccurs="0" maxOccurs="1">
                     <xs:annotation name="nullable"/>
                     <xs:annotation name="final"/>
                 </xs:element>
@@ -281,7 +281,7 @@
         </xs:sequence>
     </xs:complexType>
 
-    <xs:complexType name="densityMap">
+    <xs:complexType name="densityMapping">
         <xs:sequence>
             <xs:element name="density" type="density" maxOccurs="unbounded" minOccurs="1">
             </xs:element>

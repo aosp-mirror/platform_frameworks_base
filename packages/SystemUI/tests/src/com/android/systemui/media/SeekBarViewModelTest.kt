@@ -324,6 +324,42 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    fun seekStarted_listenerNotified() {
+        var isScrubbing: Boolean? = null
+        val listener = object : SeekBarViewModel.ScrubbingChangeListener {
+            override fun onScrubbingChanged(scrubbing: Boolean) {
+                isScrubbing = scrubbing
+            }
+        }
+        viewModel.setScrubbingChangeListener(listener)
+
+        viewModel.onSeekStarting()
+        fakeExecutor.runAllReady()
+
+        assertThat(isScrubbing).isTrue()
+    }
+
+    @Test
+    fun seekEnded_listenerNotified() {
+        var isScrubbing: Boolean? = null
+        val listener = object : SeekBarViewModel.ScrubbingChangeListener {
+            override fun onScrubbingChanged(scrubbing: Boolean) {
+                isScrubbing = scrubbing
+            }
+        }
+        viewModel.setScrubbingChangeListener(listener)
+
+        // Start seeking
+        viewModel.onSeekStarting()
+        fakeExecutor.runAllReady()
+        // End seeking
+        viewModel.onSeek(15L)
+        fakeExecutor.runAllReady()
+
+        assertThat(isScrubbing).isFalse()
+    }
+
+    @Test
     @Ignore
     fun onProgressChangedFromUser() {
         // WHEN user starts dragging the seek bar
@@ -339,16 +375,20 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun onProgressChangedFromUserWithoutStartTrackingTouch() {
-        // WHEN user starts dragging the seek bar
+    fun onProgressChangedFromUserWithoutStartTrackingTouch_transportUpdated() {
+        whenever(mockController.transportControls).thenReturn(mockTransport)
+        viewModel.updateController(mockController)
         val pos = 42
         val bar = SeekBar(context)
+
+        // WHEN we get an onProgressChanged event without an onStartTrackingTouch event
         with(viewModel.seekBarListener) {
             onProgressChanged(bar, pos, true)
         }
         fakeExecutor.runAllReady()
-        // THEN then elapsed time should not be updated
-        assertThat(viewModel.progress.value!!.elapsedTime).isNull()
+
+        // THEN we immediately update the transport
+        verify(mockTransport).seekTo(pos.toLong())
     }
 
     @Test

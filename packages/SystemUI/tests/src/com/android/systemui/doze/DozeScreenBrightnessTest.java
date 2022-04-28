@@ -506,7 +506,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
-    public void transitionToAodPaused_resetsToDefaultBrightness_lightSensorDisabled() {
+    public void transitionToAodPaused_lightSensorDisabled() {
         // GIVEN AOD
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
@@ -515,9 +515,6 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mScreen.transitionTo(DOZE_AOD, DOZE_AOD_PAUSING);
         mScreen.transitionTo(DOZE_AOD, DOZE_AOD_PAUSED);
         waitForSensorManager();
-
-        // THEN brightness is reset and light sensor is unregistered
-        assertEquals(mServiceFake.screenBrightness, DEFAULT_BRIGHTNESS);
 
         // THEN new light events don't update brightness since the light sensor was unregistered
         mSensor.sendSensorEvent(1);

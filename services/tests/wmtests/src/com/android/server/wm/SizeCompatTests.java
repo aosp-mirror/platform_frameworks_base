@@ -1529,6 +1529,27 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDisplayIgnoreOrientationRequest_orientationChangedToUnspecified() {
+        // Set up a display in landscape and ignoring orientation request.
+        setUpDisplaySizeWithApp(2800, 1400);
+        final DisplayContent display = mActivity.mDisplayContent;
+        display.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        // Portrait fixed app without max aspect.
+        prepareUnresizable(mActivity, 0, SCREEN_ORIENTATION_PORTRAIT);
+
+        assertTrue(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(mActivity.inSizeCompatMode());
+
+        mActivity.setRequestedOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
+
+        assertTrue(mActivity.inSizeCompatMode());
+        // We should remember the original orientation.
+        assertEquals(mActivity.getResolvedOverrideConfiguration().orientation,
+                Configuration.ORIENTATION_PORTRAIT);
+    }
+
+    @Test
     public void testDisplayIgnoreOrientationRequest_newLaunchedMaxAspectApp() {
         // Set up a display in landscape and ignoring orientation request.
         setUpDisplaySizeWithApp(2800, 1400);

@@ -34,18 +34,18 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Samodejno zasukaj zaslon"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Ali aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovolite dostop do dodatka USB <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Ali aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovolite dostop do naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTa aplikacija sicer nima dovoljenja za snemanje, vendar bi lahko zajemala zvok prek te naprave USB."</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Ali aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovolite dostop do naprave USB <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Želite odpreti aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje naprave USB <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Dovolite aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dostop do naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Želite odpreti <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Ta aplikacija sicer nima dovoljenja za snemanje, vendar bi lahko zajemala zvok prek te naprave USB. Uporaba aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s to napravo lahko povzroči, da boste preslišali klice, obvestila in alarme."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Uporaba aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s to napravo lahko povzroči, da boste preslišali klice, obvestila in alarme."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Ali aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> dovolite dostop do dodatka USB <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Želite odpreti aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje dodatka USB <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Želite odpreti <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Želite odpreti aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje naprave <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTa aplikacija sicer nima dovoljenja za snemanje, vendar bi lahko zajemala zvok prek te naprave USB."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Želite odpreti aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje dodatka USB <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Želite odpreti <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje dodatka <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Namešč. prog. ne delujejo s tem dodatkom USB. Več o tem dodatku preberite na <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"Dodatek USB"</string>
     <string name="label_view" msgid="6815442985276363364">"Prikaži"</string>
-    <string name="always_use_device" msgid="210535878779644679">"Ko je dodatek <xliff:g id="USB_DEVICE">%2$s</xliff:g> povezan, vedno odpri aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="always_use_device" msgid="210535878779644679">"Ko je naprava <xliff:g id="USB_DEVICE">%2$s</xliff:g> povezana, vedno odpri aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Ko je dodatek <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> povezan, vedno odpri aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Ali dovolite odpravljanje težav prek USB?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Računalnikov prstni odtis ključa RSA je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
@@ -135,8 +135,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Pristnost obraza je potrjena"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potrjeno"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Za dokončanje se dotaknite »Potrdite«"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Odklenjeno z obrazom. Za nadaljevanje pritisnite ikono za odklepanje."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Preverjena pristnost"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Uporabi kodo PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Uporabi vzorec"</string>
@@ -296,24 +295,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"S tem boste odblokirali dostop za vse aplikacije in storitve, ki imajo dovoljenje za uporabo mikrofona."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"S tem boste odblokirali dostop za vse aplikacije in storitve, ki imajo dovoljenje za uporabo fotoaparata."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"S tem boste odblokirali dostop za vse aplikacije in storitve, ki imajo dovoljenje za uporabo fotoaparata ali mikrofona."</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_title (2640140287496469689) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_title (7398084286822440384) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_title (195236134743281973) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_blocked_dialog_content (2138318880682877747) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_blocked_dialog_content (7216015168047965948) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_blocked_dialog_content (3960837827570483762) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_toast_content (306555320557065068) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_toast_content (7843105715964332311) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_camera_unblocked_toast_content (7339355093282661115) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Mikrofon je blokiran"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Kamera je blokirana"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Mikrofon in kamera sta blokirana"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Če ga želite odblokirati, dovolite dostop do mikrofona tako, da pri njem premaknete stikalo za zasebnost v napravi v vklopljen položaj. V priročniku za napravo si oglejte, kje v napravi je stikalo za zasebnost."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Če jo želite odblokirati, dovolite dostop do kamere tako, da pri njej premaknete stikalo za zasebnost v napravi v vklopljen položaj. V priročniku za napravo si oglejte, kje v napravi je stikalo za zasebnost."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Če ju želite odblokirati, dovolite dostop tako, da premaknete stikalo za zasebnost v napravi v odblokiran položaj. V priročniku za napravo si oglejte, kje v napravi je stikalo za zasebnost."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Mikrofon je na voljo"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Kamera je na voljo"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Mikrofon in kamera sta na voljo"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Druga naprava"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Vklop/izklop pregleda"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Ne bodo vas motili zvoki ali vibriranje, razen v primeru alarmov, opomnikov, dogodkov in klicateljev, ki jih določite. Še vedno pa boste slišali vse, kar se boste odločili predvajati, vključno z glasbo, videoposnetki in igrami."</string>
@@ -324,7 +314,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Znova se dotaknite, da odprete"</string>
     <string name="tap_again" msgid="1315420114387908655">"Znova se dotaknite možnosti"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Povlecite navzgor, da odprete"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Pritisnite, če želite odpreti."</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Za odpiranje pritisnite ikono za odklepanje."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Odklenjeno z obrazom. Za odpiranje pritisnite ikono za odklepanje."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Povlecite navzgor za vnovičen poskus"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Odklenite napravo, če želite uporabljati NFC."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ta naprava pripada vaši organizaciji"</string>
@@ -380,20 +371,28 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Vaša organizacija je lastnica te naprave in lahko nadzira omrežni promet"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Organizacija <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> je lastnica te naprave in lahko nadzira omrežni promet"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"To napravo zagotavlja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Ta naprava pripada vaši organizaciji in je povezana v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> in je povezana v aplikacijo <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (4137564460025113168) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (2169227918166358741) -->
+    <skip />
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Ta naprava pripada vaši organizaciji"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Ta naprava pripada vaši organizaciji in je povezana v omrežja VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> in je povezana v omrežja VPN"</string>
+    <!-- no translation found for quick_settings_disclosure_management_vpns (929181757984262902) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (3312645578322079185) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Vaša organizacija lahko nadzira omrežni promet v vašem delovnem profilu"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> lahko nadzira omrežni promet v vašem delovnem profilu"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Omrežna dejavnost delovnega profila je vidna skrbniku za IT."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Omrežje je morda nadzorovano"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Ta naprava je povezana v omrežja VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Delovni profil je povezan v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Osebni profil je povezan v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Ta naprava je povezava v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (3586175303518266301) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (153393105176944100) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (451254750289172191) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (6191822916936028208) -->
+    <skip />
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"To napravo zagotavlja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Upravljanje naprav"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -409,10 +408,14 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V tej napravi je nameščen overitelj potrdil. Varni omrežni promet se lahko nadzira ali spreminja."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Skrbnik je vklopil beleženje omrežnega prometa, ki nadzira promet v napravi."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Skrbnik je vklopil beleženje omrežnega prometa, ki nadzoruje samo promet v delovnem profilu, tistega v osebnem profilu pa ne."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Povezani ste z aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>, ki lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Povezani ste z aplikacijama <xliff:g id="VPN_APP_0">%1$s</xliff:g> in <xliff:g id="VPN_APP_1">%2$s</xliff:g>, ki lahko nadzirata omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Delovni profil je povezan z aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>, ki lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Osebni profil je povezan z aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>, ki lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
+    <!-- no translation found for monitoring_description_named_vpn (7502657784155456414) -->
+    <skip />
+    <!-- no translation found for monitoring_description_two_named_vpns (6726394451199620634) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_profile_named_vpn (7254359257263069766) -->
+    <skip />
+    <!-- no translation found for monitoring_description_personal_profile_named_vpn (5083909710727365452) -->
+    <skip />
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Odpri nastavitve omrežja VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"To napravo upravlja tvoj starš. Lahko si ogleda in upravlja podatke, na primer katere aplikacije uporabljaš, tvojo lokacijo in koliko časa uporabljaš napravo."</string>
@@ -469,7 +472,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"Omogočanje predstavitvenega načina"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Prikaz predstavitvenega načina"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Opozorilo"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Denarnica"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nastavite možnost hitrejšega in varnejšega plačevanja s telefonom."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži vse"</string>
@@ -521,6 +524,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prednostno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira pogovornih funkcij."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Za ta obvestila ni mogoče spremeniti nastavitev."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Obvestil o klicih ni mogoče spreminjati."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Te skupine obvestil ni mogoče konfigurirati tukaj"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Posredovano obvestilo"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Vsa obvestila aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -584,7 +588,7 @@
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Odstrani prilogo"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Sistem"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Začetni zaslon"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Nedavni"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Nedavno"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Nazaj"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Obvestila"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Bližnjične tipke"</string>
@@ -714,7 +718,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"Mobilni podatki"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je izklopljen"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je izklopljen."</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth je izklopljen"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Način »ne moti« je izklopljen"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Samodejno pravilo (<xliff:g id="ID_1">%s</xliff:g>) je vklopilo način »ne moti«."</string>
@@ -826,6 +830,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Začasno zaustavi"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Prejšnja skladba"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Naslednja skladba"</string>
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Vzpostavljanje povezave"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Predvajaj"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Odpri aplikacijo <xliff:g id="APP_LABEL">%1$s</xliff:g>."</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Predvajaj skladbo <xliff:g id="SONG_NAME">%1$s</xliff:g> izvajalca <xliff:g id="ARTIST_NAME">%2$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
@@ -855,19 +860,16 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Če želite predvajati to sejo, odprite aplikacijo."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Neznana aplikacija"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Ustavi predvajanje"</string>
-    <!-- no translation found for media_output_first_broadcast_title (6292237789860753022) -->
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako deluje oddajanje"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Oddajanje"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osebe v bližini z združljivo napravo Bluetooth lahko poslušajo predstavnost, ki jo oddajate."</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Če želijo poslušati vaše oddajanje, lahko osebe v bližini z združljivo napravo Bluetooth optično preberejo kodo QR ali uporabijo ime oddajanja in geslo."</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Ime oddajanja"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Geslo"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Shrani"</string>
+    <!-- no translation found for media_output_broadcast_starting (8130153654166235557) -->
     <skip />
-    <!-- no translation found for media_output_broadcast (3555580945878071543) -->
-    <skip />
-    <!-- no translation found for media_output_first_notify_broadcast_message (6353857724136398494) -->
-    <skip />
-    <!-- no translation found for media_output_broadcasting_message (4150299923404886073) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_name (8786127091542624618) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code (870795639644728542) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_dialog_save (7910865591430010198) -->
+    <!-- no translation found for media_output_broadcast_start_failed (3670835946856129775) -->
     <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Delovna različica"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Delovna različica je bila kopirana v odložišče."</string>
@@ -937,14 +939,15 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj ploščico"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne dodaj ploščice"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Izberite uporabnika"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> aktivna aplikacija</item>
-      <item quantity="two"><xliff:g id="COUNT_1">%s</xliff:g> aktivni aplikaciji</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aktivne aplikacije</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktivnih aplikacij</item>
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> aplikacija je aktivna</item>
+      <item quantity="two"><xliff:g id="COUNT_1">%s</xliff:g> aplikaciji sta aktivni</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aplikacije so aktivne</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplikacij je aktivnih</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nove informacije"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Tudi če teh aplikacij ne uporabljate, so še vedno aktivne in morda vplivajo na čas delovanja baterije."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Ustavi"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Ustavljeno"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Končano"</string>

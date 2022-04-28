@@ -3227,8 +3227,10 @@ public class TelephonyManager {
                 return "LTE_CA";
             case NETWORK_TYPE_NR:
                 return "NR";
-            default:
+            case NETWORK_TYPE_UNKNOWN:
                 return "UNKNOWN";
+            default:
+                return "UNKNOWN(" + type + ")";
         }
     }
 
@@ -3582,7 +3584,8 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @Deprecated
     public @SimState int getSimCardState(int physicalSlotIndex) {
-        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex, DEFAULT_PORT_INDEX));
+        int activePort = getFirstActivePortIndex(physicalSlotIndex);
+        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex, activePort));
         return getSimCardStateFromSimState(simState);
     }
 
@@ -3688,9 +3691,10 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @Deprecated
     public @SimState int getSimApplicationState(int physicalSlotIndex) {
+        int activePort = getFirstActivePortIndex(physicalSlotIndex);
         int simState =
                 SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex,
-                        DEFAULT_PORT_INDEX));
+                        activePort));
         return getSimApplicationStateFromSimState(simState);
     }
 
@@ -10556,7 +10560,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.enableDataConnectivity();
+                return telephony.enableDataConnectivity(getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#enableDataConnectivity", e);
         }
@@ -10571,7 +10575,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.disableDataConnectivity();
+                return telephony.disableDataConnectivity(getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#disableDataConnectivity", e);
         }
@@ -11768,7 +11772,25 @@ public class TelephonyManager {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
             List<String> newList = updateTelephonyProperty(
                     TelephonyProperties.operator_alpha(), phoneId, name);
-            TelephonyProperties.operator_alpha(newList);
+            try {
+                TelephonyProperties.operator_alpha(newList);
+            } catch (IllegalArgumentException e) { //property value is longer than the byte limit
+                Log.e(TAG, "setNetworkOperatorNameForPhone: ", e);
+
+                int numberOfEntries = newList.size();
+                int maxOperatorLength = //save 1 byte for joiner " , "
+                        (SystemProperties.PROP_VALUE_MAX - numberOfEntries) / numberOfEntries;
+
+                //examine and truncate every operator and retry
+                for (int i = 0; i < newList.size(); i++) {
+                    if (newList.get(i) != null) {
+                        newList.set(i, TextUtils
+                                .truncateStringForUtf8Storage(newList.get(i), maxOperatorLength));
+                    }
+                }
+                TelephonyProperties.operator_alpha(newList);
+                Log.e(TAG, "successfully truncated operator_alpha: " + newList);
+            }
         }
     }
 
@@ -11931,7 +11953,7 @@ public class TelephonyManager {
             Log.d(TAG, "factoryReset: subId=" + subId);
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.factoryReset(subId);
+                telephony.factoryReset(subId, getOpPackageName());
             }
         } catch (RemoteException e) {
         }
@@ -11951,7 +11973,7 @@ public class TelephonyManager {
             Log.d(TAG, "resetSettings: subId=" + getSubId());
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.factoryReset(getSubId());
+                telephony.factoryReset(getSubId(), getOpPackageName());
             }
         } catch (RemoteException e) {
         }
@@ -12172,15 +12194,7 @@ public class TelephonyManager {
     })
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public @Nullable ServiceState getServiceState() {
-        if (getRenouncedPermissions().contains(Manifest.permission.ACCESS_FINE_LOCATION))  {
-            if (getRenouncedPermissions().contains(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                return getServiceState(INCLUDE_LOCATION_DATA_NONE);
-            } else {
-                return getServiceState(INCLUDE_LOCATION_DATA_COARSE);
-            }
-        }
-
-        return getServiceState(INCLUDE_LOCATION_DATA_FINE);
+        return getServiceState(getLocationData());
     }
 
     /**
@@ -13219,7 +13233,7 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.setDataEnabledForReason(subId, reason, enabled);
+                service.setDataEnabledForReason(subId, reason, enabled, getOpPackageName());
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -14185,7 +14199,8 @@ public class TelephonyManager {
             UPDATE_AVAILABLE_NETWORKS_MULTIPLE_NETWORKS_NOT_SUPPORTED,
             UPDATE_AVAILABLE_NETWORKS_NO_OPPORTUNISTIC_SUB_AVAILABLE,
             UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION,
-            UPDATE_AVAILABLE_NETWORKS_SERVICE_IS_DISABLED})
+            UPDATE_AVAILABLE_NETWORKS_SERVICE_IS_DISABLED,
+            UPDATE_AVAILABLE_NETWORKS_SIM_PORT_NOT_AVAILABLE})
     public @interface UpdateAvailableNetworksResult {}
 
     /**
@@ -14242,6 +14257,12 @@ public class TelephonyManager {
      * OpportunisticNetworkService is disabled.
      */
     public static final int UPDATE_AVAILABLE_NETWORKS_SERVICE_IS_DISABLED = 10;
+
+    /**
+     * SIM port is not available to switch to opportunistic subscription.
+     * @hide
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_SIM_PORT_NOT_AVAILABLE = 11;
 
     /**
      * Set preferred opportunistic data subscription id.
@@ -16171,17 +16192,21 @@ public class TelephonyManager {
      */
     public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
-        if (getRenouncedPermissions().contains(Manifest.permission.ACCESS_FINE_LOCATION))  {
-            if (getRenouncedPermissions().contains(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                registerTelephonyCallback(INCLUDE_LOCATION_DATA_NONE, executor, callback);
-                return;
-            } else {
-                registerTelephonyCallback(INCLUDE_LOCATION_DATA_COARSE, executor, callback);
-                return;
-            }
-        }
+        registerTelephonyCallback(getLocationData(), executor, callback);
+    }
 
-        registerTelephonyCallback(INCLUDE_LOCATION_DATA_FINE, executor, callback);
+    private int getLocationData() {
+        boolean renounceCoarseLocation =
+                getRenouncedPermissions().contains(Manifest.permission.ACCESS_COARSE_LOCATION);
+        boolean renounceFineLocation =
+                getRenouncedPermissions().contains(Manifest.permission.ACCESS_FINE_LOCATION);
+        if (renounceCoarseLocation) {
+            return INCLUDE_LOCATION_DATA_NONE;
+        } else if (renounceFineLocation) {
+            return INCLUDE_LOCATION_DATA_COARSE;
+        } else {
+            return INCLUDE_LOCATION_DATA_FINE;
+        }
     }
 
     /** @hide */

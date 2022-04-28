@@ -57,8 +57,11 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -76,10 +79,12 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.infra.AndroidFuture;
+import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
@@ -160,11 +165,13 @@ public final class PermissionPolicyService extends SystemService {
     private NotificationManagerInternal mNotificationManager;
     private final KeyguardManager mKeyguardManager;
     private final PackageManager mPackageManager;
+    private final Handler mHandler;
 
     public PermissionPolicyService(@NonNull Context context) {
         super(context);
 
         mContext = context;
+        mHandler = new Handler(Looper.getMainLooper());
         mPackageManager = context.getPackageManager();
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         LocalServices.addService(PermissionPolicyInternal.class, new Internal());
@@ -1060,7 +1067,8 @@ public final class PermissionPolicyService extends SystemService {
                             ActivityInterceptorInfo info) {
                         super.onActivityLaunched(taskInfo, activityInfo, info);
                         if (!shouldShowNotificationDialogOrClearFlags(taskInfo,
-                                activityInfo.packageName, info.intent, info.checkedOptions, true)) {
+                                activityInfo.packageName, info.intent, info.checkedOptions, true)
+                                || isNoDisplayActivity(activityInfo)) {
                             return;
                         }
                         UserHandle user = UserHandle.of(taskInfo.userId);
@@ -1068,8 +1076,11 @@ public final class PermissionPolicyService extends SystemService {
                                 activityInfo.packageName, user)) {
                             clearNotificationReviewFlagsIfNeeded(activityInfo.packageName, user);
                         } else {
-                            showNotificationPromptIfNeeded(activityInfo.packageName,
-                                    taskInfo.userId, taskInfo.taskId, info);
+                            // Post the activity start checks to ensure the notification channel
+                            // checks happen outside the WindowManager global lock.
+                            mHandler.post(() -> showNotificationPromptIfNeeded(
+                                    activityInfo.packageName, taskInfo.userId, taskInfo.taskId,
+                                    info));
                         }
                     }
                 };
@@ -1130,6 +1141,22 @@ public final class PermissionPolicyService extends SystemService {
                 Intent intent) {
             return shouldShowNotificationDialogOrClearFlags(
                     taskInfo, currPkg, intent, null, false);
+        }
+
+        private boolean isNoDisplayActivity(@NonNull ActivityInfo aInfo) {
+            final int themeResource = aInfo.getThemeResource();
+            if (themeResource == Resources.ID_NULL) {
+                return false;
+            }
+
+            boolean noDisplay = false;
+            final AttributeCache.Entry ent = AttributeCache.instance()
+                    .get(aInfo.packageName, themeResource, R.styleable.Window, 0);
+            if (ent != null) {
+                noDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
+            }
+
+            return noDisplay;
         }
 
         /**

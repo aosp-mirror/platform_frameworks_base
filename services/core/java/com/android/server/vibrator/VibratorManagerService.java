@@ -733,6 +733,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                             + attrs);
                 }
                 break;
+            case IGNORED_FOR_RINGTONE:
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration in favor of ringtone vibration");
+                }
+                break;
+
             default:
                 if (DEBUG) {
                     Slog.d(TAG, "Vibration for uid=" + uid + " and with attrs=" + attrs
@@ -807,6 +813,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         if (currentVibration.attrs.getUsage() == VibrationAttributes.USAGE_ALARM) {
             return Vibration.Status.IGNORED_FOR_ALARM;
+        }
+
+        if (currentVibration.attrs.getUsage() == VibrationAttributes.USAGE_RINGTONE) {
+            return Vibration.Status.IGNORED_FOR_RINGTONE;
         }
 
         if (currentVibration.isRepeating()) {
@@ -989,12 +999,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      */
     @NonNull
     private VibrationAttributes fixupVibrationAttributes(@Nullable VibrationAttributes attrs,
-            CombinedVibration effect) {
+            @Nullable CombinedVibration effect) {
         if (attrs == null) {
             attrs = DEFAULT_ATTRIBUTES;
         }
         int usage = attrs.getUsage();
-        if ((usage == VibrationAttributes.USAGE_UNKNOWN) && effect.isHapticFeedbackCandidate()) {
+        if ((usage == VibrationAttributes.USAGE_UNKNOWN)
+                && (effect != null) && effect.isHapticFeedbackCandidate()) {
             usage = VibrationAttributes.USAGE_TOUCH;
         }
         int flags = attrs.getFlags();

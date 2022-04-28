@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Rozłączanie..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Łączenie..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Połączono – <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Parowanie..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Paruję…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Połączono (bez telefonu) – <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Połączono (bez multimediów) – <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Połączono (bez dostępu do wiadomości) – <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -259,7 +259,7 @@
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Paruję urządzenie…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Nie udało się sparować z urządzeniem. Kod QR jest nieprawidłowy albo urządzenie nie jest podłączone do tej samej sieci."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adres IP i port"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Zeskanuj kod QR"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skaner kodów QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Sparuj urządzenia przez Wi-Fi, skanując kod QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Połącz się z siecią Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
@@ -389,7 +389,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Warstwy debugowania GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Zezwalaj na ładowanie warstw debugowania GPU"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Włącz szczegółowe rejestrowanie dostawcy"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Dołączaj do raportów o błędach dodatkowe dane dostawcy dotyczące konkretnego urządzenia, które mogą zawierać dane prywatne oraz wykorzystywać więcej baterii lub pamięci."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Dołączaj do raportów o błędach dodatkowe dane dostawcy dotyczące konkretnego urządzenia, które mogą zawierać dane prywatne oraz wykorzystywać więcej baterii lub pamięci"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala animacji okna"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala animacji przejścia"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Skala długości animacji"</string>
@@ -596,8 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Zresetować sesję gościa?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Usunąć gościa?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetuj"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Usuń"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Resetuję sesję gościa…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Zrób zdjęcie"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Wybierz obraz"</string>
@@ -653,10 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Włączanie ekranu"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Zezwalaj na włączanie ekranu"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Zezwalaj na włączanie ekranu przez aplikację. Gdy przyznasz te uprawnienia, aplikacja będzie mogła w dowolnym momencie włączyć ekran bez Twojego wyraźnego pozwolenia."</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skaner kodów QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Aby odsłuchać, wyśrodkuj kod QR poniżej"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Nieprawidłowy format kodu QR"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zatrzymaj transmisję aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Jeśli transmitujesz aplikację <xliff:g id="SWITCHAPP">%1$s</xliff:g> lub zmieniasz dane wyjściowe, Twoja obecna transmisja zostanie zakończona"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmisja aplikacji <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Zmień dane wyjściowe"</string>
 </resources>

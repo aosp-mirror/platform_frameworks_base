@@ -55,6 +55,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AnrController;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -2132,15 +2133,19 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
 
-        PackageMonitor monitor = new PackageMonitor() {
+        if (mPackageMonitorsForUser.get(userId) == null) {
+            PackageMonitor monitor = new PackageMonitor() {
                 @Override
                 public void onPackageRemoved(String packageName, int uid) {
                     updateLegacyStorageApps(packageName, uid, false);
                 }
             };
-        // TODO(b/149391976): Use different handler?
-        monitor.register(mContext, user, true, mHandler);
-        mPackageMonitorsForUser.put(userId, monitor);
+            // TODO(b/149391976): Use different handler?
+            monitor.register(mContext, user, true, mHandler);
+            mPackageMonitorsForUser.put(userId, monitor);
+        } else {
+            Slog.w(TAG, "PackageMonitor is already registered for: " + userId);
+        }
     }
 
     private static long getLastAccessTime(AppOpsManager manager,
@@ -3530,9 +3535,12 @@ class StorageManagerService extends IStorageManager.Stub
                     appInfo.manageSpaceActivityName);
             intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
 
+            final ActivityOptions options = ActivityOptions.makeBasic();
+            options.setIgnorePendingIntentCreatorForegroundState(true);
+
             PendingIntent activity = PendingIntent.getActivity(targetAppContext, requestCode,
                     intent,
-                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE);
+                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE, options.toBundle());
             return activity;
         } catch (PackageManager.NameNotFoundException e) {
             throw new IllegalArgumentException(
@@ -3733,6 +3741,16 @@ class StorageManagerService extends IStorageManager.Stub
         final AppOpsManager appOps = (AppOpsManager) mContext.getSystemService(
                 Context.APP_OPS_SERVICE);
         appOps.checkPackage(callingUid, callingPkg);
+
+        try {
+            final PackageManager.Property noAppStorageProp = mContext.getPackageManager()
+                    .getProperty(PackageManager.PROPERTY_NO_APP_DATA_STORAGE, callingPkg);
+            if (noAppStorageProp != null && noAppStorageProp.getBoolean()) {
+                throw new SecurityException(callingPkg + " should not have " + appPath);
+            }
+        } catch (PackageManager.NameNotFoundException ignore) {
+            // Property not found
+        }
 
         File appFile = null;
         try {

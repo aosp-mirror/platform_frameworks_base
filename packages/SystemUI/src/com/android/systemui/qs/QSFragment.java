@@ -31,7 +31,6 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
@@ -60,7 +59,6 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.LifecycleFragment;
 import com.android.systemui.util.Utils;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -212,7 +210,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     }
         });
         mHeader = view.findViewById(R.id.header);
-        mQSPanelController.setHeaderContainer(view.findViewById(R.id.header_text_container));
         mFooter = qsFragmentComponent.getQSFooter();
 
         mQSContainerImplController = qsFragmentComponent.getQSContainerImplController();
@@ -522,7 +519,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Override
     public void setOverScrollAmount(int overScrollAmount) {
         mOverScrolling = overScrollAmount != 0;
-        getView().setTranslationY(overScrollAmount);
+        View view = getView();
+        if (view != null) {
+            view.setTranslationY(overScrollAmount);
+        }
     }
 
     @Override
@@ -612,8 +612,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         } else if (progress > 0 && view.getVisibility() != View.VISIBLE) {
             view.setVisibility((View.VISIBLE));
         }
-        float alpha = mQSPanelController.bouncerInTransit()
-                ? BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(progress)
+        float alpha = mQSPanelController.isBouncerInTransit()
+                ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(progress)
                 : ShadeInterpolation.getContentAlpha(progress);
         view.setAlpha(alpha);
     }
@@ -717,8 +717,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
-    public void setExpandClickListener(OnClickListener onClickListener) {
-        mFooter.setExpandClickListener(onClickListener);
+    public void setCollapseExpandAction(Runnable action) {
+        mQSPanelController.setCollapseExpandAction(action);
+        mQuickQSPanelController.setCollapseExpandAction(action);
     }
 
     @Override
@@ -826,7 +827,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         IndentingPrintWriter indentingPw = new IndentingPrintWriter(pw, /* singleIndent= */ "  ");
         indentingPw.println("QSFragment:");
         indentingPw.increaseIndent();

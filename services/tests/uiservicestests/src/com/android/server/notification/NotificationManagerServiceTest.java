@@ -170,6 +170,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenPolicy;
+import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -289,6 +290,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private UserManager mUserManager;
     @Mock
     ActivityManager mActivityManager;
+    @Mock
+    TelecomManager mTelecomManager;
     @Mock
     Resources mResources;
     @Mock
@@ -494,7 +497,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mAppUsageStats, mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
                 mAppOpsManager, mAppOpsService, mUm, mHistoryManager, mStatsManager,
                 mock(TelephonyManager.class),
-                mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class));
+                mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class),
+                mTelecomManager);
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
@@ -9122,6 +9126,54 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+    }
+
+    @Test
+    public void testCallNotificationsBypassBlock() throws Exception {
+        when(mAmi.getPendingIntentFlags(any(IIntentSender.class)))
+                .thenReturn(FLAG_MUTABLE | FLAG_ONE_SHOT);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+
+        Notification.Builder nb = new Notification.Builder(
+                mContext, mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addAction(new Notification.Action.Builder(null, "test", null).build());
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.setNotificationsEnabledForPackage(
+                r.getSbn().getPackageName(), r.getUid(), false);
+
+        // normal blocked notifications - blocked
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+
+        // just using the style - blocked
+        Person person = new Person.Builder()
+                .setName("caller")
+                .build();
+        nb.setStyle(Notification.CallStyle.forOngoingCall(
+                person, mock(PendingIntent.class)));
+        nb.setFullScreenIntent(mock(PendingIntent.class), true);
+        sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+
+        // style + managed call - bypasses block
+        when(mTelecomManager.isInManagedCall()).thenReturn(true);
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+
+        // style + self managed call - bypasses block
+        when(mTelecomManager.isInSelfManagedCall(
+                r.getSbn().getPackageName(), r.getUser())).thenReturn(true);
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
                 r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
     }

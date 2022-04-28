@@ -119,6 +119,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -135,7 +136,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
@@ -1084,6 +1084,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         final IntentFilter delayedActionFilter = new IntentFilter();
         delayedActionFilter.addAction(DELAYED_KEYGUARD_ACTION);
         delayedActionFilter.addAction(DELAYED_LOCK_PROFILE_ACTION);
+        delayedActionFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiver(mDelayedLockBroadcastReceiver, delayedActionFilter,
                 SYSTEMUI_PERMISSION, null /* scheduler */,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
@@ -1219,7 +1220,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 doKeyguardLaterLocked(timeout);
                 mLockLater = true;
             } else if (!mLockPatternUtils.isLockScreenDisabled(currentUser)) {
-                mPendingLock = true;
+                setPendingLock(true);
             }
 
             if (mPendingLock) {
@@ -1263,7 +1264,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 mContext.getSystemService(PowerManager.class).wakeUp(SystemClock.uptimeMillis(),
                         PowerManager.WAKE_REASON_CAMERA_LAUNCH,
                         "com.android.systemui:CAMERA_GESTURE_PREVENT_LOCK");
-                mPendingLock = false;
+                setPendingLock(false);
                 mPendingReset = false;
             }
 
@@ -1333,7 +1334,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             }
 
             doKeyguardLocked(null);
-            mPendingLock = false;
+            setPendingLock(false);
         }
     }
 
@@ -1393,6 +1394,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         // Lock in the future
         long when = SystemClock.elapsedRealtime() + timeout;
         Intent intent = new Intent(DELAYED_KEYGUARD_ACTION);
+        intent.setPackage(mContext.getPackageName());
         intent.putExtra("seq", mDelayedShowingSequence);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         PendingIntent sender = PendingIntent.getBroadcast(mContext,
@@ -1413,11 +1415,13 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 } else {
                     long userWhen = SystemClock.elapsedRealtime() + userTimeout;
                     Intent lockIntent = new Intent(DELAYED_LOCK_PROFILE_ACTION);
+                    lockIntent.setPackage(mContext.getPackageName());
                     lockIntent.putExtra("seq", mDelayedProfileShowingSequence);
                     lockIntent.putExtra(Intent.EXTRA_USER_ID, profileId);
                     lockIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                     PendingIntent lockSender = PendingIntent.getBroadcast(
-                            mContext, 0, lockIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                            mContext, 0, lockIntent,
+                            PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                             userWhen, lockSender);
                 }
@@ -2134,6 +2138,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             Log.i(TAG, "Device is going to sleep, aborting keyguardDone");
             return;
         }
+        setPendingLock(false); // user may have authenticated during the screen off animation
         if (mExitSecureCallback != null) {
             try {
                 mExitSecureCallback.onKeyguardExitResult(true /* authenciated */);
@@ -2264,7 +2269,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             mHiding = false;
             mKeyguardExitAnimationRunner = null;
             mWakeAndUnlocking = false;
-            mPendingLock = false;
+            setPendingLock(false);
             setShowingLocked(true);
             mKeyguardViewControllerLazy.get().show(options);
             resetKeyguardDonePendingLocked();
@@ -2599,6 +2604,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
             finishSurfaceBehindRemoteAnimation(cancelled);
             mSurfaceBehindRemoteAnimationRequested = false;
+
+            // The remote animation is over, so we're not going away anymore.
+            mKeyguardStateController.notifyKeyguardGoingAway(false);
         });
 
         mKeyguardUnlockAnimationControllerLazy.get().notifyFinishedKeyguardExitAnimation(
@@ -2617,6 +2625,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             ActivityTaskManager.getService().keyguardGoingAway(
                     WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS
                             | WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER);
+            mKeyguardStateController.notifyKeyguardGoingAway(true);
         } catch (RemoteException e) {
             mSurfaceBehindRemoteAnimationRequested = false;
             e.printStackTrace();
@@ -2780,6 +2789,13 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     public void onWakeAndUnlocking() {
         Trace.beginSection("KeyguardViewMediator#onWakeAndUnlocking");
         mWakeAndUnlocking = true;
+
+        // We're going to animate in the Launcher, so ask WM to clear the task snapshot so we don't
+        // initially display an old snapshot with all of the icons visible. We're System UI, so
+        // we're allowed to pass in null to ask WM to find the home activity for us to prevent
+        // needing to IPC to Launcher.
+        ActivityManagerWrapper.getInstance().invalidateHomeTaskSnapshot(null /* homeActivity */);
+
         keyguardDone();
         Trace.endSection();
     }
@@ -2893,7 +2909,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.print("  mSystemReady: "); pw.println(mSystemReady);
         pw.print("  mBootCompleted: "); pw.println(mBootCompleted);
         pw.print("  mBootSendUserPresent: "); pw.println(mBootSendUserPresent);
@@ -3038,6 +3054,11 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 }
             }
         }
+    }
+
+    private void setPendingLock(boolean hasPendingLock) {
+        mPendingLock = hasPendingLock;
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "pendingLock", mPendingLock ? 1 : 0);
     }
 
     public void addStateMonitorCallback(IKeyguardStateCallback callback) {

@@ -861,6 +861,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             mSessions.put(sessionId, session);
         }
+        mPm.addInstallerPackageName(session.getInstallSource());
 
         mCallbacks.notifySessionCreated(session.sessionId, session.userId);
 
@@ -1734,5 +1735,38 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
                 .setPackage(sessionInfo.installerPackageName);
         mContext.sendBroadcastAsUser(sessionUpdatedIntent, UserHandle.of(userId));
+    }
+
+    /**
+     * Abandon unfinished sessions if the installer package has been uninstalled.
+     * @param installerAppId the app ID of the installer package that has been uninstalled.
+     * @param userId the user that has the installer package uninstalled.
+     */
+    void onInstallerPackageDeleted(int installerAppId, int userId) {
+        synchronized (mSessions) {
+            for (int i = 0; i < mSessions.size(); i++) {
+                final PackageInstallerSession session = mSessions.valueAt(i);
+                if (!matchesInstaller(session, installerAppId, userId)) {
+                    continue;
+                }
+                // Find parent session and only abandon parent session if installer matches
+                PackageInstallerSession root = !session.hasParentSessionId()
+                        ? session : mSessions.get(session.getParentSessionId());
+                if (root != null && matchesInstaller(root, installerAppId, userId)
+                        && !root.isDestroyed()) {
+                    root.abandon();
+                }
+            }
+        }
+    }
+
+    private boolean matchesInstaller(PackageInstallerSession session, int installerAppId,
+            int userId) {
+        final int installerUid = session.getInstallerUid();
+        if (installerAppId == UserHandle.USER_ALL) {
+            return UserHandle.getAppId(installerUid) == installerAppId;
+        } else {
+            return UserHandle.getUid(userId, installerAppId) == installerUid;
+        }
     }
 }

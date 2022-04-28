@@ -280,8 +280,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSurfaceTransactionHelper = surfaceTransactionHelper;
         mPipAnimationController = pipAnimationController;
         mPipUiEventLoggerLogger = pipUiEventLogger;
-        mSurfaceControlTransactionFactory =
-                new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
+        mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mSplitScreenOptional = splitScreenOptional;
         mTaskOrganizer = shellTaskOrganizer;
         mMainExecutor = mainExecutor;
@@ -665,6 +664,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mSurfaceControlTransactionFactory.getTransaction();
         tx.setAlpha(mLeash, 0f);
         tx.apply();
+
+        // When entering PiP this transaction will be applied within WindowContainerTransaction and
+        // ensure that the PiP has rounded corners.
+        final SurfaceControl.Transaction boundsChangeTx =
+                mSurfaceControlTransactionFactory.getTransaction();
+        mSurfaceTransactionHelper
+                .crop(boundsChangeTx, mLeash, destinationBounds)
+                .round(boundsChangeTx, mLeash, true /* applyCornerRadius */);
+
         mPipTransitionState.setTransitionState(PipTransitionState.ENTRY_SCHEDULED);
         applyEnterPipSyncTransaction(destinationBounds, () -> {
             mPipAnimationController
@@ -677,7 +685,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // mState is set right after the animation is kicked off to block any resize
             // requests such as offsetPip that may have been called prior to the transition.
             mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
-        }, null /* boundsChangeTransaction */);
+        }, boundsChangeTx);
     }
 
     private void onEndOfSwipePipToHomeTransition() {
@@ -915,6 +923,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             removeContentOverlay(mSwipePipToHomeOverlay, null /* callback */);
             mSwipePipToHomeOverlay = null;
         }
+        resetShadowRadius();
         mPipTransitionState.setInSwipePipToHomeTransition(false);
         mPictureInPictureParams = null;
         mPipTransitionState.setTransitionState(PipTransitionState.UNDEFINED);
@@ -1560,11 +1569,26 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // Avoid double removal, which is fatal.
             return;
         }
-        final SurfaceControl.Transaction tx =
-                mSurfaceControlTransactionFactory.getTransaction();
+        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         tx.remove(surface);
         tx.apply();
         if (callback != null) callback.run();
+    }
+
+    private void resetShadowRadius() {
+        if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
+            // mLeash is undefined when in PipTransitionState.UNDEFINED
+            return;
+        }
+        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
+        tx.setShadowRadius(mLeash, 0f);
+        tx.apply();
+    }
+
+    @VisibleForTesting
+    public void setSurfaceControlTransactionFactory(
+            PipSurfaceTransactionHelper.SurfaceControlTransactionFactory factory) {
+        mSurfaceControlTransactionFactory = factory;
     }
 
     /**

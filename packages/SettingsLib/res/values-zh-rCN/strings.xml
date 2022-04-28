@@ -369,7 +369,7 @@
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"显示视图更新"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"绘图时闪烁显示窗口中的视图"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"显示硬件层更新"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Flash 硬件层在进行更新时会显示为绿色"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Flash 硬件层在更新时会显示为绿色"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"调试 GPU 过度绘制"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"停用 HW 叠加层"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"始终使用 GPU 进行屏幕合成"</string>
@@ -596,8 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"要重置访客会话吗？"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"要移除访客吗？"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"重置"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"移除"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"正在重置访客会话…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"拍摄照片"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"选择图片"</string>
@@ -653,10 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"开启屏幕"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"允许开启屏幕"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"允许应用开启屏幕。如获授权，该应用便可在您未明确表达意愿的情况下随时开启屏幕。"</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"扫描二维码"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"将扫描器对准下方二维码，即可开始收听"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"二维码的格式无效"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"要停止广播“<xliff:g id="APP_NAME">%1$s</xliff:g>”的内容吗？"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"如果广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容或更改输出来源，当前的广播就会停止"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"更改输出来源"</string>
 </resources>

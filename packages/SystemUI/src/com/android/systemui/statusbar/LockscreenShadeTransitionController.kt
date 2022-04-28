@@ -40,7 +40,6 @@ import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.LargeScreenUtils
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -73,6 +72,9 @@ class LockscreenShadeTransitionController @Inject constructor(
     dumpManager: DumpManager
 ) : Dumpable {
     private var pulseHeight: Float = 0f
+    @get:VisibleForTesting
+    var fractionToShade: Float = 0f
+        private set
     private var useSplitShade: Boolean = false
     private lateinit var nsslController: NotificationStackScrollLayoutController
     lateinit var notificationPanelController: NotificationPanelViewController
@@ -406,9 +408,9 @@ class LockscreenShadeTransitionController @Inject constructor(
             if (field != value || forceApplyAmount) {
                 field = value
                 if (!nsslController.isInLockedDownShade() || field == 0f || forceApplyAmount) {
-                    val notificationShelfProgress =
+                    fractionToShade =
                         MathUtils.saturate(dragDownAmount / notificationShelfTransitionDistance)
-                    nsslController.setTransitionToFullShadeAmount(notificationShelfProgress)
+                    nsslController.setTransitionToFullShadeAmount(fractionToShade)
 
                     qSDragProgress = MathUtils.saturate(dragDownAmount / qsTransitionDistance)
                     qS.setTransitionToFullShadeAmount(field, qSDragProgress)
@@ -696,7 +698,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         IndentingPrintWriter(pw, "  ").let {
             it.println("LSShadeTransitionController:")
             it.increaseIndent()

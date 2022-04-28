@@ -446,20 +446,6 @@ final class AccessibilityController {
         // Not relevant for the window observer.
     }
 
-    MagnificationSpec getMagnificationSpecForWindow(WindowState windowState) {
-        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-            mAccessibilityTracing.logTrace(TAG + ".getMagnificationSpecForWindow",
-                    FLAGS_MAGNIFICATION_CALLBACK,
-                    "windowState={" + windowState + "}");
-        }
-        final int displayId = windowState.getDisplayId();
-        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
-        if (displayMagnifier != null) {
-            return displayMagnifier.getMagnificationSpecForWindow(windowState);
-        }
-        return null;
-    }
-
     boolean hasCallbacks() {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
                 | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {

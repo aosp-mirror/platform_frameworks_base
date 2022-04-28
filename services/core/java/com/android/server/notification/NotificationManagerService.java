@@ -240,6 +240,7 @@ import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeProto;
+import android.telecom.TelecomManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -459,6 +460,15 @@ public class NotificationManagerService extends SystemService {
     private static final long NOTIFICATION_TRAMPOLINE_BLOCK = 167676448L;
 
     /**
+     * Activity starts coming from broadcast receivers or services in response to notification and
+     * notification action clicks will be blocked for UX and performance reasons for previously
+     * exempt role holders (browser).
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S_V2)
+    private static final long NOTIFICATION_TRAMPOLINE_BLOCK_FOR_EXEMPT_ROLES = 227752274L;
+
+    /**
      * Whether a notification listeners can understand new, more specific, cancellation reasons.
      */
     @ChangeId
@@ -509,6 +519,7 @@ public class NotificationManagerService extends SystemService {
     private ShortcutHelper mShortcutHelper;
     private PermissionHelper mPermissionHelper;
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
+    private TelecomManager mTelecomManager;
 
     final IBinder mForegroundToken = new Binder();
     private WorkerHandler mHandler;
@@ -2100,7 +2111,8 @@ public class NotificationManagerService extends SystemService {
             NotificationHistoryManager historyManager, StatsManager statsManager,
             TelephonyManager telephonyManager, ActivityManagerInternal ami,
             MultiRateLimiter toastRateLimiter, PermissionHelper permissionHelper,
-            UsageStatsManagerInternal usageStatsManagerInternal) {
+            UsageStatsManagerInternal usageStatsManagerInternal,
+            TelecomManager telecomManager) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -2129,6 +2141,7 @@ public class NotificationManagerService extends SystemService {
         mDeviceIdleManager = getContext().getSystemService(DeviceIdleManager.class);
         mDpm = dpm;
         mUm = userManager;
+        mTelecomManager = telecomManager;
         mPlatformCompat = IPlatformCompat.Stub.asInterface(
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
 
@@ -2420,7 +2433,8 @@ public class NotificationManagerService extends SystemService {
                         PermissionManagerServiceInternal.class), AppGlobals.getPackageManager(),
                         AppGlobals.getPermissionManager(), mEnableAppSettingMigration,
                         mForceUserSetOnUpgrade),
-                LocalServices.getService(UsageStatsManagerInternal.class));
+                LocalServices.getService(UsageStatsManagerInternal.class),
+                getContext().getSystemService(TelecomManager.class));
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
@@ -5535,6 +5549,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean isInCall(String pkg, int uid) {
+            checkCallerIsSystemOrSystemUiOrShell();
+            return isCallNotification(pkg, uid);
+        }
+
+        @Override
         public void setPrivateNotificationsAllowed(boolean allow) {
             if (PackageManager.PERMISSION_GRANTED
                     != getContext().checkCallingPermission(
@@ -5816,7 +5836,7 @@ public class NotificationManagerService extends SystemService {
                 // Add summary
                 final ApplicationInfo appInfo =
                         adjustedSbn.getNotification().extras.getParcelable(
-                                Notification.EXTRA_BUILDER_APPLICATION_INFO);
+                                Notification.EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
                 final Bundle extras = new Bundle();
                 extras.putParcelable(Notification.EXTRA_BUILDER_APPLICATION_INFO, appInfo);
                 final String channelId = notificationRecord.getChannel().getId();
@@ -6846,7 +6866,7 @@ public class NotificationManagerService extends SystemService {
         synchronized (mNotificationLock) {
             isBlocked |= isRecordBlockedLocked(r);
         }
-        if (isBlocked && !n.isMediaNotification()) {
+        if (isBlocked && !(n.isMediaNotification() || isCallNotification(pkg, uid, n))) {
             if (DBG) {
                 Slog.e(TAG, "Suppressing notification from package " + r.getSbn().getPackageName()
                         + " by user request.");
@@ -6856,6 +6876,23 @@ public class NotificationManagerService extends SystemService {
         }
 
         return true;
+    }
+
+    private boolean isCallNotification(String pkg, int uid, Notification n) {
+        if (n.isStyle(Notification.CallStyle.class)) {
+            return isCallNotification(pkg, uid);
+        }
+        return false;
+    }
+
+    private boolean isCallNotification(String pkg, int uid) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mTelecomManager.isInManagedCall() || mTelecomManager.isInSelfManagedCall(
+                    pkg, UserHandle.getUserHandleForUid(uid));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private boolean areNotificationsEnabledForPackageInt(String pkg, int uid) {
@@ -11504,7 +11541,8 @@ public class NotificationManagerService extends SystemService {
 
         private boolean blockTrampoline(int uid) {
             if (mRoleObserver != null && mRoleObserver.isUidExemptFromTrampolineRestrictions(uid)) {
-                return false;
+                return CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK_FOR_EXEMPT_ROLES,
+                        uid);
             }
             return CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
         }

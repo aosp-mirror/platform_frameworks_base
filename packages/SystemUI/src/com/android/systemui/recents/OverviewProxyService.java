@@ -114,7 +114,6 @@ import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.transition.ShellTransitions;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -1015,7 +1014,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG_OPS + " state:");
         pw.print("  isConnected="); pw.println(mOverviewProxy != null);
         pw.print("  mIsEnabled="); pw.println(isEnabled());
@@ -1032,7 +1031,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         pw.print("  mNavBarButtonAlpha="); pw.println(mNavBarButtonAlpha);
         pw.print("  mActiveNavBarRegion="); pw.println(mActiveNavBarRegion);
         pw.print("  mNavBarMode="); pw.println(mNavBarMode);
-        mSysUiState.dump(fd, pw, args);
+        mSysUiState.dump(pw, args);
     }
 
     public interface OverviewProxyListener {

@@ -265,20 +265,58 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onAboutToConnectDeviceChangedWithNonNullParams() {
+    fun onAboutToConnectDeviceAdded_findsDeviceInfoFromAddress() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         // Run and reset the executors and listeners so we only focus on new events.
         fakeBgExecutor.runAllReady()
         fakeFgExecutor.runAllReady()
         reset(listener)
 
-        val deviceCallback = captureCallback()
+        // Ensure we'll get device info when using the address
+        val fullMediaDevice = mock(MediaDevice::class.java)
+        val address = "fakeAddress"
+        val nameFromDevice = "nameFromDevice"
+        val iconFromDevice = mock(Drawable::class.java)
+        whenever(lmm.getMediaDeviceById(eq(address))).thenReturn(fullMediaDevice)
+        whenever(fullMediaDevice.name).thenReturn(nameFromDevice)
+        whenever(fullMediaDevice.iconWithoutBackground).thenReturn(iconFromDevice)
+
         // WHEN the about-to-connect device changes to non-null
+        val deviceCallback = captureCallback()
+        val nameFromParam = "nameFromParam"
+        val iconFromParam = mock(Drawable::class.java)
+        deviceCallback.onAboutToConnectDeviceAdded(address, nameFromParam, iconFromParam)
+        assertThat(fakeFgExecutor.runAllReady()).isEqualTo(1)
+
+        // THEN the about-to-connect device based on the address is returned
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(nameFromDevice)
+        assertThat(data.name).isNotEqualTo(nameFromParam)
+        assertThat(data.icon).isEqualTo(iconFromDevice)
+        assertThat(data.icon).isNotEqualTo(iconFromParam)
+    }
+
+    @Test
+    fun onAboutToConnectDeviceAdded_cantFindDeviceInfoFromAddress() {
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        // Run and reset the executors and listeners so we only focus on new events.
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        reset(listener)
+
+        // Ensure we can't get device info based on the address
+        val address = "fakeAddress"
+        whenever(lmm.getMediaDeviceById(eq(address))).thenReturn(null)
+
+        // WHEN the about-to-connect device changes to non-null
+        val deviceCallback = captureCallback()
         val name = "AboutToConnectDeviceName"
         val mockIcon = mock(Drawable::class.java)
-        deviceCallback.onAboutToConnectDeviceChanged(name, mockIcon)
+        deviceCallback.onAboutToConnectDeviceAdded(address, name, mockIcon)
         assertThat(fakeFgExecutor.runAllReady()).isEqualTo(1)
-        // THEN the about-to-connect device is returned
+
+        // THEN the about-to-connect device based on the parameters is returned
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isTrue()
         assertThat(data.name).isEqualTo(name)
@@ -286,21 +324,21 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onAboutToConnectDeviceChangedWithNullParams() {
+    fun onAboutToConnectDeviceAddedThenRemoved_usesNormalDevice() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         fakeBgExecutor.runAllReady()
         val deviceCallback = captureCallback()
         // First set a non-null about-to-connect device
-        deviceCallback.onAboutToConnectDeviceChanged(
-            "AboutToConnectDeviceName", mock(Drawable::class.java)
+        deviceCallback.onAboutToConnectDeviceAdded(
+            "fakeAddress", "AboutToConnectDeviceName", mock(Drawable::class.java)
         )
         // Run and reset the executors and listeners so we only focus on new events.
         fakeBgExecutor.runAllReady()
         fakeFgExecutor.runAllReady()
         reset(listener)
 
-        // WHEN the about-to-connect device changes to null
-        deviceCallback.onAboutToConnectDeviceChanged(null, null)
+        // WHEN hasDevice switches to false
+        deviceCallback.onAboutToConnectDeviceRemoved()
         assertThat(fakeFgExecutor.runAllReady()).isEqualTo(1)
         // THEN the normal device is returned
         val data = captureDeviceData(KEY)

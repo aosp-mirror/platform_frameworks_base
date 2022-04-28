@@ -122,12 +122,7 @@ public class MediaController extends FrameLayout {
     private final AccessibilityManager mAccessibilityManager;
     private boolean mBackCallbackRegistered;
     /** Handles back invocation */
-    private final OnBackInvokedCallback mBackCallback = new OnBackInvokedCallback() {
-        @Override
-        public void onBackInvoked() {
-            hide();
-        }
-    };
+    private final OnBackInvokedCallback mBackCallback = this::hide;
     /** Handles decor view attach state change */
     private final OnAttachStateChangeListener mAttachStateListener =
             new OnAttachStateChangeListener() {

@@ -131,7 +131,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
                 mDisplayController.getDisplayContext(mRootTaskInfo.displayId),
                 mRootTaskInfo.configuration, this /* layoutChangeListener */,
                 mParentContainerCallbacks, mDisplayImeController, mController.getTaskOrganizer(),
-                true /* applyDismissingParallax */);
+                SplitLayout.PARALLAX_DISMISSING);
         mDisplayInsetsController.addInsetsChangedListener(mRootTaskInfo.displayId, mSplitLayout);
 
         final WindowContainerToken token1 = task1.token;
@@ -327,13 +327,15 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
     @Override
     public void onLayoutPositionChanging(SplitLayout layout) {
         mSyncQueue.runInSync(t ->
-                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2));
+                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2,
+                        true /* applyResizingOffset */));
     }
 
     @Override
     public void onLayoutSizeChanging(SplitLayout layout) {
         mSyncQueue.runInSync(t ->
-                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2));
+                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2,
+                        true /* applyResizingOffset */));
     }
 
     @Override
@@ -342,7 +344,8 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
         layout.applyTaskChanges(wct, mTaskInfo1, mTaskInfo2);
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t ->
-                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2));
+                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2,
+                        false /* applyResizingOffset */));
     }
 
     @Override

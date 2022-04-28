@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Utzi"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Gailuak parekatzen badituzu, batetik besteko kontaktuak eta deien historia atzitu ahal izango dituzu."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Ezin izan da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin parekatu."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ezin izan da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin parekatu PIN edo pasakode okerra idatzi delako."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ezin izan da parekatu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin, PIN edo pasakode okerra idatzi delako."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Ezin da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin komunikatu."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuak bikotetzea ukatu du."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordenagailua"</string>
@@ -286,7 +286,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Erakutsi Bluetooth bidezko gailuak izenik gabe"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Desgaitu bolumen absolutua"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gaitu Gabeldorsche"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP bertsioa"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCParen bertsioa"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Hautatu Bluetooth AVRCP bertsioa"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAParen bertsioa"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Hautatu Bluetooth MAParen bertsioa"</string>
@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Egiaztatu USB bidezko aplik."</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Egiaztatu ADB/ADT bidez instalatutako aplikazioak portaera kaltegarriak atzemateko"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth bidezko gailuak izenik gabe (MAC helbideak soilik) erakutsiko dira"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Bluetooth bidezko bolumen absolutuaren eginbidea desgaitu egiten du urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo ezin bada kontrolatu"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Bluetooth bidezko bolumen absolutuaren eginbidea desgaitu egiten du urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo kontrolatu ezin bada"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche eginbide sorta gaitzen du."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Konexioak hobetzeko eginbidea gaitzen du."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Tokiko terminala"</string>
@@ -372,14 +372,14 @@
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Distirarazi hardware-geruzak berdez haiek eguneratzean"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Araztu GPU gainidazketa"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Desgaitu HW gainjartzeak"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"Erabili beti GPU pantaila-muntaietarako"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"Erabili beti GPUa pantaila-muntaietarako"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulatu kolore-eremua"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Gaitu OpenGL aztarnak"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desgaitu USB bidez audioa bideratzeko aukera"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Desgaitu USB bidezko audio-gailuetara automatikoki bideratzeko aukera"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Erakutsi diseinu-mugak"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Erakutsi kliparen mugak, marjinak, etab."</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Behartu eskuin-ezker norabidea"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Eskuinetik ezkerrerako norabidea"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Behartu pantaila-diseinuaren norabidea eskuin-ezker izatera lurraldeko ezarpen guztiekin"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Gaitu leiho-lausotzeak"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Behartu 4x MSAA"</string>
@@ -448,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopia (urdin-horia)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koloreen zuzenketa"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Koloreen zuzenketa lagungarria izan daiteke hauek egin nahi dituzunean:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Koloreak zehaztasun handiagoz ikusi.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Koloreak kendu, arreta gal ez dezazun.&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Baliteke koloreen zuzenketa lagungarria izatea hauek egin nahi dituzunean:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Koloreak zehaztasun handiagoz ikusi.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Koloreak kendu, arreta gal ez dezazun.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> hobespena gainjarri zaio"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> inguru gelditzen dira"</string>
@@ -590,14 +590,13 @@
     <string name="add_guest_failed" msgid="8074548434469843443">"Ezin izan da sortu beste gonbidatu bat"</string>
     <string name="user_nickname" msgid="262624187455825083">"Goitizena"</string>
     <string name="user_add_user" msgid="7876449291500212468">"Gehitu erabiltzaile bat"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Gehitu gonbidatua"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Gehitu gonbidatu bat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Kendu gonbidatua"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Berrezarri gonbidatuentzako saioa"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Gonbidatuentzako saioa berrezarri nahi duzu?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Gonbidatua kendu nahi duzu?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Berrezarri"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Kendu"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Gonbidatuentzako saioa berrezartzen…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Atera argazki bat"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Aukeratu irudi bat"</string>
@@ -616,7 +615,7 @@
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Operadorearen sarea aldatzen"</string>
     <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
     <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
-    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
+    <string name="data_connection_cdma" msgid="9098161966701934334">"1×"</string>
     <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
     <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
     <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+"</string>
@@ -653,10 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Piztu pantaila"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Eman pantaila pizteko baimena"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Eman pantaila pizteko baimena aplikazioei. Baimena emanez gero, aplikazioek edonoiz piztu ahal izango dute pantaila, zuk halako asmorik izan ez arren."</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Eskaneatu QR kodea"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Entzuten hasteko, zentratu beheko QR kodea"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kodearen formatuak ez du balio"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren audioa igortzeari utzi nahi diozu?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> aplikazioaren audioa igortzen baduzu, edo audio-irteera aldatzen baduzu, une hartako igorpena eten egingo da"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Igorri <xliff:g id="SWITCHAPP">%1$s</xliff:g> aplikazioaren audioa"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Aldatu audio-irteera"</string>
 </resources>

@@ -185,6 +185,30 @@ public class DevicePolicyManager {
         mResourcesManager = new DevicePolicyResourcesManager(context, service);
     }
 
+    /**
+     * Fetch the current value of mService.  This is used in the binder cache lambda
+     * expressions.
+     */
+    private final IDevicePolicyManager getService() {
+        return mService;
+    }
+
+    /**
+     * Fetch the current value of mParentInstance.  This is used in the binder cache
+     * lambda expressions.
+     */
+    private final boolean isParentInstance() {
+        return mParentInstance;
+    }
+
+    /**
+     * Fetch the current value of mContext.  This is used in the binder cache lambda
+     * expressions.
+     */
+    private final Context getContext() {
+        return mContext;
+    }
+
     /** @hide test will override it. */
     @VisibleForTesting
     protected int myUserId() {
@@ -1682,7 +1706,7 @@ public class DevicePolicyManager {
     public @interface ProvisioningConfiguration {}
 
     /**
-     * A String extra holding the provisioning trigger. It could be one of
+     * An int extra holding the provisioning trigger. It could be one of
      * {@link #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT}, {@link #PROVISIONING_TRIGGER_QR_CODE},
      * {@link #PROVISIONING_TRIGGER_MANAGED_ACCOUNT} or {@link
      * #PROVISIONING_TRIGGER_UNSPECIFIED}.
@@ -2518,7 +2542,7 @@ public class DevicePolicyManager {
      * that has this delegation. If another app already had delegated security logging access, it
      * will lose the delegation when a new app is delegated.
      *
-     * <p> Can only be granted by Device Owner or Profile Owner of an organnization owned and
+     * <p> Can only be granted by Device Owner or Profile Owner of an organization-owned
      * managed profile.
      */
     public static final String DELEGATION_SECURITY_LOGGING = "delegation-security-logging";
@@ -3298,9 +3322,9 @@ public class DevicePolicyManager {
      * Activity action: Starts the device policy management role holder updater.
      *
      * <p>The activity must handle the device policy management role holder update and set the
-     * intent result to either {@link Activity#RESULT_OK} if the update was successful, {@link
-     * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it encounters a
-     * problem that may be solved by relaunching it again, {@link
+     * intent result. This can include {@link Activity#RESULT_OK} if the update was successful,
+     * {@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if
+     * it encounters a problem that may be solved by relaunching it again, {@link
      * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED} if role holder
      * provisioning is disabled, or {@link
      * #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if it encounters
@@ -3352,7 +3376,8 @@ public class DevicePolicyManager {
 
     /**
      * An {@code int} extra which contains the result code of the last attempt to update
-     * the device policy management role holder.
+     * the device policy management role holder via {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER}.
      *
      * <p>This extra is provided to the device policy management role holder via either {@link
      * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
@@ -3370,6 +3395,8 @@ public class DevicePolicyManager {
      *    encounters a problem that may be solved by relaunching it again.
      *    <li>{@link #RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if
      *    it encounters a problem that will not be solved by relaunching it again.
+     *    <li>Any other value returned by {@link
+     *    #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER}
      * </ul>
      *
      * @hide
@@ -3783,57 +3810,21 @@ public class DevicePolicyManager {
             "android.app.extra.RESOURCE_IDS";
 
     /**
-     * A convenience class that wraps some IpcDataCache methods. Instantiate it with an
-     * API string. Instances can and should be final static. All instances of this class
-     * use the same key for invalidation.
+     * This object is a single place to tack on invalidation and disable calls.  All
+     * binder caches in this class derive from this Config, so all can be invalidated or
+     * disabled through this Config.
      */
-    private static class BinderApi {
-        private final static String KEY = "DevicePolicyManager";
-        private final String mApi;
-        BinderApi(String api) {
-            mApi = api;
-        }
-        final String api() {
-            return mApi;
-        }
-        final String key() {
-            return KEY;
-        }
-        final static void invalidate() {
-            IpcDataCache.invalidateCache(IpcDataCache.MODULE_SYSTEM, KEY);
-        }
-        final void disable() {
-            IpcDataCache.disableForCurrentProcess(mApi);
-        }
-    }
+    private static final IpcDataCache.Config sDpmCaches =
+            new IpcDataCache.Config(8, IpcDataCache.MODULE_SYSTEM, "DevicePolicyManagerCaches");
 
     /** @hide */
     public static void invalidateBinderCaches() {
-        BinderApi.invalidate();
+        sDpmCaches.invalidateCache();
     }
 
-    /**
-     * A simple wrapper for binder caches in this class. All caches are created with a
-     * maximum of 8 entries, the SYSTEM module, and a cache name that is the same as the api.
-     */
-    private static class BinderCache<Q,R> extends IpcDataCache<Q,R> {
-        BinderCache(BinderApi api, IpcDataCache.QueryHandler<Q,R> handler) {
-            super(8, IpcDataCache.MODULE_SYSTEM, api.key(), api.api(), handler);
-        }
-    }
-
-    /**
-     * Disable all caches in the local process.
-     * @hide
-     */
-    public static void disableLocalProcessCaches() {
-        disableGetKeyguardDisabledFeaturesCache();
-        disableHasDeviceOwnerCache();
-        disableGetProfileOwnerOrDeviceOwnerSupervisionComponentCache();
-        disableIsOrganizationOwnedDeviceWithManagedProfileCache();
-        disableGetDeviceOwnerOrganizationNameCache();
-        disableGetOrganizationNameForUserCache();
-        disableIsNetworkLoggingEnabled();
+    /** @hide */
+    public static void disableLocalCaches() {
+        sDpmCaches.disableAllForCurrentProcess();
     }
 
     /** @hide */
@@ -8435,54 +8426,16 @@ public class DevicePolicyManager {
         return getKeyguardDisabledFeatures(admin, myUserId());
     }
 
-    // A key into the keyguard cache.
-    private static class KeyguardQuery {
-        private final ComponentName mAdmin;
-        private final int mUserHandle;
-        KeyguardQuery(@Nullable ComponentName admin, int userHandle) {
-            mAdmin = admin;
-            mUserHandle = userHandle;
-        }
-        public boolean equals(Object o) {
-            if (o instanceof KeyguardQuery) {
-                KeyguardQuery r = (KeyguardQuery) o;
-                return Objects.equals(mAdmin, r.mAdmin) && mUserHandle == r.mUserHandle;
-            } else {
-                return false;
-            }
-        }
-        public int hashCode() {
-            return ((mAdmin != null) ? mAdmin.hashCode() : 0) * 13 + mUserHandle;
-        }
-    }
-
-    // The query handler does not cache wildcard user IDs, although they should never
-    // appear in the query.
-    private static final BinderApi sGetKeyguardDisabledFeatures =
-            new BinderApi("getKeyguardDisabledFeatures");
-    private BinderCache<KeyguardQuery, Integer> mGetKeyGuardDisabledFeaturesCache =
-            new BinderCache<>(sGetKeyguardDisabledFeatures,
-                    new IpcDataCache.QueryHandler<KeyguardQuery, Integer>() {
-                        @Override
-                        public Integer apply(KeyguardQuery query) {
-                            try {
-                                return mService.getKeyguardDisabledFeatures(
-                                    query.mAdmin, query.mUserHandle, mParentInstance);
-                            } catch (RemoteException e) {
-                                throw e.rethrowFromSystemServer();
-                            }
-                        }});
-
-    /** @hide */
-    public static void disableGetKeyguardDisabledFeaturesCache() {
-        sGetKeyguardDisabledFeatures.disable();
-    }
+    private IpcDataCache<Pair<ComponentName, Integer>, Integer> mGetKeyGuardDisabledFeaturesCache =
+            new IpcDataCache<>(sDpmCaches.child("getKeyguardDisabledFeatures"),
+                    (query) -> getService().getKeyguardDisabledFeatures(
+                            query.first, query.second, isParentInstance()));
 
     /** @hide per-user version */
     @UnsupportedAppUsage
     public int getKeyguardDisabledFeatures(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
-            return mGetKeyGuardDisabledFeaturesCache.query(new KeyguardQuery(admin, userHandle));
+            return mGetKeyGuardDisabledFeaturesCache.query(new Pair<>(admin, userHandle));
         } else {
             return KEYGUARD_DISABLE_FEATURES_NONE;
         }
@@ -8864,23 +8817,9 @@ public class DevicePolicyManager {
         return name != null ? name.getPackageName() : null;
     }
 
-    private static final BinderApi sHasDeviceOwner =
-            new BinderApi("hasDeviceOwner");
-    private BinderCache<Void, Boolean> mHasDeviceOwnerCache =
-            new BinderCache<>(sHasDeviceOwner,
-                    new IpcDataCache.QueryHandler<Void, Boolean>() {
-                        @Override
-                        public Boolean apply(Void query) {
-                            try {
-                                return mService.hasDeviceOwner();
-                            } catch (RemoteException e) {
-                                throw e.rethrowFromSystemServer();
-                            }
-                        }});
-    /** @hide */
-    public static void disableHasDeviceOwnerCache() {
-        sHasDeviceOwner.disable();
-    }
+    private IpcDataCache<Void, Boolean> mHasDeviceOwnerCache =
+            new IpcDataCache<>(sDpmCaches.child("hasDeviceOwner"),
+                    (query) -> getService().hasDeviceOwner());
 
     /**
      * Called by the system to find out whether the device is managed by a Device Owner.
@@ -9256,25 +9195,10 @@ public class DevicePolicyManager {
         return null;
     }
 
-    private final static BinderApi sGetProfileOwnerOrDeviceOwnerSupervisionComponent =
-            new BinderApi("getProfileOwnerOrDeviceOwnerSupervisionComponent");
-    private final BinderCache<UserHandle, ComponentName>
+    private final IpcDataCache<UserHandle, ComponentName>
             mGetProfileOwnerOrDeviceOwnerSupervisionComponentCache =
-            new BinderCache(sGetProfileOwnerOrDeviceOwnerSupervisionComponent,
-                    new IpcDataCache.QueryHandler<UserHandle, ComponentName>() {
-                        @Override
-                        public ComponentName apply(UserHandle user) {
-                            try {
-                                return mService.getProfileOwnerOrDeviceOwnerSupervisionComponent(
-                                    user);
-                            } catch (RemoteException re) {
-                                throw re.rethrowFromSystemServer();
-                            }
-                        }});
-    /** @hide */
-    public static void disableGetProfileOwnerOrDeviceOwnerSupervisionComponentCache() {
-        sGetProfileOwnerOrDeviceOwnerSupervisionComponent.disable();
-    }
+            new IpcDataCache<>(sDpmCaches.child("getProfileOwnerOrDeviceOwnerSupervisionComponent"),
+                    (arg) -> getService().getProfileOwnerOrDeviceOwnerSupervisionComponent(arg));
 
     /**
      * Returns the configured supervision app if it exists and is the device owner or policy owner.
@@ -9329,23 +9253,9 @@ public class DevicePolicyManager {
         return null;
     }
 
-    private final static BinderApi sIsOrganizationOwnedDeviceWithManagedProfile =
-            new BinderApi("isOrganizationOwnedDeviceWithManagedProfile");
-    private final BinderCache<Void, Boolean> mIsOrganizationOwnedDeviceWithManagedProfileCache =
-            new BinderCache(sIsOrganizationOwnedDeviceWithManagedProfile,
-                    new IpcDataCache.QueryHandler<Void, Boolean>() {
-                        @Override
-                        public Boolean apply(Void query) {
-                            try {
-                                return mService.isOrganizationOwnedDeviceWithManagedProfile();
-                            } catch (RemoteException re) {
-                                throw re.rethrowFromSystemServer();
-                            }
-                        }});
-    /** @hide */
-    public static void disableIsOrganizationOwnedDeviceWithManagedProfileCache() {
-        sIsOrganizationOwnedDeviceWithManagedProfile.disable();
-    }
+    private final IpcDataCache<Void, Boolean> mIsOrganizationOwnedDeviceWithManagedProfileCache =
+            new IpcDataCache(sDpmCaches.child("isOrganizationOwnedDeviceWithManagedProfile"),
+                    (query) -> getService().isOrganizationOwnedDeviceWithManagedProfile());
 
     /**
      * Apps can use this method to find out if the device was provisioned as
@@ -12927,23 +12837,9 @@ public class DevicePolicyManager {
         }
     }
 
-    private final static BinderApi sGetDeviceOwnerOrganizationName =
-            new BinderApi("getDeviceOwnerOrganizationName");
-    private final BinderCache<Void, CharSequence> mGetDeviceOwnerOrganizationNameCache =
-            new BinderCache(sGetDeviceOwnerOrganizationName,
-                    new IpcDataCache.QueryHandler<Void, CharSequence>() {
-                        @Override
-                        public CharSequence apply(Void query) {
-                            try {
-                                return mService.getDeviceOwnerOrganizationName();
-                            } catch (RemoteException re) {
-                                throw re.rethrowFromSystemServer();
-                            }
-                        }});
-    /** @hide */
-    public static void disableGetDeviceOwnerOrganizationNameCache() {
-        sGetDeviceOwnerOrganizationName.disable();
-    }
+    private final IpcDataCache<Void, CharSequence> mGetDeviceOwnerOrganizationNameCache =
+            new IpcDataCache(sDpmCaches.child("getDeviceOwnerOrganizationName"),
+                    (query) -> getService().getDeviceOwnerOrganizationName());
 
     /**
      * Called by the system to retrieve the name of the organization managing the device.
@@ -12960,23 +12856,9 @@ public class DevicePolicyManager {
         return mGetDeviceOwnerOrganizationNameCache.query(null);
     }
 
-    private final static BinderApi sGetOrganizationNameForUser =
-            new BinderApi("getOrganizationNameForUser");
-    private final BinderCache<Integer, CharSequence> mGetOrganizationNameForUserCache =
-            new BinderCache(sGetOrganizationNameForUser,
-                    new IpcDataCache.QueryHandler<Integer, CharSequence>() {
-                        @Override
-                        public CharSequence apply(Integer userHandle) {
-                            try {
-                                return mService.getOrganizationNameForUser(userHandle);
-                            } catch (RemoteException re) {
-                                throw re.rethrowFromSystemServer();
-                            }
-                        }});
-    /** @hide */
-    public static void disableGetOrganizationNameForUserCache() {
-        sGetOrganizationNameForUser.disable();
-    }
+    private final IpcDataCache<Integer, CharSequence> mGetOrganizationNameForUserCache =
+            new IpcDataCache<>(sDpmCaches.child("getOrganizationNameForUser"),
+                    (query) -> getService().getOrganizationNameForUser(query));
 
     /**
      * Retrieve the default title message used in the confirm credentials screen for a given user.
@@ -13372,24 +13254,10 @@ public class DevicePolicyManager {
         }
     }
 
-    private final static BinderApi sNetworkLoggingApi = new BinderApi("isNetworkLoggingEnabled");
-    private BinderCache<ComponentName, Boolean> mIsNetworkLoggingEnabledCache =
-            new BinderCache<>(sNetworkLoggingApi,
-                    new IpcDataCache.QueryHandler<ComponentName, Boolean>() {
-                        @Override
-                        public Boolean apply(ComponentName admin) {
-                            try {
-                                return mService.isNetworkLoggingEnabled(
-                                    admin, mContext.getPackageName());
-                            } catch (RemoteException re) {
-                                throw re.rethrowFromSystemServer();
-                            }
-                        }});
-
-    /** @hide */
-    public static void disableIsNetworkLoggingEnabled() {
-        sNetworkLoggingApi.disable();
-    }
+    private IpcDataCache<ComponentName, Boolean> mIsNetworkLoggingEnabledCache =
+            new IpcDataCache<>(sDpmCaches.child("isNetworkLoggingEnabled"),
+                    (admin) -> getService().isNetworkLoggingEnabled(admin,
+                            getContext().getPackageName()));
 
     /**
      * Return whether network logging is enabled by a device owner or profile owner of

@@ -79,7 +79,6 @@ static struct {
 static struct {
     jclass clazz;
     jmethodID ctor;
-    jfieldID nativeRegion;
 } gRegionClassInfo;
 
 static Mutex gHandleMutex;
@@ -290,10 +289,8 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
         region->op({r.left, r.top, r.right, r.bottom}, SkRegion::kUnion_Op);
     }
     ScopedLocalRef<jobject> regionObj(env,
-                                      env->NewObject(gRegionClassInfo.clazz,
-                                                     gRegionClassInfo.ctor));
-    env->SetLongField(regionObj.get(), gRegionClassInfo.nativeRegion,
-                      reinterpret_cast<jlong>(region));
+                                      env->NewObject(gRegionClassInfo.clazz, gRegionClassInfo.ctor,
+                                                     reinterpret_cast<jlong>(region)));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.touchableRegion,
                         regionObj.get());
 
@@ -453,8 +450,7 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     jclass regionClazz;
     FIND_CLASS(regionClazz, "android/graphics/Region");
     gRegionClassInfo.clazz = MakeGlobalRefOrDie(env, regionClazz);
-    GET_METHOD_ID(gRegionClassInfo.ctor, gRegionClassInfo.clazz, "<init>", "()V");
-    GET_FIELD_ID(gRegionClassInfo.nativeRegion, gRegionClassInfo.clazz, "mNativeRegion", "J");
+    GET_METHOD_ID(gRegionClassInfo.ctor, gRegionClassInfo.clazz, "<init>", "(J)V");
     return 0;
 }
 
