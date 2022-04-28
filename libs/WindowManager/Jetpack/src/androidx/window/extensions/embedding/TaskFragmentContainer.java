@@ -120,7 +120,7 @@ class TaskFragmentContainer {
     }
 
     ActivityStack toActivityStack() {
-        return new ActivityStack(collectActivities(), mInfo.getRunningActivityCount() == 0);
+        return new ActivityStack(collectActivities(), isEmpty());
     }
 
     void addPendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
@@ -192,10 +192,30 @@ class TaskFragmentContainer {
     }
 
     /**
+     * Removes a container that should be finished when this container is finished.
+     */
+    void removeContainerToFinishOnExit(@NonNull TaskFragmentContainer containerToRemove) {
+        mContainersToFinishOnExit.remove(containerToRemove);
+    }
+
+    /**
      * Adds an activity that should be finished when this container is finished.
      */
     void addActivityToFinishOnExit(@NonNull Activity activityToFinish) {
         mActivitiesToFinishOnExit.add(activityToFinish);
+    }
+
+    /**
+     * Removes an activity that should be finished when this container is finished.
+     */
+    void removeActivityToFinishOnExit(@NonNull Activity activityToRemove) {
+        mActivitiesToFinishOnExit.remove(activityToRemove);
+    }
+
+    /** Removes all dependencies that should be finished when this container is finished. */
+    void resetDependencies() {
+        mContainersToFinishOnExit.clear();
+        mActivitiesToFinishOnExit.clear();
     }
 
     /**
@@ -237,7 +257,8 @@ class TaskFragmentContainer {
 
         // Finish dependent containers
         for (TaskFragmentContainer container : mContainersToFinishOnExit) {
-            if (controller.shouldRetainAssociatedContainer(this, container)) {
+            if (container.mIsFinished
+                    || controller.shouldRetainAssociatedContainer(this, container)) {
                 continue;
             }
             container.finish(true /* shouldFinishDependent */, presenter,
@@ -247,18 +268,13 @@ class TaskFragmentContainer {
 
         // Finish associated activities
         for (Activity activity : mActivitiesToFinishOnExit) {
-            if (controller.shouldRetainAssociatedActivity(this, activity)) {
+            if (activity.isFinishing()
+                    || controller.shouldRetainAssociatedActivity(this, activity)) {
                 continue;
             }
             activity.finish();
         }
         mActivitiesToFinishOnExit.clear();
-
-        // Finish activities that were being re-parented to this container.
-        for (Activity activity : mPendingAppearedActivities) {
-            activity.finish();
-        }
-        mPendingAppearedActivities.clear();
     }
 
     boolean isFinished() {

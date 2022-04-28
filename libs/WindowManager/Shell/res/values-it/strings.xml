@@ -46,10 +46,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Schermata superiore al 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Schermata superiore al 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Schermata inferiore a schermo intero"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Usare la modalità one-hand"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Usare la modalità a una mano"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Per uscire, scorri verso l\'alto dalla parte inferiore dello schermo oppure tocca un punto qualsiasi sopra l\'app"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Avvia la modalità one-hand"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Esci dalla modalità one-hand"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Avvia la modalità a una mano"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Esci dalla modalità a una mano"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Impostazioni per bolle <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Altre"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Aggiungi di nuovo all\'elenco"</string>

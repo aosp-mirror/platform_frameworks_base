@@ -24,9 +24,9 @@ import android.os.IBinder;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
 
+import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.server.LocalServices;
 
@@ -164,7 +164,7 @@ public abstract class InputMethodManagerInternal {
      * @param session The session passed back from the accessibility service.
      */
     public abstract void onSessionForAccessibilityCreated(int accessibilityConnectionId,
-            IInputMethodSession session);
+            IAccessibilityInputMethodSession session);
 
     /**
      * Unbind the accessibility service with the specified accessibilityConnectionId from current
@@ -240,7 +240,7 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
-                        IInputMethodSession session) {
+                        IAccessibilityInputMethodSession session) {
                 }
 
                 @Override

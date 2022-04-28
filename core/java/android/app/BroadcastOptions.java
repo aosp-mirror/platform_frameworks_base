@@ -532,7 +532,7 @@ public class BroadcastOptions extends ComponentOptions {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
     public void recordResponseEventWhileInBackground(@IntRange(from = 0) long id) {
         mIdForResponseEvent = id;
     }

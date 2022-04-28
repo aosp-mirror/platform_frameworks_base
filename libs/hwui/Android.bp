@@ -108,6 +108,7 @@ cc_defaults {
             shared_libs: [
                 "android.hardware.graphics.common-V3-ndk",
                 "android.hardware.graphics.common@1.2",
+                "android.hardware.graphics.composer3-V1-ndk",
                 "liblog",
                 "libcutils",
                 "libutils",
@@ -249,6 +250,7 @@ cc_defaults {
         "apex/android_matrix.cpp",
         "apex/android_paint.cpp",
         "apex/android_region.cpp",
+        "apex/properties.cpp",
     ],
 
     header_libs: ["android_graphics_apex_headers"],

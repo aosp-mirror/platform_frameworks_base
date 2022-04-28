@@ -661,6 +661,7 @@ class DevicePolicyData {
         pw.println();
         pw.increaseIndent();
         pw.print("mPasswordOwner="); pw.println(mPasswordOwner);
+        pw.print("mPasswordTokenHandle="); pw.println(Long.toHexString(mPasswordTokenHandle));
         pw.print("mUserControlDisabledPackages=");
         pw.println(mUserControlDisabledPackages);
         pw.print("mAppsSuspended="); pw.println(mAppsSuspended);

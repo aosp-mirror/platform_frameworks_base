@@ -28,7 +28,6 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.io.FileDescriptor
 import java.io.PrintWriter
 
 @SmallTest
@@ -39,8 +38,6 @@ class DumpHandlerTest : SysuiTestCase() {
     @Mock
     private lateinit var logBufferEulogizer: LogBufferEulogizer
 
-    @Mock
-    private lateinit var fd: FileDescriptor
     @Mock
     private lateinit var pw: PrintWriter
 
@@ -76,15 +73,14 @@ class DumpHandlerTest : SysuiTestCase() {
 
         // WHEN some of them are dumped explicitly
         val args = arrayOf("dumpable1", "dumpable3", "buffer2")
-        dumpHandler.dump(fd, pw, args)
+        dumpHandler.dump(pw, args)
 
         // THEN only the requested ones have their dump() method called
-        verify(dumpable1).dump(fd, pw, args)
+        verify(dumpable1).dump(pw, args)
         verify(dumpable2, never()).dump(
-                any(FileDescriptor::class.java),
                 any(PrintWriter::class.java),
                 any(Array<String>::class.java))
-        verify(dumpable3).dump(fd, pw, args)
+        verify(dumpable3).dump(pw, args)
         verify(buffer1, never()).dump(any(PrintWriter::class.java), anyInt())
         verify(buffer2).dump(pw, 0)
     }
@@ -96,10 +92,10 @@ class DumpHandlerTest : SysuiTestCase() {
 
         // WHEN that module is dumped
         val args = arrayOf("dumpable1")
-        dumpHandler.dump(fd, pw, args)
+        dumpHandler.dump(pw, args)
 
         // THEN its dump() method is called
-        verify(dumpable1).dump(fd, pw, args)
+        verify(dumpable1).dump(pw, args)
     }
 
     @Test
@@ -113,12 +109,12 @@ class DumpHandlerTest : SysuiTestCase() {
 
         // WHEN a critical dump is requested
         val args = arrayOf("--dump-priority", "CRITICAL")
-        dumpHandler.dump(fd, pw, args)
+        dumpHandler.dump(pw, args)
 
         // THEN all modules are dumped (but no buffers)
-        verify(dumpable1).dump(fd, pw, args)
-        verify(dumpable2).dump(fd, pw, args)
-        verify(dumpable3).dump(fd, pw, args)
+        verify(dumpable1).dump(pw, args)
+        verify(dumpable2).dump(pw, args)
+        verify(dumpable3).dump(pw, args)
         verify(buffer1, never()).dump(any(PrintWriter::class.java), anyInt())
         verify(buffer2, never()).dump(any(PrintWriter::class.java), anyInt())
     }
@@ -134,19 +130,16 @@ class DumpHandlerTest : SysuiTestCase() {
 
         // WHEN a normal dump is requested
         val args = arrayOf("--dump-priority", "NORMAL")
-        dumpHandler.dump(fd, pw, args)
+        dumpHandler.dump(pw, args)
 
         // THEN all buffers are dumped (but no modules)
         verify(dumpable1, never()).dump(
-                any(FileDescriptor::class.java),
                 any(PrintWriter::class.java),
                 any(Array<String>::class.java))
         verify(dumpable2, never()).dump(
-                any(FileDescriptor::class.java),
                 any(PrintWriter::class.java),
                 any(Array<String>::class.java))
         verify(dumpable3, never()).dump(
-                any(FileDescriptor::class.java),
                 any(PrintWriter::class.java),
                 any(Array<String>::class.java))
         verify(buffer1).dump(pw, 0)

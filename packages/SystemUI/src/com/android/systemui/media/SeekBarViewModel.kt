@@ -76,7 +76,11 @@ class SeekBarViewModel @Inject constructor(
 ) {
     private var _data = Progress(false, false, false, false, null, 0)
         set(value) {
+            val enabledChanged = value.enabled != field.enabled
             field = value
+            if (enabledChanged) {
+                enabledChangeListener?.onEnabledChanged(value.enabled)
+            }
             _progress.postValue(value)
         }
     private val _progress = MutableLiveData<Progress>().apply {
@@ -121,19 +125,21 @@ class SeekBarViewModel @Inject constructor(
             }
         }
 
+    private var scrubbingChangeListener: ScrubbingChangeListener? = null
+    private var enabledChangeListener: EnabledChangeListener? = null
+
     /** Set to true when the user is touching the seek bar to change the position. */
     private var scrubbing = false
         set(value) {
             if (field != value) {
                 field = value
                 checkIfPollingNeeded()
+                scrubbingChangeListener?.onScrubbingChanged(value)
                 _data = _data.copy(scrubbing = value)
             }
         }
 
-    lateinit var logSmartspaceClick: () -> Unit
-
-    fun getEnabled() = _data.enabled
+    lateinit var logSeek: () -> Unit
 
     /**
      * Event indicating that the user has started interacting with the seek bar.
@@ -145,13 +151,21 @@ class SeekBarViewModel @Inject constructor(
     }
 
     /**
-     * Event indicating that the user has moved the seek bar but hasn't yet finished the gesture.
+     * Event indicating that the user has moved the seek bar.
+     *
      * @param position Current location in the track.
      */
     @AnyThread
     fun onSeekProgress(position: Long) = bgExecutor.execute {
         if (scrubbing) {
+            // The user hasn't yet finished their touch gesture, so only update the data for visual
+            // feedback and don't update [controller] yet.
             _data = _data.copy(elapsedTime = position.toInt())
+        } else {
+            // The seek progress came from an a11y action and we should immediately update to the
+            // new position. (a11y actions to change the seekbar position don't trigger
+            // SeekBar.OnSeekBarChangeListener.onStartTrackingTouch or onStopTrackingTouch.)
+            onSeek(position)
         }
     }
 
@@ -175,7 +189,7 @@ class SeekBarViewModel @Inject constructor(
             scrubbing = false
             checkPlaybackPosition()
         } else {
-            logSmartspaceClick()
+            logSeek()
             controller?.transportControls?.seekTo(position)
             // Invalidate the cached playbackState to avoid the thumb jumping back to the previous
             // position.
@@ -186,6 +200,9 @@ class SeekBarViewModel @Inject constructor(
 
     /**
      * Updates media information.
+     *
+     * This function makes a binder call, so it must happen on a worker thread.
+     *
      * @param mediaController controller for media session
      */
     @WorkerThread
@@ -228,6 +245,8 @@ class SeekBarViewModel @Inject constructor(
         playbackState = null
         cancel?.run()
         cancel = null
+        scrubbingChangeListener = null
+        enabledChangeListener = null
     }
 
     @WorkerThread
@@ -263,6 +282,36 @@ class SeekBarViewModel @Inject constructor(
     fun attachTouchHandlers(bar: SeekBar) {
         bar.setOnSeekBarChangeListener(seekBarListener)
         bar.setOnTouchListener(SeekBarTouchListener(this, bar))
+    }
+
+    fun setScrubbingChangeListener(listener: ScrubbingChangeListener) {
+        scrubbingChangeListener = listener
+    }
+
+    fun removeScrubbingChangeListener(listener: ScrubbingChangeListener) {
+        if (listener == scrubbingChangeListener) {
+            scrubbingChangeListener = null
+        }
+    }
+
+    fun setEnabledChangeListener(listener: EnabledChangeListener) {
+        enabledChangeListener = listener
+    }
+
+    fun removeEnabledChangeListener(listener: EnabledChangeListener) {
+        if (listener == enabledChangeListener) {
+            enabledChangeListener = null
+        }
+    }
+
+    /** Listener interface to be notified when the user starts or stops scrubbing. */
+    interface ScrubbingChangeListener {
+        fun onScrubbingChanged(scrubbing: Boolean)
+    }
+
+    /** Listener interface to be notified when the seekbar's enabled status changes. */
+    interface EnabledChangeListener {
+        fun onEnabledChanged(enabled: Boolean)
     }
 
     private class SeekBarChangeListener(

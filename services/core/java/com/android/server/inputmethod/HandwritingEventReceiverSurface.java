@@ -27,7 +27,6 @@ import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
-
 final class HandwritingEventReceiverSurface {
 
     public static final String TAG = HandwritingEventReceiverSurface.class.getSimpleName();
@@ -39,7 +38,6 @@ final class HandwritingEventReceiverSurface {
     // TODO(b/217538817): Specify the ordering in WM by usage.
     private static final int HANDWRITING_SURFACE_LAYER = Integer.MAX_VALUE - 1;
 
-    private final InputApplicationHandle mApplicationHandle;
     private final InputWindowHandle mWindowHandle;
     private final InputChannel mClientChannel;
     private final SurfaceControl mInputSurface;
@@ -47,13 +45,11 @@ final class HandwritingEventReceiverSurface {
 
     HandwritingEventReceiverSurface(String name, int displayId, @NonNull SurfaceControl sc,
             @NonNull InputChannel inputChannel) {
-        mApplicationHandle = new InputApplicationHandle(null, name,
-                DEFAULT_DISPATCHING_TIMEOUT_MILLIS);
-
         mClientChannel = inputChannel;
         mInputSurface = sc;
 
-        mWindowHandle = new InputWindowHandle(mApplicationHandle, displayId);
+        mWindowHandle = new InputWindowHandle(new InputApplicationHandle(null, name,
+                DEFAULT_DISPATCHING_TIMEOUT_MILLIS), displayId);
         mWindowHandle.name = name;
         mWindowHandle.token = mClientChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
@@ -61,7 +57,6 @@ final class HandwritingEventReceiverSurface {
         mWindowHandle.ownerPid = Process.myPid();
         mWindowHandle.ownerUid = Process.myUid();
         mWindowHandle.scaleFactor = 1.0f;
-        mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
         mWindowHandle.inputConfig =
                 InputConfig.NOT_FOCUSABLE
                         | InputConfig.NOT_TOUCHABLE
@@ -69,6 +64,7 @@ final class HandwritingEventReceiverSurface {
                         | InputConfig.INTERCEPTS_STYLUS
                         | InputConfig.TRUSTED_OVERLAY;
 
+        // The touchable region of this input surface is not initially configured.
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
         t.setLayer(mInputSurface, HANDWRITING_SURFACE_LAYER);
@@ -84,6 +80,10 @@ final class HandwritingEventReceiverSurface {
         mWindowHandle.ownerPid = imePid;
         mWindowHandle.ownerUid = imeUid;
         mWindowHandle.inputConfig &= ~InputConfig.SPY;
+
+        // Update the touchable region so that the IME can intercept stylus events
+        // across the entire display.
+        mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
 
         new SurfaceControl.Transaction()
                 .setInputWindowInfo(mInputSurface, mWindowHandle)
@@ -107,5 +107,9 @@ final class HandwritingEventReceiverSurface {
 
     SurfaceControl getSurface() {
         return mInputSurface;
+    }
+
+    InputWindowHandle getInputWindowHandle() {
+        return mWindowHandle;
     }
 }

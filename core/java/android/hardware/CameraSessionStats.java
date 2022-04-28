@@ -61,6 +61,7 @@ public class CameraSessionStats implements Parcelable {
     private boolean mDeviceError;
     private float mMaxPreviewFps;
     private ArrayList<CameraStreamStats> mStreamStats;
+    private String mUserTag;
 
     public CameraSessionStats() {
         mFacing = -1;
@@ -131,6 +132,7 @@ public class CameraSessionStats implements Parcelable {
         dest.writeLong(mResultErrorCount);
         dest.writeBoolean(mDeviceError);
         dest.writeTypedList(mStreamStats);
+        dest.writeString(mUserTag);
     }
 
     public void readFromParcel(Parcel in) {
@@ -151,6 +153,8 @@ public class CameraSessionStats implements Parcelable {
         ArrayList<CameraStreamStats> streamStats = new ArrayList<CameraStreamStats>();
         in.readTypedList(streamStats, CameraStreamStats.CREATOR);
         mStreamStats = streamStats;
+
+        mUserTag = in.readString();
     }
 
     public String getCameraId() {
@@ -207,5 +211,9 @@ public class CameraSessionStats implements Parcelable {
 
     public List<CameraStreamStats> getStreamStats() {
         return mStreamStats;
+    }
+
+    public String getUserTag() {
+        return mUserTag;
     }
 }

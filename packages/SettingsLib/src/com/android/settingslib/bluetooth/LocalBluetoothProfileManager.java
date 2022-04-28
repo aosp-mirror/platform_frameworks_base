@@ -27,6 +27,7 @@ import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothHidDevice;
 import android.bluetooth.BluetoothHidHost;
 import android.bluetooth.BluetoothLeAudio;
+import android.bluetooth.BluetoothLeBroadcastAssistant;
 import android.bluetooth.BluetoothMap;
 import android.bluetooth.BluetoothMapClient;
 import android.bluetooth.BluetoothPan;
@@ -104,6 +105,8 @@ public class LocalBluetoothProfileManager {
     private HearingAidProfile mHearingAidProfile;
     private CsipSetCoordinatorProfile mCsipSetCoordinatorProfile;
     private LeAudioProfile mLeAudioProfile;
+    private LocalBluetoothLeBroadcast mLeAudioBroadcast;
+    private LocalBluetoothLeBroadcastAssistant mLeAudioBroadcastAssistant;
     private SapProfile mSapProfile;
     private VolumeControlProfile mVolumeControlProfile;
 
@@ -238,7 +241,26 @@ public class LocalBluetoothProfileManager {
             }
             mLeAudioProfile = new LeAudioProfile(mContext, mDeviceManager, this);
             addProfile(mLeAudioProfile, LeAudioProfile.NAME,
-                       BluetoothLeAudio.ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED);
+                    BluetoothLeAudio.ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED);
+        }
+        if (mLeAudioBroadcast == null
+                && supportedList.contains(BluetoothProfile.LE_AUDIO_BROADCAST)) {
+            if (DEBUG) {
+                Log.d(TAG, "Adding local LE_AUDIO_BROADCAST profile");
+            }
+            mLeAudioBroadcast = new LocalBluetoothLeBroadcast(mContext);
+            // no event handler for the LE boradcast.
+            mProfileNameMap.put(LocalBluetoothLeBroadcast.NAME, mLeAudioBroadcast);
+        }
+        if (mLeAudioBroadcastAssistant == null
+                && supportedList.contains(BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT)) {
+            if (DEBUG) {
+                Log.d(TAG, "Adding local LE_AUDIO_BROADCAST_ASSISTANT profile");
+            }
+            mLeAudioBroadcastAssistant = new LocalBluetoothLeBroadcastAssistant(mContext,
+                    mDeviceManager, this);
+            addProfile(mLeAudioBroadcastAssistant, LocalBluetoothLeBroadcast.NAME,
+                    BluetoothLeBroadcastAssistant.ACTION_CONNECTION_STATE_CHANGED);
         }
         if (mCsipSetCoordinatorProfile == null
                 && supportedList.contains(BluetoothProfile.CSIP_SET_COORDINATOR)) {
@@ -497,6 +519,13 @@ public class LocalBluetoothProfileManager {
 
     public LeAudioProfile getLeAudioProfile() {
         return mLeAudioProfile;
+    }
+
+    public LocalBluetoothLeBroadcast getLeAudioBroadcastProfile() {
+        return mLeAudioBroadcast;
+    }
+    public LocalBluetoothLeBroadcastAssistant getLeAudioBroadcastAssistantProfile() {
+        return mLeAudioBroadcastAssistant;
     }
 
     SapProfile getSapProfile() {

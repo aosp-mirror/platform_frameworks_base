@@ -138,7 +138,7 @@ import android.window.ClientWindowFrames;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.policy.ForceShowNavigationBarSettingsObserver;
+import com.android.internal.policy.ForceShowNavBarSettingsObserver;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
@@ -378,7 +378,7 @@ public class DisplayPolicy {
 
     private final WindowManagerInternal.AppTransitionListener mAppTransitionListener;
 
-    private final ForceShowNavigationBarSettingsObserver mForceShowNavigationBarSettingsObserver;
+    private final ForceShowNavBarSettingsObserver mForceShowNavBarSettingsObserver;
     private boolean mForceShowNavigationBarEnabled;
 
     private class PolicyHandler extends Handler {
@@ -653,17 +653,17 @@ public class DisplayPolicy {
         });
         mHandler.post(mGestureNavigationSettingsObserver::register);
 
-        mForceShowNavigationBarSettingsObserver = new ForceShowNavigationBarSettingsObserver(
+        mForceShowNavBarSettingsObserver = new ForceShowNavBarSettingsObserver(
                 mHandler, mContext);
-        mForceShowNavigationBarSettingsObserver.setOnChangeRunnable(() -> {
+        mForceShowNavBarSettingsObserver.setOnChangeRunnable(() -> {
             synchronized (mLock) {
                 mForceShowNavigationBarEnabled =
-                        mForceShowNavigationBarSettingsObserver.isEnabled();
+                        mForceShowNavBarSettingsObserver.isEnabled();
                 updateSystemBarAttributes();
             }
         });
-        mForceShowNavigationBarEnabled = mForceShowNavigationBarSettingsObserver.isEnabled();
-        mHandler.post(mForceShowNavigationBarSettingsObserver::register);
+        mForceShowNavigationBarEnabled = mForceShowNavBarSettingsObserver.isEnabled();
+        mHandler.post(mForceShowNavBarSettingsObserver::register);
     }
 
     /**
@@ -1146,8 +1146,13 @@ public class DisplayPolicy {
                 mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR, win,
                         (displayFrames, windowContainer, inOutFrame) -> {
                             if (!mNavButtonForcedVisible) {
-                                inOutFrame.inset(win.getLayoutingAttrs(
-                                        displayFrames.mRotation).providedInternalInsets);
+                                final Insets[] providedInternalInsets = win.getLayoutingAttrs(
+                                        displayFrames.mRotation).providedInternalInsets;
+                                if (providedInternalInsets != null
+                                        && providedInternalInsets.length > ITYPE_NAVIGATION_BAR
+                                        && providedInternalInsets[ITYPE_NAVIGATION_BAR] != null) {
+                                    inOutFrame.inset(providedInternalInsets[ITYPE_NAVIGATION_BAR]);
+                                }
                                 inOutFrame.inset(win.mGivenContentInsets);
                             }
                         },
@@ -1193,13 +1198,16 @@ public class DisplayPolicy {
                 if (attrs.providesInsetsTypes != null) {
                     for (@InternalInsetsType int insetsType : attrs.providesInsetsTypes) {
                         final TriConsumer<DisplayFrames, WindowContainer, Rect> imeFrameProvider =
-                                !attrs.providedInternalImeInsets.equals(Insets.NONE)
-                                        ? (displayFrames, windowContainer, inOutFrame) -> {
-                                            inOutFrame.inset(win.getLayoutingAttrs(
-                                                    displayFrames.mRotation)
-                                                    .providedInternalImeInsets);
-                                        }
-                                        : null;
+                                (displayFrames, windowContainer, inOutFrame) -> {
+                                    final Insets[] providedInternalImeInsets =
+                                            win.getLayoutingAttrs(displayFrames.mRotation)
+                                                    .providedInternalImeInsets;
+                                    if (providedInternalImeInsets != null
+                                            && providedInternalImeInsets.length > insetsType
+                                            && providedInternalImeInsets[insetsType] != null) {
+                                        inOutFrame.inset(providedInternalImeInsets[insetsType]);
+                                    }
+                                };
                         switch (insetsType) {
                             case ITYPE_STATUS_BAR:
                                 mStatusBarAlt = win;
@@ -1220,8 +1228,13 @@ public class DisplayPolicy {
                         }
                         mDisplayContent.setInsetProvider(insetsType, win, (displayFrames,
                                 windowContainer, inOutFrame) -> {
-                            inOutFrame.inset(win.getLayoutingAttrs(
-                                    displayFrames.mRotation).providedInternalInsets);
+                            final Insets[] providedInternalInsets = win.getLayoutingAttrs(
+                                    displayFrames.mRotation).providedInternalInsets;
+                            if (providedInternalInsets != null
+                                    && providedInternalInsets.length > insetsType
+                                    && providedInternalInsets[insetsType] != null) {
+                                inOutFrame.inset(providedInternalInsets[insetsType]);
+                            }
                             inOutFrame.inset(win.mGivenContentInsets);
                         }, imeFrameProvider);
                         mInsetsSourceWindowsExceptIme.add(win);
@@ -1498,10 +1511,6 @@ public class DisplayPolicy {
         }
     }
 
-    // TODO(b/161810301): No one is calling this since we haven't moved window layout to the client.
-    //                    When that happens, this should be called when the display rotation is
-    //                    changed, so that we can dispatch the correct insets to all the clients
-    //                    before the insets source windows report their frames to the server.
     void updateInsetsSourceFramesExceptIme(DisplayFrames displayFrames) {
         for (int i = mInsetsSourceWindowsExceptIme.size() - 1; i >= 0; i--) {
             final WindowState win = mInsetsSourceWindowsExceptIme.valueAt(i);
@@ -1552,7 +1561,7 @@ public class DisplayPolicy {
                 win.getRequestedVisibilities(), attachedWindowFrame, win.mGlobalScale,
                 sTmpClientFrames);
 
-        win.setFrames(sTmpClientFrames);
+        win.setFrames(sTmpClientFrames, win.mRequestedWidth, win.mRequestedHeight);
     }
 
     WindowState getTopFullscreenOpaqueWindow() {
@@ -1941,15 +1950,23 @@ public class DisplayPolicy {
                 && lp.paramsForRotation[rotation] != null) {
             lp = lp.paramsForRotation[rotation];
         }
+        final Insets providedInternalInsets;
+        if (lp.providedInternalInsets != null
+                && lp.providedInternalInsets.length > ITYPE_NAVIGATION_BAR
+                && lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] != null) {
+            providedInternalInsets = lp.providedInternalInsets[ITYPE_NAVIGATION_BAR];
+        } else {
+            providedInternalInsets = Insets.NONE;
+        }
         if (position == NAV_BAR_LEFT) {
-            if (lp.width > lp.providedInternalInsets.right) {
-                return lp.width - lp.providedInternalInsets.right;
+            if (lp.width > providedInternalInsets.right) {
+                return lp.width - providedInternalInsets.right;
             } else {
                 return 0;
             }
         } else if (position == NAV_BAR_RIGHT) {
-            if (lp.width > lp.providedInternalInsets.left) {
-                return lp.width - lp.providedInternalInsets.left;
+            if (lp.width > providedInternalInsets.left) {
+                return lp.width - providedInternalInsets.left;
             } else {
                 return 0;
             }
@@ -1998,10 +2015,18 @@ public class DisplayPolicy {
             return 0;
         }
         LayoutParams lp = mNavigationBar.getLayoutingAttrs(rotation);
-        if (lp.height < lp.providedInternalInsets.top) {
+        final Insets providedInternalInsets;
+        if (lp.providedInternalInsets != null
+                && lp.providedInternalInsets.length > ITYPE_NAVIGATION_BAR
+                && lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] != null) {
+            providedInternalInsets = lp.providedInternalInsets[ITYPE_NAVIGATION_BAR];
+        } else {
+            providedInternalInsets = Insets.NONE;
+        }
+        if (lp.height < providedInternalInsets.top) {
             return 0;
         }
-        return lp.height - lp.providedInternalInsets.top;
+        return lp.height - providedInternalInsets.top;
     }
 
     /**
@@ -2836,7 +2861,7 @@ public class DisplayPolicy {
     void release() {
         mDisplayContent.mTransitionController.unregisterLegacyListener(mAppTransitionListener);
         mHandler.post(mGestureNavigationSettingsObserver::unregister);
-        mHandler.post(mForceShowNavigationBarSettingsObserver::unregister);
+        mHandler.post(mForceShowNavBarSettingsObserver::unregister);
         mImmersiveModeConfirmation.release();
     }
 

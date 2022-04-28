@@ -22,6 +22,6 @@
     <!-- Overload default clock widget parameters -->
     <dimen name="widget_big_font_size">88dp</dimen>
 
-    <dimen name="qs_panel_padding_top">@dimen/qqs_layout_margin_top</dimen>
+    <dimen name="qs_panel_padding_top">16dp</dimen>
 
 </resources>

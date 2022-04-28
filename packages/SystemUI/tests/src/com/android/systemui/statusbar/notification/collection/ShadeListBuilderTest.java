@@ -1451,6 +1451,25 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testGroupWithChildRemovedByFilterIsPrunedWhenOtherwiseEmpty() {
+        // GIVEN a group with only one child
+        addGroupSummary(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+        dispatchBuild();
+        // NOTICE that the group is pruned and the child is moved to the top level
+        verifyBuiltList(
+                notif(1)  // group with only one child is promoted
+        );
+
+        // WHEN the only child is filtered
+        mFinalizeFilter.mIndicesToFilter.add(1);
+        dispatchBuild();
+
+        // THEN the new list should be empty (the group summary should not be promoted)
+        verifyBuiltList();
+    }
+
+    @Test
     public void testFinalizeFilteredSummaryPromotesChildren() {
         // GIVEN a group with only one child was already drawn
         addGroupSummary(0, PACKAGE_1, GROUP_1);

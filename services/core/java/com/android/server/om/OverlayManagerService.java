@@ -82,6 +82,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
+import com.android.server.pm.KnownPackages;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
@@ -1264,7 +1265,7 @@ public final class OverlayManagerService extends SystemService {
         @Override
         public String getConfigSignaturePackage() {
             final String[] pkgs = mPackageManagerInternal.getKnownPackageNames(
-                    PackageManagerInternal.PACKAGE_OVERLAY_CONFIG_SIGNATURE,
+                    KnownPackages.PACKAGE_OVERLAY_CONFIG_SIGNATURE,
                     UserHandle.USER_SYSTEM);
             return (pkgs.length == 0) ? null : pkgs[0];
         }

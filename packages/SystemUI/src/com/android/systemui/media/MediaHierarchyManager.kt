@@ -809,11 +809,11 @@ class MediaHierarchyManager @Inject constructor(
         return resultBounds
     }
 
-    /**
-     * @return true if this transformation is guided by an external progress like a finger
-     */
-    private fun isCurrentlyInGuidedTransformation(): Boolean {
-        return hasValidStartAndEndLocations() && getTransformationProgress() >= 0
+    /** @return true if this transformation is guided by an external progress like a finger */
+    fun isCurrentlyInGuidedTransformation(): Boolean {
+        return hasValidStartAndEndLocations() &&
+                getTransformationProgress() >= 0 &&
+                areGuidedTransitionHostsVisible()
     }
 
     private fun hasValidStartAndEndLocations(): Boolean {
@@ -1146,7 +1146,10 @@ private val EMPTY_RECT = Rect()
 @Retention(AnnotationRetention.SOURCE)
 private annotation class TransformationType
 
-@IntDef(prefix = ["LOCATION_"], value = [MediaHierarchyManager.LOCATION_QS,
-    MediaHierarchyManager.LOCATION_QQS, MediaHierarchyManager.LOCATION_LOCKSCREEN])
+@IntDef(prefix = ["LOCATION_"], value = [
+    MediaHierarchyManager.LOCATION_QS,
+    MediaHierarchyManager.LOCATION_QQS,
+    MediaHierarchyManager.LOCATION_LOCKSCREEN,
+    MediaHierarchyManager.LOCATION_DREAM_OVERLAY])
 @Retention(AnnotationRetention.SOURCE)
 annotation class MediaLocation
