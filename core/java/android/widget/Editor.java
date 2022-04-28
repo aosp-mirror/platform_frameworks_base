@@ -240,12 +240,7 @@ public class Editor {
 
     private final boolean mHapticTextHandleEnabled;
     /** Handles OnBackInvokedCallback back dispatch */
-    private final OnBackInvokedCallback mBackCallback = new OnBackInvokedCallback() {
-        @Override
-        public void onBackInvoked() {
-            stopTextActionMode();
-        }
-    };
+    private final OnBackInvokedCallback mBackCallback = this::stopTextActionMode;
     private boolean mBackCallbackRegistered;
 
     @Nullable

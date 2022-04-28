@@ -30,7 +30,7 @@ interface ILauncherUnlockAnimationController {
 
     // Play a full unlock animation from 0f to 1f. This is used when System UI is unlocking from a
     // single action, such as biometric auth, and doesn't need to control individual frames.
-    oneway void playUnlockAnimation(boolean unlocked, long duration);
+    oneway void playUnlockAnimation(boolean unlocked, long duration, long startDelay);
 
     // Set the selected page on Launcher's smartspace.
     oneway void setSmartspaceSelectedPage(int selectedPage);

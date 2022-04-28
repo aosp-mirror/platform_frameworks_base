@@ -414,6 +414,10 @@ final class BroadcastRecord extends Binder {
             return ret;
         }
 
+        if (receivers == null) {
+            return ret;
+        }
+
         final String action = intent.getAction();
         if (!Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(action)
                 && !Intent.ACTION_BOOT_COMPLETED.equals(action)) {

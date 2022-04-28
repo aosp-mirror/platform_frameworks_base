@@ -817,11 +817,13 @@ public class NetworkPolicyManager {
     public static final class UidState {
         public int uid;
         public int procState;
+        public long procStateSeq;
         public int capability;
 
-        public UidState(int uid, int procState, int capability) {
+        public UidState(int uid, int procState, long procStateSeq, int capability) {
             this.uid = uid;
             this.procState = procState;
+            this.procStateSeq = procStateSeq;
             this.capability = capability;
         }
 
@@ -830,6 +832,8 @@ public class NetworkPolicyManager {
             final StringBuilder sb = new StringBuilder();
             sb.append("{procState=");
             sb.append(procStateToString(procState));
+            sb.append(",seq=");
+            sb.append(procStateSeq);
             sb.append(",cap=");
             ActivityManager.printCapabilitiesSummary(sb, capability);
             sb.append("}");

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip.tv
 
+import android.graphics.Insets
 import android.graphics.Point
 import android.graphics.Rect
 import android.util.Size
@@ -94,6 +95,13 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
     private var lastAreasOverlappingUnstashPosition: Set<Rect> = emptySet()
     private var lastStashTime: Long = Long.MIN_VALUE
 
+    /** Spaces around the PiP that we should leave space for when placing the PiP. Permanent PiP
+     * decorations are relevant for calculating intersecting keep clear areas */
+    private var pipPermanentDecorInsets = Insets.NONE
+    /** Spaces around the PiP that we should leave space for when placing the PiP. Temporary PiP
+     * decorations are not relevant for calculating intersecting keep clear areas */
+    private var pipTemporaryDecorInsets = Insets.NONE
+
     /**
      * Calculates the position the PiP should be placed at, taking into consideration the
      * given keep clear areas.
@@ -120,20 +128,30 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
     ): Placement {
         val transformedRestrictedAreas = transformAndFilterAreas(restrictedAreas)
         val transformedUnrestrictedAreas = transformAndFilterAreas(unrestrictedAreas)
-        val pipAnchorBounds = getNormalPipAnchorBounds(pipSize, transformedMovementBounds)
 
+        val pipSizeWithAllDecors = addDecors(pipSize)
+        val pipAnchorBoundsWithAllDecors =
+            getNormalPipAnchorBounds(pipSizeWithAllDecors, transformedMovementBounds)
+
+        val pipAnchorBoundsWithPermanentDecors =
+            removeTemporaryDecorsTransformed(pipAnchorBoundsWithAllDecors)
         val result = calculatePipPositionTransformed(
-            pipAnchorBounds,
+            pipAnchorBoundsWithPermanentDecors,
             transformedRestrictedAreas,
             transformedUnrestrictedAreas
         )
 
-        val screenSpaceBounds = fromTransformedSpace(result.bounds)
+        val pipBounds = removePermanentDecors(fromTransformedSpace(result.bounds))
+        val anchorBounds = removePermanentDecors(fromTransformedSpace(result.anchorBounds))
+        val unstashedDestBounds = result.unstashDestinationBounds?.let {
+            removePermanentDecors(fromTransformedSpace(it))
+        }
+
         return Placement(
-            screenSpaceBounds,
-            fromTransformedSpace(result.anchorBounds),
-            getStashType(screenSpaceBounds, movementBounds),
-            result.unstashDestinationBounds?.let { fromTransformedSpace(it) },
+            pipBounds,
+            anchorBounds,
+            getStashType(pipBounds, unstashedDestBounds),
+            unstashedDestBounds,
             result.unstashTime
         )
     }
@@ -167,7 +185,10 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
         restrictedAreas: Set<Rect>,
         unrestrictedAreas: Set<Rect>
     ): Placement {
-        if (restrictedAreas.isEmpty() && unrestrictedAreas.isEmpty()) {
+        // If PiP is not covered by any keep clear areas, we can leave it at the anchor bounds
+        val keepClearAreas = restrictedAreas + unrestrictedAreas
+        if (keepClearAreas.none { it.intersects(pipAnchorBounds) }) {
+            lastAreasOverlappingUnstashPosition = emptySet()
             return Placement(pipAnchorBounds, pipAnchorBounds)
         }
 
@@ -186,9 +207,8 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
                 ?: findFreeMovePosition(pipAnchorBounds, emptySet(), unrestrictedAreas)
                 ?: pipAnchorBounds
 
-        val keepClearAreas = restrictedAreas + unrestrictedAreas
         val areasOverlappingUnstashPosition =
-            keepClearAreas.filter { Rect.intersects(it, unstashBounds) }.toSet()
+            keepClearAreas.filterTo(mutableSetOf()) { it.intersects(unstashBounds) }
         val areasOverlappingUnstashPositionChanged =
             !lastAreasOverlappingUnstashPosition.containsAll(areasOverlappingUnstashPosition)
         lastAreasOverlappingUnstashPosition = areasOverlappingUnstashPosition
@@ -210,19 +230,22 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
         return Placement(
             stashedBounds,
             pipAnchorBounds,
-            getStashType(stashedBounds, transformedMovementBounds),
+            getStashType(stashedBounds, unstashBounds),
             unstashBounds,
             unstashTime
         )
     }
 
     @PipBoundsState.StashType
-    private fun getStashType(stashedBounds: Rect, movementBounds: Rect): Int {
+    private fun getStashType(stashedBounds: Rect, unstashedDestBounds: Rect?): Int {
+        if (unstashedDestBounds == null) {
+            return STASH_TYPE_NONE
+        }
         return when {
-            stashedBounds.left < movementBounds.left -> STASH_TYPE_LEFT
-            stashedBounds.right > movementBounds.right -> STASH_TYPE_RIGHT
-            stashedBounds.top < movementBounds.top -> STASH_TYPE_TOP
-            stashedBounds.bottom > movementBounds.bottom -> STASH_TYPE_BOTTOM
+            stashedBounds.left < unstashedDestBounds.left -> STASH_TYPE_LEFT
+            stashedBounds.right > unstashedDestBounds.right -> STASH_TYPE_RIGHT
+            stashedBounds.top < unstashedDestBounds.top -> STASH_TYPE_TOP
+            stashedBounds.bottom > unstashedDestBounds.bottom -> STASH_TYPE_BOTTOM
             else -> STASH_TYPE_NONE
         }
     }
@@ -346,55 +369,73 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
 
     private fun getNearbyStashedPosition(bounds: Rect, keepClearAreas: Set<Rect>): Rect {
         val screenBounds = transformedScreenBounds
-        val stashCandidates = Array(2) { Rect(bounds) }
+        val stashCandidates = mutableListOf<Rect>()
         val areasOverlappingPipX = keepClearAreas.filter { it.intersectsX(bounds) }
         val areasOverlappingPipY = keepClearAreas.filter { it.intersectsY(bounds) }
 
-        if (screenBounds.bottom - bounds.bottom <= bounds.top - screenBounds.top) {
-            // bottom is closer than top, stash downwards
-            val fullStashTop = screenBounds.bottom - stashOffset
+        if (areasOverlappingPipX.isNotEmpty()) {
+            if (screenBounds.bottom - bounds.bottom <= bounds.top - screenBounds.top) {
+                val fullStashTop = screenBounds.bottom - stashOffset
 
-            val maxBottom = areasOverlappingPipX.maxByOrNull { it.bottom }!!.bottom
-            val partialStashTop = maxBottom + pipAreaPadding
+                val maxBottom = areasOverlappingPipX.maxByOrNull { it.bottom }!!.bottom
+                val partialStashTop = maxBottom + pipAreaPadding
 
-            val downPosition = stashCandidates[0]
-            downPosition.offsetTo(bounds.left, min(fullStashTop, partialStashTop))
-        } else {
-            // top is closer than bottom, stash upwards
-            val fullStashY = screenBounds.top - bounds.height() + stashOffset
+                val newTop = min(fullStashTop, partialStashTop)
+                if (newTop > bounds.top) {
+                    val downPosition = Rect(bounds)
+                    downPosition.offsetTo(bounds.left, newTop)
+                    stashCandidates += downPosition
+                }
+            }
+            if (screenBounds.bottom - bounds.bottom >= bounds.top - screenBounds.top) {
+                val fullStashBottom = screenBounds.top - bounds.height() + stashOffset
 
-            val minTop = areasOverlappingPipX.minByOrNull { it.top }!!.top
-            val partialStashY = minTop - bounds.height() - pipAreaPadding
+                val minTop = areasOverlappingPipX.minByOrNull { it.top }!!.top
+                val partialStashBottom = minTop - bounds.height() - pipAreaPadding
 
-            val upPosition = stashCandidates[0]
-            upPosition.offsetTo(bounds.left, max(fullStashY, partialStashY))
+                val newTop = max(fullStashBottom, partialStashBottom)
+                if (newTop < bounds.top) {
+                    val upPosition = Rect(bounds)
+                    upPosition.offsetTo(bounds.left, newTop)
+                    stashCandidates += upPosition
+                }
+            }
         }
 
-        if (screenBounds.right - bounds.right <= bounds.left - screenBounds.left) {
-            // right is closer than left, stash rightwards
-            val fullStashLeft = screenBounds.right - stashOffset
+        if (areasOverlappingPipY.isNotEmpty()) {
+            if (screenBounds.right - bounds.right <= bounds.left - screenBounds.left) {
+                val fullStashRight = screenBounds.right - stashOffset
 
-            val maxRight = areasOverlappingPipY.maxByOrNull { it.right }!!.right
-            val partialStashLeft = maxRight + pipAreaPadding
+                val maxRight = areasOverlappingPipY.maxByOrNull { it.right }!!.right
+                val partialStashRight = maxRight + pipAreaPadding
 
-            val rightPosition = stashCandidates[1]
-            rightPosition.offsetTo(min(fullStashLeft, partialStashLeft), bounds.top)
-        } else {
-            // left is closer than right, stash leftwards
-            val fullStashLeft = screenBounds.left - bounds.width() + stashOffset
+                val newLeft = min(fullStashRight, partialStashRight)
+                if (newLeft > bounds.left) {
+                    val rightPosition = Rect(bounds)
+                    rightPosition.offsetTo(newLeft, bounds.top)
+                    stashCandidates += rightPosition
+                }
+            }
+            if (screenBounds.right - bounds.right >= bounds.left - screenBounds.left) {
+                val fullStashLeft = screenBounds.left - bounds.width() + stashOffset
 
-            val minLeft = areasOverlappingPipY.minByOrNull { it.left }!!.left
-            val partialStashLeft = minLeft - bounds.width() - pipAreaPadding
+                val minLeft = areasOverlappingPipY.minByOrNull { it.left }!!.left
+                val partialStashLeft = minLeft - bounds.width() - pipAreaPadding
 
-            val rightPosition = stashCandidates[1]
-            rightPosition.offsetTo(max(fullStashLeft, partialStashLeft), bounds.top)
+                val newLeft = max(fullStashLeft, partialStashLeft)
+                if (newLeft < bounds.left) {
+                    val leftPosition = Rect(bounds)
+                    leftPosition.offsetTo(newLeft, bounds.top)
+                    stashCandidates += leftPosition
+                }
+            }
         }
 
         return stashCandidates.minByOrNull {
             val dx = abs(it.left - bounds.left)
             val dy = abs(it.top - bounds.top)
-            dx * bounds.height() + dy * bounds.width()
-        }!!
+            return@minByOrNull dx + dy
+        } ?: bounds
     }
 
     /**
@@ -445,6 +486,14 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
         transformedScreenBounds =
             toTransformedSpace(Rect(0, 0, screenSize.width, screenSize.height))
         transformedMovementBounds = toTransformedSpace(movementBounds)
+    }
+
+    fun setPipPermanentDecorInsets(insets: Insets) {
+        pipPermanentDecorInsets = insets
+    }
+
+    fun setPipTemporaryDecorInsets(insets: Insets) {
+        pipTemporaryDecorInsets = insets
     }
 
     /**
@@ -735,7 +784,42 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
         return horizontal && vertical
     }
 
+    /**
+     * Adds space around [size] to leave space for decorations that will be drawn around the PiP
+     */
+    private fun addDecors(size: Size): Size {
+        val bounds = Rect(0, 0, size.width, size.height)
+        bounds.inset(pipPermanentDecorInsets)
+        bounds.inset(pipTemporaryDecorInsets)
+
+        return Size(bounds.width(), bounds.height())
+    }
+
+    /**
+     * Removes the space that was reserved for permanent decorations around the PiP
+     * @param bounds the bounds (in screen space) to remove the insets from
+     */
+    private fun removePermanentDecors(bounds: Rect): Rect {
+        val pipDecorReverseInsets = Insets.subtract(Insets.NONE, pipPermanentDecorInsets)
+        bounds.inset(pipDecorReverseInsets)
+        return bounds
+    }
+
+    /**
+     * Removes the space that was reserved for temporary decorations around the PiP
+     * @param bounds the bounds (in base case) to remove the insets from
+     */
+    private fun removeTemporaryDecorsTransformed(bounds: Rect): Rect {
+        if (pipTemporaryDecorInsets == Insets.NONE) return bounds
+
+        val reverseInsets = Insets.subtract(Insets.NONE, pipTemporaryDecorInsets)
+        val boundsInScreenSpace = fromTransformedSpace(bounds)
+        boundsInScreenSpace.inset(reverseInsets)
+        return toTransformedSpace(boundsInScreenSpace)
+    }
+
     private fun Rect.offsetCopy(dx: Int, dy: Int) = Rect(this).apply { offset(dx, dy) }
-    private fun Rect.intersectsY(other: Rect) = bottom >= other.top && top <= other.bottom
     private fun Rect.intersectsX(other: Rect) = right >= other.left && left <= other.right
+    private fun Rect.intersectsY(other: Rect) = bottom >= other.top && top <= other.bottom
+    private fun Rect.intersects(other: Rect) = intersectsX(other) && intersectsY(other)
 }

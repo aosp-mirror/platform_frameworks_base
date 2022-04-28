@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Angiv adgangskoden til kryptering for din enhed nedenfor. Denne bliver også brugt til at kryptere sikkerhedskopien af arkivet."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Angiv en adgangskode, som skal bruges til kryptering af alle dine sikkerhedsdata. Hvis dette felt er tomt, bruges din aktuelle adgangskode til backup:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Hvis du ønsker at kryptere sikkerhedsdataene, skal du indtaste en adgangskode nedenfor:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Eftersom din enhed er krypteret, skal du kryptere din backup. Angiv en adgangskode nedenfor:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Hvis gendannelsesdataene er krypteret, skal du angive adgangskoden nedenfor:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Backup begynder..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Backup er færdig"</string>

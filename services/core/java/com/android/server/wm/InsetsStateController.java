@@ -177,7 +177,7 @@ class InsetsStateController {
         }
     }
 
-    void onDisplayInfoUpdated(boolean notifyInsetsChange) {
+    void onDisplayFramesUpdated(boolean notifyInsetsChange) {
         final ArrayList<WindowState> insetsChangedWindows = new ArrayList<>();
         mDisplayContent.forAllWindows(w -> {
             w.mAboveInsetsState.set(mState, displayCutout());

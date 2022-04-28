@@ -203,6 +203,7 @@ public class TransactionParcelTests {
                 .setPendingResults(resultInfoList()).setActivityOptions(ActivityOptions.makeBasic())
                 .setPendingNewIntents(referrerIntentList()).setIsForward(true)
                 .setAssistToken(new Binder()).setShareableActivityToken(new Binder())
+                .setTaskFragmentToken(new Binder())
                 .build();
 
         writeAndPrepareForReading(item);

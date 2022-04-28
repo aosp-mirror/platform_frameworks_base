@@ -231,6 +231,14 @@ public class GameManagerServiceTests {
                 .thenReturn(configString);
     }
 
+    // Loading boost will be disabled for most apps, so treat enabling loading boost as a special
+    // case.
+    private void mockDeviceConfigPerformanceEnableLoadingBoost() {
+        String configString = "mode=2,downscaleFactor=0.5,loadingBoost=0";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
+    }
+
     private void mockDeviceConfigBattery() {
         String configString = "mode=3,downscaleFactor=0.7,fps=30";
         when(DeviceConfig.getProperty(anyString(), anyString()))
@@ -564,6 +572,21 @@ public class GameManagerServiceTests {
 
         // Validate GameManagerService.isAngleEnabled() returns the correct value.
         assertEquals(gameManagerService.isAngleEnabled(mPackageName, USER_ID_1), angleEnabled);
+    }
+
+    private void checkLoadingBoost(GameManagerService gameManagerService, int gameMode,
+            int loadingBoost) {
+        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+
+        // Validate GamePackageConfiguration returns the correct value.
+        GameManagerService.GamePackageConfiguration config =
+                gameManagerService.getConfig(mPackageName);
+        assertEquals(
+                loadingBoost, config.getGameModeConfiguration(gameMode).getLoadingBoostDuration());
+
+        // Validate GameManagerService.getLoadingBoostDuration() returns the correct value.
+        assertEquals(
+                loadingBoost, gameManagerService.getLoadingBoostDuration(mPackageName, USER_ID_1));
     }
 
     private void checkFps(GameManagerService gameManagerService, int gameMode, int fps) {
@@ -922,6 +945,21 @@ public class GameManagerServiceTests {
     }
 
     /**
+     * PERFORMANCE game mode is configured through Phenotype. The app hasn't specified any
+     * metadata.
+     */
+    @Test
+    public void testInterventionAllowLoadingBoostDefault() throws Exception {
+        GameManagerService gameManagerService = new GameManagerService(
+                mMockContext, mTestLooper.getLooper());
+
+        startUser(gameManagerService, USER_ID_1);
+        mockDeviceConfigPerformance();
+        mockModifyGameModeGranted();
+        checkLoadingBoost(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, -1);
+    }
+
+    /**
      * PERFORMANCE game mode is configured through Phenotype. The app has opted-out of ANGLE.
      */
     @Test
@@ -953,6 +991,25 @@ public class GameManagerServiceTests {
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
 
         checkAngleEnabled(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, true);
+    }
+
+    /**
+     * PERFORMANCE game mode is configured through Phenotype. The app has redundantly specified the
+     * Loading Boost metadata default value of "true".
+     */
+    @Test
+    public void testInterventionAllowLoadingBoost() throws Exception {
+        mockDeviceConfigPerformanceEnableLoadingBoost();
+
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        mockModifyGameModeGranted();
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_PERFORMANCE,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+        mockInterventionsEnabledFromXml();
+        checkLoadingBoost(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0);
     }
 
     @Test

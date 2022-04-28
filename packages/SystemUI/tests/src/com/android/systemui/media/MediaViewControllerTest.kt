@@ -12,6 +12,8 @@ import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 
 /**
  * Tests for {@link MediaViewController}.
@@ -20,16 +22,25 @@ import org.junit.runner.RunWith
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class MediaViewControllerTest : SysuiTestCase() {
+    @Mock
+    private lateinit var logger: MediaViewLogger
+
     private val configurationController =
             com.android.systemui.statusbar.phone.ConfigurationControllerImpl(context)
     private val mediaHostStatesManager = MediaHostStatesManager()
-    private val mediaViewController =
-            MediaViewController(context, configurationController, mediaHostStatesManager)
+    private lateinit var mediaViewController: MediaViewController
     private val mediaHostStateHolder = MediaHost.MediaHostStateHolder()
     private var transitionLayout = TransitionLayout(context, /* attrs */ null, /* defStyleAttr */ 0)
 
     @Before
     fun setUp() {
+        MockitoAnnotations.initMocks(this)
+        mediaViewController = MediaViewController(
+                context,
+                configurationController,
+                mediaHostStatesManager,
+                logger
+        )
         mediaViewController.attach(transitionLayout, MediaViewController.TYPE.PLAYER)
     }
 

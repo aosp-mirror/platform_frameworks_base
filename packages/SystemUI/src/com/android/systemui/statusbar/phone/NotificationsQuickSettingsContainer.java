@@ -103,16 +103,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         mStackScroller.setLayoutParams(params);
     }
 
-    public void setQSScrollPaddingBottom(int paddingBottom) {
-        if (mQSScrollView != null) {
-            mQSScrollView.setPaddingRelative(
-                    mQSScrollView.getPaddingLeft(),
-                    mQSScrollView.getPaddingTop(),
-                    mQSScrollView.getPaddingRight(),
-                    paddingBottom);
-        }
-    }
-
     public void setQSContainerPaddingBottom(int paddingBottom) {
         if (mQSContainer != null) {
             mQSContainer.setPadding(

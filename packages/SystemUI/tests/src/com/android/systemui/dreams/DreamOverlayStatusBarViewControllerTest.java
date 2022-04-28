@@ -16,10 +16,14 @@
 
 package com.android.systemui.dreams;
 
+import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
+import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +36,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -40,6 +45,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.time.DateFormatUtil;
 
@@ -84,6 +91,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     ZenModeController mZenModeController;
     @Mock
     DreamOverlayNotificationCountProvider mDreamOverlayNotificationCountProvider;
+    @Mock
+    StatusBarWindowStateController mStatusBarWindowStateController;
 
     private final Executor mMainExecutor = Runnable::run;
 
@@ -107,7 +116,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mDateFormatUtil,
                 mSensorPrivacyController,
                 mDreamOverlayNotificationCountProvider,
-                mZenModeController);
+                mZenModeController,
+                mStatusBarWindowStateController);
     }
 
     @Test
@@ -400,5 +410,42 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
 
         verify(mView).showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON, false, null);
+    }
+
+    @Test
+    public void testStatusBarHiddenWhenSystemStatusBarShown() {
+        mController.onViewAttached();
+
+        final ArgumentCaptor<StatusBarWindowStateListener>
+                callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
+        verify(mStatusBarWindowStateController).addListener(callbackCapture.capture());
+        callbackCapture.getValue().onStatusBarWindowStateChanged(WINDOW_STATE_SHOWING);
+
+        verify(mView).setVisibility(View.INVISIBLE);
+    }
+
+    @Test
+    public void testStatusBarShownWhenSystemStatusBarHidden() {
+        mController.onViewAttached();
+
+        final ArgumentCaptor<StatusBarWindowStateListener>
+                callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
+        verify(mStatusBarWindowStateController).addListener(callbackCapture.capture());
+        callbackCapture.getValue().onStatusBarWindowStateChanged(WINDOW_STATE_HIDDEN);
+
+        verify(mView).setVisibility(View.VISIBLE);
+    }
+
+    @Test
+    public void testUnattachedStatusBarVisibilityUnchangedWhenSystemStatusBarHidden() {
+        mController.onViewAttached();
+        mController.onViewDetached();
+
+        final ArgumentCaptor<StatusBarWindowStateListener>
+                callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
+        verify(mStatusBarWindowStateController).addListener(callbackCapture.capture());
+        callbackCapture.getValue().onStatusBarWindowStateChanged(WINDOW_STATE_SHOWING);
+
+        verify(mView, never()).setVisibility(anyInt());
     }
 }

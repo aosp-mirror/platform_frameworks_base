@@ -44,11 +44,13 @@ public class MockMagnificationAnimationCallback extends IRemoteMagnificationAnim
 
     @Override
     public void onResult(boolean success) throws RemoteException {
-        mCountDownLatch.countDown();
         if (success) {
             mSuccessCount.getAndIncrement();
         } else {
             mFailedCount.getAndIncrement();
         }
+        // It should be put at the last line to avoid making CountDownLatch#await passed without
+        // updating values.
+        mCountDownLatch.countDown();
     }
 }

@@ -30,11 +30,14 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.util.Random;
 
 public class Utils {
     public static final String TAG = "BlobStoreTest";
@@ -162,6 +165,25 @@ public class Utils {
 
     public static void triggerIdleMaintenance() throws IOException {
         runShellCmd("cmd blob_store idle-maintenance");
+    }
+
+    public static void writeRandomData(File file, long fileSizeBytes)
+            throws Exception {
+        writeRandomData(new RandomAccessFile(file, "rw"), new Random(0), fileSizeBytes);
+    }
+
+    public static void writeRandomData(RandomAccessFile file, Random random, long fileSizeBytes)
+            throws Exception {
+        long bytesWritten = 0;
+        final byte[] buffer = new byte[BUFFER_SIZE_BYTES];
+        while (bytesWritten < fileSizeBytes) {
+            random.nextBytes(buffer);
+            final int toWrite = (bytesWritten + buffer.length <= fileSizeBytes)
+                    ? buffer.length : (int) (fileSizeBytes - bytesWritten);
+            file.seek(bytesWritten);
+            file.write(buffer, 0, toWrite);
+            bytesWritten += toWrite;
+        }
     }
 
     public static String runShellCmd(String cmd) throws IOException {

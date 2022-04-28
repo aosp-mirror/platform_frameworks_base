@@ -5,13 +5,18 @@ import android.media.INearbyMediaDevicesUpdateCallback
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import android.media.NearbyDevice
+import android.os.IBinder
 import com.android.systemui.statusbar.CommandQueue
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito
+import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -19,16 +24,18 @@ class NearbyMediaDevicesManagerTest : SysuiTestCase() {
 
     private lateinit var manager: NearbyMediaDevicesManager
     @Mock
+    private lateinit var logger: NearbyMediaDevicesLogger
+    @Mock
     private lateinit var commandQueue: CommandQueue
     private lateinit var commandQueueCallbacks: CommandQueue.Callbacks
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        manager = NearbyMediaDevicesManager(commandQueue)
+        manager = NearbyMediaDevicesManager(commandQueue, logger)
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
-        Mockito.verify(commandQueue).addCallback(callbackCaptor.capture())
+        verify(commandQueue).addCallback(callbackCaptor.capture())
         commandQueueCallbacks = callbackCaptor.value!!
     }
 
@@ -128,9 +135,92 @@ class NearbyMediaDevicesManagerTest : SysuiTestCase() {
         assertThat(provider2.lastRegisteredCallback).isEqualTo(callback)
     }
 
+    @Test
+    fun providerUnregistered_doesNotReceiveNewCallback() {
+        val provider = TestProvider()
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(provider)
+        commandQueueCallbacks.unregisterNearbyMediaDevicesProvider(provider)
+
+        val callback = object : INearbyMediaDevicesUpdateCallback.Stub() {
+            override fun onDevicesUpdated(nearbyDevices: List<NearbyDevice>) {}
+        }
+        manager.registerNearbyDevicesCallback(callback)
+
+        assertThat(provider.lastRegisteredCallback).isEqualTo(null)
+    }
+
+    @Test
+    fun providerRegistered_isLogged() {
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(TestProvider())
+
+        verify(logger).logProviderRegistered(numProviders = 1)
+    }
+
+    @Test
+    fun providerRegisteredTwice_onlyLoggedOnce() {
+        val provider = TestProvider()
+
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(provider)
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(provider)
+
+        verify(logger, times(1)).logProviderRegistered(numProviders = 1)
+    }
+
+    @Test
+    fun multipleProvidersRegistered_isLogged() {
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(TestProvider())
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(TestProvider())
+        reset(logger)
+
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(TestProvider())
+
+        verify(logger).logProviderRegistered(numProviders = 3)
+    }
+
+    @Test
+    fun providerUnregistered_isLogged() {
+        val provider = TestProvider()
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(provider)
+
+        commandQueueCallbacks.unregisterNearbyMediaDevicesProvider(provider)
+
+        verify(logger).logProviderUnregistered(numProviders = 0)
+    }
+
+    @Test
+    fun multipleProvidersRegisteredThenUnregistered_isLogged() {
+        val provider = TestProvider()
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(provider)
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(TestProvider())
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(TestProvider())
+
+        commandQueueCallbacks.unregisterNearbyMediaDevicesProvider(provider)
+
+        verify(logger).logProviderUnregistered(numProviders = 2)
+    }
+
+    @Test
+    fun providerUnregisteredButNeverRegistered_notLogged() {
+        commandQueueCallbacks.unregisterNearbyMediaDevicesProvider(TestProvider())
+
+        verify(logger, never()).logProviderRegistered(anyInt())
+    }
+
+    @Test
+    fun providerBinderDied_isLogged() {
+        val provider = TestProvider()
+        commandQueueCallbacks.registerNearbyMediaDevicesProvider(provider)
+
+        provider.deathRecipient!!.binderDied(provider)
+
+        verify(logger).logProviderBinderDied(numProviders = 0)
+    }
+
     private class TestProvider : INearbyMediaDevicesProvider.Stub() {
         var lastRegisteredCallback: INearbyMediaDevicesUpdateCallback? = null
         var lastUnregisteredCallback: INearbyMediaDevicesUpdateCallback? = null
+        var deathRecipient: IBinder.DeathRecipient? = null
+
         override fun registerNearbyDevicesCallback(
             callback: INearbyMediaDevicesUpdateCallback
         ) {
@@ -141,6 +231,14 @@ class NearbyMediaDevicesManagerTest : SysuiTestCase() {
             callback: INearbyMediaDevicesUpdateCallback
         ) {
             lastUnregisteredCallback = callback
+        }
+
+        override fun asBinder(): IBinder {
+            return this
+        }
+
+        override fun linkToDeath(recipient: IBinder.DeathRecipient, flags: Int) {
+            deathRecipient = recipient
         }
     }
 }

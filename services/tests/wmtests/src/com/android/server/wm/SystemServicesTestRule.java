@@ -52,6 +52,7 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.Uri;
@@ -228,6 +229,10 @@ public class SystemServicesTestRule implements TestRule {
         // AppOpsManager
         final AppOpsManager aom = mock(AppOpsManager.class);
         doReturn(aom).when(mContext).getSystemService(eq(Context.APP_OPS_SERVICE));
+
+        // DeviceStateManager
+        final DeviceStateManager dsm = mock(DeviceStateManager.class);
+        doReturn(dsm).when(mContext).getSystemService(eq(Context.DEVICE_STATE_SERVICE));
 
         // Prevent "WakeLock finalized while still held: SCREEN_FROZEN".
         final PowerManager pm = mock(PowerManager.class);
