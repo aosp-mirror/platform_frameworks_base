@@ -64,14 +64,12 @@ public:
     virtual void shutdown(const sp<IMountShutdownObserver>& observer) = 0;
     virtual void finishMediaUpdate() = 0;
     virtual void mountObb(const String16& rawPath, const String16& canonicalPath,
-            const String16& key, const sp<IObbActionListener>& token,
-            const int32_t nonce, const sp<ObbInfo>& obbInfo) = 0;
+            const sp<IObbActionListener>& token, const int32_t nonce,
+            const sp<ObbInfo>& obbInfo) = 0;
     virtual void unmountObb(const String16& filename, const bool force,
             const sp<IObbActionListener>& token, const int32_t nonce) = 0;
     virtual bool isObbMounted(const String16& filename) = 0;
     virtual bool getMountedObbPath(const String16& filename, String16& path) = 0;
-    virtual int32_t decryptStorage(const String16& password) = 0;
-    virtual int32_t encryptStorage(const String16& password) = 0;
 };
 
 // ----------------------------------------------------------------------------

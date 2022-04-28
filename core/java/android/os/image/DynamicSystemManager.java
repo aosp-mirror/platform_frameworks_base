@@ -16,13 +16,16 @@
 
 package android.os.image;
 
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.gsi.AvbPublicKey;
 import android.gsi.GsiProgress;
+import android.gsi.IGsiService;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.util.Pair;
 
 /**
  * The DynamicSystemManager offers a mechanism to use a new system image temporarily. After the
@@ -138,17 +141,18 @@ public class DynamicSystemManager {
      * @param name The DSU partition name
      * @param size Size of the DSU image in bytes
      * @param readOnly True if the partition is read only, e.g. system.
-     * @return {@code true} if the call succeeds. {@code false} either the device does not contain
-     *     enough space or a DynamicSystem is currently in use where the {@link #isInUse} would be
-     *     true.
+     * @return {@code Integer} an IGsiService.INSTALL_* status code. {@link Session} an installation
+     *     session object if successful, otherwise {@code null}.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public Session createPartition(String name, long size, boolean readOnly) {
+    public @NonNull Pair<Integer, Session> createPartition(
+            String name, long size, boolean readOnly) {
         try {
-            if (mService.createPartition(name, size, readOnly)) {
-                return new Session();
+            int status = mService.createPartition(name, size, readOnly);
+            if (status == IGsiService.INSTALL_OK) {
+                return new Pair<>(status, new Session());
             } else {
-                return null;
+                return new Pair<>(status, null);
             }
         } catch (RemoteException e) {
             throw new RuntimeException(e.toString());

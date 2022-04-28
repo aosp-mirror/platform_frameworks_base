@@ -100,7 +100,7 @@ public abstract class PlatformVpnProfile {
      * always gain the {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED} capability
      * immediately after it connects, whether it can reach public Internet destinations or not.
      */
-    public final boolean getRequiresInternetValidation() {
+    public final boolean isInternetValidationRequired() {
         return mRequiresInternetValidation;
     }
 

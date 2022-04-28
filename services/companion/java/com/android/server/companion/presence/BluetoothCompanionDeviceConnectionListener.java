@@ -94,7 +94,7 @@ class BluetoothCompanionDeviceConnectionListener
             int reason) {
         if (DEBUG) {
             Log.i(TAG, "onDevice_Disconnected() " + btDeviceToString(device));
-            Log.d(TAG, "  reason=" + disconnectReasonText(reason));
+            Log.d(TAG, "  reason=" + disconnectReasonToString(reason));
         }
 
         final MacAddress macAddress = MacAddress.fromString(device.getAddress());

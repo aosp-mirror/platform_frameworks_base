@@ -44,6 +44,8 @@ license {
     ],
 }
 
+// No longer used. Only kept because the ObexPacket class is a public API.
+// The library has been migrated to platform/external/obex.
 java_sdk_library {
     name: "javax.obex",
     srcs: ["javax/**/*.java"],

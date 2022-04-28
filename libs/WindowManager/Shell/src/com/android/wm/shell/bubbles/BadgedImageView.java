@@ -173,8 +173,8 @@ public class BadgedImageView extends ConstraintLayout {
     }
 
     @Override
-    public void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    public void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
 
         if (!shouldDrawDot()) {
             return;

@@ -94,7 +94,7 @@ public class WorkLockActivity extends Activity {
         // Blank out the activity. When it is on-screen it will look like a Recents thumbnail with
         // redaction switched on.
         final DevicePolicyManager dpm = getSystemService(DevicePolicyManager.class);
-        String contentDescription = dpm.getString(
+        String contentDescription = dpm.getResources().getString(
                 WORK_LOCK_ACCESSIBILITY, () -> getString(R.string.accessibility_desc_work_lock));
         final View blankView = new View(this);
         blankView.setContentDescription(contentDescription);

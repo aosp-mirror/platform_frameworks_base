@@ -104,7 +104,44 @@ public class CrossProfileApps {
                     mContext.getAttributionTag(),
                     component,
                     targetUser.getIdentifier(),
-                    true);
+                    true,
+                    null,
+                    null);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Starts the specified main activity of the caller package in the specified profile, launching
+     * in the specified activity.
+     *
+     * @param component The ComponentName of the activity to launch, it must be exported and has
+     *        action {@link android.content.Intent#ACTION_MAIN}, category
+     *        {@link android.content.Intent#CATEGORY_LAUNCHER}. Otherwise, SecurityException will
+     *        be thrown.
+     * @param targetUser The UserHandle of the profile, must be one of the users returned by
+     *        {@link #getTargetUserProfiles()}, otherwise a {@link SecurityException} will
+     *        be thrown.
+     * @param callingActivity The activity to start the new activity from for the purposes of
+     *        deciding which task the new activity should belong to. If {@code null}, the activity
+     *        will always be started in a new task.
+     * @param options The activity options or {@code null}. See {@link android.app.ActivityOptions}.
+     */
+    public void startMainActivity(@NonNull ComponentName component,
+            @NonNull UserHandle targetUser,
+            @Nullable Activity callingActivity,
+            @Nullable Bundle options) {
+        try {
+            mService.startActivityAsUser(
+                    mContext.getIApplicationThread(),
+                    mContext.getPackageName(),
+                    mContext.getAttributionTag(),
+                    component,
+                    targetUser.getIdentifier(),
+                    true,
+                    callingActivity != null ? callingActivity.getActivityToken() : null,
+                    options);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -191,6 +228,48 @@ public class CrossProfileApps {
      * @param targetUser The UserHandle of the profile, must be one of the users returned by
      *        {@link #getTargetUserProfiles()}, otherwise a {@link SecurityException} will
      *        be thrown.
+     * @param callingActivity The activity to start the new activity from for the purposes of
+     *        deciding which task the new activity should belong to. If {@code null}, the activity
+     *        will always be started in a new task.
+     * @param options The activity options or {@code null}. See {@link android.app.ActivityOptions}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES,
+            android.Manifest.permission.START_CROSS_PROFILE_ACTIVITIES})
+    public void startActivity(
+            @NonNull ComponentName component,
+            @NonNull UserHandle targetUser,
+            @Nullable Activity callingActivity,
+            @Nullable Bundle options) {
+        try {
+            mService.startActivityAsUser(
+                    mContext.getIApplicationThread(),
+                    mContext.getPackageName(),
+                    mContext.getAttributionTag(),
+                    component,
+                    targetUser.getIdentifier(),
+                    false,
+                    callingActivity != null ? callingActivity.getActivityToken() : null,
+                    options);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Starts the specified activity of the caller package in the specified profile. Unlike
+     * {@link #startMainActivity}, this can start any activity of the caller package, not just
+     * the main activity.
+     * The caller must have the {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES}
+     * or {@link android.Manifest.permission#START_CROSS_PROFILE_ACTIVITIES}
+     * permission and both the caller and target user profiles must be in the same profile group.
+     *
+     * @param component The ComponentName of the activity to launch. It must be exported.
+     * @param targetUser The UserHandle of the profile, must be one of the users returned by
+     *        {@link #getTargetUserProfiles()}, otherwise a {@link SecurityException} will
+     *        be thrown.
      * @hide
      */
     @SystemApi
@@ -201,7 +280,7 @@ public class CrossProfileApps {
         try {
             mService.startActivityAsUser(mContext.getIApplicationThread(),
                     mContext.getPackageName(), mContext.getAttributionTag(), component,
-                    targetUser.getIdentifier(), false);
+                    targetUser.getIdentifier(), false, null, null);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -247,7 +326,7 @@ public class CrossProfileApps {
 
         final boolean isManagedProfile = mUserManager.isManagedProfile(userHandle.getIdentifier());
         final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(
+        return dpm.getResources().getString(
                 getUpdatableProfileSwitchingLabelId(isManagedProfile),
                 () -> getDefaultProfileSwitchingLabel(isManagedProfile));
     }

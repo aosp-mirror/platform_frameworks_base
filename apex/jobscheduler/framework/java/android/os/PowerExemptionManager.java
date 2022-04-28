@@ -369,6 +369,16 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_CARRIER_PRIVILEGED_APP = 321;
+    /**
+     * Device/Profile owner protected apps.
+     * @hide
+     */
+    public static final int REASON_DPO_PROTECTED_APP = 322;
+    /**
+     * Apps control is disallowed for the user.
+     * @hide
+     */
+    public static final int REASON_DISALLOW_APPS_CONTROL = 323;
 
     /** @hide The app requests out-out. */
     public static final int REASON_OPT_OUT_REQUESTED = 1000;
@@ -447,6 +457,8 @@ public class PowerExemptionManager {
             REASON_SYSTEM_MODULE,
             REASON_CARRIER_PRIVILEGED_APP,
             REASON_OPT_OUT_REQUESTED,
+            REASON_DPO_PROTECTED_APP,
+            REASON_DISALLOW_APPS_CONTROL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReasonCode {}
@@ -618,6 +630,51 @@ public class PowerExemptionManager {
     }
 
     /**
+     * @hide
+     * @return the reason code mapped to statsd for the AppBackgroundRestrictionsInfo atom.
+     */
+    public static int getExemptionReasonForStatsd(@ReasonCode int reasonCode) {
+        switch (reasonCode) {
+            case REASON_SYSTEM_UID:
+                return AppBackgroundRestrictionsInfo.REASON_SYSTEM_UID;
+            case REASON_ALLOWLISTED_PACKAGE:
+                return AppBackgroundRestrictionsInfo.REASON_ALLOWLISTED_PACKAGE;
+            case REASON_COMPANION_DEVICE_MANAGER:
+                return AppBackgroundRestrictionsInfo.REASON_COMPANION_DEVICE_MANAGER;
+            case REASON_DEVICE_DEMO_MODE:
+                return AppBackgroundRestrictionsInfo.REASON_DEVICE_DEMO_MODE;
+            case REASON_DEVICE_OWNER:
+                return AppBackgroundRestrictionsInfo.REASON_DEVICE_OWNER;
+            case REASON_PROFILE_OWNER:
+                return AppBackgroundRestrictionsInfo.REASON_PROFILE_OWNER;
+            case REASON_PROC_STATE_PERSISTENT:
+                return AppBackgroundRestrictionsInfo.REASON_PROC_STATE_PERSISTENT;
+            case REASON_PROC_STATE_PERSISTENT_UI:
+                return AppBackgroundRestrictionsInfo.REASON_PROC_STATE_PERSISTENT_UI;
+            case REASON_OP_ACTIVATE_VPN:
+                return AppBackgroundRestrictionsInfo.REASON_OP_ACTIVATE_VPN;
+            case REASON_OP_ACTIVATE_PLATFORM_VPN:
+                return AppBackgroundRestrictionsInfo.REASON_OP_ACTIVATE_PLATFORM_VPN;
+            case REASON_SYSTEM_MODULE:
+                return AppBackgroundRestrictionsInfo.REASON_SYSTEM_MODULE;
+            case REASON_CARRIER_PRIVILEGED_APP:
+                return AppBackgroundRestrictionsInfo.REASON_CARRIER_PRIVILEGED_APP;
+            case REASON_SYSTEM_ALLOW_LISTED:
+                return AppBackgroundRestrictionsInfo.REASON_SYSTEM_ALLOW_LISTED;
+            case REASON_ROLE_DIALER:
+                return AppBackgroundRestrictionsInfo.REASON_ROLE_DIALER;
+            case REASON_ROLE_EMERGENCY:
+                return AppBackgroundRestrictionsInfo.REASON_ROLE_EMERGENCY;
+            case REASON_DPO_PROTECTED_APP:
+                return AppBackgroundRestrictionsInfo.REASON_DPO_PROTECTED_APP;
+            case REASON_DISALLOW_APPS_CONTROL:
+                return AppBackgroundRestrictionsInfo.REASON_DISALLOW_APPS_CONTROL;
+            default:
+                return AppBackgroundRestrictionsInfo.REASON_DENIED;
+        }
+    }
+
+    /**
      * Return string name of the integer reason code.
      * @hide
      * @param reasonCode
@@ -757,6 +814,10 @@ public class PowerExemptionManager {
                 return "SYSTEM_MODULE";
             case REASON_CARRIER_PRIVILEGED_APP:
                 return "CARRIER_PRIVILEGED_APP";
+            case REASON_DPO_PROTECTED_APP:
+                return "DPO_PROTECTED_APP";
+            case REASON_DISALLOW_APPS_CONTROL:
+                return "DISALLOW_APPS_CONTROL";
             case REASON_OPT_OUT_REQUESTED:
                 return "REASON_OPT_OUT_REQUESTED";
             default:

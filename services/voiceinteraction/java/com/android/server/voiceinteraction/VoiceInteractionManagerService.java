@@ -1824,6 +1824,32 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        public void setSessionWindowVisible(IBinder token, boolean visible) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "setSessionWindowVisible called without running voice interaction "
+                            + "service");
+                    return;
+                }
+                if (mImpl.mActiveSession == null || token != mImpl.mActiveSession.mToken) {
+                    Slog.w(TAG, "setSessionWindowVisible does not match active session");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mVoiceInteractionSessionListeners.broadcast(listener -> {
+                        try {
+                            listener.onVoiceSessionWindowVisibilityChanged(visible);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Error delivering window visibility event to listener.", e);
+                        }
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;

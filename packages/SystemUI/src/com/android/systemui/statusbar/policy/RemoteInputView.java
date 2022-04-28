@@ -22,8 +22,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityManager;
 import android.app.Notification;
-import android.app.PendingIntent;
-import android.app.RemoteInput;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -75,7 +73,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -111,21 +108,15 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private ProgressBar mProgressBar;
     private ImageView mDelete;
     private ImageView mDeleteBg;
-    // TODO(b/193539698): remove reveal param fields, turn them into parameters where needed
-    private int mRevealCx;
-    private int mRevealCy;
-    private int mRevealR;
     private boolean mColorized;
     private int mTint;
     private boolean mResetting;
+    @Nullable private RevealParams mRevealParams;
 
     // TODO(b/193539698): move these to a Controller
     private RemoteInputController mController;
     private final UiEventLogger mUiEventLogger;
     private NotificationEntry mEntry;
-    private PendingIntent mPendingIntent;
-    private RemoteInput mRemoteInput;
-    private RemoteInput[] mRemoteInputs;
     private boolean mRemoved;
     private NotificationViewWrapper mWrapper;
 
@@ -397,9 +388,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         // During removal, we get reattached and lose focus. Not hiding in that
         // case to prevent flicker.
         if (!mRemoved) {
-            if (animate && mRevealR > 0) {
-                Animator reveal = ViewAnimationUtils.createCircularReveal(
-                        this, mRevealCx, mRevealCy, mRevealR, 0);
+            if (animate && mRevealParams != null && mRevealParams.radius > 0) {
+                Animator reveal = mRevealParams.createCircularHideAnimator(this);
                 reveal.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
                 reveal.setDuration(StackStateAnimator.ANIMATION_DURATION_CLOSE_REMOTE_INPUT);
                 reveal.addListener(new AnimatorListenerAdapter() {
@@ -454,30 +444,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mController.removeSpinning(mEntry.getKey(), mToken);
     }
 
-    public void setPendingIntent(PendingIntent pendingIntent) {
-        mPendingIntent = pendingIntent;
+    public void setHintText(CharSequence hintText) {
+        mEditText.setHint(hintText);
     }
 
-    /**
-     * Sets the remote input for this view.
-     *
-     * @param remoteInputs The remote inputs that need to be sent to the app.
-     * @param remoteInput The remote input that needs to be activated.
-     * @param editedSuggestionInfo The smart reply that should be inserted in the remote input, or
-     *         {@code null} if the user is not editing a smart reply.
-     */
-    public void setRemoteInput(RemoteInput[] remoteInputs, RemoteInput remoteInput,
-            @Nullable EditedSuggestionInfo editedSuggestionInfo) {
-        mRemoteInputs = remoteInputs;
-        mRemoteInput = remoteInput;
-        mEditText.setHint(mRemoteInput.getLabel());
-        mEditText.setSupportedMimeTypes(remoteInput.getAllowedDataTypes());
-
-        mEntry.editedSuggestionInfo = editedSuggestionInfo;
-        if (editedSuggestionInfo != null) {
-            mEntry.remoteInputText = editedSuggestionInfo.originalText;
-            mEntry.remoteInputAttachment = null;
-        }
+    public void setSupportedMimeTypes(Collection<String> mimeTypes) {
+        mEditText.setSupportedMimeTypes(mimeTypes);
     }
 
     /** Populates the text field of the remote input with the given content. */
@@ -486,9 +458,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     public void focusAnimated() {
-        if (getVisibility() != VISIBLE) {
-            Animator animator = ViewAnimationUtils.createCircularReveal(
-                    this, mRevealCx, mRevealCy, 0, mRevealR);
+        if (getVisibility() != VISIBLE && mRevealParams != null) {
+            Animator animator = mRevealParams.createCircularRevealAnimator(this);
             animator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
             animator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
             animator.start();
@@ -587,30 +558,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         return mEditText.isFocused() && mEditText.isEnabled();
     }
 
-    // TODO(b/193539698): move this to the controller
-    public void stealFocusFrom(RemoteInputView other) {
-        other.close();
-        setPendingIntent(other.mPendingIntent);
-        setRemoteInput(other.mRemoteInputs, other.mRemoteInput, mEntry.editedSuggestionInfo);
-        setRevealParameters(other.mRevealCx, other.mRevealCy, other.mRevealR);
-        getController().setPendingIntent(other.mPendingIntent);
-        getController().setRemoteInput(other.mRemoteInput);
-        getController().setRemoteInputs(other.mRemoteInputs);
-        focus();
-    }
-
-    public PendingIntent getPendingIntent() {
-        return mPendingIntent;
-    }
-
     public void setRemoved() {
         mRemoved = true;
     }
 
-    public void setRevealParameters(int cx, int cy, int r) {
-        mRevealCx = cx;
-        mRevealCy = cy;
-        mRevealR = r;
+    public void setRevealParameters(@Nullable RevealParams revealParams) {
+        mRevealParams = revealParams;
     }
 
     @Override
@@ -937,5 +890,25 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             return remainingItems;
         }
 
+    }
+
+    public static class RevealParams {
+        final int centerX;
+        final int centerY;
+        final int radius;
+
+        public RevealParams(int centerX, int centerY, int radius) {
+            this.centerX = centerX;
+            this.centerY = centerY;
+            this.radius = radius;
+        }
+
+        Animator createCircularHideAnimator(View view) {
+            return ViewAnimationUtils.createCircularReveal(view, centerX, centerY, radius, 0);
+        }
+
+        Animator createCircularRevealAnimator(View view) {
+            return ViewAnimationUtils.createCircularReveal(view, centerX, centerY, 0, radius);
+        }
     }
 }

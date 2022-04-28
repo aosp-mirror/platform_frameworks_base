@@ -303,9 +303,80 @@ public interface SettingsProxy {
     default boolean putInt(String name, int value) {
         return putIntForUser(name, value, getUserId());
     }
+
     /** See {@link #putInt(String, int)}. */
     default boolean putIntForUser(String name, int value, int userHandle) {
         return putStringForUser(name, Integer.toString(value), userHandle);
+    }
+
+    /**
+     * Convenience function for retrieving a single secure settings value
+     * as a boolean.  Note that internally setting values are always
+     * stored as strings; this function converts the string to a boolean
+     * for you.  The default value will be returned if the setting is
+     * not defined or not a boolean.
+     *
+     * @param name The name of the setting to retrieve.
+     * @param def Value to return if the setting is not defined.
+     *
+     * @return The setting's current value, or 'def' if it is not defined
+     * or not a valid boolean.
+     */
+    default boolean getBool(String name, boolean def) {
+        return getBoolForUser(name, def, getUserId());
+    }
+
+    /** See {@link #getBool(String, boolean)}. */
+    default boolean getBoolForUser(String name, boolean def, int userHandle) {
+        return getIntForUser(name, def ? 1 : 0, userHandle) != 0;
+    }
+
+    /**
+     * Convenience function for retrieving a single secure settings value
+     * as a boolean.  Note that internally setting values are always
+     * stored as strings; this function converts the string to a boolean
+     * for you.
+     * <p>
+     * This version does not take a default value.  If the setting has not
+     * been set, or the string value is not a number,
+     * it throws {@link Settings.SettingNotFoundException}.
+     *
+     * @param name The name of the setting to retrieve.
+     *
+     * @throws Settings.SettingNotFoundException Thrown if a setting by the given
+     * name can't be found or the setting value is not a boolean.
+     *
+     * @return The setting's current value.
+     */
+    default boolean getBool(String name) throws Settings.SettingNotFoundException {
+        return getBoolForUser(name, getUserId());
+    }
+
+    /** See {@link #getBool(String)}. */
+    default boolean getBoolForUser(String name, int userHandle)
+            throws Settings.SettingNotFoundException {
+        return getIntForUser(name, userHandle) != 0;
+    }
+
+    /**
+     * Convenience function for updating a single settings value as a
+     * boolean. This will either create a new entry in the table if the
+     * given name does not exist, or modify the value of the existing row
+     * with that name.  Note that internally setting values are always
+     * stored as strings, so this function converts the given value to a
+     * string before storing it.
+     *
+     * @param name The name of the setting to modify.
+     * @param value The new value for the setting.
+     * @return true if the value was set, false on database errors
+     */
+    default boolean putBool(String name, boolean value) {
+        return putBoolForUser(name, value, getUserId());
+    }
+
+    /** See {@link #putBool(String, boolean)}. */
+    default boolean putBoolForUser(String name, boolean value, int userHandle) {
+        return putIntForUser(name, value ? 1 : 0, userHandle);
     }
 
     /**

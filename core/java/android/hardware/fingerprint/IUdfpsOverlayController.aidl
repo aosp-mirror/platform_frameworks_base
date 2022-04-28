@@ -23,14 +23,15 @@ import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
  */
 oneway interface IUdfpsOverlayController {
     // Shows the overlay  for the given sensor with a reason from BiometricOverlayConstants.
-    void showUdfpsOverlay(int sensorId, int reason, IUdfpsOverlayControllerCallback callback);
+    void showUdfpsOverlay(long requestId, int sensorId, int reason, IUdfpsOverlayControllerCallback callback);
 
     // Hides the overlay.
     void hideUdfpsOverlay(int sensorId);
 
-    // Good image captured. Turn off HBM. Success/Reject comes after, which is when hideUdfpsOverlay
-    // will be called.
-    void onAcquiredGood(int sensorId);
+    // Check acquiredInfo for the acquired type (BiometricFingerprintConstants#FingerprintAcquired).
+    // Check BiometricFingerprintConstants#shouldTurnOffHbm for whether the acquiredInfo
+    // should turn off HBM.
+    void onAcquired(int sensorId, int acquiredInfo);
 
     // Notifies of enrollment progress changes.
     void onEnrollmentProgress(int sensorId, int remaining);

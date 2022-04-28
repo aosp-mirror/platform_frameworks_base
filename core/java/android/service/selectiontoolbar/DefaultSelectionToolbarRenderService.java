@@ -24,6 +24,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.selectiontoolbar.ShowInfo;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.UUID;
 
 /**
@@ -128,6 +130,23 @@ public final class DefaultSelectionToolbarRenderService extends SelectionToolbar
                 mToolbarCache.remove(mToolbarCache.keyAt(i));
                 return;
             }
+        }
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        int size = mToolbarCache.size();
+        pw.print("number selectionToolbar: "); pw.println(size);
+        String pfx = "  ";
+        for (int i = 0; i < size; i++) {
+            pw.print("#"); pw.println(i);
+            int callingUid = mToolbarCache.keyAt(i);
+            pw.print(pfx); pw.print("callingUid: "); pw.println(callingUid);
+            Pair<Long, RemoteSelectionToolbar> toolbarPair = mToolbarCache.valueAt(i);
+            RemoteSelectionToolbar selectionToolbar = toolbarPair.second;
+            pw.print(pfx); pw.print("selectionToolbar: ");
+            selectionToolbar.dump(pfx, pw);
+            pw.println();
         }
     }
 }

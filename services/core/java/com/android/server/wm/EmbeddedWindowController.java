@@ -17,6 +17,9 @@
 package com.android.server.wm;
 
 
+import static com.android.server.wm.IdentifierProto.HASH_CODE;
+import static com.android.server.wm.IdentifierProto.TITLE;
+import static com.android.server.wm.WindowContainerProto.IDENTIFIER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -25,6 +28,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.proto.ProtoOutputStream;
 import android.util.Slog;
 import android.view.IWindow;
 import android.view.InputApplicationHandle;
@@ -42,6 +46,8 @@ class EmbeddedWindowController {
     /* maps input token to an embedded window */
     private ArrayMap<IBinder /*input token */, EmbeddedWindow> mWindows = new ArrayMap<>();
     private ArrayMap<IBinder /*focus grant token */, EmbeddedWindow> mWindowsByFocusToken =
+        new ArrayMap<>();
+    private ArrayMap<IBinder /*window token*/, EmbeddedWindow> mWindowsByWindowToken =
         new ArrayMap<>();
     private final Object mGlobalLock;
     private final ActivityTaskManagerService mAtmService;
@@ -63,6 +69,7 @@ class EmbeddedWindowController {
             mWindows.put(inputToken, window);
             final IBinder focusToken = window.getFocusGrantToken();
             mWindowsByFocusToken.put(focusToken, window);
+            mWindowsByWindowToken.put(window.getWindowToken(), window);
             updateProcessController(window);
             window.mClient.asBinder().linkToDeath(()-> {
                 synchronized (mGlobalLock) {
@@ -116,6 +123,7 @@ class EmbeddedWindowController {
             if (ew.mClient.asBinder() == client.asBinder()) {
                 mWindows.removeAt(i).onRemoved();
                 mWindowsByFocusToken.remove(ew.getFocusGrantToken());
+                mWindowsByWindowToken.remove(ew.getWindowToken());
                 return;
             }
         }
@@ -127,6 +135,7 @@ class EmbeddedWindowController {
             if (ew.mHostWindowState == host) {
                 mWindows.removeAt(i).onRemoved();
                 mWindowsByFocusToken.remove(ew.getFocusGrantToken());
+                mWindowsByWindowToken.remove(ew.getWindowToken());
             }
         }
     }
@@ -137,6 +146,10 @@ class EmbeddedWindowController {
 
     EmbeddedWindow getByFocusToken(IBinder focusGrantToken) {
         return mWindowsByFocusToken.get(focusGrantToken);
+    }
+
+    EmbeddedWindow getByWindowToken(IBinder windowToken) {
+        return mWindowsByWindowToken.get(windowToken);
     }
 
     void onActivityRemoved(ActivityRecord activityRecord) {
@@ -244,13 +257,27 @@ class EmbeddedWindowController {
         }
 
         @Override
+        public DisplayContent getDisplayContent() {
+            return mWmService.mRoot.getDisplayContent(getDisplayId());
+        }
+
+        @Override
         public IWindow getIWindow() {
             return mClient;
+        }
+
+        public IBinder getWindowToken() {
+            return mClient.asBinder();
         }
 
         @Override
         public int getPid() {
             return mOwnerPid;
+        }
+
+        @Override
+        public int getUid() {
+            return mOwnerUid;
         }
 
         void setIsOverlay() {
@@ -296,6 +323,47 @@ class EmbeddedWindowController {
         @Override
         public void handleTapOutsideFocusInsideSelf() {
             handleTap(true);
+        }
+
+        @Override
+        public boolean shouldControlIme() {
+            return false;
+        }
+
+        @Override
+        public boolean canScreenshotIme() {
+            return true;
+        }
+
+        @Override
+        public void unfreezeInsetsAfterStartInput() {
+        }
+
+        @Override
+        public InsetsControlTarget getImeControlTarget() {
+            return mWmService.getDefaultDisplayContentLocked().mRemoteInsetsControlTarget;
+        }
+
+        @Override
+        public boolean isInputMethodClientFocus(int uid, int pid) {
+            return uid == mOwnerUid && pid == mOwnerPid;
+        }
+
+        @Override
+        public ActivityRecord getActivityRecord() {
+            return null;
+        }
+
+        @Override
+        public void dumpProto(ProtoOutputStream proto, long fieldId,
+                              @WindowTraceLogLevel int logLevel) {
+            final long token = proto.start(fieldId);
+
+            final long token2 = proto.start(IDENTIFIER);
+            proto.write(HASH_CODE, System.identityHashCode(this));
+            proto.write(TITLE, "EmbeddedWindow");
+            proto.end(token2);
+            proto.end(token);
         }
     }
 }

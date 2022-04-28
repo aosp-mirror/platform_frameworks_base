@@ -38,7 +38,7 @@ inline android::hash_t hash_type(const ResourceName& name) {
   std::hash<std::string> str_hash;
   android::hash_t hash = 0;
   hash = android::JenkinsHashMix(hash, (uint32_t)str_hash(name.package));
-  hash = android::JenkinsHashMix(hash, (uint32_t)name.type);
+  hash = android::JenkinsHashMix(hash, (uint32_t)str_hash(name.type.name));
   hash = android::JenkinsHashMix(hash, (uint32_t)str_hash(name.entry));
   return hash;
 }

@@ -223,19 +223,19 @@ import java.util.concurrent.locks.ReentrantLock;
   </thead>
   <tbody>
    <tr>
-    <td>{@code "crop-left"}</td>
+    <td>{@link MediaFormat#KEY_CROP_LEFT}</td>
     <td>Integer</td>
     <td>The left-coordinate (x) of the crop rectangle</td>
    </tr><tr>
-    <td>{@code "crop-top"}</td>
+    <td>{@link MediaFormat#KEY_CROP_TOP}</td>
     <td>Integer</td>
     <td>The top-coordinate (y) of the crop rectangle</td>
    </tr><tr>
-    <td>{@code "crop-right"}</td>
+    <td>{@link MediaFormat#KEY_CROP_RIGHT}</td>
     <td>Integer</td>
     <td>The right-coordinate (x) <strong>MINUS 1</strong> of the crop rectangle</td>
    </tr><tr>
-    <td>{@code "crop-bottom"}</td>
+    <td>{@link MediaFormat#KEY_CROP_BOTTOM}</td>
     <td>Integer</td>
     <td>The bottom-coordinate (y) <strong>MINUS 1</strong> of the crop rectangle</td>
    </tr><tr>
@@ -251,12 +251,16 @@ import java.util.concurrent.locks.ReentrantLock;
  <pre class=prettyprint>
  MediaFormat format = decoder.getOutputFormat(&hellip;);
  int width = format.getInteger(MediaFormat.KEY_WIDTH);
- if (format.containsKey("crop-left") && format.containsKey("crop-right")) {
-     width = format.getInteger("crop-right") + 1 - format.getInteger("crop-left");
+ if (format.containsKey(MediaFormat.KEY_CROP_LEFT)
+         && format.containsKey(MediaFormat.KEY_CROP_RIGHT)) {
+     width = format.getInteger(MediaFormat.KEY_CROP_RIGHT) + 1
+                 - format.getInteger(MediaFormat.KEY_CROP_LEFT);
  }
  int height = format.getInteger(MediaFormat.KEY_HEIGHT);
- if (format.containsKey("crop-top") && format.containsKey("crop-bottom")) {
-     height = format.getInteger("crop-bottom") + 1 - format.getInteger("crop-top");
+ if (format.containsKey(MediaFormat.KEY_CROP_TOP)
+         && format.containsKey(MediaFormat.KEY_CROP_BOTTOM)) {
+     height = format.getInteger(MediaFormat.KEY_CROP_BOTTOM) + 1
+                  - format.getInteger(MediaFormat.KEY_CROP_TOP);
  }
  </pre>
  <p class=note>

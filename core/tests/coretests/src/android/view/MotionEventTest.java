@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InputDevice.SOURCE_CLASS_POINTER;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.TOOL_TYPE_FINGER;
@@ -213,5 +214,28 @@ public class MotionEventTest {
         mat.setValues(new float[]{1, 2, 3, -4, -5, -6, 0, 0, 1});
         rotInvalid.transform(mat);
         assertEquals(-1, rotInvalid.getSurfaceRotation());
+    }
+
+    @Test
+    public void testUsesPointerSourceByDefault() {
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                ACTION_DOWN, 0 /* x */, 0 /* y */, 0 /* metaState */);
+        assertTrue(event.isFromSource(SOURCE_CLASS_POINTER));
+    }
+
+    @Test
+    public void testLocationOffsetOnlyAppliedToNonPointerSources() {
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                ACTION_DOWN, 10 /* x */, 20 /* y */, 0 /* metaState */);
+        event.offsetLocation(40, 50);
+
+        // The offset should be applied since a pointer source is used by default.
+        assertEquals(50, (int) event.getX());
+        assertEquals(70, (int) event.getY());
+
+        // The offset should not be applied if the source is changed to a non-pointer source.
+        event.setSource(InputDevice.SOURCE_JOYSTICK);
+        assertEquals(10, (int) event.getX());
+        assertEquals(20, (int) event.getY());
     }
 }

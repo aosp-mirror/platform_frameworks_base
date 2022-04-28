@@ -498,11 +498,11 @@ public final class ZenPolicy implements Parcelable {
             mZenPolicy.mPriorityCategories.set(category, STATE_UNSET);
 
             if (category == PRIORITY_CATEGORY_MESSAGES) {
-                mZenPolicy.mPriorityMessages = STATE_UNSET;
+                mZenPolicy.mPriorityMessages = PEOPLE_TYPE_UNSET;
             } else if (category == PRIORITY_CATEGORY_CALLS) {
-                mZenPolicy.mPriorityCalls = STATE_UNSET;
+                mZenPolicy.mPriorityCalls = PEOPLE_TYPE_UNSET;
             } else if (category == PRIORITY_CATEGORY_CONVERSATIONS) {
-                mZenPolicy.mConversationSenders = STATE_UNSET;
+                mZenPolicy.mConversationSenders = CONVERSATION_SENDERS_UNSET;
             }
 
             return this;

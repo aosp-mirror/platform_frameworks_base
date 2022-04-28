@@ -19,7 +19,6 @@ package com.android.settingslib.widget;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.widget.TextView;
 
@@ -43,17 +42,6 @@ public class FooterPreferenceTest {
     public void setUp() {
         mContext = RuntimeEnvironment.application;
         mFooterPreference = new FooterPreference(mContext);
-    }
-
-    @Test
-    public void bindPreference_shouldLinkifyContent() {
-        final PreferenceViewHolder holder = PreferenceViewHolder.createInstanceForTests(
-                LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null));
-
-        mFooterPreference.onBindViewHolder(holder);
-
-        assertThat(((TextView) holder.findViewById(android.R.id.title)).getMovementMethod())
-                .isInstanceOf(LinkMovementMethod.class);
     }
 
     @Test

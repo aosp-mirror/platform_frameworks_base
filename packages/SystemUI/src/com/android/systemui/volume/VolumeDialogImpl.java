@@ -1180,11 +1180,6 @@ public class VolumeDialogImpl implements VolumeDialog,
         if (mODICaptionsIcon.getCaptionsEnabled() != captionsEnabled) {
             mHandler.post(mODICaptionsIcon.setCaptionsEnabled(captionsEnabled));
         }
-
-        boolean isOptedOut = mController.isCaptionStreamOptedOut();
-        if (mODICaptionsIcon.getOptedOut() != isOptedOut) {
-            mHandler.post(() -> mODICaptionsIcon.setOptedOut(isOptedOut));
-        }
     }
 
     private void onCaptionIconClicked() {

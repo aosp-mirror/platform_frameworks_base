@@ -111,6 +111,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -129,6 +130,9 @@ import android.view.textclassifier.TextClassificationManager;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView.Drawables;
 import android.widget.TextView.OnEditorActionListener;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.EditableInputConnection;
@@ -235,6 +239,9 @@ public class Editor {
     private boolean mSelectionControllerEnabled;
 
     private final boolean mHapticTextHandleEnabled;
+    /** Handles OnBackInvokedCallback back dispatch */
+    private final OnBackInvokedCallback mBackCallback = this::stopTextActionMode;
+    private boolean mBackCallbackRegistered;
 
     @Nullable
     private MagnifierMotionAnimator mMagnifierAnimator;
@@ -753,6 +760,35 @@ public class Editor {
         stopTextActionModeWithPreservingSelection();
 
         mDefaultOnReceiveContentListener.clearInputConnectionInfo();
+        unregisterOnBackInvokedCallback();
+    }
+
+    private void unregisterOnBackInvokedCallback() {
+        if (!mBackCallbackRegistered) {
+            return;
+        }
+        ViewRootImpl viewRootImpl = getTextView().getViewRootImpl();
+        if (viewRootImpl != null
+                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(
+                        viewRootImpl.mContext)) {
+            viewRootImpl.getOnBackInvokedDispatcher()
+                    .unregisterOnBackInvokedCallback(mBackCallback);
+            mBackCallbackRegistered = false;
+        }
+    }
+
+    private void registerOnBackInvokedCallback() {
+        if (mBackCallbackRegistered) {
+            return;
+        }
+        ViewRootImpl viewRootImpl = mTextView.getViewRootImpl();
+        if (viewRootImpl != null
+                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(
+                        viewRootImpl.mContext)) {
+            viewRootImpl.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mBackCallback);
+            mBackCallbackRegistered = true;
+        }
     }
 
     private void discardTextDisplayLists() {
@@ -2370,6 +2406,7 @@ public class Editor {
                 new TextActionModeCallback(TextActionMode.INSERTION);
         mTextActionMode = mTextView.startActionMode(
                 actionModeCallback, ActionMode.TYPE_FLOATING);
+        registerOnBackInvokedCallback();
         if (mTextActionMode != null && getInsertionController() != null) {
             getInsertionController().show();
         }
@@ -2485,6 +2522,7 @@ public class Editor {
 
         ActionMode.Callback actionModeCallback = new TextActionModeCallback(actionMode);
         mTextActionMode = mTextView.startActionMode(actionModeCallback, ActionMode.TYPE_FLOATING);
+        registerOnBackInvokedCallback();
 
         final boolean selectableText = mTextView.isTextEditable() || mTextView.isTextSelectable();
         if (actionMode == TextActionMode.TEXT_LINK && !selectableText
@@ -2660,6 +2698,7 @@ public class Editor {
             // This will hide the mSelectionModifierCursorController
             mTextActionMode.finish();
         }
+        unregisterOnBackInvokedCallback();
     }
 
     private void stopTextActionModeWithPreservingSelection() {
@@ -4595,7 +4634,7 @@ public class Editor {
 
             if (includeEditorBounds) {
                 final RectF bounds = new RectF();
-                mTextView.getBoundsOnScreen(bounds, false /* clipToParent */);
+                bounds.set(0 /* left */, 0 /* top */, mTextView.getWidth(), mTextView.getHeight());
                 EditorBoundsInfo.Builder boundsBuilder = new EditorBoundsInfo.Builder();
                 //TODO(b/210039666): add Handwriting bounds once they're available.
                 builder.setEditorBoundsInfo(
@@ -6309,7 +6348,8 @@ public class Editor {
             }
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_MOVE:
-                    if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+                    if (event.isFromSource(InputDevice.SOURCE_MOUSE)
+                            || (mTextView.isAutoHandwritingEnabled() && isFromStylus(event))) {
                         break;
                     }
                     if (mIsDraggingCursor) {
@@ -6330,6 +6370,11 @@ public class Editor {
                     }
                     break;
             }
+        }
+
+        private boolean isFromStylus(MotionEvent motionEvent) {
+            final int pointerIndex = motionEvent.getActionIndex();
+            return motionEvent.getToolType(pointerIndex) == MotionEvent.TOOL_TYPE_STYLUS;
         }
 
         private void positionCursorDuringDrag(MotionEvent event) {

@@ -321,7 +321,8 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
      *                       on the device.
      * @return {@code true} if the available storage space is reached.
      */
-    boolean pruneUnusedStaticSharedLibraries(long neededSpace, long maxCachePeriod)
+    boolean pruneUnusedStaticSharedLibraries(@NonNull Computer computer, long neededSpace,
+            long maxCachePeriod)
             throws IOException {
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         final File volume = storage.findPathForUuid(StorageManager.UUID_PRIVATE_INTERNAL);
@@ -332,38 +333,36 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         // Important: We skip shared libs used for some user since
         // in such a case we need to keep the APK on the device. The check for
         // a lib being used for any user is performed by the uninstall call.
-        mPm.executeWithConsistentComputer(computer -> {
-            final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
-                    sharedLibraries = computer.getSharedLibraries();
-            final int libCount = sharedLibraries.size();
-            for (int i = 0; i < libCount; i++) {
-                final WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
-                        sharedLibraries.valueAt(i);
-                if (versionedLib == null) {
+        final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
+                sharedLibraries = computer.getSharedLibraries();
+        final int libCount = sharedLibraries.size();
+        for (int i = 0; i < libCount; i++) {
+            final WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
+                    sharedLibraries.valueAt(i);
+            if (versionedLib == null) {
+                continue;
+            }
+            final int versionCount = versionedLib.size();
+            for (int j = 0; j < versionCount; j++) {
+                SharedLibraryInfo libInfo = versionedLib.valueAt(j);
+                final PackageStateInternal ps = getLibraryPackage(computer, libInfo);
+                if (ps == null) {
                     continue;
                 }
-                final int versionCount = versionedLib.size();
-                for (int j = 0; j < versionCount; j++) {
-                    SharedLibraryInfo libInfo = versionedLib.valueAt(j);
-                    final PackageStateInternal ps = getLibraryPackage(computer, libInfo);
-                    if (ps == null) {
-                        continue;
-                    }
-                    // Skip unused libs cached less than the min period to prevent pruning a lib
-                    // needed by a subsequently installed package.
-                    if (now - ps.getLastUpdateTime() < maxCachePeriod) {
-                        continue;
-                    }
-
-                    if (ps.getPkg().isSystem()) {
-                        continue;
-                    }
-
-                    packagesToDelete.add(new VersionedPackage(ps.getPkg().getPackageName(),
-                            libInfo.getDeclaringPackage().getLongVersionCode()));
+                // Skip unused libs cached less than the min period to prevent pruning a lib
+                // needed by a subsequently installed package.
+                if (now - ps.getLastUpdateTime() < maxCachePeriod) {
+                    continue;
                 }
+
+                if (ps.getPkg().isSystem()) {
+                    continue;
+                }
+
+                packagesToDelete.add(new VersionedPackage(ps.getPkg().getPackageName(),
+                        libInfo.getDeclaringPackage().getLongVersionCode()));
             }
-        });
+        }
 
         final int packageCount = packagesToDelete.size();
         for (int i = 0; i < packageCount; i++) {
@@ -742,9 +741,11 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         }
         SharedLibraryInfo libraryInfo = versionedLib.valueAt(libIdx);
 
+        final Computer snapshot = mPm.snapshotComputer();
+
         // Remove the shared library overlays from its dependent packages.
         for (int currentUserId : mPm.mUserManager.getUserIds()) {
-            final List<VersionedPackage> dependents = mPm.getPackagesUsingSharedLibrary(
+            final List<VersionedPackage> dependents = snapshot.getPackagesUsingSharedLibrary(
                     libraryInfo, 0, Process.SYSTEM_UID, currentUserId);
             if (dependents == null) {
                 continue;

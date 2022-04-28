@@ -497,19 +497,8 @@ interface IPackageManager {
     void enterSafeMode();
     @UnsupportedAppUsage
     boolean isSafeMode();
-    void systemReady();
     @UnsupportedAppUsage
     boolean hasSystemUidErrors();
-
-    /**
-     * Ask the package manager to fstrim the disk if needed.
-     */
-    void performFstrimIfNeeded();
-
-    /**
-     * Ask the package manager to update packages if needed.
-     */
-    void updatePackagesIfNeeded();
 
     /**
      * Notify the package manager that a package is going to be used and why.
@@ -582,8 +571,14 @@ interface IPackageManager {
 
     /**
      * Ask the package manager to dump profiles associated with a package.
+     *
+     * @param packageName The name of the package to dump.
+     * @param dumpClassesAndMethods If false, pass {@code --dump-only} to profman to dump the
+     *   profile in a human readable form intended for debugging. If true, pass
+     *   {@code --dump-classes-and-methods} to profman to dump a sorted list of classes and methods
+     *   in a human readable form that is valid input for {@code profman --create-profile-from}.
      */
-    void dumpProfiles(String packageName);
+    void dumpProfiles(String packageName, boolean dumpClassesAndMethods);
 
     void forceDexOpt(String packageName);
 
@@ -653,7 +648,7 @@ interface IPackageManager {
 
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     String getPermissionControllerPackageName();
-    String getSupplementalProcessPackageName();
+    String getSdkSandboxPackageName();
 
     ParceledListSlice getInstantApps(int userId);
     byte[] getInstantAppCookie(String packageName, int userId);
@@ -792,7 +787,11 @@ interface IPackageManager {
 
     boolean isAutoRevokeWhitelisted(String packageName);
 
-    void grantImplicitAccess(int queryingUid, String visibleAuthority);
+    void makeProviderVisible(int recipientAppId, String visibleAuthority);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MAKE_UID_VISIBLE)")
+    void makeUidVisible(int recipientAppId, int visibleUid);
 
     IBinder getHoldLockToken();
 

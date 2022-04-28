@@ -22,8 +22,12 @@ import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
 
-final class GameSessionActivityResult implements Parcelable {
+
+/** @hide */
+@VisibleForTesting
+public final class GameSessionActivityResult implements Parcelable {
 
     public static final Creator<GameSessionActivityResult> CREATOR =
             new Creator<GameSessionActivityResult>() {
@@ -44,17 +48,17 @@ final class GameSessionActivityResult implements Parcelable {
     @Nullable
     private final Intent mData;
 
-    GameSessionActivityResult(int resultCode, @Nullable Intent data) {
+    public GameSessionActivityResult(int resultCode, @Nullable Intent data) {
         mResultCode = resultCode;
         mData = data;
     }
 
-    int getResultCode() {
+    public int getResultCode() {
         return mResultCode;
     }
 
     @Nullable
-    Intent getData() {
+    public Intent getData() {
         return mData;
     }
 

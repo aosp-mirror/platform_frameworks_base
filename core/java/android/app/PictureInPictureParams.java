@@ -64,6 +64,27 @@ public final class PictureInPictureParams implements Parcelable {
 
         private CharSequence mSubtitle;
 
+        private Boolean mIsLaunchIntoPip;
+
+        /** Default constructor */
+        public Builder() {}
+
+        /**
+         * Copy constructor
+         * @param original {@link PictureInPictureParams} instance this builder is built upon.
+         */
+        public Builder(@NonNull PictureInPictureParams original) {
+            mAspectRatio = original.mAspectRatio;
+            mUserActions = original.mUserActions;
+            mCloseAction = original.mCloseAction;
+            mSourceRectHint = original.mSourceRectHint;
+            mAutoEnterEnabled = original.mAutoEnterEnabled;
+            mSeamlessResizeEnabled = original.mSeamlessResizeEnabled;
+            mTitle = original.mTitle;
+            mSubtitle = original.mSubtitle;
+            mIsLaunchIntoPip = original.mIsLaunchIntoPip;
+        }
+
         /**
          * Sets the aspect ratio.  This aspect ratio is defined as the desired width / height, and
          * does not change upon device rotation.
@@ -221,6 +242,20 @@ public final class PictureInPictureParams implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets whether the built {@link PictureInPictureParams} represents a launch into
+         * picture-in-picture request.
+         *
+         * This property is {@code false} by default.
+         * @param isLaunchIntoPip {@code true} if the built instance represents a launch into
+         *                                 picture-in-picture request
+         * @return this builder instance.
+         */
+        @NonNull
+        Builder setIsLaunchIntoPip(boolean isLaunchIntoPip) {
+            mIsLaunchIntoPip = isLaunchIntoPip;
+            return this;
+        }
 
         /**
          * @return an immutable {@link PictureInPictureParams} to be used when entering or updating
@@ -232,7 +267,8 @@ public final class PictureInPictureParams implements Parcelable {
         public PictureInPictureParams build() {
             PictureInPictureParams params = new PictureInPictureParams(mAspectRatio,
                     mExpandedAspectRatio, mUserActions, mCloseAction, mSourceRectHint,
-                    mAutoEnterEnabled, mSeamlessResizeEnabled, mTitle, mSubtitle);
+                    mAutoEnterEnabled, mSeamlessResizeEnabled, mTitle, mSubtitle,
+                    mIsLaunchIntoPip);
             return params;
         }
     }
@@ -244,7 +280,7 @@ public final class PictureInPictureParams implements Parcelable {
     private Rational mAspectRatio;
 
     /**
-     * The expected aspect ratio of the vertically expanded picture-in-picture window.
+     * The expected aspect ratio of the expanded picture-in-picture window.
      */
     @Nullable
     private Rational mExpandedAspectRatio;
@@ -294,6 +330,13 @@ public final class PictureInPictureParams implements Parcelable {
     @Nullable
     private CharSequence mSubtitle;
 
+    /**
+     * Whether this {@link PictureInPictureParams} represents a launch into
+     * picture-in-picture request.
+     * {@link #isLaunchIntoPip()} defaults to {@code false} is this is not set.
+     */
+    private Boolean mIsLaunchIntoPip;
+
     /** {@hide} */
     PictureInPictureParams() {
     }
@@ -322,13 +365,16 @@ public final class PictureInPictureParams implements Parcelable {
         if (in.readInt() != 0) {
             mSubtitle = in.readCharSequence();
         }
+        if (in.readInt() != 0) {
+            mIsLaunchIntoPip = in.readBoolean();
+        }
     }
 
     /** {@hide} */
     PictureInPictureParams(Rational aspectRatio, Rational expandedAspectRatio,
             List<RemoteAction> actions, RemoteAction closeAction, Rect sourceRectHint,
             Boolean autoEnterEnabled, Boolean seamlessResizeEnabled, CharSequence title,
-            CharSequence subtitle) {
+            CharSequence subtitle, Boolean isLaunchIntoPip) {
         mAspectRatio = aspectRatio;
         mExpandedAspectRatio = expandedAspectRatio;
         mUserActions = actions;
@@ -338,6 +384,7 @@ public final class PictureInPictureParams implements Parcelable {
         mSeamlessResizeEnabled = seamlessResizeEnabled;
         mTitle = title;
         mSubtitle = subtitle;
+        mIsLaunchIntoPip = isLaunchIntoPip;
     }
 
     /**
@@ -347,8 +394,8 @@ public final class PictureInPictureParams implements Parcelable {
     public PictureInPictureParams(PictureInPictureParams other) {
         this(other.mAspectRatio, other.mExpandedAspectRatio, other.mUserActions, other.mCloseAction,
                 other.hasSourceBoundsHint() ? new Rect(other.getSourceRectHint()) : null,
-                other.mAutoEnterEnabled, other.mSeamlessResizeEnabled, other.mTitle,
-                other.mSubtitle);
+                other.mAutoEnterEnabled, other.mSeamlessResizeEnabled,
+                other.mTitle, other.mSubtitle, other.mIsLaunchIntoPip);
     }
 
     /**
@@ -384,6 +431,9 @@ public final class PictureInPictureParams implements Parcelable {
         if (otherArgs.hasSetSubtitle()) {
             mSubtitle = otherArgs.mSubtitle;
         }
+        if (otherArgs.mIsLaunchIntoPip != null) {
+            mIsLaunchIntoPip = otherArgs.mIsLaunchIntoPip;
+        }
     }
 
     /**
@@ -391,15 +441,21 @@ public final class PictureInPictureParams implements Parcelable {
      * @hide
      */
     @TestApi
-    public float getAspectRatio() {
+    public float getAspectRatioFloat() {
         if (mAspectRatio != null) {
             return mAspectRatio.floatValue();
         }
         return 0f;
     }
 
-    /** @hide */
-    public Rational getAspectRatioRational() {
+    /**
+     * Returns the expected aspect ratio of the picture-in-picture window.
+     *
+     * @return aspect ratio as the desired width / height or {@code null} if not set.
+     * @see PictureInPictureParams.Builder#setAspectRatio(Rational)
+     */
+    @Nullable
+    public Rational getAspectRatio() {
         return mAspectRatio;
     }
 
@@ -416,11 +472,22 @@ public final class PictureInPictureParams implements Parcelable {
      * @hide
      */
     @TestApi
-    public float getExpandedAspectRatio() {
+    public float getExpandedAspectRatioFloat() {
         if (mExpandedAspectRatio != null) {
             return mExpandedAspectRatio.floatValue();
         }
         return 0f;
+    }
+
+    /**
+     * Returns the desired aspect ratio of the expanded picture-in-picture window.
+     *
+     * @return aspect ratio as the desired width / height or {@code null} if not set.
+     * @see PictureInPictureParams.Builder#setExpandedAspectRatio(Rational)
+     */
+    @Nullable
+    public Rational getExpandedAspectRatio() {
+        return mExpandedAspectRatio;
     }
 
     /**
@@ -432,11 +499,17 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return the set of user actions.
-     * @hide
+     * Returns the list of user actions that are associated with the activity when in
+     * picture-in-picture mode.
+     *
+     * @return the user actions in a new list.
+     * @see PictureInPictureParams.Builder#setActions(List)
      */
-    @TestApi
+    @NonNull
     public List<RemoteAction> getActions() {
+        if (mUserActions == null) {
+            return new ArrayList<>();
+        }
         return mUserActions;
     }
 
@@ -449,10 +522,11 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return the close action.
-     * @hide
+     * Returns the action that is to replace the system close action.
+     *
+     * @return the close action or {@code null} if not set.
+     * @see PictureInPictureParams.Builder#setCloseAction(RemoteAction)
      */
-    @TestApi
     @Nullable
     public RemoteAction getCloseAction() {
         return mCloseAction;
@@ -478,10 +552,12 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return the source rect hint
-     * @hide
+     * Returns the source rect hint.
+     *
+     * @return the source rect hint also known as launch bounds or {@code null} if not set.
+     * @see PictureInPictureParams.Builder#setSourceRectHint(Rect)
      */
-    @TestApi
+    @Nullable
     public Rect getSourceRectHint() {
         return mSourceRectHint;
     }
@@ -495,18 +571,23 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return whether auto pip is enabled.
-     * @hide
+     * Returns whether auto enter picture-in-picture is enabled.
+     *
+     * @return {@code true} if the system will automatically put the activity in
+     * picture-in-picture mode.
+     * @see PictureInPictureParams.Builder#setAutoEnterEnabled(boolean)
      */
     public boolean isAutoEnterEnabled() {
         return mAutoEnterEnabled == null ? false : mAutoEnterEnabled;
     }
 
     /**
-     * @return whether seamless resize is enabled.
-     * @hide
+     * Returns whether seamless resize is enabled.
+     *
+     * @return true if the system can seamlessly resize the window while activity is in
+     * picture-in-picture mode.
+     * @see PictureInPictureParams.Builder#setSeamlessResizeEnabled(boolean)
      */
-    @TestApi
     public boolean isSeamlessResizeEnabled() {
         return mSeamlessResizeEnabled == null ? true : mSeamlessResizeEnabled;
     }
@@ -520,10 +601,11 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return title of the pip.
-     * @hide
+     * Returns the title of the picture-in-picture window that may be displayed to the user.
+     *
+     * @return title of the picture-in-picture window.
+     * @see PictureInPictureParams.Builder#setTitle(CharSequence)
      */
-    @TestApi
     @Nullable
     public CharSequence getTitle() {
         return mTitle;
@@ -538,13 +620,22 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return subtitle of the pip.
-     * @hide
+     * Returns the subtitle of the picture-in-picture window that may be displayed to the user.
+     *
+     * @return subtitle of the picture-in-picture window.
+     * @see PictureInPictureParams.Builder#setSubtitle(CharSequence)
      */
-    @TestApi
     @Nullable
     public CharSequence getSubtitle() {
         return mSubtitle;
+    }
+
+    /**
+     * @return whether this {@link PictureInPictureParams} represents a launch into pip request.
+     * @hide
+     */
+    public boolean isLaunchIntoPip() {
+        return mIsLaunchIntoPip == null ? false : mIsLaunchIntoPip;
     }
 
     /**
@@ -553,9 +644,9 @@ public final class PictureInPictureParams implements Parcelable {
      */
     public boolean empty() {
         return !hasSourceBoundsHint() && !hasSetActions() && !hasSetCloseAction()
-                && !hasSetAspectRatio() && !hasSetExpandedAspectRatio() && mAutoEnterEnabled != null
-                && mSeamlessResizeEnabled != null && !hasSetTitle()
-                && !hasSetSubtitle();
+                && !hasSetAspectRatio() && !hasSetExpandedAspectRatio() && mAutoEnterEnabled == null
+                && mSeamlessResizeEnabled == null && !hasSetTitle()
+                && !hasSetSubtitle() && mIsLaunchIntoPip == null;
     }
 
     @Override
@@ -571,13 +662,15 @@ public final class PictureInPictureParams implements Parcelable {
                 && Objects.equals(mCloseAction, that.mCloseAction)
                 && Objects.equals(mSourceRectHint, that.mSourceRectHint)
                 && Objects.equals(mTitle, that.mTitle)
-                && Objects.equals(mSubtitle, that.mSubtitle);
+                && Objects.equals(mSubtitle, that.mSubtitle)
+                && Objects.equals(mIsLaunchIntoPip, that.mIsLaunchIntoPip);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mAspectRatio, mExpandedAspectRatio, mUserActions, mCloseAction,
-                mSourceRectHint, mAutoEnterEnabled, mSeamlessResizeEnabled, mTitle, mSubtitle);
+                mSourceRectHint, mAutoEnterEnabled, mSeamlessResizeEnabled, mTitle, mSubtitle,
+                mIsLaunchIntoPip);
     }
 
     @Override
@@ -628,6 +721,12 @@ public final class PictureInPictureParams implements Parcelable {
         } else {
             out.writeInt(0);
         }
+        if (mIsLaunchIntoPip != null) {
+            out.writeInt(1);
+            out.writeBoolean(mIsLaunchIntoPip);
+        } else {
+            out.writeInt(0);
+        }
     }
 
     private void writeRationalToParcel(Rational rational, Parcel out) {
@@ -650,7 +749,7 @@ public final class PictureInPictureParams implements Parcelable {
     @Override
     public String toString() {
         return "PictureInPictureParams("
-                + " aspectRatio=" + getAspectRatioRational()
+                + " aspectRatio=" + getAspectRatio()
                 + " expandedAspectRatio=" + mExpandedAspectRatio
                 + " sourceRectHint=" + getSourceRectHint()
                 + " hasSetActions=" + hasSetActions()
@@ -659,6 +758,7 @@ public final class PictureInPictureParams implements Parcelable {
                 + " isSeamlessResizeEnabled=" + isSeamlessResizeEnabled()
                 + " title=" + getTitle()
                 + " subtitle=" + getSubtitle()
+                + " isLaunchIntoPip=" + isLaunchIntoPip()
                 + ")";
     }
 

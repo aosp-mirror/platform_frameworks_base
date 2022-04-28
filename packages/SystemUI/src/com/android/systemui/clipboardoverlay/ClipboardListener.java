@@ -17,16 +17,17 @@
 package com.android.systemui.clipboardoverlay;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_ENABLED;
-
-import static java.util.Objects.requireNonNull;
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ENTERED;
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_UPDATED;
 
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.provider.DeviceConfig;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.screenshot.TimeoutHandler;
+import com.android.systemui.util.DeviceConfigProxy;
 
 import javax.inject.Inject;
 
@@ -37,19 +38,27 @@ import javax.inject.Inject;
 public class ClipboardListener extends CoreStartable
         implements ClipboardManager.OnPrimaryClipChangedListener {
 
+    private final DeviceConfigProxy mDeviceConfig;
+    private final ClipboardOverlayControllerFactory mOverlayFactory;
+    private final ClipboardManager mClipboardManager;
+    private final UiEventLogger mUiEventLogger;
     private ClipboardOverlayController mClipboardOverlayController;
-    private ClipboardManager mClipboardManager;
 
     @Inject
-    public ClipboardListener(Context context) {
+    public ClipboardListener(Context context, DeviceConfigProxy deviceConfigProxy,
+            ClipboardOverlayControllerFactory overlayFactory, ClipboardManager clipboardManager,
+            UiEventLogger uiEventLogger) {
         super(context);
+        mDeviceConfig = deviceConfigProxy;
+        mOverlayFactory = overlayFactory;
+        mClipboardManager = clipboardManager;
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
     public void start() {
-        if (DeviceConfig.getBoolean(
+        if (mDeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED, true)) {
-            mClipboardManager = requireNonNull(mContext.getSystemService(ClipboardManager.class));
             mClipboardManager.addPrimaryClipChangedListener(this);
         }
     }
@@ -59,12 +68,15 @@ public class ClipboardListener extends CoreStartable
         if (!mClipboardManager.hasPrimaryClip()) {
             return;
         }
+        String clipSource = mClipboardManager.getPrimaryClipSource();
         if (mClipboardOverlayController == null) {
-            mClipboardOverlayController =
-                    new ClipboardOverlayController(mContext, new TimeoutHandler(mContext));
+            mClipboardOverlayController = mOverlayFactory.create(mContext);
+            mUiEventLogger.log(CLIPBOARD_OVERLAY_ENTERED, 0, clipSource);
+        } else {
+            mUiEventLogger.log(CLIPBOARD_OVERLAY_UPDATED, 0, clipSource);
         }
         mClipboardOverlayController.setClipData(
-                mClipboardManager.getPrimaryClip(), mClipboardManager.getPrimaryClipSource());
+                mClipboardManager.getPrimaryClip(), clipSource);
         mClipboardOverlayController.setOnSessionCompleteListener(() -> {
             // Session is complete, free memory until it's needed again.
             mClipboardOverlayController = null;

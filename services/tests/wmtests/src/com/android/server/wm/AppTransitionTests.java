@@ -36,6 +36,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -422,6 +423,7 @@ public class AppTransitionTests extends WindowTestsBase {
     public void testActivityRecordReparentToTaskFragment() {
         final ActivityRecord activity = createActivityRecord(mDc);
         final SurfaceControl activityLeash = mock(SurfaceControl.class);
+        doNothing().when(activity).setDropInputMode(anyInt());
         activity.setVisibility(true);
         activity.setSurfaceControl(activityLeash);
         final Task task = activity.getTask();

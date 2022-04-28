@@ -47,7 +47,7 @@ import org.robolectric.android.controller.ActivityController;
 @RunWith(RobolectricTestRunner.class)
 public class ManagedDeviceActionDisabledByAdminControllerTest {
 
-    private static UserHandle MANAGED_USER = UserHandle.of(123);
+    private static UserHandle MANAGED_USER = new UserHandle(123);
     private static final String RESTRICTION = UserManager.DISALLOW_ADJUST_VOLUME;
     private static final String EMPTY_URL = "";
     private static final String SUPPORT_TITLE_FOR_RESTRICTION = DISALLOW_ADJUST_VOLUME_TITLE;

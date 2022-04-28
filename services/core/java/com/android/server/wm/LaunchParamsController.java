@@ -142,18 +142,6 @@ class LaunchParamsController {
         mService.deferWindowLayout();
 
         try {
-            if (mTmpParams.mPreferredTaskDisplayArea != null
-                    && task.getDisplayArea() != mTmpParams.mPreferredTaskDisplayArea) {
-                mService.mRootWindowContainer.moveRootTaskToTaskDisplayArea(task.getRootTaskId(),
-                        mTmpParams.mPreferredTaskDisplayArea, true /* onTop */);
-            }
-
-            if (mTmpParams.hasWindowingMode() && task.isRootTask()
-                    && mTmpParams.mWindowingMode != task.getWindowingMode()) {
-                task.setWindowingMode(task.getDisplayArea().validateWindowingMode(
-                        mTmpParams.mWindowingMode, activity, task));
-            }
-
             if (mTmpParams.mBounds.isEmpty()) {
                 return false;
             }

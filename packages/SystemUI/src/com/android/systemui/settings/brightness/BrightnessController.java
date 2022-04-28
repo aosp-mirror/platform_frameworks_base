@@ -54,7 +54,7 @@ import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import javax.inject.Inject;
 
 public class BrightnessController implements ToggleSlider.Listener, MirroredBrightnessController {
-    private static final String TAG = "StatusBar.BrightnessController";
+    private static final String TAG = "CentralSurfaces.BrightnessController";
     private static final int SLIDER_ANIMATION_DURATION = 3000;
 
     private static final int MSG_UPDATE_SLIDER = 1;

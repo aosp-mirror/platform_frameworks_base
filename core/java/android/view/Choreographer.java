@@ -154,13 +154,13 @@ public final class Choreographer {
     private static final int MSG_DO_SCHEDULE_VSYNC = 1;
     private static final int MSG_DO_SCHEDULE_CALLBACK = 2;
 
-    // All frame callbacks posted by applications have this token or EXTENDED_FRAME_CALLBACK_TOKEN.
+    // All frame callbacks posted by applications have this token or VSYNC_CALLBACK_TOKEN.
     private static final Object FRAME_CALLBACK_TOKEN = new Object() {
         public String toString() { return "FRAME_CALLBACK_TOKEN"; }
     };
-    private static final Object EXTENDED_FRAME_CALLBACK_TOKEN = new Object() {
+    private static final Object VSYNC_CALLBACK_TOKEN = new Object() {
         public String toString() {
-            return "EXTENDED_FRAME_CALLBACK_TOKEN";
+            return "VSYNC_CALLBACK_TOKEN";
         }
     };
 
@@ -492,12 +492,12 @@ public final class Choreographer {
     }
 
     /**
-     * Posts an extended frame callback to run on the next frame.
+     * Posts a vsync callback to run on the next frame.
      * <p>
      * The callback runs once then is automatically removed.
      * </p>
      *
-     * @param callback The extended frame callback to run during the next frame.
+     * @param callback The vsync callback to run during the next frame.
      *
      * @see #removeVsyncCallback
      */
@@ -506,7 +506,7 @@ public final class Choreographer {
             throw new IllegalArgumentException("callback must not be null");
         }
 
-        postCallbackDelayedInternal(CALLBACK_ANIMATION, callback, EXTENDED_FRAME_CALLBACK_TOKEN, 0);
+        postCallbackDelayedInternal(CALLBACK_ANIMATION, callback, VSYNC_CALLBACK_TOKEN, 0);
     }
 
     /**
@@ -599,9 +599,9 @@ public final class Choreographer {
     }
 
     /**
-     * Removes a previously posted extended frame callback.
+     * Removes a previously posted vsync callback.
      *
-     * @param callback The extended frame callback to remove.
+     * @param callback The vsync callback to remove.
      *
      * @see #postVsyncCallback
      */
@@ -610,7 +610,7 @@ public final class Choreographer {
             throw new IllegalArgumentException("callback must not be null");
         }
 
-        removeCallbacksInternal(CALLBACK_ANIMATION, callback, EXTENDED_FRAME_CALLBACK_TOKEN);
+        removeCallbacksInternal(CALLBACK_ANIMATION, callback, VSYNC_CALLBACK_TOKEN);
     }
 
     /**
@@ -765,21 +765,29 @@ public final class Choreographer {
                 startNanos = System.nanoTime();
                 final long jitterNanos = startNanos - frameTimeNanos;
                 if (jitterNanos >= frameIntervalNanos) {
-                    final long skippedFrames = jitterNanos / frameIntervalNanos;
-                    if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
-                        Log.i(TAG, "Skipped " + skippedFrames + " frames!  "
-                                + "The application may be doing too much work on its main thread.");
-                    }
                     final long lastFrameOffset = jitterNanos % frameIntervalNanos;
-                    if (DEBUG_JANK) {
-                        Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f) + " ms "
-                                + "which is more than the frame interval of "
-                                + (frameIntervalNanos * 0.000001f) + " ms!  "
-                                + "Skipping " + skippedFrames + " frames and setting frame "
-                                + "time to " + (lastFrameOffset * 0.000001f) + " ms in the past.");
+                    if (frameIntervalNanos == 0) {
+                        Log.i(TAG, "Vsync data empty due to timeout");
+                    } else {
+                        final long skippedFrames = jitterNanos / frameIntervalNanos;
+                        if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
+                            Log.i(TAG, "Skipped " + skippedFrames + " frames!  "
+                                    + "The application may be doing too much work on its main "
+                                    + "thread.");
+                        }
+                        if (DEBUG_JANK) {
+                            Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f) + " ms "
+                                    + "which is more than the frame interval of "
+                                    + (frameIntervalNanos * 0.000001f) + " ms!  "
+                                    + "Skipping " + skippedFrames + " frames and setting frame "
+                                    + "time to " + (lastFrameOffset * 0.000001f)
+                                    + " ms in the past.");
+                        }
                     }
                     frameTimeNanos = startNanos - lastFrameOffset;
-                    frameData.setFrameTimeNanos(frameTimeNanos);
+                    DisplayEventReceiver.VsyncEventData latestVsyncEventData =
+                            mDisplayEventReceiver.getLatestVsyncEventData();
+                    frameData.updateFrameData(frameTimeNanos, latestVsyncEventData);
                 }
 
                 if (frameTimeNanos < mLastFrameTimeNanos) {
@@ -877,7 +885,9 @@ public final class Choreographer {
                     }
                     frameTimeNanos = now - lastFrameOffset;
                     mLastFrameTimeNanos = frameTimeNanos;
-                    frameData.setFrameTimeNanos(frameTimeNanos);
+                    DisplayEventReceiver.VsyncEventData latestVsyncEventData =
+                            mDisplayEventReceiver.getLatestVsyncEventData();
+                    frameData.updateFrameData(frameTimeNanos, latestVsyncEventData);
                 }
             }
         }
@@ -1012,11 +1022,6 @@ public final class Choreographer {
             return mVsyncId;
         }
 
-        /** Sets the vsync ID. */
-        void resetVsyncId() {
-            mVsyncId = FrameInfo.INVALID_VSYNC_ID;
-        }
-
         /**
          * The time in {@link System#nanoTime()} timebase which this frame is expected to be
          * presented.
@@ -1061,17 +1066,15 @@ public final class Choreographer {
         }
 
         private long mFrameTimeNanos;
-        private final FrameTimeline[] mFrameTimelines;
-        private final FrameTimeline mPreferredFrameTimeline;
+        private FrameTimeline[] mFrameTimelines;
+        private FrameTimeline mPreferredFrameTimeline;
 
-        void setFrameTimeNanos(long frameTimeNanos) {
+        void updateFrameData(long frameTimeNanos,
+                DisplayEventReceiver.VsyncEventData latestVsyncEventData) {
             mFrameTimeNanos = frameTimeNanos;
-            for (FrameTimeline ft : mFrameTimelines) {
-                // The ID is no longer valid because the frame time that was registered with the ID
-                // no longer matches.
-                // TODO(b/205721584): Ask SF for valid vsync information.
-                ft.resetVsyncId();
-            }
+            mFrameTimelines = convertFrameTimelines(latestVsyncEventData);
+            mPreferredFrameTimeline =
+                mFrameTimelines[latestVsyncEventData.preferredFrameTimelineIndex];
         }
 
         /** The time in nanoseconds when the frame started being rendered. */
@@ -1090,6 +1093,19 @@ public final class Choreographer {
         @NonNull
         public FrameTimeline getPreferredFrameTimeline() {
             return mPreferredFrameTimeline;
+        }
+
+        private FrameTimeline[] convertFrameTimelines(
+                DisplayEventReceiver.VsyncEventData vsyncEventData) {
+            FrameTimeline[] frameTimelines =
+                    new FrameTimeline[vsyncEventData.frameTimelines.length];
+            for (int i = 0; i < vsyncEventData.frameTimelines.length; i++) {
+                DisplayEventReceiver.VsyncEventData.FrameTimeline frameTimeline =
+                        vsyncEventData.frameTimelines[i];
+                frameTimelines[i] = new FrameTimeline(frameTimeline.vsyncId,
+                        frameTimeline.expectedPresentTime, frameTimeline.deadline);
+            }
+            return frameTimelines;
         }
     }
 
@@ -1198,7 +1214,7 @@ public final class Choreographer {
     private static final class CallbackRecord {
         public CallbackRecord next;
         public long dueTime;
-        /** Runnable or FrameCallback or ExtendedFrameCallback object. */
+        /** Runnable or FrameCallback or VsyncCallback object. */
         public Object action;
         /** Denotes the action type. */
         public Object token;
@@ -1213,7 +1229,7 @@ public final class Choreographer {
         }
 
         void run(FrameData frameData) {
-            if (token == EXTENDED_FRAME_CALLBACK_TOKEN) {
+            if (token == VSYNC_CALLBACK_TOKEN) {
                 ((VsyncCallback) action).onVsync(frameData);
             } else {
                 run(frameData.getFrameTimeNanos());

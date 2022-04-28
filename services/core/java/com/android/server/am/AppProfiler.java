@@ -58,7 +58,6 @@ import android.content.ComponentCallbacks2;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Binder;
@@ -608,13 +607,7 @@ public class AppProfiler {
         if (check != null) {
             if ((pss * 1024) >= check && profile.getThread() != null
                     && mMemWatchDumpProcName == null) {
-                boolean isDebuggable = Build.IS_DEBUGGABLE;
-                if (!isDebuggable) {
-                    if ((proc.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                        isDebuggable = true;
-                    }
-                }
-                if (isDebuggable) {
+                if (Build.IS_DEBUGGABLE || proc.isDebuggable()) {
                     Slog.w(TAG, "Process " + proc + " exceeded pss limit " + check + "; reporting");
                     startHeapDumpLPf(profile, false);
                 } else {
@@ -1702,7 +1695,8 @@ public class AppProfiler {
         try {
             if (start) {
                 stopProfilerLPf(null, 0);
-                mService.setProfileApp(proc.info, proc.processName, profilerInfo);
+                mService.setProfileApp(proc.info, proc.processName, profilerInfo,
+                        proc.isSdkSandbox ? proc.getClientInfoForSdkSandbox() : null);
                 mProfileData.setProfileProc(proc);
                 mProfileType = profileType;
                 ParcelFileDescriptor fd = profilerInfo.profileFd;
@@ -1886,8 +1880,7 @@ public class AppProfiler {
                                     BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
                                     if (ps == null || !ps.isActive()) {
                                         st.batteryStats = ps = bstats.getProcessStatsLocked(
-                                                bstats.mapUid(st.uid), st.name,
-                                                elapsedRealtime, uptime);
+                                                st.uid, st.name, elapsedRealtime, uptime);
                                     }
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                 }
@@ -2076,7 +2069,7 @@ public class AppProfiler {
             if (mAppAgentMap != null && mAppAgentMap.containsKey(processName)) {
                 // We need to do a debuggable check here. See setAgentApp for why the check is
                 // postponed to here.
-                if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                if (app.isDebuggable()) {
                     String agent = mAppAgentMap.get(processName);
                     // Do not overwrite already requested agent.
                     if (profilerInfo == null) {
@@ -2133,7 +2126,7 @@ public class AppProfiler {
         if (preBindAgent != null) {
             thread.attachAgent(preBindAgent);
         }
-        if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+        if (app.isDebuggable()) {
             thread.attachStartupAgents(app.info.dataDir);
         }
         return profilerInfo;

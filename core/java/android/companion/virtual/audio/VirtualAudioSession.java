@@ -50,16 +50,14 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @VisibleForTesting
-public final class VirtualAudioSession extends IAudioSessionCallback.Stub implements
+public final class VirtualAudioSession extends IAudioRoutingCallback.Stub implements
         UserRestrictionsCallback, Closeable {
     private static final String TAG = "VirtualAudioSession";
 
     private final Context mContext;
     private final UserRestrictionsDetector mUserRestrictionsDetector;
-    /** The {@link Executor} for sending {@link AudioConfigurationChangeCallback} to the caller */
-    private final Executor mExecutor;
     @Nullable
-    private final AudioConfigurationChangeCallback mCallback;
+    private final AudioConfigChangedCallback mAudioConfigChangedCallback;
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private final IntArray mReroutedAppUids = new IntArray();
@@ -68,24 +66,49 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
     private AudioPolicy mAudioPolicy;
     @Nullable
     @GuardedBy("mLock")
-    private AudioFormat mCaptureFormat;
-    @Nullable
-    @GuardedBy("mLock")
-    private AudioFormat mInjectionFormat;
-    @Nullable
-    @GuardedBy("mLock")
     private AudioCapture mAudioCapture;
     @Nullable
     @GuardedBy("mLock")
     private AudioInjection mAudioInjection;
+
+    /**
+     * Class to receive {@link IAudioConfigChangedCallback} callbacks from service.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static final class AudioConfigChangedCallback extends IAudioConfigChangedCallback.Stub {
+        private final Executor mExecutor;
+        private final AudioConfigurationChangeCallback mCallback;
+
+        AudioConfigChangedCallback(Context context, Executor executor,
+                AudioConfigurationChangeCallback callback) {
+            mExecutor = executor != null ? executor : context.getMainExecutor();
+            mCallback = callback;
+        }
+
+        @Override
+        public void onPlaybackConfigChanged(List<AudioPlaybackConfiguration> configs) {
+            if (mCallback != null) {
+                mExecutor.execute(() -> mCallback.onPlaybackConfigChanged(configs));
+            }
+        }
+
+        @Override
+        public void onRecordingConfigChanged(List<AudioRecordingConfiguration> configs) {
+            if (mCallback != null) {
+                mExecutor.execute(() -> mCallback.onRecordingConfigChanged(configs));
+            }
+        }
+    }
 
     @VisibleForTesting
     public VirtualAudioSession(Context context,
             @Nullable AudioConfigurationChangeCallback callback, @Nullable Executor executor) {
         mContext = context;
         mUserRestrictionsDetector = new UserRestrictionsDetector(context);
-        mCallback = callback;
-        mExecutor = executor != null ? executor : context.getMainExecutor();
+        mAudioConfigChangedCallback = callback == null ? null : new AudioConfigChangedCallback(
+                context, executor, callback);
     }
 
     /**
@@ -104,8 +127,7 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
                         "Cannot start capture while another capture is ongoing.");
             }
 
-            mCaptureFormat = captureFormat;
-            mAudioCapture = new AudioCapture();
+            mAudioCapture = new AudioCapture(captureFormat);
             mAudioCapture.startRecording();
             return mAudioCapture;
         }
@@ -120,19 +142,27 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
     @NonNull
     public AudioInjection startAudioInjection(@NonNull AudioFormat injectionFormat) {
         Objects.requireNonNull(injectionFormat, "injectionFormat must not be null");
-        mUserRestrictionsDetector.register(/* callback= */ this);
+
         synchronized (mLock) {
             if (mAudioInjection != null) {
                 throw new IllegalStateException(
                         "Cannot start injection while injection is already ongoing.");
             }
 
-            mInjectionFormat = injectionFormat;
-            mAudioInjection = new AudioInjection();
+            mAudioInjection = new AudioInjection(injectionFormat);
             mAudioInjection.play();
+
+            mUserRestrictionsDetector.register(/* callback= */ this);
             mAudioInjection.setSilent(mUserRestrictionsDetector.isUnmuteMicrophoneDisallowed());
             return mAudioInjection;
         }
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    @Nullable
+    public AudioConfigChangedCallback getAudioConfigChangedListener() {
+        return mAudioConfigChangedCallback;
     }
 
     /** @hide */
@@ -177,10 +207,14 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
         mUserRestrictionsDetector.unregister();
         releaseAudioStreams();
         synchronized (mLock) {
-            mAudioCapture = null;
-            mAudioInjection = null;
-            mCaptureFormat = null;
-            mInjectionFormat = null;
+            if (mAudioCapture != null) {
+                mAudioCapture.close();
+                mAudioCapture = null;
+            }
+            if (mAudioInjection != null) {
+                mAudioInjection.close();
+                mAudioInjection = null;
+            }
         }
     }
 
@@ -196,9 +230,9 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     private void createAudioStreams(int[] appUids) {
         synchronized (mLock) {
-            if (mCaptureFormat == null && mInjectionFormat == null) {
+            if (mAudioCapture == null && mAudioInjection == null) {
                 throw new IllegalStateException(
-                        "At least one of captureFormat and injectionFormat must be specified.");
+                        "At least one of AudioCapture and AudioInjection must be started.");
             }
             if (mAudioPolicy != null) {
                 throw new IllegalStateException(
@@ -216,12 +250,12 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
             AudioMix audioRecordMix = null;
             AudioMix audioTrackMix = null;
             AudioPolicy.Builder builder = new AudioPolicy.Builder(mContext);
-            if (mCaptureFormat != null) {
-                audioRecordMix = createAudioRecordMix(mCaptureFormat, appUids);
+            if (mAudioCapture != null) {
+                audioRecordMix = createAudioRecordMix(mAudioCapture.getFormat(), appUids);
                 builder.addMix(audioRecordMix);
             }
-            if (mInjectionFormat != null) {
-                audioTrackMix = createAudioTrackMix(mInjectionFormat, appUids);
+            if (mAudioInjection != null) {
+                audioTrackMix = createAudioTrackMix(mAudioInjection.getFormat(), appUids);
                 builder.addMix(audioTrackMix);
             }
             mAudioPolicy = builder.build();
@@ -262,20 +296,6 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
                 mAudioPolicy = null;
                 Log.i(TAG, "AudioPolicy unregistered");
             }
-        }
-    }
-
-    @Override
-    public void onPlaybackConfigChanged(List<AudioPlaybackConfiguration> configs) {
-        if (mCallback != null) {
-            mExecutor.execute(() -> mCallback.onPlaybackConfigChanged(configs));
-        }
-    }
-
-    @Override
-    public void onRecordingConfigChanged(List<AudioRecordingConfiguration> configs) {
-        if (mCallback != null) {
-            mExecutor.execute(() -> mCallback.onRecordingConfigChanged(configs));
         }
     }
 

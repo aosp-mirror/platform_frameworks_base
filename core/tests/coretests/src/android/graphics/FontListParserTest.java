@@ -355,6 +355,27 @@ public final class FontListParserTest {
         assertThat(config.getAliases()).isEmpty();
     }
 
+    @Test
+    public void ignore() throws Exception {
+        String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font>test.ttf</font>"
+                + "  </family>"
+                + "  <family lang='und-Zsye' ignore='true'>"
+                + "    <font>emoji_legacy.ttf</font>"
+                + "  </family>"
+                + "  <family lang='und-Zsye'>"
+                + "    <font>emoji.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+        FontConfig config = readFamilies(xml, true /* include non-existing font files */);
+        List<FontConfig.FontFamily> families = config.getFontFamilies();
+        assertThat(families.size()).isEqualTo(2);  // legacy one should be ignored.
+        assertThat(families.get(1).getFontList().get(0).getFile().getName())
+                .isEqualTo("emoji.ttf");
+    }
+
     private FontConfig readFamilies(String xml, boolean allowNonExisting)
             throws IOException, XmlPullParserException {
         ByteArrayInputStream buffer = new ByteArrayInputStream(

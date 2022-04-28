@@ -51,6 +51,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -85,8 +86,7 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         mWindowManager = new CompatUIWindowManager(mContext,
                 createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN),
                 mSyncTransactionQueue, mCallback, mTaskListener,
-                new DisplayLayout(), /* hasShownSizeCompatHint= */ false,
-                /* hasShownCameraCompatHint= */ false);
+                new DisplayLayout(), new CompatUIHintsState());
 
         spyOn(mWindowManager);
         doReturn(mLayout).when(mWindowManager).inflateLayout();
@@ -102,7 +102,7 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         verify(mWindowManager, never()).inflateLayout();
 
         // Doesn't create hint popup.
-        mWindowManager.mShouldShowSizeCompatHint = false;
+        mWindowManager.mCompatUIHintsState.mHasShownSizeCompatHint = true;
         assertTrue(mWindowManager.createLayout(/* canShow= */ true));
 
         verify(mWindowManager).inflateLayout();
@@ -113,14 +113,14 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         clearInvocations(mWindowManager);
         clearInvocations(mLayout);
         mWindowManager.release();
-        mWindowManager.mShouldShowSizeCompatHint = true;
+        mWindowManager.mCompatUIHintsState.mHasShownSizeCompatHint = false;
         assertTrue(mWindowManager.createLayout(/* canShow= */ true));
 
         verify(mWindowManager).inflateLayout();
         assertNotNull(mLayout);
         verify(mLayout).setRestartButtonVisibility(/* show= */ true);
         verify(mLayout).setSizeCompatHintVisibility(/* show= */ true);
-        assertFalse(mWindowManager.mShouldShowSizeCompatHint);
+        assertTrue(mWindowManager.mCompatUIHintsState.mHasShownSizeCompatHint);
 
         // Returns false and doesn't create layout if has Size Compat is false.
         clearInvocations(mWindowManager);
@@ -140,7 +140,7 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         verify(mWindowManager, never()).inflateLayout();
 
         // Doesn't create hint popup.
-        mWindowManager.mShouldShowCameraCompatHint = false;
+        mWindowManager.mCompatUIHintsState.mHasShownCameraCompatHint = true;
         assertTrue(mWindowManager.createLayout(/* canShow= */ true));
 
         verify(mWindowManager).inflateLayout();
@@ -151,14 +151,14 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         clearInvocations(mWindowManager);
         clearInvocations(mLayout);
         mWindowManager.release();
-        mWindowManager.mShouldShowCameraCompatHint = true;
+        mWindowManager.mCompatUIHintsState.mHasShownCameraCompatHint = false;
         assertTrue(mWindowManager.createLayout(/* canShow= */ true));
 
         verify(mWindowManager).inflateLayout();
         assertNotNull(mLayout);
         verify(mLayout).setCameraControlVisibility(/* show= */ true);
         verify(mLayout).setCameraCompatHintVisibility(/* show= */ true);
-        assertFalse(mWindowManager.mShouldShowCameraCompatHint);
+        assertTrue(mWindowManager.mCompatUIHintsState.mHasShownCameraCompatHint);
 
         // Returns false and doesn't create layout if Camera Compat state is hidden
         clearInvocations(mWindowManager);
@@ -411,7 +411,7 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     public void testOnRestartButtonLongClicked_showHint() {
        // Not create hint popup.
         mWindowManager.mHasSizeCompat = true;
-        mWindowManager.mShouldShowSizeCompatHint = false;
+        mWindowManager.mCompatUIHintsState.mHasShownSizeCompatHint = true;
         mWindowManager.createLayout(/* canShow= */ true);
 
         verify(mWindowManager).inflateLayout();
@@ -423,10 +423,10 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     }
 
     @Test
-    public void testOnCamerControlLongClicked_showHint() {
+    public void testOnCameraControlLongClicked_showHint() {
        // Not create hint popup.
         mWindowManager.mCameraCompatControlState = CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
-        mWindowManager.mShouldShowCameraCompatHint = false;
+        mWindowManager.mCompatUIHintsState.mHasShownCameraCompatHint = true;
         mWindowManager.createLayout(/* canShow= */ true);
 
         verify(mWindowManager).inflateLayout();

@@ -46,25 +46,11 @@ public final class SuspendParams {
     private final PersistableBundle appExtras;
     private final PersistableBundle launcherExtras;
 
-    private SuspendParams(SuspendDialogInfo dialogInfo, PersistableBundle appExtras,
+    public SuspendParams(SuspendDialogInfo dialogInfo, PersistableBundle appExtras,
             PersistableBundle launcherExtras) {
         this.dialogInfo = dialogInfo;
         this.appExtras = appExtras;
         this.launcherExtras = launcherExtras;
-    }
-
-    /**
-     * Returns a {@link SuspendParams} object with the given fields. Returns {@code null} if all
-     * the fields are {@code null}.
-     *
-     * @return A {@link SuspendParams} object or {@code null}.
-     */
-    public static SuspendParams getInstanceOrNull(SuspendDialogInfo dialogInfo,
-            PersistableBundle appExtras, PersistableBundle launcherExtras) {
-        if (dialogInfo == null && appExtras == null && launcherExtras == null) {
-            return null;
-        }
-        return new SuspendParams(dialogInfo, appExtras, launcherExtras);
     }
 
     @Override
@@ -170,7 +156,7 @@ public final class SuspendParams {
             Slog.e(LOG_TAG, "Exception while trying to parse SuspendParams,"
                     + " some fields may default", e);
         }
-        return getInstanceOrNull(readDialogInfo, readAppExtras, readLauncherExtras);
+        return new SuspendParams(readDialogInfo, readAppExtras, readLauncherExtras);
     }
 
     public SuspendDialogInfo getDialogInfo() {

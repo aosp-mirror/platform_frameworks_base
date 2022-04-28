@@ -74,7 +74,15 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
     if (backBuffer.get() == nullptr) {
         return false;
     }
-    LightingInfo::updateLighting(lightGeometry, lightInfo);
+
+    // update the coordinates of the global light position based on surface rotation
+    SkPoint lightCenter = mVkSurface->getCurrentPreTransform().mapXY(lightGeometry.center.x,
+                                                                     lightGeometry.center.y);
+    LightGeometry localGeometry = lightGeometry;
+    localGeometry.center.x = lightCenter.fX;
+    localGeometry.center.y = lightCenter.fY;
+
+    LightingInfo::updateLighting(localGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, backBuffer,
                 mVkSurface->getCurrentPreTransform());
 

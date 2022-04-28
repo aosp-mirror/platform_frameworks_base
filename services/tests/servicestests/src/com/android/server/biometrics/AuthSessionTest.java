@@ -219,7 +219,7 @@ public class AuthSessionTest {
     public void testMultiAuth_singleSensor_fingerprintSensorStartsAfterDialogAnimationCompletes()
             throws Exception {
         setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
-        testMultiAuth_fingerprintSensorStartsAfter(false /* fingerprintStartsAfterDelay */);
+        testMultiAuth_fingerprintSensorStartsAfterUINotifies();
     }
 
     @Test
@@ -227,10 +227,10 @@ public class AuthSessionTest {
             throws Exception {
         setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
         setupFace(1 /* id */, false, mock(IBiometricAuthenticator.class));
-        testMultiAuth_fingerprintSensorStartsAfter(true /* fingerprintStartsAfterDelay */);
+        testMultiAuth_fingerprintSensorStartsAfterUINotifies();
     }
 
-    public void testMultiAuth_fingerprintSensorStartsAfter(boolean fingerprintStartsAfterDelay)
+    public void testMultiAuth_fingerprintSensorStartsAfterUINotifies()
             throws Exception {
         final long operationId = 123;
         final int userId = 10;
@@ -274,12 +274,6 @@ public class AuthSessionTest {
 
         // Notify AuthSession that the UI is shown. Then, fingerprint sensor should be started.
         session.onDialogAnimatedIn();
-        if (fingerprintStartsAfterDelay) {
-            assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
-            assertEquals(BiometricSensor.STATE_COOKIE_RETURNED,
-                    session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getSensorState());
-            session.onStartFingerprint();
-        }
         assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
         assertEquals(BiometricSensor.STATE_AUTHENTICATING,
                 session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getSensorState());
