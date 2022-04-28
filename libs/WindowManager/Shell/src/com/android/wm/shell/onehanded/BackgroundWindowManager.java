@@ -142,12 +142,7 @@ public final class BackgroundWindowManager extends WindowlessWindowManager {
      * @param displayLayout The latest {@link DisplayLayout} for display bounds.
      */
     public void onDisplayChanged(DisplayLayout displayLayout) {
-        // One-handed mode is only available on portrait.
-        if (displayLayout.height() > displayLayout.width()) {
-            mDisplayBounds = new Rect(0, 0, displayLayout.width(), displayLayout.height());
-        } else {
-            mDisplayBounds = new Rect(0, 0, displayLayout.height(), displayLayout.width());
-        }
+        mDisplayBounds = new Rect(0, 0, displayLayout.width(), displayLayout.height());
     }
 
     private void updateThemeOnly() {

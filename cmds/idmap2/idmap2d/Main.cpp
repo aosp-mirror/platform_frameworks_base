@@ -15,14 +15,14 @@
  */
 
 #define ATRACE_TAG ATRACE_TAG_RESOURCES
+#define LOG_TAG "idmap2d"
+#include "android-base/logging.h"
 
 #include <binder/BinderService.h>
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 
 #include <cstdlib>  // EXIT_{FAILURE,SUCCESS}
-#include <iostream>
-#include <sstream>
 
 #include "Idmap2Service.h"
 #include "android-base/macros.h"
@@ -35,14 +35,17 @@ using android::status_t;
 using android::os::Idmap2Service;
 
 int main(int argc ATTRIBUTE_UNUSED, char** argv ATTRIBUTE_UNUSED) {
+  LOG(INFO) << "Starting";
   IPCThreadState::disableBackgroundScheduling(true);
   status_t ret = BinderService<Idmap2Service>::publish();
   if (ret != android::OK) {
+    LOG(ERROR) << "Failed to start: " << ret;
     return EXIT_FAILURE;
   }
   sp<ProcessState> ps(ProcessState::self());
   ps->startThreadPool();
   ps->giveThreadPoolName();
   IPCThreadState::self()->joinThreadPool();
+  LOG(INFO) << "Exiting";
   return EXIT_SUCCESS;
 }

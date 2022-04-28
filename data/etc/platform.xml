@@ -223,13 +223,41 @@
                       targetSdk="29">
         <new-permission name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     </split-permission>
-    <split-permission name="android.permission.BODY_SENSORS"
-                      targetSdk="33">
-        <new-permission name="android.permission.BODY_SENSORS_BACKGROUND" />
-    </split-permission>
     <split-permission name="android.permission.READ_EXTERNAL_STORAGE"
                       targetSdk="29">
         <new-permission name="android.permission.ACCESS_MEDIA_LOCATION" />
+    </split-permission>
+    <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE"
+                      targetSdk="29">
+        <new-permission name="android.permission.ACCESS_MEDIA_LOCATION" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_SCAN" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_CONNECT" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_ADVERTISE" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH_ADMIN"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_SCAN" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH_ADMIN"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_CONNECT" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH_ADMIN"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_ADVERTISE" />
+    </split-permission>
+    <split-permission name="android.permission.BODY_SENSORS"
+                      targetSdk="33">
+        <new-permission name="android.permission.BODY_SENSORS_BACKGROUND" />
     </split-permission>
     <split-permission name="android.permission.READ_EXTERNAL_STORAGE"
                       targetSdk="33">
@@ -241,31 +269,19 @@
     </split-permission>
     <split-permission name="android.permission.READ_EXTERNAL_STORAGE"
                       targetSdk="33">
-        <new-permission name="android.permission.READ_MEDIA_IMAGE" />
+        <new-permission name="android.permission.READ_MEDIA_IMAGES" />
     </split-permission>
-    <split-permission name="android.permission.BLUETOOTH"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_SCAN" />
+    <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE"
+                      targetSdk="33">
+        <new-permission name="android.permission.READ_MEDIA_AUDIO" />
     </split-permission>
-    <split-permission name="android.permission.BLUETOOTH"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_CONNECT" />
+    <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE"
+                      targetSdk="33">
+        <new-permission name="android.permission.READ_MEDIA_VIDEO" />
     </split-permission>
-    <split-permission name="android.permission.BLUETOOTH"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_ADVERTISE" />
-    </split-permission>
-    <split-permission name="android.permission.BLUETOOTH_ADMIN"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_SCAN" />
-    </split-permission>
-    <split-permission name="android.permission.BLUETOOTH_ADMIN"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_CONNECT" />
-    </split-permission>
-    <split-permission name="android.permission.BLUETOOTH_ADMIN"
-                      targetSdk="31">
-        <new-permission name="android.permission.BLUETOOTH_ADVERTISE" />
+    <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE"
+                      targetSdk="33">
+        <new-permission name="android.permission.READ_MEDIA_IMAGES" />
     </split-permission>
 
     <!-- This is a list of all the libraries available for application

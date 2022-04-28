@@ -86,6 +86,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     private long mStartTimeMs;
 
     private boolean mAuthAttempted;
+    private boolean mAuthSuccess = false;
 
     // TODO: This is currently hard to maintain, as each AuthenticationClient subclass must update
     //  the state. We should think of a way to improve this in the future.
@@ -104,7 +105,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
-        mActivityTaskManager = ActivityTaskManager.getInstance();
+        mActivityTaskManager = getActivityTaskManager();
         mBiometricManager = context.getSystemService(BiometricManager.class);
         mTaskStackListener = taskStackListener;
         mLockoutTracker = lockoutTracker;
@@ -130,6 +131,10 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     protected long getStartTimeMs() {
         return mStartTimeMs;
+    }
+
+    protected ActivityTaskManager getActivityTaskManager() {
+        return ActivityTaskManager.getInstance();
     }
 
     @Override
@@ -237,6 +242,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                         "Successful background authentication!");
             }
 
+            mAuthSuccess = true;
             markAlreadyDone();
 
             if (mTaskStackListener != null) {
@@ -308,45 +314,50 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                     sendCancelOnly(listener);
                 }
             });
-        } else {
-            // Allow system-defined limit of number of attempts before giving up
-            final @LockoutTracker.LockoutMode int lockoutMode =
-                    handleFailedAttempt(getTargetUserId());
-            if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
-                markAlreadyDone();
+        } else { // not authenticated
+            if (isBackgroundAuth) {
+                Slog.e(TAG, "cancelling due to background auth");
+                cancel();
+            } else {
+                // Allow system-defined limit of number of attempts before giving up
+                final @LockoutTracker.LockoutMode int lockoutMode =
+                        handleFailedAttempt(getTargetUserId());
+                if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
+                    markAlreadyDone();
+                }
+
+                final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+                coordinator.onAuthenticationRejected(SystemClock.uptimeMillis(), this, lockoutMode,
+                        new CoexCoordinator.Callback() {
+                            @Override
+                            public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
+                                if (listener != null) {
+                                    try {
+                                        listener.onAuthenticationFailed(getSensorId());
+                                    } catch (RemoteException e) {
+                                        Slog.e(TAG, "Unable to notify listener", e);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void sendHapticFeedback() {
+                                if (listener != null && mShouldVibrate) {
+                                    vibrateError();
+                                }
+                            }
+
+                            @Override
+                            public void handleLifecycleAfterAuth() {
+                                AuthenticationClient.this.handleLifecycleAfterAuth(false /* authenticated */);
+                            }
+
+                            @Override
+                            public void sendAuthenticationCanceled() {
+                                sendCancelOnly(listener);
+                            }
+                        });
             }
-
-            final CoexCoordinator coordinator = CoexCoordinator.getInstance();
-            coordinator.onAuthenticationRejected(SystemClock.uptimeMillis(), this, lockoutMode,
-                    new CoexCoordinator.Callback() {
-                @Override
-                public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
-                    if (listener != null) {
-                        try {
-                            listener.onAuthenticationFailed(getSensorId());
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Unable to notify listener", e);
-                        }
-                    }
-                }
-
-                @Override
-                public void sendHapticFeedback() {
-                    if (listener != null && mShouldVibrate) {
-                        vibrateError();
-                    }
-                }
-
-                @Override
-                public void handleLifecycleAfterAuth() {
-                    AuthenticationClient.this.handleLifecycleAfterAuth(false /* authenticated */);
-                }
-
-                @Override
-                public void sendAuthenticationCanceled() {
-                    sendCancelOnly(listener);
-                }
-            });
         }
     }
 
@@ -500,6 +511,11 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     public boolean wasAuthAttempted() {
         return mAuthAttempted;
+    }
+
+    /** If an auth attempt completed successfully. */
+    public boolean wasAuthSuccessful() {
+        return mAuthSuccess;
     }
 
     protected int getShowOverlayReason() {

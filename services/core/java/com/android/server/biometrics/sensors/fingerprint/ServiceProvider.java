@@ -142,11 +142,11 @@ public interface ServiceProvider {
 
     long getAuthenticatorId(int sensorId, int userId);
 
-    void onPointerDown(int sensorId, int x, int y, float minor, float major);
+    void onPointerDown(long requestId, int sensorId, int x, int y, float minor, float major);
 
-    void onPointerUp(int sensorId);
+    void onPointerUp(long requestId, int sensorId);
 
-    void onUiReady(int sensorId);
+    void onUiReady(long requestId, int sensorId);
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 

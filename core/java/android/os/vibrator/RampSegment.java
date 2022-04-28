@@ -108,14 +108,9 @@ public final class RampSegment extends VibrationEffectSegment {
     /** @hide */
     @Override
     public void validate() {
-        Preconditions.checkArgumentNonNegative(mStartFrequencyHz,
-                "Frequencies must all be >= 0, got start frequency of " + mStartFrequencyHz);
-        Preconditions.checkArgumentFinite(mStartFrequencyHz, "startFrequencyHz");
-        Preconditions.checkArgumentNonNegative(mEndFrequencyHz,
-                "Frequencies must all be >= 0, got end frequency of " + mEndFrequencyHz);
-        Preconditions.checkArgumentFinite(mEndFrequencyHz, "endFrequencyHz");
-        Preconditions.checkArgumentNonnegative(mDuration,
-                "Durations must all be >= 0, got " + mDuration);
+        VibrationEffectSegment.checkFrequencyArgument(mStartFrequencyHz, "startFrequencyHz");
+        VibrationEffectSegment.checkFrequencyArgument(mEndFrequencyHz, "endFrequencyHz");
+        VibrationEffectSegment.checkDurationArgument(mDuration, "duration");
         Preconditions.checkArgumentInRange(mStartAmplitude, 0f, 1f, "startAmplitude");
         Preconditions.checkArgumentInRange(mEndAmplitude, 0f, 1f, "endAmplitude");
     }

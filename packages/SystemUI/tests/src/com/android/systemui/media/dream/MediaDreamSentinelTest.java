@@ -75,11 +75,13 @@ public class MediaDreamSentinelTest extends SysuiTestCase {
         final MediaDataManager.Listener listener = listenerCaptor.getValue();
 
         when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
-        listener.onMediaDataLoaded(mKey, mOldKey, mData, true, 0);
+        listener.onMediaDataLoaded(mKey, mOldKey, mData, /* immediately= */ true,
+                /* receivedSmartspaceCardLatency= */ 0, /* isSsReactived= */ false);
         verify(mDreamOverlayStateController, never()).addComplication(any());
 
         when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
-        listener.onMediaDataLoaded(mKey, mOldKey, mData, true, 0);
+        listener.onMediaDataLoaded(mKey, mOldKey, mData, /* immediately= */true,
+                /* receivedSmartspaceCardLatency= */0, /* isSsReactived= */ false);
         verify(mDreamOverlayStateController).addComplication(eq(mComplication));
 
         listener.onMediaDataRemoved(mKey);

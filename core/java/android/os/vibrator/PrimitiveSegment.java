@@ -108,7 +108,7 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
         Preconditions.checkArgumentInRange(mPrimitiveId, VibrationEffect.Composition.PRIMITIVE_NOOP,
                 VibrationEffect.Composition.PRIMITIVE_LOW_TICK, "primitiveId");
         Preconditions.checkArgumentInRange(mScale, 0f, 1f, "scale");
-        Preconditions.checkArgumentNonnegative(mDelay, "primitive delay should be >= 0");
+        VibrationEffectSegment.checkDurationArgument(mDelay, "delay");
     }
 
     @Override

@@ -77,14 +77,26 @@ class LaunchAnimator(
          * This will be used to:
          *  - Get the associated [Context].
          *  - Compute whether we are expanding fully above the launch container.
-         *  - Apply surface transactions in sync with RenderThread when animating an activity
-         *    launch.
+         *  - Get to overlay to which we initially put the window background layer, until the
+         *    opening window is made visible (see [openingWindowSyncView]).
          *
          * This container can be changed to force this [Controller] to animate the expanding view
          * inside a different location, for instance to ensure correct layering during the
          * animation.
          */
         var launchContainer: ViewGroup
+
+        /**
+         * The [View] with which the opening app window should be synchronized with once it starts
+         * to be visible.
+         *
+         * We will also move the window background layer to this view's overlay once the opening
+         * window is visible.
+         *
+         * If null, this will default to [launchContainer].
+         */
+        val openingWindowSyncView: View?
+            get() = null
 
         /**
          * Return the [State] of the view that will be animated. We will animate from this state to
@@ -100,11 +112,9 @@ class LaunchAnimator(
          * needed for the animation. [isExpandingFullyAbove] will be true if the window is expanding
          * fully above the [launchContainer].
          */
-        @JvmDefault
         fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {}
 
         /** The animation made progress and the expandable view [state] should be updated. */
-        @JvmDefault
         fun onLaunchAnimationProgress(state: State, progress: Float, linearProgress: Float) {}
 
         /**
@@ -112,7 +122,6 @@ class LaunchAnimator(
          * called previously. This is typically used to clean up the resources initialized when the
          * animation was started.
          */
-        @JvmDefault
         fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {}
     }
 
@@ -154,7 +163,7 @@ class LaunchAnimator(
     }
 
     /** The timings (durations and delays) used by this animator. */
-    class Timings(
+    data class Timings(
         /** The total duration of the animation. */
         val totalDuration: Long,
 
@@ -257,8 +266,17 @@ class LaunchAnimator(
         animator.duration = timings.totalDuration
         animator.interpolator = LINEAR
 
+        // Whether we should move the [windowBackgroundLayer] into the overlay of
+        // [Controller.openingWindowSyncView] once the opening app window starts to be visible.
+        val openingWindowSyncView = controller.openingWindowSyncView
+        val openingWindowSyncViewOverlay = openingWindowSyncView?.overlay
+        val moveBackgroundLayerWhenAppIsVisible = openingWindowSyncView != null &&
+            openingWindowSyncView.viewRootImpl != controller.launchContainer.viewRootImpl
+
         val launchContainerOverlay = launchContainer.overlay
         var cancelled = false
+        var movedBackgroundLayer = false
+
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
                 if (DEBUG) {
@@ -278,6 +296,10 @@ class LaunchAnimator(
                 }
                 controller.onLaunchAnimationEnd(isExpandingFullyAbove)
                 launchContainerOverlay.remove(windowBackgroundLayer)
+
+                if (moveBackgroundLayerWhenAppIsVisible) {
+                    openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
+                }
             }
         })
 
@@ -318,11 +340,29 @@ class LaunchAnimator(
                 timings.contentBeforeFadeOutDuration
             ) < 1
 
+            if (moveBackgroundLayerWhenAppIsVisible && !state.visible && !movedBackgroundLayer) {
+                // The expanding view is not visible, so the opening app is visible. If this is the
+                // first frame when it happens, trigger a one-off sync and move the background layer
+                // in its new container.
+                movedBackgroundLayer = true
+
+                launchContainerOverlay.remove(windowBackgroundLayer)
+                openingWindowSyncViewOverlay!!.add(windowBackgroundLayer)
+
+                ViewRootSync.synchronizeNextDraw(launchContainer, openingWindowSyncView, then = {})
+            }
+
+            val container = if (movedBackgroundLayer) {
+                openingWindowSyncView!!
+            } else {
+                controller.launchContainer
+            }
+
             applyStateToWindowBackgroundLayer(
                 windowBackgroundLayer,
                 state,
                 linearProgress,
-                launchContainer,
+                container,
                 drawHole
             )
             controller.onLaunchAnimationProgress(state, progress, linearProgress)

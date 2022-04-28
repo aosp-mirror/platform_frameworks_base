@@ -20,9 +20,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.content.pm.SigningDetails
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
-import com.android.server.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainOwner
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_MODIFIABLE_VERIFIED
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_NO_RESPONSE
@@ -39,9 +36,12 @@ import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
 import android.util.Xml
+import com.android.server.pm.Computer
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
-import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageStates
+import com.android.server.pm.pkg.PackageUserStateInternal
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.testutils.mock
 import com.android.server.testutils.mockThrowOnUnmocked
@@ -194,7 +194,8 @@ class DomainVerificationPackageTest {
         """
 
         val service = makeService(pkg1, pkg2)
-        service.restoreSettings(Xml.resolvePullParser(xml.byteInputStream()))
+        val computer = mockComputer(pkg1, pkg2)
+        service.restoreSettings(computer, Xml.resolvePullParser(xml.byteInputStream()))
         service.addPackage(pkg1)
         val info = service.getInfo(pkg1.packageName)
         assertThat(info.packageName).isEqualTo(pkg1.packageName)
@@ -243,7 +244,8 @@ class DomainVerificationPackageTest {
         """
 
         val service = makeService(pkg1, pkg2)
-        service.restoreSettings(Xml.resolvePullParser(xml.byteInputStream()))
+        val computer = mockComputer(pkg1, pkg2)
+        service.restoreSettings(computer, Xml.resolvePullParser(xml.byteInputStream()))
         service.addPackage(pkg1)
         val info = service.getInfo(pkg1.packageName)
         assertThat(info.packageName).isEqualTo(pkg1.packageName)
@@ -298,8 +300,9 @@ class DomainVerificationPackageTest {
         """.trimIndent()
 
         val service = makeService(pkg1, pkg2)
+        val computer = mockComputer(pkg1, pkg2)
         xml.byteInputStream().use {
-            service.readSettings(Xml.resolvePullParser(it))
+            service.readSettings(computer, Xml.resolvePullParser(it))
         }
 
         service.addPackage(pkg1)
@@ -311,8 +314,9 @@ class DomainVerificationPackageTest {
     fun addPackagePendingStripInvalidDomains() {
         val xml = addPackagePendingOrRestoredWithInvalidDomains()
         val service = makeService(pkg1, pkg2)
+        val computer = mockComputer(pkg1, pkg2)
         xml.byteInputStream().use {
-            service.readSettings(Xml.resolvePullParser(it))
+            service.readSettings(computer, Xml.resolvePullParser(it))
         }
 
         service.addPackage(pkg1)
@@ -334,8 +338,9 @@ class DomainVerificationPackageTest {
     fun addPackageRestoredStripInvalidDomains() {
         val xml = addPackagePendingOrRestoredWithInvalidDomains()
         val service = makeService(pkg1, pkg2)
+        val computer = mockComputer(pkg1, pkg2)
         xml.byteInputStream().use {
-            service.restoreSettings(Xml.resolvePullParser(it))
+            service.restoreSettings(computer, Xml.resolvePullParser(it))
         }
 
         service.addPackage(pkg1)
@@ -686,6 +691,7 @@ class DomainVerificationPackageTest {
         val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, SIGNATURE_TWO,
             listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3))
         val serviceBefore = makeService(pkg1, pkg2)
+        val computerBefore = mockComputer(pkg1, pkg2)
         serviceBefore.addPackage(pkg1)
         serviceBefore.addPackage(pkg2)
 
@@ -729,16 +735,17 @@ class DomainVerificationPackageTest {
         assertExpectedState(serviceBefore)
 
         val backupUser0 = ByteArrayOutputStream().use {
-            serviceBefore.writeSettings(Xml.resolveSerializer(it), true, 0)
+            serviceBefore.writeSettings(computerBefore, Xml.resolveSerializer(it), true, 0)
             it.toByteArray()
         }
 
         val backupUser1 = ByteArrayOutputStream().use {
-            serviceBefore.writeSettings(Xml.resolveSerializer(it), true, 10)
+            serviceBefore.writeSettings(computerBefore, Xml.resolveSerializer(it), true, 10)
             it.toByteArray()
         }
 
         val serviceAfter = makeService(pkg1, pkg2)
+        val computerAfter = mockComputer(pkg1, pkg2)
         serviceAfter.addPackage(pkg1)
         serviceAfter.addPackage(pkg2)
 
@@ -763,7 +770,7 @@ class DomainVerificationPackageTest {
         }
 
         ByteArrayInputStream(backupUser1).use {
-            serviceAfter.restoreSettings(Xml.resolvePullParser(it))
+            serviceAfter.restoreSettings(computerAfter, Xml.resolvePullParser(it))
         }
 
         // Assert user 1 was restored
@@ -800,7 +807,7 @@ class DomainVerificationPackageTest {
         )
 
         ByteArrayInputStream(backupUser0).use {
-            serviceAfter.restoreSettings(Xml.resolvePullParser(it))
+            serviceAfter.restoreSettings(computerAfter, Xml.resolvePullParser(it))
         }
 
         assertExpectedState(serviceAfter)
@@ -848,10 +855,18 @@ class DomainVerificationPackageTest {
                 whenever(callingUid) { Process.ROOT_UID }
                 whenever(callingUserId) { 0 }
 
-                mockPackageStates {
-                    pkgStateFunction(it)
-                }
+                whenever(snapshot()) { mockComputer(pkgStateFunction) }
             })
+        }
+
+    private fun mockComputer(vararg pkgStates: PackageStateInternal) =
+        mockComputer { pkgName -> pkgStates.find { pkgName == it.packageName } }
+
+    private fun mockComputer(pkgStateFunction: (String) -> PackageStateInternal? = { null }) =
+        mockThrowOnUnmocked<Computer> {
+            whenever(getPackageStateInternal(anyString())) {
+                pkgStateFunction(getArgument(0))
+            }
         }
 
     private fun mockPkgState(

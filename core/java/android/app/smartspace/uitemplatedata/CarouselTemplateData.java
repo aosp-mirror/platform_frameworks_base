@@ -56,20 +56,17 @@ public final class CarouselTemplateData extends BaseTemplateData {
     }
 
     private CarouselTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable Text titleText,
-            @Nullable Icon titleIcon,
-            @Nullable Text subtitleText,
-            @Nullable Icon subTitleIcon,
-            @Nullable TapAction primaryTapAction,
-            @Nullable Text supplementalSubtitleText,
-            @Nullable Icon supplementalSubtitleIcon,
-            @Nullable TapAction supplementalSubtitleTapAction,
-            @Nullable Text supplementalAlarmText,
+            @Nullable SubItemInfo primaryItem,
+            @Nullable SubItemInfo subtitleItem,
+            @Nullable SubItemInfo subtitleSupplementalItem,
+            @Nullable SubItemInfo supplementalLineItem,
+            @Nullable SubItemInfo supplementalAlarmItem,
+            int layoutWeight,
             @NonNull List<CarouselItem> carouselItems,
             @Nullable TapAction carouselAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
-                supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
-                supplementalAlarmText);
+        super(templateType, primaryItem, subtitleItem, subtitleSupplementalItem,
+                supplementalLineItem, supplementalAlarmItem, layoutWeight);
+
         mCarouselItems = carouselItems;
         mCarouselAction = carouselAction;
     }
@@ -178,11 +175,10 @@ public final class CarouselTemplateData extends BaseTemplateData {
                 throw new IllegalStateException("Carousel data is empty");
             }
 
-            return new CarouselTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
-                    getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalAlarmText(), mCarouselItems,
-                    mCarouselAction);
+            return new CarouselTemplateData(getTemplateType(), getPrimaryItem(),
+                    getSubtitleItem(), getSubtitleSupplemtnalItem(),
+                    getSupplementalLineItem(), getSupplementalAlarmItem(), getLayoutWeight(),
+                    mCarouselItems, mCarouselAction);
         }
     }
 

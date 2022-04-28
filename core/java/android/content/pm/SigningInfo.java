@@ -72,9 +72,11 @@ public final class SigningInfo implements Parcelable {
     /**
      * Returns the signing certificates this package has proven it is authorized to use. This
      * includes both the signing certificate associated with the signer of the package and the past
-     * signing certificates it included as its proof of signing certificate rotation.  This method
-     * is the preferred replacement for the {@code GET_SIGNATURES} flag used with {@link
-     * PackageManager#getPackageInfo(String, int)}.  When determining if a package is signed by a
+     * signing certificates it included as its proof of signing certificate rotation.  Signing
+     * certificates are returned in the order of rotation with the original signing certificate at
+     * index 0, and the current signing certificate at the last index. This method is the preferred
+     * replacement for the {@code GET_SIGNATURES} flag used with {@link
+     * PackageManager#getPackageInfo(String, int)}. When determining if a package is signed by a
      * desired certificate, the returned array should be checked to determine if it is one of the
      * entries.
      *

@@ -29,9 +29,14 @@ import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -51,6 +56,7 @@ import com.android.internal.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Shows a dialog with actions to take on a chooser target.
@@ -60,9 +66,17 @@ public class ChooserTargetActionsDialogFragment extends DialogFragment
 
     protected ArrayList<DisplayResolveInfo> mTargetInfos = new ArrayList<>();
     protected UserHandle mUserHandle;
+    protected String mShortcutId;
+    protected String mShortcutTitle;
+    protected boolean mIsShortcutPinned;
+    protected IntentFilter mIntentFilter;
 
     public static final String USER_HANDLE_KEY = "user_handle";
     public static final String TARGET_INFOS_KEY = "target_infos";
+    public static final String SHORTCUT_ID_KEY = "shortcut_id";
+    public static final String SHORTCUT_TITLE_KEY = "shortcut_title";
+    public static final String IS_SHORTCUT_PINNED_KEY = "is_shortcut_pinned";
+    public static final String INTENT_FILTER_KEY = "intent_filter";
 
     public ChooserTargetActionsDialogFragment() {}
 
@@ -79,6 +93,10 @@ public class ChooserTargetActionsDialogFragment extends DialogFragment
     void setStateFromBundle(Bundle b) {
         mTargetInfos = (ArrayList<DisplayResolveInfo>) b.get(TARGET_INFOS_KEY);
         mUserHandle = (UserHandle) b.get(USER_HANDLE_KEY);
+        mShortcutId = b.getString(SHORTCUT_ID_KEY);
+        mShortcutTitle = b.getString(SHORTCUT_TITLE_KEY);
+        mIsShortcutPinned = b.getBoolean(IS_SHORTCUT_PINNED_KEY);
+        mIntentFilter = (IntentFilter) b.get(INTENT_FILTER_KEY);
     }
 
     @Override
@@ -89,6 +107,11 @@ public class ChooserTargetActionsDialogFragment extends DialogFragment
                 mUserHandle);
         outState.putParcelableArrayList(ChooserTargetActionsDialogFragment.TARGET_INFOS_KEY,
                 mTargetInfos);
+        outState.putString(ChooserTargetActionsDialogFragment.SHORTCUT_ID_KEY, mShortcutId);
+        outState.putBoolean(ChooserTargetActionsDialogFragment.IS_SHORTCUT_PINNED_KEY,
+                mIsShortcutPinned);
+        outState.putString(ChooserTargetActionsDialogFragment.SHORTCUT_TITLE_KEY, mShortcutTitle);
+        outState.putParcelable(ChooserTargetActionsDialogFragment.INTENT_FILTER_KEY, mIntentFilter);
     }
 
     /**
@@ -121,7 +144,7 @@ public class ChooserTargetActionsDialogFragment extends DialogFragment
         RecyclerView rv = v.findViewById(R.id.listContainer);
 
         final ResolveInfoPresentationGetter pg = getProvidingAppPresentationGetter();
-        title.setText(pg.getLabel());
+        title.setText(isShortcutTarget() ? mShortcutTitle : pg.getLabel());
         icon.setImageDrawable(pg.getIcon(mUserHandle));
         rv.setAdapter(new VHAdapter(items));
 
@@ -180,9 +203,43 @@ public class ChooserTargetActionsDialogFragment extends DialogFragment
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        pinComponent(mTargetInfos.get(which).getResolvedComponentName());
+        if (isShortcutTarget()) {
+            toggleShortcutPinned(mTargetInfos.get(which).getResolvedComponentName());
+        } else {
+            pinComponent(mTargetInfos.get(which).getResolvedComponentName());
+        }
         ((ChooserActivity) getActivity()).handlePackagesChanged();
         dismiss();
+    }
+
+    private void toggleShortcutPinned(ComponentName name) {
+        if (mIntentFilter == null) {
+            return;
+        }
+        // Fetch existing pinned shortcuts of the given package.
+        List<String> pinnedShortcuts = getPinnedShortcutsFromPackageAsUser(getContext(),
+                mUserHandle, mIntentFilter, name.getPackageName());
+        // If the shortcut has already been pinned, unpin it; otherwise, pin it.
+        if (mIsShortcutPinned) {
+            pinnedShortcuts.remove(mShortcutId);
+        } else {
+            pinnedShortcuts.add(mShortcutId);
+        }
+        // Update pinned shortcut list in ShortcutService via LauncherApps
+        getContext().getSystemService(LauncherApps.class).pinShortcuts(
+                name.getPackageName(), pinnedShortcuts, mUserHandle);
+    }
+
+    private static List<String> getPinnedShortcutsFromPackageAsUser(Context context,
+            UserHandle user, IntentFilter filter, String packageName) {
+        Context contextAsUser = context.createContextAsUser(user, 0 /* flags */);
+        List<ShortcutManager.ShareShortcutInfo> targets = contextAsUser.getSystemService(
+                ShortcutManager.class).getShareTargets(filter);
+        return targets.stream()
+                .map(ShortcutManager.ShareShortcutInfo::getShortcutInfo)
+                .filter(s -> s.isPinned() && s.getPackage().equals(packageName))
+                .map(ShortcutInfo::getId)
+                .collect(Collectors.toList());
     }
 
     private void pinComponent(ComponentName name) {
@@ -211,12 +268,13 @@ public class ChooserTargetActionsDialogFragment extends DialogFragment
     @NonNull
     protected CharSequence getItemLabel(DisplayResolveInfo dri) {
         final PackageManager pm = getContext().getPackageManager();
-        return getPinLabel(dri.isPinned(), dri.getResolveInfo().loadLabel(pm));
+        return getPinLabel(isPinned(dri),
+                isShortcutTarget() ? "" : dri.getResolveInfo().loadLabel(pm));
     }
 
     @Nullable
     protected Drawable getItemIcon(DisplayResolveInfo dri) {
-        return getPinIcon(dri.isPinned());
+        return getPinIcon(isPinned(dri));
     }
 
     private ResolveInfoPresentationGetter getProvidingAppPresentationGetter() {
@@ -229,4 +287,11 @@ public class ChooserTargetActionsDialogFragment extends DialogFragment
                 mTargetInfos.get(0).getResolveInfo());
     }
 
+    private boolean isPinned(DisplayResolveInfo dri) {
+        return isShortcutTarget() ? mIsShortcutPinned : dri.isPinned();
+    }
+
+    private boolean isShortcutTarget() {
+        return mShortcutId != null;
+    }
 }

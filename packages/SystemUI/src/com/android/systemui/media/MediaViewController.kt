@@ -18,6 +18,7 @@ package com.android.systemui.media
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.R
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -34,7 +35,8 @@ import javax.inject.Inject
 class MediaViewController @Inject constructor(
     private val context: Context,
     private val configurationController: ConfigurationController,
-    private val mediaHostStatesManager: MediaHostStatesManager
+    private val mediaHostStatesManager: MediaHostStatesManager,
+    private val logger: MediaViewLogger
 ) {
 
     /**
@@ -42,7 +44,7 @@ class MediaViewController @Inject constructor(
      * session-based player, or recommendation
      */
     enum class TYPE {
-        PLAYER, PLAYER_SESSION, RECOMMENDATION
+        PLAYER, RECOMMENDATION
     }
 
     companion object {
@@ -188,11 +190,6 @@ class MediaViewController @Inject constructor(
     var isGutsVisible = false
         private set
 
-    /**
-     * Whether the settings button in the guts should be visible
-     */
-    var shouldHideGutsSettings = false
-
     init {
         mediaHostStatesManager.addController(this)
         layoutController.sizeChangedListener = { width: Int, height: Int ->
@@ -261,16 +258,10 @@ class MediaViewController @Inject constructor(
      */
     private fun setGutsViewState(viewState: TransitionViewState) {
         val controlsIds = when (type) {
-            TYPE.PLAYER -> PlayerViewHolder.controlsIds
-            TYPE.PLAYER_SESSION -> PlayerSessionViewHolder.controlsIds
+            TYPE.PLAYER -> MediaViewHolder.controlsIds
             TYPE.RECOMMENDATION -> RecommendationViewHolder.controlsIds
         }
-        val gutsIds = when (type) {
-            TYPE.PLAYER -> PlayerViewHolder.gutsIds
-            TYPE.PLAYER_SESSION -> PlayerSessionViewHolder.gutsIds
-            TYPE.RECOMMENDATION -> RecommendationViewHolder.gutsIds
-        }
-
+        val gutsIds = GutsViewHolder.ids
         controlsIds.forEach { id ->
             viewState.widgetStates.get(id)?.let { state ->
                 // Make sure to use the unmodified state if guts are not visible.
@@ -282,59 +273,80 @@ class MediaViewController @Inject constructor(
             viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
             viewState.widgetStates.get(id)?.gone = !isGutsVisible
         }
+    }
 
-        if (shouldHideGutsSettings) {
-            viewState.widgetStates.get(R.id.settings)?.gone = true
+    /**
+     * Apply squishFraction to a copy of viewState such that the cached version is untouched.
+     */
+    private fun squishViewState(
+        viewState: TransitionViewState,
+        squishFraction: Float
+    ): TransitionViewState {
+        val squishedViewState = viewState.copy()
+        squishedViewState.height = (squishedViewState.height * squishFraction).toInt()
+        val albumArtViewState = viewState.widgetStates.get(R.id.album_art)
+        if (albumArtViewState != null) {
+            albumArtViewState.height = squishedViewState.height
         }
+        return squishedViewState
     }
 
     /**
      * Obtain a new viewState for a given media state. This usually returns a cached state, but if
      * it's not available, it will recreate one by measuring, which may be expensive.
      */
-    private fun obtainViewState(state: MediaHostState?): TransitionViewState? {
+    @VisibleForTesting
+    public fun obtainViewState(state: MediaHostState?): TransitionViewState? {
         if (state == null || state.measurementInput == null) {
             return null
         }
         // Only a subset of the state is relevant to get a valid viewState. Let's get the cachekey
         var cacheKey = getKey(state, isGutsVisible, tmpKey)
         val viewState = viewStates[cacheKey]
+
         if (viewState != null) {
             // we already have cached this measurement, let's continue
+            if (state.squishFraction < 1f) {
+                return squishViewState(viewState, state.squishFraction)
+            }
             return viewState
         }
         // Copy the key since this might call recursively into it and we're using tmpKey
         cacheKey = cacheKey.copy()
         val result: TransitionViewState?
-        if (transitionLayout != null) {
-            // Let's create a new measurement
-            if (state.expansion == 0.0f || state.expansion == 1.0f) {
-                result = transitionLayout!!.calculateViewState(
-                        state.measurementInput!!,
-                        constraintSetForExpansion(state.expansion),
-                        TransitionViewState())
-
-                setGutsViewState(result)
-                // We don't want to cache interpolated or null states as this could quickly fill up
-                // our cache. We only cache the start and the end states since the interpolation
-                // is cheap
-                viewStates[cacheKey] = result
-            } else {
-                // This is an interpolated state
-                val startState = state.copy().also { it.expansion = 0.0f }
-
-                // Given that we have a measurement and a view, let's get (guaranteed) viewstates
-                // from the start and end state and interpolate them
-                val startViewState = obtainViewState(startState) as TransitionViewState
-                val endState = state.copy().also { it.expansion = 1.0f }
-                val endViewState = obtainViewState(endState) as TransitionViewState
-                result = layoutController.getInterpolatedState(
-                        startViewState,
-                        endViewState,
-                        state.expansion)
-            }
+        if (transitionLayout == null) {
+            return null
+        }
+        // Not cached. Let's create a new measurement
+        if (state.expansion == 0.0f || state.expansion == 1.0f) {
+            result = transitionLayout!!.calculateViewState(
+                    state.measurementInput!!,
+                    constraintSetForExpansion(state.expansion),
+                    TransitionViewState())
+            // We don't want to cache interpolated or null states as this could quickly fill up
+            // our cache. We only cache the start and the end states since the interpolation
+            // is cheap
+            setGutsViewState(result)
+            viewStates[cacheKey] = result
+            logger.logMediaSize("measured new viewState", result.width, result.height)
         } else {
-            result = null
+            // This is an interpolated state
+            val startState = state.copy().also { it.expansion = 0.0f }
+
+            // Given that we have a measurement and a view, let's get (guaranteed) viewstates
+            // from the start and end state and interpolate them
+            val startViewState = obtainViewState(startState) as TransitionViewState
+            val endState = state.copy().also { it.expansion = 1.0f }
+
+            val endViewState = obtainViewState(endState) as TransitionViewState
+            result = layoutController.getInterpolatedState(
+                    startViewState,
+                    endViewState,
+                    state.expansion)
+            logger.logMediaSize("interpolated viewState", result.width, result.height)
+        }
+        if (state.squishFraction < 1f) {
+            return squishViewState(result, state.squishFraction)
         }
         return result
     }
@@ -359,6 +371,7 @@ class MediaViewController @Inject constructor(
      */
     fun attach(transitionLayout: TransitionLayout, type: TYPE) {
         updateMediaViewControllerType(type)
+        logger.logMediaLocation("attach", currentStartLocation, currentEndLocation)
         this.transitionLayout = transitionLayout
         layoutController.attach(transitionLayout)
         if (currentEndLocation == -1) {
@@ -397,6 +410,7 @@ class MediaViewController @Inject constructor(
         currentEndLocation = endLocation
         currentStartLocation = startLocation
         currentTransitionProgress = transitionProgress
+        logger.logMediaLocation("setCurrentState", startLocation, endLocation)
 
         val shouldAnimate = animateNextStateChange && !applyImmediately
 
@@ -449,6 +463,7 @@ class MediaViewController @Inject constructor(
             result = layoutController.getInterpolatedState(startViewState, endViewState,
                     transitionProgress, tmpState)
         }
+        logger.logMediaSize("setCurrentState", result.width, result.height)
         layoutController.setState(result, applyImmediately, shouldAnimate, animationDuration,
                 animationDelay)
     }
@@ -466,6 +481,7 @@ class MediaViewController @Inject constructor(
             result.height = Math.max(it.measuredHeight, result.height)
             result.width = Math.max(it.measuredWidth, result.width)
         }
+        logger.logMediaSize("update to carousel", result.width, result.height)
         return result
     }
 
@@ -475,10 +491,6 @@ class MediaViewController @Inject constructor(
         // These XML resources contain ConstraintSets that will apply to this player type's layout
         when (type) {
             TYPE.PLAYER -> {
-                collapsedLayout.load(context, R.xml.media_collapsed)
-                expandedLayout.load(context, R.xml.media_expanded)
-            }
-            TYPE.PLAYER_SESSION -> {
                 collapsedLayout.load(context, R.xml.media_session_collapsed)
                 expandedLayout.load(context, R.xml.media_session_expanded)
             }

@@ -18,8 +18,6 @@ package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -88,12 +86,11 @@ public final class GameState implements Parcelable {
     // One of the states listed above.
     private final @GameStateMode int mMode;
 
-    // This is a game specific description. For example can be level or scene name.
-    private final @Nullable String mDescription;
+    // A developer-supplied enum, e.g. to indicate level or scene.
+    private final int mLabel;
 
-    // This contains any other game specific parameters not covered by the fields above. It can be
-    // quality parameter data, settings, or game modes.
-    private final @NonNull Bundle mMetaData;
+    // The developer-supplied enum, e.g. to indicate the current quality level.
+    private final int mQuality;
 
     /**
      * Create a GameState with the specified loading status.
@@ -101,29 +98,28 @@ public final class GameState implements Parcelable {
      * @param mode The game state mode of type @GameStateMode.
      */
     public GameState(boolean isLoading, @GameStateMode int mode) {
-        this(isLoading, mode, null, new Bundle());
+        this(isLoading, mode, -1, -1);
     }
 
     /**
      * Create a GameState with the given state variables.
      * @param isLoading Whether the game is in the loading state.
-     * @param mode The game state mode of type @GameStateMode.
-     * @param description An optional description of the state.
-     * @param metaData Optional metadata.
+     * @param mode The game state mode.
+     * @param label An optional developer-supplied enum e.g. for the current level.
+     * @param quality An optional developer-supplied enum, e.g. for the current quality level.
      */
-    public GameState(boolean isLoading, @GameStateMode int mode, @Nullable String description,
-            @NonNull Bundle metaData) {
+    public GameState(boolean isLoading, @GameStateMode int mode, int label, int quality) {
         mIsLoading = isLoading;
         mMode = mode;
-        mDescription = description;
-        mMetaData = metaData;
+        mLabel = label;
+        mQuality = quality;
     }
 
     private GameState(Parcel in) {
         mIsLoading = in.readBoolean();
         mMode = in.readInt();
-        mDescription = in.readString();
-        mMetaData = in.readBundle();
+        mLabel = in.readInt();
+        mQuality = in.readInt();
     }
 
     /**
@@ -141,17 +137,19 @@ public final class GameState implements Parcelable {
     }
 
     /**
-     * @return The state description, or null if one is not set.
+     * @return The developer-supplied enum, e.g. to indicate level or scene. The default value (if
+     * not supplied) is -1.
      */
-    public @Nullable String getDescription() {
-        return mDescription;
+    public int getLabel() {
+        return mLabel;
     }
 
     /**
-     * @return metadata associated with the state.
+     * @return The developer-supplied enum, e.g. to indicate the current quality level. The default
+     * value (if not suplied) is -1.
      */
-    public @NonNull Bundle getMetadata() {
-        return mMetaData;
+    public int getQuality() {
+        return mQuality;
     }
 
     @Override
@@ -163,8 +161,8 @@ public final class GameState implements Parcelable {
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeBoolean(mIsLoading);
         parcel.writeInt(mMode);
-        parcel.writeString(mDescription);
-        parcel.writeBundle(mMetaData);
+        parcel.writeInt(mLabel);
+        parcel.writeInt(mQuality);
     }
 
     /**

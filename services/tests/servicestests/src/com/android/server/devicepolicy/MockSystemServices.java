@@ -33,6 +33,7 @@ import android.app.IActivityTaskManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.IBackupManager;
+import android.app.role.RoleManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -131,6 +132,7 @@ public class MockSystemServices {
     public final VpnManager vpnManager;
     public final DevicePolicyManager devicePolicyManager;
     public final LocationManager locationManager;
+    public final RoleManager roleManager;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
     public final BuildMock buildMock = new BuildMock();
@@ -181,6 +183,7 @@ public class MockSystemServices {
         vpnManager = mock(VpnManager.class);
         devicePolicyManager = mock(DevicePolicyManager.class);
         locationManager = mock(LocationManager.class);
+        roleManager = realContext.getSystemService(RoleManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());
@@ -499,18 +502,6 @@ public class MockSystemServices {
 
     public static class StorageManagerForMock {
         public boolean isFileBasedEncryptionEnabled() {
-            return false;
-        }
-
-        public boolean isNonDefaultBlockEncrypted() {
-            return false;
-        }
-
-        public boolean isEncrypted() {
-            return false;
-        }
-
-        public boolean isEncryptable() {
             return false;
         }
     }

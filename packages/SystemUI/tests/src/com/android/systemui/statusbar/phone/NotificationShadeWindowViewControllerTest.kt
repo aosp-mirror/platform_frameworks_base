@@ -24,11 +24,13 @@ import com.android.keyguard.LockIconViewController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.lowlightclock.LowLightClockController
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
@@ -61,7 +63,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var mStatusBarStateController: SysuiStatusBarStateController
     @Mock
-    private lateinit var mStatusBar: StatusBar
+    private lateinit var mCentralSurfaces: CentralSurfaces
     @Mock
     private lateinit var mDockManager: DockManager
     @Mock
@@ -70,6 +72,10 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     private lateinit var mNotificationShadeDepthController: NotificationShadeDepthController
     @Mock
     private lateinit var mNotificationShadeWindowController: NotificationShadeWindowController
+    @Mock
+    private lateinit var mKeyguardUnlockAnimationController: KeyguardUnlockAnimationController
+    @Mock
+    private lateinit var mAmbientState: AmbientState
     @Mock
     private lateinit var stackScrollLayoutController: NotificationStackScrollLayoutController
     @Mock
@@ -107,10 +113,13 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             mStatusBarKeyguardViewManager,
             mStatusBarWindowStateController,
             mLockIconViewController,
-            Optional.of(mLowLightClockController)
+            Optional.of(mLowLightClockController),
+            mCentralSurfaces,
+            mNotificationShadeWindowController,
+            mKeyguardUnlockAnimationController,
+            mAmbientState
         )
         mController.setupExpandedStatusBar()
-        mController.setService(mStatusBar, mNotificationShadeWindowController)
 
         mInteractionEventHandlerCaptor =
             ArgumentCaptor.forClass(InteractionEventHandler::class.java)

@@ -22,6 +22,9 @@ android_app {
     defaults: ["platform_app_defaults"],
 
     srcs: ["src/**/*.java"],
+    static_libs: [
+        "DynamicSystemInstallationService-logtags",
+    ],
     resource_dirs: ["res"],
 
     certificate: "platform",
@@ -31,4 +34,9 @@ android_app {
     optimize: {
         enabled: false,
     },
+}
+
+java_library {
+    name: "DynamicSystemInstallationService-logtags",
+    srcs: ["src/**/*.logtags"],
 }

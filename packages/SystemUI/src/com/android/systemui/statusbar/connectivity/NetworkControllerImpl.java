@@ -85,7 +85,6 @@ import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.CarrierConfigTracker;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -251,10 +250,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 broadcastDispatcher,
                 demoModeController,
                 carrierConfigTracker,
+                handler,
                 featureFlags,
                 dumpManager);
         mReceiverHandler.post(mRegisterListeners);
-        mMainHandler = handler;
         mInternetDialogFactory = internetDialogFactory;
     }
 
@@ -274,12 +273,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
             BroadcastDispatcher broadcastDispatcher,
             DemoModeController demoModeController,
             CarrierConfigTracker carrierConfigTracker,
+            @Main Handler handler,
             FeatureFlags featureFlags,
             DumpManager dumpManager
     ) {
         mContext = context;
         mTelephonyListenerManager = telephonyListenerManager;
         mConfig = config;
+        mMainHandler = handler;
         mReceiverHandler = new Handler(bgLooper);
         mBgLooper = bgLooper;
         mBgExecutor = bgExecutor;
@@ -315,7 +316,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         });
         mWifiSignalController = new WifiSignalController(mContext, mHasMobileDataFeature,
-                mCallbackHandler, this, mWifiManager, mConnectivityManager, networkScoreManager);
+                mCallbackHandler, this, mWifiManager, mConnectivityManager, networkScoreManager,
+                mMainHandler, mReceiverHandler);
 
         mEthernetSignalController = new EthernetSignalController(mContext, mCallbackHandler, this);
 
@@ -1142,7 +1144,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     /** */
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("NetworkController state:");
         pw.println("  mUserSetup=" + mUserSetup);
 

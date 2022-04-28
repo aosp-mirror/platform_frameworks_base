@@ -27,7 +27,7 @@
 
     <LinearLayout
         android:id="@+id/half_shelf"
-        android:layout_width="@dimen/qs_panel_width"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="bottom"

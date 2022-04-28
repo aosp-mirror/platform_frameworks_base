@@ -31,9 +31,10 @@ import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.telephony.CellSignalStrength;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.mobile.TelephonyIcons;
 
@@ -56,6 +57,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        allowTestableLooperAsMainThread();
         when(mWifiInfo.makeCopy(anyLong())).thenReturn(mWifiInfo);
         when(mWifiInfo.isPrimary()).thenReturn(true);
     }

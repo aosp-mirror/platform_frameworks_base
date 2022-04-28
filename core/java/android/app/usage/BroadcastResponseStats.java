@@ -29,6 +29,8 @@ import java.util.Objects;
  * Class containing a collection of stats related to response events started from an app
  * after receiving a broadcast.
  *
+ * @see UsageStatsManager#queryBroadcastResponseStats(String, long)
+ * @see UsageStatsManager#clearBroadcastResponseStats(String, long)
  * @hide
  */
 @SystemApi

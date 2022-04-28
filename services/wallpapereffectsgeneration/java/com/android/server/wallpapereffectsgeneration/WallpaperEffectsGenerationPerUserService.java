@@ -141,6 +141,13 @@ public class WallpaperEffectsGenerationPerUserService extends
         invokeCinematicListenerAndCleanup(cinematicEffectResponse);
     }
 
+    /**
+     * Checks whether the calling uid matches the bind service uid.
+     */
+    public boolean isCallingUidAllowed(int callingUid) {
+        return getServiceUidLocked() ==  callingUid;
+    }
+
     @GuardedBy("mLock")
     private void updateRemoteServiceLocked() {
         if (mRemoteService != null) {
@@ -152,7 +159,6 @@ public class WallpaperEffectsGenerationPerUserService extends
             invokeCinematicListenerAndCleanup(
                     createErrorCinematicEffectResponse(mCinematicEffectListenerWrapper.mTaskId));
         }
-
     }
 
     void onPackageUpdatedLocked() {

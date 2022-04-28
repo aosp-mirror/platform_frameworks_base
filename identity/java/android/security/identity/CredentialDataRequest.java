@@ -153,7 +153,15 @@ public class CredentialDataRequest {
         /**
          * Sets whether to allow using an authentication key which use count has been exceeded.
          *
-         * By default this is set to true.
+         * <p>This is useful in situations where the application hasn't had a chance to renew
+         * authentication keys, for example if the device hasn't been connected to the Internet or
+         * if the issuing authority server has been down.
+         *
+         * <p>The reason this could be useful is that the privacy risk of reusing an authentication
+         * key for a credential presentation could be significantly smaller compared to the
+         * inconvenience of not being able to present the credential at all.
+         *
+         * <p>By default this is set to true.
          *
          * @param allowUsingExhaustedKeys whether to allow using an authentication key which use
          *                                count has been exceeded if no other key is available.
@@ -167,7 +175,16 @@ public class CredentialDataRequest {
         /**
          * Sets whether to allow using an authentication key which is expired.
          *
-         * By default this is set to false.
+         * <p>This is useful in situations where the application hasn't had a chance to renew
+         * authentication keys, for example if the device hasn't been connected to the Internet or
+         * if the issuing authority server has been down.
+         *
+         * <p>The reason this could be useful is that many verifiers are likely to accept a
+         * credential presentation using an expired authentication key (the credential itself
+         * wouldn't be expired) and it's likely better for the holder to be able to do this than
+         * not present their credential at all.
+         *
+         * <p>By default this is set to false.
          *
          * @param allowUsingExpiredKeys whether to allow using an authentication key which is
          *                              expired if no other key is available.
@@ -181,7 +198,12 @@ public class CredentialDataRequest {
         /**
          * Sets whether to increment the use-count for the authentication key used.
          *
-         * By default this is set to true.
+         * <p>Not incrementing the use-count for an authentication key is useful in situations
+         * where the authentication key is known with certainty to not be leaked. For example,
+         * consider an application doing a credential presentation for the sole purpose of
+         * displaying the credential data to the user (not for verification).
+         *
+         * <p>By default this is set to true.
          *
          * @param incrementUseCount whether to increment the use count of the authentication
          *                          key used.

@@ -69,7 +69,10 @@ public final class Icon implements Parcelable {
         return mContentDescription;
     }
 
-    /** Return shouldTint value. The default value is true. */
+    /**
+     * Return shouldTint value, which means whether should tint the icon with the system's theme
+     * color. The default value is true.
+     */
     public boolean shouldTint() {
         return mShouldTint;
     }
@@ -155,7 +158,7 @@ public final class Icon implements Parcelable {
         }
 
         /**
-         * Sets should tint icon.
+         * Sets should tint icon with the system's theme color.
          */
         @NonNull
         public Builder setShouldTint(boolean shouldTint) {

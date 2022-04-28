@@ -21,7 +21,6 @@ import static android.view.InsetsState.ITYPE_IME;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
-import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.IME_TARGET_FROM_IME;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.INSETS_SOURCE_PROVIDER;
@@ -30,6 +29,7 @@ import static com.android.server.wm.WindowManagerService.H.UPDATE_MULTI_WINDOW_S
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
@@ -46,7 +46,7 @@ import java.io.PrintWriter;
  * Controller for IME inset source on the server. It's called provider as it provides the
  * {@link InsetsSource} to the client that uses it in {@link InsetsSourceConsumer}.
  */
-final class ImeInsetsSourceProvider extends InsetsSourceProvider {
+final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider {
 
     private InsetsControlTarget mImeRequester;
     private Runnable mShowImeRunner;
@@ -80,8 +80,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     @Override
-    void updateSourceFrame() {
-        super.updateSourceFrame();
+    void updateSourceFrame(Rect frame) {
+        super.updateSourceFrame(frame);
         onSourceChanged();
     }
 
@@ -113,8 +113,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     private void reportImeDrawnForOrganizer(InsetsControlTarget caller) {
         if (caller.getWindow() != null && caller.getWindow().getTask() != null) {
             if (caller.getWindow().getTask().isOrganized()) {
-                mWin.mWmService.mAtmService.mTaskOrganizerController.reportImeDrawnOnTask(
-                        caller.getWindow().getTask());
+                mWindowContainer.mWmService.mAtmService.mTaskOrganizerController
+                        .reportImeDrawnOnTask(caller.getWindow().getTask());
             }
         }
     }
@@ -173,12 +173,18 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     void checkShowImePostLayout() {
+        if (mWindowContainer == null) {
+            return;
+        }
+        WindowState windowState =  mWindowContainer.asWindowState();
+        if (windowState == null) {
+            throw new IllegalArgumentException("IME insets must be provided by a window.");
+        }
         // check if IME is drawn
         if (mIsImeLayoutDrawn
                 || (isReadyToShowIme()
-                && mWin != null
-                && mWin.isDrawn()
-                && !mWin.mGivenInsetsPending)) {
+                && windowState.isDrawn()
+                && !windowState.mGivenInsetsPending)) {
             mIsImeLayoutDrawn = true;
             // show IME if InputMethodService requested it to be shown.
             if (mShowImeRunner != null) {
@@ -243,7 +249,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     private boolean isImeInputTarget(InsetsControlTarget target) {
-        return target == mDisplayContent.getImeTarget(IME_TARGET_INPUT);
+        return target == mDisplayContent.getImeInputTarget();
     }
 
     private boolean sameAsImeControlTarget() {

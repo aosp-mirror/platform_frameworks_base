@@ -16,57 +16,60 @@
 
 package com.android.systemui.dreams;
 
-import android.annotation.IntDef;
-import android.content.Context;
+import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
+import static android.app.StatusBarManager.WINDOW_STATE_HIDING;
+import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+
+import android.annotation.Nullable;
+import android.app.AlarmManager;
+import android.app.StatusBarManager;
+import android.content.res.Resources;
+import android.hardware.SensorPrivacyManager;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.text.format.DateFormat;
+import android.util.PluralsMessageFormatter;
+import android.view.View;
 
-import com.android.systemui.battery.BatteryMeterViewController;
+import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.dreams.dagger.DreamOverlayModule;
-import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
+import com.android.systemui.statusbar.policy.NextAlarmController;
+import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.ViewController;
+import com.android.systemui.util.time.DateFormatUtil;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * View controller for {@link DreamOverlayStatusBarView}.
  */
 @DreamOverlayComponent.DreamOverlayScope
 public class DreamOverlayStatusBarViewController extends ViewController<DreamOverlayStatusBarView> {
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "WIFI_STATUS_" }, value = {
-            WIFI_STATUS_UNKNOWN,
-            WIFI_STATUS_UNAVAILABLE,
-            WIFI_STATUS_AVAILABLE
-    })
-    private @interface WifiStatus {}
-    private static final int WIFI_STATUS_UNKNOWN = 0;
-    private static final int WIFI_STATUS_UNAVAILABLE = 1;
-    private static final int WIFI_STATUS_AVAILABLE = 2;
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "BATTERY_STATUS_" }, value = {
-            BATTERY_STATUS_UNKNOWN,
-            BATTERY_STATUS_NOT_CHARGING,
-            BATTERY_STATUS_CHARGING
-    })
-    private @interface BatteryStatus {}
-    private static final int BATTERY_STATUS_UNKNOWN = 0;
-    private static final int BATTERY_STATUS_NOT_CHARGING = 1;
-    private static final int BATTERY_STATUS_CHARGING = 2;
-
-    private final BatteryController mBatteryController;
-    private final BatteryMeterViewController mBatteryMeterViewController;
     private final ConnectivityManager mConnectivityManager;
-    private final boolean mShowPercentAvailable;
+    private final TouchInsetManager.TouchInsetSession mTouchInsetSession;
+    private final NextAlarmController mNextAlarmController;
+    private final AlarmManager mAlarmManager;
+    private final Resources mResources;
+    private final DateFormatUtil mDateFormatUtil;
+    private final IndividualSensorPrivacyController mSensorPrivacyController;
+    private final DreamOverlayNotificationCountProvider mDreamOverlayNotificationCountProvider;
+    private final ZenModeController mZenModeController;
+    private final Executor mMainExecutor;
+
+    private boolean mIsAttached;
 
     private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
             .clearCapabilities()
@@ -76,97 +79,184 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         @Override
         public void onCapabilitiesChanged(
                 Network network, NetworkCapabilities networkCapabilities) {
-            onWifiAvailabilityChanged(
-                    networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
+            updateWifiUnavailableStatusIcon();
         }
 
         @Override
         public void onAvailable(Network network) {
-            onWifiAvailabilityChanged(true);
+            updateWifiUnavailableStatusIcon();
         }
 
         @Override
         public void onLost(Network network) {
-            onWifiAvailabilityChanged(false);
+            updateWifiUnavailableStatusIcon();
         }
     };
 
-    private final BatteryController.BatteryStateChangeCallback mBatteryStateChangeCallback =
-            new BatteryController.BatteryStateChangeCallback() {
-                @Override
-                public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-                    DreamOverlayStatusBarViewController.this.onBatteryLevelChanged(charging);
-                }
-            };
+    private final IndividualSensorPrivacyController.Callback mSensorCallback =
+            (sensor, blocked) -> updateMicCameraBlockedStatusIcon();
 
-    private @WifiStatus int mWifiStatus = WIFI_STATUS_UNKNOWN;
-    private @BatteryStatus int mBatteryStatus = BATTERY_STATUS_UNKNOWN;
+    private final NextAlarmController.NextAlarmChangeCallback mNextAlarmCallback =
+            nextAlarm -> updateAlarmStatusIcon();
+
+    private final ZenModeController.Callback mZenModeCallback = new ZenModeController.Callback() {
+        @Override
+        public void onZenChanged(int zen) {
+            updatePriorityModeStatusIcon();
+        }
+    };
+
+    private final DreamOverlayNotificationCountProvider.Callback mNotificationCountCallback =
+            notificationCount -> showIcon(
+                    DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS,
+                    notificationCount > 0,
+                    notificationCount > 0
+                            ? buildNotificationsContentDescription(notificationCount)
+                            : null);
 
     @Inject
     public DreamOverlayStatusBarViewController(
-            Context context,
             DreamOverlayStatusBarView view,
-            BatteryController batteryController,
-            @Named(DreamOverlayModule.DREAM_OVERLAY_BATTERY_CONTROLLER)
-                    BatteryMeterViewController batteryMeterViewController,
-            ConnectivityManager connectivityManager) {
+            @Main Resources resources,
+            @Main Executor mainExecutor,
+            ConnectivityManager connectivityManager,
+            TouchInsetManager.TouchInsetSession touchInsetSession,
+            AlarmManager alarmManager,
+            NextAlarmController nextAlarmController,
+            DateFormatUtil dateFormatUtil,
+            IndividualSensorPrivacyController sensorPrivacyController,
+            DreamOverlayNotificationCountProvider dreamOverlayNotificationCountProvider,
+            ZenModeController zenModeController,
+            StatusBarWindowStateController statusBarWindowStateController) {
         super(view);
-        mBatteryController = batteryController;
-        mBatteryMeterViewController = batteryMeterViewController;
+        mResources = resources;
+        mMainExecutor = mainExecutor;
         mConnectivityManager = connectivityManager;
+        mTouchInsetSession = touchInsetSession;
+        mAlarmManager = alarmManager;
+        mNextAlarmController = nextAlarmController;
+        mDateFormatUtil = dateFormatUtil;
+        mSensorPrivacyController = sensorPrivacyController;
+        mDreamOverlayNotificationCountProvider = dreamOverlayNotificationCountProvider;
+        mZenModeController = zenModeController;
 
-        mShowPercentAvailable = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_battery_percentage_setting_available);
-    }
-
-    @Override
-    protected void onInit() {
-        super.onInit();
-        mBatteryMeterViewController.init();
+        // Register to receive show/hide updates for the system status bar. Our custom status bar
+        // needs to hide when the system status bar is showing to ovoid overlapping status bars.
+        statusBarWindowStateController.addListener(this::onSystemStatusBarStateChanged);
     }
 
     @Override
     protected void onViewAttached() {
-        mBatteryController.addCallback(mBatteryStateChangeCallback);
-        mConnectivityManager.registerNetworkCallback(mNetworkRequest, mNetworkCallback);
+        mIsAttached = true;
 
-        NetworkCapabilities capabilities =
-                mConnectivityManager.getNetworkCapabilities(
-                        mConnectivityManager.getActiveNetwork());
-        onWifiAvailabilityChanged(
-                capabilities != null
-                        && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
+        mConnectivityManager.registerNetworkCallback(mNetworkRequest, mNetworkCallback);
+        updateWifiUnavailableStatusIcon();
+
+        mNextAlarmController.addCallback(mNextAlarmCallback);
+        updateAlarmStatusIcon();
+
+        mSensorPrivacyController.addCallback(mSensorCallback);
+        updateMicCameraBlockedStatusIcon();
+
+        mZenModeController.addCallback(mZenModeCallback);
+        updatePriorityModeStatusIcon();
+
+        mDreamOverlayNotificationCountProvider.addCallback(mNotificationCountCallback);
+        mTouchInsetSession.addViewToTracking(mView);
     }
 
     @Override
     protected void onViewDetached() {
-        mBatteryController.removeCallback(mBatteryStateChangeCallback);
+        mZenModeController.removeCallback(mZenModeCallback);
+        mSensorPrivacyController.removeCallback(mSensorCallback);
+        mNextAlarmController.removeCallback(mNextAlarmCallback);
         mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
+        mDreamOverlayNotificationCountProvider.removeCallback(mNotificationCountCallback);
+        mTouchInsetSession.clear();
+
+        mIsAttached = false;
     }
 
-    /**
-     * Wifi availability has changed. Update the wifi status icon as appropriate.
-     * @param available Whether wifi is available.
-     */
-    private void onWifiAvailabilityChanged(boolean available) {
-        final int newWifiStatus = available ? WIFI_STATUS_AVAILABLE : WIFI_STATUS_UNAVAILABLE;
-        if (mWifiStatus != newWifiStatus) {
-            mWifiStatus = newWifiStatus;
-            mView.showWifiStatus(mWifiStatus == WIFI_STATUS_UNAVAILABLE);
-        }
+    private void updateWifiUnavailableStatusIcon() {
+        final NetworkCapabilities capabilities =
+                mConnectivityManager.getNetworkCapabilities(
+                        mConnectivityManager.getActiveNetwork());
+        final boolean available = capabilities != null
+                && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+        showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, !available);
     }
 
-    /**
-     * The battery level has changed. Update the battery status icon as appropriate.
-     * @param charging Whether the battery is currently charging.
-     */
-    private void onBatteryLevelChanged(boolean charging) {
-        final int newBatteryStatus =
-                charging ? BATTERY_STATUS_CHARGING : BATTERY_STATUS_NOT_CHARGING;
-        if (mBatteryStatus != newBatteryStatus) {
-            mBatteryStatus = newBatteryStatus;
-            mView.showBatteryPercentText(
-                    mBatteryStatus == BATTERY_STATUS_CHARGING && mShowPercentAvailable);
-        }
+    private void updateAlarmStatusIcon() {
+        final AlarmManager.AlarmClockInfo alarm =
+                mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
+        final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
+        showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_ALARM_SET,
+                hasAlarm,
+                hasAlarm ? buildAlarmContentDescription(alarm) : null);
+    }
+
+    private String buildAlarmContentDescription(AlarmManager.AlarmClockInfo alarm) {
+        final String skeleton = mDateFormatUtil.is24HourFormat() ? "EHm" : "Ehma";
+        final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+        final String dateString = DateFormat.format(pattern, alarm.getTriggerTime()).toString();
+
+        return mResources.getString(R.string.accessibility_quick_settings_alarm, dateString);
+    }
+
+    private void updateMicCameraBlockedStatusIcon() {
+        final boolean micBlocked = mSensorPrivacyController
+                .isSensorBlocked(SensorPrivacyManager.Sensors.MICROPHONE);
+        final boolean cameraBlocked = mSensorPrivacyController
+                .isSensorBlocked(SensorPrivacyManager.Sensors.CAMERA);
+        showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED,
+                micBlocked && cameraBlocked);
+    }
+
+    private String buildNotificationsContentDescription(int notificationCount) {
+        return PluralsMessageFormatter.format(
+                mResources,
+                Map.of("count", notificationCount),
+                R.string.dream_overlay_status_bar_notification_indicator);
+    }
+
+    private void updatePriorityModeStatusIcon() {
+        showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON,
+                mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF);
+    }
+
+    private void showIcon(@DreamOverlayStatusBarView.StatusIconType int iconType, boolean show) {
+        showIcon(iconType, show, null);
+    }
+
+    private void showIcon(
+            @DreamOverlayStatusBarView.StatusIconType int iconType,
+            boolean show,
+            @Nullable String contentDescription) {
+        mMainExecutor.execute(() -> {
+            if (mIsAttached) {
+                mView.showIcon(iconType, show, contentDescription);
+            }
+        });
+    }
+
+    private void onSystemStatusBarStateChanged(@StatusBarManager.WindowVisibleState int state) {
+        mMainExecutor.execute(() -> {
+            if (!mIsAttached) {
+                return;
+            }
+
+            switch (state) {
+                case WINDOW_STATE_SHOWING:
+                    mView.setVisibility(View.INVISIBLE);
+                    break;
+                case WINDOW_STATE_HIDING:
+                case WINDOW_STATE_HIDDEN:
+                    mView.setVisibility(View.VISIBLE);
+                    break;
+            }
+        });
     }
 }

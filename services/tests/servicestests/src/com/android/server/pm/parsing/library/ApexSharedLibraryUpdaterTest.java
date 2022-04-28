@@ -41,6 +41,8 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTest {
 
+    private static final String SDK_INT_PLUS_ONE = "" + (Build.VERSION.SDK_INT + 1);
+    private static final String SDK_INT_PLUS_TWO = "" + (Build.VERSION.SDK_INT + 2);
     private final ArrayMap<String, SystemConfig.SharedLibraryEntry> mSharedLibraries =
             new ArrayMap<>(8);
 
@@ -51,14 +53,19 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
 
     private void installSharedLibraries() throws Exception {
         mSharedLibraries.clear();
-        insertLibrary("foo", 0, 0);
-        insertLibrary("fooBcpSince30", 30, 0);
-        insertLibrary("fooBcpBefore30", 0, 30);
-        insertLibrary("fooFromFuture", Build.VERSION.SDK_INT + 2, 0);
+        insertLibrary("foo", null, null);
+        insertLibrary("fooBcpSince30", "30", null);
+        insertLibrary("fooBcpBefore30", null, "30");
+        // simulate libraries being added to the BCP in a future release
+        insertLibrary("fooSinceFuture", SDK_INT_PLUS_ONE, null);
+        insertLibrary("fooSinceFutureCodename", "Z", null);
+        // simulate libraries being removed from the BCP in a future release
+        insertLibrary("fooBcpBeforeFuture", null, SDK_INT_PLUS_ONE);
+        insertLibrary("fooBcpBeforeFutureCodename", null, "Z");
     }
 
-    private void insertLibrary(String libraryName, int onBootclasspathSince,
-            int onBootclasspathBefore) {
+    private void insertLibrary(String libraryName, String onBootclasspathSince,
+            String onBootclasspathBefore) {
         mSharedLibraries.put(libraryName, new SystemConfig.SharedLibraryEntry(
                 libraryName,
                 "foo.jar",
@@ -112,7 +119,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
     }
 
     @Test
-    public void testBcpSince11kNotAppliedWithoutLibrary() {
+    public void testBcpSinceFutureNotAppliedWithoutLibrary() {
         ParsedPackage before = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
                 .setTargetSdkVersion(Build.VERSION_CODES.R)
                 .hideAsParsed());
@@ -128,15 +135,17 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
     }
 
     @Test
-    public void testBcpSince11kNotAppliedWithLibrary() {
+    public void testBcpSinceFutureNotAppliedWithLibrary() {
         ParsedPackage before = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
                 .setTargetSdkVersion(Build.VERSION_CODES.R)
-                .addUsesLibrary("fooFromFuture")
+                .addUsesLibrary("fooSinceFuture")
+                .addUsesLibrary("fooSinceFutureCodename")
                 .hideAsParsed());
 
         AndroidPackage after = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
                 .setTargetSdkVersion(Build.VERSION_CODES.R)
-                .addUsesLibrary("fooFromFuture")
+                .addUsesLibrary("fooSinceFuture")
+                .addUsesLibrary("fooSinceFutureCodename")
                 .hideAsParsed())
                 .hideAsFinal();
 
@@ -183,7 +192,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
      */
     @Test
     public void testBcpRemovedThenAddedPast() {
-        insertLibrary("fooBcpRemovedThenAdded", 30, 28);
+        insertLibrary("fooBcpRemovedThenAdded", "30", "28");
 
         ParsedPackage before = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
                 .setTargetSdkVersion(Build.VERSION_CODES.N)
@@ -207,7 +216,8 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
      */
     @Test
     public void testBcpRemovedThenAddedMiddle_targetQ() {
-        insertLibrary("fooBcpRemovedThenAdded", Build.VERSION.SDK_INT + 1, 30);
+        insertLibrary("fooBcpRemovedThenAdded", SDK_INT_PLUS_ONE, "30");
+        insertLibrary("fooBcpRemovedThenAddedCodename", "Z", "30");
 
         ParsedPackage before = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
                 .setTargetSdkVersion(Build.VERSION_CODES.Q)
@@ -217,6 +227,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
                 .setTargetSdkVersion(Build.VERSION_CODES.Q)
                 .addUsesLibrary("fooBcpRemovedThenAdded")
                 .addUsesLibrary("fooBcpBefore30")
+                .addUsesLibrary("fooBcpRemovedThenAddedCodename")
                 .hideAsParsed())
                 .hideAsFinal();
 
@@ -232,7 +243,8 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
      */
     @Test
     public void testBcpRemovedThenAddedMiddle_targetR() {
-        insertLibrary("fooBcpRemovedThenAdded", Build.VERSION.SDK_INT + 1, 30);
+        insertLibrary("fooBcpRemovedThenAdded", SDK_INT_PLUS_ONE, "30");
+        insertLibrary("fooBcpRemovedThenAddedCodename", "Z", "30");
 
         ParsedPackage before = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
                 .setTargetSdkVersion(Build.VERSION_CODES.R)
@@ -256,7 +268,8 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
      */
     @Test
     public void testBcpRemovedThenAddedMiddle_targetR_usingLib() {
-        insertLibrary("fooBcpRemovedThenAdded", Build.VERSION.SDK_INT + 1, 30);
+        insertLibrary("fooBcpRemovedThenAdded", SDK_INT_PLUS_ONE, "30");
+        insertLibrary("fooBcpRemovedThenAddedCodename", "Z", "30");
 
         ParsedPackage before = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
                 .setTargetSdkVersion(Build.VERSION_CODES.R)
@@ -271,6 +284,82 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
 
         // in this example, we are at the point where the library is not in the BOOTCLASSPATH.
         // Because the app wants to use the library, it needs to be present
+        checkBackwardsCompatibility(before, after);
+    }
+
+    /**
+     * Test a library that was first removed from the BCP [to a mainline module] and later was
+     * moved back to the BCP via a mainline module update. Both things happening in future SDKs.
+     */
+    @Test
+    public void testBcpRemovedThenAddedFuture() {
+        insertLibrary("fooBcpRemovedThenAdded", SDK_INT_PLUS_TWO, SDK_INT_PLUS_ONE);
+        ParsedPackage before = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
+                .setTargetSdkVersion(Build.VERSION_CODES.R)
+                .hideAsParsed());
+
+        AndroidPackage after = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
+                .setTargetSdkVersion(Build.VERSION_CODES.R)
+                .hideAsParsed())
+                .hideAsFinal();
+
+        // in this example, we are at the point where the library is still in the BCP
+        checkBackwardsCompatibility(before, after);
+    }
+
+    /**
+     * Test a library that was first removed from the BCP [to a mainline module] and later was
+     * moved back to the BCP via a mainline module update. Both things happening in future SDKs.
+     */
+    @Test
+    public void testBcpRemovedThenAddedFuture_usingLib() {
+        insertLibrary("fooBcpRemovedThenAdded", SDK_INT_PLUS_TWO, SDK_INT_PLUS_ONE);
+
+        ParsedPackage before = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
+                .setTargetSdkVersion(Integer.parseInt(SDK_INT_PLUS_ONE))
+                .addUsesLibrary("fooBcpRemovedThenAdded")
+                .hideAsParsed());
+
+        AndroidPackage after = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
+                .setTargetSdkVersion(Integer.parseInt(SDK_INT_PLUS_ONE))
+                .hideAsParsed())
+                .hideAsFinal();
+
+        // in this example, we are at the point where the library was removed from the BCP
+        checkBackwardsCompatibility(before, after);
+    }
+
+    @Test
+    public void testBcpBeforeFuture() {
+        ParsedPackage before = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
+                .setTargetSdkVersion(Build.VERSION_CODES.R)
+                .addUsesLibrary("fooBcpBeforeFuture")
+                .addUsesLibrary("fooBcpBeforeFutureCodename")
+                .hideAsParsed());
+
+        AndroidPackage after = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
+                .setTargetSdkVersion(Build.VERSION_CODES.R)
+                .hideAsParsed())
+                .hideAsFinal();
+
+        // in this example, we are at the point where the library was removed from the BCP
+        checkBackwardsCompatibility(before, after);
+    }
+
+    @Test
+    public void testBcpBeforeFuture_futureTargetSdk() {
+        ParsedPackage before = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
+                .setTargetSdkVersion(Integer.parseInt(SDK_INT_PLUS_ONE))
+                .addUsesLibrary("fooBcpBeforeFuture")
+                .addUsesLibrary("fooBcpBeforeFutureCodename")
+                .hideAsParsed());
+
+        AndroidPackage after = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
+                .setTargetSdkVersion(Integer.parseInt(SDK_INT_PLUS_ONE))
+                .hideAsParsed())
+                .hideAsFinal();
+
+        // in this example, we are at the point where the library was removed from the BCP
         checkBackwardsCompatibility(before, after);
     }
 

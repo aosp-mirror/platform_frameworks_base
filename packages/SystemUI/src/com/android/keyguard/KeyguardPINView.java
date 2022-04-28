@@ -188,14 +188,13 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
         enableClipping(false);
         setTranslationY(0);
-        AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 280 /* duration */,
-                mDisappearYTranslation, mDisappearAnimationUtils.getInterpolator(),
-                getAnimationListener(InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_DISAPPEAR));
         DisappearAnimationUtils disappearAnimationUtils = needsSlowUnlockTransition
                         ? mDisappearAnimationUtilsLocked
                         : mDisappearAnimationUtils;
-        disappearAnimationUtils.startAnimation2d(mViews,
-                () -> {
+        disappearAnimationUtils.createAnimation(
+                this, 0, 200, mDisappearYTranslation, false,
+                mDisappearAnimationUtils.getInterpolator(), () -> {
+                    getAnimationListener(InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_DISAPPEAR);
                     enableClipping(true);
                     if (finishRunnable != null) {
                         finishRunnable.run();

@@ -160,14 +160,15 @@ public class QRCodeScannerController implements
      * Returns true if lock screen entry point for QR Code Scanner is to be enabled.
      */
     public boolean isEnabledForLockScreenButton() {
-        return mQRCodeScannerEnabled && mIntent != null && mConfigEnableLockScreenButton;
+        return mQRCodeScannerEnabled && mIntent != null && mConfigEnableLockScreenButton
+                && isActivityCallable(mIntent);
     }
 
     /**
      * Returns true if quick settings entry point for QR Code Scanner is to be enabled.
      */
     public boolean isEnabledForQuickSettings() {
-        return mIntent != null;
+        return mIntent != null && isActivityCallable(mIntent);
     }
 
     /**
@@ -278,7 +279,7 @@ public class QRCodeScannerController implements
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         }
 
-        if (isActivityCallable(intent)) {
+        if (isActivityAvailable(intent)) {
             mQRCodeScannerActivity = qrCodeScannerActivity;
             mComponentName = componentName;
             mIntent = intent;
@@ -293,7 +294,7 @@ public class QRCodeScannerController implements
         }
     }
 
-    private boolean isActivityCallable(Intent intent) {
+    private boolean isActivityAvailable(Intent intent) {
         // Our intent should always be explicit and should have a component set
         if (intent.getComponent() == null) return false;
 
@@ -303,6 +304,17 @@ public class QRCodeScannerController implements
                 | PackageManager.MATCH_DISABLED_COMPONENTS
                 | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
                 | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS;
+        return !mContext.getPackageManager().queryIntentActivities(intent,
+                flags).isEmpty();
+    }
+
+    private boolean isActivityCallable(Intent intent) {
+        // Our intent should always be explicit and should have a component set
+        if (intent.getComponent() == null) return false;
+
+        int flags = PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
         return !mContext.getPackageManager().queryIntentActivities(intent,
                 flags).isEmpty();
     }

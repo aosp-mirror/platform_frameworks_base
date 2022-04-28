@@ -40,6 +40,7 @@ import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
@@ -70,7 +71,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_SET_INPUT_CONTEXT = 20;
     private static final int DO_UNSET_INPUT_CONTEXT = 30;
     private static final int DO_START_INPUT = 32;
-    private static final int DO_ON_SHOULD_SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN_CHANGED = 35;
+    private static final int DO_ON_NAV_BUTTON_FLAGS_CHANGED = 35;
     private static final int DO_CREATE_SESSION = 40;
     private static final int DO_SET_SESSION_ENABLED = 45;
     private static final int DO_SHOW_SOFT_INPUT = 60;
@@ -80,6 +81,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_CAN_START_STYLUS_HANDWRITING = 100;
     private static final int DO_START_STYLUS_HANDWRITING = 110;
     private static final int DO_INIT_INK_WINDOW = 120;
+    private static final int DO_FINISH_STYLUS_HANDWRITING = 130;
 
     final WeakReference<InputMethodServiceInternal> mTarget;
     final Context mContext;
@@ -176,7 +178,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 try {
                     inputMethod.initializeInternal((IBinder) args.arg1,
                             (IInputMethodPrivilegedOperations) args.arg2, msg.arg1,
-                            (boolean) args.arg3, msg.arg2 != 0);
+                            (boolean) args.arg3, msg.arg2);
                 } finally {
                     args.recycle();
                 }
@@ -196,22 +198,20 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 final EditorInfo info = (EditorInfo) args.arg3;
                 final CancellationGroup cancellationGroup = (CancellationGroup) args.arg4;
                 final boolean restarting = args.argi5 == 1;
-                final boolean shouldShowImeSwitcherWhenImeIsShown = args.argi6 != 0;
+                @InputMethodNavButtonFlags
+                final int navButtonFlags = args.argi6;
                 final InputConnection ic = inputContext != null
                         ? new RemoteInputConnection(mTarget, inputContext, cancellationGroup)
                         : null;
                 info.makeCompatible(mTargetSdkVersion);
                 inputMethod.dispatchStartInputWithToken(ic, info, restarting, startInputToken,
-                        shouldShowImeSwitcherWhenImeIsShown);
+                        navButtonFlags);
                 args.recycle();
                 return;
             }
-            case DO_ON_SHOULD_SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN_CHANGED: {
-                final boolean shouldShowImeSwitcherWhenImeIsShown = msg.arg1 != 0;
-                inputMethod.onShouldShowImeSwitcherWhenImeIsShownChanged(
-                        shouldShowImeSwitcherWhenImeIsShown);
+            case DO_ON_NAV_BUTTON_FLAGS_CHANGED:
+                inputMethod.onNavButtonFlagsChanged(msg.arg1);
                 return;
-            }
             case DO_CREATE_SESSION: {
                 SomeArgs args = (SomeArgs)msg.obj;
                 inputMethod.createSession(new InputMethodSessionCallbackWrapper(
@@ -264,6 +264,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 inputMethod.initInkWindow();
                 return;
             }
+            case DO_FINISH_STYLUS_HANDWRITING: {
+                inputMethod.finishStylusHandwriting();
+                return;
+            }
 
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
@@ -301,10 +305,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @Override
     public void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
             int configChanges, boolean stylusHwSupported,
-            boolean shouldShowImeSwitcherWhenImeIsShown) {
+            @InputMethodNavButtonFlags int navButtonFlags) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageIIOOO(DO_INITIALIZE_INTERNAL,
-                configChanges, shouldShowImeSwitcherWhenImeIsShown ? 1 : 0, token, privOps,
-                stylusHwSupported));
+                configChanges, navButtonFlags, token, privOps, stylusHwSupported));
     }
 
     @BinderThread
@@ -344,23 +347,21 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void startInput(IBinder startInputToken, IInputContext inputContext,
-            EditorInfo attribute, boolean restarting, boolean shouldShowImeSwitcherWhenImeIsShown) {
+            EditorInfo attribute, boolean restarting,
+            @InputMethodNavButtonFlags int navButtonFlags) {
         if (mCancellationGroup == null) {
             Log.e(TAG, "startInput must be called after bindInput.");
             mCancellationGroup = new CancellationGroup();
         }
         mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOII(DO_START_INPUT, startInputToken,
-                inputContext, attribute, mCancellationGroup, restarting ? 1 : 0,
-                shouldShowImeSwitcherWhenImeIsShown ? 1 : 0));
+                inputContext, attribute, mCancellationGroup, restarting ? 1 : 0, navButtonFlags));
     }
 
     @BinderThread
     @Override
-    public void onShouldShowImeSwitcherWhenImeIsShownChanged(
-            boolean shouldShowImeSwitcherWhenImeIsShown) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageI(
-                DO_ON_SHOULD_SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN_CHANGED,
-                shouldShowImeSwitcherWhenImeIsShown ? 1 : 0));
+    public void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageI(DO_ON_NAV_BUTTON_FLAGS_CHANGED, navButtonFlags));
     }
 
     @BinderThread
@@ -430,5 +431,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @Override
     public void initInkWindow() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_INIT_INK_WINDOW));
+    }
+
+    @BinderThread
+    @Override
+    public void finishStylusHandwriting() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_FINISH_STYLUS_HANDWRITING));
     }
 }
