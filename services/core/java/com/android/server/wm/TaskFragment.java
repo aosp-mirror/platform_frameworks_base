@@ -591,8 +591,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * @see #isAllowedToEmbedActivityInTrustedMode(ActivityRecord)
      */
     boolean isAllowedToBeEmbeddedInTrustedMode() {
-        final Predicate<ActivityRecord> callback = this::isAllowedToEmbedActivityInTrustedMode;
-        return forAllActivities(callback);
+        // Traverse all activities to see if any of them are not in the trusted mode.
+        final Predicate<ActivityRecord> callback = r -> !isAllowedToEmbedActivityInTrustedMode(r);
+        return !forAllActivities(callback);
     }
 
     /**

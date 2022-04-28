@@ -415,7 +415,7 @@ public class CoexCoordinatorTest {
         // Auth was attempted
         when(mUdfpsClient.getState())
                 .thenReturn(AuthenticationClient.STATE_STARTED_PAUSED_ATTEMPTED);
-        verify(mCallback, never()).sendHapticFeedback();
+        verify(mCallback).sendHapticFeedback();
         verify(mCallback).handleLifecycleAfterAuth();
 
         // Then face rejected. Note that scheduler leaves UDFPS in the CoexCoordinator since
@@ -425,7 +425,7 @@ public class CoexCoordinatorTest {
                 LockoutTracker.LOCKOUT_NONE, faceCallback);
         verify(faceCallback).sendHapticFeedback();
         verify(faceCallback).sendAuthenticationResult(eq(false) /* addAuthTokenIfStrong */);
-        verify(mCallback, never()).sendHapticFeedback();
+        verify(mCallback).sendHapticFeedback();
     }
 
     @Test
