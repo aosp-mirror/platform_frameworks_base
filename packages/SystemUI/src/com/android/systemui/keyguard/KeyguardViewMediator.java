@@ -849,7 +849,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
                 @Override
                 public void onLaunchAnimationCancelled() {
-                    setOccluded(true /* occluded */, false /* animate */);
+                    Log.d(TAG, "Occlude launch animation cancelled. "
+                            + "Occluded state is now: " + mOccluded);
                 }
 
                 @NonNull
@@ -894,7 +895,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             };
 
     private IRemoteAnimationRunner mOccludeAnimationRunner =
-            new ActivityLaunchRemoteAnimationRunner(mOccludeAnimationController);
+            new OccludeActivityLaunchRemoteAnimationRunner(mOccludeAnimationController);
 
     /**
      * Animation controller for activities that unocclude the keyguard. This does not use the
@@ -919,12 +920,16 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                         RemoteAnimationTarget[] wallpapers,
                         RemoteAnimationTarget[] nonApps,
                         IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
-                    final RemoteAnimationTarget primary = apps[0];
+                    if (apps == null || apps.length == 0 || apps[0] == null) {
+                        Log.d(TAG, "No apps provided to unocclude runner; "
+                                + "skipping animation and unoccluding.");
 
-                    if (primary == null) {
                         finishedCallback.onAnimationFinished();
+                        setOccluded(false /* isOccluded */, true /* animate */);
                         return;
                     }
+
+                    final RemoteAnimationTarget primary = apps[0];
 
                     final SyncRtSurfaceTransactionApplier applier =
                             new SyncRtSurfaceTransactionApplier(
@@ -965,6 +970,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                             @Override
                             public void onAnimationEnd(Animator animation) {
                                 try {
+                                    setOccluded(false /* isOccluded */, true /* animate */);
                                     finishedCallback.onAnimationFinished();
                                     mUnoccludeAnimator = null;
                                 } catch (RemoteException e) {
@@ -3117,6 +3123,38 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 throws RemoteException {
             mRunner = mActivityLaunchAnimator.get().createRunner(mActivityLaunchController);
             mRunner.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
+        }
+    }
+
+    /**
+     * Subclass of {@link ActivityLaunchRemoteAnimationRunner} that calls {@link #setOccluded} when
+     * onAnimationStart is called.
+     */
+    private class OccludeActivityLaunchRemoteAnimationRunner
+            extends ActivityLaunchRemoteAnimationRunner {
+
+        OccludeActivityLaunchRemoteAnimationRunner(
+                ActivityLaunchAnimator.Controller controller) {
+            super(controller);
+        }
+
+        @Override
+        public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
+                IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
+            super.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
+
+            // This is the first signal we have from WM that we're going to be occluded. Set our
+            // internal state to reflect that immediately, vs. waiting for the launch animator to
+            // begin. Otherwise, calls to setShowingLocked, etc. will not know that we're about to
+            // be occluded and might re-show the keyguard.
+            setOccluded(true /* isOccluded */, false /* animate */);
+        }
+
+        @Override
+        public void onAnimationCancelled() throws RemoteException {
+            super.onAnimationCancelled();
+            Log.d(TAG, "Occlude launch animation cancelled. Occluded state is now: " + mOccluded);
         }
     }
 }
