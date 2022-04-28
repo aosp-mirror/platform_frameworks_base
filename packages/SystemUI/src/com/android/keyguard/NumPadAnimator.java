@@ -15,8 +15,6 @@
  */
 package com.android.keyguard;
 
-import static com.android.systemui.util.ColorUtilKt.getPrivateAttrColorIfUnset;
-
 import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
@@ -154,7 +152,7 @@ class NumPadAnimator {
 
         ContextThemeWrapper ctw = new ContextThemeWrapper(context, mStyle);
         TypedArray a = ctw.obtainStyledAttributes(customAttrs);
-        mNormalColor = getPrivateAttrColorIfUnset(ctw, a, 0, 0,
+        mNormalColor = Utils.getPrivateAttrColorIfUnset(ctw, a, 0, 0,
                 com.android.internal.R.attr.colorSurface);
         mHighlightColor = a.getColor(1, 0);
         a.recycle();
