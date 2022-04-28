@@ -60,7 +60,6 @@ import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -564,9 +563,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("QSTileHost:");
         mTiles.values().stream().filter(obj -> obj instanceof Dumpable)
-                .forEach(o -> ((Dumpable) o).dump(fd, pw, args));
+                .forEach(o -> ((Dumpable) o).dump(pw, args));
     }
 }

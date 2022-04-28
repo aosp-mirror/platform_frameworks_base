@@ -53,6 +53,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
@@ -92,6 +93,7 @@ import android.view.autofill.AutofillManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.DirectBootAwareness;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
@@ -453,6 +455,18 @@ public final class InputMethodManager {
     private CursorAnchorInfo mCursorAnchorInfo = null;
 
     /**
+     * A special {@link Matrix} that can be provided by the system when this instance is running
+     * inside a virtual display.
+     *
+     * <p>If this is non-{@code null}, {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}
+     * should be adjusted with this {@link Matrix}.</p>
+     *
+     * <p>{@code null} when not used.</p>
+     */
+    @GuardedBy("mH")
+    private Matrix mVirtualDisplayToScreenMatrix = null;
+
+    /**
      * As reported by {@link InputBindResult}. This value is determined by
      * {@link com.android.internal.R.styleable#InputMethod_suppressesSpellChecking}.
      */
@@ -493,8 +507,8 @@ public final class InputMethodManager {
      */
     @Nullable
     @GuardedBy("mH")
-    private final SparseArray<InputMethodSessionWrapper> mAccessibilityInputMethodSession =
-            new SparseArray<>();
+    private final SparseArray<IAccessibilityInputMethodSessionInvoker>
+            mAccessibilityInputMethodSession = new SparseArray<>();
 
     InputChannel mCurChannel;
     ImeInputEventSender mCurSender;
@@ -528,6 +542,8 @@ public final class InputMethodManager {
     static final int MSG_REPORT_FULLSCREEN_MODE = 10;
     static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
     static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
+    static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
+    static final int MSG_ON_SHOW_REQUESTED = 31;
 
     private static boolean isAutofillUIShowing(View servedView) {
         AutofillManager afm = servedView.getContext().getSystemService(AutofillManager.class);
@@ -655,7 +671,8 @@ public final class InputMethodManager {
                 if (mCurrentInputMethodSession != null) {
                     mCurrentInputMethodSession.finishInput();
                 }
-                forAccessibilitySessions(InputMethodSessionWrapper::finishInput);
+                forAccessibilitySessionsLocked(
+                        IAccessibilityInputMethodSessionInvoker::finishInput);
             }
         }
 
@@ -716,7 +733,7 @@ public final class InputMethodManager {
                             focusedView.getWindowToken(), startInputFlags, softInputMode,
                             windowFlags,
                             null,
-                            null,
+                            null, null,
                             mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -892,6 +909,7 @@ public final class InputMethodManager {
                                 InputMethodSessionWrapper.createOrNull(res.method);
                         mCurId = res.id;
                         mBindSequence = res.sequence;
+                        mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
                         mIsInputMethodSuppressingSpellChecker =
                                 res.isInputMethodSuppressingSpellChecker;
                     }
@@ -948,13 +966,13 @@ public final class InputMethodManager {
                         // we send a notification so that the a11y service knows the session is
                         // registered and update the a11y service with the current cursor positions.
                         if (res.accessibilitySessions != null) {
-                            InputMethodSessionWrapper wrapper =
-                                    InputMethodSessionWrapper.createOrNull(
+                            IAccessibilityInputMethodSessionInvoker invoker =
+                                    IAccessibilityInputMethodSessionInvoker.createOrNull(
                                             res.accessibilitySessions.get(id));
-                            if (wrapper != null) {
-                                mAccessibilityInputMethodSession.put(id, wrapper);
+                            if (invoker != null) {
+                                mAccessibilityInputMethodSession.put(id, invoker);
                                 if (mServedInputConnection != null) {
-                                    wrapper.updateSelection(mInitialSelStart, mInitialSelEnd,
+                                    invoker.updateSelection(mInitialSelStart, mInitialSelEnd,
                                             mCursorSelStart, mCursorSelEnd, mCursorCandStart,
                                             mCursorCandEnd);
                                 } else {
@@ -963,9 +981,7 @@ public final class InputMethodManager {
                                     // binds before or after input starts, it may wonder if it binds
                                     // after input starts, why it doesn't receive a notification of
                                     // the current cursor positions.
-                                    wrapper.updateSelection(-1, -1,
-                                            -1, -1, -1,
-                                            -1);
+                                    invoker.updateSelection(-1, -1, -1, -1, -1, -1);
                                 }
                             }
                         }
@@ -1063,6 +1079,53 @@ public final class InputMethodManager {
                     }
                     return;
                 }
+                case MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX: {
+                    final float[] matrixValues = (float[]) msg.obj;
+                    final int bindSequence = msg.arg1;
+                    synchronized (mH) {
+                        if (mBindSequence != bindSequence) {
+                            return;
+                        }
+                        if (matrixValues == null || mVirtualDisplayToScreenMatrix == null) {
+                            // Either InputBoundResult#mVirtualDisplayToScreenMatrixValues is null
+                            // OR this app is unbound from the parent VirtualDisplay. In this case,
+                            // calling updateCursorAnchorInfo() isn't safe. Only clear the matrix.
+                            mVirtualDisplayToScreenMatrix = null;
+                            return;
+                        }
+
+                        final float[] currentValues = new float[9];
+                        mVirtualDisplayToScreenMatrix.getValues(currentValues);
+                        if (Arrays.equals(currentValues, matrixValues)) {
+                            return;
+                        }
+                        mVirtualDisplayToScreenMatrix.setValues(matrixValues);
+
+                        if (mCursorAnchorInfo == null || mCurrentInputMethodSession == null
+                                || mServedInputConnection == null) {
+                            return;
+                        }
+                        final boolean isMonitoring = (mRequestUpdateCursorAnchorInfoMonitorMode
+                                & InputConnection.CURSOR_UPDATE_MONITOR) != 0;
+                        if (!isMonitoring) {
+                            return;
+                        }
+                        // Since the host VirtualDisplay is moved, we need to issue
+                        // IMS#updateCursorAnchorInfo() again.
+                        mCurrentInputMethodSession.updateCursorAnchorInfo(
+                                CursorAnchorInfo.createForAdditionalParentMatrix(
+                                        mCursorAnchorInfo, mVirtualDisplayToScreenMatrix));
+                    }
+                    return;
+                }
+                case MSG_ON_SHOW_REQUESTED: {
+                    synchronized (mH) {
+                        if (mImeInsetsConsumer != null) {
+                            mImeInsetsConsumer.onShowRequested();
+                        }
+                    }
+                    return;
+                }
             }
         }
     }
@@ -1125,6 +1188,12 @@ public final class InputMethodManager {
         public void reportFullscreenMode(boolean fullscreen) {
             mH.obtainMessage(MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, 0)
                     .sendToTarget();
+        }
+
+        @Override
+        public void updateVirtualDisplayToScreenMatrix(int bindSequence, float[] matrixValues) {
+            mH.obtainMessage(MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX, bindSequence, 0,
+                    matrixValues).sendToTarget();
         }
 
         @Override
@@ -1596,7 +1665,9 @@ public final class InputMethodManager {
      * Disconnect any existing input connection, clearing the served view.
      */
     @UnsupportedAppUsage
+    @GuardedBy("mH")
     void finishInputLocked() {
+        mVirtualDisplayToScreenMatrix = null;
         mIsInputMethodSuppressingSpellChecker = false;
         setNextServedViewLocked(null);
         if (getServedViewLocked() != null) {
@@ -1772,6 +1843,9 @@ public final class InputMethodManager {
                 return false;
             }
 
+            // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
+            // TODO(b/229426865): call WindowInsetsController#show instead.
+            mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
             try {
                 Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags + " reason="
                         + InputMethodDebug.softInputDisplayReasonToString(reason));
@@ -1807,6 +1881,9 @@ public final class InputMethodManager {
                     Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
                     return;
                 }
+                // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
+                // TODO(b/229426865): call WindowInsetsController#show instead.
+                mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
                 mService.showSoftInput(
                         mClient,
                         mCurRootView.getView().getWindowToken(),
@@ -2086,8 +2163,10 @@ public final class InputMethodManager {
             editorInfo.setInitialSurroundingTextInternal(textSnapshot.getSurroundingText());
             mCurrentInputMethodSession.invalidateInput(editorInfo, mServedInputConnection,
                     sessionId);
-            forAccessibilitySessions(wrapper -> wrapper.invalidateInput(editorInfo,
-                    mServedInputConnection, sessionId));
+            final IRemoteAccessibilityInputConnection accessibilityInputConnection =
+                    mServedInputConnection.asIRemoteAccessibilityInputConnection();
+            forAccessibilitySessionsLocked(wrapper -> wrapper.invalidateInput(editorInfo,
+                    accessibilityInputConnection, sessionId));
             return true;
         }
     }
@@ -2261,6 +2340,8 @@ public final class InputMethodManager {
                 res = mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,
                         softInputMode, windowFlags, tba, servedInputConnection,
+                        servedInputConnection == null ? null
+                                : servedInputConnection.asIRemoteAccessibilityInputConnection(),
                         view.getContext().getApplicationInfo().targetSdkVersion);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -2275,6 +2356,7 @@ public final class InputMethodManager {
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
                 return false;
             }
+            mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
             mIsInputMethodSuppressingSpellChecker = res.isInputMethodSuppressingSpellChecker;
             if (res.id != null) {
                 setInputChannelLocked(res.channel);
@@ -2284,8 +2366,9 @@ public final class InputMethodManager {
                 mAccessibilityInputMethodSession.clear();
                 if (res.accessibilitySessions != null) {
                     for (int i = 0; i < res.accessibilitySessions.size(); i++) {
-                        InputMethodSessionWrapper wrapper = InputMethodSessionWrapper.createOrNull(
-                                res.accessibilitySessions.valueAt(i));
+                        IAccessibilityInputMethodSessionInvoker wrapper =
+                                IAccessibilityInputMethodSessionInvoker.createOrNull(
+                                        res.accessibilitySessions.valueAt(i));
                         if (wrapper != null) {
                             mAccessibilityInputMethodSession.append(
                                     res.accessibilitySessions.keyAt(i), wrapper);
@@ -2453,7 +2536,7 @@ public final class InputMethodManager {
     }
 
     /**
-     * Notify IME directly that it is no longer visible.
+     * Notify IMMS that IME insets are no longer visible.
      *
      * @param windowToken the window from which this request originates. If this doesn't match the
      *                    currently served view, the request is ignored.
@@ -2465,7 +2548,13 @@ public final class InputMethodManager {
         synchronized (mH) {
             if (mCurrentInputMethodSession != null && mCurRootView != null
                     && mCurRootView.getWindowToken() == windowToken) {
-                mCurrentInputMethodSession.notifyImeHidden();
+                try {
+                    mService.hideSoftInput(mClient, windowToken, 0 /* flags */,
+                            null /* resultReceiver */,
+                            SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
         }
     }
@@ -2535,7 +2624,7 @@ public final class InputMethodManager {
                 mCursorCandEnd = candidatesEnd;
                 mCurrentInputMethodSession.updateSelection(
                         oldSelStart, oldSelEnd, selStart, selEnd, candidatesStart, candidatesEnd);
-                forAccessibilitySessions(wrapper -> wrapper.updateSelection(oldSelStart,
+                forAccessibilitySessionsLocked(wrapper -> wrapper.updateSelection(oldSelStart,
                         oldSelEnd, selStart, selEnd, candidatesStart, candidatesEnd));
             }
         }
@@ -2695,7 +2784,13 @@ public final class InputMethodManager {
                 return;
             }
             if (DEBUG) Log.v(TAG, "updateCursorAnchorInfo: " + cursorAnchorInfo);
-            mCurrentInputMethodSession.updateCursorAnchorInfo(cursorAnchorInfo);
+            if (mVirtualDisplayToScreenMatrix != null) {
+                mCurrentInputMethodSession.updateCursorAnchorInfo(
+                        CursorAnchorInfo.createForAdditionalParentMatrix(
+                                cursorAnchorInfo, mVirtualDisplayToScreenMatrix));
+            } else {
+                mCurrentInputMethodSession.updateCursorAnchorInfo(cursorAnchorInfo);
+            }
             mCursorAnchorInfo = cursorAnchorInfo;
             // Clear immediate bit (if any).
             mRequestUpdateCursorAnchorInfoMonitorMode &= ~CURSOR_UPDATE_IMMEDIATE;
@@ -3269,6 +3364,43 @@ public final class InputMethodManager {
     }
 
     /**
+     * An internal API for {@link android.hardware.display.VirtualDisplay} to report where its
+     * embedded virtual display is placed.
+     *
+     * @param childDisplayId Display ID of the embedded virtual display.
+     * @param matrix         {@link Matrix} to convert virtual display screen coordinates to
+     *                       the host screen coordinates. {@code null} to clear the relationship.
+     * @hide
+     */
+    public void reportVirtualDisplayGeometry(int childDisplayId, @Nullable Matrix matrix) {
+        try {
+            final float[] matrixValues;
+            if (matrix == null) {
+                matrixValues = null;
+            } else {
+                matrixValues = new float[9];
+                matrix.getValues(matrixValues);
+            }
+            mService.reportVirtualDisplayGeometryAsync(mClient, childDisplayId, matrixValues);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * An internal API that returns if the current display has a transformation matrix to apply.
+     *
+     * @return {@code true} if {@link Matrix} to convert virtual display screen coordinates to
+     * the host screen coordinates is set.
+     * @hide
+     */
+    public boolean hasVirtualDisplayToScreenMatrix() {
+        synchronized (mH) {
+            return mVirtualDisplayToScreenMatrix != null;
+        }
+    }
+
+    /**
      * Force switch to the last used input method and subtype. If the last input method didn't have
      * any subtypes, the framework will simply switch to the last input method with no subtype
      * specified.
@@ -3552,7 +3684,8 @@ public final class InputMethodManager {
         }
     }
 
-    private void forAccessibilitySessions(Consumer<InputMethodSessionWrapper> consumer) {
+    private void forAccessibilitySessionsLocked(
+            Consumer<IAccessibilityInputMethodSessionInvoker> consumer) {
         for (int i = 0; i < mAccessibilityInputMethodSession.size(); i++) {
             consumer.accept(mAccessibilityInputMethodSession.valueAt(i));
         }

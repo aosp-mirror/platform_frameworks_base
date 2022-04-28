@@ -192,7 +192,8 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                 argThat(intentFilter -> intentFilter.hasAction(Intent.ACTION_USER_SWITCHED)),
                 isNull(),
                 isNull(),
-                eq(Context.RECEIVER_EXPORTED));
+                eq(Context.RECEIVER_EXPORTED),
+                isNull());
         BroadcastReceiver callback = callbackCaptor.getValue();
 
         Consumer<String> listener = mock(Consumer.class);

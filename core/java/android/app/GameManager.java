@@ -200,6 +200,21 @@ public final class GameManager {
     }
 
     /**
+     * Set up the automatic power boost if appropriate.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public void notifyGraphicsEnvironmentSetup() {
+        try {
+            mService.notifyGraphicsEnvironmentSetup(
+                    mContext.getPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Called by games to communicate the current state to the platform.
      * @param gameState An object set to the current state.
      */

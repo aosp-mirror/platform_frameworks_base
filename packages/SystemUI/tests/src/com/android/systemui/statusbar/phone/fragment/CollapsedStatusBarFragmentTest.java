@@ -29,6 +29,7 @@ import android.app.Fragment;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -59,6 +60,7 @@ import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentCom
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -90,6 +92,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private OperatorNameViewController mOperatorNameViewController;
     private SecureSettings mSecureSettings;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+    private final CarrierConfigTracker mCarrierConfigTracker = mock(CarrierConfigTracker.class);
 
     @Mock
     private StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
@@ -329,7 +332,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         String str = mContext.getString(com.android.internal.R.string.status_bar_volume);
 
         // GIVEN the setting is ON
-        when(mSecureSettings.getInt(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON, 0))
+        when(mSecureSettings.getIntForUser(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON, 0,
+                UserHandle.USER_CURRENT))
                 .thenReturn(1);
 
         // WHEN CollapsedStatusBarFragment builds the blocklist
@@ -373,6 +377,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mNetworkController,
                 mStatusBarStateController,
                 mCommandQueue,
+                mCarrierConfigTracker,
                 new CollapsedStatusBarFragmentLogger(
                         new LogBuffer("TEST", 1, 1, mock(LogcatEchoTracker.class)),
                         new DisableFlagsLogger()

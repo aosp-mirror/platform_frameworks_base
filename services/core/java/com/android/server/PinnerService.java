@@ -385,6 +385,10 @@ public final class PinnerService extends SystemService {
                 @Override
                 public void onUidCachedChanged(int uid, boolean cached) throws RemoteException {
                 }
+
+                @Override
+                public void onUidProcAdjChanged(int uid) throws RemoteException {
+                }
             }, UID_OBSERVER_GONE | UID_OBSERVER_ACTIVE, 0, null);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to register uid observer", e);

@@ -297,9 +297,9 @@ public final class QuotaController extends StateController {
     private final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
 
     /**
-     * List of jobs that started while the UID was in the TOP state. There will be no more than
-     * 16 ({@link JobSchedulerService#MAX_JOB_CONTEXTS_COUNT}) running at once, so an ArraySet is
-     * fine.
+     * List of jobs that started while the UID was in the TOP state. There will usually be no more
+     * than {@value JobConcurrencyManager#MAX_STANDARD_JOB_CONCURRENCY} running at once, so an
+     * ArraySet is fine.
      */
     private final ArraySet<JobStatus> mTopStartedJobs = new ArraySet<>();
 
@@ -307,7 +307,7 @@ public final class QuotaController extends StateController {
     private final SparseBooleanArray mTempAllowlistCache = new SparseBooleanArray();
 
     /**
-     * Mapping of UIDs to the when their temp allowlist grace period ends (in the elapsed
+     * Mapping of UIDs to when their temp allowlist grace period ends (in the elapsed
      * realtime timebase).
      */
     private final SparseLongArray mTempAllowlistGraceCache = new SparseLongArray();
@@ -403,6 +403,10 @@ public final class QuotaController extends StateController {
 
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
+        }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) {
         }
     }
 
@@ -602,7 +606,7 @@ public final class QuotaController extends StateController {
         final boolean isWithinQuota = isWithinQuotaLocked(jobStatus);
         final boolean isWithinEJQuota =
                 jobStatus.isRequestedExpeditedJob() && isWithinEJQuotaLocked(jobStatus);
-        setConstraintSatisfied(jobStatus, nowElapsed, isWithinQuota || isWithinEJQuota);
+        setConstraintSatisfied(jobStatus, nowElapsed, isWithinQuota, isWithinEJQuota);
         final boolean outOfEJQuota;
         if (jobStatus.isRequestedExpeditedJob()) {
             setExpeditedQuotaApproved(jobStatus, nowElapsed, isWithinEJQuota);
@@ -811,6 +815,19 @@ public final class QuotaController extends StateController {
                 jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
     }
 
+    private boolean hasTempAllowlistExemptionLocked(int sourceUid, int standbyBucket,
+            long nowElapsed) {
+        if (standbyBucket == RESTRICTED_INDEX || standbyBucket == NEVER_INDEX) {
+            // Don't let RESTRICTED apps get free quota from the temp allowlist.
+            // TODO: consider granting the exemption to RESTRICTED apps if the temp allowlist allows
+            // them to start FGS
+            return false;
+        }
+        final long tempAllowlistGracePeriodEndElapsed = mTempAllowlistGraceCache.get(sourceUid);
+        return mTempAllowlistCache.get(sourceUid)
+                || nowElapsed < tempAllowlistGracePeriodEndElapsed;
+    }
+
     /** @return true if the job is within expedited job quota. */
     @GuardedBy("mLock")
     public boolean isWithinEJQuotaLocked(@NonNull final JobStatus jobStatus) {
@@ -829,11 +846,8 @@ public final class QuotaController extends StateController {
         }
 
         final long nowElapsed = sElapsedRealtimeClock.millis();
-        final long tempAllowlistGracePeriodEndElapsed =
-                mTempAllowlistGraceCache.get(jobStatus.getSourceUid());
-        final boolean hasTempAllowlistExemption = mTempAllowlistCache.get(jobStatus.getSourceUid())
-                || nowElapsed < tempAllowlistGracePeriodEndElapsed;
-        if (hasTempAllowlistExemption) {
+        if (hasTempAllowlistExemptionLocked(jobStatus.getSourceUid(),
+                jobStatus.getEffectiveStandbyBucket(), nowElapsed)) {
             return true;
         }
 
@@ -1623,13 +1637,13 @@ public final class QuotaController extends StateController {
                 // An app in the ACTIVE bucket may be out of quota while the job could be in quota
                 // for some reason. Therefore, avoid setting the real value here and check each job
                 // individually.
-                if (setConstraintSatisfied(js, nowElapsed, isWithinEJQuota || realInQuota)) {
+                if (setConstraintSatisfied(js, nowElapsed, realInQuota, isWithinEJQuota)) {
                     changedJobs.add(js);
                 }
             } else {
                 // This job is somehow exempted. Need to determine its own quota status.
                 if (setConstraintSatisfied(js, nowElapsed,
-                        isWithinEJQuota || isWithinQuotaLocked(js))) {
+                        isWithinQuotaLocked(js), isWithinEJQuota)) {
                     changedJobs.add(js);
                 }
             }
@@ -1672,7 +1686,7 @@ public final class QuotaController extends StateController {
                 isWithinEJQuota = false;
             }
             if (setConstraintSatisfied(jobStatus, mUpdateTimeElapsed,
-                    isWithinEJQuota || isWithinQuotaLocked(jobStatus))) {
+                    isWithinQuotaLocked(jobStatus), isWithinEJQuota)) {
                 changedJobs.add(jobStatus);
             }
             if (setExpeditedQuotaApproved(jobStatus, mUpdateTimeElapsed, isWithinEJQuota)) {
@@ -1829,12 +1843,24 @@ public final class QuotaController extends StateController {
     }
 
     private boolean setConstraintSatisfied(@NonNull JobStatus jobStatus, long nowElapsed,
-            boolean isWithinQuota) {
-        if (!isWithinQuota && jobStatus.getWhenStandbyDeferred() == 0) {
+            boolean isWithinQuota, boolean isWithinEjQuota) {
+        final boolean isSatisfied;
+        if (jobStatus.startedAsExpeditedJob) {
+            // If the job started as an EJ, then we should only consider EJ quota for the constraint
+            // satisfaction.
+            isSatisfied = isWithinEjQuota;
+        } else if (mService.isCurrentlyRunningLocked(jobStatus)) {
+            // Job is running but didn't start as an EJ, so only the regular quota should be
+            // considered.
+            isSatisfied = isWithinQuota;
+        } else {
+            isSatisfied = isWithinEjQuota || isWithinQuota;
+        }
+        if (!isSatisfied && jobStatus.getWhenStandbyDeferred() == 0) {
             // Mark that the job is being deferred due to buckets.
             jobStatus.setWhenStandbyDeferred(nowElapsed);
         }
-        return jobStatus.setQuotaConstraintSatisfied(nowElapsed, isWithinQuota);
+        return jobStatus.setQuotaConstraintSatisfied(nowElapsed, isSatisfied);
     }
 
     /**
@@ -2111,10 +2137,8 @@ public final class QuotaController extends StateController {
             final long nowElapsed = sElapsedRealtimeClock.millis();
             final int standbyBucket = JobSchedulerService.standbyBucketForPackage(mPkg.packageName,
                     mPkg.userId, nowElapsed);
-            final long tempAllowlistGracePeriodEndElapsed = mTempAllowlistGraceCache.get(mUid);
             final boolean hasTempAllowlistExemption = !mRegularJobTimer
-                    && (mTempAllowlistCache.get(mUid)
-                    || nowElapsed < tempAllowlistGracePeriodEndElapsed);
+                    && hasTempAllowlistExemptionLocked(mUid, standbyBucket, nowElapsed);
             final long topAppGracePeriodEndElapsed = mTopAppGraceCache.get(mUid);
             final boolean hasTopAppExemption = !mRegularJobTimer
                     && (mTopAppCache.get(mUid) || nowElapsed < topAppGracePeriodEndElapsed);

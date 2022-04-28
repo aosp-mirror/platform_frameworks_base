@@ -83,7 +83,6 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -278,7 +277,7 @@ public class BubbleStackView extends FrameLayout
     private int mPointerIndexDown = -1;
 
     /** Description of current animation controller state. */
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("Stack view state:");
 
         String bubblesOnScreen = BubbleDebugConfig.formatBubblesString(
@@ -292,8 +291,8 @@ public class BubbleStackView extends FrameLayout
         pw.print("  expandedContainerMatrix: ");
         pw.println(mExpandedViewContainer.getAnimationMatrix());
 
-        mStackAnimationController.dump(fd, pw, args);
-        mExpandedAnimationController.dump(fd, pw, args);
+        mStackAnimationController.dump(pw, args);
+        mExpandedAnimationController.dump(pw, args);
 
         if (mExpandedBubble != null) {
             pw.println("Expanded bubble state:");
@@ -914,8 +913,10 @@ public class BubbleStackView extends FrameLayout
                             afterExpandedViewAnimation();
                             showManageMenu(mShowingManage);
                         } /* after */);
+                        PointF p = mPositioner.getExpandedBubbleXY(getBubbleIndex(mExpandedBubble),
+                                getState());
                         final float translationY = mPositioner.getExpandedViewY(mExpandedBubble,
-                                getBubbleIndex(mExpandedBubble));
+                                mPositioner.showBubblesVertically() ? p.y : p.x);
                         mExpandedViewContainer.setTranslationX(0f);
                         mExpandedViewContainer.setTranslationY(translationY);
                         mExpandedViewContainer.setAlpha(1f);
@@ -1604,6 +1605,13 @@ public class BubbleStackView extends FrameLayout
      */
     public boolean isExpansionAnimating() {
         return mIsExpansionAnimating;
+    }
+
+    /**
+     * Whether the stack of bubbles is animating a switch between bubbles.
+     */
+    public boolean isSwitchAnimating() {
+        return mIsBubbleSwitchAnimating;
     }
 
     /**
@@ -2356,7 +2364,14 @@ public class BubbleStackView extends FrameLayout
             }
         } else if (mPositioner.showBubblesVertically() && mIsExpanded
                 && mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
+            float selectedY = mPositioner.getExpandedBubbleXY(getState().selectedIndex,
+                    getState()).y;
+            float newExpandedViewTop = mPositioner.getExpandedViewY(mExpandedBubble, selectedY);
             mExpandedBubble.getExpandedView().setImeVisible(visible);
+            if (!mExpandedBubble.getExpandedView().isUsingMaxHeight()) {
+                mExpandedViewContainer.animate().translationY(newExpandedViewTop);
+            }
+
             List<Animator> animList = new ArrayList();
             for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
                 View child = mBubbleContainer.getChildAt(i);
@@ -2459,6 +2474,10 @@ public class BubbleStackView extends FrameLayout
 
     private void dismissBubbleIfExists(@Nullable BubbleViewProvider bubble) {
         if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
+            if (mIsExpanded && mBubbleData.getBubbles().size() > 1) {
+                // If we have more than 1 bubble we will perform the switch animation
+                mIsBubbleSwitchAnimating = true;
+            }
             mBubbleData.dismissBubbleWithKey(bubble.getKey(), Bubbles.DISMISS_USER_GESTURE);
         }
     }
@@ -2879,7 +2898,10 @@ public class BubbleStackView extends FrameLayout
         PhysicsAnimator.getInstance(mAnimatingOutSurfaceContainer).cancel();
         mAnimatingOutSurfaceContainer.setScaleX(1f);
         mAnimatingOutSurfaceContainer.setScaleY(1f);
-        mAnimatingOutSurfaceContainer.setTranslationX(mExpandedViewContainer.getPaddingLeft());
+        final float translationX = mPositioner.showBubblesVertically() && mStackOnLeftOrWillBe
+                ? mExpandedViewContainer.getPaddingLeft() + mPositioner.getPointerSize()
+                : mExpandedViewContainer.getPaddingLeft();
+        mAnimatingOutSurfaceContainer.setTranslationX(translationX);
         mAnimatingOutSurfaceContainer.setTranslationY(0);
 
         final int[] taskViewLocation =

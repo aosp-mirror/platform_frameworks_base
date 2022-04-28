@@ -49,6 +49,7 @@ public class DraggableConstraintLayout extends ConstraintLayout
     private final SwipeDismissHandler mSwipeDismissHandler;
     private final GestureDetector mSwipeDetector;
     private View mActionsContainer;
+    private View mActionsContainerBackground;
     private SwipeDismissCallbacks mCallbacks;
     private final DisplayMetrics mDisplayMetrics;
 
@@ -118,7 +119,8 @@ public class DraggableConstraintLayout extends ConstraintLayout
 
     @Override // View
     protected void onFinishInflate() {
-        mActionsContainer = findViewById(R.id.actions_container_background);
+        mActionsContainer = findViewById(R.id.actions_container);
+        mActionsContainerBackground = findViewById(R.id.actions_container_background);
     }
 
     @Override
@@ -127,10 +129,6 @@ public class DraggableConstraintLayout extends ConstraintLayout
             mSwipeDismissHandler.onTouch(this, ev);
         }
         return mSwipeDetector.onTouchEvent(ev);
-    }
-
-    public int getVisibleRight() {
-        return mActionsContainer.getRight();
     }
 
     /**
@@ -331,7 +329,7 @@ public class DraggableConstraintLayout extends ConstraintLayout
             if (startX > 0 || (startX == 0 && layoutDir == LAYOUT_DIRECTION_RTL)) {
                 finalX = mDisplayMetrics.widthPixels;
             } else {
-                finalX = -1 * mActionsContainer.getRight();
+                finalX = -1 * mActionsContainerBackground.getRight();
             }
             float distance = Math.abs(finalX - startX);
 

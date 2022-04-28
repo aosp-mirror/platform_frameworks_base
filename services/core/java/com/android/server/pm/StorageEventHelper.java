@@ -42,15 +42,19 @@ import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.policy.AttributeCache;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +64,9 @@ public final class StorageEventHelper extends StorageEventListener {
     private final BroadcastHelper mBroadcastHelper;
     private final DeletePackageHelper mDeletePackageHelper;
     private final RemovePackageHelper mRemovePackageHelper;
+
+    @GuardedBy("mLoadedVolumes")
+    final ArraySet<String> mLoadedVolumes = new ArraySet<>();
 
     // TODO(b/198166813): remove PMS dependency
     public StorageEventHelper(PackageManagerService pm, DeletePackageHelper deletePackageHelper,
@@ -102,8 +109,9 @@ public final class StorageEventHelper extends StorageEventListener {
 
         // Remove any apps installed on the forgotten volume
         synchronized (mPm.mLock) {
-            final List<PackageSetting> packages = mPm.mSettings.getVolumePackagesLPr(fsUuid);
-            for (PackageSetting ps : packages) {
+            final List<? extends PackageStateInternal> packages =
+                    mPm.mSettings.getVolumePackagesLPr(fsUuid);
+            for (PackageStateInternal ps : packages) {
                 Slog.d(TAG, "Destroying " + ps.getPackageName()
                         + " because volume was forgotten");
                 mPm.deletePackageVersioned(new VersionedPackage(ps.getPackageName(),
@@ -138,14 +146,14 @@ public final class StorageEventHelper extends StorageEventListener {
         final int parseFlags = mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_EXTERNAL_STORAGE;
 
         final Settings.VersionInfo ver;
-        final List<PackageSetting> packages;
+        final List<? extends PackageStateInternal> packages;
         final InstallPackageHelper installPackageHelper = new InstallPackageHelper(mPm);
         synchronized (mPm.mLock) {
             ver = mPm.mSettings.findOrCreateVersion(volumeUuid);
             packages = mPm.mSettings.getVolumePackagesLPr(volumeUuid);
         }
 
-        for (PackageSetting ps : packages) {
+        for (PackageStateInternal ps : packages) {
             freezers.add(mPm.freezePackage(ps.getPackageName(), "loadPrivatePackagesInner"));
             synchronized (mPm.mInstallLock) {
                 final AndroidPackage pkg;
@@ -216,8 +224,8 @@ public final class StorageEventHelper extends StorageEventListener {
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Loaded packages " + loaded);
         sendResourcesChangedBroadcast(true, false, loaded, null);
-        synchronized (mPm.mLoadedVolumes) {
-            mPm.mLoadedVolumes.add(vol.getId());
+        synchronized (mLoadedVolumes) {
+            mLoadedVolumes.add(vol.getId());
         }
     }
 
@@ -236,9 +244,9 @@ public final class StorageEventHelper extends StorageEventListener {
         final ArrayList<AndroidPackage> unloaded = new ArrayList<>();
         synchronized (mPm.mInstallLock) {
             synchronized (mPm.mLock) {
-                final List<PackageSetting> packages =
+                final List<? extends PackageStateInternal> packages =
                         mPm.mSettings.getVolumePackagesLPr(volumeUuid);
-                for (PackageSetting ps : packages) {
+                for (PackageStateInternal ps : packages) {
                     if (ps.getPkg() == null) continue;
 
                     final AndroidPackage pkg = ps.getPkg();
@@ -267,8 +275,8 @@ public final class StorageEventHelper extends StorageEventListener {
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Unloaded packages " + unloaded);
         sendResourcesChangedBroadcast(false, false, unloaded, null);
-        synchronized (mPm.mLoadedVolumes) {
-            mPm.mLoadedVolumes.remove(vol.getId());
+        synchronized (mLoadedVolumes) {
+            mLoadedVolumes.remove(vol.getId());
         }
 
         // Try very hard to release any references to this path so we don't risk
@@ -356,5 +364,25 @@ public final class StorageEventHelper extends StorageEventListener {
             codePaths.add(ps.getPath().getAbsolutePath());
         }
         return codePaths;
+    }
+
+    public void dumpLoadedVolumes(@NonNull PrintWriter pw, @NonNull DumpState dumpState) {
+        if (dumpState.onTitlePrinted()) {
+            pw.println();
+        }
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+        ipw.println();
+        ipw.println("Loaded volumes:");
+        ipw.increaseIndent();
+        synchronized (mLoadedVolumes) {
+            if (mLoadedVolumes.size() == 0) {
+                ipw.println("(none)");
+            } else {
+                for (int i = 0; i < mLoadedVolumes.size(); i++) {
+                    ipw.println(mLoadedVolumes.valueAt(i));
+                }
+            }
+        }
+        ipw.decreaseIndent();
     }
 }

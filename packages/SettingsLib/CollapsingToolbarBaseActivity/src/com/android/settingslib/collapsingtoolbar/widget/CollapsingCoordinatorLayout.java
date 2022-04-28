@@ -122,15 +122,66 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
         }
 
         if (activity instanceof AppCompatActivity) {
-            initSupportToolbar((AppCompatActivity) activity);
+            initSettingsStyleToolBar((SupportActionBarHost)
+                    toolBar -> {
+                        AppCompatActivity appCompatActivity = (AppCompatActivity) activity;
+                        appCompatActivity.setSupportActionBar(toolBar);
+                        return appCompatActivity.getSupportActionBar();
+                    });
+        } else {
+            initSettingsStyleToolBar((ActionBarHost)
+                    toolBar -> {
+                        activity.setActionBar(toolBar);
+                        return activity.getActionBar();
+                    });
+        }
+    }
+
+    /**
+     * Initialize some attributes of {@link ActionBar}.
+     *
+     * @param actionBarHost Host Activity that is not AppCompat.
+     */
+    public void initSettingsStyleToolBar(ActionBarHost actionBarHost) {
+        if (actionBarHost == null) {
+            Log.w(TAG, "initSettingsStyleToolBar: actionBarHost is null");
             return;
         }
 
         final Toolbar toolbar = findViewById(R.id.action_bar);
-        activity.setActionBar(toolbar);
+        final ActionBar actionBar = actionBarHost.setupActionBar(toolbar);
 
         // Enable title and home button by default
-        final ActionBar actionBar = activity.getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(true);
+        }
+    }
+
+    /**
+     * Initialize some attributes of {@link ActionBar}.
+     *
+     * @param supportActionBarHost Host Activity that is AppCompat.
+     */
+    public void initSettingsStyleToolBar(SupportActionBarHost supportActionBarHost) {
+        if (supportActionBarHost == null) {
+            Log.w(TAG, "initSettingsStyleToolBar: supportActionBarHost is null");
+            return;
+        }
+        if (mCollapsingToolbarLayout == null) {
+            return;
+        }
+
+        mCollapsingToolbarLayout.removeAllViews();
+        inflate(getContext(), R.layout.support_toolbar, mCollapsingToolbarLayout);
+        final androidx.appcompat.widget.Toolbar supportToolbar =
+                mCollapsingToolbarLayout.findViewById(R.id.support_action_bar);
+
+        final androidx.appcompat.app.ActionBar actionBar =
+                supportActionBarHost.setupSupportActionBar(supportToolbar);
+
+        // Enable title and home button by default
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
@@ -156,18 +207,25 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
         }
     }
 
-    /**
-     * Returns an instance of collapsing toolbar.
-     */
+    /** Returns an instance of collapsing toolbar. */
     public CollapsingToolbarLayout getCollapsingToolbarLayout() {
         return mCollapsingToolbarLayout;
     }
 
-    /**
-     * Return an instance of app bar.
-     */
+    /** Return an instance of app bar. */
     public AppBarLayout getAppBarLayout() {
         return mAppBarLayout;
+    }
+
+    /** Returns the content frame layout. */
+    public View getContentFrameLayout() {
+        return findViewById(R.id.content_frame);
+    }
+
+    /** Returns the AppCompat Toolbar. */
+    public androidx.appcompat.widget.Toolbar getSupportToolbar() {
+        return (androidx.appcompat.widget.Toolbar)
+            mCollapsingToolbarLayout.findViewById(R.id.support_action_bar);
     }
 
     private void disableCollapsingToolbarLayoutScrollingBehavior() {
@@ -187,25 +245,22 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
         params.setBehavior(behavior);
     }
 
-    // This API is for supportActionBar of {@link AppCompatActivity}
-    private void initSupportToolbar(AppCompatActivity appCompatActivity) {
-        if (mCollapsingToolbarLayout == null) {
-            return;
-        }
+    /** Interface to be implemented by a host Activity that is not AppCompat. */
+    public interface ActionBarHost {
+        /**
+         * Sets a Toolbar as an actionBar and optionally returns an ActionBar represented by
+         * this toolbar if it should be used.
+         */
+        @Nullable ActionBar setupActionBar(Toolbar toolbar);
+    }
 
-        mCollapsingToolbarLayout.removeAllViews();
-        inflate(getContext(), R.layout.support_toolbar, mCollapsingToolbarLayout);
-        final androidx.appcompat.widget.Toolbar supportToolbar =
-                mCollapsingToolbarLayout.findViewById(R.id.support_action_bar);
-
-        appCompatActivity.setSupportActionBar(supportToolbar);
-
-        // Enable title and home button by default
-        final androidx.appcompat.app.ActionBar actionBar = appCompatActivity.getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.setDisplayShowTitleEnabled(true);
-        }
+    /** Interface to be implemented by a host Activity that is AppCompat. */
+    public interface SupportActionBarHost {
+        /**
+         * Sets a Toolbar as an actionBar and optionally returns an ActionBar represented by
+         * this toolbar if it should be used.
+         */
+        @Nullable androidx.appcompat.app.ActionBar setupSupportActionBar(
+                androidx.appcompat.widget.Toolbar toolbar);
     }
 }

@@ -303,6 +303,7 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
                     jpegBuffer, jpegCapacity, jpegParams.mQuality,
                     0, 0, yuvImage.getWidth(), yuvImage.getHeight(),
                     jpegParams.mRotation);
+            jpegImage.setTimestamp(yuvImage.getTimestamp());
             yuvImage.close();
 
             try {

@@ -54,7 +54,7 @@ public final class ProfcollectForwardingService extends SystemService {
 
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
 
-    private static final long BG_PROCESS_PERIOD = TimeUnit.DAYS.toMillis(1); // every 1 day.
+    private static final long BG_PROCESS_PERIOD = TimeUnit.HOURS.toMillis(4); // every 4 hours.
 
     private IProfCollectd mIProfcollect;
     private static ProfcollectForwardingService sSelfService;

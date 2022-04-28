@@ -1850,9 +1850,12 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testIsSnapshotCompatible() {
         final ActivityRecord activity = createActivityWithTask();
+        final Task task = activity.getTask();
+        final Rect taskBounds = task.getBounds();
         final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
                 .setTopActivityComponent(activity.mActivityComponent)
                 .setRotation(activity.getWindowConfiguration().getRotation())
+                .setTaskSize(taskBounds.width(), taskBounds.height())
                 .build();
 
         assertTrue(activity.isSnapshotCompatible(snapshot));
@@ -1872,14 +1875,55 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setTask(activity.getTask())
                 .setOnTop(true)
                 .build();
+        final Task task = secondActivity.getTask();
+        final Rect taskBounds = task.getBounds();
         final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
                 .setTopActivityComponent(secondActivity.mActivityComponent)
+                .setTaskSize(taskBounds.width(), taskBounds.height())
                 .build();
 
         assertTrue(secondActivity.isSnapshotCompatible(snapshot));
 
         // Emulate the top activity changed.
         assertFalse(activity.isSnapshotCompatible(snapshot));
+    }
+
+    /**
+     * Test that the snapshot should be obsoleted if the task size changed.
+     */
+    @Test
+    public void testIsSnapshotCompatibleTaskSizeChanged() {
+        final ActivityRecord activity = createActivityWithTask();
+        final Task task = activity.getTask();
+        final Rect taskBounds = task.getBounds();
+        final int currentRotation = mDisplayContent.getRotation();
+        final int w = taskBounds.width();
+        final int h = taskBounds.height();
+        final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
+                .setTopActivityComponent(activity.mActivityComponent)
+                .setRotation(currentRotation)
+                .setTaskSize(w, h)
+                .build();
+
+        assertTrue(activity.isSnapshotCompatible(snapshot));
+
+        taskBounds.right = taskBounds.width() * 2;
+        task.getWindowConfiguration().setBounds(taskBounds);
+        activity.getWindowConfiguration().setBounds(taskBounds);
+
+        assertFalse(activity.isSnapshotCompatible(snapshot));
+
+        // Flipped size should be accepted if the activity will show with 90 degree rotation.
+        final int targetRotation = currentRotation + 1;
+        doReturn(targetRotation).when(mDisplayContent)
+                .rotationForActivityInDifferentOrientation(any());
+        final TaskSnapshot rotatedSnapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
+                .setTopActivityComponent(activity.mActivityComponent)
+                .setRotation(targetRotation)
+                .setTaskSize(h, w)
+                .build();
+        task.getWindowConfiguration().getBounds().set(0, 0, w, h);
+        assertTrue(activity.isSnapshotCompatible(rotatedSnapshot));
     }
 
     @Test
@@ -2693,7 +2737,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .resumeFocusedTasksTopActivities();
         // Make mVisibleSetFromTransferredStartingWindow true.
         final ActivityRecord middle = new ActivityBuilder(mAtm).setTask(task).build();
-        task.startActivityLocked(middle, null /* focusedTopActivity */,
+        task.startActivityLocked(middle, null /* topTask */,
                 false /* newTask */, false /* isTaskSwitch */, null /* options */,
                 null /* sourceRecord */);
         middle.makeFinishingLocked();
@@ -2706,7 +2750,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // a visible activity.
         top.setVisible(false);
         // The finishing middle should be able to transfer starting window to top.
-        task.startActivityLocked(top, null /* focusedTopActivity */,
+        task.startActivityLocked(top, null /* topTask */,
                 false /* newTask */, false /* isTaskSwitch */, null /* options */,
                 null /* sourceRecord */);
 

@@ -8,6 +8,7 @@ import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.internal.graphics.ColorUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
@@ -18,7 +19,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.anyFloat
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
@@ -34,8 +35,7 @@ class SquigglyProgressTest : SysuiTestCase() {
 
     lateinit var squigglyProgress: SquigglyProgress
     @Mock lateinit var canvas: Canvas
-    @Captor lateinit var wavePaintCaptor: ArgumentCaptor<Paint>
-    @Captor lateinit var linePaintCaptor: ArgumentCaptor<Paint>
+    @Captor lateinit var paintCaptor: ArgumentCaptor<Paint>
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
     @Before
@@ -52,9 +52,7 @@ class SquigglyProgressTest : SysuiTestCase() {
     fun testDrawPathAndLine() {
         squigglyProgress.draw(canvas)
 
-        verify(canvas).drawPath(any(), wavePaintCaptor.capture())
-        verify(canvas).drawLine(anyFloat(), anyFloat(), anyFloat(), anyFloat(),
-                linePaintCaptor.capture())
+        verify(canvas, times(2)).drawPath(any(), paintCaptor.capture())
     }
 
     @Test
@@ -68,12 +66,11 @@ class SquigglyProgressTest : SysuiTestCase() {
     fun testStrokeWidth() {
         squigglyProgress.draw(canvas)
 
-        verify(canvas).drawPath(any(), wavePaintCaptor.capture())
-        verify(canvas).drawLine(anyFloat(), anyFloat(), anyFloat(), anyFloat(),
-                linePaintCaptor.capture())
+        verify(canvas, times(2)).drawPath(any(), paintCaptor.capture())
+        val (wavePaint, linePaint) = paintCaptor.getAllValues()
 
-        assertThat(wavePaintCaptor.value.strokeWidth).isEqualTo(strokeWidth)
-        assertThat(linePaintCaptor.value.strokeWidth).isEqualTo(strokeWidth)
+        assertThat(wavePaint.strokeWidth).isEqualTo(strokeWidth)
+        assertThat(linePaint.strokeWidth).isEqualTo(strokeWidth)
     }
 
     @Test
@@ -81,13 +78,12 @@ class SquigglyProgressTest : SysuiTestCase() {
         squigglyProgress.alpha = alpha
         squigglyProgress.draw(canvas)
 
-        verify(canvas).drawPath(any(), wavePaintCaptor.capture())
-        verify(canvas).drawLine(anyFloat(), anyFloat(), anyFloat(), anyFloat(),
-                linePaintCaptor.capture())
+        verify(canvas, times(2)).drawPath(any(), paintCaptor.capture())
+        val (wavePaint, linePaint) = paintCaptor.getAllValues()
 
         assertThat(squigglyProgress.alpha).isEqualTo(alpha)
-        assertThat(wavePaintCaptor.value.alpha).isEqualTo(alpha)
-        assertThat(linePaintCaptor.value.alpha).isEqualTo((alpha / 255f * DISABLED_ALPHA).toInt())
+        assertThat(wavePaint.alpha).isEqualTo(alpha)
+        assertThat(linePaint.alpha).isEqualTo((alpha / 255f * DISABLED_ALPHA).toInt())
     }
 
     @Test
@@ -95,12 +91,11 @@ class SquigglyProgressTest : SysuiTestCase() {
         squigglyProgress.colorFilter = colorFilter
         squigglyProgress.draw(canvas)
 
-        verify(canvas).drawPath(any(), wavePaintCaptor.capture())
-        verify(canvas).drawLine(anyFloat(), anyFloat(), anyFloat(), anyFloat(),
-                linePaintCaptor.capture())
+        verify(canvas, times(2)).drawPath(any(), paintCaptor.capture())
+        val (wavePaint, linePaint) = paintCaptor.getAllValues()
 
-        assertThat(wavePaintCaptor.value.colorFilter).isEqualTo(colorFilter)
-        assertThat(linePaintCaptor.value.colorFilter).isEqualTo(colorFilter)
+        assertThat(wavePaint.colorFilter).isEqualTo(colorFilter)
+        assertThat(linePaint.colorFilter).isEqualTo(colorFilter)
     }
 
     @Test
@@ -108,11 +103,11 @@ class SquigglyProgressTest : SysuiTestCase() {
         squigglyProgress.setTint(tint)
         squigglyProgress.draw(canvas)
 
-        verify(canvas).drawPath(any(), wavePaintCaptor.capture())
-        verify(canvas).drawLine(anyFloat(), anyFloat(), anyFloat(), anyFloat(),
-                linePaintCaptor.capture())
+        verify(canvas, times(2)).drawPath(any(), paintCaptor.capture())
+        val (wavePaint, linePaint) = paintCaptor.getAllValues()
 
-        assertThat(wavePaintCaptor.value.color).isEqualTo(tint)
-        assertThat(linePaintCaptor.value.color).isEqualTo(tint)
+        assertThat(wavePaint.color).isEqualTo(tint)
+        assertThat(linePaint.color).isEqualTo(
+                ColorUtils.setAlphaComponent(tint, DISABLED_ALPHA))
     }
 }

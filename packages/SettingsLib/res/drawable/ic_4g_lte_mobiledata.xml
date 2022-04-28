@@ -1,0 +1,25 @@
+<!--
+     Copyright (C) 2018 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="42.3281dp"
+    android:height="24dp"
+    android:viewportWidth="42.3281"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M10.7871,12.959H11.8477V14.1016H10.7871V16H9.3633V14.1016H5.6777L5.6367,13.2344L9.3164,7.4688H10.7871V12.959ZM7.1309,12.959H9.3633V9.3965L9.2578,9.584L7.1309,12.959ZM19.5586,14.8926C19.25,15.2949 18.8223,15.5996 18.2754,15.8066C17.7285,16.0137 17.1074,16.1172 16.4121,16.1172C15.6973,16.1172 15.0645,15.9551 14.5137,15.6309C13.9629,15.3066 13.5371,14.8438 13.2363,14.2422C12.9395,13.6367 12.7852,12.9316 12.7734,12.127V11.459C12.7734,10.1699 13.082,9.1641 13.6992,8.4414C14.3164,7.7148 15.1777,7.3516 16.2832,7.3516C17.2324,7.3516 17.9863,7.5859 18.5449,8.0547C19.1035,8.5234 19.4395,9.1992 19.5527,10.082H18.0996C17.9355,9.0547 17.3398,8.541 16.3125,8.541C15.6484,8.541 15.1426,8.7813 14.7949,9.2617C14.4512,9.7383 14.2734,10.4395 14.2617,11.3652V12.0215C14.2617,12.9434 14.4551,13.6602 14.8418,14.1719C15.2324,14.6797 15.7734,14.9336 16.4648,14.9336C17.2227,14.9336 17.7617,14.7617 18.082,14.418V12.748H16.3242V11.623H19.5586V14.8926ZM25.6582,14.8164H29.5312V16H24.1758V7.4688H25.6582V14.8164ZM35.625,8.6641H32.9648V16H31.4941V8.6641H28.8574V7.4688H35.625V8.6641ZM41.7363,12.1914H38.2324V14.8164H42.3281V16H36.75V7.4688H42.2871V8.6641H38.2324V11.0195H41.7363V12.1914Z" />
+
+</vector>

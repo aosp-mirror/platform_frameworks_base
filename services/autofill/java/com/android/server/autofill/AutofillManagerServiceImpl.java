@@ -805,12 +805,13 @@ final class AutofillManagerServiceImpl
      * Updates the last fill response when a dataset was selected.
      */
     void logDatasetSelected(@Nullable String selectedDataset, int sessionId,
-            @Nullable Bundle clientState) {
+            @Nullable Bundle clientState,  int presentationType) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState, null,
-                                null, null, null, null, null, null, null));
+                                null, null, null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
+                                presentationType));
             }
         }
     }

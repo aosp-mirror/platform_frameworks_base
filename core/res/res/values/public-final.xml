@@ -3222,4 +3222,184 @@
   <public type="id" name="accessibilityActionDragDrop" id="0x01020056" />
   <public type="id" name="accessibilityActionDragCancel" id="0x01020057" />
 
+  <!-- ===============================================================
+    Resources added in version T of the platform
+
+    NOTE: After this version of the platform is forked, changes cannot be made to the root
+    branch's groups for that release. Only merge changes to the forked platform branch.
+    =============================================================== -->
+  <eat-comment/>
+
+  <staging-public-group-final type="attr" first-id="0x01df0000">
+    <public name="sharedUserMaxSdkVersion" />
+    <public name="requiredSplitTypes" />
+    <public name="splitTypes" />
+    <public name="canDisplayOnRemoteDevices" />
+    <public name="supportedTypes" />
+    <public name="resetEnabledSettingsOnAppDataCleared" />
+    <public name="supportsStylusHandwriting" />
+    <public name="showClockAndComplications" />
+    <!-- @hide @SystemApi -->
+    <public name="gameSessionService" />
+    <public name="supportsBatteryGameMode" />
+    <public name="supportsPerformanceGameMode" />
+    <public name="allowGameAngleDriver" />
+    <public name="allowGameDownscaling" />
+    <public name="allowGameFpsOverride" />
+    <public name="localeConfig" />
+    <public name="showBackdrop" />
+    <public name="removed_useTargetActivityForQuickAccess"/>
+    <public name="removed_inheritKeyStoreKeys" />
+    <public name="preferKeepClear" />
+    <public name="autoHandwritingEnabled" />
+    <public name="fromExtendLeft" />
+    <public name="fromExtendTop" />
+    <public name="fromExtendRight" />
+    <public name="fromExtendBottom" />
+    <public name="toExtendLeft" />
+    <public name="toExtendTop" />
+    <public name="toExtendRight" />
+    <public name="toExtendBottom" />
+    <public name="tileService" />
+    <public name="windowSplashScreenBehavior" />
+    <public name="allowUntrustedActivityEmbedding" />
+    <public name="knownActivityEmbeddingCerts" />
+    <public name="intro" />
+    <public name="enableOnBackInvokedCallback" />
+    <public name="supportsInlineSuggestionsWithTouchExploration" />
+    <public name="lineBreakStyle" />
+    <public name="lineBreakWordStyle" />
+    <!-- @hide -->
+    <public name="maxDrawableWidth" />
+    <!-- @hide -->
+    <public name="maxDrawableHeight" />
+    <public name="backdropColor" />
+  </staging-public-group-final>
+
+  <public type="attr" name="sharedUserMaxSdkVersion" id="0x0101064d" />
+  <public type="attr" name="requiredSplitTypes" id="0x0101064e" />
+  <public type="attr" name="splitTypes" id="0x0101064f" />
+  <public type="attr" name="canDisplayOnRemoteDevices" id="0x01010650" />
+  <public type="attr" name="supportedTypes" id="0x01010651" />
+  <public type="attr" name="resetEnabledSettingsOnAppDataCleared" id="0x01010652" />
+  <public type="attr" name="supportsStylusHandwriting" id="0x01010653" />
+  <public type="attr" name="showClockAndComplications" id="0x01010654" />
+    <!-- @hide @SystemApi -->
+  <public type="attr" name="gameSessionService" id="0x01010655" />
+  <public type="attr" name="supportsBatteryGameMode" id="0x01010656" />
+  <public type="attr" name="supportsPerformanceGameMode" id="0x01010657" />
+  <public type="attr" name="allowGameAngleDriver" id="0x01010658" />
+  <public type="attr" name="allowGameDownscaling" id="0x01010659" />
+  <public type="attr" name="allowGameFpsOverride" id="0x0101065a" />
+  <public type="attr" name="localeConfig" id="0x0101065b" />
+  <public type="attr" name="showBackdrop" id="0x0101065c" />
+  <public type="attr" name="preferKeepClear" id="0x0101065d" />
+  <public type="attr" name="autoHandwritingEnabled" id="0x0101065e" />
+  <public type="attr" name="fromExtendLeft" id="0x0101065f" />
+  <public type="attr" name="fromExtendTop" id="0x01010660" />
+  <public type="attr" name="fromExtendRight" id="0x01010661" />
+  <public type="attr" name="fromExtendBottom" id="0x01010662" />
+  <public type="attr" name="toExtendLeft" id="0x01010663" />
+  <public type="attr" name="toExtendTop" id="0x01010664" />
+  <public type="attr" name="toExtendRight" id="0x01010665" />
+  <public type="attr" name="toExtendBottom" id="0x01010666" />
+  <public type="attr" name="tileService" id="0x01010667" />
+  <public type="attr" name="windowSplashScreenBehavior" id="0x01010668" />
+  <public type="attr" name="allowUntrustedActivityEmbedding" id="0x01010669" />
+  <public type="attr" name="knownActivityEmbeddingCerts" id="0x0101066a" />
+  <public type="attr" name="intro" id="0x0101066b" />
+  <public type="attr" name="enableOnBackInvokedCallback" id="0x0101066c" />
+  <public type="attr" name="supportsInlineSuggestionsWithTouchExploration" id="0x0101066d" />
+  <public type="attr" name="lineBreakStyle" id="0x0101066e" />
+  <public type="attr" name="lineBreakWordStyle" id="0x0101066f" />
+    <!-- @hide -->
+  <public type="attr" name="maxDrawableWidth" id="0x01010670" />
+    <!-- @hide -->
+  <public type="attr" name="maxDrawableHeight" id="0x01010671" />
+  <public type="attr" name="backdropColor" id="0x01010672" />
+
+  <staging-public-group-final type="id" first-id="0x01de0000">
+    <public name="removed_accessibilityActionSwipeLeft" />
+    <public name="removed_accessibilityActionSwipeRight" />
+    <public name="removed_accessibilityActionSwipeUp" />
+    <public name="removed_accessibilityActionSwipeDown" />
+    <public name="accessibilityActionShowTextSuggestions" />
+    <public name="inputExtractAction" />
+    <public name="inputExtractAccessories" />
+  </staging-public-group-final>
+
+  <public type="id" name="accessibilityActionShowTextSuggestions" id="0x01020058" />
+  <public type="id" name="inputExtractAction" id="0x01020059" />
+  <public type="id" name="inputExtractAccessories" id="0x0102005a" />
+
+  <staging-public-group-final type="style" first-id="0x01dd0000">
+    <public name="TextAppearance.DeviceDefault.Headline" />
+  </staging-public-group-final>
+
+  <public type="style" name="TextAppearance.DeviceDefault.Headline" id="0x010302e5" />
+
+  <staging-public-group-final type="string" first-id="0x01dc0000">
+    <!-- @hide @SystemApi -->
+    <public name="config_systemSupervision" />
+    <!-- @hide @SystemApi -->
+    <public name="config_devicePolicyManagement" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemAppProtectionService" />
+    <!-- @hide @SystemApi @TestApi -->
+    <public name="config_systemAutomotiveCalendarSyncManager" />
+    <!-- @hide @SystemApi -->
+    <public name="config_defaultAutomotiveNavigation" />
+    <!-- @hide @SystemApi -->
+    <public name="safety_protection_display_text" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemSettingsIntelligence" />
+    <!-- @hide -->
+    <public name="config_systemBluetoothStack" />
+  </staging-public-group-final>
+
+    <!-- @hide @SystemApi -->
+  <public type="string" name="config_systemSupervision" id="0x0104003c" />
+    <!-- @hide @SystemApi -->
+  <public type="string" name="config_devicePolicyManagement" id="0x0104003d" />
+    <!-- @hide @SystemApi -->
+  <public type="string" name="config_systemAppProtectionService" id="0x0104003e" />
+    <!-- @hide @SystemApi @TestApi -->
+  <public type="string" name="config_systemAutomotiveCalendarSyncManager" id="0x0104003f" />
+    <!-- @hide @SystemApi -->
+  <public type="string" name="config_defaultAutomotiveNavigation" id="0x01040040" />
+    <!-- @hide @SystemApi -->
+  <public type="string" name="safety_protection_display_text" id="0x01040041" />
+    <!-- @hide @SystemApi -->
+  <public type="string" name="config_systemSettingsIntelligence" id="0x01040042" />
+    <!-- @hide -->
+  <public type="string" name="config_systemBluetoothStack" id="0x01040043" />
+
+  <staging-public-group-final type="array" first-id="0x01d90000">
+    <!-- @hide @SystemApi -->
+    <public name="config_optionalIpSecAlgorithms" />
+  </staging-public-group-final>
+
+    <!-- @hide @SystemApi -->
+  <public type="array" name="config_optionalIpSecAlgorithms" id="0x01070006" />
+
+  <staging-public-group-final type="drawable" first-id="0x01d80000">
+    <!-- @hide @SystemApi -->
+    <public name="ic_safety_protection" />
+  </staging-public-group-final>
+
+    <!-- @hide @SystemApi -->
+  <public type="drawable" name="ic_safety_protection" id="0x010800b5" />
+
+  <staging-public-group-final type="bool" first-id="0x01cf0000">
+    <!-- @hide @TestApi -->
+    <public name="config_preventImeStartupUnlessTextEditor" />
+    <!-- @hide @SystemApi -->
+    <public name="config_enableQrCodeScannerOnLockScreen" />
+  </staging-public-group-final>
+
+    <!-- @hide @TestApi -->
+  <public type="bool" name="config_preventImeStartupUnlessTextEditor" id="0x01110007" />
+    <!-- @hide @SystemApi -->
+  <public type="bool" name="config_enableQrCodeScannerOnLockScreen" id="0x01110008" />
+
 </resources>
