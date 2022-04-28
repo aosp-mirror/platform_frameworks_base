@@ -567,9 +567,14 @@ public class ApkLiteParseUtils {
                     targetCode = minCode;
                 }
 
+                boolean allowUnknownCodenames = false;
+                if ((flags & FrameworkParsingPackageUtils.PARSE_APK_IN_APEX) != 0) {
+                    allowUnknownCodenames = true;
+                }
+
                 ParseResult<Integer> targetResult = FrameworkParsingPackageUtils.computeTargetSdkVersion(
                         targetVer, targetCode, SDK_CODENAMES, input,
-                        /* allowUnknownCodenames= */ false);
+                        allowUnknownCodenames);
                 if (targetResult.isError()) {
                     return input.error(targetResult);
                 }
