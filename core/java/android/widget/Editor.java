@@ -4633,12 +4633,18 @@ public class Editor {
             builder.setMatrix(mViewToScreenMatrix);
 
             if (includeEditorBounds) {
-                final RectF bounds = new RectF();
-                bounds.set(0 /* left */, 0 /* top */, mTextView.getWidth(), mTextView.getHeight());
+                final RectF editorBounds = new RectF();
+                editorBounds.set(0 /* left */, 0 /* top */,
+                        mTextView.getWidth(), mTextView.getHeight());
+                final RectF handwritingBounds = new RectF(
+                        -mTextView.getHandwritingBoundsOffsetLeft(),
+                        -mTextView.getHandwritingBoundsOffsetTop(),
+                        mTextView.getWidth() + mTextView.getHandwritingBoundsOffsetRight(),
+                        mTextView.getHeight() + mTextView.getHandwritingBoundsOffsetBottom());
                 EditorBoundsInfo.Builder boundsBuilder = new EditorBoundsInfo.Builder();
-                //TODO(b/210039666): add Handwriting bounds once they're available.
-                builder.setEditorBoundsInfo(
-                        boundsBuilder.setEditorBounds(bounds).build());
+                EditorBoundsInfo editorBoundsInfo = boundsBuilder.setEditorBounds(editorBounds)
+                        .setHandwritingBounds(handwritingBounds).build();
+                builder.setEditorBoundsInfo(editorBoundsInfo);
             }
 
             if (includeCharacterBounds || includeInsertionMarker) {

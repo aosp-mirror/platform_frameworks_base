@@ -34,8 +34,6 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.HandwritingInitiator;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -63,14 +61,16 @@ import org.junit.runner.RunWith;
 public class HandwritingInitiatorTest {
     private static final int TOUCH_SLOP = 8;
     private static final long TIMEOUT = ViewConfiguration.getLongPressTimeout();
-    private static final int HANDWRITING_AREA_PADDING_DIP = 20;
+    private static final int HW_BOUNDS_OFFSETS_LEFT_PX = 10;
+    private static final int HW_BOUNDS_OFFSETS_TOP_PX = 20;
+    private static  final int HW_BOUNDS_OFFSETS_RIGHT_PX = 30;
+    private static final int HW_BOUNDS_OFFSETS_BOTTOM_PX = 40;
 
     private static final Rect sHwArea = new Rect(100, 200, 500, 500);
 
     private HandwritingInitiator mHandwritingInitiator;
     private View mTestView;
     private Context mContext;
-    private int mHandwritingAreaPaddingPx;
 
     @Before
     public void setup() {
@@ -79,17 +79,15 @@ public class HandwritingInitiatorTest {
         final ViewConfiguration viewConfiguration = mock(ViewConfiguration.class);
         when(viewConfiguration.getScaledTouchSlop()).thenReturn(TOUCH_SLOP);
 
-
-        final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
         InputMethodManager inputMethodManager = mContext.getSystemService(InputMethodManager.class);
-        mHandwritingInitiator = spy(new HandwritingInitiator(viewConfiguration, inputMethodManager,
-                displayMetrics));
+        mHandwritingInitiator =
+                spy(new HandwritingInitiator(viewConfiguration, inputMethodManager));
 
-        mHandwritingAreaPaddingPx = Math.round(TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                HANDWRITING_AREA_PADDING_DIP,
-                displayMetrics));
-        mTestView = createView(sHwArea, true);
+        mTestView = createView(sHwArea, true,
+                HW_BOUNDS_OFFSETS_LEFT_PX,
+                HW_BOUNDS_OFFSETS_TOP_PX,
+                HW_BOUNDS_OFFSETS_RIGHT_PX,
+                HW_BOUNDS_OFFSETS_BOTTOM_PX);
         mHandwritingInitiator.updateHandwritingAreasForView(mTestView);
     }
 
@@ -140,8 +138,8 @@ public class HandwritingInitiatorTest {
     @Test
     public void onTouchEvent_startHandwriting_when_stylusMove_withinExtendedHWArea() {
         mHandwritingInitiator.onInputConnectionCreated(mTestView);
-        final int x1 = sHwArea.left - mHandwritingAreaPaddingPx / 2;
-        final int y1 = sHwArea.top - mHandwritingAreaPaddingPx / 2;
+        final int x1 = sHwArea.left - HW_BOUNDS_OFFSETS_LEFT_PX / 2;
+        final int y1 = sHwArea.top - HW_BOUNDS_OFFSETS_TOP_PX / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -175,8 +173,8 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onTouchEvent_startHandwriting_inputConnectionBuilt_stylusMoveInExtendedHWArea() {
-        final int x1 = sHwArea.right + mHandwritingAreaPaddingPx / 2;
-        final int y1 = sHwArea.bottom + mHandwritingAreaPaddingPx / 2;
+        final int x1 = sHwArea.right + HW_BOUNDS_OFFSETS_RIGHT_PX / 2;
+        final int y1 = sHwArea.bottom + HW_BOUNDS_OFFSETS_BOTTOM_PX / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -261,8 +259,8 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onTouchEvent_focusView_stylusMoveOnce_withinExtendedHWArea() {
-        final int x1 = sHwArea.left - mHandwritingAreaPaddingPx / 2;
-        final int y1 = sHwArea.top - mHandwritingAreaPaddingPx / 2;
+        final int x1 = sHwArea.left - HW_BOUNDS_OFFSETS_LEFT_PX / 2;
+        final int y1 = sHwArea.top - HW_BOUNDS_OFFSETS_TOP_PX / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 

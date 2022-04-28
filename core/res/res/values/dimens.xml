@@ -1008,4 +1008,10 @@
     <!-- Dimensions for the translations of the default dialog animation. -->
     <dimen name="popup_enter_animation_from_y_delta">20dp</dimen>
     <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
+
+    <!-- Default handwriting bounds offsets for editors. -->
+    <dimen name="handwriting_bounds_offset_left">10dp</dimen>
+    <dimen name="handwriting_bounds_offset_top">40dp</dimen>
+    <dimen name="handwriting_bounds_offset_right">10dp</dimen>
+    <dimen name="handwriting_bounds_offset_bottom">40dp</dimen>
 </resources>

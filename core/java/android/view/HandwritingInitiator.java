@@ -19,8 +19,6 @@ package android.view;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -51,12 +49,6 @@ import java.util.List;
  * @hide
  */
 public class HandwritingInitiator {
-    /** The amount of extra space added to handwriting in dip. */
-    private static final int HANDWRITING_AREA_PADDING_DIP = 20;
-
-    /** The amount of extra space added to handwriting in px. */
-    private final float mHandwritingAreaPaddingPx;
-
     /**
      * The touchSlop from {@link ViewConfiguration} used to decide whether a pointer is considered
      * moving or stationary.
@@ -96,13 +88,9 @@ public class HandwritingInitiator {
 
     @VisibleForTesting
     public HandwritingInitiator(@NonNull ViewConfiguration viewConfiguration,
-            @NonNull InputMethodManager inputMethodManager, DisplayMetrics displayMetrics) {
+            @NonNull InputMethodManager inputMethodManager) {
         mTouchSlop = viewConfiguration.getScaledTouchSlop();
         mHandwritingTimeoutInMillis = ViewConfiguration.getLongPressTimeout();
-        mHandwritingAreaPaddingPx = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                HANDWRITING_AREA_PADDING_DIP,
-                displayMetrics);
         mImm = inputMethodManager;
     }
 
@@ -262,8 +250,8 @@ public class HandwritingInitiator {
         }
 
         final Rect handwritingArea = getViewHandwritingArea(connectedView);
-        if (containsInExtendedHandwritingArea(handwritingArea,
-                mState.mStylusDownX, mState.mStylusDownY)) {
+        if (isInHandwritingArea(handwritingArea, mState.mStylusDownX,
+                mState.mStylusDownY, connectedView)) {
             startHandwriting(connectedView);
         } else {
             reset();
@@ -303,7 +291,7 @@ public class HandwritingInitiator {
         final View connectedView = getConnectedView();
         if (connectedView != null && connectedView.isAutoHandwritingEnabled()) {
             Rect handwritingArea = getViewHandwritingArea(connectedView);
-            if (containsInExtendedHandwritingArea(handwritingArea, x, y)) {
+            if (isInHandwritingArea(handwritingArea, x, y, connectedView)) {
                 final float distance = distance(handwritingArea, x, y);
                 if (distance == 0f) return connectedView;
 
@@ -318,7 +306,7 @@ public class HandwritingInitiator {
         for (HandwritableViewInfo viewInfo : handwritableViewInfos) {
             final View view = viewInfo.getView();
             final Rect handwritingArea = viewInfo.getHandwritingArea();
-            if (!containsInExtendedHandwritingArea(handwritingArea, x, y)) continue;
+            if (!isInHandwritingArea(handwritingArea, x, y, view)) continue;
 
             final float distance = distance(handwritingArea, x, y);
 
@@ -409,24 +397,28 @@ public class HandwritingInitiator {
     }
 
     /**
-     * Return true if the (x, y) is inside by the given {@link Rect} extended by the View's
-     * handwriting extends settings.
+     * Return true if the (x, y) is inside by the given {@link Rect} with the View's
+     * handwriting bounds with offsets applied.
      */
-    private boolean containsInExtendedHandwritingArea(@Nullable Rect handwritingArea,
-            float x, float y) {
+    private boolean isInHandwritingArea(@Nullable Rect handwritingArea,
+            float x, float y, View view) {
         if (handwritingArea == null) return false;
-        return contains(handwritingArea, x, y, mHandwritingAreaPaddingPx, mHandwritingAreaPaddingPx,
-                mHandwritingAreaPaddingPx, mHandwritingAreaPaddingPx);
+
+        return contains(handwritingArea, x, y,
+                view.getHandwritingBoundsOffsetLeft(),
+                view.getHandwritingBoundsOffsetTop(),
+                view.getHandwritingBoundsOffsetRight(),
+                view.getHandwritingBoundsOffsetBottom());
     }
 
     /**
-     * Return true if the (x, y) is inside by the given {@link Rect} extended by the given
-     * extendLeft, extendTop, extendRight and extendBottom.
+     * Return true if the (x, y) is inside by the given {@link Rect} offset by the given
+     * offsetLeft, offsetTop, offsetRight and offsetBottom.
      */
     private static boolean contains(@NonNull Rect rect, float x, float y,
-            float extendLeft, float extendTop, float extendRight, float extendBottom) {
-        return x >= rect.left - extendLeft && x < rect.right  + extendRight
-                && y >= rect.top - extendTop && y < rect.bottom + extendBottom;
+            float offsetLeft, float offsetTop, float offsetRight, float offsetBottom) {
+        return x >= rect.left - offsetLeft && x < rect.right  + offsetRight
+                && y >= rect.top - offsetTop && y < rect.bottom + offsetBottom;
     }
 
     private boolean largerThanTouchSlop(float x1, float y1, float x2, float y2) {
