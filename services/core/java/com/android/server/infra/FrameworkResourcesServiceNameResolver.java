@@ -20,7 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UserIdInt;
+import android.app.AppGlobals;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -34,7 +38,9 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Gets the service name using a framework resources, temporarily changing the service if necessary
@@ -49,10 +55,14 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     /** Handler message to {@link #resetTemporaryService(int)} */
     private static final int MSG_RESET_TEMPORARY_SERVICE = 0;
 
-    @NonNull private final Context mContext;
-    @NonNull private final Object mLock = new Object();
-    @StringRes private final int mStringResourceId;
-    @ArrayRes private final int mArrayResourceId;
+    @NonNull
+    private final Context mContext;
+    @NonNull
+    private final Object mLock = new Object();
+    @StringRes
+    private final int mStringResourceId;
+    @ArrayRes
+    private final int mArrayResourceId;
     private final boolean mIsMultiple;
     /**
      * Map of temporary service name list set by {@link #setTemporaryServices(int, String[], int)},
@@ -71,7 +81,8 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
      */
     @GuardedBy("mLock")
     private final SparseBooleanArray mDefaultServicesDisabled = new SparseBooleanArray();
-    @Nullable private NameResolverListener mOnSetCallback;
+    @Nullable
+    private NameResolverListener mOnSetCallback;
     /**
      * When the temporary service will expire (and reset back to the default).
      */
@@ -160,10 +171,33 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     public String[] getDefaultServiceNameList(int userId) {
         synchronized (mLock) {
             if (mIsMultiple) {
-                return mContext.getResources().getStringArray(mArrayResourceId);
+                String[] serviceNameList = mContext.getResources().getStringArray(mArrayResourceId);
+                // Filter out unimplemented services
+                // Initialize the validated array as null because we do not know the final size.
+                List<String> validatedServiceNameList = new ArrayList<>();
+                try {
+                    for (int i = 0; i < serviceNameList.length; i++) {
+                        if (TextUtils.isEmpty(serviceNameList[i])) {
+                            continue;
+                        }
+                        ComponentName serviceComponent = ComponentName.unflattenFromString(
+                                serviceNameList[i]);
+                        ServiceInfo serviceInfo = AppGlobals.getPackageManager().getServiceInfo(
+                                serviceComponent,
+                                PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+                        if (serviceInfo != null) {
+                            validatedServiceNameList.add(serviceNameList[i]);
+                        }
+                    }
+                } catch (Exception e) {
+                    Slog.e(TAG, "Could not validate provided services.", e);
+                }
+                String[] validatedServiceNameArray = new String[validatedServiceNameList.size()];
+                return validatedServiceNameList.toArray(validatedServiceNameArray);
             } else {
                 final String name = mContext.getString(mStringResourceId);
-                return TextUtils.isEmpty(name) ? new String[0] : new String[] { name };
+                return TextUtils.isEmpty(name) ? new String[0] : new String[]{name};
             }
         }
     }
