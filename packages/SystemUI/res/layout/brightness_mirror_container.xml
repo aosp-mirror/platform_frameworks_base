@@ -23,7 +23,6 @@
     android:background="@drawable/brightness_mirror_background"
     android:layout_gravity="center_vertical"
     android:layout_margin="8dp"
-    android:padding="@dimen/rounded_slider_background_padding"
     android:gravity="center"
     android:visibility="invisible">
 

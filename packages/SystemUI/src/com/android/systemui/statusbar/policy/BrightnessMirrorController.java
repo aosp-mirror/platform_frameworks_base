@@ -68,6 +68,7 @@ public class BrightnessMirrorController
             mBrightnessMirror.setVisibility(View.INVISIBLE);
         });
         mVisibilityCallback = visibilityCallback;
+        updateResources();
     }
 
     public void showMirror() {
