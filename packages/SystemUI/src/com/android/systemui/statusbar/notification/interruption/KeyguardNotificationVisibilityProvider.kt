@@ -164,12 +164,23 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
         !lockscreenUserManager.shouldShowLockscreenNotifications() -> true
         // User settings do not allow this notification on the lockscreen, so hide it.
         userSettingsDisallowNotification(entry) -> true
+        // if entry is silent, apply custom logic to see if should hide
+        shouldHideIfEntrySilent(entry) -> true
+        else -> false
+    }
+
+    private fun shouldHideIfEntrySilent(entry: ListEntry): Boolean = when {
+        // Show if high priority (not hidden)
+        highPriorityProvider.isHighPriority(entry) -> false
+        // Ambient notifications are hidden always from lock screen
+        entry.representativeEntry?.isAmbient == true -> true
+        // [Now notification is silent]
+        // Hide regardless of parent priority if user wants silent notifs hidden
+        hideSilentNotificationsOnLockscreen -> true
         // Parent priority is high enough to be shown on the lockscreen, do not hide.
-        entry.parent?.let(::priorityExceedsLockscreenShowingThreshold) == true -> false
-        // Entry priority is high enough to be shown on the lockscreen, do not hide.
-        priorityExceedsLockscreenShowingThreshold(entry) -> false
-        // Priority is too low, hide.
-        else -> true
+        entry.parent?.let(::shouldHideIfEntrySilent) == false -> false
+        // Show when silent notifications are allowed on lockscreen
+        else -> false
     }
 
     private fun userSettingsDisallowNotification(entry: NotificationEntry): Boolean {
@@ -191,11 +202,6 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
             notifUser == currentUser -> false
             else -> disallowForUser(notifUser)
         }
-    }
-
-    private fun priorityExceedsLockscreenShowingThreshold(entry: ListEntry): Boolean = when {
-        hideSilentNotificationsOnLockscreen -> highPriorityProvider.isHighPriority(entry)
-        else -> entry.representativeEntry?.ranking?.isAmbient == false
     }
 
     private fun readShowSilentNotificationSetting() {
