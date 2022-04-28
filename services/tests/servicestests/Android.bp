@@ -19,9 +19,6 @@ android_test {
         "src/**/*.java",
         "src/**/*.kt",
 
-        "aidl/com/android/servicestests/aidl/INetworkStateObserver.aidl",
-        "aidl/com/android/servicestests/aidl/ICmdReceiverService.aidl",
-
         "test-apps/JobTestApp/src/**/*.java",
 
         "test-apps/SuspendTestApp/src/**/*.java",
@@ -66,10 +63,6 @@ android_test {
         "platform-compat-test-rules",
         "ActivityContext",
     ],
-
-    aidl: {
-        local_include_dirs: ["aidl"],
-    },
 
     libs: [
         "android.hardware.power-V1-java",
