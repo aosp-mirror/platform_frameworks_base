@@ -76,8 +76,8 @@ public final class VirtualAudioDevice implements Closeable {
      * @hide
      */
     public VirtualAudioDevice(Context context, IVirtualDevice virtualDevice,
-            VirtualDisplay virtualDisplay, Executor executor,
-            AudioConfigurationChangeCallback callback) {
+            @NonNull VirtualDisplay virtualDisplay, @Nullable Executor executor,
+            @Nullable AudioConfigurationChangeCallback callback) {
         mContext = context;
         mVirtualDevice = virtualDevice;
         mVirtualDisplay = virtualDisplay;
@@ -105,7 +105,8 @@ public final class VirtualAudioDevice implements Closeable {
 
         try {
             mVirtualDevice.onAudioSessionStarting(mVirtualDisplay.getDisplay().getDisplayId(),
-                    /* callback= */ mOngoingSession);
+                    /* routingCallback= */ mOngoingSession,
+                    /* configChangedCallback= */  mOngoingSession.getAudioConfigChangedListener());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -135,7 +136,8 @@ public final class VirtualAudioDevice implements Closeable {
 
         try {
             mVirtualDevice.onAudioSessionStarting(mVirtualDisplay.getDisplay().getDisplayId(),
-                    /* callback= */ mOngoingSession);
+                    /* routingCallback= */ mOngoingSession,
+                    /* configChangedCallback= */ mOngoingSession.getAudioConfigChangedListener());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

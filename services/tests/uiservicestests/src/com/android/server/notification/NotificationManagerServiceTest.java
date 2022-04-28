@@ -20,7 +20,6 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREG
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
-import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.Notification.FLAG_AUTO_CANCEL;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_CAN_COLORIZE;
@@ -171,6 +170,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenPolicy;
+import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -290,6 +290,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private UserManager mUserManager;
     @Mock
     ActivityManager mActivityManager;
+    @Mock
+    TelecomManager mTelecomManager;
     @Mock
     Resources mResources;
     @Mock
@@ -495,7 +497,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mAppUsageStats, mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
                 mAppOpsManager, mAppOpsService, mUm, mHistoryManager, mStatsManager,
                 mock(TelephonyManager.class),
-                mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class));
+                mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class),
+                mTelecomManager);
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
@@ -9128,6 +9131,54 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testCallNotificationsBypassBlock() throws Exception {
+        when(mAmi.getPendingIntentFlags(any(IIntentSender.class)))
+                .thenReturn(FLAG_MUTABLE | FLAG_ONE_SHOT);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+
+        Notification.Builder nb = new Notification.Builder(
+                mContext, mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addAction(new Notification.Action.Builder(null, "test", null).build());
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.setNotificationsEnabledForPackage(
+                r.getSbn().getPackageName(), r.getUid(), false);
+
+        // normal blocked notifications - blocked
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+
+        // just using the style - blocked
+        Person person = new Person.Builder()
+                .setName("caller")
+                .build();
+        nb.setStyle(Notification.CallStyle.forOngoingCall(
+                person, mock(PendingIntent.class)));
+        nb.setFullScreenIntent(mock(PendingIntent.class), true);
+        sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+
+        // style + managed call - bypasses block
+        when(mTelecomManager.isInManagedCall()).thenReturn(true);
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+
+        // style + self managed call - bypasses block
+        when(mTelecomManager.isInSelfManagedCall(
+                r.getSbn().getPackageName(), r.getUser())).thenReturn(true);
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+    }
+
+    @Test
     public void testGetAllUsersNotificationPermissions_migrationNotEnabled() {
         // make sure we don't bother if the migration is not enabled
         assertThat(mService.getAllUsersNotificationPermissions()).isNull();
@@ -9160,5 +9211,40 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 fail("leaked data across users");
             }
         }
+    }
+
+    @Test
+    public void testUngroupingOngoingAutoSummary() throws Exception {
+        NotificationRecord nr0 =
+                generateNotificationRecord(mTestNotificationChannel, 0);
+        NotificationRecord nr1 =
+                generateNotificationRecord(mTestNotificationChannel, 0);
+        nr1.getSbn().getNotification().flags |= FLAG_ONGOING_EVENT;
+
+        mService.addNotification(nr0);
+        mService.addNotification(nr1);
+
+        // grouphelper is a mock here, so make the calls it would make
+
+        // add summary; wait for it to be posted
+        mService.addAutoGroupSummary(nr1.getUserId(), nr1.getSbn().getPackageName(), nr1.getKey(),
+                true);
+        waitForIdle();
+
+        // cancel both children
+        mBinderService.cancelNotificationWithTag(PKG, PKG, nr0.getSbn().getTag(),
+                nr0.getSbn().getId(), nr0.getSbn().getUserId());
+        mBinderService.cancelNotificationWithTag(PKG, PKG, nr1.getSbn().getTag(),
+                nr1.getSbn().getId(), nr1.getSbn().getUserId());
+        waitForIdle();
+
+        // group helper would send 'remove flag' and then 'remove summary' events
+        mService.updateAutobundledSummaryFlags(nr1.getUserId(), nr1.getSbn().getPackageName(),
+                false, false);
+        mService.clearAutogroupSummaryLocked(nr1.getUserId(), nr1.getSbn().getPackageName());
+        waitForIdle();
+
+        // make sure the summary was removed and not re-posted
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(0);
     }
 }

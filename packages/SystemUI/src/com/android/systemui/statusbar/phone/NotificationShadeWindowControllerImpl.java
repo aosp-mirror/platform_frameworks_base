@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
@@ -60,7 +61,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -288,7 +288,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         final boolean keyguardOrAod = state.mKeyguardShowing
                 || (state.mDozing && mDozeParameters.getAlwaysOn());
         if ((keyguardOrAod && !state.mBackdropShowing && !state.mLightRevealScrimOpaque)
-                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe()) {
+                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehind()) {
             // Show the wallpaper if we're on keyguard/AOD and the wallpaper is not occluded by a
             // solid backdrop. Also, show it if we are currently animating between the
             // keyguard and the surface behind the keyguard - we want to use the wallpaper as a
@@ -327,6 +327,16 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             Trace.setCounter("display_max_refresh_rate",
                     (long) mLpChanged.preferredMaxDisplayRefreshRate);
         }
+
+        if (state.mBouncerShowing && !isDebuggable()) {
+            mLpChanged.flags |= LayoutParams.FLAG_SECURE;
+        } else {
+            mLpChanged.flags &= ~LayoutParams.FLAG_SECURE;
+        }
+    }
+
+    protected boolean isDebuggable() {
+        return Build.IS_DEBUGGABLE;
     }
 
     private void adjustScreenOrientation(State state) {
@@ -754,7 +764,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG + ":");
         pw.println("  mKeyguardMaxRefreshRate=" + mKeyguardMaxRefreshRate);
         pw.println("  mKeyguardPreferredRefreshRate=" + mKeyguardPreferredRefreshRate);

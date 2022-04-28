@@ -32,6 +32,7 @@ import android.provider.DeviceConfig;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.DeviceConfigProxyFake;
 
@@ -53,6 +54,8 @@ public class ClipboardListenerTest extends SysuiTestCase {
     private ClipboardOverlayControllerFactory mClipboardOverlayControllerFactory;
     @Mock
     private ClipboardOverlayController mOverlayController;
+    @Mock
+    private UiEventLogger mUiEventLogger;
     private DeviceConfigProxyFake mDeviceConfigProxy;
 
     private ClipData mSampleClipData;
@@ -87,9 +90,10 @@ public class ClipboardListenerTest extends SysuiTestCase {
         mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED,
                 "false", false);
         ClipboardListener listener = new ClipboardListener(getContext(), mDeviceConfigProxy,
-                mClipboardOverlayControllerFactory, mClipboardManager);
+                mClipboardOverlayControllerFactory, mClipboardManager, mUiEventLogger);
         listener.start();
         verifyZeroInteractions(mClipboardManager);
+        verifyZeroInteractions(mUiEventLogger);
     }
 
     @Test
@@ -97,9 +101,10 @@ public class ClipboardListenerTest extends SysuiTestCase {
         mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED,
                 "true", false);
         ClipboardListener listener = new ClipboardListener(getContext(), mDeviceConfigProxy,
-                mClipboardOverlayControllerFactory, mClipboardManager);
+                mClipboardOverlayControllerFactory, mClipboardManager, mUiEventLogger);
         listener.start();
         verify(mClipboardManager).addPrimaryClipChangedListener(any());
+        verifyZeroInteractions(mUiEventLogger);
     }
 
     @Test
@@ -107,7 +112,7 @@ public class ClipboardListenerTest extends SysuiTestCase {
         mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED,
                 "true", false);
         ClipboardListener listener = new ClipboardListener(getContext(), mDeviceConfigProxy,
-                mClipboardOverlayControllerFactory, mClipboardManager);
+                mClipboardOverlayControllerFactory, mClipboardManager, mUiEventLogger);
         listener.start();
         listener.onPrimaryClipChanged();
 

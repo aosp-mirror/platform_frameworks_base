@@ -58,6 +58,7 @@ android_test {
         "hamcrest-library",
         "platform-compat-test-rules",
         "CtsSurfaceValidatorLib",
+        "service-sdksandbox.impl",
     ],
 
     libs: [

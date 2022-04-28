@@ -70,6 +70,8 @@ import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayGroupListener;
 import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
+import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
+import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
@@ -708,9 +710,6 @@ public final class DisplayManagerService extends SystemService {
         synchronized (mSyncRoot) {
             final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
             if (display != null) {
-                // Do not let constrain be overwritten by override from WindowManager.
-                info.shouldConstrainMetricsForLauncher =
-                        display.getDisplayInfoLocked().shouldConstrainMetricsForLauncher;
                 if (display.setDisplayInfoOverrideFromWindowManagerLocked(info)) {
                     handleLogicalDisplayChangedLocked(display);
                 }
@@ -2084,6 +2083,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private SurfaceControl.ScreenshotHardwareBuffer systemScreenshotInternal(int displayId) {
+        final SurfaceControl.DisplayCaptureArgs captureArgs;
         synchronized (mSyncRoot) {
             final IBinder token = getDisplayToken(displayId);
             if (token == null) {
@@ -2095,15 +2095,14 @@ public final class DisplayManagerService extends SystemService {
             }
 
             final DisplayInfo displayInfo = logicalDisplay.getDisplayInfoLocked();
-            final SurfaceControl.DisplayCaptureArgs captureArgs =
-                    new SurfaceControl.DisplayCaptureArgs.Builder(token)
-                            .setSize(displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight())
-                            .setUseIdentityTransform(true)
-                            .setCaptureSecureLayers(true)
-                            .setAllowProtected(true)
-                            .build();
-            return SurfaceControl.captureDisplay(captureArgs);
+            captureArgs = new SurfaceControl.DisplayCaptureArgs.Builder(token)
+                    .setSize(displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight())
+                    .setUseIdentityTransform(true)
+                    .setCaptureSecureLayers(true)
+                    .setAllowProtected(true)
+                    .build();
         }
+        return SurfaceControl.captureDisplay(captureArgs);
     }
 
     private SurfaceControl.ScreenshotHardwareBuffer userScreenshotInternal(int displayId) {
@@ -2208,21 +2207,6 @@ public final class DisplayManagerService extends SystemService {
                     Display.DEFAULT_DISPLAY);
             if (displayPowerController != null) {
                 displayPowerController.setAmbientColorTemperatureOverride(cct);
-            }
-        }
-    }
-
-    void setShouldConstrainMetricsForLauncher(boolean constrain) {
-        // Apply constrain for every display.
-        synchronized (mSyncRoot) {
-            int[] displayIds = mLogicalDisplayMapper.getDisplayIdsLocked(Process.myUid());
-            for (int i : displayIds) {
-                final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(i);
-                if (display == null) {
-                    return;
-                }
-                display.getDisplayInfoLocked().shouldConstrainMetricsForLauncher = constrain;
-                setDisplayInfoOverrideFromWindowManagerInternal(i, display.getDisplayInfoLocked());
             }
         }
     }

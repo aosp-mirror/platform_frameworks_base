@@ -287,6 +287,9 @@ public class Installer extends SystemService {
      * Sets in Installd that it is first boot after data wipe
      */
     public void setFirstBoot() throws InstallerException {
+        if (!checkBeforeRemote()) {
+            return;
+        }
         try {
             mInstalld.setFirstBoot();
         } catch (RemoteException e) {
@@ -626,12 +629,17 @@ public class Installer extends SystemService {
         }
     }
 
-    public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath)
+    /**
+     * Dumps profiles associated with a package in a human readable format.
+     */
+    public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath,
+                                boolean dumpClassesAndMethods)
             throws InstallerException {
         if (!checkBeforeRemote()) return false;
         BlockGuard.getVmPolicy().onPathAccess(codePath);
         try {
-            return mInstalld.dumpProfiles(uid, packageName, profileName, codePath);
+            return mInstalld.dumpProfiles(uid, packageName, profileName, codePath,
+                    dumpClassesAndMethods);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -684,6 +692,20 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.destroyAppProfiles(packageName);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Deletes the reference profile with the given name of the given package.
+     * @throws InstallerException if the deletion fails.
+     */
+    public void deleteReferenceProfile(String packageName, String profileName)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.deleteReferenceProfile(packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

@@ -36,7 +36,6 @@ import androidx.annotation.NonNull;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -269,7 +268,7 @@ public class FlashlightControllerImpl implements FlashlightController {
         }
     };
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("FlashlightController state:");
 
         pw.print("  mCameraId=");

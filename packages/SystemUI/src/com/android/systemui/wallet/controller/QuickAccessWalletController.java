@@ -24,6 +24,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -211,27 +212,24 @@ public class QuickAccessWalletController {
     public void startQuickAccessUiIntent(ActivityStarter activityStarter,
             ActivityLaunchAnimator.Controller animationController,
             boolean hasCard) {
-        if (mQuickAccessWalletClient.useTargetActivityForQuickAccess() || !hasCard) {
-            mQuickAccessWalletClient.getWalletPendingIntent(mCallbackExecutor,
-                    walletPendingIntent -> {
-                        if (walletPendingIntent == null) {
-                            Intent intent = mQuickAccessWalletClient.createWalletIntent();
-                            if (intent == null) {
-                                intent = getSysUiWalletIntent();
-                            }
-                            startQuickAccessViaIntent(intent, hasCard, activityStarter,
-                                    animationController);
-                            return;
-                        }
-                        startQuickAccessViaPendingIntent(walletPendingIntent,
-                                activityStarter, animationController);
-                    });
-        } else {
-            startQuickAccessViaIntent(getSysUiWalletIntent(),
-                    hasCard,
-                    activityStarter,
-                    animationController);
-        }
+        mQuickAccessWalletClient.getWalletPendingIntent(mCallbackExecutor,
+                walletPendingIntent -> {
+                    if (walletPendingIntent != null) {
+                        startQuickAccessViaPendingIntent(walletPendingIntent, activityStarter,
+                                animationController);
+                        return;
+                    }
+                    Intent intent = null;
+                    if (!hasCard) {
+                        intent = mQuickAccessWalletClient.createWalletIntent();
+                    }
+                    if (intent == null) {
+                        intent = getSysUiWalletIntent();
+                    }
+                    startQuickAccessViaIntent(intent, hasCard, activityStarter,
+                            animationController);
+
+                });
     }
 
     private Intent getSysUiWalletIntent() {
@@ -278,10 +276,11 @@ public class QuickAccessWalletController {
                 }
             };
 
-            mSecureSettings.registerContentObserver(
+            mSecureSettings.registerContentObserverForUser(
                     Settings.Secure.getUriFor(Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT),
                     false /* notifyForDescendants */,
-                    mDefaultPaymentAppObserver);
+                    mDefaultPaymentAppObserver,
+                    UserHandle.USER_ALL);
         }
         mDefaultPaymentAppChangeEvents++;
     }
@@ -297,10 +296,11 @@ public class QuickAccessWalletController {
                 }
             };
 
-            mSecureSettings.registerContentObserver(
+            mSecureSettings.registerContentObserverForUser(
                     Settings.Secure.getUriFor(QuickAccessWalletClientImpl.SETTING_KEY),
                     false /* notifyForDescendants */,
-                    mWalletPreferenceObserver);
+                    mWalletPreferenceObserver,
+                    UserHandle.USER_ALL);
         }
         mWalletPreferenceChangeEvents++;
     }

@@ -42,7 +42,6 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -321,9 +320,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     //  Dumpable overrides:
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("HeadsUpManagerPhone state:");
-        dumpInternal(fd, pw, args);
+        dumpInternal(pw, args);
     }
 
     @Override
@@ -373,8 +372,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     }
 
     @Override
-    protected void dumpInternal(FileDescriptor fd, PrintWriter pw, String[] args) {
-        super.dumpInternal(fd, pw, args);
+    protected void dumpInternal(PrintWriter pw, String[] args) {
+        super.dumpInternal(pw, args);
         pw.print("  mBarState=");
         pw.println(mStatusBarState);
         pw.print("  mTouchableRegion=");

@@ -31,7 +31,6 @@ import androidx.annotation.WorkerThread
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.Assert
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.lang.IllegalStateException
 import java.lang.ref.WeakReference
@@ -199,7 +198,7 @@ class UserTrackerImpl internal constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Initialized: $initialized")
         if (initialized) {
             pw.println("userId: $userId")

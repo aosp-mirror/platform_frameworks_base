@@ -495,6 +495,9 @@
     <!-- Permission needed for CTS test - DefaultDisplayModeTest -->
     <uses-permission android:name="android.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE" />
 
+    <!-- Permissions needed for manual testing telephony time zone detector behavior -->
+    <uses-permission android:name="android.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE" />
+
     <!-- Permissions needed for CTS test - TimeManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
     <uses-permission android:name="android.permission.SUGGEST_EXTERNAL_TIME" />
@@ -571,6 +574,9 @@
     <uses-permission android:name="android.permission.PROVIDE_TRUST_AGENT" />
     <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
     <uses-permission android:name="android.permission.TRUST_LISTENER" />
+
+    <!-- Permission required for CTS test - CtsTaskFpsCallbackTestCases -->
+    <uses-permission android:name="android.permission.ACCESS_FPS_COUNTER" />
 
     <!-- Permission required for CTS test - CtsGameManagerTestCases -->
     <uses-permission android:name="android.permission.MANAGE_GAME_MODE" />
@@ -671,8 +677,17 @@
     <!-- Permission required for CTS test - CtsTelephonyTestCases -->
     <uses-permission android:name="android.permission.BIND_TELECOM_CONNECTION_SERVICE" />
 
+    <!-- Permission required for CTS test - CtsPersistentDataBlockManagerTestCases -->
+    <uses-permission android:name="android.permission.ACCESS_PDB_STATE" />
+
     <!-- Permission required for CTS test - CtsAppEnumerationTestCases -->
     <uses-permission android:name="android.permission.MAKE_UID_VISIBLE" />
+
+    <!-- Permission required for CTS test - CtsKeystoreTestCases -->
+    <uses-permission android:name="android.permission.REQUEST_UNIQUE_ID_ATTESTATION" />
+
+    <!-- Permission required for CTS test - CtsDevicePolicyManagerTestCases -->
+    <uses-permission android:name="android.permission.READ_NEARBY_STREAMING_POLICY" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

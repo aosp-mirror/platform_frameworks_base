@@ -188,12 +188,6 @@
         <attr name="borderColor" format="color" />
     </declare-styleable>
 
-    <declare-styleable name="DualHeightHorizontalLinearLayout">
-        <attr name="singleLineHeight" format="dimension" />
-        <attr name="singleLineVerticalPadding" format="dimension" />
-        <attr name="textViewId" format="reference" />
-    </declare-styleable>
-
     <attr name="overlayButtonTextColor" format="color" />
 
     <declare-styleable name="DreamOverlayDotImageView">

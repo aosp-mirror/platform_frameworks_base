@@ -20,6 +20,7 @@ import static android.provider.DeviceConfig.NAMESPACE_AMBIENT_CONTEXT_MANAGER_SE
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
@@ -34,6 +35,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -42,6 +44,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
+import com.android.server.pm.KnownPackages;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -59,9 +62,50 @@ public class AmbientContextManagerService extends
 
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
+    public static final int MAX_TEMPORARY_SERVICE_DURATION_MS = 30000;
+
+    static class ClientRequest {
+        private final int mUserId;
+        private final AmbientContextEventRequest mRequest;
+        private final PendingIntent mPendingIntent;
+        private final RemoteCallback mClientStatusCallback;
+
+        ClientRequest(int userId, AmbientContextEventRequest request,
+                PendingIntent pendingIntent, RemoteCallback clientStatusCallback) {
+            this.mUserId = userId;
+            this.mRequest = request;
+            this.mPendingIntent = pendingIntent;
+            this.mClientStatusCallback = clientStatusCallback;
+        }
+
+        String getPackageName() {
+            return mPendingIntent.getCreatorPackage();
+        }
+
+        AmbientContextEventRequest getRequest() {
+            return mRequest;
+        }
+
+        PendingIntent getPendingIntent() {
+            return mPendingIntent;
+        }
+
+        RemoteCallback getClientStatusCallback() {
+            return mClientStatusCallback;
+        }
+
+        boolean hasUserId(int userId) {
+            return mUserId == userId;
+        }
+
+        boolean hasUserIdAndPackageName(int userId, String packageName) {
+            return (userId == mUserId) && packageName.equals(getPackageName());
+        }
+    }
 
     private final Context mContext;
     boolean mIsServiceEnabled;
+    private Set<ClientRequest> mExistingClientRequests;
 
     public AmbientContextManagerService(Context context) {
         super(context,
@@ -72,6 +116,7 @@ public class AmbientContextManagerService extends
                 PACKAGE_UPDATE_POLICY_REFRESH_EAGER
                         | /*To avoid high latency*/ PACKAGE_RESTART_POLICY_REFRESH_EAGER);
         mContext = context;
+        mExistingClientRequests = new ArraySet<>();
     }
 
     @Override
@@ -93,6 +138,44 @@ public class AmbientContextManagerService extends
         }
     }
 
+    void newClientAdded(int userId, AmbientContextEventRequest request,
+            PendingIntent pendingIntent, RemoteCallback clientStatusCallback) {
+        Slog.d(TAG, "New client added: " + pendingIntent.getCreatorPackage());
+
+        // Remove any existing ClientRequest for this user and package.
+        mExistingClientRequests.removeAll(
+                findExistingRequests(userId, pendingIntent.getCreatorPackage()));
+
+        // Add to existing ClientRequests
+        mExistingClientRequests.add(
+                new ClientRequest(userId, request, pendingIntent, clientStatusCallback));
+    }
+
+    void clientRemoved(int userId, String packageName) {
+        Slog.d(TAG, "Remove client: " + packageName);
+        mExistingClientRequests.removeAll(findExistingRequests(userId, packageName));
+    }
+
+    private Set<ClientRequest> findExistingRequests(int userId, String packageName) {
+        Set<ClientRequest> existingRequests = new ArraySet<>();
+        for (ClientRequest clientRequest : mExistingClientRequests) {
+            if (clientRequest.hasUserIdAndPackageName(userId, packageName)) {
+                existingRequests.add(clientRequest);
+            }
+        }
+        return existingRequests;
+    }
+
+    @Nullable
+    PendingIntent getPendingIntent(int userId, String packageName) {
+        for (ClientRequest clientRequest : mExistingClientRequests) {
+            if (clientRequest.hasUserIdAndPackageName(userId, packageName)) {
+                return clientRequest.getPendingIntent();
+            }
+        }
+        return null;
+    }
+
     private void onDeviceConfigChange(@NonNull Set<String> keys) {
         if (keys.contains(KEY_SERVICE_ENABLED)) {
             mIsServiceEnabled = DeviceConfig.getBoolean(
@@ -110,14 +193,38 @@ public class AmbientContextManagerService extends
     @Override
     protected void onServiceRemoved(
             AmbientContextManagerPerUserService service, @UserIdInt int userId) {
+        Slog.d(TAG, "onServiceRemoved");
         service.destroyLocked();
+    }
+
+    @Override
+    protected void onServicePackageRestartedLocked(@UserIdInt int userId) {
+        Slog.d(TAG, "Restoring remote request. Reason: Service package restarted.");
+        restorePreviouslyEnabledClients(userId);
+    }
+
+    @Override
+    protected void onServicePackageUpdatedLocked(@UserIdInt int userId) {
+        Slog.d(TAG, "Restoring remote request. Reason: Service package updated.");
+        restorePreviouslyEnabledClients(userId);
+    }
+
+    @Override
+    protected void enforceCallingPermissionForManagement() {
+        getContext().enforceCallingPermission(
+                Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
+    }
+
+    @Override
+    protected int getMaximumTemporaryServiceDurationMs() {
+        return MAX_TEMPORARY_SERVICE_DURATION_MS;
     }
 
     /** Returns {@code true} if the detection service is configured on this device. */
     public static boolean isDetectionServiceConfigured() {
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
         final String[] packageNames = pmi.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_AMBIENT_CONTEXT_DETECTION, UserHandle.USER_SYSTEM);
+                KnownPackages.PACKAGE_AMBIENT_CONTEXT_DETECTION, UserHandle.USER_SYSTEM);
         boolean isServiceConfigured = (packageNames.length != 0);
         Slog.i(TAG, "Detection service configured: " + isServiceConfigured);
         return isServiceConfigured;
@@ -177,6 +284,22 @@ public class AmbientContextManagerService extends
                 service.onQueryServiceStatus(eventTypes, packageName, callback);
             } else {
                 Slog.i(TAG, "query service not available for user_id: " + userId);
+            }
+        }
+    }
+
+    private void restorePreviouslyEnabledClients(int userId) {
+        synchronized (mLock) {
+            final AmbientContextManagerPerUserService service = getServiceForUserLocked(userId);
+            for (ClientRequest clientRequest : mExistingClientRequests) {
+                // Start detection for previously enabled clients
+                if (clientRequest.hasUserId(userId)) {
+                    Slog.d(TAG, "Restoring detection for " + clientRequest.getPackageName());
+                    service.startDetection(clientRequest.getRequest(),
+                            clientRequest.getPackageName(),
+                            service.createDetectionResultRemoteCallback(),
+                            clientRequest.getClientStatusCallback());
+                }
             }
         }
     }
@@ -249,6 +372,8 @@ public class AmbientContextManagerService extends
             Objects.requireNonNull(eventTypes);
             Objects.requireNonNull(callingPackage);
             assertCalledByPackageOwner(callingPackage);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
             mService.onStartConsentActivity(eventTypes, callingPackage);
         }
 

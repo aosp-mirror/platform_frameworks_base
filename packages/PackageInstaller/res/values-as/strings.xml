@@ -53,7 +53,7 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"এপ্ আনইনষ্টল কৰক"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"আপডে’ট আনইনষ্টল কৰক"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> হৈছে তলৰ এপটোৰ এটা অংশ:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"আপুনি এই এপটো আনইনষ্টল কৰিব বিচাৰেনে?"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"আপুনি এই এপ্‌টো আনইনষ্টল কৰিব বিচাৰে নেকি?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"আপুনি "<b>"সকলো"</b>" ব্যৱহাৰকাৰীৰ বাবে এই এপটো আনইনষ্টল কৰিব বিচাৰেনে? এপ্লিকেশ্বন আৰু ইয়াৰ ডেটা ডিভাইচটোত থকা "<b>"সকলো"</b>" ব্যৱহাৰকাৰীৰ পৰা আঁতৰোৱা হ\'ব৷"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"আপুনি ব্যৱহাৰকাৰীৰ <xliff:g id="USERNAME">%1$s</xliff:g> বাবে এই এপটো আনইনষ্টল কৰিব বিচাৰেনে?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"আপুনি নিজৰ কৰ্মস্থানৰ প্ৰ’ফাইলৰ পৰা এই এপ্‌টো আনইনষ্টল কৰিব বিচাৰেনে?"</string>

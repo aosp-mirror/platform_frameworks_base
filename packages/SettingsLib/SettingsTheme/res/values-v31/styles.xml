@@ -45,24 +45,4 @@
         <item name="android:progressDrawable">@drawable/settingslib_progress_horizontal</item>
         <item name="android:scaleY">0.5</item>
     </style>
-
-    <style name="Spinner.SettingsLib"
-           parent="android:style/Widget.Material.Spinner">
-        <item name="android:background">@drawable/settingslib_spinner_background</item>
-        <item name="android:popupBackground">@drawable/settingslib_spinner_dropdown_background</item>
-        <item name="android:dropDownVerticalOffset">48dp</item>
-        <item name="android:layout_marginTop">16dp</item>
-        <item name="android:layout_marginBottom">8dp</item>
-    </style>
-
-    <style name="SpinnerItem.SettingsLib"
-           parent="@android:style/Widget.DeviceDefault.TextView.SpinnerItem">
-        <item name="android:textColor">@color/settingslib_spinner_dropdown_color</item>
-    </style>
-
-    <style name="SpinnerDropDownItem.SettingsLib"
-           parent="@android:style/Widget.Material.DropDownItem.Spinner">
-        <item name="android:textColor">@color/settingslib_spinner_dropdown_color</item>
-    </style>
-
 </resources>

@@ -28,10 +28,4 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <com.android.systemui.biometrics.UdfpsSurfaceView
-        android:id="@+id/hbm_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"/>
-
 </com.android.systemui.biometrics.UdfpsView>
