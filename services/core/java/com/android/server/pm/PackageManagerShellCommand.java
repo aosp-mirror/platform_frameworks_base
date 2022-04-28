@@ -907,6 +907,9 @@ class PackageManagerShellCommand extends ShellCommand {
                         getFlags |= PackageManager.MATCH_APEX;
                         listApexOnly = true;
                         break;
+                    case "--factory-only":
+                        getFlags |= PackageManager.MATCH_FACTORY_ONLY;
+                        break;
                     case "--user":
                         defaultUserId = UserHandle.parseUserArg(getNextArgRequired());
                         break;
