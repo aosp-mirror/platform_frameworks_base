@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 import javax.inject.Inject;
 
@@ -45,6 +46,10 @@ public class AmbientState {
 
     private final SectionProvider mSectionProvider;
     private final BypassController mBypassController;
+    /**
+     *  Used to read bouncer states.
+     */
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private int mScrollY;
     private boolean mDimmed;
     private ActivatableNotificationView mActivatedChild;
@@ -77,13 +82,29 @@ public class AmbientState {
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
 
+    /** Fraction of lockscreen to shade animation (on lockscreen swipe down). */
+    private float mFractionToShade;
+
+    /**
+     * @param fractionToShade Fraction of lockscreen to shade transition
+     */
+    public void setFractionToShade(float fractionToShade) {
+        mFractionToShade = fractionToShade;
+    }
+
+    /**
+     * @return fractionToShade Fraction of lockscreen to shade transition
+     */
+    public float getFractionToShade() {
+        return mFractionToShade;
+    }
+
     /** How we much we are sleeping. 1f fully dozing (AOD), 0f fully awake (for all other states) */
     private float mDozeAmount = 0.0f;
 
     private Runnable mOnPulseHeightChangedListener;
     private ExpandableNotificationRow mTrackedHeadsUpRow;
     private float mAppearFraction;
-    private boolean mIsShadeOpening;
     private float mOverExpansion;
     private int mStackTopMargin;
 
@@ -101,6 +122,16 @@ public class AmbientState {
 
     /** Whether we are swiping up. */
     private boolean mIsSwipingUp;
+
+    /** Whether we are flinging the shade open or closed. */
+    private boolean mIsFlinging;
+
+    /**
+     * Whether we need to do a fling down after swiping up on lockscreen.
+     * True right after we swipe up on lockscreen and have not finished the fling down that follows.
+     * False when we stop flinging or leave lockscreen.
+     */
+    private boolean mNeedFlingAfterLockscreenSwipeUp = false;
 
     /**
      * @return Height of the notifications panel without top padding when expansion completes.
@@ -142,6 +173,10 @@ public class AmbientState {
      * @param isSwipingUp Whether we are swiping up.
      */
     public void setSwipingUp(boolean isSwipingUp) {
+        if (!isSwipingUp && mIsSwipingUp) {
+            // Just stopped swiping up.
+            mNeedFlingAfterLockscreenSwipeUp = true;
+        }
         mIsSwipingUp = isSwipingUp;
     }
 
@@ -150,6 +185,17 @@ public class AmbientState {
      */
     public boolean isSwipingUp() {
         return mIsSwipingUp;
+    }
+
+    /**
+     * @param isFlinging Whether we are flinging the shade open or closed.
+     */
+    public void setIsFlinging(boolean isFlinging) {
+        if (isOnKeyguard() && !isFlinging && mIsFlinging) {
+            // Just stopped flinging.
+            mNeedFlingAfterLockscreenSwipeUp = false;
+        }
+        mIsFlinging = isFlinging;
     }
 
     /**
@@ -180,9 +226,11 @@ public class AmbientState {
     public AmbientState(
             Context context,
             @NonNull SectionProvider sectionProvider,
-            @NonNull BypassController bypassController) {
+            @NonNull BypassController bypassController,
+            @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         mSectionProvider = sectionProvider;
         mBypassController = bypassController;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         reload(context);
     }
 
@@ -192,14 +240,6 @@ public class AmbientState {
     public void reload(Context context) {
         mZDistanceBetweenElements = getZDistanceBetweenElements(context);
         mBaseZHeight = getBaseHeight(mZDistanceBetweenElements);
-    }
-
-    public void setIsShadeOpening(boolean isOpening) {
-        mIsShadeOpening = isOpening;
-    }
-
-    public boolean isShadeOpening() {
-        return mIsShadeOpening;
     }
 
     void setOverExpansion(float overExpansion) {
@@ -459,6 +499,9 @@ public class AmbientState {
     }
 
     public void setStatusBarState(int statusBarState) {
+        if (mStatusBarState != StatusBarState.KEYGUARD) {
+            mNeedFlingAfterLockscreenSwipeUp = false;
+        }
         mStatusBarState = statusBarState;
     }
 
@@ -519,6 +562,13 @@ public class AmbientState {
 
     public boolean isUnlockHintRunning() {
         return mUnlockHintRunning;
+    }
+
+    /**
+     * @return Whether we need to do a fling down after swiping up on lockscreen.
+     */
+    public boolean isFlingingAfterSwipeUpOnLockscreen() {
+        return mIsFlinging && mNeedFlingAfterLockscreenSwipeUp;
     }
 
     /**
@@ -634,5 +684,15 @@ public class AmbientState {
 
     public int getStackTopMargin() {
         return mStackTopMargin;
+    }
+
+    /**
+     * Check to see if we are about to show bouncer.
+     *
+     * @return if bouncer expansion is between 0 and 1.
+     */
+    public boolean isBouncerInTransit() {
+        return mStatusBarKeyguardViewManager != null
+                && mStatusBarKeyguardViewManager.isBouncerInTransit();
     }
 }

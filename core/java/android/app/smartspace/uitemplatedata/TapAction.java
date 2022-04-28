@@ -58,7 +58,13 @@ public final class TapAction implements Parcelable {
     private final UserHandle mUserHandle;
 
     @Nullable
-    private Bundle mExtras;
+    private final Bundle mExtras;
+
+    /**
+     * Whether the tap action's result should be shown on the lockscreen (e.g. turn off the
+     * flashlight can be done on LS bypassing the keyguard). Default value is false.
+     */
+    private final boolean mShouldShowOnLockscreen;
 
     TapAction(@NonNull Parcel in) {
         mId = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
@@ -66,16 +72,18 @@ public final class TapAction implements Parcelable {
         mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
         mUserHandle = in.readTypedObject(UserHandle.CREATOR);
         mExtras = in.readBundle();
+        mShouldShowOnLockscreen = in.readBoolean();
     }
 
     private TapAction(@Nullable CharSequence id, @Nullable Intent intent,
             @Nullable PendingIntent pendingIntent, @Nullable UserHandle userHandle,
-            @Nullable Bundle extras) {
+            @Nullable Bundle extras, boolean shouldShowOnLockscreen) {
         mId = id;
         mIntent = intent;
         mPendingIntent = pendingIntent;
         mUserHandle = userHandle;
         mExtras = extras;
+        mShouldShowOnLockscreen = shouldShowOnLockscreen;
     }
 
     /** Returns the unique id of the tap action. */
@@ -110,6 +118,14 @@ public final class TapAction implements Parcelable {
         return mExtras;
     }
 
+    /**
+     * Whether the tap action's result should be shown on the lockscreen. If true, the tap action's
+     * handling should bypass the keyguard. Default value is false.
+     */
+    public boolean shouldShowOnLockscreen() {
+        return mShouldShowOnLockscreen;
+    }
+
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
         TextUtils.writeToParcel(mId, out, flags);
@@ -117,6 +133,7 @@ public final class TapAction implements Parcelable {
         out.writeTypedObject(mPendingIntent, flags);
         out.writeTypedObject(mUserHandle, flags);
         out.writeBundle(mExtras);
+        out.writeBoolean(mShouldShowOnLockscreen);
     }
 
     @Override
@@ -158,6 +175,7 @@ public final class TapAction implements Parcelable {
                 + ", mPendingIntent=" + mPendingIntent
                 + ", mUserHandle=" + mUserHandle
                 + ", mExtras=" + mExtras
+                + ", mShouldShowOnLockscreen=" + mShouldShowOnLockscreen
                 + '}';
     }
 
@@ -174,14 +192,16 @@ public final class TapAction implements Parcelable {
         private PendingIntent mPendingIntent;
         private UserHandle mUserHandle;
         private Bundle mExtras;
+        private boolean mShouldShowOnLockScreen;
 
         /**
-         * A builder for {@link TapAction}.
+         * A builder for {@link TapAction}. By default sets should_show_on_lockscreen to false.
          *
          * @param id A unique Id of this {@link TapAction}.
          */
         public Builder(@NonNull CharSequence id) {
             mId = Objects.requireNonNull(id);
+            mShouldShowOnLockScreen = false;
         }
 
         /**
@@ -222,6 +242,16 @@ public final class TapAction implements Parcelable {
         }
 
         /**
+         * Sets whether the tap action's result should be shown on the lockscreen, to bypass the
+         * keyguard when the tap action is triggered.
+         */
+        @NonNull
+        public Builder setShouldShowOnLockscreen(@NonNull boolean shouldShowOnLockScreen) {
+            mShouldShowOnLockScreen = shouldShowOnLockScreen;
+            return this;
+        }
+
+        /**
          * Builds a new SmartspaceTapAction instance.
          *
          * @throws IllegalStateException if the tap action is empty.
@@ -231,7 +261,8 @@ public final class TapAction implements Parcelable {
             if (mIntent == null && mPendingIntent == null && mExtras == null) {
                 throw new IllegalStateException("Please assign at least 1 valid tap field");
             }
-            return new TapAction(mId, mIntent, mPendingIntent, mUserHandle, mExtras);
+            return new TapAction(mId, mIntent, mPendingIntent, mUserHandle, mExtras,
+                    mShouldShowOnLockScreen);
         }
     }
 }

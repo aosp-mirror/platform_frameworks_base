@@ -16,10 +16,12 @@
 
 package com.android.wm.shell.compatui.letterboxedu;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -31,13 +33,14 @@ import com.android.wm.shell.R;
  * <p>This layout should fill the entire task and the background around the dialog acts as the
  * background dim which dismisses the dialog when clicked.
  */
-// TODO(b/215316431): Add tests
 class LetterboxEduDialogLayout extends ConstraintLayout {
 
     // The alpha of a background is a number between 0 (fully transparent) to 255 (fully opaque).
     // 204 is simply 255 * 0.8.
     static final int BACKGROUND_DIM_ALPHA = 204;
+
     private View mDialogContainer;
+    private TextView mDialogTitle;
     private Drawable mBackgroundDim;
 
     public LetterboxEduDialogLayout(Context context) {
@@ -61,6 +64,10 @@ class LetterboxEduDialogLayout extends ConstraintLayout {
         return mDialogContainer;
     }
 
+    TextView getDialogTitle() {
+        return mDialogTitle;
+    }
+
     Drawable getBackgroundDim() {
         return mBackgroundDim;
     }
@@ -68,22 +75,23 @@ class LetterboxEduDialogLayout extends ConstraintLayout {
     /**
      * Register a callback for the dismiss button and background dim.
      *
-     * @param callback The callback to register
+     * @param callback The callback to register or null if all on click listeners should be removed.
      */
-    void setDismissOnClickListener(Runnable callback) {
-        findViewById(R.id.letterbox_education_dialog_dismiss_button).setOnClickListener(
-                view -> callback.run());
+    void setDismissOnClickListener(@Nullable Runnable callback) {
+        final OnClickListener listener = callback == null ? null : view -> callback.run();
+        findViewById(R.id.letterbox_education_dialog_dismiss_button).setOnClickListener(listener);
         // Clicks on the background dim should also dismiss the dialog.
-        setOnClickListener(view -> callback.run());
+        setOnClickListener(listener);
         // We add a no-op on-click listener to the dialog container so that clicks on it won't
         // propagate to the listener of the layout (which represents the background dim).
-        mDialogContainer.setOnClickListener(view -> {});
+        mDialogContainer.setOnClickListener(callback == null ? null : view -> {});
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mDialogContainer = findViewById(R.id.letterbox_education_dialog_container);
+        mDialogTitle = findViewById(R.id.letterbox_education_dialog_title);
         mBackgroundDim = getBackground().mutate();
         // Set the alpha of the background dim to 0 for enter animation.
         mBackgroundDim.setAlpha(0);

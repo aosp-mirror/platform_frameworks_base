@@ -73,6 +73,7 @@ public class Scribe {
     private static final String XML_TAG_TRANSACTION = "transaction";
     private static final String XML_TAG_USER = "user";
 
+    private static final String XML_ATTR_CTP = "ctp";
     private static final String XML_ATTR_DELTA = "delta";
     private static final String XML_ATTR_EVENT_ID = "eventId";
     private static final String XML_ATTR_TAG = "tag";
@@ -83,6 +84,8 @@ public class Scribe {
     private static final String XML_ATTR_USER_ID = "userId";
     private static final String XML_ATTR_VERSION = "version";
     private static final String XML_ATTR_LAST_RECLAMATION_TIME = "lastReclamationTime";
+    private static final String XML_ATTR_REMAINING_CONSUMABLE_CAKES = "remainingConsumableCakes";
+    private static final String XML_ATTR_CONSUMPTION_LIMIT = "consumptionLimit";
 
     /** Version of the file schema. */
     private static final int STATE_FILE_VERSION = 0;
@@ -95,7 +98,9 @@ public class Scribe {
     @GuardedBy("mIrs.getLock()")
     private long mLastReclamationTime;
     @GuardedBy("mIrs.getLock()")
-    private long mNarcsInCirculation;
+    private long mSatiatedConsumptionLimit;
+    @GuardedBy("mIrs.getLock()")
+    private long mRemainingConsumableCakes;
     @GuardedBy("mIrs.getLock()")
     private final SparseArrayMap<String, Ledger> mLedgers = new SparseArrayMap<>();
 
@@ -117,10 +122,10 @@ public class Scribe {
     }
 
     @GuardedBy("mIrs.getLock()")
-    void adjustNarcsInCirculationLocked(long delta) {
+    void adjustRemainingConsumableCakesLocked(long delta) {
         if (delta != 0) {
             // No point doing any work if the change is 0.
-            mNarcsInCirculation += delta;
+            mRemainingConsumableCakes += delta;
             postWrite();
         }
     }
@@ -129,6 +134,11 @@ public class Scribe {
     void discardLedgerLocked(final int userId, @NonNull final String pkgName) {
         mLedgers.delete(userId, pkgName);
         postWrite();
+    }
+
+    @GuardedBy("mIrs.getLock()")
+    long getSatiatedConsumptionLimitLocked() {
+        return mSatiatedConsumptionLimit;
     }
 
     @GuardedBy("mIrs.getLock()")
@@ -153,19 +163,37 @@ public class Scribe {
         return mLedgers;
     }
 
-    /** Returns the total amount of narcs currently allocated to apps. */
+    /**
+     * Returns the sum of credits granted to all apps on the system. This is expensive so don't
+     * call it for normal operation.
+     */
     @GuardedBy("mIrs.getLock()")
-    long getNarcsInCirculationLocked() {
-        return mNarcsInCirculation;
+    long getCakesInCirculationForLoggingLocked() {
+        long sum = 0;
+        for (int uIdx = mLedgers.numMaps() - 1; uIdx >= 0; --uIdx) {
+            for (int pIdx = mLedgers.numElementsForKeyAt(uIdx) - 1; pIdx >= 0; --pIdx) {
+                sum += mLedgers.valueAt(uIdx, pIdx).getCurrentBalance();
+            }
+        }
+        return sum;
+    }
+
+    /** Returns the total amount of cakes that remain to be consumed. */
+    @GuardedBy("mIrs.getLock()")
+    long getRemainingConsumableCakesLocked() {
+        return mRemainingConsumableCakes;
     }
 
     @GuardedBy("mIrs.getLock()")
     void loadFromDiskLocked() {
         mLedgers.clear();
-        mNarcsInCirculation = 0;
         if (!recordExists()) {
+            mSatiatedConsumptionLimit = mIrs.getInitialSatiatedConsumptionLimitLocked();
+            mRemainingConsumableCakes = mIrs.getConsumptionLimitLocked();
             return;
         }
+        mSatiatedConsumptionLimit = 0;
+        mRemainingConsumableCakes = 0;
 
         final SparseArray<ArraySet<String>> installedPackagesPerUser = new SparseArray<>();
         final List<PackageInfo> installedPackages = mIrs.getInstalledPackages();
@@ -222,6 +250,13 @@ public class Scribe {
                     case XML_TAG_HIGH_LEVEL_STATE:
                         mLastReclamationTime =
                                 parser.getAttributeLong(null, XML_ATTR_LAST_RECLAMATION_TIME);
+                        mSatiatedConsumptionLimit =
+                                parser.getAttributeLong(null, XML_ATTR_CONSUMPTION_LIMIT,
+                                        mIrs.getInitialSatiatedConsumptionLimitLocked());
+                        final long consumptionLimit = mIrs.getConsumptionLimitLocked();
+                        mRemainingConsumableCakes = Math.min(consumptionLimit,
+                                parser.getAttributeLong(null, XML_ATTR_REMAINING_CONSUMABLE_CAKES,
+                                        consumptionLimit));
                         break;
                     case XML_TAG_USER:
                         earliestEndTime = Math.min(earliestEndTime,
@@ -249,6 +284,18 @@ public class Scribe {
     }
 
     @GuardedBy("mIrs.getLock()")
+    void setConsumptionLimitLocked(long limit) {
+        if (mRemainingConsumableCakes > limit) {
+            mRemainingConsumableCakes = limit;
+        } else if (limit > mSatiatedConsumptionLimit) {
+            final long diff = mSatiatedConsumptionLimit - mRemainingConsumableCakes;
+            mRemainingConsumableCakes = (limit - diff);
+        }
+        mSatiatedConsumptionLimit = limit;
+        postWrite();
+    }
+
+    @GuardedBy("mIrs.getLock()")
     void setLastReclamationTimeLocked(long time) {
         mLastReclamationTime = time;
         postWrite();
@@ -259,7 +306,8 @@ public class Scribe {
         TareHandlerThread.getHandler().removeCallbacks(mCleanRunnable);
         TareHandlerThread.getHandler().removeCallbacks(mWriteRunnable);
         mLedgers.clear();
-        mNarcsInCirculation = 0;
+        mRemainingConsumableCakes = 0;
+        mSatiatedConsumptionLimit = 0;
         mLastReclamationTime = 0;
     }
 
@@ -339,13 +387,14 @@ public class Scribe {
             final long endTime = parser.getAttributeLong(null, XML_ATTR_END_TIME);
             final int eventId = parser.getAttributeInt(null, XML_ATTR_EVENT_ID);
             final long delta = parser.getAttributeLong(null, XML_ATTR_DELTA);
+            final long ctp = parser.getAttributeLong(null, XML_ATTR_CTP);
             if (endTime <= endTimeCutoff) {
                 if (DEBUG) {
                     Slog.d(TAG, "Skipping event because it's too old.");
                 }
                 continue;
             }
-            transactions.add(new Ledger.Transaction(startTime, endTime, eventId, tag, delta));
+            transactions.add(new Ledger.Transaction(startTime, endTime, eventId, tag, delta, ctp));
         }
 
         if (!isInstalled) {
@@ -395,7 +444,6 @@ public class Scribe {
                 final Ledger ledger = ledgerData.second;
                 if (ledger != null) {
                     mLedgers.add(curUser, ledgerData.first, ledger);
-                    mNarcsInCirculation += Math.max(0, ledger.getCurrentBalance());
                     final Ledger.Transaction transaction = ledger.getEarliestTransaction();
                     if (transaction != null) {
                         earliestEndTime = Math.min(earliestEndTime, transaction.endTimeMs);
@@ -442,6 +490,9 @@ public class Scribe {
 
                 out.startTag(null, XML_TAG_HIGH_LEVEL_STATE);
                 out.attributeLong(null, XML_ATTR_LAST_RECLAMATION_TIME, mLastReclamationTime);
+                out.attributeLong(null, XML_ATTR_CONSUMPTION_LIMIT, mSatiatedConsumptionLimit);
+                out.attributeLong(null, XML_ATTR_REMAINING_CONSUMABLE_CAKES,
+                        mRemainingConsumableCakes);
                 out.endTag(null, XML_TAG_HIGH_LEVEL_STATE);
 
                 for (int uIdx = mLedgers.numMaps() - 1; uIdx >= 0; --uIdx) {
@@ -505,6 +556,7 @@ public class Scribe {
             out.attribute(null, XML_ATTR_TAG, transaction.tag);
         }
         out.attributeLong(null, XML_ATTR_DELTA, transaction.delta);
+        out.attributeLong(null, XML_ATTR_CTP, transaction.ctp);
         out.endTag(null, XML_TAG_TRANSACTION);
     }
 

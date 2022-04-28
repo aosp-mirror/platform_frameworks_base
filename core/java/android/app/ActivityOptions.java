@@ -46,6 +46,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.transition.TransitionManager;
 import android.util.Pair;
@@ -172,6 +173,13 @@ public class ActivityOptions extends ComponentOptions {
      * @hide
      */
     public static final String KEY_SPLASH_SCREEN_THEME = "android.activity.splashScreenTheme";
+
+    /**
+     * Indicates that this activity launch is eligible to show a legacy permission prompt
+     * @hide
+     */
+    public static final String KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE =
+            "android:activity.legacyPermissionPromptEligible";
 
     /**
      * Callback for when the last frame of the animation is played.
@@ -354,6 +362,13 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_LAUNCH_INTO_PIP_PARAMS =
             "android.activity.launchIntoPipParams";
 
+    /** See {@link #setDismissKeyguardIfInsecure()}. */
+    private static final String KEY_DISMISS_KEYGUARD_IF_INSECURE =
+            "android.activity.dismissKeyguardIfInsecure";
+
+    private static final String KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE =
+            "android.activity.ignorePendingIntentCreatorForegroundState";
+
     /**
      * @see #setLaunchCookie
      * @hide
@@ -445,10 +460,13 @@ public class ActivityOptions extends ComponentOptions {
     private String mSplashScreenThemeResName;
     @SplashScreen.SplashScreenStyle
     private int mSplashScreenStyle = SplashScreen.SPLASH_SCREEN_STYLE_UNDEFINED;
+    private boolean mIsEligibleForLegacyPermissionPrompt;
     private boolean mRemoveWithTaskOrganizer;
     private boolean mLaunchedFromBubble;
     private boolean mTransientLaunch;
     private PictureInPictureParams mLaunchIntoPipParams;
+    private boolean mDismissKeyguardIfInsecure;
+    private boolean mIgnorePendingIntentCreatorForegroundState;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -617,9 +635,10 @@ public class ActivityOptions extends ComponentOptions {
             mAnimationStartedListener = new IRemoteCallback.Stub() {
                 @Override
                 public void sendResult(Bundle data) throws RemoteException {
+                    final long elapsedRealtime = SystemClock.elapsedRealtime();
                     handler.post(new Runnable() {
                         @Override public void run() {
-                            listener.onAnimationStarted();
+                            listener.onAnimationStarted(elapsedRealtime);
                         }
                     });
                 }
@@ -628,13 +647,15 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
-     * Callback for use with {@link ActivityOptions#makeThumbnailScaleUpAnimation}
-     * to find out when the given animation has started running.
+     * Callback for finding out when the given animation has started running.
      * @hide
      */
     @TestApi
     public interface OnAnimationStartedListener {
-        void onAnimationStarted();
+        /**
+         * @param elapsedRealTime {@link SystemClock#elapsedRealTime} when animation started.
+         */
+        void onAnimationStarted(long elapsedRealTime);
     }
 
     private void setOnAnimationFinishedListener(final Handler handler,
@@ -643,10 +664,11 @@ public class ActivityOptions extends ComponentOptions {
             mAnimationFinishedListener = new IRemoteCallback.Stub() {
                 @Override
                 public void sendResult(Bundle data) throws RemoteException {
+                    final long elapsedRealtime = SystemClock.elapsedRealtime();
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            listener.onAnimationFinished();
+                            listener.onAnimationFinished(elapsedRealtime);
                         }
                     });
                 }
@@ -655,13 +677,15 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
-     * Callback for use with {@link ActivityOptions#makeThumbnailAspectScaleDownAnimation}
-     * to find out when the given animation has drawn its last frame.
+     * Callback for finding out when the given animation has drawn its last frame.
      * @hide
      */
     @TestApi
     public interface OnAnimationFinishedListener {
-        void onAnimationFinished();
+        /**
+         * @param elapsedRealTime {@link SystemClock#elapsedRealTime} when animation finished.
+         */
+        void onAnimationFinished(long elapsedRealTime);
     }
 
     /**
@@ -1154,6 +1178,7 @@ public class ActivityOptions extends ComponentOptions {
             case ANIM_CUSTOM:
                 mCustomEnterResId = opts.getInt(KEY_ANIM_ENTER_RES_ID, 0);
                 mCustomExitResId = opts.getInt(KEY_ANIM_EXIT_RES_ID, 0);
+                mCustomBackgroundColor = opts.getInt(KEY_ANIM_BACKGROUND_COLOR, 0);
                 mAnimationStartedListener = IRemoteCallback.Stub.asInterface(
                         opts.getBinder(KEY_ANIM_START_LISTENER));
                 break;
@@ -1243,6 +1268,11 @@ public class ActivityOptions extends ComponentOptions {
         mTransientLaunch = opts.getBoolean(KEY_TRANSIENT_LAUNCH);
         mSplashScreenStyle = opts.getInt(KEY_SPLASH_SCREEN_STYLE);
         mLaunchIntoPipParams = opts.getParcelable(KEY_LAUNCH_INTO_PIP_PARAMS);
+        mIsEligibleForLegacyPermissionPrompt =
+                opts.getBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE);
+        mDismissKeyguardIfInsecure = opts.getBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE);
+        mIgnorePendingIntentCreatorForegroundState = opts.getBoolean(
+                KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE);
     }
 
     /**
@@ -1411,17 +1441,9 @@ public class ActivityOptions extends ComponentOptions {
         return mRemoteTransition;
     }
 
-    /**
-     * Creates an ActivityOptions from the Bundle generated from {@link ActivityOptions#toBundle()}.
-     * Returns an instance of ActivityOptions populated with options with known keys from the
-     * provided Bundle, stripping out unknown entries.
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
-    @NonNull
-    public static ActivityOptions fromBundle(@NonNull Bundle bOptions) {
-        return new ActivityOptions(bOptions);
+    /** @hide */
+    public static ActivityOptions fromBundle(Bundle bOptions) {
+        return bOptions != null ? new ActivityOptions(bOptions) : null;
     }
 
     /** @hide */
@@ -1462,15 +1484,33 @@ public class ActivityOptions extends ComponentOptions {
      * Sets the preferred splash screen style of the opening activities. This only applies if the
      * Activity or Process is not yet created.
      * @param style Can be either {@link SplashScreen#SPLASH_SCREEN_STYLE_ICON} or
-     *              {@link SplashScreen#SPLASH_SCREEN_STYLE_EMPTY}
+     *              {@link SplashScreen#SPLASH_SCREEN_STYLE_SOLID_COLOR}
      */
     @NonNull
     public ActivityOptions setSplashScreenStyle(@SplashScreen.SplashScreenStyle int style) {
         if (style == SplashScreen.SPLASH_SCREEN_STYLE_ICON
-                || style == SplashScreen.SPLASH_SCREEN_STYLE_EMPTY) {
+                || style == SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR) {
             mSplashScreenStyle = style;
         }
         return this;
+    }
+
+    /**
+     * Whether the activity is eligible to show a legacy permission prompt
+     * @hide
+     */
+    @TestApi
+    public boolean isEligibleForLegacyPermissionPrompt() {
+        return mIsEligibleForLegacyPermissionPrompt;
+    }
+
+    /**
+     * Sets whether the activity is eligible to show a legacy permission prompt
+     * @hide
+     */
+    @TestApi
+    public void setEligibleForLegacyPermissionPrompt(boolean eligible) {
+        mIsEligibleForLegacyPermissionPrompt = eligible;
     }
 
     /**
@@ -1829,6 +1869,44 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
+     * Sets whether the insecure keyguard should go away when this activity launches. In case the
+     * keyguard is secure, this option will be ignored.
+     *
+     * @see Activity#setShowWhenLocked(boolean)
+     * @see android.R.attr#showWhenLocked
+     * @hide
+     */
+    public void setDismissKeyguardIfInsecure() {
+        mDismissKeyguardIfInsecure = true;
+    }
+
+    /**
+     * @see #setDismissKeyguardIfInsecure()
+     * @return whether the insecure keyguard should go away when the activity launches.
+     * @hide
+     */
+    public boolean getDismissKeyguardIfInsecure() {
+        return mDismissKeyguardIfInsecure;
+    }
+
+    /**
+     * Sets background activity launch logic won't use pending intent creator foreground state.
+     * @hide
+     */
+    public void setIgnorePendingIntentCreatorForegroundState(boolean state) {
+        mIgnorePendingIntentCreatorForegroundState = state;
+    }
+
+    /**
+     * @return whether background activity launch logic should use pending intent creator
+     * foreground state.
+     * @hide
+     */
+    public boolean getIgnorePendingIntentCreatorForegroundState() {
+        return mIgnorePendingIntentCreatorForegroundState;
+    }
+
+    /**
      * Update the current values in this ActivityOptions from those supplied
      * in <var>otherOptions</var>.  Any values
      * defined in <var>otherOptions</var> replace those in the base options.
@@ -1909,6 +1987,7 @@ public class ActivityOptions extends ComponentOptions {
         mSpecsFuture = otherOptions.mSpecsFuture;
         mRemoteAnimationAdapter = otherOptions.mRemoteAnimationAdapter;
         mLaunchIntoPipParams = otherOptions.mLaunchIntoPipParams;
+        mIsEligibleForLegacyPermissionPrompt = otherOptions.mIsEligibleForLegacyPermissionPrompt;
     }
 
     /**
@@ -2083,6 +2162,17 @@ public class ActivityOptions extends ComponentOptions {
         }
         if (mLaunchIntoPipParams != null) {
             b.putParcelable(KEY_LAUNCH_INTO_PIP_PARAMS, mLaunchIntoPipParams);
+        }
+        if (mIsEligibleForLegacyPermissionPrompt) {
+            b.putBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE,
+                    mIsEligibleForLegacyPermissionPrompt);
+        }
+        if (mDismissKeyguardIfInsecure) {
+            b.putBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE, mDismissKeyguardIfInsecure);
+        }
+        if (mIgnorePendingIntentCreatorForegroundState) {
+            b.putBoolean(KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE,
+                    mIgnorePendingIntentCreatorForegroundState);
         }
         return b;
     }

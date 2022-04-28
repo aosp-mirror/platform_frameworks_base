@@ -88,7 +88,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private boolean mIsInitialized;
     private Listener mListener;
     private Executor mListenerExecutor;
-    private Rect mObscuredTouchRect;
+    private Region mObscuredTouchRegion;
 
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRootRect = new Rect();
@@ -202,7 +202,16 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      * @param obscuredRect the obscured region of the view.
      */
     public void setObscuredTouchRect(Rect obscuredRect) {
-        mObscuredTouchRect = obscuredRect;
+        mObscuredTouchRegion = obscuredRect != null ? new Region(obscuredRect) : null;
+    }
+
+    /**
+     * Indicates a region of the view that is not touchable.
+     *
+     * @param obscuredRegion the obscured region of the view.
+     */
+    public void setObscuredTouchRegion(Region obscuredRegion) {
+        mObscuredTouchRegion = obscuredRegion;
     }
 
     private void onLocationChanged(WindowContainerTransaction wct) {
@@ -367,10 +376,20 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
-        if (mTaskInfo.taskId != taskId) {
+        b.setParent(findTaskSurface(taskId));
+    }
+
+    @Override
+    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
+            SurfaceControl.Transaction t) {
+        t.reparent(sc, findTaskSurface(taskId));
+    }
+
+    private SurfaceControl findTaskSurface(int taskId) {
+        if (mTaskInfo == null || mTaskLeash == null || mTaskInfo.taskId != taskId) {
             throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
         }
-        b.setParent(mTaskLeash);
+        return mTaskLeash;
     }
 
     @Override
@@ -458,8 +477,8 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
                 mTmpLocation[0] + getWidth(), mTmpLocation[1] + getHeight());
         inoutInfo.touchableRegion.op(mTmpRect, Region.Op.DIFFERENCE);
 
-        if (mObscuredTouchRect != null) {
-            inoutInfo.touchableRegion.union(mObscuredTouchRect);
+        if (mObscuredTouchRegion != null) {
+            inoutInfo.touchableRegion.op(mObscuredTouchRegion, Region.Op.UNION);
         }
     }
 

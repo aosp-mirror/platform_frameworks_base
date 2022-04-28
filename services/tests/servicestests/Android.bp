@@ -25,7 +25,6 @@ android_test {
         "test-apps/JobTestApp/src/**/*.java",
 
         "test-apps/SuspendTestApp/src/**/*.java",
-        ":service-bluetooth-tests-sources", // TODO(b/214988855) : Remove once framework-bluetooth jar is ready
     ],
     static_libs: [
         "frameworks-base-testutils",
@@ -65,6 +64,7 @@ android_test {
         "testng",
         "junit",
         "platform-compat-test-rules",
+        "ActivityContext",
     ],
 
     aidl: {

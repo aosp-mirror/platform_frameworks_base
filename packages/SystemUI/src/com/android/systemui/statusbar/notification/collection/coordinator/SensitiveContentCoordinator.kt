@@ -34,11 +34,11 @@ import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
 
-@Module(includes = [PrivateModule::class])
+@Module(includes = [PrivateSensitiveContentCoordinatorModule::class])
 interface SensitiveContentCoordinatorModule
 
 @Module
-private interface PrivateModule {
+private interface PrivateSensitiveContentCoordinatorModule {
     @Binds
     fun bindCoordinator(impl: SensitiveContentCoordinatorImpl): SensitiveContentCoordinator
 }

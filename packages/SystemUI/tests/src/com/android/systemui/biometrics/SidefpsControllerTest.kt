@@ -17,10 +17,10 @@
 package com.android.systemui.biometrics
 
 import android.animation.Animator
-import android.graphics.Insets
 import android.app.ActivityManager
 import android.app.ActivityTaskManager
 import android.content.ComponentName
+import android.graphics.Insets
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
@@ -65,8 +65,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyFloat
-import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -188,7 +188,7 @@ class SidefpsControllerTest : SysuiTestCase() {
         overlayController.show(SENSOR_ID, REASON_UNKNOWN)
         executor.runAllReady()
 
-        verify(displayManager).registerDisplayListener(any(), eq(handler))
+        verify(displayManager).registerDisplayListener(any(), eq(handler), anyLong())
 
         overlayController.hide(SENSOR_ID)
         executor.runAllReady()

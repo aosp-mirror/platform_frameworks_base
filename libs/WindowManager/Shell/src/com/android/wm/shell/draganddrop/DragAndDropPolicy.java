@@ -123,6 +123,13 @@ public class DragAndDropPolicy {
     }
 
     /**
+     * Returns the number of targets.
+     */
+    int getNumTargets() {
+        return mTargets.size();
+    }
+
+    /**
      * Returns the target's regions based on the current state of the device and display.
      */
     @NonNull

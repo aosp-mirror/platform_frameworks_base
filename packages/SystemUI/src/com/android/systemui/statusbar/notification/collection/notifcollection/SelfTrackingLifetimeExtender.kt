@@ -5,7 +5,6 @@ import android.util.ArrayMap
 import android.util.Log
 import com.android.systemui.Dumpable
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import java.io.FileDescriptor
 import java.io.PrintWriter
 
 /**
@@ -105,7 +104,7 @@ abstract class SelfTrackingLifetimeExtender(
         mCallback = callback
     }
 
-    final override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    final override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("LifetimeExtender: $name:")
         pw.println("  mEntriesExtended: ${mEntriesExtended.size}")
         mEntriesExtended.forEach { pw.println("  * ${it.key}") }

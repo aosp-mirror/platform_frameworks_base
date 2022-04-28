@@ -32,6 +32,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.ShellCommandHandler;
@@ -39,7 +40,6 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.compatui.CompatUI;
 import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -67,12 +67,12 @@ public class WMShellTest extends SysuiTestCase {
 
     @Mock CommandQueue mCommandQueue;
     @Mock ConfigurationController mConfigurationController;
+    @Mock KeyguardStateController mKeyguardStateController;
     @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock NavigationModeController mNavigationModeController;
     @Mock ScreenLifecycle mScreenLifecycle;
     @Mock SysUiState mSysUiState;
     @Mock Pip mPip;
-    @Mock LegacySplitScreen mLegacySplitScreen;
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
     @Mock HideDisplayCutout mHideDisplayCutout;
@@ -88,13 +88,13 @@ public class WMShellTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mWMShell = new WMShell(mContext, Optional.of(mPip), Optional.of(mLegacySplitScreen),
+        mWMShell = new WMShell(mContext, Optional.of(mPip),
                 Optional.of(mSplitScreen), Optional.of(mOneHanded), Optional.of(mHideDisplayCutout),
                 Optional.of(mShellCommandHandler), Optional.of(mCompatUI),
                 Optional.of(mDragAndDrop),
-                mCommandQueue, mConfigurationController, mKeyguardUpdateMonitor,
-                mNavigationModeController, mScreenLifecycle, mSysUiState, mProtoTracer,
-                mWakefulnessLifecycle, mUserInfoController, mSysUiMainExecutor);
+                mCommandQueue, mConfigurationController, mKeyguardStateController,
+                mKeyguardUpdateMonitor, mNavigationModeController, mScreenLifecycle, mSysUiState,
+                mProtoTracer, mWakefulnessLifecycle, mUserInfoController, mSysUiMainExecutor);
     }
 
     @Test
@@ -102,13 +102,6 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell.initPip(mPip);
 
         verify(mCommandQueue).addCallback(any(CommandQueue.Callbacks.class));
-    }
-
-    @Test
-    public void initLegacySplitScreen_registersCallbacks() {
-        mWMShell.initLegacySplitScreen(mLegacySplitScreen);
-
-        verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
     }
 
     @Test
@@ -141,6 +134,6 @@ public class WMShellTest extends SysuiTestCase {
     public void initCompatUI_registersCallbacks() {
         mWMShell.initCompatUi(mCompatUI);
 
-        verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
+        verify(mKeyguardStateController).addCallback(any(KeyguardStateController.Callback.class));
     }
 }

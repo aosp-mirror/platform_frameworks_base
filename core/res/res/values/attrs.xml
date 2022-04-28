@@ -2322,7 +2322,9 @@
         <attr name="windowSplashScreenAnimatedIcon" format="reference"/>
         <!-- The duration, in milliseconds, of the window splash screen icon animation duration
              when playing the splash screen starting window. The maximum animation duration should
-             be limited below 1000ms. -->
+             be limited below 1000ms.
+              @deprecated Not used by framework starting from API level 33. The system estimates the
+               duration of the vector animation automatically. -->
         <attr name="windowSplashScreenAnimationDuration" format="integer"/>
 
         <!-- Place an drawable image in the bottom of the starting window, it can be used to
@@ -3932,12 +3934,12 @@
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_INPUT_METHOD_EDITOR}. -->
             <flag name="flagInputMethodEditor" value="0x0008000" />
         </attr>
-        <!-- Component name of an activity that allows the user to modify
-             the settings for this service. This setting cannot be changed at runtime. -->
+        <!-- Fully qualified class name of an activity that allows the user to modify the settings
+             for this service. This setting cannot be changed at runtime. -->
         <attr name="settingsActivity" />
-        <!-- Component name of {@link android.service.quicksettings.TileService} is associated
-             with this accessibility service for one to one mapping. It is used by system settings
-             to remind users this accessibility service has a
+        <!-- Fully qualified class name of {@link android.service.quicksettings.TileService} is
+             associated with this accessibility service for one to one mapping. It is used by system
+             settings to remind users this accessibility service has a
              {@link android.service.quicksettings.TileService}. -->
         <attr name="tileService" format="string" />
         <!-- Attribute whether the accessibility service wants to be able to retrieve the
@@ -4026,12 +4028,12 @@
         <!-- Html description of the target of accessibility shortcut usage, availability, or
              limitations (e.g. isn't supported by all apps). -->
         <attr name="htmlDescription" format="reference"/>
-        <!-- Component name of an activity that allows the user to modify the settings for this
-             target of accessibility shortcut. -->
+        <!-- Fully qualified class name of an activity that allows the user to modify the settings
+             for this target of accessibility shortcut. -->
         <attr name="settingsActivity" />
-        <!-- Component name of {@link android.service.quicksettings.TileService} is associated
-             with this accessibility shortcut target for one to one mapping. It is used by system
-             settings to remind users this accessibility service has a
+        <!-- Fully qualified class name of {@link android.service.quicksettings.TileService} is
+             associated with this accessibility shortcut target for one to one mapping. It is used
+             by system settings to remind users this accessibility service has a
              {@link android.service.quicksettings.TileService}. -->
         <attr name="tileService" format="string" />
         <!-- Detailed intro of the target of accessibility shortcut purpose or behavior. -->
@@ -5479,9 +5481,9 @@
             <enum name="none" value="0" />
             <!-- Use the least restrictive rule for line-breaking. -->
             <enum name="loose" value="1" />
-            <!-- Indicate breaking text with the most comment set of line-breaking rules. -->
+            <!-- Indicates breaking text with the most comment set of line-breaking rules. -->
             <enum name="normal" value="2" />
-            <!-- ndicates breaking text with the most strictest line-breaking rules. -->
+            <!-- Indicates breaking text with the most strictest line-breaking rules. -->
             <enum name="strict" value="3" />
         </attr>
         <!-- Specify the phrase-based line break can be used when calculating the text wrapping.-->
@@ -6958,9 +6960,13 @@
         <!-- Special option for window animations: whether window should have rounded corners.
              @see ScreenDecorationsUtils#getWindowCornerRadius(Resources) -->
         <attr name="hasRoundedCorners" format="boolean" />
+        <!-- Special option for window animations: whether to show a background behind the animating
+             windows. By default the window's background is used unless overridden by the
+             animation. -->
+        <attr name="showBackdrop" format="boolean" />
         <!-- Special option for window animations: whether the window's background should be used as
              a background to the animation. -->
-        <attr name="showBackground" format="boolean" />
+        <attr name="backdropColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="AnimationSet">
@@ -7013,30 +7019,42 @@
 
     <!-- Defines the ExtendAnimation used to extend windows during animations -->
     <declare-styleable name="ExtendAnimation">
-        <!-- Defines the amount a window should be extended outward from the left at
-             the start of the animation. -->
-        <attr name="fromExtendLeft" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the top at
-             the start of the animation. -->
-        <attr name="fromExtendTop" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the right at
-             the start of the animation. -->
-        <attr name="fromExtendRight" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the bottom at
-             the start of the animation. -->
-        <attr name="fromExtendBottom" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the left by
-             the end of the animation by transitioning from the fromExtendLeft amount. -->
-        <attr name="toExtendLeft" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the top by
-             the end of the animation by transitioning from the fromExtendTop amount. -->
-        <attr name="toExtendTop" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the right by
-             the end of the animation by transitioning from the fromExtendRight amount. -->
-        <attr name="toExtendRight" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the bottom by
-             the end of the animation by transitioning from the fromExtendBottom amount. -->
-        <attr name="toExtendBottom" format="float|fraction" />
+        <!-- Defines the amount a window should be extended outward from the left at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's width. -->
+        <attr name="fromExtendLeft" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the top at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's height. -->
+        <attr name="fromExtendTop" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the right at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's width. -->
+        <attr name="fromExtendRight" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the bottom at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's height. -->
+        <attr name="fromExtendBottom" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the left by the end of the
+             animation by transitioning from the fromExtendLeft amount in an absolute dimension
+             (interpreted as pixels if no dimension unit is provided) or as a percentage of the
+             animation target's width. -->
+        <attr name="toExtendLeft" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the top by the end of the
+             animation by transitioning from the fromExtendTop amount in an absolute dimension
+             (interpreted as pixels if no dimension unit is provided) or as a percentage of the
+             animation target's height. -->
+        <attr name="toExtendTop" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the right by the end of
+             the animation by transitioning from the fromExtendRight amount in an absolute
+             dimension (interpreted as pixels if no dimension unit is provided) or as a percentage
+             of the animation target's width. -->
+        <attr name="toExtendRight" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the bottom by the end of
+             the animation by transitioning from the fromExtendBottom amount in an absolute
+             dimension (interpreted as pixels if no dimension unit is provided) or as a percentage
+             of the animation target's height. -->
+        <attr name="toExtendBottom" format="float|fraction|dimension" />
     </declare-styleable>
 
     <declare-styleable name="LayoutAnimation">
@@ -8857,8 +8875,6 @@
         <attr name="shortcutLongLabel"/>
         <!-- Text shown on the button that takes users to the wallet application -->
         <attr name="shortcutShortLabel"/>
-        <!-- When true, launch the component specified in targetActivity for quick access -->
-        <attr name="useTargetActivityForQuickAccess" format="boolean"/>
     </declare-styleable>
 
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that
@@ -9794,5 +9810,13 @@
         <!-- The <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 language tag</a>
         of the supported locale. {@link android.app.LocaleConfig} -->
         <attr name="name" />
+    </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="CachingIconView">
+        <!-- Maximum width of displayed drawable. Drawables exceeding this size will be downsampled. -->
+        <attr name="maxDrawableWidth" format="dimension"/>
+        <!-- Maximum width of height drawable. Drawables exceeding this size will be downsampled. -->
+        <attr name="maxDrawableHeight" format="dimension"/>
     </declare-styleable>
     </resources>

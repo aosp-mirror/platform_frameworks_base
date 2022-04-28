@@ -523,6 +523,8 @@ public class BroadcastOptions extends ComponentOptions {
      * Sets whether events (such as posting a notification) originating from an app after it
      * receives the broadcast while in background should be recorded as responses to the broadcast.
      *
+     * <p> Note that this will only be considered when sending explicit broadcast intents.
+     *
      * @param id ID to be used for the response events corresponding to this broadcast. If the
      *           value is {@code 0} (default), then response events will not be recorded. Otherwise,
      *           they will be recorded with the ID provided.
@@ -530,7 +532,7 @@ public class BroadcastOptions extends ComponentOptions {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
     public void recordResponseEventWhileInBackground(@IntRange(from = 0) long id) {
         mIdForResponseEvent = id;
     }

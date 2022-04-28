@@ -46,10 +46,8 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
-import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManagerGlobal;
@@ -61,6 +59,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
@@ -85,10 +84,12 @@ import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUtils;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -106,7 +107,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private PipAppOpsListener mAppOpsListener;
     private PipMediaController mMediaController;
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
+    private PipKeepClearAlgorithm mPipKeepClearAlgorithm;
     private PipBoundsState mPipBoundsState;
+    private PipMotionHelper mPipMotionHelper;
     private PipTouchHandler mTouchHandler;
     private PipTransitionController mPipTransitionController;
     private TaskStackListenerImpl mTaskStackListener;
@@ -130,12 +133,18 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         void onPipAnimationStarted();
 
         /**
-         * Notifies the listener about PiP round corner radius changes.
+         * Notifies the listener about PiP resource dimensions changed.
          * Listener can expect an immediate callback the first time they attach.
          *
          * @param cornerRadius the pixel value of the corner radius, zero means it's disabled.
+         * @param shadowRadius the pixel value of the shadow radius, zero means it's disabled.
          */
-        void onPipCornerRadiusChanged(int cornerRadius);
+        void onPipResourceDimensionsChanged(int cornerRadius, int shadowRadius);
+
+        /**
+         * Notifies the listener that user leaves PiP by tapping on the expand button.
+         */
+        void onExpandPip();
     }
 
     /**
@@ -143,6 +152,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      */
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
+        if (mPipTransitionController.handleRotateDisplay(fromRotation, toRotation, t)) {
+            return;
+        }
         if (mPipBoundsState.getDisplayLayout().rotation() == toRotation) {
             // The same rotation may have been set by auto PiP-able or fixed rotation. So notify
             // the change with fromRotation=false to apply the rotated destination bounds from
@@ -225,6 +237,18 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
                             true /* saveRestoreSnapFraction */);
                 }
+
+                @Override
+                public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
+                        Set<Rect> unrestricted) {
+                    if (mPipBoundsState.getDisplayId() == displayId) {
+                        mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+                        mPipMotionHelper.moveToBounds(mPipKeepClearAlgorithm.adjust(
+                                mPipBoundsState.getBounds(),
+                                mPipBoundsState.getRestrictedKeepClearAreas(),
+                                mPipBoundsState.getUnrestrictedKeepClearAreas()));
+                    }
+                }
             };
 
     /**
@@ -246,8 +270,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
-            mMenuController.setAppActions(actions);
+        public void onActionsChanged(ParceledListSlice<RemoteAction> actions,
+                RemoteAction closeAction) {
+            mMenuController.setAppActions(actions, closeAction);
         }
 
         @Override
@@ -274,7 +299,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     @Nullable
     public static Pip create(Context context, DisplayController displayController,
             PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipBoundsState pipBoundsState, PipMediaController pipMediaController,
+            PipKeepClearAlgorithm pipKeepClearAlgorithm, PipBoundsState pipBoundsState,
+            PipMotionHelper pipMotionHelper, PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
@@ -282,14 +308,15 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
-            Slog.w(TAG, "Device doesn't support Pip feature");
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Device doesn't support Pip feature", TAG);
             return null;
         }
 
         return new PipController(context, displayController, pipAppOpsListener, pipBoundsAlgorithm,
-                pipBoundsState, pipMediaController, phonePipMenuController, pipTaskOrganizer,
-                pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
-                taskStackListener, oneHandedController, mainExecutor)
+                pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper, pipMediaController,
+                phonePipMenuController, pipTaskOrganizer,  pipTouchHandler, pipTransitionController,
+                windowManagerShellWrapper, taskStackListener, oneHandedController, mainExecutor)
                 .mImpl;
     }
 
@@ -297,7 +324,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             DisplayController displayController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipKeepClearAlgorithm pipKeepClearAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
+            PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController,
             PipTaskOrganizer pipTaskOrganizer,
@@ -319,7 +348,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mWindowManagerShellWrapper = windowManagerShellWrapper;
         mDisplayController = displayController;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
+        mPipKeepClearAlgorithm = pipKeepClearAlgorithm;
         mPipBoundsState = pipBoundsState;
+        mPipMotionHelper = pipMotionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
         mMainExecutor = mainExecutor;
         mMediaController = pipMediaController;
@@ -375,7 +406,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         try {
             mWindowManagerShellWrapper.addPinnedStackListener(mPinnedTaskListener);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to register pinned stack listener", e);
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Failed to register pinned stack listener, %s", TAG, e);
         }
 
         try {
@@ -387,7 +419,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 mPipInputConsumer.registerInputConsumer();
             }
         } catch (RemoteException | UnsupportedOperationException e) {
-            Log.e(TAG, "Failed to register pinned stack listener", e);
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Failed to register pinned stack listener, %s", TAG, e);
             e.printStackTrace();
         }
 
@@ -458,7 +491,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void onDensityOrFontScaleChanged() {
         mPipTaskOrganizer.onDensityOrFontScaleChanged(mContext);
-        onPipCornerRadiusChanged();
+        onPipResourceDimensionsChanged();
     }
 
     private void onOverlayChanged() {
@@ -488,6 +521,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         };
 
         if (mPipTaskOrganizer.isInPip() && saveRestoreSnapFraction) {
+            mMenuController.attachPipMenuView();
             // Calculate the snap fraction of the current stack along the old movement bounds
             final PipSnapAlgorithm pipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
             final Rect postChangeStackBounds = new Rect(mPipBoundsState.getBounds());
@@ -569,14 +603,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void setPinnedStackAnimationListener(PipAnimationListener callback) {
         mPinnedStackAnimationRecentsCallback = callback;
-        onPipCornerRadiusChanged();
+        onPipResourceDimensionsChanged();
     }
 
-    private void onPipCornerRadiusChanged() {
+    private void onPipResourceDimensionsChanged() {
         if (mPinnedStackAnimationRecentsCallback != null) {
-            final int cornerRadius =
-                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
-            mPinnedStackAnimationRecentsCallback.onPipCornerRadiusChanged(cornerRadius);
+            mPinnedStackAnimationRecentsCallback.onPipResourceDimensionsChanged(
+                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius),
+                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius));
         }
     }
 
@@ -592,9 +626,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         return entryBounds;
     }
 
-    private void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
+    private void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
             SurfaceControl overlay) {
-        mPipTaskOrganizer.stopSwipePipToHome(componentName, destinationBounds, overlay);
+        mPipTaskOrganizer.stopSwipePipToHome(taskId, componentName, destinationBounds, overlay);
     }
 
     private String getTransitionTag(int direction) {
@@ -636,6 +670,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mTouchHandler.setTouchEnabled(false);
         if (mPinnedStackAnimationRecentsCallback != null) {
             mPinnedStackAnimationRecentsCallback.onPipAnimationStarted();
+            if (direction == TRANSITION_DIRECTION_LEAVE_PIP) {
+                mPinnedStackAnimationRecentsCallback.onExpandPip();
+            }
         }
     }
 
@@ -724,7 +761,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     .getRootTaskInfo(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (pinnedTaskInfo == null) return false;
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get RootTaskInfo for pinned task", e);
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Failed to get RootTaskInfo for pinned task, %s", TAG, e);
             return false;
         }
         final PipSnapAlgorithm pipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
@@ -870,7 +908,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     PipController.this.dump(pw);
                 });
             } catch (InterruptedException e) {
-                Slog.e(TAG, "Failed to dump PipController in 2s");
+                ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: Failed to dump PipController in 2s", TAG);
             }
         }
     }
@@ -890,8 +929,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             }
 
             @Override
-            public void onPipCornerRadiusChanged(int cornerRadius) {
-                mListener.call(l -> l.onPipCornerRadiusChanged(cornerRadius));
+            public void onPipResourceDimensionsChanged(int cornerRadius, int shadowRadius) {
+                mListener.call(l -> l.onPipResourceDimensionsChanged(cornerRadius, shadowRadius));
+            }
+
+            @Override
+            public void onExpandPip() {
+                mListener.call(l -> l.onExpandPip());
             }
         };
 
@@ -923,11 +967,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
-                SurfaceControl overlay) {
+        public void stopSwipePipToHome(int taskId, ComponentName componentName,
+                Rect destinationBounds, SurfaceControl overlay) {
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> {
-                        controller.stopSwipePipToHome(componentName, destinationBounds, overlay);
+                        controller.stopSwipePipToHome(taskId, componentName, destinationBounds,
+                                overlay);
                     });
         }
 

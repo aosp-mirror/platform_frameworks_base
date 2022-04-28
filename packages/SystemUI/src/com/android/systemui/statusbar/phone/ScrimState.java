@@ -238,7 +238,7 @@ public enum ScrimState {
 
             mAnimationDuration = mKeyguardFadingAway
                     ? mKeyguardFadingAwayDuration
-                    : StatusBar.FADE_KEYGUARD_DURATION;
+                    : CentralSurfaces.FADE_KEYGUARD_DURATION;
 
             boolean fromAod = previousState == AOD || previousState == PULSING;
             mAnimateChange = !mLaunchingAffordanceWithPreview && !fromAod;
@@ -257,6 +257,25 @@ public enum ScrimState {
                 mBehindTint = Color.BLACK;
                 mBlankScreen = true;
             }
+
+            if (mClipQsScrim) {
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+            }
+        }
+    },
+
+    DREAMING {
+        @Override
+        public void prepare(ScrimState previousState) {
+            mFrontTint = Color.TRANSPARENT;
+            mBehindTint = Color.BLACK;
+            mNotifTint = mClipQsScrim ? Color.BLACK : Color.TRANSPARENT;
+
+            mFrontAlpha = 0;
+            mBehindAlpha = mClipQsScrim ? 1 : 0;
+            mNotifAlpha = 0;
+
+            mBlankScreen = false;
 
             if (mClipQsScrim) {
                 updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);

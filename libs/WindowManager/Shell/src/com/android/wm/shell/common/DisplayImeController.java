@@ -40,7 +40,6 @@ import android.view.WindowInsets;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
-import androidx.annotation.BinderThread;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.view.IInputMethodManager;
@@ -325,7 +324,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
 
         @Override
-        public void topFocusedWindowChanged(String packageName) {
+        public void topFocusedWindowChanged(String packageName,
+                InsetsVisibilities requestedVisibilities) {
             // Do nothing
         }
 

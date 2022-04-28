@@ -20,7 +20,7 @@
     android:id="@+id/split_shade_status_bar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="@dimen/split_shade_header_min_height"
+    android:minHeight="@dimen/large_screen_shade_header_min_height"
     android:clickable="false"
     android:focusable="true"
     android:paddingLeft="@dimen/qs_panel_padding"
@@ -61,8 +61,8 @@
     <include
         android:id="@+id/carrier_group"
         layout="@layout/qs_carrier_group"
-        app:layout_constraintHeight_min="@dimen/split_shade_header_min_height"
-        android:minHeight="@dimen/split_shade_header_min_height"
+        app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
+        android:minHeight="@dimen/large_screen_shade_header_min_height"
         app:layout_constraintWidth_min="48dp"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -78,7 +78,7 @@
 
     <com.android.systemui.statusbar.phone.StatusIconContainer
         android:id="@+id/statusIcons"
-        app:layout_constraintHeight_min="@dimen/split_shade_header_min_height"
+        app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
         android:paddingEnd="@dimen/signal_cluster_battery_padding"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
@@ -93,7 +93,7 @@
         android:id="@+id/batteryRemainingIcon"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        app:layout_constraintHeight_min="@dimen/split_shade_header_min_height"
+        app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
         app:textAppearance="@style/TextAppearance.QS.Status"
         app:layout_constraintStart_toEndOf="@id/statusIcons"
         app:layout_constraintEnd_toEndOf="parent"

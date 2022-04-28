@@ -43,6 +43,7 @@ interface ISystemUiProxy {
 
     /**
      * Get the secondary split screen app's rectangle when not minimized.
+     * @deprecated
      */
     Rect getNonMinimizedSplitScreenSecondaryBounds() = 7;
 
@@ -104,6 +105,7 @@ interface ISystemUiProxy {
 
     /**
      * Sets the split-screen divider minimized state
+     * @deprecated
      */
     void setSplitScreenMinimized(boolean minimized) = 22;
 

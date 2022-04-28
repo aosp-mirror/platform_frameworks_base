@@ -256,6 +256,14 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         mActivityMetricsLogger.notifyVisibilityChanged(noDrawnActivity);
 
         verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(noDrawnActivity));
+
+        // If an activity is removed immediately before visibility update, it should cancel too.
+        final ActivityRecord removedImm = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        clearInvocations(mLaunchObserver);
+        onActivityLaunched(removedImm);
+        removedImm.removeImmediately();
+        // Verify any() instead of proto because the field of record may be changed.
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(any());
     }
 
     @Test
@@ -299,15 +307,16 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     @Test
     public void testOnReportFullyDrawn() {
         // Create an invisible event that should be cancelled after the next event starts.
-        onActivityLaunched(mTrampolineActivity);
-        mTrampolineActivity.mVisibleRequested = false;
+        final ActivityRecord prev = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        onActivityLaunched(prev);
+        prev.mVisibleRequested = false;
 
         mActivityOptions = ActivityOptions.makeBasic();
         mActivityOptions.setSourceInfo(SourceInfo.TYPE_LAUNCHER, SystemClock.uptimeMillis() - 10);
         onIntentStarted(mTopActivity.intent);
         notifyActivityLaunched(START_SUCCESS, mTopActivity);
         verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(mTopActivity), anyInt());
-        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mTrampolineActivity));
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(prev));
 
         // The activity reports fully drawn before windows drawn, then the fully drawn event will
         // be pending (see {@link WindowingModeTransitionInfo#pendingFullyDrawn}).

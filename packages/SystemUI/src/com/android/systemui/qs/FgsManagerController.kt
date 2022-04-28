@@ -18,7 +18,10 @@ package com.android.systemui.qs
 
 import android.app.IActivityManager
 import android.app.IForegroundServiceObserver
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.IBinder
@@ -42,15 +45,16 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.indentIfPossible
 import com.android.systemui.util.time.SystemClock
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.Objects
 import java.util.concurrent.Executor
@@ -67,6 +71,7 @@ class FgsManagerController @Inject constructor(
     private val packageManager: PackageManager,
     private val deviceConfigProxy: DeviceConfigProxy,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val broadcastDispatcher: BroadcastDispatcher,
     private val dumpManager: DumpManager
 ) : IForegroundServiceObserver.Stub(), Dumpable {
 
@@ -124,6 +129,18 @@ class FgsManagerController @Inject constructor(
                     .getBoolean(NAMESPACE_SYSTEMUI, TASK_MANAGER_ENABLED, true)
 
             dumpManager.registerDumpable(this)
+
+            broadcastDispatcher.registerReceiver(
+                    object : BroadcastReceiver() {
+                        override fun onReceive(context: Context, intent: Intent) {
+                            if (intent.action == Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER) {
+                                showDialog(null)
+                            }
+                        }
+                    },
+                    IntentFilter(Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER),
+                    executor = mainExecutor,
+                    flags = Context.RECEIVER_NOT_EXPORTED)
 
             initialized = true
         }
@@ -211,8 +228,13 @@ class FgsManagerController @Inject constructor(
         synchronized(lock) {
             if (dialog == null) {
 
+                runningServiceTokens.keys.forEach {
+                    it.updateUiControl()
+                }
+
                 val dialog = SystemUIDialog(context)
                 dialog.setTitle(R.string.fgs_manager_dialog_title)
+                dialog.setMessage(R.string.fgs_manager_dialog_message)
 
                 val dialogContext = dialog.context
 
@@ -220,7 +242,9 @@ class FgsManagerController @Inject constructor(
                 recyclerView.layoutManager = LinearLayoutManager(dialogContext)
                 recyclerView.adapter = appListAdapter
 
-                dialog.setView(recyclerView)
+                val topSpacing = dialogContext.resources
+                        .getDimensionPixelSize(R.dimen.fgs_manager_list_top_spacing)
+                dialog.setView(recyclerView, 0, topSpacing, 0, 0)
 
                 this.dialog = dialog
 
@@ -266,6 +290,7 @@ class FgsManagerController @Inject constructor(
             runningApps[it] = RunningApp(it.userId, it.packageName,
                     runningServiceTokens[it]!!.startTime, it.uiControl,
                     ai.loadLabel(packageManager), ai.loadIcon(packageManager))
+            logEvent(stopped = false, it.packageName, it.userId, runningApps[it]!!.timeStarted)
         }
 
         removedPackages.forEach { pkg ->
@@ -284,8 +309,23 @@ class FgsManagerController @Inject constructor(
         }
     }
 
-    private fun stopPackage(userId: Int, packageName: String) {
+    private fun stopPackage(userId: Int, packageName: String, timeStarted: Long) {
+        logEvent(stopped = true, packageName, userId, timeStarted)
         activityManager.stopAppForUser(packageName, userId)
+    }
+
+    private fun logEvent(stopped: Boolean, packageName: String, userId: Int, timeStarted: Long) {
+        val timeLogged = systemClock.elapsedRealtime()
+        val event = if (stopped) {
+            SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED__EVENT__STOPPED
+        } else {
+            SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED__EVENT__VIEWED
+        }
+        backgroundExecutor.execute {
+            val uid = packageManager.getPackageUidAsUser(packageName, userId)
+            SysUiStatsLog.write(SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED, uid, event,
+                    timeLogged - timeStarted)
+        }
     }
 
     private inner class AppListAdapter : RecyclerView.Adapter<AppItemViewHolder>() {
@@ -312,7 +352,7 @@ class FgsManagerController @Inject constructor(
                         DateUtils.LENGTH_MEDIUM)
                 stopButton.setOnClickListener {
                     stopButton.setText(R.string.fgs_manager_app_item_stop_button_stopped_label)
-                    stopPackage(runningApp.userId, runningApp.packageName)
+                    stopPackage(runningApp.userId, runningApp.packageName, runningApp.timeStarted)
                 }
                 if (runningApp.uiControl == UIControl.HIDE_BUTTON) {
                     stopButton.visibility = View.INVISIBLE
@@ -363,14 +403,27 @@ class FgsManagerController @Inject constructor(
         val userId: Int,
         val packageName: String
     ) {
-        val uiControl: UIControl by lazy {
-            val uid = packageManager.getPackageUidAsUser(packageName, userId)
+        val uid by lazy { packageManager.getPackageUidAsUser(packageName, userId) }
 
-            when (activityManager.getBackgroundRestrictionExemptionReason(uid)) {
+        private var uiControlInitialized = false
+        var uiControl: UIControl = UIControl.NORMAL
+            get() {
+                if (!uiControlInitialized) {
+                    updateUiControl()
+                }
+                return field
+            }
+            private set
+
+        fun updateUiControl() {
+            uiControl = when (activityManager.getBackgroundRestrictionExemptionReason(uid)) {
                 PowerExemptionManager.REASON_SYSTEM_UID,
                 PowerExemptionManager.REASON_DEVICE_DEMO_MODE -> UIControl.HIDE_ENTRY
 
+                PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE,
                 PowerExemptionManager.REASON_DEVICE_OWNER,
+                PowerExemptionManager.REASON_DISALLOW_APPS_CONTROL,
+                PowerExemptionManager.REASON_DPO_PROTECTED_APP,
                 PowerExemptionManager.REASON_PROFILE_OWNER,
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT,
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI,
@@ -378,6 +431,7 @@ class FgsManagerController @Inject constructor(
                 PowerExemptionManager.REASON_SYSTEM_MODULE -> UIControl.HIDE_BUTTON
                 else -> UIControl.NORMAL
             }
+            uiControlInitialized = true
         }
 
         override fun equals(other: Any?): Boolean {
@@ -485,7 +539,7 @@ class FgsManagerController @Inject constructor(
         NORMAL, HIDE_BUTTON, HIDE_ENTRY
     }
 
-    override fun dump(fd: FileDescriptor, printwriter: PrintWriter, args: Array<out String>) {
+    override fun dump(printwriter: PrintWriter, args: Array<out String>) {
         val pw = IndentingPrintWriter(printwriter)
         synchronized(lock) {
             pw.println("changesSinceDialog=$changesSinceDialog")

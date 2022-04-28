@@ -881,13 +881,13 @@ public class SystemSensorManager extends SensorManager {
                 mListener.onAccuracyChanged(t.sensor, t.accuracy);
             }
 
-            // call onSensorDiscontinuity() if the discontinuity counter changed
-            if (t.sensor.getType() == Sensor.TYPE_HEAD_TRACKER
-                    && mListener instanceof SensorEventCallback) {
+            // Indicate if the discontinuity count changed
+            if (t.sensor.getType() == Sensor.TYPE_HEAD_TRACKER) {
                 final int lastCount = mSensorDiscontinuityCounts.get(handle);
                 final int curCount = Float.floatToIntBits(values[6]);
                 if (lastCount >= 0 && lastCount != curCount) {
-                    ((SensorEventCallback) mListener).onSensorDiscontinuity(t.sensor);
+                    mSensorDiscontinuityCounts.put(handle, curCount);
+                    t.firstEventAfterDiscontinuity = true;
                 }
             }
 

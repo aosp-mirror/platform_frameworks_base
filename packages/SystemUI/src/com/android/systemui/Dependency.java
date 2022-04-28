@@ -38,6 +38,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -107,6 +108,7 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -372,6 +374,8 @@ public class Dependency {
     @Inject Lazy<AmbientState> mAmbientStateLazy;
     @Inject Lazy<GroupMembershipManager> mGroupMembershipManagerLazy;
     @Inject Lazy<GroupExpansionManager> mGroupExpansionManagerLazy;
+    @Inject Lazy<SystemUIDialogManager> mSystemUIDialogManagerLazy;
+    @Inject Lazy<DialogLaunchAnimator> mDialogLaunchAnimatorLazy;
 
     @Inject
     public Dependency() {
@@ -592,6 +596,8 @@ public class Dependency {
         mProviders.put(AmbientState.class, mAmbientStateLazy::get);
         mProviders.put(GroupMembershipManager.class, mGroupMembershipManagerLazy::get);
         mProviders.put(GroupExpansionManager.class, mGroupExpansionManagerLazy::get);
+        mProviders.put(SystemUIDialogManager.class, mSystemUIDialogManagerLazy::get);
+        mProviders.put(DialogLaunchAnimator.class, mDialogLaunchAnimatorLazy::get);
 
         Dependency.setInstance(this);
     }

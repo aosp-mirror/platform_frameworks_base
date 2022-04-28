@@ -159,6 +159,24 @@ public final class SmartspaceTarget implements Parcelable {
     public static final int FEATURE_TIMER = 21;
     public static final int FEATURE_STOPWATCH = 22;
     public static final int FEATURE_UPCOMING_ALARM = 23;
+    public static final int FEATURE_GAS_STATION_PAYMENT = 24;
+    public static final int FEATURE_PAIRED_DEVICE_STATE = 25;
+    public static final int FEATURE_DRIVING_MODE = 26;
+    public static final int FEATURE_SLEEP_SUMMARY = 27;
+    public static final int FEATURE_FLASHLIGHT = 28;
+    public static final int FEATURE_TIME_TO_LEAVE = 29;
+    public static final int FEATURE_DOORBELL = 30;
+    public static final int FEATURE_MEDIA_RESUME = 31;
+    public static final int FEATURE_CROSS_DEVICE_TIMER = 32;
+    public static final int FEATURE_SEVERE_WEATHER_ALERT = 33;
+    public static final int FEATURE_HOLIDAY_ALARM = 34;
+    public static final int FEATURE_SAFETY_CHECK = 35;
+    public static final int FEATURE_MEDIA_HEADS_UP = 36;
+    public static final int FEATURE_STEP_COUNTING = 37;
+    public static final int FEATURE_EARTHQUAKE_ALERT = 38;
+    public static final int FEATURE_STEP_DATE = 39;
+    public static final int FEATURE_BLAZE_BUILD_PROGRESS = 40;
+    public static final int FEATURE_EARTHQUAKE_OCCURRED = 41;
 
     /**
      * @hide
@@ -187,7 +205,25 @@ public final class SmartspaceTarget implements Parcelable {
             FEATURE_PACKAGE_TRACKING,
             FEATURE_TIMER,
             FEATURE_STOPWATCH,
-            FEATURE_UPCOMING_ALARM
+            FEATURE_UPCOMING_ALARM,
+            FEATURE_GAS_STATION_PAYMENT,
+            FEATURE_PAIRED_DEVICE_STATE,
+            FEATURE_DRIVING_MODE,
+            FEATURE_SLEEP_SUMMARY,
+            FEATURE_FLASHLIGHT,
+            FEATURE_TIME_TO_LEAVE,
+            FEATURE_DOORBELL,
+            FEATURE_MEDIA_RESUME,
+            FEATURE_CROSS_DEVICE_TIMER,
+            FEATURE_SEVERE_WEATHER_ALERT,
+            FEATURE_HOLIDAY_ALARM,
+            FEATURE_SAFETY_CHECK,
+            FEATURE_MEDIA_HEADS_UP,
+            FEATURE_STEP_COUNTING,
+            FEATURE_EARTHQUAKE_ALERT,
+            FEATURE_STEP_DATE,
+            FEATURE_BLAZE_BUILD_PROGRESS,
+            FEATURE_EARTHQUAKE_OCCURRED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FeatureType {

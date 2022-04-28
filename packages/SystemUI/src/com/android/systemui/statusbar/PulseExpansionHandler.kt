@@ -46,7 +46,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
@@ -192,7 +191,10 @@ constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val finishExpanding = (event.action == MotionEvent.ACTION_CANCEL ||
             event.action == MotionEvent.ACTION_UP) && isExpanding
-        if (!canHandleMotionEvent() && !finishExpanding) {
+
+        val isDraggingNotificationOrCanBypass = mStartingChild?.showingPulsing() == true ||
+                bypassController.canBypass()
+        if ((!canHandleMotionEvent() || !isDraggingNotificationOrCanBypass) && !finishExpanding) {
             // We allow cancellations/finishing to still go through here to clean up the state
             return false
         }
@@ -330,7 +332,7 @@ constructor(
         mPulsing = pulsing
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         IndentingPrintWriter(pw, "  ").let {
             it.println("PulseExpansionHandler:")
             it.increaseIndent()

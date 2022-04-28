@@ -18,7 +18,10 @@ package com.android.server.vibrator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
+import android.content.pm.PackageManagerInternal;
 import android.hardware.vibrator.IVibrator;
 import android.os.Handler;
 import android.os.VibrationEffect;
@@ -33,8 +36,14 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.server.LocalServices;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -59,10 +68,19 @@ public class DeviceVibrationEffectAdapterTest {
             new VibratorInfo.FrequencyProfile(TEST_RESONANT_FREQUENCY, TEST_MIN_FREQUENCY,
                     TEST_FREQUENCY_RESOLUTION, TEST_AMPLITUDE_MAP);
 
+    @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
+
+    @Mock private PackageManagerInternal mPackageManagerInternalMock;
+
     private DeviceVibrationEffectAdapter mAdapter;
 
     @Before
     public void setUp() throws Exception {
+        when(mPackageManagerInternalMock.getSystemUiServiceComponent())
+                .thenReturn(new ComponentName("", ""));
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
+
         VibrationSettings vibrationSettings = new VibrationSettings(
                 InstrumentationRegistry.getContext(), new Handler(new TestLooper().getLooper()));
         mAdapter = new DeviceVibrationEffectAdapter(vibrationSettings);

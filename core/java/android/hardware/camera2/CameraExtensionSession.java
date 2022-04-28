@@ -265,8 +265,8 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * from the camera device, to produce a single high-quality output result.
      *
      * <p>Note that single capture requests currently do not support
-     * client parameters except for {@link CaptureRequest#JPEG_ORIENTATION orientation} and
-     * {@link CaptureRequest#JPEG_QUALITY quality} in case of ImageFormat.JPEG output target.
+     * client parameters except for controls advertised in
+     * {@link CameraExtensionCharacteristics#getAvailableCaptureRequestKeys}.
      * The rest of the settings included in the request will be entirely overridden by
      * the device-specific extension. </p>
      *
@@ -274,6 +274,11 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * ImageFormat.YUV_420_888 or ImageFormat.JPEG target surface. {@link CaptureRequest}
      * arguments that include further targets will cause
      * IllegalArgumentException to be thrown. </p>
+     *
+     * <p>Starting with Android {@link android.os.Build.VERSION_CODES#TIRAMISU} single capture
+     * requests will also support the preview {@link android.graphics.ImageFormat#PRIVATE} target
+     * surface. These can typically be used for enabling AF/AE triggers. Do note, that single
+     * capture requests referencing both output surfaces remain unsupported.</p>
      *
      * <p>Each request will produce one new frame for one target Surface, set
      * with the CaptureRequest builder's
@@ -319,8 +324,10 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * rate possible.</p>
      *
      * <p>Note that repeating capture requests currently do not support
-     * client parameters. Settings included in the request will
-     * be completely overridden by the device-specific extension.</p>
+     * client parameters except for controls advertised in
+     * {@link CameraExtensionCharacteristics#getAvailableCaptureRequestKeys}.
+     * The rest of the settings included in the request will be entirely overridden by
+     * the device-specific extension. </p>
      *
      * <p>The {@link CaptureRequest.Builder#addTarget} supports only one
      * target surface. {@link CaptureRequest} arguments that include further

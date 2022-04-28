@@ -12,10 +12,10 @@ java_binary_host {
     manifest: "manifest.txt",
     srcs: ["src/**/*.java"],
     static_libs: [
-        "asm-7.0",
-        "asm-commons-7.0",
-        "asm-tree-7.0",
-        "asm-analysis-7.0",
+        "asm-9.2",
+        "asm-commons-9.2",
+        "asm-tree-9.2",
+        "asm-analysis-9.2",
         "guava-21.0",
     ],
 }

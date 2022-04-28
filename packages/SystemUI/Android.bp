@@ -112,6 +112,7 @@ android_library {
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
+        "com.google.android.material_material",
         "kotlinx_coroutines_android",
         "kotlinx_coroutines",
         "iconloader_base",
@@ -127,6 +128,10 @@ android_library {
     kotlincflags: ["-Xjvm-default=enable"],
 
     plugins: ["dagger2-compiler"],
+
+    lint: {
+        extra_check_modules: ["SystemUILintChecker"],
+    },
 }
 
 filegroup {

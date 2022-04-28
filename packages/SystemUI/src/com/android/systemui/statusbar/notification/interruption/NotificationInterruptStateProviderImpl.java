@@ -36,6 +36,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -66,6 +67,8 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private final ContentObserver mHeadsUpObserver;
     private final HeadsUpManager mHeadsUpManager;
     private final NotificationInterruptLogger mLogger;
+    private final NotifPipelineFlags mFlags;
+    private final KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
 
     @VisibleForTesting
     protected boolean mUseHeadsUp = false;
@@ -81,7 +84,9 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             StatusBarStateController statusBarStateController,
             HeadsUpManager headsUpManager,
             NotificationInterruptLogger logger,
-            @Main Handler mainHandler) {
+            @Main Handler mainHandler,
+            NotifPipelineFlags flags,
+            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider) {
         mContentResolver = contentResolver;
         mPowerManager = powerManager;
         mDreamManager = dreamManager;
@@ -91,6 +96,8 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         mStatusBarStateController = statusBarStateController;
         mHeadsUpManager = headsUpManager;
         mLogger = logger;
+        mFlags = flags;
+        mKeyguardNotificationVisibilityProvider = keyguardNotificationVisibilityProvider;
         mHeadsUpObserver = new ContentObserver(mainHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -282,7 +289,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private boolean canAlertCommon(NotificationEntry entry) {
         StatusBarNotification sbn = entry.getSbn();
 
-        if (mNotificationFilter.shouldFilterOut(entry)) {
+        if (!mFlags.isNewPipelineEnabled() && mNotificationFilter.shouldFilterOut(entry)) {
             mLogger.logNoAlertingFilteredOut(sbn);
             return false;
         }
@@ -302,6 +309,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
         if (entry.hasJustLaunchedFullScreenIntent()) {
             mLogger.logNoAlertingRecentFullscreen(sbn);
+            return false;
+        }
+
+        if (mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry)) {
+            mLogger.keyguardHideNotification(entry.getKey());
             return false;
         }
 

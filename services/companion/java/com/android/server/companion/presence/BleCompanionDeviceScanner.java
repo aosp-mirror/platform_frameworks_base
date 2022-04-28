@@ -21,8 +21,6 @@ import static android.bluetooth.BluetoothAdapter.ACTION_BLE_STATE_CHANGED;
 import static android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED;
 import static android.bluetooth.BluetoothAdapter.EXTRA_PREVIOUS_STATE;
 import static android.bluetooth.BluetoothAdapter.EXTRA_STATE;
-import static android.bluetooth.BluetoothAdapter.STATE_BLE_ON;
-import static android.bluetooth.BluetoothAdapter.STATE_ON;
 import static android.bluetooth.BluetoothAdapter.nameForState;
 import static android.bluetooth.le.ScanCallback.SCAN_FAILED_ALREADY_STARTED;
 import static android.bluetooth.le.ScanCallback.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED;
@@ -196,6 +194,8 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         // Collect MAC addresses from all associations.
         final Set<String> macAddresses = new HashSet<>();
         for (AssociationInfo association : mAssociationStore.getAssociations()) {
+            if (!association.isNotifyOnDeviceNearby()) continue;
+
             // Beware that BT stack does not consider low-case MAC addresses valid, while
             // MacAddress.toString() return a low-case String.
             final String macAddress = association.getDeviceMacAddressAsString();
@@ -230,18 +230,24 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
 
         if (DEBUG) Log.i(TAG, "stopScan()");
         if (!mScanning) {
-            Log.d(TAG, "  > not scanning.");
+            if (DEBUG) Log.d(TAG, "  > not scanning.");
             return;
+        }
+        // mScanCallback is non-null here - it cannot be null when mScanning is true.
+
+        // BluetoothLeScanner will throw an IllegalStateException if stopScan() is called while LE
+        // is not enabled.
+        if (mBtAdapter.isLeEnabled()) {
+            try {
+                mBleScanner.stopScan(mScanCallback);
+            } catch (RuntimeException e) {
+                // Just to be sure not to crash system server here if BluetoothLeScanner throws
+                // another RuntimeException.
+                Slog.w(TAG, "Exception while stopping BLE scanning", e);
+            }
         }
 
         mScanning = false;
-
-        if (mBtAdapter.getState() != STATE_ON && mBtAdapter.getState() != STATE_BLE_ON) {
-            Log.d(TAG, "BT Adapter is not turned ON");
-            return;
-        }
-
-        mBleScanner.stopScan(mScanCallback);
     }
 
     @MainThread

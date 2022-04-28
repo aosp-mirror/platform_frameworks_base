@@ -29,10 +29,9 @@ import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowManager;
 import android.view.View;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.navigationbar.NavigationBarComponent.NavigationBarScope;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 
@@ -40,6 +39,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+/** */
+@NavigationBarScope
 public final class NavigationBarTransitions extends BarTransitions implements
         LightBarTransitionsController.DarkIntensityApplier {
 
@@ -58,6 +61,8 @@ public final class NavigationBarTransitions extends BarTransitions implements
     }
 
     private final NavigationBarView mView;
+    @org.jetbrains.annotations.NotNull
+    private final IWindowManager mWindowManagerService;
     private final LightBarTransitionsController mLightTransitionsController;
     private final boolean mAllowAutoDimWallpaperNotVisible;
     private boolean mWallpaperVisible;
@@ -79,18 +84,21 @@ public final class NavigationBarTransitions extends BarTransitions implements
         }
     };
 
-    public NavigationBarTransitions(NavigationBarView view, CommandQueue commandQueue) {
+    @Inject
+    public NavigationBarTransitions(
+            NavigationBarView view,
+            IWindowManager windowManagerService,
+            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory) {
         super(view, R.drawable.nav_background);
         mView = view;
-        mLightTransitionsController = new LightBarTransitionsController(
-                view.getContext(), this, commandQueue);
+        mWindowManagerService = windowManagerService;
+        mLightTransitionsController = lightBarTransitionsControllerFactory.create(this);
         mAllowAutoDimWallpaperNotVisible = view.getContext().getResources()
                 .getBoolean(R.bool.config_navigation_bar_enable_auto_dim_no_visible_wallpaper);
         mDarkIntensityListeners = new ArrayList();
 
-        IWindowManager windowManagerService = Dependency.get(IWindowManager.class);
         try {
-            mWallpaperVisible = windowManagerService.registerWallpaperVisibilityListener(
+            mWallpaperVisible = mWindowManagerService.registerWallpaperVisibilityListener(
                     mWallpaperVisibilityListener, Display.DEFAULT_DISPLAY);
         } catch (RemoteException e) {
         }
@@ -115,12 +123,12 @@ public final class NavigationBarTransitions extends BarTransitions implements
 
     @Override
     public void destroy() {
-        IWindowManager windowManagerService = Dependency.get(IWindowManager.class);
         try {
-            windowManagerService.unregisterWallpaperVisibilityListener(mWallpaperVisibilityListener,
+            mWindowManagerService.unregisterWallpaperVisibilityListener(mWallpaperVisibilityListener,
                     Display.DEFAULT_DISPLAY);
         } catch (RemoteException e) {
         }
+        mLightTransitionsController.destroy();
     }
 
     @Override

@@ -93,6 +93,7 @@ import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
+import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import dalvik.system.VMRuntime;
@@ -849,6 +850,8 @@ public class PackageManagerServiceUtils {
         ret.recommendedInstallLocation = recommendedInstallLocation;
         ret.multiArch = pkg.isMultiArch();
         ret.debuggable = pkg.isDebuggable();
+        ret.isSdkLibrary = pkg.isIsSdkLibrary();
+
         return ret;
     }
 
@@ -1064,7 +1067,7 @@ public class PackageManagerServiceUtils {
 
     // Static to give access to ComputeEngine
     public static void applyEnforceIntentFilterMatching(
-            PlatformCompat compat, ComponentResolver resolver,
+            PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
         // Do not enforce filter matching when the caller is system or root.
@@ -1242,10 +1245,25 @@ public class PackageManagerServiceUtils {
      * @throws SecurityException if the caller is not system or shell
      */
     public static void enforceSystemOrRootOrShell(String message) {
-        final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != Process.ROOT_UID && uid != Process.SHELL_UID) {
+        if (!isSystemOrRootOrShell()) {
             throw new SecurityException(message);
         }
+    }
+
+    /**
+     * Check if the Binder caller is system UID, root's UID, or shell's UID.
+     */
+    public static boolean isSystemOrRootOrShell() {
+        final int uid = Binder.getCallingUid();
+        return uid == Process.SYSTEM_UID || uid == Process.ROOT_UID || uid == Process.SHELL_UID;
+    }
+
+    /**
+     * Check if the Binder caller is system UID or root's UID.
+     */
+    public static boolean isSystemOrRoot() {
+        final int uid = Binder.getCallingUid();
+        return uid == Process.SYSTEM_UID || uid == Process.ROOT_UID;
     }
 
     /**
@@ -1256,8 +1274,7 @@ public class PackageManagerServiceUtils {
      * @throws SecurityException if the caller is not system or root
      */
     public static void enforceSystemOrRoot(String message) {
-        final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != Process.ROOT_UID) {
+        if (!isSystemOrRoot()) {
             throw new SecurityException(message);
         }
     }

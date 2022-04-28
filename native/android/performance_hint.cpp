@@ -48,6 +48,7 @@ private:
     static APerformanceHintManager* create(sp<IHintManager> iHintManager);
 
     sp<IHintManager> mHintManager;
+    const sp<IBinder> mToken = sp<BBinder>::make();
     const int64_t mPreferredRateNanos;
 };
 
@@ -119,11 +120,10 @@ APerformanceHintManager* APerformanceHintManager::create(sp<IHintManager> manage
 
 APerformanceHintSession* APerformanceHintManager::createSession(
         const int32_t* threadIds, size_t size, int64_t initialTargetWorkDurationNanos) {
-    sp<IBinder> token = sp<BBinder>::make();
     std::vector<int32_t> tids(threadIds, threadIds + size);
     sp<IHintSession> session;
     binder::Status ret =
-            mHintManager->createHintSession(token, tids, initialTargetWorkDurationNanos, &session);
+            mHintManager->createHintSession(mToken, tids, initialTargetWorkDurationNanos, &session);
     if (!ret.isOk() || !session) {
         return nullptr;
     }
@@ -184,13 +184,13 @@ int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNano
     mTimestampsNanos.push_back(now);
 
     /**
-     * Use current sample to determine the rate limit. We can pick a shorter rate limit
-     * if any sample underperformed, however, it could be the lower level system is slow
-     * to react. So here we explicitly choose the rate limit with the latest sample.
+     * Cache the hint if the hint is not overtime and the mLastUpdateTimestamp is
+     * still in the mPreferredRateNanos duration.
      */
-    int64_t rateLimit = actualDurationNanos > mTargetDurationNanos ? mPreferredRateNanos
-                                                                   : 10 * mPreferredRateNanos;
-    if (now - mLastUpdateTimestamp <= rateLimit) return 0;
+    if (actualDurationNanos < mTargetDurationNanos &&
+        now - mLastUpdateTimestamp <= mPreferredRateNanos) {
+        return 0;
+    }
 
     binder::Status ret =
             mHintSession->reportActualWorkDuration(mActualDurationsNanos, mTimestampsNanos);

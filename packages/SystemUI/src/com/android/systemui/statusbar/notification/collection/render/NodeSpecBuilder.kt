@@ -22,6 +22,7 @@ import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
+import com.android.systemui.util.Compile
 import com.android.systemui.util.traceSection
 
 /**
@@ -37,8 +38,11 @@ class NodeSpecBuilder(
     private val mediaContainerController: MediaContainerController,
     private val sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
-    private val viewBarn: NotifViewBarn
+    private val viewBarn: NotifViewBarn,
+    private val logger: NodeSpecBuilderLogger
 ) {
+    private var lastSections = setOf<NotifSection?>()
+
     fun buildNodeSpec(
         rootController: NodeController,
         notifList: List<ListEntry>
@@ -53,11 +57,23 @@ class NodeSpecBuilder(
 
         var currentSection: NotifSection? = null
         val prevSections = mutableSetOf<NotifSection?>()
+        var lastSection: NotifSection? = null
         val showHeaders = sectionHeaderVisibilityProvider.sectionHeadersVisible
+        val sectionOrder = mutableListOf<NotifSection?>()
+        val sectionHeaders = mutableMapOf<NotifSection?, NodeController?>()
+        val sectionCounts = mutableMapOf<NotifSection?, Int>()
 
         for (entry in notifList) {
             val section = entry.section!!
 
+            lastSection?.let {
+                if (it.bucket > section.bucket) {
+                    throw IllegalStateException("buildNodeSpec with non contiguous section " +
+                            "buckets ${it.sectioner.name} - ${it.bucket} & " +
+                            "${it.sectioner.name} - ${it.bucket}")
+                }
+            }
+            lastSection = section
             if (prevSections.contains(section)) {
                 throw java.lang.RuntimeException("Section ${section.label} has been duplicated")
             }
@@ -67,14 +83,28 @@ class NodeSpecBuilder(
                 if (section.headerController != currentSection?.headerController && showHeaders) {
                     section.headerController?.let { headerController ->
                         root.children.add(NodeSpecImpl(root, headerController))
+                        if (Compile.IS_DEBUG) {
+                            sectionHeaders[section] = headerController
+                        }
                     }
                 }
                 prevSections.add(currentSection)
                 currentSection = section
+                if (Compile.IS_DEBUG) {
+                    sectionOrder.add(section)
+                }
             }
 
             // Finally, add the actual notif node!
             root.children.add(buildNotifNode(root, entry))
+            if (Compile.IS_DEBUG) {
+                sectionCounts[section] = sectionCounts.getOrDefault(section, 0) + 1
+            }
+        }
+
+        if (Compile.IS_DEBUG) {
+            logger.logBuildNodeSpec(lastSections, sectionHeaders, sectionCounts, sectionOrder)
+            lastSections = sectionCounts.keys
         }
 
         return@traceSection root
