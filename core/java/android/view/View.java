@@ -162,6 +162,7 @@ import android.view.translation.ViewTranslationResponse;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
+import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
@@ -1279,6 +1280,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY = "creditCardExpirationDay";
+
+    /**
+     * A hint indicating that this view can be autofilled with a password.
+     *
+     * This is a heuristic-based hint that is meant to be used by UI Toolkit developers when a
+     * view is a password field but doesn't specify a
+     * <code>{@value View#AUTOFILL_HINT_PASSWORD}</code>.
+     * @hide
+     */
+    // TODO(229765029): unhide this for UI toolkit
+    public static final String AUTOFILL_HINT_PASSWORD_AUTO = "passwordAuto";
 
     /**
      * Hints for the autofill services that describes the content of the view.
@@ -8206,12 +8218,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         // becomes true where it should issue notifyViewEntered().
                         afm.notifyViewEntered(this);
                     } else {
-                        afm.enableFillRequestActivityStarted();
+                        afm.enableFillRequestActivityStarted(this);
                     }
                 } else if (!enter && !isFocused()) {
                     afm.notifyViewExited(this);
                 } else if (enter) {
-                    afm.enableFillRequestActivityStarted();
+                    afm.enableFillRequestActivityStarted(this);
                 }
             }
         }
@@ -11939,13 +11951,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @NonNull
     List<Rect> collectPreferKeepClearRects() {
         ListenerInfo info = mListenerInfo;
-        final List<Rect> list = new ArrayList<>();
+        boolean keepBoundsClear =
+                (info != null && info.mPreferKeepClear) || mPreferKeepClearForFocus;
+        boolean hasCustomKeepClearRects = info != null && info.mKeepClearRects != null;
 
-        if ((info != null && info.mPreferKeepClear) || mPreferKeepClearForFocus) {
+        if (!keepBoundsClear && !hasCustomKeepClearRects) {
+            return Collections.emptyList();
+        } else if (keepBoundsClear && !hasCustomKeepClearRects) {
+            return Collections.singletonList(new Rect(0, 0, getWidth(), getHeight()));
+        }
+
+        final List<Rect> list = new ArrayList<>();
+        if (keepBoundsClear) {
             list.add(new Rect(0, 0, getWidth(), getHeight()));
         }
 
-        if (info != null && info.mKeepClearRects != null) {
+        if (hasCustomKeepClearRects) {
             list.addAll(info.mKeepClearRects);
         }
 
@@ -12023,7 +12044,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     public Rect getHandwritingArea() {
         final ListenerInfo info = mListenerInfo;
-        if (info != null) {
+        if (info != null && info.mHandwritingArea != null) {
             return new Rect(info.mHandwritingArea);
         }
         return null;
@@ -12039,13 +12060,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Compute the view's coordinate within the surface.
+     * Gets the coordinates of this view in the coordinate space of the
+     * {@link Surface} that contains the view.
      *
-     * <p>Computes the coordinates of this view in its surface. The argument
-     * must be an array of two integers. After the method returns, the array
-     * contains the x and y location in that order.</p>
+     * <p>In multiple-screen scenarios, if the surface spans multiple screens,
+     * the coordinate space of the surface also spans multiple screens.
      *
-     * @param location an array of two integers in which to hold the coordinates
+     * <p>After the method returns, the argument array contains the x- and
+     * y-coordinates of the view relative to the view's left and top edges,
+     * respectively.
+     *
+     * @param location A two-element integer array in which the view coordinates
+     *      are stored. The x-coordinate is at index 0; the y-coordinate, at
+     *      index 1.
      */
     public void getLocationInSurface(@NonNull @Size(2) int[] location) {
         getLocationInWindow(location);
@@ -12085,6 +12112,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else if (parent instanceof ViewRootImpl) {
             // Between WindowManager.addView() and the first traversal AttachInfo isn't set yet.
             return ((ViewRootImpl) parent).getInsetsController();
+        }
+        return null;
+    }
+
+
+    /**
+     * Walk up the View hierarchy to find the nearest {@link OnBackInvokedDispatcher}.
+     *
+     * @return The {@link OnBackInvokedDispatcher} from this or the nearest
+     * ancestor, or null if this view is both not attached and have no ancestor providing an
+     * {@link OnBackInvokedDispatcher}.
+     */
+    @Nullable
+    public final OnBackInvokedDispatcher findOnBackInvokedDispatcher() {
+        ViewParent parent = getParent();
+        if (parent != null) {
+            return parent.findOnBackInvokedDispatcherForChild(this, this);
         }
         return null;
     }
@@ -25544,11 +25588,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * <p>Computes the coordinates of this view on the screen. The argument
-     * must be an array of two integers. After the method returns, the array
-     * contains the x and y location in that order.</p>
+     * Gets the coordinates of this view in the coordinate space of the device
+     * screen, irrespective of system decorations and whether the system is in
+     * multi-window mode.
      *
-     * @param outLocation an array of two integers in which to hold the coordinates
+     * <p>In multi-window mode, the coordinate space encompasses the entire
+     * device screen, ignoring the bounds of the app window. For example, if the
+     * view is in the bottom portion of a horizontal split screen, the top edge
+     * of the screen&mdash;not the top edge of the window&mdash;is the origin
+     * from which the y-coordinate is calculated.
+     *
+     * <p>In multiple-screen scenarios, the coordinate space can span screens.
+     * For example, if the app is spanning both screens of a dual-screen device
+     * and the view is located on the right-hand screen, the x-coordinate is
+     * calculated from the left edge of the left-hand screen to the left edge of
+     * the view. When the app is restricted to a single screen in a
+     * multiple-screen environment, the coordinate space includes only the
+     * screen on which the app is running.
+     *
+     * <p>After the method returns, the argument array contains the x- and
+     * y-coordinates of the view relative to the view's left and top edges,
+     * respectively.
+     *
+     * @param outLocation A two-element integer array in which the view
+     *      coordinates are stored. The x-coordinate is at index 0; the
+     *      y-coordinate, at index 1.
      */
     public void getLocationOnScreen(@Size(2) int[] outLocation) {
         getLocationInWindow(outLocation);
@@ -25561,11 +25625,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * <p>Computes the coordinates of this view in its window. The argument
-     * must be an array of two integers. After the method returns, the array
-     * contains the x and y location in that order.</p>
+     * Gets the coordinates of this view in the coordinate space of the window
+     * that contains the view, irrespective of system decorations.
      *
-     * @param outLocation an array of two integers in which to hold the coordinates
+     * <p>In multi-window mode, the origin of the coordinate space is the
+     * top left corner of the window that contains the view. In full screen
+     * mode, the origin is the top left corner of the device screen.
+     *
+     * <p>In multiple-screen scenarios, if the app spans multiple screens, the
+     * coordinate space also spans multiple screens. But if the app is
+     * restricted to a single screen, the coordinate space includes only the
+     * screen on which the app is running.
+     *
+     * <p>After the method returns, the argument array contains the x- and
+     * y-coordinates of the view relative to the view's left and top edges,
+     * respectively.
+     *
+     * @param outLocation A two-element integer array in which the view
+     *      coordinates are stored. The x-coordinate is at index 0; the
+     *      y-coordinate, at index 1.
      */
     public void getLocationInWindow(@Size(2) int[] outLocation) {
         if (outLocation == null || outLocation.length < 2) {
@@ -28667,7 +28745,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *     {@link InputDevice#SOURCE_MOUSE_RELATIVE}, and relative position changes will be
      *     available through {@link MotionEvent#getX} and {@link MotionEvent#getY}.</li>
      *
-     *     <li>Events from a touchpad will be delivered with the source
+     *     <li>Events from a touchpad or trackpad will be delivered with the source
      *     {@link InputDevice#SOURCE_TOUCHPAD}, where the absolute position of each of the pointers
      *     on the touchpad will be available through {@link MotionEvent#getX(int)} and
      *     {@link MotionEvent#getY(int)}, and their relative movements are stored in
@@ -28675,6 +28753,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      *     <li>Events from other types of devices, such as touchscreens, will not be affected.</li>
      * </ul>
+     * <p>
+     * When pointer capture changes, connected mouse and trackpad devices may be reconfigured,
+     * and their properties (such as their sources or motion ranges) may change. Use an
+     * {@link android.hardware.input.InputManager.InputDeviceListener} to be notified when a device
+     * changes (which may happen after enabling or disabling pointer capture), and use
+     * {@link InputDevice#getDevice(int)} to get the updated {@link InputDevice}.
      * <p>
      * Events captured through pointer capture will be dispatched to
      * {@link OnCapturedPointerListener#onCapturedPointer(View, MotionEvent)} if an
@@ -29883,10 +29967,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean mHandlingPointerEvent;
 
         /**
-         * The screen matrix of this view when it's on a {@link SurfaceControlViewHost} that is
+         * The window matrix of this view when it's on a {@link SurfaceControlViewHost} that is
          * embedded within a SurfaceView.
          */
-        Matrix mScreenMatrixInEmbeddedHierarchy;
+        Matrix mWindowMatrixInEmbeddedHierarchy;
 
         /**
          * Global to the view hierarchy used as a temporary for dealing with

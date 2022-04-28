@@ -97,6 +97,10 @@ class ProcessStateModifier extends Modifier {
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
         }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) {
+        }
     };
 
     ProcessStateModifier(@NonNull InternalResourceService irs) {

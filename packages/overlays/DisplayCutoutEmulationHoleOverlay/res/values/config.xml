@@ -48,6 +48,9 @@
      -->
     <bool name="config_fillMainBuiltInDisplayCutout">true</bool>
 
+    <!-- Height of the status bar -->
+    <dimen name="status_bar_height_portrait">136px</dimen>
+    <dimen name="status_bar_height_landscape">28dp</dimen>
 </resources>
 
 

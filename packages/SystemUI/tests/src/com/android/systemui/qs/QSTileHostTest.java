@@ -77,7 +77,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -262,7 +261,7 @@ public class QSTileHostTest extends SysuiTestCase {
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1,spec2");
         StringWriter w = new StringWriter();
         PrintWriter pw = new PrintWriter(w);
-        mQSTileHost.dump(mock(FileDescriptor.class), pw, new String[]{});
+        mQSTileHost.dump(pw, new String[]{});
         String output = "QSTileHost:\n"
                 + TestTile1.class.getSimpleName() + ":\n"
                 + "    " + MOCK_STATE_STRING + "\n"

@@ -83,7 +83,9 @@ public final class HdmiCecStandbyModeHandler {
     private final HdmiCecLocalDevice mDevice;
 
     private final SparseArray<CecMessageHandler> mCecMessageHandlers = new SparseArray<>();
-    private final CecMessageHandler mDefaultHandler = new Aborter(
+    private final CecMessageHandler mDefaultHandler;
+
+    private final CecMessageHandler mAborterUnrecognizedOpcode = new Aborter(
             Constants.ABORT_UNRECOGNIZED_OPCODE);
     private final CecMessageHandler mAborterIncorrectMode = new Aborter(
             Constants.ABORT_NOT_IN_CORRECT_MODE);
@@ -95,6 +97,10 @@ public final class HdmiCecStandbyModeHandler {
             mUserControlProcessedHandler = new UserControlProcessedHandler();
 
     private void addCommonHandlers() {
+        addHandler(Constants.MESSAGE_USER_CONTROL_PRESSED, mUserControlProcessedHandler);
+    }
+
+    private void addTvHandlers() {
         addHandler(Constants.MESSAGE_ACTIVE_SOURCE, mBystander);
         addHandler(Constants.MESSAGE_REQUEST_ACTIVE_SOURCE, mBystander);
         addHandler(Constants.MESSAGE_ROUTING_CHANGE, mBystander);
@@ -118,17 +124,13 @@ public final class HdmiCecStandbyModeHandler {
         addHandler(Constants.MESSAGE_REPORT_POWER_STATUS, mBypasser);
         addHandler(Constants.MESSAGE_GIVE_FEATURES, mBypasser);
 
-        addHandler(Constants.MESSAGE_USER_CONTROL_PRESSED, mUserControlProcessedHandler);
-
         addHandler(Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS, mBypasser);
         addHandler(Constants.MESSAGE_ABORT, mBypasser);
         addHandler(Constants.MESSAGE_GET_CEC_VERSION, mBypasser);
 
         addHandler(Constants.MESSAGE_VENDOR_COMMAND_WITH_ID, mAborterIncorrectMode);
         addHandler(Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE, mAborterIncorrectMode);
-    }
 
-    private void addTvHandlers() {
         addHandler(Constants.MESSAGE_IMAGE_VIEW_ON, mAutoOnHandler);
         addHandler(Constants.MESSAGE_TEXT_VIEW_ON, mAutoOnHandler);
 
@@ -153,6 +155,9 @@ public final class HdmiCecStandbyModeHandler {
         addCommonHandlers();
         if (mDevice.getType() == HdmiDeviceInfo.DEVICE_TV) {
             addTvHandlers();
+            mDefaultHandler = mAborterUnrecognizedOpcode;
+        } else {
+            mDefaultHandler = mBypasser;
         }
     }
 

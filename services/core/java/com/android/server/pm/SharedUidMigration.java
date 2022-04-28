@@ -61,7 +61,7 @@ public final class SharedUidMigration {
     public @interface Strategy {}
 
     @Strategy
-    private static final int DEFAULT = BEST_EFFORT;
+    private static final int DEFAULT = NEW_INSTALL_ONLY;
 
     /**
      * Whether shared UID migration is fully disabled. Disabled means the sharedUserMaxSdkVersion

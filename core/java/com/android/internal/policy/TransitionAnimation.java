@@ -101,10 +101,6 @@ public class TransitionAnimation {
 
     private static final String DEFAULT_PACKAGE = "android";
 
-    // TODO (b/215515255): remove once we full migrate to shell transitions
-    private static final boolean SHELL_TRANSITIONS_ENABLED =
-            SystemProperties.getBoolean("persist.wm.debug.shell_transit", false);
-
     private final Context mContext;
     private final String mTag;
 
@@ -259,32 +255,11 @@ public class TransitionAnimation {
                 resId = ent.array.getResourceId(animAttr, 0);
             }
         }
-        if (!SHELL_TRANSITIONS_ENABLED) {
-            resId = updateToLegacyIfNeeded(resId);
-        }
         resId = updateToTranslucentAnimIfNeeded(resId, transit);
         if (ResourceId.isValid(resId)) {
             return loadAnimationSafely(context, resId, mTag);
         }
         return null;
-    }
-
-    /**
-     * Replace animations that are not compatible with the legacy transition system with ones that
-     * are compatible with it.
-     * TODO (b/215515255): remove once we full migrate to shell transitions
-     */
-    private int updateToLegacyIfNeeded(int anim) {
-        if (anim == R.anim.activity_open_enter) {
-            return R.anim.activity_open_enter_legacy;
-        } else if (anim == R.anim.activity_open_exit) {
-            return R.anim.activity_open_exit_legacy;
-        } else if (anim == R.anim.activity_close_enter) {
-            return R.anim.activity_close_enter_legacy;
-        } else if (anim == R.anim.activity_close_exit) {
-            return R.anim.activity_close_exit_legacy;
-        }
-        return anim;
     }
 
     /** Load animation by attribute Id from a specific AnimationStyle resource. */

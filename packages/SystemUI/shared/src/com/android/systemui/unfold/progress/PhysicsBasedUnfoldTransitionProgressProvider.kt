@@ -77,7 +77,7 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
 
                 // Stop the animation if the device has already opened by the time when
                 // the display is available as we won't receive the full open event anymore
-                if (foldStateProvider.isFullyOpened) {
+                if (foldStateProvider.isFinishedOpening) {
                     cancelTransition(endValue = 1f, animate = true)
                 }
             }

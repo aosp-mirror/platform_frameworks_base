@@ -34,7 +34,6 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -734,7 +733,7 @@ public class ViewState implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         StringBuilder result = new StringBuilder();
         result.append("ViewState { ");
 

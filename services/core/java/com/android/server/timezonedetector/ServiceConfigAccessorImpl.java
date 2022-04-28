@@ -59,6 +59,8 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
      */
     private static final Set<String> CONFIGURATION_INTERNAL_SERVER_FLAGS_KEYS_TO_WATCH = Set.of(
             ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
+            ServerFlags.KEY_PRIMARY_LTZP_MODE_OVERRIDE,
+            ServerFlags.KEY_SECONDARY_LTZP_MODE_OVERRIDE,
             ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED,
             ServerFlags.KEY_ENHANCED_METRICS_COLLECTION_ENABLED,
             ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
@@ -443,6 +445,9 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         mTestPrimaryLocationTimeZoneProviderMode =
                 mTestPrimaryLocationTimeZoneProviderPackageName == null
                         ? PROVIDER_MODE_DISABLED : PROVIDER_MODE_ENABLED;
+        // Changing this state can affect the content of ConfigurationInternal, so listeners need to
+        // be informed.
+        mContext.getMainThreadHandler().post(this::handleConfigurationInternalChangeOnMainThread);
     }
 
     @Override
@@ -469,6 +474,9 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         mTestSecondaryLocationTimeZoneProviderMode =
                 mTestSecondaryLocationTimeZoneProviderPackageName == null
                         ? PROVIDER_MODE_DISABLED : PROVIDER_MODE_ENABLED;
+        // Changing this state can affect the content of ConfigurationInternal, so listeners need to
+        // be informed.
+        mContext.getMainThreadHandler().post(this::handleConfigurationInternalChangeOnMainThread);
     }
 
     @Override
@@ -573,6 +581,10 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         mTestSecondaryLocationTimeZoneProviderPackageName = null;
         mTestSecondaryLocationTimeZoneProviderMode = null;
         mRecordStateChangesForTests = false;
+
+        // Changing LTZP config can affect the content of ConfigurationInternal, so listeners
+        // need to be informed.
+        mContext.getMainThreadHandler().post(this::handleConfigurationInternalChangeOnMainThread);
     }
 
     private boolean isTelephonyFallbackSupported() {

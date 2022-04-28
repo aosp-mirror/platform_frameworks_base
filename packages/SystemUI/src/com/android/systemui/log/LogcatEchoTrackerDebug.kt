@@ -41,6 +41,7 @@ class LogcatEchoTrackerDebug private constructor(
 ) : LogcatEchoTracker {
     private val cachedBufferLevels: MutableMap<String, LogLevel> = mutableMapOf()
     private val cachedTagLevels: MutableMap<String, LogLevel> = mutableMapOf()
+    override val logInBackgroundThread = true
 
     companion object Factory {
         @JvmStatic

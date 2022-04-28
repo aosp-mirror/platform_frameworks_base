@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
@@ -60,7 +61,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -285,14 +285,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     private void applyKeyguardFlags(State state) {
-        final boolean scrimsOccludingWallpaper =
-                state.mScrimsVisibility == ScrimController.OPAQUE || state.mLightRevealScrimOpaque;
         final boolean keyguardOrAod = state.mKeyguardShowing
                 || (state.mDozing && mDozeParameters.getAlwaysOn());
-        if ((keyguardOrAod && !state.mBackdropShowing && !scrimsOccludingWallpaper)
-                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe()) {
+        if ((keyguardOrAod && !state.mBackdropShowing && !state.mLightRevealScrimOpaque)
+                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehind()) {
             // Show the wallpaper if we're on keyguard/AOD and the wallpaper is not occluded by a
-            // solid backdrop or scrim. Also, show it if we are currently animating between the
+            // solid backdrop. Also, show it if we are currently animating between the
             // keyguard and the surface behind the keyguard - we want to use the wallpaper as a
             // backdrop for this animation.
             mLpChanged.flags |= LayoutParams.FLAG_SHOW_WALLPAPER;
@@ -329,6 +327,16 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             Trace.setCounter("display_max_refresh_rate",
                     (long) mLpChanged.preferredMaxDisplayRefreshRate);
         }
+
+        if (state.mBouncerShowing && !isDebuggable()) {
+            mLpChanged.flags |= LayoutParams.FLAG_SECURE;
+        } else {
+            mLpChanged.flags &= ~LayoutParams.FLAG_SECURE;
+        }
+    }
+
+    protected boolean isDebuggable() {
+        return Build.IS_DEBUGGABLE;
     }
 
     private void adjustScreenOrientation(State state) {
@@ -756,7 +764,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG + ":");
         pw.println("  mKeyguardMaxRefreshRate=" + mKeyguardMaxRefreshRate);
         pw.println("  mKeyguardPreferredRefreshRate=" + mKeyguardPreferredRefreshRate);

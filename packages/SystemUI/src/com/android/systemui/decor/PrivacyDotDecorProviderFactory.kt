@@ -16,6 +16,7 @@
 
 package com.android.systemui.decor
 
+import android.content.Context
 import android.content.res.Resources
 import android.view.DisplayCutout
 import android.view.LayoutInflater
@@ -76,12 +77,21 @@ class PrivacyDotCornerDecorProviderImpl(
     private val layoutId: Int
 ) : CornerDecorProvider() {
 
+    override fun onReloadResAndMeasure(
+        view: View,
+        reloadToken: Int,
+        rotation: Int,
+        displayUniqueId: String?
+    ) {
+        // Do nothing here because it is handled inside PrivacyDotViewController
+    }
+
     override fun inflateView(
-        inflater: LayoutInflater,
+        context: Context,
         parent: ViewGroup,
         @Surface.Rotation rotation: Int
     ): View {
-        inflater.inflate(layoutId, parent, true)
+        LayoutInflater.from(context).inflate(layoutId, parent, true)
         return parent.getChildAt(parent.childCount - 1 /* latest new added child */)
     }
 }

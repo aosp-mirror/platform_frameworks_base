@@ -119,8 +119,6 @@ public final class ShellCommandHandlerImpl {
                 return runRemoveFromSideStage(args, pw);
             case "setSideStagePosition":
                 return runSetSideStagePosition(args, pw);
-            case "setSideStageVisibility":
-                return runSetSideStageVisibility(args, pw);
             case "help":
                 return runHelp(pw);
             default:
@@ -186,18 +184,6 @@ public final class ShellCommandHandlerImpl {
         return true;
     }
 
-    private boolean runSetSideStageVisibility(String[] args, PrintWriter pw) {
-        if (args.length < 3) {
-            // First arguments are "WMShell" and command name.
-            pw.println("Error: side stage visibility should be provided as arguments");
-            return false;
-        }
-        final Boolean visible = new Boolean(args[2]);
-
-        mSplitScreenOptional.ifPresent(split -> split.setSideStageVisibility(visible));
-        return true;
-    }
-
     private boolean runHelp(PrintWriter pw) {
         pw.println("Window Manager Shell commands:");
         pw.println("  help");
@@ -215,8 +201,6 @@ public final class ShellCommandHandlerImpl {
         pw.println("    Enable/Disable outline on the side-stage.");
         pw.println("  setSideStagePosition <SideStagePosition>");
         pw.println("    Sets the position of the side-stage.");
-        pw.println("  setSideStageVisibility <true/false>");
-        pw.println("    Show/hide side-stage.");
         return true;
     }
 

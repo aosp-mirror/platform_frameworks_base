@@ -68,10 +68,19 @@
     The chain is set to "spread" so that the progress bar can be weighted to fill any empty space.
      -->
     <Constraint
-        android:id="@+id/actionPrev"
+        android:id="@+id/media_scrubbing_elapsed_time"
         android:layout_width="48dp"
         android:layout_height="48dp"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/actionPrev"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread" />
+
+    <Constraint
+        android:id="@+id/actionPrev"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:layout_constraintLeft_toRightOf="@id/media_scrubbing_elapsed_time"
         app:layout_constraintRight_toLeftOf="@id/media_progress_bar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_chainStyle="spread" />
@@ -90,6 +99,14 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         app:layout_constraintLeft_toRightOf="@id/media_progress_bar"
+        app:layout_constraintRight_toLeftOf="@id/media_scrubbing_total_time"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <Constraint
+        android:id="@+id/media_scrubbing_total_time"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:layout_constraintLeft_toRightOf="@id/actionNext"
         app:layout_constraintRight_toLeftOf="@id/action0"
         app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -97,7 +114,7 @@
         android:id="@+id/action0"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        app:layout_constraintLeft_toRightOf="@id/actionNext"
+        app:layout_constraintLeft_toRightOf="@id/media_scrubbing_total_time"
         app:layout_constraintRight_toLeftOf="@id/action1"
         app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -115,7 +132,7 @@
         android:layout_height="48dp"
         app:layout_constraintLeft_toRightOf="@id/action1"
         app:layout_constraintRight_toLeftOf="@id/action3"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <Constraint
         android:id="@+id/action3"
@@ -123,7 +140,7 @@
         android:layout_height="48dp"
         app:layout_constraintLeft_toRightOf="@id/action2"
         app:layout_constraintRight_toLeftOf="@id/action4"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <Constraint
         android:id="@+id/action4"

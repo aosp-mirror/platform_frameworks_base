@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.os.IpcDataCache;
 import android.os.Parcel;
 import android.os.UserHandle;
 import android.util.TypedXmlPullParser;
@@ -128,6 +129,10 @@ public class PolicyVersionUpgraderTest extends DpmTestBase {
 
     @Before
     public void setUp() {
+        // Disable caches in this test process. This must happen early, since some of the
+        // following initialization steps invalidate caches.
+        IpcDataCache.disableForTestMode();
+
         mProvider = new FakePolicyUpgraderDataProvider();
         mUpgrader = new PolicyVersionUpgrader(mProvider);
         mDataDir = new File(mRealTestContext.getCacheDir(), "test-data");

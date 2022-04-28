@@ -198,8 +198,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getQuickAccessUiIntent_hasCards_useTargetActivityFalse_startsWalletActivity() {
-        when(mQuickAccessWalletClient.useTargetActivityForQuickAccess()).thenReturn(false);
+    public void getQuickAccessUiIntent_hasCards_noPendingIntent_startsWalletActivity() {
         mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, true);
         verify(mActivityStarter).startActivity(mIntentCaptor.capture(), eq(true),
                 any(ActivityLaunchAnimator.Controller.class), eq(true));
@@ -211,8 +210,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getQuickAccessUiIntent_noCards_useTargetActivityFalse_isWalletActivity() {
-        when(mQuickAccessWalletClient.useTargetActivityForQuickAccess()).thenReturn(false);
+    public void getQuickAccessUiIntent_noCards_noPendingIntent_startsWalletActivity() {
         mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, false);
         verify(mActivityStarter).postStartActivityDismissingKeyguard(mIntentCaptor.capture(), eq(0),
                 any(ActivityLaunchAnimator.Controller.class));
@@ -236,7 +234,6 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
                     PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE));
             return null;
         }).when(mQuickAccessWalletClient).getWalletPendingIntent(any(), any());
-        when(mQuickAccessWalletClient.useTargetActivityForQuickAccess()).thenReturn(true);
         mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, true);
         verify(mActivityStarter).postStartActivityDismissingKeyguard(mPendingIntentCaptor.capture(),
                 any(ActivityLaunchAnimator.Controller.class));

@@ -57,12 +57,13 @@ class MediaCarouselScrollHandler(
     private val scrollView: MediaScrollView,
     private val pageIndicator: PageIndicator,
     private val mainExecutor: DelayableExecutor,
-    private val dismissCallback: () -> Unit,
+    val dismissCallback: () -> Unit,
     private var translationChangedListener: () -> Unit,
     private val closeGuts: (immediate: Boolean) -> Unit,
     private val falsingCollector: FalsingCollector,
     private val falsingManager: FalsingManager,
-    private val logSmartspaceImpression: (Boolean) -> Unit
+    private val logSmartspaceImpression: (Boolean) -> Unit,
+    private val logger: MediaUiEventLogger
 ) {
     /**
      * Is the view in RTL
@@ -476,6 +477,7 @@ class MediaCarouselScrollHandler(
             visibleMediaIndex = newIndex
             if (oldIndex != visibleMediaIndex && visibleToUser) {
                 logSmartspaceImpression(qsExpanded)
+                logger.logMediaCarouselPage(newIndex)
             }
             closeGuts(false)
             updatePlayerVisibilities()

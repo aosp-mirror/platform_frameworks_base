@@ -15,7 +15,6 @@
 package com.android.systemui.plugins.qs;
 
 import android.view.View;
-import android.view.View.OnClickListener;
 
 import com.android.systemui.plugins.FragmentBase;
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -34,7 +33,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 13;
+    int VERSION = 14;
 
     String TAG = "QS";
 
@@ -68,7 +67,12 @@ public interface QS extends FragmentBase {
     void setHeaderListening(boolean listening);
     void notifyCustomizeChanged();
     void setContainerController(QSContainerController controller);
-    void setExpandClickListener(OnClickListener onClickListener);
+
+    /**
+     * Provide an action to collapse if expanded or expand if collapsed.
+     * @param action
+     */
+    void setCollapseExpandAction(Runnable action);
 
     /**
      * Returns the height difference between the QSPanel container and the QuickQSPanel container

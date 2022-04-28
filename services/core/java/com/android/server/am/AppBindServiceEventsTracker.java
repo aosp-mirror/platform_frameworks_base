@@ -24,8 +24,12 @@ import static com.android.server.am.BaseAppStateTracker.ONE_DAY;
 import android.annotation.NonNull;
 import android.app.ActivityManagerInternal.BindServiceEventListener;
 import android.content.Context;
+import android.os.AppBackgroundRestrictionsInfo;
+import android.os.SystemClock;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.server.am.AppBindServiceEventsTracker.AppBindServiceEventsPolicy;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.BaseAppStateTimeSlotEventsTracker.SimpleAppStateTimeslotEvents;
 import com.android.server.am.BaseAppStateTracker.Injector;
 
@@ -59,6 +63,11 @@ final class AppBindServiceEventsTracker extends BaseAppStateTimeSlotEventsTracke
     }
 
     @Override
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_BIND_SERVICE_EVENTS;
+    }
+
+    @Override
     void onSystemReady() {
         super.onSystemReady();
         mInjector.getActivityManagerInternal().addBindServiceEventListener(this);
@@ -73,6 +82,22 @@ final class AppBindServiceEventsTracker extends BaseAppStateTimeSlotEventsTracke
     @Override
     public SimpleAppStateTimeslotEvents createAppStateEvents(SimpleAppStateTimeslotEvents other) {
         return new SimpleAppStateTimeslotEvents(other);
+    }
+
+    @Override
+    byte[] getTrackerInfoForStatsd(int uid) {
+        final long now = SystemClock.elapsedRealtime();
+        final int numOfBindRequests = getTotalEventsLocked(uid, now);
+        if (numOfBindRequests == 0) {
+            // Not interested.
+            return null;
+        }
+        final ProtoOutputStream proto = new ProtoOutputStream();
+        proto.write(
+                AppBackgroundRestrictionsInfo.BindServiceEventsTrackerInfo.BIND_SERVICE_REQUESTS,
+                numOfBindRequests);
+        proto.flush();
+        return proto.getBytes();
     }
 
     @Override

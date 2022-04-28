@@ -29,6 +29,7 @@ import android.graphics.PointF;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Slog;
+import android.view.Display;
 import android.view.InputApplicationHandle;
 import android.view.KeyEvent;
 import android.view.SurfaceControl;
@@ -194,6 +195,9 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
             int firstExternalDisplayId = DEFAULT_DISPLAY;
             for (int i = mService.mRoot.mChildren.size() - 1; i >= 0; --i) {
                 final DisplayContent displayContent = mService.mRoot.mChildren.get(i);
+                if (displayContent.getDisplayInfo().state == Display.STATE_OFF) {
+                    continue;
+                }
                 // Heuristic solution here. Currently when "Freeform windows" developer option is
                 // enabled we automatically put secondary displays in freeform mode and emulating
                 // "desktop mode". It also makes sense to show the pointer on the same display.
