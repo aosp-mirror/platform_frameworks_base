@@ -1489,25 +1489,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFinalizeFilteredChildrenPromotesSummary() {
-        // GIVEN a group with only one child was already drawn
-        addGroupSummary(0, PACKAGE_1, GROUP_1);
-        addGroupChild(1, PACKAGE_1, GROUP_1);
-        addGroupChild(2, PACKAGE_1, GROUP_1);
-
-        // WHEN the parent is filtered out at the finalize step
-        mFinalizeFilter.mIndicesToFilter.add(1);
-        mFinalizeFilter.mIndicesToFilter.add(2);
-
-        dispatchBuild();
-
-        // THEN the children should be promoted to the top level
-        verifyBuiltList(
-                notif(0)
-        );
-    }
-
-    @Test
     public void testFinalizeFilteredChildPromotesSibling() {
         // GIVEN a group with only one child was already drawn
         addGroupSummary(0, PACKAGE_1, GROUP_1);
