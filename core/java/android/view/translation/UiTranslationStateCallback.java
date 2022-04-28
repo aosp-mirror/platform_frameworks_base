@@ -25,14 +25,28 @@ import java.util.concurrent.Executor;
  * Callback for listening to UI Translation state changes. See {@link
  * UiTranslationManager#registerUiTranslationStateCallback(Executor, UiTranslationStateCallback)}.
  * <p>
- * Prior to Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}, callback methods
- * <em>without</em> {@code packageName} are invoked. Apps with minSdkVersion lower than {@link
- * android.os.Build.VERSION_CODES#TIRAMISU} <em>must</em> implement those methods if they want to
- * handle the events.
+ * Prior to Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+ * <ul>
+ *     <li>Callback methods <em>without</em> {@code packageName} are invoked. Apps with
+ *     minSdkVersion lower than {@link android.os.Build.VERSION_CODES#TIRAMISU} <em>must</em>
+ *     implement those methods if they want to handle the events.</li>
+ *     <li>Callback methods for a particular event <em>may</em> be called multiple times
+ *     consecutively, even when the translation state has not changed (e.g.,
+ *     {@link #onStarted(ULocale, ULocale, String)} may be called multiple times even after
+ *     translation has already started).</li>
+ * </ul>
  * <p>
- * In Android version {@link android.os.Build.VERSION_CODES#TIRAMISU} and later, if both methods
- * with and without {@code packageName} are implemented (e.g., {@link #onFinished()} and {@link
- * #onFinished(String)}, only the one <em>with</em> {@code packageName} will be called.
+ * In Android version {@link android.os.Build.VERSION_CODES#TIRAMISU} and later:
+ * <ul>
+ *     <li>If both methods with and without {@code packageName} are implemented (e.g.,
+ *     {@link #onFinished()} and {@link #onFinished(String)}, only the one <em>with</em> {@code
+ *     packageName} will be called.</li>
+ *     <li>Callback methods for a particular event will <em>not</em> be called multiple times
+ *     consecutively. They will only be called when the translation state has actually changed
+ *     (e.g., from "started" to "paused"). Note: "resumed" is not considered a separate state
+ *     from "started", so {@link #onResumed(ULocale, ULocale, String)} will never be called after
+ *     {@link #onStarted(ULocale, ULocale, String)}.<</li>
+ * </ul>
  */
 public interface UiTranslationStateCallback {
 

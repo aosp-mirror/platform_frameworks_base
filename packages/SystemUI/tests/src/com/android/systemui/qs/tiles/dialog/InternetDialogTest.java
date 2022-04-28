@@ -21,12 +21,15 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.filters.SmallTest;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.UiEventLogger;
+import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -42,6 +45,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
 
 import java.util.List;
 
@@ -79,11 +83,15 @@ public class InternetDialogTest extends SysuiTestCase {
     private LinearLayout mEthernet;
     private LinearLayout mMobileDataToggle;
     private LinearLayout mWifiToggle;
+    private Switch mWifiToggleSwitch;
+    private TextView mWifiToggleSummary;
     private LinearLayout mConnectedWifi;
     private RecyclerView mWifiList;
     private LinearLayout mSeeAll;
     private LinearLayout mWifiScanNotify;
     private TextView mAirplaneModeSummaryText;
+
+    private MockitoSession mMockitoSession;
 
     @Before
     public void setUp() {
@@ -101,6 +109,15 @@ public class InternetDialogTest extends SysuiTestCase {
                 .thenReturn(MOBILE_NETWORK_SUMMARY);
         when(mInternetDialogController.getWifiManager()).thenReturn(mWifiManager);
 
+        mMockitoSession = ExtendedMockito.mockitoSession()
+                .spyStatic(WifiEnterpriseRestrictionUtils.class)
+                .startMocking();
+        when(WifiEnterpriseRestrictionUtils.isChangeWifiStateAllowed(mContext)).thenReturn(true);
+
+        createInternetDialog();
+    }
+
+    private void createInternetDialog() {
         mInternetDialog = new InternetDialog(mContext, mock(InternetDialogFactory.class),
                 mInternetDialogController, true, true, true, mock(UiEventLogger.class), mHandler,
                 mBgExecutor, mKeyguard);
@@ -114,6 +131,8 @@ public class InternetDialogTest extends SysuiTestCase {
         mEthernet = mDialogView.requireViewById(R.id.ethernet_layout);
         mMobileDataToggle = mDialogView.requireViewById(R.id.mobile_network_layout);
         mWifiToggle = mDialogView.requireViewById(R.id.turn_on_wifi_layout);
+        mWifiToggleSwitch = mDialogView.requireViewById(R.id.wifi_toggle);
+        mWifiToggleSummary = mDialogView.requireViewById(R.id.wifi_toggle_summary);
         mConnectedWifi = mDialogView.requireViewById(R.id.wifi_connected_layout);
         mWifiList = mDialogView.requireViewById(R.id.wifi_list_layout);
         mSeeAll = mDialogView.requireViewById(R.id.see_all_layout);
@@ -124,6 +143,7 @@ public class InternetDialogTest extends SysuiTestCase {
     @After
     public void tearDown() {
         mInternetDialog.dismissDialog();
+        mMockitoSession.finishMocking();
     }
 
     @Test
@@ -408,6 +428,33 @@ public class InternetDialogTest extends SysuiTestCase {
         assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.GONE);
         assertThat(mWifiList.getVisibility()).isEqualTo(View.GONE);
         assertThat(mSeeAll.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_disallowChangeWifiState_disableWifiSwitch() {
+        mInternetDialog.dismissDialog();
+        when(WifiEnterpriseRestrictionUtils.isChangeWifiStateAllowed(mContext)).thenReturn(false);
+        createInternetDialog();
+
+        mInternetDialog.updateDialog(false);
+
+        // Disable Wi-Fi switch and show restriction message in summary.
+        assertThat(mWifiToggleSwitch.isEnabled()).isFalse();
+        assertThat(mWifiToggleSummary.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mWifiToggleSummary.getText().length()).isNotEqualTo(0);
+    }
+
+    @Test
+    public void updateDialog_allowChangeWifiState_enableWifiSwitch() {
+        mInternetDialog.dismissDialog();
+        when(WifiEnterpriseRestrictionUtils.isChangeWifiStateAllowed(mContext)).thenReturn(true);
+        createInternetDialog();
+
+        mInternetDialog.updateDialog(false);
+
+        // Enable Wi-Fi switch and hide restriction message in summary.
+        assertThat(mWifiToggleSwitch.isEnabled()).isTrue();
+        assertThat(mWifiToggleSummary.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test

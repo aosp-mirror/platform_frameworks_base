@@ -65,7 +65,7 @@
     <string name="uninstalling" msgid="8709566347688966845">"Се деинсталира…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Се деинсталира <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Деинсталирањето заврши."</string>
-    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> е деинсталиран"</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> се деинсталираше"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Деинсталирањето е неуспешно."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Деинсталирањето на <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> е неуспешно."</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Не може да се деинсталира активна апликација на администраторот на уредот"</string>

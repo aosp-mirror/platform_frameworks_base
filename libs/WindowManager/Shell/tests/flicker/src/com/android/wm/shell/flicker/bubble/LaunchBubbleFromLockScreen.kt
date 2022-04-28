@@ -17,6 +17,8 @@
 package com.android.wm.shell.flicker.bubble
 
 import android.platform.test.annotations.Presubmit
+import android.view.WindowInsets
+import android.view.WindowManager
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
@@ -59,6 +61,16 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
                 }
             }
             transitions {
+                // Swipe & wait for the notification shade to expand so all can be seen
+                val wm = context.getSystemService(WindowManager::class.java)
+                val metricInsets = wm.getCurrentWindowMetrics().windowInsets
+                val insets = metricInsets.getInsetsIgnoringVisibility(
+                        WindowInsets.Type.statusBars()
+                        or WindowInsets.Type.displayCutout())
+                device.swipe(100, insets.top + 100, 100, device.getDisplayHeight() / 2, 4)
+                device.waitForIdle(2000)
+                instrumentation.uiAutomation.syncInputTransactions()
+
                 val notification = device.wait(Until.findObject(
                     By.text("BubbleChat")), FIND_OBJECT_TIMEOUT)
                 notification?.click() ?: error("Notification not found")

@@ -216,6 +216,10 @@ class ScreenRotationAnimation {
 
             t.setLayer(mScreenshotLayer, SCREEN_FREEZE_LAYER_BASE);
             t.reparent(mBackColorSurface, displayContent.getSurfaceControl());
+            // If hdr layers are on-screen, e.g. picture-in-picture mode, the screenshot of
+            // rotation animation is an sdr image containing tone-mapping hdr content, then
+            // disable dimming effect to get avoid of hdr content being dimmed during animation.
+            t.setDimmingEnabled(mScreenshotLayer, false);
             t.setLayer(mBackColorSurface, -1);
             t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
             t.setAlpha(mBackColorSurface, 1);

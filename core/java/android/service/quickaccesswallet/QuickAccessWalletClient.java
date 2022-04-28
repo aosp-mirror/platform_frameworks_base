@@ -240,15 +240,4 @@ public interface QuickAccessWalletClient extends Closeable {
      */
     @Nullable
     CharSequence getShortcutLongLabel();
-
-    /**
-     * Return whether the system should use the component specified by the
-     * {@link android:targetActivity} or
-     * {@link QuickAccessWalletService#getTargetActivityPendingIntent()}
-     * as the "quick access" , invoked directly by the system.
-     * If false, the system will use the built-in UI instead of the component specified
-     * in {@link android:targetActivity} or
-     * {@link QuickAccessWalletService#getTargetActivityPendingIntent()}.
-     */
-    boolean useTargetActivityForQuickAccess();
 }

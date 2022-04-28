@@ -21,15 +21,16 @@ import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewRootImpl;
 
 import com.android.internal.annotations.GuardedBy;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -99,7 +100,9 @@ public class SurfaceSyncer {
         Handler handler = new Handler(Looper.myLooper());
         return setupSync(transaction -> {
             transaction.apply();
-            handler.post(onComplete);
+            if (onComplete != null) {
+                handler.post(onComplete);
+            }
         });
     }
 
@@ -171,7 +174,11 @@ public class SurfaceSyncer {
      */
     @UiThread
     public boolean addToSync(int syncId, @NonNull View view) {
-        return addToSync(syncId, view.getViewRootImpl().mSyncTarget);
+        ViewRootImpl viewRoot = view.getViewRootImpl();
+        if (viewRoot == null) {
+            return false;
+        }
+        return addToSync(syncId, viewRoot.mSyncTarget);
     }
 
     /**
@@ -232,9 +239,17 @@ public class SurfaceSyncer {
          * and {@link SyncBufferCallback#onBufferReady(Transaction)} in order for this Syncable
          * to be marked as complete.
          *
+         * Always invoked on the thread that initiated the call to
+         * {@link #addToSync(int, SyncTarget)}
+         *
          * @param syncBufferCallback A SyncBufferCallback that the caller must invoke onBufferReady
          */
         void onReadyToSync(SyncBufferCallback syncBufferCallback);
+
+        /**
+         * There's no guarantee about the thread this callback is invoked on.
+         */
+        default void onSyncComplete() {}
     }
 
     /**
@@ -260,11 +275,13 @@ public class SurfaceSyncer {
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
-        private final Set<Integer> mPendingSyncs = new HashSet<>();
+        private final Set<Integer> mPendingSyncs = new ArraySet<>();
         @GuardedBy("mLock")
         private final Transaction mTransaction = sTransactionFactory.get();
         @GuardedBy("mLock")
         private boolean mSyncReady;
+        @GuardedBy("mLock")
+        private final Set<SyncTarget> mSyncTargets = new ArraySet<>();
 
         private final int mSyncId;
         private final Consumer<Transaction> mSyncRequestCompleteCallback;
@@ -290,6 +307,7 @@ public class SurfaceSyncer {
 
             synchronized (mLock) {
                 mPendingSyncs.add(syncBufferCallback.hashCode());
+                mSyncTargets.add(syncTarget);
             }
             syncTarget.onReadyToSync(syncBufferCallback);
         }
@@ -314,6 +332,11 @@ public class SurfaceSyncer {
             if (DEBUG) {
                 Log.d(TAG, "Successfully finished sync id=" + mSyncId);
             }
+
+            for (SyncTarget syncTarget : mSyncTargets) {
+                syncTarget.onSyncComplete();
+            }
+            mSyncTargets.clear();
             mSyncRequestCompleteCallback.accept(mTransaction);
         }
 

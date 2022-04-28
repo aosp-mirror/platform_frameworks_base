@@ -430,7 +430,7 @@ class TransitionController {
         }, true /* traverseTopToBottom */);
         // Collect all visible non-app windows which need to be drawn before the animation starts.
         dc.forAllWindows(w -> {
-            if (w.mActivityRecord == null && w.isVisible() && !inTransition(w.mToken)
+            if (w.mActivityRecord == null && w.isVisible() && !isCollecting(w.mToken)
                     && dc.shouldSyncRotationChange(w)) {
                 transition.collect(w.mToken);
             }

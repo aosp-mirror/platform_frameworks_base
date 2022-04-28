@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static com.android.internal.app.AppLocaleStore.AppLocaleResult.LocaleStatus;
+
 import android.app.LocaleConfig;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -25,41 +27,43 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class AppLocaleStore {
+class AppLocaleStore {
     private static final String TAG = AppLocaleStore.class.getSimpleName();
 
-    public static ArrayList<Locale> getAppSupportedLocales(Context context, String packageName) {
+    public static AppLocaleResult getAppSupportedLocales(
+            Context context, String packageName) {
+        LocaleConfig localeConfig = null;
+        AppLocaleResult.LocaleStatus localeStatus = LocaleStatus.UNKNOWN_FAILURE;
         ArrayList<Locale> appSupportedLocales = new ArrayList<>();
-        LocaleList packageLocaleList = getPackageLocales(context, packageName);
 
-        if (packageLocaleList != null && packageLocaleList.size() > 0) {
-            for (int i = 0; i < packageLocaleList.size(); i++) {
-                appSupportedLocales.add(packageLocaleList.get(i));
-            }
-            Log.d(TAG, "getAppSupportedLocales from LocaleConfig. Size: "
-                    + appSupportedLocales.size());
-        } else {
-            String[] languages = getAssetLocales(context, packageName);
-            for (String language : languages) {
-                appSupportedLocales.add(Locale.forLanguageTag(language));
-            }
-            Log.d(TAG, "getAppSupportedLocales from asset. Size: "
-                    + appSupportedLocales.size());
-        }
-        return appSupportedLocales;
-    }
-
-    private static LocaleList getPackageLocales(Context context, String packageName) {
         try {
-            LocaleConfig localeConfig =
-                    new LocaleConfig(context.createPackageContext(packageName, 0));
-            if (localeConfig.getStatus() == LocaleConfig.STATUS_SUCCESS) {
-                return localeConfig.getSupportedLocales();
-            }
+            localeConfig = new LocaleConfig(context.createPackageContext(packageName, 0));
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Can not found the package name : " + packageName + " / " + e);
         }
-        return null;
+
+        if (localeConfig != null) {
+            if (localeConfig.getStatus() == LocaleConfig.STATUS_SUCCESS) {
+                LocaleList packageLocaleList = localeConfig.getSupportedLocales();
+                if (packageLocaleList.size() > 0) {
+                    localeStatus = LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_LOCAL_CONFIG;
+                    for (int i = 0; i < packageLocaleList.size(); i++) {
+                        appSupportedLocales.add(packageLocaleList.get(i));
+                    }
+                } else {
+                    localeStatus = LocaleStatus.NO_SUPPORTED_LANGUAGE;
+                }
+            } else if (localeConfig.getStatus() == LocaleConfig.STATUS_NOT_SPECIFIED) {
+                localeStatus = LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_ASSET;
+                String[] languages = getAssetLocales(context, packageName);
+                for (String language : languages) {
+                    appSupportedLocales.add(Locale.forLanguageTag(language));
+                }
+            }
+        }
+        Log.d(TAG, "getAppSupportedLocales(). status: " + localeStatus
+                + ", appSupportedLocales:" + appSupportedLocales.size());
+        return new AppLocaleResult(localeStatus, appSupportedLocales);
     }
 
     private static String[] getAssetLocales(Context context, String packageName) {
@@ -82,4 +86,20 @@ public class AppLocaleStore {
         return new String[0];
     }
 
+    static class AppLocaleResult {
+        enum LocaleStatus {
+            UNKNOWN_FAILURE,
+            NO_SUPPORTED_LANGUAGE,
+            GET_SUPPORTED_LANGUAGE_FROM_LOCAL_CONFIG,
+            GET_SUPPORTED_LANGUAGE_FROM_ASSET,
+        }
+
+        LocaleStatus mLocaleStatus;
+        ArrayList<Locale> mAppSupportedLocales;
+
+        public AppLocaleResult(LocaleStatus localeStatus, ArrayList<Locale> appSupportedLocales) {
+            this.mLocaleStatus = localeStatus;
+            this.mAppSupportedLocales = appSupportedLocales;
+        }
+    }
 }

@@ -475,9 +475,10 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testHideAuthenticationDialog() {
-        mCommandQueue.hideAuthenticationDialog();
+        final long id = 4;
+        mCommandQueue.hideAuthenticationDialog(id);
         waitForIdleSync();
-        verify(mCallbacks).hideAuthenticationDialog();
+        verify(mCallbacks).hideAuthenticationDialog(eq(id));
     }
 
     @Test
