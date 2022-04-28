@@ -21,10 +21,13 @@
             android:layout_height="match_parent"
             android:gravity="center|top">
 
+    <!-- Matches the PiP app content -->
     <View
         android:id="@+id/tv_pip"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:alpha="0"
+        android:background="@color/tv_pip_menu_background"
         android:layout_marginTop="@dimen/pip_menu_outer_space"
         android:layout_marginStart="@dimen/pip_menu_outer_space"
         android:layout_marginEnd="@dimen/pip_menu_outer_space"/>

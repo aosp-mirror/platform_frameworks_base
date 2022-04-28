@@ -217,6 +217,21 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     }
 
     void onPipTransitionStarted(Rect finishBounds) {
+        // Fade out content by fading in view on top.
+        if (mCurrentPipBounds != null && finishBounds != null) {
+            boolean ratioChanged = PipUtils.aspectRatioChanged(
+                    mCurrentPipBounds.width() / (float) mCurrentPipBounds.height(),
+                    finishBounds.width() / (float) finishBounds.height());
+            if (ratioChanged) {
+                mPipView.animate()
+                        .alpha(1f)
+                        .setInterpolator(TvPipInterpolators.EXIT)
+                        .setDuration(mResizeAnimationDuration / 2)
+                        .start();
+            }
+        }
+
+        // Update buttons.
         final boolean vertical = finishBounds.height() > finishBounds.width();
         final boolean orientationChanged =
                 vertical != (mActionButtonsContainer.getOrientation() == LinearLayout.VERTICAL);
@@ -235,10 +250,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                     .withEndAction(() -> {
                         changeButtonScrollOrientation(finishBounds);
                         updateButtonGravity(finishBounds);
-                        mActionButtonsContainer.animate()
-                                .alpha(1)
-                                .setInterpolator(TvPipInterpolators.ENTER)
-                                .setDuration(mResizeAnimationDuration / 2);
+                        // Only make buttons visible again in onPipTransitionFinished to keep in
+                        // sync with PiP content alpha animation.
                     });
         } else {
             changeButtonScrollOrientation(finishBounds);
@@ -249,7 +262,21 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     void onPipTransitionFinished() {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onPipTransitionFinished()", TAG);
-        if (!mSwitchingOrientation) {
+
+        // Fade in content by fading out view on top.
+        mPipView.animate()
+                .alpha(0f)
+                .setDuration(mResizeAnimationDuration / 2)
+                .setInterpolator(TvPipInterpolators.ENTER)
+                .start();
+
+        // Update buttons.
+        if (mSwitchingOrientation) {
+            mActionButtonsContainer.animate()
+                    .alpha(1)
+                    .setInterpolator(TvPipInterpolators.ENTER)
+                    .setDuration(mResizeAnimationDuration / 2);
+        } else {
             refocusPreviousButton();
         }
         mSwitchingOrientation = false;
