@@ -16,43 +16,43 @@
 
 package com.android.server.tare;
 
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_AM_HARD_CONSUMPTION_LIMIT;
-import static android.app.tare.EconomyManager.DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT;
-import static android.app.tare.EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE;
-import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED;
-import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_MAX;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_SEEN_INSTANT;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_SEEN_MAX;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_SEEN_ONGOING;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_INSTANT;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_MAX;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_ONGOING;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_WIDGET_INTERACTION_INSTANT;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_WIDGET_INTERACTION_MAX;
-import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_WIDGET_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_HARD_CONSUMPTION_LIMIT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_MAX_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_SEEN_INSTANT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_SEEN_MAX_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_SEEN_ONGOING_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_INSTANT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_MAX_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_ONGOING_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_WIDGET_INTERACTION_INSTANT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_WIDGET_INTERACTION_MAX_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_WIDGET_INTERACTION_ONGOING_CAKES;
 import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE;
 import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALARMCLOCK_CTP;
 import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_BASE_PRICE;
@@ -97,12 +97,12 @@ import static com.android.server.tare.Modifier.COST_MODIFIER_CHARGING;
 import static com.android.server.tare.Modifier.COST_MODIFIER_DEVICE_IDLE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_PROCESS_STATE;
-import static com.android.server.tare.TareUtils.arcToCake;
 import static com.android.server.tare.TareUtils.cakeToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
@@ -157,14 +157,15 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     AlarmManagerEconomicPolicy(InternalResourceService irs) {
         super(irs);
         mInternalResourceService = irs;
-        loadConstants("");
+        loadConstants("", null);
     }
 
     @Override
-    void setup() {
-        super.setup();
+    void setup(@NonNull DeviceConfig.Properties properties) {
+        super.setup(properties);
         ContentResolver resolver = mInternalResourceService.getContext().getContentResolver();
-        loadConstants(Settings.Global.getString(resolver, TARE_ALARM_MANAGER_CONSTANTS));
+        loadConstants(Settings.Global.getString(resolver, TARE_ALARM_MANAGER_CONSTANTS),
+                properties);
     }
 
     @Override
@@ -178,6 +179,11 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
 
     @Override
     long getMaxSatiatedBalance() {
+        // TODO(230501287): adjust balance based on whether the app has the SCHEDULE_EXACT_ALARM
+        // permission granted. Apps without the permission granted shouldn't need a high balance
+        // since they won't be able to use exact alarms. Apps with the permission granted could
+        // have a higher balance, or perhaps just those with the USE_EXACT_ALARM permission since
+        // that is limited to specific use cases.
         return mMaxSatiatedBalance;
     }
 
@@ -209,7 +215,8 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
         return mRewards.get(rewardId);
     }
 
-    private void loadConstants(String policyValuesString) {
+    private void loadConstants(String policyValuesString,
+            @Nullable DeviceConfig.Properties properties) {
         mActions.clear();
         mRewards.clear();
 
@@ -219,145 +226,159 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
             Slog.e(TAG, "Global setting key incorrect: ", e);
         }
 
-        mMinSatiatedBalanceExempted = arcToCake(mParser.getInt(KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED,
-                DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED));
-        mMinSatiatedBalanceOther = arcToCake(mParser.getInt(KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP,
-                DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP));
-        mMaxSatiatedBalance = arcToCake(mParser.getInt(KEY_AM_MAX_SATIATED_BALANCE,
-                DEFAULT_AM_MAX_SATIATED_BALANCE));
-        mInitialSatiatedConsumptionLimit = arcToCake(mParser.getInt(
-                KEY_AM_INITIAL_CONSUMPTION_LIMIT, DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT));
+        mMinSatiatedBalanceExempted = getConstantAsCake(mParser, properties,
+                KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED,
+                DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED_CAKES);
+        mMinSatiatedBalanceOther = getConstantAsCake(mParser, properties,
+                KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP,
+                DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP_CAKES);
+        mMaxSatiatedBalance = getConstantAsCake(mParser, properties,
+                KEY_AM_MAX_SATIATED_BALANCE,
+                DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES);
+        mInitialSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+                KEY_AM_INITIAL_CONSUMPTION_LIMIT, DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT_CAKES);
         mHardSatiatedConsumptionLimit = Math.max(mInitialSatiatedConsumptionLimit,
-                arcToCake(mParser.getInt(
-                        KEY_AM_HARD_CONSUMPTION_LIMIT, DEFAULT_AM_HARD_CONSUMPTION_LIMIT)));
+                getConstantAsCake(mParser, properties,
+                        KEY_AM_HARD_CONSUMPTION_LIMIT, DEFAULT_AM_HARD_CONSUMPTION_LIMIT_CAKES));
 
-        final long exactAllowWhileIdleWakeupBasePrice = arcToCake(
-                mParser.getInt(KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE,
-                        DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE));
+        final long exactAllowWhileIdleWakeupBasePrice = getConstantAsCake(mParser, properties,
+                KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE,
+                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE_CAKES);
 
         mActions.put(ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE,
-                        arcToCake(mParser.getInt(
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP,
-                                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP)),
+                                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP_CAKES),
                         exactAllowWhileIdleWakeupBasePrice));
         mActions.put(ACTION_ALARM_WAKEUP_EXACT,
                 new Action(ACTION_ALARM_WAKEUP_EXACT,
-                        arcToCake(mParser.getInt(KEY_AM_ACTION_ALARM_EXACT_WAKEUP_CTP,
-                                DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_CTP)),
-                        arcToCake(mParser.getInt(KEY_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE,
-                                DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE))));
+                        getConstantAsCake(mParser, properties,
+                                KEY_AM_ACTION_ALARM_EXACT_WAKEUP_CTP,
+                                DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_CTP_CAKES),
+                        getConstantAsCake(mParser, properties,
+                                KEY_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE,
+                                DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE_CAKES)));
 
         final long inexactAllowWhileIdleWakeupBasePrice =
-                arcToCake(mParser.getInt(
+                getConstantAsCake(mParser, properties,
                         KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE,
-                        DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE));
+                        DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE_CAKES);
 
         mActions.put(ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE,
-                        arcToCake(mParser.getInt(
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP,
-                                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP)),
+                                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP_CAKES),
                         inexactAllowWhileIdleWakeupBasePrice));
         mActions.put(ACTION_ALARM_WAKEUP_INEXACT,
                 new Action(ACTION_ALARM_WAKEUP_INEXACT,
-                        arcToCake(mParser.getInt(
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP,
-                                DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP)),
-                        arcToCake(mParser.getInt(
+                                DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE,
-                                DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE))));
+                                DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE_CAKES)));
 
-        final long exactAllowWhileIdleNonWakeupBasePrice =
-                arcToCake(mParser.getInt(
-                        KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_BASE_PRICE,
-                        DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE));
-
+        final long exactAllowWhileIdleNonWakeupBasePrice = getConstantAsCake(mParser, properties,
+                KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_BASE_PRICE,
+                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE_CAKES);
         mActions.put(ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE,
-                        arcToCake(mParser.getInt(
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP,
-                                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP)),
+                                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP_CAKES),
                         exactAllowWhileIdleNonWakeupBasePrice));
+
         mActions.put(ACTION_ALARM_NONWAKEUP_EXACT,
                 new Action(ACTION_ALARM_NONWAKEUP_EXACT,
-                        arcToCake(mParser.getInt(
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP,
-                                DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP)),
-                        arcToCake(mParser.getInt(
+                                DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE,
-                                DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE))));
+                                DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE_CAKES)));
 
-        final long inexactAllowWhileIdleNonWakeupBasePrice =
-                arcToCake(mParser.getInt(
-                        KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE,
-                        DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE));
-
+        final long inexactAllowWhileIdleNonWakeupBasePrice = getConstantAsCake(mParser, properties,
+                KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE,
+                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE_CAKES);
+        final long inexactAllowWhileIdleNonWakeupCtp = getConstantAsCake(mParser, properties,
+                KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP,
+                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP_CAKES);
         mActions.put(ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE,
-                        arcToCake(mParser.getInt(
-                                KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP,
-                                DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP)),
+                        inexactAllowWhileIdleNonWakeupCtp,
                         inexactAllowWhileIdleNonWakeupBasePrice));
+
         mActions.put(ACTION_ALARM_NONWAKEUP_INEXACT,
                 new Action(ACTION_ALARM_NONWAKEUP_INEXACT,
-                        arcToCake(mParser.getInt(
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP,
-                                DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP)),
-                        arcToCake(mParser.getInt(
+                                DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE,
-                                DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE))));
+                                DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE_CAKES)));
         mActions.put(ACTION_ALARM_CLOCK,
                 new Action(ACTION_ALARM_CLOCK,
-                        arcToCake(mParser.getInt(
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_ALARMCLOCK_CTP,
-                                DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_CTP)),
-                        arcToCake(mParser.getInt(
+                                DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_CTP_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE,
-                                DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE))));
+                                DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE_CAKES)));
 
         mRewards.put(REWARD_TOP_ACTIVITY, new Reward(REWARD_TOP_ACTIVITY,
-                arcToCake(mParser.getInt(KEY_AM_REWARD_TOP_ACTIVITY_INSTANT,
-                        DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT)),
-                (long) (arcToCake(1) * mParser.getFloat(KEY_AM_REWARD_TOP_ACTIVITY_ONGOING,
-                        DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING)),
-                arcToCake(mParser.getInt(KEY_AM_REWARD_TOP_ACTIVITY_MAX,
-                        DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX))));
+                getConstantAsCake(mParser, properties,
+                        KEY_AM_REWARD_TOP_ACTIVITY_INSTANT,
+                        DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_AM_REWARD_TOP_ACTIVITY_ONGOING,
+                        DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_AM_REWARD_TOP_ACTIVITY_MAX,
+                        DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX_CAKES)));
         mRewards.put(REWARD_NOTIFICATION_SEEN, new Reward(REWARD_NOTIFICATION_SEEN,
-                arcToCake(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_INSTANT,
-                        DEFAULT_AM_REWARD_NOTIFICATION_SEEN_INSTANT)),
-                arcToCake(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_ONGOING,
-                        DEFAULT_AM_REWARD_NOTIFICATION_SEEN_ONGOING)),
-                arcToCake(mParser.getInt(KEY_AM_REWARD_NOTIFICATION_SEEN_MAX,
-                        DEFAULT_AM_REWARD_NOTIFICATION_SEEN_MAX))));
+                getConstantAsCake(mParser, properties,
+                        KEY_AM_REWARD_NOTIFICATION_SEEN_INSTANT,
+                        DEFAULT_AM_REWARD_NOTIFICATION_SEEN_INSTANT_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_AM_REWARD_NOTIFICATION_SEEN_ONGOING,
+                        DEFAULT_AM_REWARD_NOTIFICATION_SEEN_ONGOING_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_AM_REWARD_NOTIFICATION_SEEN_MAX,
+                        DEFAULT_AM_REWARD_NOTIFICATION_SEEN_MAX_CAKES)));
         mRewards.put(REWARD_NOTIFICATION_INTERACTION,
                 new Reward(REWARD_NOTIFICATION_INTERACTION,
-                        arcToCake(mParser.getInt(
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT,
-                                DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT)),
-                        arcToCake(mParser.getInt(
+                                DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING,
-                                DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING)),
-                        arcToCake(mParser.getInt(
+                                DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_REWARD_NOTIFICATION_INTERACTION_MAX,
-                                DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_MAX))));
+                                DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_MAX_CAKES)));
         mRewards.put(REWARD_WIDGET_INTERACTION, new Reward(REWARD_WIDGET_INTERACTION,
-                arcToCake(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_INSTANT,
-                        DEFAULT_AM_REWARD_WIDGET_INTERACTION_INSTANT)),
-                arcToCake(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_ONGOING,
-                        DEFAULT_AM_REWARD_WIDGET_INTERACTION_ONGOING)),
-                arcToCake(mParser.getInt(KEY_AM_REWARD_WIDGET_INTERACTION_MAX,
-                        DEFAULT_AM_REWARD_WIDGET_INTERACTION_MAX))));
+                getConstantAsCake(mParser, properties,
+                        KEY_AM_REWARD_WIDGET_INTERACTION_INSTANT,
+                        DEFAULT_AM_REWARD_WIDGET_INTERACTION_INSTANT_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_AM_REWARD_WIDGET_INTERACTION_ONGOING,
+                        DEFAULT_AM_REWARD_WIDGET_INTERACTION_ONGOING_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_AM_REWARD_WIDGET_INTERACTION_MAX,
+                        DEFAULT_AM_REWARD_WIDGET_INTERACTION_MAX_CAKES)));
         mRewards.put(REWARD_OTHER_USER_INTERACTION,
                 new Reward(REWARD_OTHER_USER_INTERACTION,
-                        arcToCake(mParser.getInt(KEY_AM_REWARD_OTHER_USER_INTERACTION_INSTANT,
-                                DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_INSTANT)),
-                        arcToCake(mParser.getInt(
+                        getConstantAsCake(mParser, properties,
+                                KEY_AM_REWARD_OTHER_USER_INTERACTION_INSTANT,
+                                DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_INSTANT_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_REWARD_OTHER_USER_INTERACTION_ONGOING,
-                                DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_ONGOING)),
-                        arcToCake(mParser.getInt(
+                                DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_ONGOING_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_AM_REWARD_OTHER_USER_INTERACTION_MAX,
-                                DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_MAX))));
+                                DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_MAX_CAKES)));
     }
 
     @Override
