@@ -18,11 +18,10 @@
 
 #include <vector>
 
-#include "android-base/macros.h"
-#include "androidfw/StringPiece.h"
-
 #include "LoadedApk.h"
 #include "ValueVisitor.h"
+#include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
 #include "cmd/Util.h"
 #include "format/binary/TableFlattener.h"
 #include "format/binary/XmlFlattener.h"
@@ -240,7 +239,7 @@ class Context : public IAaptContext {
   }
 
   int GetMinSdkVersion() override {
-    return 0u;
+    return min_sdk_;
   }
 
   const std::set<std::string>& GetSplitNameDependencies() override {
@@ -251,6 +250,7 @@ class Context : public IAaptContext {
 
   bool verbose_ = false;
   std::string package_;
+  int32_t min_sdk_ = 0;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Context);
@@ -373,6 +373,7 @@ int ConvertCommand::Action(const std::vector<std::string>& args) {
   }
 
   context.package_ = app_info.value().package;
+  context.min_sdk_ = app_info.value().min_sdk_version.value_or(0);
   unique_ptr<IArchiveWriter> writer = CreateZipFileArchiveWriter(context.GetDiagnostics(),
                                                                  output_path_);
   if (writer == nullptr) {
