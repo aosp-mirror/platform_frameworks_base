@@ -166,7 +166,6 @@ public class NavigationBarView extends FrameLayout {
     private RotationContextButton mRotationContextButton;
     private FloatingRotationButton mFloatingRotationButton;
     private RotationButtonController mRotationButtonController;
-    private NavigationBarOverlayController mNavBarOverlayController;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -408,12 +407,6 @@ public class NavigationBarView extends FrameLayout {
                         return isGesturalModeOnDefaultDisplay(getContext(), mNavBarMode);
                     }
                 }, backgroundExecutor);
-
-        mNavBarOverlayController = Dependency.get(NavigationBarOverlayController.class);
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.init(mNavbarOverlayVisibilityChangeCallback,
-                    mEdgeBackGestureHandler::updateNavigationBarOverlayExcludeRegion);
-        }
     }
 
     void setBarTransitions(NavigationBarTransitions navigationBarTransitions) {
@@ -466,17 +459,6 @@ public class NavigationBarView extends FrameLayout {
 
     void onTransientStateChanged(boolean isTransient, boolean isGestureOnSystemBar) {
         mEdgeBackGestureHandler.onNavBarTransientStateChanged(isTransient);
-
-        // The visibility of the navigation bar buttons is dependent on the transient state of
-        // the navigation bar.
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            // Always allow the overlay if in non-gestural nav mode, otherwise, only allow showing
-            // the overlay if the user is swiping directly over a system bar
-            boolean allowNavBarOverlay = !QuickStepContract.isGesturalMode(mNavBarMode)
-                    || isGestureOnSystemBar;
-            isTransient = isTransient && allowNavBarOverlay;
-            mNavBarOverlayController.setButtonState(isTransient, /* force */ false);
-        }
     }
 
     void onBarTransition(int newMode) {
@@ -701,9 +683,6 @@ public class NavigationBarView extends FrameLayout {
         }
         mImeVisible = visible;
         mRotationButtonController.getRotationButton().setCanShowRotationButton(!mImeVisible);
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.setCanShow(!mImeVisible);
-        }
     }
 
     void setDisabledFlags(int disabledFlags, SysUiState sysUiState) {
@@ -1060,11 +1039,6 @@ public class NavigationBarView extends FrameLayout {
         } else {
             updateButtonLocation(getRotateSuggestionButton(), inScreenSpace, useNearestRegion);
         }
-        if (includeFloatingButtons && mNavBarOverlayController.isNavigationBarOverlayEnabled()
-                && mNavBarOverlayController.isVisible()) {
-            // Note: this button is floating so the nearest region doesn't apply
-            updateButtonLocation(mNavBarOverlayController.getCurrentView(), inScreenSpace);
-        }
         return mTmpRegion;
     }
 
@@ -1297,9 +1271,6 @@ public class NavigationBarView extends FrameLayout {
         if (mRotationButtonController != null) {
             mRotationButtonController.registerListeners();
         }
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.registerListeners();
-        }
 
         getViewTreeObserver().addOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
         updateNavButtonIcons();
@@ -1314,10 +1285,6 @@ public class NavigationBarView extends FrameLayout {
         if (mRotationButtonController != null) {
             mFloatingRotationButton.hide();
             mRotationButtonController.unregisterListeners();
-        }
-
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.unregisterListeners();
         }
 
         mEdgeBackGestureHandler.onNavBarDetached();
