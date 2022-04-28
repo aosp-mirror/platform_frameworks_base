@@ -17,28 +17,26 @@
 package com.android.server;
 
 import android.annotation.NonNull;
-import android.os.IBinder;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputBinding;
 
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodSession;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 
 /**
  * Accessibility manager local system service interface.
  */
 public abstract class AccessibilityManagerInternal {
     /** Enable or disable the sessions. */
-    public abstract void setImeSessionEnabled(SparseArray<IInputMethodSession> sessions,
-            boolean enabled);
+    public abstract void setImeSessionEnabled(
+            SparseArray<IAccessibilityInputMethodSession> sessions, boolean enabled);
 
     /** Unbind input for all accessibility services which require ime capabilities. */
     public abstract void unbindInput();
 
     /** Bind input for all accessibility services which require ime capabilities. */
-    public abstract void bindInput(InputBinding binding);
+    public abstract void bindInput();
 
     /**
      * Request input session from all accessibility services which require ime capabilities and
@@ -47,12 +45,13 @@ public abstract class AccessibilityManagerInternal {
     public abstract void createImeSession(ArraySet<Integer> ignoreSet);
 
     /** Start input for all accessibility services which require ime capabilities. */
-    public abstract void startInput(IBinder startInputToken, IInputContext inputContext,
+    public abstract void startInput(
+            IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             EditorInfo editorInfo, boolean restarting);
 
     private static final AccessibilityManagerInternal NOP = new AccessibilityManagerInternal() {
         @Override
-        public void setImeSessionEnabled(SparseArray<IInputMethodSession> sessions,
+        public void setImeSessionEnabled(SparseArray<IAccessibilityInputMethodSession> sessions,
                 boolean enabled) {
         }
 
@@ -61,7 +60,7 @@ public abstract class AccessibilityManagerInternal {
         }
 
         @Override
-        public void bindInput(InputBinding binding) {
+        public void bindInput() {
         }
 
         @Override
@@ -69,7 +68,7 @@ public abstract class AccessibilityManagerInternal {
         }
 
         @Override
-        public void startInput(IBinder startInputToken, IInputContext inputContext,
+        public void startInput(IRemoteAccessibilityInputConnection remoteAccessibility,
                 EditorInfo editorInfo, boolean restarting) {
         }
     };

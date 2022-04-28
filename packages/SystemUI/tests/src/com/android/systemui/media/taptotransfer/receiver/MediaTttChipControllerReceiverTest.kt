@@ -102,7 +102,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             TapGestureDetector(context),
             powerManager,
             Handler.getMain(),
-            receiverUiEventLogger,
+            receiverUiEventLogger
         )
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
@@ -204,6 +204,18 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         val expectedSize = controllerReceiver.getIconSize(isAppIcon = false)
         assertThat(chipView.getAppIconView().measuredWidth).isEqualTo(expectedSize)
         assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(expectedSize)
+    }
+
+    @Test
+    fun commandQueueCallback_invalidStateParam_noChipShown() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            routeInfo,
+            null,
+            APP_NAME
+        )
+
+        verify(windowManager, never()).addView(any(), any())
     }
 
     private fun getChipView(): ViewGroup {

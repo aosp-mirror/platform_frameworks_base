@@ -271,10 +271,8 @@ public class ScreenPinningRequest implements View.OnClickListener,
 
             final Optional<CentralSurfaces> centralSurfacesOptional =
                     mCentralSurfacesOptionalLazy.get();
-            NavigationBarView navigationBarView =
-                    centralSurfacesOptional.map(CentralSurfaces::getNavigationBarView).orElse(null);
-            final boolean recentsVisible = navigationBarView != null
-                    && navigationBarView.isRecentsButtonVisible();
+            boolean recentsVisible =
+                    centralSurfacesOptional.map(CentralSurfaces::isOverviewEnabled).orElse(false);
             boolean touchExplorationEnabled = mAccessibilityService.isTouchExplorationEnabled();
             int descriptionStringResId;
             if (QuickStepContract.isGesturalMode(mNavBarMode)) {
@@ -295,6 +293,8 @@ public class ScreenPinningRequest implements View.OnClickListener,
                         : R.string.screen_pinning_description_recents_invisible;
             }
 
+            NavigationBarView navigationBarView =
+                    centralSurfacesOptional.map(CentralSurfaces::getNavigationBarView).orElse(null);
             if (navigationBarView != null) {
                 ((ImageView) mLayout.findViewById(R.id.screen_pinning_back_icon))
                         .setImageDrawable(navigationBarView.getBackDrawable());

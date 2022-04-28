@@ -15,83 +15,88 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.internal.widget.AlertDialogLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@*android:id/parentPanel"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center_horizontal|top"
-    android:orientation="vertical"
-    android:paddingTop="@dimen/dialog_top_padding"
-    >
+    android:layout_height="wrap_content">
 
-    <include layout="@layout/alert_dialog_title_systemui" />
-
-    <FrameLayout
-        android:id="@*android:id/contentPanel"
+    <com.android.internal.widget.AlertDialogLayout
+        android:id="@*android:id/parentPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:paddingStart="@dimen/dialog_side_padding"
-        android:paddingEnd="@dimen/dialog_side_padding"
+        android:gravity="center_horizontal|top"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/dialog_top_padding"
         >
 
-        <ScrollView
-            android:id="@*android:id/scrollView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipToPadding="false">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <Space
-                    android:id="@*android:id/textSpacerNoTitle"
-                    android:visibility="gone"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp" />
-
-                <TextView
-                    android:id="@*android:id/message"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/TextAppearance.Dialog.Body.Message" />
-
-                <Space
-                    android:id="@*android:id/textSpacerNoButtons"
-                    android:visibility="gone"
-                    android:layout_width="match_parent"
-                    android:layout_height="6dp" />
-            </LinearLayout>
-        </ScrollView>
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@*android:id/customPanel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:paddingStart="@dimen/dialog_side_padding"
-        android:paddingEnd="@dimen/dialog_side_padding"
-        >
+        <include layout="@layout/alert_dialog_title_systemui" />
 
         <FrameLayout
-            android:id="@*android:id/custom"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="@dimen/dialog_side_padding"
-        android:paddingEnd="@dimen/dialog_side_padding">
-        <include
+            android:id="@*android:id/contentPanel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            layout="@layout/alert_dialog_button_bar_systemui" />
-    </FrameLayout>
+            android:minHeight="48dp"
+            android:paddingStart="@dimen/dialog_side_padding"
+            android:paddingEnd="@dimen/dialog_side_padding"
+            >
 
-</com.android.internal.widget.AlertDialogLayout>
+            <ScrollView
+                android:id="@*android:id/scrollView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <Space
+                        android:id="@*android:id/textSpacerNoTitle"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp" />
+
+                    <TextView
+                        android:id="@*android:id/message"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/TextAppearance.Dialog.Body.Message" />
+
+                    <Space
+                        android:id="@*android:id/textSpacerNoButtons"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="6dp" />
+                </LinearLayout>
+            </ScrollView>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@*android:id/customPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:paddingStart="@dimen/dialog_side_padding"
+            android:paddingEnd="@dimen/dialog_side_padding"
+            >
+
+            <FrameLayout
+                android:id="@*android:id/custom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/dialog_side_padding"
+            android:paddingEnd="@dimen/dialog_side_padding">
+            <include
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/alert_dialog_button_bar_systemui" />
+        </FrameLayout>
+    </com.android.internal.widget.AlertDialogLayout>
+
+</androidx.core.widget.NestedScrollView>

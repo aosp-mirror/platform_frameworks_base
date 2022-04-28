@@ -37,7 +37,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.ClientWindowFrames;
-import android.window.IOnBackInvokedCallback;
+import android.window.OnBackInvokedCallbackInfo;
 
 import java.util.List;
 
@@ -371,14 +371,14 @@ interface IWindowSession {
             in String hashAlgorithm, in RemoteCallback callback);
 
     /**
-     * Sets the {@link IOnBackInvokedCallback} to be invoked for a window when back is triggered.
+     * Sets the {@link OnBackInvokedCallbackInfo} containing the callback to be invoked for
+     * a window when back is triggered.
      *
      * @param window The token for the window to set the callback to.
-     * @param callback The {@link IOnBackInvokedCallback} to set.
-     * @param priority The priority of the callback.
+     * @param callbackInfo The {@link OnBackInvokedCallbackInfo} to set.
      */
-    oneway void setOnBackInvokedCallback(
-            IWindow window, IOnBackInvokedCallback callback, int priority);
+    oneway void setOnBackInvokedCallbackInfo(
+            IWindow window, in OnBackInvokedCallbackInfo callbackInfo);
 
     /**
      * Clears a touchable region set by {@link #setInsets}.

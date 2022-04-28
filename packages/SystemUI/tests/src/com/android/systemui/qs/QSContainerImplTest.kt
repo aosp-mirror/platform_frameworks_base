@@ -59,22 +59,14 @@ class QSContainerImplTest : SysuiTestCase() {
     fun testContainerBottomPadding() {
         qsContainer.updateResources(
             qsPanelController,
-            quickStatusBarHeaderController,
-            /* newFooter */ false
-        )
-        verify(qsPanelContainer).setPaddingRelative(anyInt(), anyInt(), anyInt(), eq(0))
-
-        qsContainer.updateResources(
-            qsPanelController,
-            quickStatusBarHeaderController,
-            /* newFooter */ true
+            quickStatusBarHeaderController
         )
         verify(qsPanelContainer)
             .setPaddingRelative(
                 anyInt(),
                 anyInt(),
                 anyInt(),
-                eq(mContext.resources.getDimensionPixelSize(R.dimen.new_footer_height))
+                eq(mContext.resources.getDimensionPixelSize(R.dimen.footer_actions_height))
             )
     }
 }

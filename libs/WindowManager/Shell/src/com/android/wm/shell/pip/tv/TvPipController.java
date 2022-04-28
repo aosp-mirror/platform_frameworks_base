@@ -115,6 +115,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     private int mPipForceCloseDelay;
 
     private int mResizeAnimationDuration;
+    private int mEduTextWindowExitAnimationDurationMs;
 
     public static Pip create(
             Context context,
@@ -323,11 +324,15 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         }
     }
 
+    private void updatePinnedStackBounds() {
+        updatePinnedStackBounds(mResizeAnimationDuration);
+    }
+
     /**
      * Update the PiP bounds based on the state of the PiP and keep clear areas.
      * Animates to the current PiP bounds, and schedules unstashing the PiP if necessary.
      */
-    private void updatePinnedStackBounds() {
+    private void updatePinnedStackBounds(int animationDuration) {
         if (mState == STATE_NO_PIP) {
             return;
         }
@@ -353,23 +358,26 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             mUnstashRunnable = null;
         }
         if (!disallowStashing && placement.getUnstashDestinationBounds() != null) {
-            mUnstashRunnable = () -> movePinnedStackTo(placement.getUnstashDestinationBounds());
+            mUnstashRunnable = () -> {
+                movePinnedStackTo(placement.getUnstashDestinationBounds(), animationDuration);
+            };
             mMainHandler.postAtTime(mUnstashRunnable, placement.getUnstashTime());
         }
     }
 
     /** Animates the PiP to the given bounds. */
     private void movePinnedStackTo(Rect bounds) {
+        movePinnedStackTo(bounds, mResizeAnimationDuration);
+    }
+
+    /** Animates the PiP to the given bounds with the given animation duration. */
+    private void movePinnedStackTo(Rect bounds, int animationDuration) {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: movePinnedStack() - new pip bounds: %s", TAG, bounds.toShortString());
         }
         mPipTaskOrganizer.scheduleAnimateResizePip(bounds,
-                mResizeAnimationDuration, rect -> {
-                    if (DEBUG) {
-                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                                "%s: movePinnedStack() animation done", TAG);
-                    }
+                animationDuration, rect -> {
                     mTvPipMenuController.updateExpansionState();
                 });
     }
@@ -406,6 +414,11 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         }
         removeTask(mPinnedTaskId);
         onPipDisappeared();
+    }
+
+    @Override
+    public void closeEduText() {
+        updatePinnedStackBounds(mEduTextWindowExitAnimationDurationMs);
     }
 
     private void registerSessionListenerForCurrentUser() {
@@ -457,6 +470,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: onPipTransition_Started(), state=%s", TAG, stateToName(mState));
         }
+        mTvPipMenuController.notifyPipAnimating(true);
     }
 
     @Override
@@ -465,6 +479,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: onPipTransition_Canceled(), state=%s", TAG, stateToName(mState));
         }
+        mTvPipMenuController.notifyPipAnimating(false);
     }
 
     @Override
@@ -476,6 +491,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: onPipTransition_Finished(), state=%s", TAG, stateToName(mState));
         }
+        mTvPipMenuController.notifyPipAnimating(false);
     }
 
     private void setState(@State int state) {
@@ -491,6 +507,8 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         final Resources res = mContext.getResources();
         mResizeAnimationDuration = res.getInteger(R.integer.config_pipResizeAnimationDuration);
         mPipForceCloseDelay = res.getInteger(R.integer.config_pipForceCloseDelay);
+        mEduTextWindowExitAnimationDurationMs =
+                res.getInteger(R.integer.pip_edu_text_window_exit_animation_duration_ms);
     }
 
     private void registerTaskStackListenerCallback(TaskStackListenerImpl taskStackListener) {

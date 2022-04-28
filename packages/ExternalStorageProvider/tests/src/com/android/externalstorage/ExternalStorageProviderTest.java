@@ -67,5 +67,16 @@ public class ExternalStorageProviderTest {
 
         docId = root + ":";
         assertTrue(getPathFromDocId(docId).isEmpty());
+
+        docId = root + ":./" + path;
+        assertEquals(getPathFromDocId(docId), path);
+
+        final String dotPath = "abc/./def/ghi";
+        docId = root + ":" + dotPath;
+        assertEquals(getPathFromDocId(docId), path);
+
+        final String twoDotPath = "abc/../abc/def/ghi";
+        docId = root + ":" + twoDotPath;
+        assertEquals(getPathFromDocId(docId), path);
     }
 }

@@ -28,6 +28,7 @@
 #include <android/hardware/gnss/2.0/IGnss.h>
 #include <android/hardware/gnss/2.1/IGnss.h>
 #include <android/hardware/gnss/BnGnss.h>
+#include <binder/IBinder.h>
 #include <log/log.h>
 
 #include "AGnss.h"
@@ -50,10 +51,21 @@ namespace android::gnss {
 struct GnssDeathRecipient : virtual public hardware::hidl_death_recipient {
     // hidl_death_recipient interface
     virtual void serviceDied(uint64_t cookie, const wp<hidl::base::V1_0::IBase>& who) override {
-        ALOGE("IGNSS hidl service failed, trying to recover...");
+        ALOGE("GNSS HIDL service failed, trying to recover...");
+        onServiceDied();
+    }
 
+    static void onServiceDied() {
         JNIEnv* env = android::AndroidRuntime::getJNIEnv();
         env->CallVoidMethod(android::mCallbacksObj, method_reportGnssServiceDied);
+    }
+};
+
+struct GnssDeathRecipientAidl : virtual public IBinder::DeathRecipient {
+    // IBinder::DeathRecipient implementation
+    virtual void binderDied(const wp<IBinder>& who) override {
+        ALOGE("GNSS AIDL service failed, trying to recover...");
+        GnssDeathRecipient::onServiceDied();
     }
 };
 
@@ -109,6 +121,7 @@ public:
 
 private:
     sp<GnssDeathRecipient> gnssHalDeathRecipient = nullptr;
+    sp<GnssDeathRecipientAidl> gnssHalDeathRecipientAidl = nullptr;
     sp<hardware::gnss::V1_0::IGnss> gnssHal = nullptr;
     sp<hardware::gnss::V1_1::IGnss> gnssHal_V1_1 = nullptr;
     sp<hardware::gnss::V2_0::IGnss> gnssHal_V2_0 = nullptr;

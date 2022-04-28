@@ -69,6 +69,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.parsing.ParsingPackage
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.pm.resolution.ComponentResolver
+import com.android.server.pm.snapshot.PackageDataSnapshot
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.sdksandbox.SdkSandboxManagerLocal
 import com.android.server.testutils.TestHandler
@@ -194,7 +195,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val packageParser: PackageParser2 = mock()
         val keySetManagerService: KeySetManagerService = mock()
         val packageAbiHelper: PackageAbiHelper = mock()
-        val appsFilter: AppsFilter = mock {
+        val appsFilter: AppsFilterImpl = mock {
             whenever(snapshot()) { this@mock }
         }
         val dexManager: DexManager = mock()
@@ -203,6 +204,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val domainVerificationManagerInternal: DomainVerificationManagerInternal = mock()
         val handler = TestHandler(null)
         val defaultAppProvider: DefaultAppProvider = mock()
+        val backgroundHandler = TestHandler(null)
     }
 
     companion object {
@@ -222,6 +224,10 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
             DEFAULT_VERSION_INFO.fingerprint = "abcdef"
             DEFAULT_VERSION_INFO.sdkVersion = Build.VERSION_CODES.R
             DEFAULT_VERSION_INFO.databaseVersion = Settings.CURRENT_DATABASE_VERSION
+        }
+
+        fun addDefaultSharedLibrary(libName: String, libEntry: SystemConfig.SharedLibraryEntry) {
+            DEFAULT_SHARED_LIBRARIES_LIST[libName] = libEntry
         }
     }
 
@@ -282,6 +288,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
             .thenReturn(mocks.domainVerificationManagerInternal)
         whenever(mocks.injector.handler) { mocks.handler }
         whenever(mocks.injector.defaultAppProvider) { mocks.defaultAppProvider }
+        whenever(mocks.injector.backgroundHandler) { mocks.backgroundHandler }
         wheneverStatic { SystemConfig.getInstance() }.thenReturn(mocks.systemConfig)
         whenever(mocks.systemConfig.availableFeatures).thenReturn(DEFAULT_AVAILABLE_FEATURES_MAP)
         whenever(mocks.systemConfig.sharedLibraries).thenReturn(DEFAULT_SHARED_LIBRARIES_LIST)
@@ -323,7 +330,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         }
         whenever(mocks.injector.sharedLibrariesImpl) { mSharedLibraries }
         // everything visible by default
-        whenever(mocks.appsFilter.shouldFilterApplication(
+        whenever(mocks.appsFilter.shouldFilterApplication(any(PackageDataSnapshot::class.java),
                 anyInt(), nullable(), nullable(), anyInt())) { false }
 
         val displayManager: DisplayManager = mock()
@@ -365,7 +372,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 })
         existingSettingBuilderRef[0]?.setPackage(null)
         val packageSetting = existingSettingBuilderRef[0]?.let { withExistingSetting(it) }!!.build()
-        addPreExistingSetting(packageName, packageSetting)
+        addPreExistingSetting(packageSetting.name, packageSetting)
     }
 
     /**
@@ -394,7 +401,8 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         stageParse(apkPath, pkg)
         val parentFile = apkPath.parentFile
         val settingBuilder = withSetting(createBasicSettingBuilder(parentFile, pkg))
-        stageSettingInsert(packageName, settingBuilder.build())
+        val packageSetting = settingBuilder.build()
+        stageSettingInsert(packageSetting.name, packageSetting)
     }
 
     /**

@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class LatencyTracker {
     private static final String TAG = "LatencyTracker";
-    private static final String SETTINGS_ENABLED_KEY = "enabled";
+    public static final String SETTINGS_ENABLED_KEY = "enabled";
     private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
     private static final boolean DEBUG = false;
     /** Default to being enabled on debug builds. */

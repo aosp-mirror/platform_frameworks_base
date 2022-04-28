@@ -353,6 +353,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mSourceBounds.setEmpty();
         updateSystemUIStateIfNeeded();
         mContext.unregisterComponentCallbacks(this);
+        // Notify source bounds empty when magnification is deleted.
+        mWindowMagnifierCallback.onSourceBoundsChanged(mDisplayId, new Rect());
     }
 
     @Override

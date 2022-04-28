@@ -197,7 +197,9 @@ public class CloudSearchPerUserService extends
             Slog.d(TAG, "onDestroyLocked(): requestId=" + requestId);
         }
         final CloudSearchCallbackInfo sessionInfo = mCallbackQueue.removeElement(requestId);
-        sessionInfo.destroy();
+        if (sessionInfo != null) {
+            sessionInfo.destroy();
+        }
     }
 
     @Override

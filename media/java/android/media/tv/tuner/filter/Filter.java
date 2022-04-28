@@ -560,6 +560,11 @@ public class Filter implements AutoCloseable {
      */
     @Override
     public void close() {
+        synchronized (mCallbackLock) {
+            mCallback = null;
+            mExecutor = null;
+        }
+
         synchronized (mLock) {
             if (mIsClosed) {
                 return;
@@ -568,8 +573,6 @@ public class Filter implements AutoCloseable {
             if (res != Tuner.RESULT_SUCCESS) {
                 TunerUtils.throwExceptionForResult(res, "Failed to close filter.");
             } else {
-                mCallback = null;
-                mExecutor = null;
                 mIsStarted = false;
                 mIsClosed = true;
             }

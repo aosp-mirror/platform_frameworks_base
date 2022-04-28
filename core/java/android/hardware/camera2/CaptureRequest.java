@@ -266,6 +266,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     private int mRequestType = -1;
 
+    private static final String SET_TAG_STRING_PREFIX =
+            "android.hardware.camera2.CaptureRequest.setTag.";
     /**
      * Get the type of the capture request
      *
@@ -614,6 +616,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
                 throw new RuntimeException("Reading cached CaptureRequest is not supported");
             }
         }
+
+        boolean hasUserTagStr = (in.readInt() == 1) ? true : false;
+        if (hasUserTagStr) {
+            mUserTag = in.readString();
+        }
     }
 
     @Override
@@ -623,6 +630,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        if (!mPhysicalCameraSettings.containsKey(mLogicalCameraId)) {
+            throw new IllegalStateException("Physical camera settings map must contain a key for "
+                    + "the logical camera id.");
+        }
+
         int physicalCameraCount = mPhysicalCameraSettings.size();
         dest.writeInt(physicalCameraCount);
         //Logical camera id and settings always come first.
@@ -650,6 +662,19 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             } else {
                 dest.writeInt(0);
             }
+        }
+
+        // Write string for user tag if set to something in the same namespace
+        if (mUserTag != null) {
+            String userTagStr = mUserTag.toString();
+            if (userTagStr != null && userTagStr.startsWith(SET_TAG_STRING_PREFIX)) {
+                dest.writeInt(1);
+                dest.writeString(userTagStr.substring(SET_TAG_STRING_PREFIX.length()));
+            } else {
+                dest.writeInt(0);
+            }
+        } else {
+            dest.writeInt(0);
         }
     }
 
@@ -933,7 +958,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * <p>This tag is not used for anything by the camera device, but can be
          * used by an application to easily identify a CaptureRequest when it is
          * returned by
-         * {@link CameraCaptureSession.CaptureCallback#onCaptureCompleted CaptureCallback.onCaptureCompleted}
+         * {@link CameraCaptureSession.CaptureCallback#onCaptureCompleted CaptureCallback.onCaptureCompleted}.</p>
+         *
+         * <p>If the application overrides the tag object's {@link Object#toString} function, the
+         * returned string must not contain personal identifiable information.</p>
          *
          * @param tag an arbitrary Object to store with this request
          * @see CaptureRequest#getTag
@@ -1382,6 +1410,14 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * region and output only the intersection rectangle as the metering region in the result
      * metadata.  If the region is entirely outside the crop region, it will be ignored and
      * not reported in the result metadata.</p>
+     * <p>When setting the AE metering regions, the application must consider the additional
+     * crop resulted from the aspect ratio differences between the preview stream and
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}. For example, if the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} is the full
+     * active array size with 4:3 aspect ratio, and the preview stream is 16:9,
+     * the boundary of AE regions will be [0, y_crop] and
+     * [active_width, active_height - 2 * y_crop] rather than [0, 0] and
+     * [active_width, active_height], where y_crop is the additional crop due to aspect ratio
+     * mismatch.</p>
      * <p>Starting from API level 30, the coordinate system of activeArraySize or
      * preCorrectionActiveArraySize is used to represent post-zoomRatio field of view, not
      * pre-zoom field of view. This means that the same aeRegions values at different
@@ -1604,6 +1640,14 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * region and output only the intersection rectangle as the metering region in the result
      * metadata. If the region is entirely outside the crop region, it will be ignored and
      * not reported in the result metadata.</p>
+     * <p>When setting the AF metering regions, the application must consider the additional
+     * crop resulted from the aspect ratio differences between the preview stream and
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}. For example, if the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} is the full
+     * active array size with 4:3 aspect ratio, and the preview stream is 16:9,
+     * the boundary of AF regions will be [0, y_crop] and
+     * [active_width, active_height - 2 * y_crop] rather than [0, 0] and
+     * [active_width, active_height], where y_crop is the additional crop due to aspect ratio
+     * mismatch.</p>
      * <p>Starting from API level 30, the coordinate system of activeArraySize or
      * preCorrectionActiveArraySize is used to represent post-zoomRatio field of view, not
      * pre-zoom field of view. This means that the same afRegions values at different
@@ -1818,6 +1862,14 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * region and output only the intersection rectangle as the metering region in the result
      * metadata.  If the region is entirely outside the crop region, it will be ignored and
      * not reported in the result metadata.</p>
+     * <p>When setting the AWB metering regions, the application must consider the additional
+     * crop resulted from the aspect ratio differences between the preview stream and
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}. For example, if the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} is the full
+     * active array size with 4:3 aspect ratio, and the preview stream is 16:9,
+     * the boundary of AWB regions will be [0, y_crop] and
+     * [active_width, active_height - 2 * y_crop] rather than [0, 0] and
+     * [active_width, active_height], where y_crop is the additional crop due to aspect ratio
+     * mismatch.</p>
      * <p>Starting from API level 30, the coordinate system of activeArraySize or
      * preCorrectionActiveArraySize is used to represent post-zoomRatio field of view, not
      * pre-zoom field of view. This means that the same awbRegions values at different

@@ -32,7 +32,6 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN;
 
 import android.window.StartingWindowInfo;
-import android.window.TaskSnapshot;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -80,7 +79,7 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
 
         if (taskSwitch) {
             if (allowTaskSnapshot) {
-                if (isSnapshotCompatible(windowInfo)) {
+                if (windowInfo.taskSnapshot != null) {
                     return STARTING_WINDOW_TYPE_SNAPSHOT;
                 }
                 if (!topIsHome) {
@@ -101,33 +100,5 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
                 : legacySplashScreen
                         ? STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
                         : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-    }
-
-    /**
-     * Returns {@code true} if the task snapshot is compatible with this activity (at least the
-     * rotation must be the same).
-     */
-    private boolean isSnapshotCompatible(StartingWindowInfo windowInfo) {
-        final TaskSnapshot snapshot = windowInfo.taskSnapshot;
-        if (snapshot == null) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
-                    "isSnapshotCompatible no snapshot, taskId=%d",
-                    windowInfo.taskInfo.taskId);
-            return false;
-        }
-        if (!snapshot.getTopActivityComponent().equals(windowInfo.taskInfo.topActivity)) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
-                    "isSnapshotCompatible obsoleted snapshot for %s",
-                    windowInfo.taskInfo.topActivity);
-            return false;
-        }
-
-        final int taskRotation = windowInfo.taskInfo.configuration
-                .windowConfiguration.getRotation();
-        final int snapshotRotation = snapshot.getRotation();
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
-                "isSnapshotCompatible taskRotation=%d, snapshotRotation=%d",
-                taskRotation, snapshotRotation);
-        return taskRotation == snapshotRotation;
     }
 }
