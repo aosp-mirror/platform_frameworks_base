@@ -17,9 +17,9 @@
 package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresDevice
 import android.view.WindowManager
 import androidx.test.filters.FlakyTest
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -76,7 +76,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
-class SeamlessAppRotationTest(
+open class SeamlessAppRotationTest(
     testSpec: FlickerTestParameter
 ) : RotationTransition(testSpec) {
     override val testApp = SeamlessRotationAppHelper(instrumentation)

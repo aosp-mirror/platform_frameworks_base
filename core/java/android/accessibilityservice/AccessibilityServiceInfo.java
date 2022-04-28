@@ -83,11 +83,13 @@ import java.util.List;
  * @attr ref android.R.styleable#AccessibilityService_canRequestFilterKeyEvents
  * @attr ref android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
  * @attr ref android.R.styleable#AccessibilityService_canRetrieveWindowContent
+ * @attr ref android.R.styleable#AccessibilityService_intro
  * @attr ref android.R.styleable#AccessibilityService_description
  * @attr ref android.R.styleable#AccessibilityService_summary
  * @attr ref android.R.styleable#AccessibilityService_notificationTimeout
  * @attr ref android.R.styleable#AccessibilityService_packageNames
  * @attr ref android.R.styleable#AccessibilityService_settingsActivity
+ * @attr ref android.R.styleable#AccessibilityService_tileService
  * @attr ref android.R.styleable#AccessibilityService_nonInteractiveUiTimeout
  * @attr ref android.R.styleable#AccessibilityService_interactiveUiTimeout
  * @attr ref android.R.styleable#AccessibilityService_canTakeScreenshot
@@ -547,11 +549,11 @@ public class AccessibilityServiceInfo implements Parcelable {
     private String mSettingsActivityName;
 
     /**
-     * The class name of {@link android.service.quicksettings.TileService} is associated with this
+     * The name of {@link android.service.quicksettings.TileService} is associated with this
      * accessibility service for one to one mapping. It is used by system settings to remind users
      * this accessibility service has a {@link android.service.quicksettings.TileService}.
      */
-    private String mTileServiceClassName;
+    private String mTileServiceName;
 
     /**
      * Bit mask with capabilities of this service.
@@ -740,7 +742,7 @@ public class AccessibilityServiceInfo implements Parcelable {
             }
             mIsAccessibilityTool = asAttributes.getBoolean(
                     R.styleable.AccessibilityService_isAccessibilityTool, false);
-            mTileServiceClassName = asAttributes.getString(
+            mTileServiceName = asAttributes.getString(
                     com.android.internal.R.styleable.AccessibilityService_tileService);
             peekedValue = asAttributes.peekValue(
                     com.android.internal.R.styleable.AccessibilityService_intro);
@@ -850,14 +852,14 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
-     * Gets the class name of {@link android.service.quicksettings.TileService} is associated with
+     * Gets the name of {@link android.service.quicksettings.TileService} is associated with
      * this accessibility service.
      *
-     * @return The class names of {@link android.service.quicksettings.TileService}.
+     * @return The name of {@link android.service.quicksettings.TileService}.
      */
     @Nullable
-    public String getTileServiceClassName() {
-        return mTileServiceClassName;
+    public String getTileServiceName() {
+        return mTileServiceName;
     }
 
     /**
@@ -1146,7 +1148,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeInt(mHtmlDescriptionRes);
         parcel.writeString(mNonLocalizedDescription);
         parcel.writeBoolean(mIsAccessibilityTool);
-        parcel.writeString(mTileServiceClassName);
+        parcel.writeString(mTileServiceName);
         parcel.writeInt(mIntroResId);
     }
 
@@ -1170,7 +1172,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         mHtmlDescriptionRes = parcel.readInt();
         mNonLocalizedDescription = parcel.readString();
         mIsAccessibilityTool = parcel.readBoolean();
-        mTileServiceClassName = parcel.readString();
+        mTileServiceName = parcel.readString();
         mIntroResId = parcel.readInt();
     }
 
@@ -1224,7 +1226,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         stringBuilder.append(", ");
         stringBuilder.append("settingsActivityName: ").append(mSettingsActivityName);
         stringBuilder.append(", ");
-        stringBuilder.append("tileServiceClassName: ").append(mTileServiceClassName);
+        stringBuilder.append("tileServiceName: ").append(mTileServiceName);
         stringBuilder.append(", ");
         stringBuilder.append("summary: ").append(mNonLocalizedSummary);
         stringBuilder.append(", ");

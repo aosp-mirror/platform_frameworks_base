@@ -22,6 +22,9 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.ContentObserver;
+import android.os.UserHandle;
+import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -45,6 +48,16 @@ public class DeviceStateRotationLockSettingsManagerTest {
     @Mock private Context mMockContext;
     @Mock private Resources mMockResources;
 
+    private DeviceStateRotationLockSettingsManager mManager;
+    private int mNumSettingsChanges = 0;
+    private final ContentObserver mContentObserver = new ContentObserver(null) {
+        @Override
+        public void onChange(boolean selfChange) {
+            mNumSettingsChanges++;
+        }
+    };
+    private final FakeSecureSettings mFakeSecureSettings = new FakeSecureSettings();
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -52,6 +65,39 @@ public class DeviceStateRotationLockSettingsManagerTest {
         when(mMockContext.getApplicationContext()).thenReturn(mMockContext);
         when(mMockContext.getResources()).thenReturn(mMockResources);
         when(mMockContext.getContentResolver()).thenReturn(context.getContentResolver());
+        mFakeSecureSettings.registerContentObserver(
+                Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
+                /* notifyForDescendents= */ false, //NOTYPO
+                mContentObserver,
+                UserHandle.USER_CURRENT);
+        mManager = new DeviceStateRotationLockSettingsManager(context, mFakeSecureSettings);
+    }
+
+    @Test
+    public void initialization_settingsAreChangedOnce() {
+        assertThat(mNumSettingsChanges).isEqualTo(1);
+    }
+
+    @Test
+    public void updateSetting_multipleTimes_sameValue_settingsAreChangedOnlyOnce() {
+        mNumSettingsChanges = 0;
+
+        mManager.updateSetting(/* deviceState= */ 1, /* rotationLocked= */ true);
+        mManager.updateSetting(/* deviceState= */ 1, /* rotationLocked= */ true);
+        mManager.updateSetting(/* deviceState= */ 1, /* rotationLocked= */ true);
+
+        assertThat(mNumSettingsChanges).isEqualTo(1);
+    }
+
+    @Test
+    public void updateSetting_multipleTimes_differentValues_settingsAreChangedMultipleTimes() {
+        mNumSettingsChanges = 0;
+
+        mManager.updateSetting(/* deviceState= */ 1, /* rotationLocked= */ true);
+        mManager.updateSetting(/* deviceState= */ 1, /* rotationLocked= */ false);
+        mManager.updateSetting(/* deviceState= */ 1, /* rotationLocked= */ true);
+
+        assertThat(mNumSettingsChanges).isEqualTo(3);
     }
 
     @Test

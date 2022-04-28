@@ -19,6 +19,7 @@ android_library {
         "androidx.appcompat_appcompat",
         "androidx.lifecycle_lifecycle-runtime",
         "androidx.mediarouter_mediarouter-nodeps",
+        "com.google.android.material_material",
         "iconloader",
 
         "WifiTrackerLibRes",
@@ -48,9 +49,9 @@ android_library {
         "SettingsLibCollapsingToolbarBaseActivity",
         "SettingsLibTwoTargetPreference",
         "SettingsLibSettingsTransition",
-        "SettingsLibActivityEmbedding",
         "SettingsLibButtonPreference",
         "setupdesign",
+        "zxing-core-1.7",
     ],
 
     // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES

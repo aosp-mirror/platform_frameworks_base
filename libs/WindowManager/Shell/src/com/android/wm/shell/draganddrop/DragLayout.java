@@ -17,6 +17,7 @@
 package com.android.wm.shell.draganddrop;
 
 import static android.app.StatusBarManager.DISABLE_NONE;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -24,6 +25,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
@@ -44,6 +46,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
+import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -91,6 +94,9 @@ public class DragLayout extends LinearLayout {
         mDividerSize = context.getResources().getDimensionPixelSize(
                 R.dimen.split_divider_bar_width);
 
+        // Always use LTR because we assume dropZoneView1 is on the left and 2 is on the right when
+        // showing the highlight.
+        setLayoutDirection(LAYOUT_DIRECTION_LTR);
         mDropZoneView1 = new DropZoneView(context);
         mDropZoneView2 = new DropZoneView(context);
         addView(mDropZoneView1, new LinearLayout.LayoutParams(MATCH_PARENT,
@@ -135,6 +141,12 @@ public class DragLayout extends LinearLayout {
         }
     }
 
+    private void updateContainerMarginsForSingleTask() {
+        mDropZoneView1.setContainerMargin(
+                mDisplayMargin, mDisplayMargin, mDisplayMargin, mDisplayMargin);
+        mDropZoneView2.setContainerMargin(0, 0, 0, 0);
+    }
+
     private void updateContainerMargins(int orientation) {
         final float halfMargin = mDisplayMargin / 2f;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -165,11 +177,20 @@ public class DragLayout extends LinearLayout {
         if (!alreadyInSplit) {
             ActivityManager.RunningTaskInfo taskInfo1 = mPolicy.getLatestRunningTask();
             if (taskInfo1 != null) {
-                Drawable icon1 = mIconProvider.getIcon(taskInfo1.topActivityInfo);
-                int bgColor1 = getResizingBackgroundColor(taskInfo1);
-                mDropZoneView1.setAppInfo(bgColor1, icon1);
-                mDropZoneView2.setAppInfo(bgColor1, icon1);
-                updateDropZoneSizes(null, null); // passing null splits the views evenly
+                final int activityType = taskInfo1.getActivityType();
+                if (activityType == ACTIVITY_TYPE_STANDARD) {
+                    Drawable icon1 = mIconProvider.getIcon(taskInfo1.topActivityInfo);
+                    int bgColor1 = getResizingBackgroundColor(taskInfo1);
+                    mDropZoneView1.setAppInfo(bgColor1, icon1);
+                    mDropZoneView2.setAppInfo(bgColor1, icon1);
+                    updateDropZoneSizes(null, null); // passing null splits the views evenly
+                } else {
+                    // We use the first drop zone to show the fullscreen highlight, and don't need
+                    // to set additional info
+                    mDropZoneView1.setForceIgnoreBottomMargin(true);
+                    updateDropZoneSizesForSingleTask();
+                    updateContainerMarginsForSingleTask();
+                }
             }
         } else {
             // We're already in split so get taskInfo from the controller to populate icon / color.
@@ -193,6 +214,21 @@ public class DragLayout extends LinearLayout {
             mSplitScreenController.getStageBounds(topOrLeftBounds, bottomOrRightBounds);
             updateDropZoneSizes(topOrLeftBounds, bottomOrRightBounds);
         }
+    }
+
+    private void updateDropZoneSizesForSingleTask() {
+        final LinearLayout.LayoutParams dropZoneView1 =
+                (LayoutParams) mDropZoneView1.getLayoutParams();
+        final LinearLayout.LayoutParams dropZoneView2 =
+                (LayoutParams) mDropZoneView2.getLayoutParams();
+        dropZoneView1.width = MATCH_PARENT;
+        dropZoneView1.height = MATCH_PARENT;
+        dropZoneView2.width = 0;
+        dropZoneView2.height = 0;
+        dropZoneView1.weight = 1;
+        dropZoneView2.weight = 0;
+        mDropZoneView1.setLayoutParams(dropZoneView1);
+        mDropZoneView2.setLayoutParams(dropZoneView2);
     }
 
     /**
@@ -265,9 +301,12 @@ public class DragLayout extends LinearLayout {
                 // Animating to no target
                 animateSplitContainers(false, null /* animCompleteCallback */);
             } else if (mCurrentTarget == null) {
-                // Animating to first target
-                animateSplitContainers(true, null /* animCompleteCallback */);
-                animateHighlight(target);
+                if (mPolicy.getNumTargets() == 1) {
+                    animateFullscreenContainer(true);
+                } else {
+                    animateSplitContainers(true, null /* animCompleteCallback */);
+                    animateHighlight(target);
+                }
             } else {
                 // Switching between targets
                 mDropZoneView1.animateSwitch();
@@ -283,6 +322,10 @@ public class DragLayout extends LinearLayout {
     public void hide(DragEvent event, Runnable hideCompleteCallback) {
         mIsShowing = false;
         animateSplitContainers(false, hideCompleteCallback);
+        // Reset the state if we previously force-ignore the bottom margin
+        mDropZoneView1.setForceIgnoreBottomMargin(false);
+        mDropZoneView2.setForceIgnoreBottomMargin(false);
+        updateContainerMargins(getResources().getConfiguration().orientation);
         mCurrentTarget = null;
     }
 
@@ -297,9 +340,61 @@ public class DragLayout extends LinearLayout {
         // Process the drop
         mPolicy.handleDrop(mCurrentTarget, event.getClipData());
 
-        // TODO(b/169894807): Coordinate with dragSurface
+        // Start animating the drop UI out with the drag surface
         hide(event, dropCompleteCallback);
+        hideDragSurface(dragSurface);
         return handledDrop;
+    }
+
+    private void hideDragSurface(SurfaceControl dragSurface) {
+        final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+        final ValueAnimator dragSurfaceAnimator = ValueAnimator.ofFloat(0f, 1f);
+        // Currently the splash icon animation runs with the default ValueAnimator duration of
+        // 300ms
+        dragSurfaceAnimator.setDuration(300);
+        dragSurfaceAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        dragSurfaceAnimator.addUpdateListener(animation -> {
+            float t = animation.getAnimatedFraction();
+            float alpha = 1f - t;
+            // TODO: Scale the drag surface as well once we make all the source surfaces
+            //       consistent
+            tx.setAlpha(dragSurface, alpha);
+            tx.apply();
+        });
+        dragSurfaceAnimator.addListener(new AnimatorListenerAdapter() {
+            private boolean mCanceled = false;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                cleanUpSurface();
+                mCanceled = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (mCanceled) {
+                    // Already handled above
+                    return;
+                }
+                cleanUpSurface();
+            }
+
+            private void cleanUpSurface() {
+                // Clean up the drag surface
+                tx.remove(dragSurface);
+                tx.apply();
+            }
+        });
+        dragSurfaceAnimator.start();
+    }
+
+    private void animateFullscreenContainer(boolean visible) {
+        mStatusBarManager.disable(visible
+                ? HIDE_STATUS_BAR_FLAGS
+                : DISABLE_NONE);
+        // We're only using the first drop zone if there is one fullscreen target
+        mDropZoneView1.setShowingMargin(visible);
+        mDropZoneView1.setShowingHighlight(visible);
     }
 
     private void animateSplitContainers(boolean visible, Runnable animCompleteCallback) {

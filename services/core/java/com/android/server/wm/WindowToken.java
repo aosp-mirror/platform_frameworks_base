@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
@@ -578,7 +580,6 @@ class WindowToken extends WindowContainer<WindowState> {
                 .setParent(getParentSurfaceControl())
                 .setName(getSurfaceControl() + " - rotation-leash")
                 .setHidden(false)
-                .setEffectLayer()
                 .setCallsite("WindowToken.getOrCreateFixedRotationLeash")
                 .build();
         t.setPosition(leash, mLastSurfacePosition.x, mLastSurfacePosition.y);
@@ -615,6 +616,12 @@ class WindowToken extends WindowContainer<WindowState> {
             getResolvedOverrideConfiguration().updateFrom(
                     mFixedRotationTransformState.mRotatedOverrideConfiguration);
         }
+        if (getTaskDisplayArea() == null) {
+            // We only defined behaviors of system windows in fullscreen mode, i.e. windows not
+            // contained in a task display area.
+            getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(
+                    WINDOWING_MODE_FULLSCREEN);
+        }
     }
 
     @Override
@@ -638,8 +645,10 @@ class WindowToken extends WindowContainer<WindowState> {
         final ActivityRecord r = asActivityRecord();
         if (r != null) {
             final Task rootTask = r.getRootTask();
-            // Don't transform the activity in PiP because the PiP task organizer will handle it.
-            if (rootTask != null && rootTask.inPinnedWindowingMode()) {
+            // Don't transform the activity exiting PiP because the PiP task organizer will handle
+            // it.
+            if (rootTask != null && mTransitionController.getWindowingModeAtStart(rootTask)
+                    == WINDOWING_MODE_PINNED) {
                 return;
             }
         }

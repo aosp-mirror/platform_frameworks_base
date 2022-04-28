@@ -91,7 +91,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -605,6 +604,13 @@ public class AudioManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int FLAG_FROM_KEY = 1 << 12;
 
+    /**
+     * Indicates that an absolute volume controller is notifying AudioService of a change in the
+     * volume or mute status of an external audio system.
+     * @hide
+     */
+    public static final int FLAG_ABSOLUTE_VOLUME = 1 << 13;
+
     /** @hide */
     @IntDef(prefix = {"ENCODED_SURROUND_OUTPUT_"}, value = {
             ENCODED_SURROUND_OUTPUT_UNKNOWN,
@@ -662,6 +668,7 @@ public class AudioManager {
             FLAG_SHOW_UI_WARNINGS,
             FLAG_SHOW_VIBRATE_HINT,
             FLAG_FROM_KEY,
+            FLAG_ABSOLUTE_VOLUME,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
@@ -683,6 +690,7 @@ public class AudioManager {
         FLAG_NAMES.put(FLAG_SHOW_UI_WARNINGS, "FLAG_SHOW_UI_WARNINGS");
         FLAG_NAMES.put(FLAG_SHOW_VIBRATE_HINT, "FLAG_SHOW_VIBRATE_HINT");
         FLAG_NAMES.put(FLAG_FROM_KEY, "FLAG_FROM_KEY");
+        FLAG_NAMES.put(FLAG_ABSOLUTE_VOLUME, "FLAG_ABSOLUTE_VOLUME");
     }
 
     /** @hide */
@@ -5625,27 +5633,33 @@ public class AudioManager {
      * Note that the information may be imprecise when the implementation
      * cannot distinguish whether a particular device is enabled.
      *
-     * {@hide}
+     * @deprecated on {@link android.os.Build.VERSION_CODES#T} as new devices
+     *             will have multi-bit device types.
+     *             Prefer to use {@link #getDevicesForAttributes()} instead,
+     *             noting that getDevicesForStream() has a few small discrepancies
+     *             for better volume handling.
+     * @hide
      */
     @UnsupportedAppUsage
+    @Deprecated
     public int getDevicesForStream(int streamType) {
         switch (streamType) {
-        case STREAM_VOICE_CALL:
-        case STREAM_SYSTEM:
-        case STREAM_RING:
-        case STREAM_MUSIC:
-        case STREAM_ALARM:
-        case STREAM_NOTIFICATION:
-        case STREAM_DTMF:
-        case STREAM_ACCESSIBILITY:
-            final IAudioService service = getService();
-            try {
-                return service.getDevicesForStream(streamType);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        default:
-            return 0;
+            case STREAM_VOICE_CALL:
+            case STREAM_SYSTEM:
+            case STREAM_RING:
+            case STREAM_MUSIC:
+            case STREAM_ALARM:
+            case STREAM_NOTIFICATION:
+            case STREAM_DTMF:
+            case STREAM_ACCESSIBILITY:
+                final IAudioService service = getService();
+                try {
+                    return service.getDeviceMaskForStream(streamType);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            default:
+                return 0;
         }
     }
 
@@ -5884,14 +5898,8 @@ public class AudioManager {
      */
     @UnsupportedAppUsage
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void setWiredDeviceConnectionState(int device, int state, String address,
-            String name) {
-        final IAudioService service = getService();
-        int role = isOutputDevice(device)
-                ? AudioDeviceAttributes.ROLE_OUTPUT : AudioDeviceAttributes.ROLE_INPUT;
-        AudioDeviceAttributes attributes = new AudioDeviceAttributes(
-                role, AudioDeviceInfo.convertInternalDeviceToDeviceType(device), address,
-                name, new ArrayList<>()/*mAudioProfiles*/, new ArrayList<>()/*mAudioDescriptors*/);
+    public void setWiredDeviceConnectionState(int device, int state, String address, String name) {
+        AudioDeviceAttributes attributes = new AudioDeviceAttributes(device, address, name);
         setWiredDeviceConnectionState(attributes, state);
     }
 
@@ -6947,7 +6955,8 @@ public class AudioManager {
         for (Integer format : formatsList) {
             int btSourceCodec = AudioSystem.audioFormatToBluetoothSourceCodec(format);
             if (btSourceCodec != BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
-                codecConfigList.add(new BluetoothCodecConfig(btSourceCodec));
+                codecConfigList.add(
+                        new BluetoothCodecConfig.Builder().setCodecType(btSourceCodec).build());
             }
         }
         return codecConfigList;
@@ -7294,8 +7303,13 @@ public class AudioManager {
      * Ultrasound playback and capture, false otherwise.
      */
     @SystemApi
-    public static boolean isUltrasoundSupported() {
-        return AudioSystem.isUltrasoundSupported();
+    @RequiresPermission(android.Manifest.permission.ACCESS_ULTRASOUND)
+    public boolean isUltrasoundSupported() {
+        try {
+            return getService().isUltrasoundSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -8344,101 +8358,120 @@ public class AudioManager {
     }
 
     /**
-     * Add UID's that can be considered as assistant.
+     * Add UIDs that can be considered as assistant.
      *
-     * @param assistantUids UID's of the services that can be considered as assistant.
+     * @param assistantUids UIDs of the services that can be considered as assistant.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void addAssistantServicesUids(@NonNull List<Integer> assistantUids) {
+    public void addAssistantServicesUids(@NonNull int[] assistantUids) {
         try {
-            getService().addAssistantServicesUids(assistantUids.stream()
-                    .mapToInt(Integer::intValue).toArray());
+            getService().addAssistantServicesUids(assistantUids);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Remove UID's that can be considered as assistant.
+     * Remove UIDs that can be considered as assistant.
      *
-     * @param assistantUids UID'S of the services that should be remove.
+     * @param assistantUids UIDs of the services that should be remove.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void removeAssistantServicesUids(@NonNull List<Integer> assistantUids) {
+    public void removeAssistantServicesUids(@NonNull int[] assistantUids) {
         try {
-            getService().removeAssistantServicesUids(assistantUids.stream()
-                    .mapToInt(Integer::intValue).toArray());
+            getService().removeAssistantServicesUids(assistantUids);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Get the list of assistants UIDs that been added with the
-     * {@link #addAssistantServicesUids(List)} (List)} and not yet removed with
-     * {@link #removeAssistantServicesUids(List)}
+     * Get the assistants UIDs that been added with the
+     * {@link #addAssistantServicesUids(int[])} and not yet removed with
+     * {@link #removeAssistantServicesUids(int[])}
      *
-     * @return list of assistants UID's
+     * <p> Note that during native audioserver crash and after boot up the list of assistant
+     * UIDs will be reset to an empty list (i.e. no UID will be considered as assistant)
+     * Just after user switch, the list of assistant will also reset to empty.
+     * In both cases,The component's UID of the assistiant role or assistant setting will be
+     * automitically added to the list by the audio service.
+     *
+     * @return array of assistants UIDs
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public @NonNull List<Integer> getAssistantServicesUids() {
+    public @NonNull int[] getAssistantServicesUids() {
         try {
             int[] uids = getService().getAssistantServicesUids();
-            return Arrays.stream(uids).boxed().collect(Collectors.toList());
+            return Arrays.copyOf(uids, uids.length);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Sets UID's that can be considered as active assistant. Calling the API with a new list will
-     * overwrite previous list. If the list of UIDs is empty then no UID will be considered active.
-     * In this manner calling the API with an empty list will remove all UID's previously set.
+     * Sets UIDs that can be considered as active assistant. Calling the API with a new array will
+     * overwrite previous UIDs. If the array of UIDs is empty then no UID will be considered active.
+     * In this manner calling the API with an empty array will remove all UIDs previously set.
      *
-     * @param assistantUids UID'S of the services that can be considered active assistant. Can be
-     * an empty list, for this no UID will be considered active.
+     * @param assistantUids UIDs of the services that can be considered active assistant. Can be
+     * an empty array, for this no UID will be considered active.
      *
      * <p> Note that during audio service crash reset and after boot up the list of active assistant
-     * UID's will be reset to an empty list (i.e. no UID will be considered as an active assistant).
+     * UIDs will be reset to an empty list (i.e. no UID will be considered as an active assistant).
      * Just after user switch the list of active assistant will also reset to empty.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void setActiveAssistantServiceUids(@NonNull List<Integer>  assistantUids) {
+    public void setActiveAssistantServiceUids(@NonNull int[]  assistantUids) {
         try {
-            getService().setActiveAssistantServiceUids(assistantUids.stream()
-                    .mapToInt(Integer::intValue).toArray());
+            getService().setActiveAssistantServiceUids(assistantUids);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Get the list of active assistant UIDs last set with the
-     * {@link #setActiveAssistantServiceUids(List)}
+     * Get active assistant UIDs last set with the
+     * {@link #setActiveAssistantServiceUids(int[])}
      *
-     * @return list of active assistants UID's
+     * @return array of active assistants UIDs
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public @NonNull List<Integer> getActiveAssistantServicesUids() {
+    public @NonNull int[] getActiveAssistantServicesUids() {
         try {
             int[] uids = getService().getActiveAssistantServiceUids();
-            return Arrays.stream(uids).boxed().collect(Collectors.toList());
+            return Arrays.copyOf(uids, uids.length);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the audio HAL version in the form MAJOR.MINOR. If there is no audio HAL found, null
+     * will be returned.
+     *
+     * @hide
+     */
+    @TestApi
+    public static @Nullable String getHalVersion() {
+        try {
+            return getService().getHalVersion();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error querying getHalVersion", e);
             throw e.rethrowFromSystemServer();
         }
     }

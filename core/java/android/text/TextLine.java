@@ -866,8 +866,12 @@ public class TextLine {
             wp.getFontMetricsInt(mChars, start, count, contextStart, contextCount, runIsRtl,
                     fmi);
         } else {
-            wp.getFontMetricsInt(mText, mStart + start, count, mStart + contextStart, contextCount,
-                    runIsRtl, fmi);
+            if (mComputed == null) {
+                wp.getFontMetricsInt(mText, mStart + start, count, mStart + contextStart,
+                        contextCount, runIsRtl, fmi);
+            } else {
+                mComputed.getFontMetricsInt(mStart + start, mStart + end, fmi);
+            }
         }
 
         updateMetrics(fmi, previousTop, previousAscent, previousDescent, previousBottom,

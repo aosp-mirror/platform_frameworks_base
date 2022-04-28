@@ -94,6 +94,14 @@ public class WindowMagnificationConnectionWrapperTest {
     }
 
     @Test
+    public void moveWindowMagnifierToPosition() throws RemoteException {
+        mConnectionWrapper.moveWindowMagnifierToPosition(TEST_DISPLAY, 100, 150,
+                mAnimationCallback);
+        verify(mConnection).moveWindowMagnifierToPosition(eq(TEST_DISPLAY),
+                eq(100f), eq(150f), any(IRemoteMagnificationAnimationCallback.class));
+    }
+
+    @Test
     public void showMagnificationButton() throws RemoteException {
         mConnectionWrapper.showMagnificationButton(TEST_DISPLAY,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);

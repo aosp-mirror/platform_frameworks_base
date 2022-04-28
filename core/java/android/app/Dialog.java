@@ -52,9 +52,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.OnBackInvokedCallback;
-import android.view.OnBackInvokedDispatcher;
-import android.view.OnBackInvokedDispatcherOwner;
 import android.view.SearchEvent;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
@@ -63,6 +60,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
@@ -98,8 +97,7 @@ import java.lang.ref.WeakReference;
  * </div>
  */
 public class Dialog implements DialogInterface, Window.Callback,
-        KeyEvent.Callback, OnCreateContextMenuListener, Window.OnWindowDismissedCallback,
-        OnBackInvokedDispatcherOwner {
+        KeyEvent.Callback, OnCreateContextMenuListener, Window.OnWindowDismissedCallback {
     private static final String TAG = "Dialog";
     @UnsupportedAppUsage
     private Activity mOwnerActivity;
@@ -456,15 +454,12 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     protected void onStart() {
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
-        if (mContext != null && !WindowOnBackInvokedDispatcher.shouldUseLegacyBack()) {
+        if (mContext != null
+                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
             // Add onBackPressed as default back behavior.
-            mDefaultBackCallback = new OnBackInvokedCallback() {
-                @Override
-                public void onBackInvoked() {
-                    onBackPressed();
-                }
-            };
-            getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(mDefaultBackCallback);
+            mDefaultBackCallback = this::onBackPressed;
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mDefaultBackCallback);
             mDefaultBackCallback = null;
         }
     }
@@ -703,7 +698,7 @@ public class Dialog implements DialogInterface, Window.Callback,
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
                 && event.isTracking()
                 && !event.isCanceled()
-                && WindowOnBackInvokedDispatcher.shouldUseLegacyBack()) {
+                && !WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
             onBackPressed();
             return true;
         }
@@ -724,7 +719,11 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Called when the dialog has detected the user's press of the back
      * key.  The default implementation simply cancels the dialog (only if
      * it is cancelable), but you can override this to do whatever you want.
+     *
+     * @deprecated Use {@link OnBackInvokedCallback} or
+     * {@code androidx.activity.OnBackPressedCallback} to handle back navigation instead.
      */
+    @Deprecated
     public void onBackPressed() {
         if (mCancelable) {
             cancel();
@@ -1468,8 +1467,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Returns null if the dialog is not attached to a window with a decor.
      */
     @NonNull
-    @Override
     public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
-        return ((OnBackInvokedDispatcherOwner) mWindow).getOnBackInvokedDispatcher();
+        return mWindow.getOnBackInvokedDispatcher();
     }
 }

@@ -29,7 +29,9 @@ import android.os.IBinder;
 import android.os.IHwBinder;
 import android.os.RemoteException;
 import android.system.OsConstants;
+import android.util.Log;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -54,6 +56,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * </ul>
  */
 final class SoundTriggerHw2Compat implements ISoundTriggerHal {
+    private static final String TAG = "SoundTriggerHw2Compat";
+
     private final @NonNull Runnable mRebootRunnable;
     private final @NonNull IHwBinder mBinder;
     private @NonNull android.hardware.soundtrigger.V2_0.ISoundTriggerHw mUnderlying_2_0;
@@ -226,6 +230,16 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
             return handle.get();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        } finally {
+            // TODO(b/219825762): We should be able to use the entire object in a try-with-resources
+            //   clause, instead of having to explicitly close internal fields.
+            if (hidlModel.data != null) {
+                try {
+                    hidlModel.data.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to close file", e);
+                }
+            }
         }
     }
 
@@ -252,6 +266,16 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
             return handle.get();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        } finally {
+            // TODO(b/219825762): We should be able to use the entire object in a try-with-resources
+            //   clause, instead of having to explicitly close internal fields.
+            if (hidlModel.common.data != null) {
+                try {
+                    hidlModel.common.data.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to close file", e);
+                }
+            }
         }
     }
 

@@ -20,10 +20,14 @@ import android.testing.AndroidTestingRunner
 import android.view.Choreographer
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
+import dagger.BindsInstance
+import dagger.Component
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,8 +45,10 @@ class NotifPipelineChoreographerTest : SysuiTestCase() {
         whenever(it.executeDelayed(any(), anyLong())).thenReturn(timeoueSubscription)
     }
 
-    val pipelineChoreographer: NotifPipelineChoreographer = NotifPipelineChoreographerModule
-            .provideChoreographer(viewChoreographer, executor)
+    val pipelineChoreographer: NotifPipelineChoreographer =
+        DaggerNotifPipelineChoreographerTestComponent.factory()
+                .create(viewChoreographer, executor)
+                .choreographer
 
     @Test
     fun scheduleThenEvalFrameCallback() {
@@ -96,5 +102,20 @@ class NotifPipelineChoreographerTest : SysuiTestCase() {
         // THEN both the FrameCallback is unregistered and the timeout subscription is cancelled.
         verify(viewChoreographer).removeFrameCallback(frameCallback)
         verify(timeoueSubscription).run()
+    }
+}
+
+@SysUISingleton
+@Component(modules = [NotifPipelineChoreographerModule::class])
+interface NotifPipelineChoreographerTestComponent {
+
+    val choreographer: NotifPipelineChoreographer
+
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance viewChoreographer: Choreographer,
+            @BindsInstance @Main executor: DelayableExecutor
+        ): NotifPipelineChoreographerTestComponent
     }
 }

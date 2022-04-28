@@ -16,10 +16,9 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
+import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -112,7 +111,7 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     /**
      * Checks that the visible region of [pipApp] always expands during the animation
      */
-    @Presubmit
+    @FlakyTest(bugId = 228012337)
     @Test
     fun pipLayerExpands() {
         val layerName = pipApp.component.toLayerName()
@@ -149,7 +148,7 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     /**
      * Checks that the focus doesn't change between windows during the transition
      */
-    @Postsubmit
+    @FlakyTest(bugId = 216306753)
     @Test
     fun focusDoesNotChange() {
         testSpec.assertEventLog {

@@ -20,13 +20,18 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.UserInfo;
+import android.net.Uri;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
@@ -35,11 +40,13 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ConcurrentUtils;
 import com.android.server.SystemService;
+import com.android.server.app.GameServiceConfiguration.GameServiceComponentConfiguration;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -61,9 +68,13 @@ public final class GameServiceControllerTest {
             new ComponentName(PROVIDER_A_PACKAGE_NAME, "com.provider.a.ServiceA");
     private static final ComponentName PROVIDER_A_SERVICE_B =
             new ComponentName(PROVIDER_A_PACKAGE_NAME, "com.provider.a.ServiceB");
+    private static final ComponentName PROVIDER_A_SERVICE_C =
+            new ComponentName(PROVIDER_A_PACKAGE_NAME, "com.provider.a.ServiceC");
 
     private MockitoSession mMockingSession;
     private GameServiceController mGameServiceManager;
+    @Mock
+    private Context mMockContext;
     @Mock
     private GameServiceProviderSelector mMockGameServiceProviderSelector;
     @Mock
@@ -77,7 +88,7 @@ public final class GameServiceControllerTest {
                 .startMocking();
 
         mGameServiceManager = new GameServiceController(
-                ConcurrentUtils.DIRECT_EXECUTOR,
+                mMockContext, ConcurrentUtils.DIRECT_EXECUTOR,
                 mMockGameServiceProviderSelector,
                 mMockGameServiceProviderInstanceFactory);
     }
@@ -96,25 +107,30 @@ public final class GameServiceControllerTest {
 
     @Test
     public void notifyUserStarted_createsAndStartsNewInstance() {
-        GameServiceProviderConfiguration configurationA =
-                new GameServiceProviderConfiguration(USER_HANDLE_10, PROVIDER_A_SERVICE_A,
-                        PROVIDER_A_SERVICE_B);
+        GameServiceConfiguration configurationA =
+                new GameServiceConfiguration(PROVIDER_A_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_10,
+                                PROVIDER_A_SERVICE_A,
+                                PROVIDER_A_SERVICE_B));
         FakeGameServiceProviderInstance instanceA =
                 seedConfigurationForUser(USER_10, configurationA);
 
         mGameServiceManager.onBootComplete();
         mGameServiceManager.notifyUserStarted(USER_10);
 
-        verify(mMockGameServiceProviderInstanceFactory).create(configurationA);
+        verify(mMockGameServiceProviderInstanceFactory).create(
+                configurationA.getGameServiceComponentConfiguration());
         verifyNoMoreInteractions(mMockGameServiceProviderInstanceFactory);
         assertThat(instanceA.getIsRunning()).isTrue();
     }
 
     @Test
     public void notifyUserStarted_sameUser_doesNotCreateNewInstance() {
-        GameServiceProviderConfiguration configurationA =
-                new GameServiceProviderConfiguration(USER_HANDLE_10, PROVIDER_A_SERVICE_A,
-                        PROVIDER_A_SERVICE_B);
+        GameServiceConfiguration configurationA =
+                new GameServiceConfiguration(PROVIDER_A_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_10,
+                                PROVIDER_A_SERVICE_A,
+                                PROVIDER_A_SERVICE_B));
         FakeGameServiceProviderInstance instanceA =
                 seedConfigurationForUser(USER_10, configurationA);
 
@@ -122,16 +138,19 @@ public final class GameServiceControllerTest {
         mGameServiceManager.notifyUserStarted(USER_10);
         mGameServiceManager.notifyUserStarted(USER_10);
 
-        verify(mMockGameServiceProviderInstanceFactory).create(configurationA);
+        verify(mMockGameServiceProviderInstanceFactory).create(
+                configurationA.getGameServiceComponentConfiguration());
         verifyNoMoreInteractions(mMockGameServiceProviderInstanceFactory);
         assertThat(instanceA.getIsRunning()).isTrue();
     }
 
     @Test
     public void notifyUserUnlocking_noForegroundUser_ignores() {
-        GameServiceProviderConfiguration configurationA =
-                new GameServiceProviderConfiguration(USER_HANDLE_10, PROVIDER_A_SERVICE_A,
-                        PROVIDER_A_SERVICE_B);
+        GameServiceConfiguration configurationA =
+                new GameServiceConfiguration(PROVIDER_A_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_10,
+                                PROVIDER_A_SERVICE_A,
+                                PROVIDER_A_SERVICE_B));
         FakeGameServiceProviderInstance instanceA =
                 seedConfigurationForUser(USER_10, configurationA);
 
@@ -144,9 +163,11 @@ public final class GameServiceControllerTest {
 
     @Test
     public void notifyUserUnlocking_sameAsForegroundUser_evaluatesProvider() {
-        GameServiceProviderConfiguration configurationA =
-                new GameServiceProviderConfiguration(USER_HANDLE_10, PROVIDER_A_SERVICE_A,
-                        PROVIDER_A_SERVICE_B);
+        GameServiceConfiguration configurationA =
+                new GameServiceConfiguration(PROVIDER_A_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_10,
+                                PROVIDER_A_SERVICE_A,
+                                PROVIDER_A_SERVICE_B));
         seedNoConfigurationForUser(USER_10);
 
         mGameServiceManager.onBootComplete();
@@ -155,16 +176,19 @@ public final class GameServiceControllerTest {
                 seedConfigurationForUser(USER_10, configurationA);
         mGameServiceManager.notifyUserUnlocking(USER_10);
 
-        verify(mMockGameServiceProviderInstanceFactory).create(configurationA);
+        verify(mMockGameServiceProviderInstanceFactory).create(
+                configurationA.getGameServiceComponentConfiguration());
         verifyNoMoreInteractions(mMockGameServiceProviderInstanceFactory);
         assertThat(instanceA.getIsRunning()).isTrue();
     }
 
     @Test
     public void notifyUserUnlocking_differentFromForegroundUser_ignores() {
-        GameServiceProviderConfiguration configurationA =
-                new GameServiceProviderConfiguration(USER_HANDLE_10, PROVIDER_A_SERVICE_A,
-                        PROVIDER_A_SERVICE_B);
+        GameServiceConfiguration configurationA =
+                new GameServiceConfiguration(PROVIDER_A_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_10,
+                                PROVIDER_A_SERVICE_A,
+                                PROVIDER_A_SERVICE_B));
         seedNoConfigurationForUser(USER_10);
 
         mGameServiceManager.onBootComplete();
@@ -180,14 +204,18 @@ public final class GameServiceControllerTest {
     @Test
     public void
             notifyNewForegroundUser_differentUser_stopsPreviousInstanceAndThenStartsNewInstance() {
-        GameServiceProviderConfiguration configurationA =
-                new GameServiceProviderConfiguration(USER_HANDLE_10, PROVIDER_A_SERVICE_A,
-                        PROVIDER_A_SERVICE_B);
+        GameServiceConfiguration configurationA =
+                new GameServiceConfiguration(PROVIDER_A_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_10,
+                                PROVIDER_A_SERVICE_A,
+                                PROVIDER_A_SERVICE_B));
         FakeGameServiceProviderInstance instanceA =
                 seedConfigurationForUser(USER_10, configurationA);
-        GameServiceProviderConfiguration configurationB =
-                new GameServiceProviderConfiguration(USER_HANDLE_11, PROVIDER_A_SERVICE_A,
-                        PROVIDER_A_SERVICE_B);
+        GameServiceConfiguration configurationB =
+                new GameServiceConfiguration(PROVIDER_A_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_11,
+                                PROVIDER_A_SERVICE_A,
+                                PROVIDER_A_SERVICE_B));
         FakeGameServiceProviderInstance instanceB = seedConfigurationForUser(USER_11,
                 configurationB);
         InOrder instancesInOrder = Mockito.inOrder(instanceA, instanceB);
@@ -196,8 +224,50 @@ public final class GameServiceControllerTest {
         mGameServiceManager.notifyUserStarted(USER_10);
         mGameServiceManager.notifyNewForegroundUser(USER_11);
 
-        verify(mMockGameServiceProviderInstanceFactory).create(configurationA);
-        verify(mMockGameServiceProviderInstanceFactory).create(configurationB);
+        verify(mMockGameServiceProviderInstanceFactory).create(
+                configurationA.getGameServiceComponentConfiguration());
+        verify(mMockGameServiceProviderInstanceFactory).create(
+                configurationB.getGameServiceComponentConfiguration());
+        instancesInOrder.verify(instanceA).start();
+        instancesInOrder.verify(instanceA).stop();
+        instancesInOrder.verify(instanceB).start();
+        verifyNoMoreInteractions(mMockGameServiceProviderInstanceFactory);
+        assertThat(instanceA.getIsRunning()).isFalse();
+        assertThat(instanceB.getIsRunning()).isTrue();
+    }
+
+    @Test
+    public void packageChanges_reevaluatesGameServiceProvider() {
+        GameServiceConfiguration configurationA =
+                new GameServiceConfiguration(PROVIDER_A_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_10,
+                                PROVIDER_A_SERVICE_A,
+                                PROVIDER_A_SERVICE_B));
+        FakeGameServiceProviderInstance instanceA =
+                seedConfigurationForUser(USER_10, configurationA);
+
+        mGameServiceManager.onBootComplete();
+        mGameServiceManager.notifyUserStarted(USER_10);
+        ArgumentCaptor<BroadcastReceiver> broadcastReceiverArgumentCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mMockContext).registerReceiver(broadcastReceiverArgumentCaptor.capture(), any());
+
+        GameServiceConfiguration configurationB =
+                new GameServiceConfiguration(PROVIDER_A_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_10,
+                                PROVIDER_A_SERVICE_A,
+                                PROVIDER_A_SERVICE_C));
+        FakeGameServiceProviderInstance instanceB =
+                seedConfigurationForUser(USER_10, configurationA);
+        Intent intent = new Intent();
+        intent.setData(Uri.parse("package:" + PROVIDER_A_PACKAGE_NAME));
+        broadcastReceiverArgumentCaptor.getValue().onReceive(mMockContext, intent);
+
+        InOrder instancesInOrder = Mockito.inOrder(instanceA, instanceB);
+        verify(mMockGameServiceProviderInstanceFactory).create(
+                configurationA.getGameServiceComponentConfiguration());
+        verify(mMockGameServiceProviderInstanceFactory).create(
+                configurationB.getGameServiceComponentConfiguration());
         instancesInOrder.verify(instanceA).start();
         instancesInOrder.verify(instanceA).stop();
         instancesInOrder.verify(instanceB).start();
@@ -207,15 +277,16 @@ public final class GameServiceControllerTest {
     }
 
     private void seedNoConfigurationForUser(SystemService.TargetUser user) {
-        when(mMockGameServiceProviderSelector.get(user, "")).thenReturn(null);
+        when(mMockGameServiceProviderSelector.get(user, null)).thenReturn(null);
     }
 
     private FakeGameServiceProviderInstance seedConfigurationForUser(SystemService.TargetUser user,
-            GameServiceProviderConfiguration configuration) {
-        when(mMockGameServiceProviderSelector.get(user, "")).thenReturn(configuration);
+            GameServiceConfiguration configuration) {
+        when(mMockGameServiceProviderSelector.get(user, null)).thenReturn(configuration);
         FakeGameServiceProviderInstance instanceForConfiguration =
                 spy(new FakeGameServiceProviderInstance());
-        when(mMockGameServiceProviderInstanceFactory.create(configuration))
+        when(mMockGameServiceProviderInstanceFactory.create(
+                configuration.getGameServiceComponentConfiguration()))
                 .thenReturn(instanceForConfiguration);
 
         return instanceForConfiguration;

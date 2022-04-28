@@ -287,6 +287,16 @@ public class MeasuredParagraph {
     }
 
     /**
+     * Retrieves the font metrics for the given range.
+     *
+     * This is available only if the MeasuredParagraph is computed with buildForStaticLayout.
+     */
+    public void getFontMetricsInt(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
+            @NonNull Paint.FontMetricsInt fmi) {
+        mMeasuredText.getFontMetricsInt(start, end, fmi);
+    }
+
+    /**
      * Returns a width of the character at the offset.
      *
      * This is available only if the MeasuredParagraph is computed with buildForStaticLayout.

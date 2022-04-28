@@ -46,7 +46,7 @@ public class SmartStorageMaintIdler extends JobService {
             }
             // ... and try again in a next period
             scheduleSmartIdlePass(SmartStorageMaintIdler.this,
-                StorageManagerService.SMART_IDLE_MAINT_PERIOD);
+                StorageManagerService.sSmartIdleMaintPeriod);
         }
     };
 
@@ -70,7 +70,7 @@ public class SmartStorageMaintIdler extends JobService {
     /**
      * Schedule the smart storage idle maintenance job
      */
-    public static void scheduleSmartIdlePass(Context context, int nHours) {
+    public static void scheduleSmartIdlePass(Context context, int nMinutes) {
         StorageManagerService ms = StorageManagerService.sSelf;
         if ((ms == null) || ms.isPassedLifetimeThresh()) {
             return;
@@ -78,7 +78,7 @@ public class SmartStorageMaintIdler extends JobService {
 
         JobScheduler tm = context.getSystemService(JobScheduler.class);
 
-        long nextScheduleTime = TimeUnit.HOURS.toMillis(nHours);
+        long nextScheduleTime = TimeUnit.MINUTES.toMillis(nMinutes);
 
         JobInfo.Builder builder = new JobInfo.Builder(SMART_MAINT_JOB_ID,
             SMART_STORAGE_MAINT_SERVICE);

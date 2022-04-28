@@ -20,7 +20,6 @@ import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.app.admin.DevicePolicyResources.Drawables;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,51 +28,51 @@ import java.util.Objects;
 
 /**
  * Used to pass in the required information for updating an enterprise drawable resource using
- * {@link DevicePolicyManager#setDrawables}.
+ * {@link DevicePolicyResourcesManager#setDrawables}.
  *
  * @hide
  */
 @SystemApi
 public final class DevicePolicyDrawableResource implements Parcelable {
-    @NonNull private final @DevicePolicyResources.UpdatableDrawableId String mDrawableId;
-    @NonNull private final @DevicePolicyResources.UpdatableDrawableStyle String mDrawableStyle;
-    @NonNull private final @DevicePolicyResources.UpdatableDrawableSource String mDrawableSource;
-    private final @DrawableRes int mCallingPackageResourceId;
+    @NonNull private final String mDrawableId;
+    @NonNull private final String mDrawableStyle;
+    @NonNull private final String mDrawableSource;
+    private final @DrawableRes int mResourceIdInCallingPackage;
     @NonNull private ParcelableResource mResource;
 
     /**
      * Creates an object containing the required information for updating an enterprise drawable
-     * resource using {@link DevicePolicyManager#setDrawables}.
+     * resource using {@link DevicePolicyResourcesManager#setDrawables}.
      *
      * <p>It will be used to update the drawable defined by {@code drawableId} with style
      * {@code drawableStyle} located in source {@code drawableSource} to the drawable with ID
-     * {@code callingPackageResourceId} in the calling package</p>
+     * {@code resourceIdInCallingPackage} in the calling package</p>
      *
      * @param drawableId The ID of the drawable to update.
      * @param drawableStyle The style of the drawable to update.
      * @param drawableSource The source of the drawable to update.
-     * @param callingPackageResourceId The ID of the drawable resource in the calling package to
+     * @param resourceIdInCallingPackage The ID of the drawable resource in the calling package to
      *        use as an updated resource.
      *
      * @throws IllegalStateException if the resource with ID
-     * {@code callingPackageResourceId} doesn't exist in the {@code context} package.
+     * {@code resourceIdInCallingPackage} doesn't exist in the {@code context} package.
      */
     public DevicePolicyDrawableResource(
             @NonNull Context context,
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
-            @DrawableRes int callingPackageResourceId) {
-        this(drawableId, drawableStyle, drawableSource, callingPackageResourceId,
-                new ParcelableResource(context, callingPackageResourceId,
+            @NonNull String drawableId,
+            @NonNull String drawableStyle,
+            @NonNull String drawableSource,
+            @DrawableRes int resourceIdInCallingPackage) {
+        this(drawableId, drawableStyle, drawableSource, resourceIdInCallingPackage,
+                new ParcelableResource(context, resourceIdInCallingPackage,
                         ParcelableResource.RESOURCE_TYPE_DRAWABLE));
     }
 
     private DevicePolicyDrawableResource(
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
-            @DrawableRes int callingPackageResourceId,
+            @NonNull String drawableId,
+            @NonNull String drawableStyle,
+            @NonNull String drawableSource,
+            @DrawableRes int resourceIdInCallingPackage,
             @NonNull ParcelableResource resource) {
 
         Objects.requireNonNull(drawableId);
@@ -84,39 +83,38 @@ public final class DevicePolicyDrawableResource implements Parcelable {
         this.mDrawableId = drawableId;
         this.mDrawableStyle = drawableStyle;
         this.mDrawableSource = drawableSource;
-        this.mCallingPackageResourceId = callingPackageResourceId;
+        this.mResourceIdInCallingPackage = resourceIdInCallingPackage;
         this.mResource = resource;
     }
 
     /**
      * Creates an object containing the required information for updating an enterprise drawable
-     * resource using {@link DevicePolicyManager#setDrawables}.
+     * resource using {@link DevicePolicyResourcesManager#setDrawables}.
      * <p>It will be used to update the drawable defined by {@code drawableId} with style
-     * {@code drawableStyle} to the drawable with ID {@code callingPackageResourceId} in the
+     * {@code drawableStyle} to the drawable with ID {@code resourceIdInCallingPackage} in the
      * calling package</p>
      *
      * @param drawableId The ID of the drawable to update.
      * @param drawableStyle The style of the drawable to update.
-     * @param callingPackageResourceId The ID of the drawable resource in the calling package to
+     * @param resourceIdInCallingPackage The ID of the drawable resource in the calling package to
      *        use as an updated resource.
      *
      * @throws IllegalStateException if the resource with ID
-     * {@code callingPackageResourceId} doesn't exist in the calling package.
+     * {@code resourceIdInCallingPackage} doesn't exist in the calling package.
      */
     public DevicePolicyDrawableResource(
             @NonNull Context context,
-            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
-            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @DrawableRes int callingPackageResourceId) {
-       this(context, drawableId, drawableStyle, Drawables.Source.UNDEFINED,
-               callingPackageResourceId);
+            @NonNull String drawableId,
+            @NonNull String drawableStyle,
+            @DrawableRes int resourceIdInCallingPackage) {
+       this(context, drawableId, drawableStyle, DevicePolicyResources.UNDEFINED,
+               resourceIdInCallingPackage);
     }
 
     /**
      * Returns the ID of the drawable to update.
      */
     @NonNull
-    @DevicePolicyResources.UpdatableDrawableId
     public String getDrawableId() {
         return mDrawableId;
     }
@@ -125,7 +123,6 @@ public final class DevicePolicyDrawableResource implements Parcelable {
      * Returns the style of the drawable to update
      */
     @NonNull
-    @DevicePolicyResources.UpdatableDrawableStyle
     public String getDrawableStyle() {
         return mDrawableStyle;
     }
@@ -134,7 +131,6 @@ public final class DevicePolicyDrawableResource implements Parcelable {
      * Returns the source of the drawable to update.
      */
     @NonNull
-    @DevicePolicyResources.UpdatableDrawableSource
     public String getDrawableSource() {
         return mDrawableSource;
     }
@@ -144,8 +140,8 @@ public final class DevicePolicyDrawableResource implements Parcelable {
      * resource.
      */
     @DrawableRes
-    public int getCallingPackageResourceId() {
-        return mCallingPackageResourceId;
+    public int getResourceIdInCallingPackage() {
+        return mResourceIdInCallingPackage;
     }
 
     /**
@@ -166,14 +162,14 @@ public final class DevicePolicyDrawableResource implements Parcelable {
         return mDrawableId.equals(other.mDrawableId)
                 && mDrawableStyle.equals(other.mDrawableStyle)
                 && mDrawableSource.equals(other.mDrawableSource)
-                && mCallingPackageResourceId == other.mCallingPackageResourceId
+                && mResourceIdInCallingPackage == other.mResourceIdInCallingPackage
                 && mResource.equals(other.mResource);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                mDrawableId, mDrawableStyle, mDrawableSource, mCallingPackageResourceId, mResource);
+        return Objects.hash(mDrawableId, mDrawableStyle, mDrawableSource,
+                mResourceIdInCallingPackage, mResource);
     }
 
     @Override
@@ -186,7 +182,7 @@ public final class DevicePolicyDrawableResource implements Parcelable {
         dest.writeString(mDrawableId);
         dest.writeString(mDrawableStyle);
         dest.writeString(mDrawableSource);
-        dest.writeInt(mCallingPackageResourceId);
+        dest.writeInt(mResourceIdInCallingPackage);
         dest.writeTypedObject(mResource, flags);
     }
 
@@ -197,11 +193,11 @@ public final class DevicePolicyDrawableResource implements Parcelable {
                     String drawableId = in.readString();
                     String drawableStyle = in.readString();
                     String drawableSource = in.readString();
-                    int callingPackageResourceId = in.readInt();
+                    int resourceIdInCallingPackage = in.readInt();
                     ParcelableResource resource = in.readTypedObject(ParcelableResource.CREATOR);
 
                     return new DevicePolicyDrawableResource(
-                            drawableId, drawableStyle, drawableSource, callingPackageResourceId,
+                            drawableId, drawableStyle, drawableSource, resourceIdInCallingPackage,
                             resource);
                 }
 

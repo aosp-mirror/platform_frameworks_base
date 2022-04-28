@@ -24,7 +24,9 @@
 
 #include <memory>
 
+#include <aidl/android/hardware/graphics/common/PixelFormat.h>
 #include <android-base/chrono_utils.h>
+#include <android/graphics/properties.h>
 #include <android/graphics/region.h>
 #include <android/gui/BnScreenCaptureListener.h>
 #include <android/hardware/display/IDeviceProductInfoConstants.h>
@@ -62,6 +64,7 @@
 
 namespace android {
 
+using gui::CaptureArgs;
 using gui::FocusRequest;
 
 static void doThrowNPE(JNIEnv* env) {
@@ -251,6 +254,11 @@ static struct {
     jfieldID format;
     jfieldID alphaInterpretation;
 } gDisplayDecorationSupportInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID invokeReleaseCallback;
+} gInvokeReleaseCallback;
 
 class JNamedColorSpace {
 public:
@@ -624,13 +632,69 @@ static void nativeSetGeometry(JNIEnv* env, jclass clazz, jlong transactionObj, j
     transaction->setGeometry(ctrl, source, dst, orientation);
 }
 
+class JGlobalRefHolder {
+public:
+    JGlobalRefHolder(JavaVM* vm, jobject object) : mVm(vm), mObject(object) {}
+
+    virtual ~JGlobalRefHolder() {
+        env()->DeleteGlobalRef(mObject);
+        mObject = nullptr;
+    }
+
+    jobject object() { return mObject; }
+    JavaVM* vm() { return mVm; }
+
+    JNIEnv* env() {
+        JNIEnv* env = nullptr;
+        if (mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+            if (mVm->AttachCurrentThreadAsDaemon(&env, nullptr) != JNI_OK) {
+                LOG_ALWAYS_FATAL("Failed to AttachCurrentThread!");
+            }
+        }
+        return env;
+    }
+
+private:
+    JGlobalRefHolder(const JGlobalRefHolder&) = delete;
+    void operator=(const JGlobalRefHolder&) = delete;
+
+    JavaVM* mVm;
+    jobject mObject;
+};
+
+static ReleaseBufferCallback genReleaseCallback(JNIEnv* env, jobject releaseCallback) {
+    if (releaseCallback == nullptr) return nullptr;
+
+    JavaVM* vm = nullptr;
+    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
+    auto globalCallbackRef =
+            std::make_shared<JGlobalRefHolder>(vm, env->NewGlobalRef(releaseCallback));
+    return [globalCallbackRef](const ReleaseCallbackId&, const sp<Fence>& releaseFence,
+                               std::optional<uint32_t> currentMaxAcquiredBufferCount) {
+        Fence* fenceCopy = releaseFence.get();
+        // We need to grab an extra ref as Java's SyncFence takes ownership
+        if (fenceCopy) {
+            fenceCopy->incStrong(0);
+        }
+        globalCallbackRef->env()->CallStaticVoidMethod(gInvokeReleaseCallback.clazz,
+                                                       gInvokeReleaseCallback.invokeReleaseCallback,
+                                                       globalCallbackRef->object(),
+                                                       reinterpret_cast<jlong>(fenceCopy));
+    };
+}
+
 static void nativeSetBuffer(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
-                            jobject bufferObject) {
+                            jobject bufferObject, jlong fencePtr, jobject releaseCallback) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
     sp<GraphicBuffer> graphicBuffer(GraphicBuffer::fromAHardwareBuffer(
             android_hardware_HardwareBuffer_getNativeHardwareBuffer(env, bufferObject)));
-    transaction->setBuffer(ctrl, graphicBuffer);
+    std::optional<sp<Fence>> optFence = std::nullopt;
+    if (fencePtr != 0) {
+        optFence = sp<Fence>{reinterpret_cast<Fence*>(fencePtr)};
+    }
+    transaction->setBuffer(ctrl, graphicBuffer, optFence, std::nullopt,
+                           genReleaseCallback(env, releaseCallback));
 }
 
 static void nativeSetBufferTransform(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -787,6 +851,14 @@ static void nativeSetDamageRegion(JNIEnv* env, jclass clazz, jlong transactionOb
     }
 
     transaction->setSurfaceDamageRegion(surfaceControl, region);
+}
+
+static void nativeSetDimmingEnabled(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                    jlong nativeObject, jboolean dimmingEnabled) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setDimmingEnabled(ctrl, dimmingEnabled);
 }
 
 static void nativeSetAlpha(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -955,6 +1027,14 @@ static void nativeSetDropInputMode(JNIEnv* env, jclass clazz, jlong transactionO
 static void nativeSanitize(JNIEnv* env, jclass clazz, jlong transactionObj) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     transaction->sanitize();
+}
+
+static void nativeSetDestinationFrame(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                      jlong nativeObject, jint l, jint t, jint r, jint b) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    Rect crop(l, t, r, b);
+    transaction->setDestinationFrame(ctrl, crop);
 }
 
 static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
@@ -1810,6 +1890,11 @@ static jobject nativeGetDisplayDecorationSupport(JNIEnv* env, jclass clazz,
         return nullptr;
     }
 
+    using aidl::android::hardware::graphics::common::PixelFormat;
+    if (support.value().format == PixelFormat::R_8 && !hwui_uses_vulkan()) {
+        return nullptr;
+    }
+
     jobject jDisplayDecorationSupport =
             env->NewObject(gDisplayDecorationSupportInfo.clazz, gDisplayDecorationSupportInfo.ctor);
     if (jDisplayDecorationSupport == nullptr) {
@@ -1827,6 +1912,15 @@ static jobject nativeGetDisplayDecorationSupport(JNIEnv* env, jclass clazz,
 static jlong nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     SurfaceControl *surfaceControl = reinterpret_cast<SurfaceControl*>(nativeObject);
     return reinterpret_cast<jlong>(surfaceControl->getHandle().get());
+}
+
+static void nativeRemoveCurrentInputFocus(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                          jint displayId) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    FocusRequest request;
+    request.timestamp = systemTime(SYSTEM_TIME_MONOTONIC);
+    request.displayId = displayId;
+    transaction->setFocusedWindow(request);
 }
 
 static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2016,8 +2110,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetSize },
     {"nativeSetTransparentRegionHint", "(JJLandroid/graphics/Region;)V",
             (void*)nativeSetTransparentRegionHint },
-    { "nativeSetDamageRegion", "(JJLandroid/graphics/Region;)V",
+    {"nativeSetDamageRegion", "(JJLandroid/graphics/Region;)V",
             (void*)nativeSetDamageRegion },
+    {"nativeSetDimmingEnabled", "(JJZ)V", (void*)nativeSetDimmingEnabled },
     {"nativeSetAlpha", "(JJF)V",
             (void*)nativeSetAlpha },
     {"nativeSetColor", "(JJ[F)V",
@@ -2133,7 +2228,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetDisplayedContentSample },
     {"nativeSetGeometry", "(JJLandroid/graphics/Rect;Landroid/graphics/Rect;J)V",
             (void*)nativeSetGeometry },
-    {"nativeSetBuffer", "(JJLandroid/hardware/HardwareBuffer;)V",
+    {"nativeSetBuffer", "(JJLandroid/hardware/HardwareBuffer;JLjava/util/function/Consumer;)V",
             (void*)nativeSetBuffer },
     {"nativeSetBufferTransform", "(JJI)V", (void*) nativeSetBufferTransform},
     {"nativeSetDataSpace", "(JJI)V",
@@ -2163,6 +2258,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFixedTransformHint},
     {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;I)V",
             (void*)nativeSetFocusedWindow},
+    {"nativeRemoveCurrentInputFocus", "(JI)V",
+            (void*)nativeRemoveCurrentInputFocus},
     {"nativeSetFrameTimelineVsync", "(JJ)V",
             (void*)nativeSetFrameTimelineVsync },
     {"nativeAddJankDataListener", "(JJ)V",
@@ -2186,7 +2283,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeAddTransactionCommittedListener", "(JLandroid/view/SurfaceControl$TransactionCommittedListener;)V",
             (void*) nativeAddTransactionCommittedListener },
     {"nativeSanitize", "(J)V",
-            (void*) nativeSanitize }
+            (void*) nativeSanitize },
+    {"nativeSetDestinationFrame", "(JJIIII)V",
+                (void*)nativeSetDestinationFrame },
         // clang-format on
 };
 
@@ -2424,6 +2523,12 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetFieldIDOrDie(env, displayDecorationSupportClazz, "format", "I");
     gDisplayDecorationSupportInfo.alphaInterpretation =
             GetFieldIDOrDie(env, displayDecorationSupportClazz, "alphaInterpretation", "I");
+
+    jclass surfaceControlClazz = FindClassOrDie(env, "android/view/SurfaceControl");
+    gInvokeReleaseCallback.clazz = MakeGlobalRefOrDie(env, surfaceControlClazz);
+    gInvokeReleaseCallback.invokeReleaseCallback =
+            GetStaticMethodIDOrDie(env, surfaceControlClazz, "invokeReleaseCallback",
+                                   "(Ljava/util/function/Consumer;J)V");
 
     return err;
 }

@@ -89,8 +89,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.os.storage.IStorageManager;
-import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -136,6 +134,8 @@ import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
 import com.android.server.backup.utils.SparseArrayUtils;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import com.google.android.collect.Sets;
 
@@ -323,7 +323,6 @@ public class UserBackupManagerService {
     private final ActivityManagerInternal mActivityManagerInternal;
     private PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
-    private final IStorageManager mStorageManager;
     private final BackupManagerConstants mConstants;
     private final BackupWakeLock mWakelock;
     private final BackupHandler mBackupHandler;
@@ -534,7 +533,6 @@ public class UserBackupManagerService {
         mBackupPasswordManager = null;
         mPackageManagerBinder = null;
         mActivityManager = null;
-        mStorageManager = null;
         mBackupManagerBinder = null;
         mScheduledBackupEligibility = null;
     }
@@ -558,7 +556,6 @@ public class UserBackupManagerService {
 
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
 
         Objects.requireNonNull(parent, "parent cannot be null");
         mBackupManagerBinder = BackupManagerService.asInterface(parent.asBinder());
@@ -2072,26 +2069,6 @@ public class UserBackupManagerService {
             }
         } catch (RemoteException e) {
             Slog.d(TAG, addUserIdToLogMessage(mUserId, "Lost app trying to shut down"));
-        }
-    }
-
-    /** For adb backup/restore. */
-    public boolean deviceIsEncrypted() {
-        try {
-            return mStorageManager.getEncryptionState()
-                    != StorageManager.ENCRYPTION_STATE_NONE
-                    && mStorageManager.getPasswordType()
-                    != StorageManager.CRYPT_TYPE_DEFAULT;
-        } catch (Exception e) {
-            // If we can't talk to the storagemanager service we have a serious problem; fail
-            // "secure" i.e. assuming that the device is encrypted.
-            Slog.e(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId,
-                            "Unable to communicate with storagemanager service: "
-                                    + e.getMessage()));
-            return true;
         }
     }
 
@@ -4072,6 +4049,7 @@ public class UserBackupManagerService {
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     private void dumpInternal(PrintWriter pw) {
         // Add prefix for only non-system users so that system user dumpsys is the same as before
         String userPrefix = mUserId == UserHandle.USER_SYSTEM ? "" : "User " + mUserId + ":";

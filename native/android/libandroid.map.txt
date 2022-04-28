@@ -29,12 +29,12 @@ LIBANDROID {
     AChoreographer_postFrameCallbackDelayed64; # introduced=29
     AChoreographer_registerRefreshRateCallback; # introduced=30
     AChoreographer_unregisterRefreshRateCallback; # introduced=30
-    AChoreographer_postExtendedFrameCallback;  # introduced=33
+    AChoreographer_postVsyncCallback;  # introduced=33
     AChoreographerFrameCallbackData_getFrameTimeNanos;  # introduced=33
     AChoreographerFrameCallbackData_getFrameTimelinesLength;  # introduced=33
     AChoreographerFrameCallbackData_getPreferredFrameTimelineIndex;  # introduced=33
     AChoreographerFrameCallbackData_getFrameTimelineVsyncId;  # introduced=33
-    AChoreographerFrameCallbackData_getFrameTimelineExpectedPresentTimeNanos;  # introduced=33
+    AChoreographerFrameCallbackData_getFrameTimelineExpectedPresentationTimeNanos;  # introduced=33
     AChoreographerFrameCallbackData_getFrameTimelineDeadlineNanos;  # introduced=33
     AConfiguration_copy;
     AConfiguration_delete;
@@ -114,8 +114,10 @@ LIBANDROID {
     ALooper_removeFd;
     ALooper_wake;
     AMotionEvent_getAction;
+    AMotionEvent_getActionButton; # introduced=Tiramisu
     AMotionEvent_getAxisValue; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
     AMotionEvent_getButtonState; # introduced-arm=14 introduced-arm64=21 introduced-mips=14 introduced-mips64=21 introduced-x86=14 introduced-x86_64=21
+    AMotionEvent_getClassification; # introduced=Tiramisu
     AMotionEvent_getDownTime;
     AMotionEvent_getEdgeFlags;
     AMotionEvent_getEventTime;

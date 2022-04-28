@@ -54,6 +54,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
+@FlakyTest(bugId = 219750830)
 class ExitPipViaExpandButtonClickTest(
     testSpec: FlickerTestParameter
 ) : ExitPipToAppTransition(testSpec) {
@@ -73,7 +74,7 @@ class ExitPipViaExpandButtonClickTest(
                 // This will bring PipApp to fullscreen
                 pipApp.expandPipWindowToApp(wmHelper)
                 // Wait until the other app is no longer visible
-                wmHelper.waitForSurfaceAppeared(testApp.component.toWindowName())
+                wmHelper.waitForWindowSurfaceDisappeared(testApp.component)
             }
         }
 

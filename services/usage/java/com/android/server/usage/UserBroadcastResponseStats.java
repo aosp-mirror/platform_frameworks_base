@@ -16,12 +16,15 @@
 
 package com.android.server.usage;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.usage.BroadcastResponseStats;
 import android.util.ArrayMap;
 
 import com.android.internal.util.IndentingPrintWriter;
+
+import java.util.List;
 
 class UserBroadcastResponseStats {
     /**
@@ -39,31 +42,38 @@ class UserBroadcastResponseStats {
             BroadcastEvent broadcastEvent) {
         BroadcastResponseStats responseStats = mResponseStats.get(broadcastEvent);
         if (responseStats == null) {
-            responseStats = new BroadcastResponseStats(broadcastEvent.getTargetPackage());
+            responseStats = new BroadcastResponseStats(broadcastEvent.getTargetPackage(),
+                    broadcastEvent.getIdForResponseEvent());
             mResponseStats.put(broadcastEvent, responseStats);
         }
         return responseStats;
     }
 
-    void aggregateBroadcastResponseStats(
-            @NonNull BroadcastResponseStats responseStats,
-            @NonNull String packageName, long id) {
+    void populateAllBroadcastResponseStats(
+            @NonNull List<BroadcastResponseStats> broadcastResponseStatsList,
+            @Nullable String packageName, @IntRange(from = 0) long id) {
         for (int i = mResponseStats.size() - 1; i >= 0; --i) {
             final BroadcastEvent broadcastEvent = mResponseStats.keyAt(i);
-            if (broadcastEvent.getIdForResponseEvent() == id
-                    && broadcastEvent.getTargetPackage().equals(packageName)) {
-                responseStats.addCounts(mResponseStats.valueAt(i));
+            if (id != 0 && id != broadcastEvent.getIdForResponseEvent()) {
+                continue;
             }
+            if (packageName != null && !packageName.equals(broadcastEvent.getTargetPackage())) {
+                continue;
+            }
+            broadcastResponseStatsList.add(mResponseStats.valueAt(i));
         }
     }
 
-    void clearBroadcastResponseStats(@NonNull String packageName, long id) {
+    void clearBroadcastResponseStats(@Nullable String packageName, @IntRange(from = 0) long id) {
         for (int i = mResponseStats.size() - 1; i >= 0; --i) {
             final BroadcastEvent broadcastEvent = mResponseStats.keyAt(i);
-            if (broadcastEvent.getIdForResponseEvent() == id
-                    && broadcastEvent.getTargetPackage().equals(packageName)) {
-                mResponseStats.removeAt(i);
+            if (id != 0 && id != broadcastEvent.getIdForResponseEvent()) {
+                continue;
             }
+            if (packageName != null && !packageName.equals(broadcastEvent.getTargetPackage())) {
+                continue;
+            }
+            mResponseStats.removeAt(i);
         }
     }
 

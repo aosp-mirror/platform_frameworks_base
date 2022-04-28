@@ -46,9 +46,11 @@ import android.annotation.IntRange;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.Size;
 import android.annotation.StyleRes;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.annotation.UiThread;
@@ -160,6 +162,7 @@ import android.view.translation.ViewTranslationResponse;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
+import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
@@ -1277,6 +1280,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY = "creditCardExpirationDay";
+
+    /**
+     * A hint indicating that this view can be autofilled with a password.
+     *
+     * This is a heuristic-based hint that is meant to be used by UI Toolkit developers when a
+     * view is a password field but doesn't specify a
+     * <code>{@value View#AUTOFILL_HINT_PASSWORD}</code>.
+     * @hide
+     */
+    // TODO(229765029): unhide this for UI toolkit
+    public static final String AUTOFILL_HINT_PASSWORD_AUTO = "passwordAuto";
 
     /**
      * Hints for the autofill services that describes the content of the view.
@@ -4744,6 +4758,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         private List<Rect> mSystemGestureExclusionRects = null;
         private List<Rect> mKeepClearRects = null;
+        private List<Rect> mUnrestrictedKeepClearRects = null;
         private boolean mPreferKeepClear = false;
         private Rect mHandwritingArea = null;
 
@@ -4765,6 +4780,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     @UnsupportedAppUsage
     ListenerInfo mListenerInfo;
+
+    private boolean mPreferKeepClearForFocus;
+    private Runnable mMarkPreferKeepClearForFocus;
 
     private static class TooltipInfo {
         /**
@@ -8168,6 +8186,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         notifyEnterOrExitForAutoFillIfNeeded(gainFocus);
+        updatePreferKeepClearForFocus();
     }
 
     /**
@@ -8199,12 +8218,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         // becomes true where it should issue notifyViewEntered().
                         afm.notifyViewEntered(this);
                     } else {
-                        afm.enableFillRequestActivityStarted();
+                        afm.enableFillRequestActivityStarted(this);
                     }
                 } else if (!enter && !isFocused()) {
                     afm.notifyViewExited(this);
                 } else if (enter) {
-                    afm.enableFillRequestActivityStarted();
+                    afm.enableFillRequestActivityStarted(this);
                 }
             }
         }
@@ -8226,9 +8245,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setAccessibilityPaneTitle(@Nullable CharSequence accessibilityPaneTitle) {
         if (!TextUtils.equals(accessibilityPaneTitle, mAccessibilityPaneTitle)) {
+            boolean currentPaneTitleEmpty = mAccessibilityPaneTitle == null;
+            boolean newPaneTitleEmpty =  accessibilityPaneTitle == null;
             mAccessibilityPaneTitle = accessibilityPaneTitle;
-            notifyViewAccessibilityStateChangedIfNeeded(
-                    AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_TITLE);
+            // Make explicitly important as nulled titles need to be important for DISAPPEARED
+            // events.
+            if (mAccessibilityPaneTitle != null
+                    && getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+                setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+            }
+            if (currentPaneTitleEmpty) {
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_APPEARED);
+            } else if (newPaneTitleEmpty) {
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED);
+            } else {
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_TITLE);
+            }
         }
     }
 
@@ -11713,6 +11748,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final ListenerInfo info = getListenerInfo();
         if (getSystemGestureExclusionRects().isEmpty()
                 && collectPreferKeepClearRects().isEmpty()
+                && collectUnrestrictedPreferKeepClearRects().isEmpty()
                 && (info.mHandwritingArea == null || !isAutoHandwritingEnabled())) {
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
@@ -11785,7 +11821,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * user and that ideally it should not be covered. Setting this is only appropriate for UI
      * where the user would likely take action to uncover it.
      * <p>
-     * The system will try to respect this, but when not possible will ignore it.
+     * The system will try to respect this preference, but when not possible will ignore it.
+     * <p>
+     * Note: This is independent from {@link #setPreferKeepClearRects}. If both are set, both will
+     * be taken into account.
      * <p>
      * @see #setPreferKeepClearRects
      * @see #isPreferKeepClear
@@ -11817,10 +11856,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * user and that ideally they should not be covered. Setting this is only appropriate for UI
      * where the user would likely take action to uncover it.
      * <p>
-     * If the whole view is preferred to be clear ({@link #isPreferKeepClear}), the rects set here
-     * will be ignored.
-     * <p>
      * The system will try to respect this preference, but when not possible will ignore it.
+     * <p>
+     * Note: This is independent from {@link #setPreferKeepClear}. If both are set, both will be
+     * taken into account.
      * <p>
      * @see #setPreferKeepClear
      * @see #getPreferKeepClearRects
@@ -11852,6 +11891,52 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return Collections.emptyList();
     }
 
+    /**
+     * Set a preference to keep the provided rects clear from floating windows above this
+     * view's window. This informs the system that these rects are considered vital areas for the
+     * user and that ideally they should not be covered. Setting this is only appropriate for UI
+     * where the user would likely take action to uncover it.
+     * <p>
+     * Note: The difference with {@link #setPreferKeepClearRects} is that the system won't apply
+     * restrictions to the rects set here.
+     * <p>
+     * @see #setPreferKeepClear
+     * @see #getPreferKeepClearRects
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS)
+    public final void setUnrestrictedPreferKeepClearRects(@NonNull List<Rect> rects) {
+        final ListenerInfo info = getListenerInfo();
+        if (info.mUnrestrictedKeepClearRects != null) {
+            info.mUnrestrictedKeepClearRects.clear();
+            info.mUnrestrictedKeepClearRects.addAll(rects);
+        } else {
+            info.mUnrestrictedKeepClearRects = new ArrayList<>(rects);
+        }
+        updatePositionUpdateListener();
+        postUpdate(this::updateKeepClearRects);
+    }
+
+    /**
+     * @return the list of rects, set by {@link #setPreferKeepClearRects}.
+     *
+     * @see #setPreferKeepClearRects
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public final List<Rect> getUnrestrictedPreferKeepClearRects() {
+        final ListenerInfo info = mListenerInfo;
+        if (info != null && info.mKeepClearRects != null) {
+            return new ArrayList(info.mUnrestrictedKeepClearRects);
+        }
+
+        return Collections.emptyList();
+    }
+
     void updateKeepClearRects() {
         final AttachInfo ai = mAttachInfo;
         if (ai != null) {
@@ -11865,15 +11950,66 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @NonNull
     List<Rect> collectPreferKeepClearRects() {
+        ListenerInfo info = mListenerInfo;
+        boolean keepBoundsClear =
+                (info != null && info.mPreferKeepClear) || mPreferKeepClearForFocus;
+        boolean hasCustomKeepClearRects = info != null && info.mKeepClearRects != null;
+
+        if (!keepBoundsClear && !hasCustomKeepClearRects) {
+            return Collections.emptyList();
+        } else if (keepBoundsClear && !hasCustomKeepClearRects) {
+            return Collections.singletonList(new Rect(0, 0, getWidth(), getHeight()));
+        }
+
+        final List<Rect> list = new ArrayList<>();
+        if (keepBoundsClear) {
+            list.add(new Rect(0, 0, getWidth(), getHeight()));
+        }
+
+        if (hasCustomKeepClearRects) {
+            list.addAll(info.mKeepClearRects);
+        }
+
+        return list;
+    }
+
+    private void updatePreferKeepClearForFocus() {
+        if (mMarkPreferKeepClearForFocus != null) {
+            removeCallbacks(mMarkPreferKeepClearForFocus);
+            mMarkPreferKeepClearForFocus = null;
+        }
+
+        final ViewConfiguration configuration = ViewConfiguration.get(mContext);
+        final int delay = configuration.getPreferKeepClearForFocusDelay();
+        if (delay >= 0) {
+            mMarkPreferKeepClearForFocus = () -> {
+                mPreferKeepClearForFocus = isFocused();
+                mMarkPreferKeepClearForFocus = null;
+
+                updatePositionUpdateListener();
+                post(this::updateKeepClearRects);
+            };
+            postDelayed(mMarkPreferKeepClearForFocus, delay);
+        }
+    }
+
+    private void cancelMarkPreferKeepClearForFocus() {
+        if (mMarkPreferKeepClearForFocus != null) {
+            removeCallbacks(mMarkPreferKeepClearForFocus);
+            mMarkPreferKeepClearForFocus = null;
+        }
+        mPreferKeepClearForFocus = false;
+    }
+
+    /**
+     * Retrieve the list of unrestricted areas within this view's post-layout coordinate space
+     * which the system will try to not cover with other floating elements, like the pip window.
+     */
+    @NonNull
+    List<Rect> collectUnrestrictedPreferKeepClearRects() {
         final ListenerInfo info = mListenerInfo;
-        if (info != null) {
-            final List<Rect> list = new ArrayList();
-            if (info.mPreferKeepClear) {
-                list.add(new Rect(0, 0, getWidth(), getHeight()));
-            } else if (info.mKeepClearRects != null) {
-                list.addAll(info.mKeepClearRects);
-            }
-            return list;
+        if (info != null && info.mUnrestrictedKeepClearRects != null) {
+            return info.mUnrestrictedKeepClearRects;
         }
 
         return Collections.emptyList();
@@ -11901,7 +12037,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Return the handwriting areas set on this view, in its local coordinates.
-     * Notice: the caller of this method should not modify the Rect returned.
      * @see #setHandwritingArea(Rect)
      *
      * @hide
@@ -11909,8 +12044,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     public Rect getHandwritingArea() {
         final ListenerInfo info = mListenerInfo;
-        if (info != null) {
-            return info.mHandwritingArea;
+        if (info != null && info.mHandwritingArea != null) {
+            return new Rect(info.mHandwritingArea);
         }
         return null;
     }
@@ -11925,13 +12060,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Compute the view's coordinate within the surface.
+     * Gets the coordinates of this view in the coordinate space of the
+     * {@link Surface} that contains the view.
      *
-     * <p>Computes the coordinates of this view in its surface. The argument
-     * must be an array of two integers. After the method returns, the array
-     * contains the x and y location in that order.</p>
+     * <p>In multiple-screen scenarios, if the surface spans multiple screens,
+     * the coordinate space of the surface also spans multiple screens.
      *
-     * @param location an array of two integers in which to hold the coordinates
+     * <p>After the method returns, the argument array contains the x and y
+     * coordinates of the view relative to the view's left and top edges,
+     * respectively.
+     *
+     * @param location A two-element integer array in which the view coordinates
+     *      are stored. The x-coordinate is at index 0; the y-coordinate, at
+     *      index 1.
      */
     public void getLocationInSurface(@NonNull @Size(2) int[] location) {
         getLocationInWindow(location);
@@ -11971,6 +12112,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else if (parent instanceof ViewRootImpl) {
             // Between WindowManager.addView() and the first traversal AttachInfo isn't set yet.
             return ((ViewRootImpl) parent).getInsetsController();
+        }
+        return null;
+    }
+
+
+    /**
+     * Walk up the View hierarchy to find the nearest {@link OnBackInvokedDispatcher}.
+     *
+     * @return The {@link OnBackInvokedDispatcher} from this or the nearest
+     * ancestor, or null if this view is both not attached and have no ancestor providing an
+     * {@link OnBackInvokedDispatcher}.
+     */
+    @Nullable
+    public final OnBackInvokedDispatcher findOnBackInvokedDispatcher() {
+        ViewParent parent = getParent();
+        if (parent != null) {
+            return parent.findOnBackInvokedDispatcherForChild(this, this);
         }
         return null;
     }
@@ -13572,6 +13730,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             invalidate();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
+            updatePreferKeepClearForFocus();
             return true;
         }
         return false;
@@ -13651,6 +13810,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     sendAccessibilityEventUnchecked(event);
                 }
             }
+
+            updatePreferKeepClearForFocus();
         }
     }
 
@@ -14165,12 +14326,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         // Changes to views with a pane title count as window state changes, as the pane title
-        // marks them as significant parts of the UI.
+        // marks them as significant parts of the UI. A visible view with a nulled title may send
+        // a disappeared event.
         if ((changeType != AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE)
-                && isAccessibilityPane()) {
+                && (isAccessibilityPane()
+                || (changeType == AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED)
+                && isAggregatedVisible())) {
             // If the pane isn't visible, content changed events are sufficient unless we're
             // reporting that the view just disappeared
-            if ((getVisibility() == VISIBLE)
+            if ((isAggregatedVisible())
                     || (changeType == AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED)) {
                 final AccessibilityEvent event = AccessibilityEvent.obtain();
                 onInitializeAccessibilityEvent(event);
@@ -14529,6 +14693,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int selectionStart;
         int selectionEnd;
         if (extendSelection && isAccessibilitySelectionExtendable()) {
+            prepareForExtendedAccessibilitySelection();
             selectionStart = getAccessibilitySelectionStart();
             if (selectionStart == ACCESSIBILITY_CURSOR_POSITION_UNDEFINED) {
                 selectionStart = forward ? segmentStart : segmentEnd;
@@ -14565,6 +14730,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public boolean isAccessibilitySelectionExtendable() {
         return false;
+    }
+
+    /**
+     * Prepare for extended selection.
+     * @hide
+     */
+    public void prepareForExtendedAccessibilitySelection() {
+        return;
     }
 
     /**
@@ -15496,7 +15669,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param event the KeyEvent object that defines the button action
      */
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (event.hasNoModifiers() && KeyEvent.isConfirmKey(keyCode)) {
+        if (KeyEvent.isConfirmKey(keyCode) && event.hasNoModifiers()) {
             if ((mViewFlags & ENABLED_MASK) == DISABLED) {
                 return true;
             }
@@ -15553,7 +15726,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param event   The KeyEvent object that defines the button action.
      */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (event.hasNoModifiers() && KeyEvent.isConfirmKey(keyCode)) {
+        if (KeyEvent.isConfirmKey(keyCode) && event.hasNoModifiers()) {
             if ((mViewFlags & ENABLED_MASK) == DISABLED) {
                 return true;
             }
@@ -18570,18 +18743,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * If some part of this view is not clipped by any of its parents, then
-     * return that area in r in global (root) coordinates. To convert r to local
-     * coordinates (without taking possible View rotations into account), offset
-     * it by -globalOffset (e.g. r.offset(-globalOffset.x, -globalOffset.y)).
-     * If the view is completely clipped or translated out, return false.
+     * Sets {@code r} to the coordinates of the non-clipped area of this view in
+     * the coordinate space of the view's root view. Sets {@code globalOffset}
+     * to the offset of the view's x and y coordinates from the coordinate space
+     * origin, which is the top left corner of the root view irrespective of
+     * screen decorations and system UI elements.
      *
-     * @param r If true is returned, r holds the global coordinates of the
-     *        visible portion of this view.
-     * @param globalOffset If true is returned, globalOffset holds the dx,dy
-     *        between this view and its root. globalOffet may be null.
-     * @return true if r is non-empty (i.e. part of the view is visible at the
-     *         root level.
+     * <p>To convert {@code r} to coordinates relative to the top left corner of
+     * this view (without taking view rotations into account), offset {@code r}
+     * by the inverse values of
+     * {@code globalOffset}&mdash;{@code r.offset(-globalOffset.x,
+     * -globalOffset.y)}&mdash;which is equivalent to calling
+     * {@link #getLocalVisibleRect(Rect) getLocalVisibleRect(Rect)}.
+     *
+     * <p><b>Note:</b> Do not use this method to determine the size of a window
+     * in multi-window mode; use
+     * {@link WindowManager#getCurrentWindowMetrics()}.
+     *
+     * @param r If the method returns true, contains the coordinates of the
+     *      visible portion of this view in the coordinate space of the view's
+     *      root view. If the method returns false, the contents of {@code r}
+     *      are undefined.
+     * @param globalOffset If the method returns true, contains the offset of
+     *      the x and y coordinates of this view from the top left corner of the
+     *      view's root view. If the method returns false, the contents of
+     *      {@code globalOffset} are undefined. The argument can be null (see
+     *      {@link #getGlobalVisibleRect(Rect) getGlobalVisibleRect(Rect)}.
+     * @return true if at least part of the view is visible within the root
+     *      view; false if the view is completely clipped or translated out of
+     *      the visible area of the root view.
+     *
+     * @see #getLocalVisibleRect(Rect)
      */
     public boolean getGlobalVisibleRect(Rect r, Point globalOffset) {
         int width = mRight - mLeft;
@@ -18596,10 +18788,48 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return false;
     }
 
+    /**
+     * Sets {@code r} to the coordinates of the non-clipped area of this view in
+     * the coordinate space of the view's root view.
+     *
+     * <p>See {@link #getGlobalVisibleRect(Rect, Point)
+     * getGlobalVisibleRect(Rect, Point)} for more information.
+     *
+     * @param r If the method returns true, contains the coordinates of the
+     *      visible portion of this view in the coordinate space of the view's
+     *      root view. If the method returns false, the contents of {@code r}
+     *      are undefined.
+     * @return true if at least part of the view is visible within the root
+     *      view; otherwise false.
+     */
     public final boolean getGlobalVisibleRect(Rect r) {
         return getGlobalVisibleRect(r, null);
     }
 
+    /**
+     * Sets {@code r} to the coordinates of the non-clipped area of this view
+     * relative to the top left corner of the view.
+     *
+     * <p>If the view is clipped on the left or top, the left and top
+     * coordinates are offset from 0 by the clipped amount. For example, if the
+     * view is off screen 50px on the left and 30px at the top, the left and top
+     * coordinates are 50 and 30 respectively.
+     *
+     * <p>If the view is clipped on the right or bottom, the right and bottom
+     * coordinates are reduced by the clipped amount. For example, if the view
+     * is off screen 40px on the right and 20px at the bottom, the right
+     * coordinate is the view width - 40, and the bottom coordinate is the view
+     * height - 20.
+     *
+     * @param r If the method returns true, contains the coordinates of the
+     *      visible portion of this view relative to the top left corner of the
+     *      view. If the method returns false, the contents of {@code r} are
+     *      undefined.
+     * @return true if at least part of the view is visible; false if the view
+     *      is completely clipped or translated out of the visible area.
+     *
+     * @see #getGlobalVisibleRect(Rect, Point)
+     */
     public final boolean getLocalVisibleRect(Rect r) {
         final Point offset = mAttachInfo != null ? mAttachInfo.mPoint : new Point();
         if (getGlobalVisibleRect(r, offset)) {
@@ -20900,6 +21130,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         removePerformClickCallback();
         clearAccessibilityThrottles();
         stopNestedScroll();
+        cancelMarkPreferKeepClearForFocus();
 
         // Anything that started animating right before detach should already
         // be in its final state when re-attached.
@@ -21139,6 +21370,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         notifyEnterOrExitForAutoFillIfNeeded(false);
+
+        if (info != null && !collectPreferKeepClearRects().isEmpty()) {
+            info.mViewRootImpl.updateKeepClearRectsForView(this);
+        }
     }
 
     /**
@@ -25410,11 +25645,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * <p>Computes the coordinates of this view on the screen. The argument
-     * must be an array of two integers. After the method returns, the array
-     * contains the x and y location in that order.</p>
+     * Gets the coordinates of this view in the coordinate space of the device
+     * screen, irrespective of system decorations and whether the system is in
+     * multi-window mode.
      *
-     * @param outLocation an array of two integers in which to hold the coordinates
+     * <p>In multi-window mode, the coordinate space encompasses the entire
+     * device screen, ignoring the bounds of the app window. For example, if the
+     * view is in the bottom portion of a horizontal split screen, the top edge
+     * of the screen&mdash;not the top edge of the window&mdash;is the origin
+     * from which the y-coordinate is calculated.
+     *
+     * <p>In multiple-screen scenarios, the coordinate space can span screens.
+     * For example, if the app is spanning both screens of a dual-screen device
+     * and the view is located on the right-hand screen, the x-coordinate is
+     * calculated from the left edge of the left-hand screen to the left edge of
+     * the view. When the app is restricted to a single screen in a
+     * multiple-screen environment, the coordinate space includes only the
+     * screen on which the app is running.
+     *
+     * <p>After the method returns, the argument array contains the x and y
+     * coordinates of the view relative to the view's left and top edges,
+     * respectively.
+     *
+     * @param outLocation A two-element integer array in which the view
+     *      coordinates are stored. The x-coordinate is at index 0; the
+     *      y-coordinate, at index 1.
      */
     public void getLocationOnScreen(@Size(2) int[] outLocation) {
         getLocationInWindow(outLocation);
@@ -25427,11 +25682,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * <p>Computes the coordinates of this view in its window. The argument
-     * must be an array of two integers. After the method returns, the array
-     * contains the x and y location in that order.</p>
+     * Gets the coordinates of this view in the coordinate space of the window
+     * that contains the view, irrespective of system decorations.
      *
-     * @param outLocation an array of two integers in which to hold the coordinates
+     * <p>In multi-window mode, the origin of the coordinate space is the
+     * top left corner of the window that contains the view. In full screen
+     * mode, the origin is the top left corner of the device screen.
+     *
+     * <p>In multiple-screen scenarios, if the app spans multiple screens, the
+     * coordinate space also spans multiple screens. But if the app is
+     * restricted to a single screen, the coordinate space includes only the
+     * screen on which the app is running.
+     *
+     * <p>After the method returns, the argument array contains the x and y
+     * coordinates of the view relative to the view's left and top edges,
+     * respectively.
+     *
+     * @param outLocation A two-element integer array in which the view
+     *      coordinates are stored. The x-coordinate is at index 0; the
+     *      y-coordinate, at index 1.
      */
     public void getLocationInWindow(@Size(2) int[] outLocation) {
         if (outLocation == null || outLocation.length < 2) {
@@ -28533,7 +28802,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *     {@link InputDevice#SOURCE_MOUSE_RELATIVE}, and relative position changes will be
      *     available through {@link MotionEvent#getX} and {@link MotionEvent#getY}.</li>
      *
-     *     <li>Events from a touchpad will be delivered with the source
+     *     <li>Events from a touchpad or trackpad will be delivered with the source
      *     {@link InputDevice#SOURCE_TOUCHPAD}, where the absolute position of each of the pointers
      *     on the touchpad will be available through {@link MotionEvent#getX(int)} and
      *     {@link MotionEvent#getY(int)}, and their relative movements are stored in
@@ -28541,6 +28810,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      *     <li>Events from other types of devices, such as touchscreens, will not be affected.</li>
      * </ul>
+     * <p>
+     * When pointer capture changes, connected mouse and trackpad devices may be reconfigured,
+     * and their properties (such as their sources or motion ranges) may change. Use an
+     * {@link android.hardware.input.InputManager.InputDeviceListener} to be notified when a device
+     * changes (which may happen after enabling or disabling pointer capture), and use
+     * {@link InputDevice#getDevice(int)} to get the updated {@link InputDevice}.
      * <p>
      * Events captured through pointer capture will be dispatched to
      * {@link OnCapturedPointerListener#onCapturedPointer(View, MotionEvent)} if an
@@ -29749,10 +30024,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean mHandlingPointerEvent;
 
         /**
-         * The screen matrix of this view when it's on a {@link SurfaceControlViewHost} that is
+         * The window matrix of this view when it's on a {@link SurfaceControlViewHost} that is
          * embedded within a SurfaceView.
          */
-        Matrix mScreenMatrixInEmbeddedHierarchy;
+        Matrix mWindowMatrixInEmbeddedHierarchy;
 
         /**
          * Global to the view hierarchy used as a temporary for dealing with

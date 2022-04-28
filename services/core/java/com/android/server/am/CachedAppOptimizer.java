@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -181,6 +182,8 @@ public final class CachedAppOptimizer {
     private final ActivityManagerService mAm;
 
     private final ActivityManagerGlobalLock mProcLock;
+
+    private final Object mFreezerLock = new Object();
 
     private final OnPropertiesChangedListener mOnFlagsChangedListener =
             new OnPropertiesChangedListener() {
@@ -948,8 +951,8 @@ public final class CachedAppOptimizer {
         }
     }
 
-    @GuardedBy({"mAm", "mProcLock"})
-    void unfreezeAppLSP(ProcessRecord app) {
+    @GuardedBy({"mAm", "mProcLock", "mFreezerLock"})
+    void unfreezeAppInternalLSP(ProcessRecord app) {
         final int pid = app.getPid();
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         if (opt.isPendingFreeze()) {
@@ -1034,6 +1037,42 @@ public final class CachedAppOptimizer {
         }
     }
 
+    @GuardedBy({"mAm", "mProcLock"})
+    void unfreezeAppLSP(ProcessRecord app) {
+        synchronized (mFreezerLock) {
+            unfreezeAppInternalLSP(app);
+        }
+    }
+
+    /**
+     * This quick function works around the race condition between WM/ATMS and AMS, allowing
+     * the former to directly unfreeze a frozen process before the latter runs updateOomAdj.
+     * After the race issue is solved, this workaround can be removed. (b/213288355)
+     * The caller of this function should still trigger updateOomAdj for AMS to unfreeze the app.
+     * @param pid pid of the process to be unfrozen
+     */
+    void unfreezeProcess(int pid) {
+        synchronized (mFreezerLock) {
+            ProcessRecord app = mFrozenProcesses.get(pid);
+            if (app == null) {
+                return;
+            }
+            Slog.d(TAG_AM, "quick sync unfreeze " + pid);
+            try {
+                freezeBinder(pid, false);
+            } catch (RuntimeException e) {
+                Slog.e(TAG_AM, "Unable to quick unfreeze binder for " + pid);
+                return;
+            }
+
+            try {
+                Process.setProcessFrozen(pid, app.uid, false);
+            } catch (Exception e) {
+                Slog.e(TAG_AM, "Unable to quick unfreeze " + pid);
+            }
+        }
+    }
+
     /**
      * To be called when the given app is killed.
      */
@@ -1048,6 +1087,17 @@ public final class CachedAppOptimizer {
             }
 
             mFrozenProcesses.delete(app.getPid());
+        }
+    }
+
+    void onWakefulnessChanged(int wakefulness) {
+        if(wakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE) {
+            // Remove any pending compaction we may have scheduled to happen while screen was off
+            Slog.e(TAG_AM, "Cancel pending or running compactions as system is awake");
+            synchronized(mProcLock) {
+                mPendingCompactionProcesses.clear();
+            }
+            cancelCompaction();
         }
     }
 
@@ -1105,6 +1155,9 @@ public final class CachedAppOptimizer {
                     int lastOomAdj = msg.arg1;
                     int procState = msg.arg2;
                     synchronized (mProcLock) {
+                        if(mPendingCompactionProcesses.isEmpty()) {
+                            return;
+                        }
                         proc = mPendingCompactionProcesses.remove(0);
                         opt = proc.mOptRecord;
 
@@ -1448,8 +1501,6 @@ public final class CachedAppOptimizer {
             if (!frozen) {
                 return;
             }
-
-            Slog.d(TAG_AM, "froze " + pid + " " + name);
 
             EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
 

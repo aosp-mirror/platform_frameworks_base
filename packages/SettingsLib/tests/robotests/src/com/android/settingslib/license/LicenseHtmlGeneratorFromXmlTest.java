@@ -18,7 +18,6 @@ package com.android.settingslib.license;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -36,7 +35,6 @@ import java.util.Map;
 import java.util.Set;
 
 @RunWith(RobolectricTestRunner.class)
-@Ignore
 public class LicenseHtmlGeneratorFromXmlTest {
     private static final String VALID_OLD_XML_STRING =
             "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
@@ -122,7 +120,7 @@ public class LicenseHtmlGeneratorFromXmlTest {
             + "</div><!-- table of contents -->\n"
             + "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n"
             + "<tr id=\"id0\"><td class=\"same-license\">\n"
-            + "<div class=\"label\">Notices for file(s):</div>\n"
+            + "<div class=\"label\"><strong>libA</strong> used by:</div>\n"
             + "<div class=\"file-list\">\n"
             + "/file0 <br/>\n"
             + "/file1 <br/>\n"
@@ -132,7 +130,7 @@ public class LicenseHtmlGeneratorFromXmlTest {
             + "</pre><!-- license-text -->\n"
             + "</td></tr><!-- same-license -->\n"
             + "<tr id=\"id1\"><td class=\"same-license\">\n"
-            + "<div class=\"label\">Notices for file(s):</div>\n"
+            + "<div class=\"label\"><strong>libB</strong> used by:</div>\n"
             + "<div class=\"file-list\">\n"
             + "/file0 <br/>\n"
             + "</div><!-- file-list -->\n"
@@ -160,10 +158,12 @@ public class LicenseHtmlGeneratorFromXmlTest {
         LicenseHtmlGeneratorFromXml.parse(
                 new InputStreamReader(new ByteArrayInputStream(VALID_OLD_XML_STRING.getBytes())),
                 fileNameToLibraryToContentIdMap, contentIdToFileContentMap);
-        assertThat(fileNameToLibraryToContentIdMap.size()).isEqualTo(1);
-        assertThat(fileNameToLibraryToContentIdMap.get("").size()).isEqualTo(2);
-        assertThat(fileNameToLibraryToContentIdMap.get("").get("/file0")).containsExactly("0");
-        assertThat(fileNameToLibraryToContentIdMap.get("").get("/file1")).containsExactly("0");
+
+        assertThat(fileNameToLibraryToContentIdMap).hasSize(2);
+        assertThat(fileNameToLibraryToContentIdMap.get("/file0")).hasSize(1);
+        assertThat(fileNameToLibraryToContentIdMap.get("/file1")).hasSize(1);
+        assertThat(fileNameToLibraryToContentIdMap.get("/file0").get(null)).containsExactly("0");
+        assertThat(fileNameToLibraryToContentIdMap.get("/file1").get(null)).containsExactly("0");
         assertThat(contentIdToFileContentMap.size()).isEqualTo(1);
         assertThat(contentIdToFileContentMap.get("0")).isEqualTo("license content #0");
     }
@@ -176,11 +176,12 @@ public class LicenseHtmlGeneratorFromXmlTest {
         LicenseHtmlGeneratorFromXml.parse(
                 new InputStreamReader(new ByteArrayInputStream(VALID_NEW_XML_STRING.getBytes())),
                 fileNameToLibraryToContentIdMap, contentIdToFileContentMap);
-        assertThat(fileNameToLibraryToContentIdMap.size()).isEqualTo(2);
-        assertThat(fileNameToLibraryToContentIdMap.get("libA").size()).isEqualTo(1);
-        assertThat(fileNameToLibraryToContentIdMap.get("libB").size()).isEqualTo(1);
-        assertThat(fileNameToLibraryToContentIdMap.get("libA").get("/file0")).containsExactly("0");
-        assertThat(fileNameToLibraryToContentIdMap.get("libB").get("/file1")).containsExactly("0");
+
+        assertThat(fileNameToLibraryToContentIdMap).hasSize(2);
+        assertThat(fileNameToLibraryToContentIdMap.get("/file0")).hasSize(1);
+        assertThat(fileNameToLibraryToContentIdMap.get("/file1")).hasSize(1);
+        assertThat(fileNameToLibraryToContentIdMap.get("/file0").get("libA")).containsExactly("0");
+        assertThat(fileNameToLibraryToContentIdMap.get("/file1").get("libB")).containsExactly("0");
         assertThat(contentIdToFileContentMap.size()).isEqualTo(1);
         assertThat(contentIdToFileContentMap.get("0")).isEqualTo("license content #0");
     }

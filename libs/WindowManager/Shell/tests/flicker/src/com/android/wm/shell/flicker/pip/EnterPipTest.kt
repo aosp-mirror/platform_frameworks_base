@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -27,9 +26,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.rules.WMFlickerServiceRuleForTestSpec
 import org.junit.FixMethodOrder
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -58,14 +55,23 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
 class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
-    @get:Rule
-    val flickerRule = WMFlickerServiceRuleForTestSpec(testSpec)
 
     /**
      * Defines the transition used to run the test
      */
     override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition(eachRun = true, stringExtras = emptyMap()) {
+        get() = {
+            setupAndTeardown(this)
+            setup {
+                eachRun {
+                    pipApp.launchViaIntent(wmHelper)
+                }
+            }
+            teardown {
+                eachRun {
+                    pipApp.exit(wmHelper)
+                }
+            }
             transitions {
                 pipApp.clickEnterPipButton(wmHelper)
             }
@@ -167,7 +173,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
      * Checks that the focus changes between the [pipApp] window and the launcher when
      * closing the pip window
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun focusChanges() {
         testSpec.assertEventLog {

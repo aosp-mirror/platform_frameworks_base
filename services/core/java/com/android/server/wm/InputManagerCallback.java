@@ -29,6 +29,7 @@ import android.graphics.PointF;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Slog;
+import android.view.Display;
 import android.view.InputApplicationHandle;
 import android.view.KeyEvent;
 import android.view.SurfaceControl;
@@ -39,6 +40,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.input.InputManagerService;
 
 import java.io.PrintWriter;
+import java.util.OptionalInt;
 
 final class InputManagerCallback implements InputManagerService.WindowManagerCallbacks {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "InputManagerCallback" : TAG_WM;
@@ -98,23 +100,14 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     }
 
     @Override
-    public void notifyGestureMonitorUnresponsive(int pid, @NonNull String reason) {
-        mService.mAnrController.notifyGestureMonitorUnresponsive(pid, reason);
+    public void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull OptionalInt pid,
+            @NonNull String reason) {
+        mService.mAnrController.notifyWindowUnresponsive(token, pid, reason);
     }
 
     @Override
-    public void notifyWindowUnresponsive(@NonNull IBinder token, String reason) {
-        mService.mAnrController.notifyWindowUnresponsive(token, reason);
-    }
-
-    @Override
-    public void notifyGestureMonitorResponsive(int pid) {
-        mService.mAnrController.notifyGestureMonitorResponsive(pid);
-    }
-
-    @Override
-    public void notifyWindowResponsive(@NonNull IBinder token) {
-        mService.mAnrController.notifyWindowResponsive(token);
+    public void notifyWindowResponsive(@NonNull IBinder token, @NonNull OptionalInt pid) {
+        mService.mAnrController.notifyWindowResponsive(token, pid);
     }
 
     /** Notifies that the input device configuration has changed. */
@@ -202,6 +195,9 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
             int firstExternalDisplayId = DEFAULT_DISPLAY;
             for (int i = mService.mRoot.mChildren.size() - 1; i >= 0; --i) {
                 final DisplayContent displayContent = mService.mRoot.mChildren.get(i);
+                if (displayContent.getDisplayInfo().state == Display.STATE_OFF) {
+                    continue;
+                }
                 // Heuristic solution here. Currently when "Freeform windows" developer option is
                 // enabled we automatically put secondary displays in freeform mode and emulating
                 // "desktop mode". It also makes sense to show the pointer on the same display.

@@ -37,6 +37,7 @@ import android.net.NetworkStack;
 import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
 import android.net.VpnManager;
+import android.net.VpnProfileState;
 import android.net.VpnService;
 import android.net.util.NetdService;
 import android.os.Binder;
@@ -370,6 +371,24 @@ public class VpnManagerService extends IVpnManager.Stub {
         final int user = UserHandle.getUserId(callingUid);
         synchronized (mVpns) {
             mVpns.get(user).stopVpnProfile(packageName);
+        }
+    }
+
+    /**
+     * Retrieve the VpnProfileState for the profile provisioned by the given package.
+     *
+     * @return the VpnProfileState with current information, or null if there was no profile
+     *         provisioned by the given package.
+     * @hide
+     */
+    @Override
+    @Nullable
+    public VpnProfileState getProvisionedVpnProfileState(@NonNull String packageName) {
+        final int callingUid = Binder.getCallingUid();
+        verifyCallingUidAndPackage(packageName, callingUid);
+        final int user = UserHandle.getUserId(callingUid);
+        synchronized (mVpns) {
+            return mVpns.get(user).getProvisionedVpnProfileState(packageName);
         }
     }
 

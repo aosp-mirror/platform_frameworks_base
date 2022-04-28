@@ -31,6 +31,8 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.media.NearbyDevice;
+import android.os.Parcel;
 
 import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -65,9 +67,9 @@ public class MediaDeviceTest {
     private static final String ROUTER_ID_3 = "RouterId_3";
     private static final String TEST_PACKAGE_NAME = "com.test.playmusic";
     private final BluetoothClass mHeadreeClass =
-            new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
+            createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
     private final BluetoothClass mCarkitClass =
-            new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO);
+            createBtClass(BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO);
 
     @Mock
     private BluetoothDevice mDevice1;
@@ -117,6 +119,16 @@ public class MediaDeviceTest {
     private InfoMediaDevice mInfoMediaDevice3;
     private List<MediaDevice> mMediaDevices = new ArrayList<>();
     private PhoneMediaDevice mPhoneMediaDevice;
+
+    private BluetoothClass createBtClass(int deviceClass) {
+        Parcel p = Parcel.obtain();
+        p.writeInt(deviceClass);
+        p.setDataPosition(0); // reset position of parcel before passing to constructor
+
+        BluetoothClass bluetoothClass = BluetoothClass.CREATOR.createFromParcel(p);
+        p.recycle();
+        return bluetoothClass;
+    }
 
     @Before
     public void setUp() {
@@ -189,6 +201,18 @@ public class MediaDeviceTest {
     }
 
     @Test
+    public void compareTo_differentRange_sortWithRange() {
+        mBluetoothMediaDevice1.setRangeZone(NearbyDevice.RANGE_FAR);
+        mBluetoothMediaDevice2.setRangeZone(NearbyDevice.RANGE_CLOSE);
+        mMediaDevices.add(mBluetoothMediaDevice1);
+        mMediaDevices.add(mBluetoothMediaDevice2);
+
+        assertThat(mMediaDevices.get(0)).isEqualTo(mBluetoothMediaDevice1);
+        Collections.sort(mMediaDevices, COMPARATOR);
+        assertThat(mMediaDevices.get(0)).isEqualTo(mBluetoothMediaDevice2);
+    }
+
+    @Test
     public void compareTo_carKit_info_carKitFirst() {
         when(mDevice1.getBluetoothClass()).thenReturn(mCarkitClass);
         mMediaDevices.add(mInfoMediaDevice1);
@@ -200,14 +224,14 @@ public class MediaDeviceTest {
     }
 
     @Test
-    public void compareTo_carKit_phone_carKitFirst() {
+    public void compareTo_carKit_phone_phoneFirst() {
         when(mDevice1.getBluetoothClass()).thenReturn(mCarkitClass);
-        mMediaDevices.add(mPhoneMediaDevice);
         mMediaDevices.add(mBluetoothMediaDevice1);
+        mMediaDevices.add(mPhoneMediaDevice);
 
-        assertThat(mMediaDevices.get(0)).isEqualTo(mPhoneMediaDevice);
-        Collections.sort(mMediaDevices, COMPARATOR);
         assertThat(mMediaDevices.get(0)).isEqualTo(mBluetoothMediaDevice1);
+        Collections.sort(mMediaDevices, COMPARATOR);
+        assertThat(mMediaDevices.get(0)).isEqualTo(mPhoneMediaDevice);
     }
 
     @Test
@@ -281,13 +305,13 @@ public class MediaDeviceTest {
     }
 
     @Test
-    public void compareTo_bluetooth_phone_bluetoothFirst() {
-        mMediaDevices.add(mPhoneMediaDevice);
+    public void compareTo_bluetooth_phone_phoneFirst() {
         mMediaDevices.add(mBluetoothMediaDevice1);
+        mMediaDevices.add(mPhoneMediaDevice);
 
-        assertThat(mMediaDevices.get(0)).isEqualTo(mPhoneMediaDevice);
-        Collections.sort(mMediaDevices, COMPARATOR);
         assertThat(mMediaDevices.get(0)).isEqualTo(mBluetoothMediaDevice1);
+        Collections.sort(mMediaDevices, COMPARATOR);
+        assertThat(mMediaDevices.get(0)).isEqualTo(mPhoneMediaDevice);
     }
 
     @Test
@@ -360,7 +384,7 @@ public class MediaDeviceTest {
     // 5.mBluetoothMediaDevice2: * 2 times usage
     // 6.mBluetoothMediaDevice3: * 1 time usage
     // 7.mPhoneMediaDevice:      * 0 time usage
-    // Order: 2 -> 5 -> 6 -> 1 -> 3 -> 4 -> 7
+    // Order: 7 -> 2 -> 5 -> 6 -> 1 -> 3 -> 4
     @Test
     public void compareTo_mixedDevices_carKitFirst() {
         when(mDevice1.getBluetoothClass()).thenReturn(mCarkitClass);
@@ -382,13 +406,13 @@ public class MediaDeviceTest {
         mInfoMediaDevice1.connect();
 
         Collections.sort(mMediaDevices, COMPARATOR);
-        assertThat(mMediaDevices.get(0)).isEqualTo(mBluetoothMediaDevice1);
-        assertThat(mMediaDevices.get(1)).isEqualTo(mBluetoothMediaDevice2);
-        assertThat(mMediaDevices.get(2)).isEqualTo(mBluetoothMediaDevice3);
-        assertThat(mMediaDevices.get(3)).isEqualTo(mInfoMediaDevice1);
-        assertThat(mMediaDevices.get(4)).isEqualTo(mInfoMediaDevice2);
-        assertThat(mMediaDevices.get(5)).isEqualTo(mInfoMediaDevice3);
-        assertThat(mMediaDevices.get(6)).isEqualTo(mPhoneMediaDevice);
+        assertThat(mMediaDevices.get(0)).isEqualTo(mPhoneMediaDevice);
+        assertThat(mMediaDevices.get(1)).isEqualTo(mBluetoothMediaDevice1);
+        assertThat(mMediaDevices.get(2)).isEqualTo(mBluetoothMediaDevice2);
+        assertThat(mMediaDevices.get(3)).isEqualTo(mBluetoothMediaDevice3);
+        assertThat(mMediaDevices.get(4)).isEqualTo(mInfoMediaDevice1);
+        assertThat(mMediaDevices.get(5)).isEqualTo(mInfoMediaDevice2);
+        assertThat(mMediaDevices.get(6)).isEqualTo(mInfoMediaDevice3);
     }
 
     // 1.mInfoMediaDevice1:      Last Selected device
@@ -398,7 +422,7 @@ public class MediaDeviceTest {
     // 5.mBluetoothMediaDevice2: * 4 times usage not connected
     // 6.mBluetoothMediaDevice3: * 1 time usage
     // 7.mPhoneMediaDevice:      * 0 time usage
-    // Order: 6 -> 1 -> 3 -> 4 -> 7 -> 2 -> 5
+    // Order: 7 -> 6 -> 1 -> 3 -> 4 -> 2 -> 5
     @Test
     public void compareTo_mixedDevices_connectDeviceFirst() {
         when(mDevice1.getBluetoothClass()).thenReturn(mCarkitClass);
@@ -424,11 +448,11 @@ public class MediaDeviceTest {
         mInfoMediaDevice1.connect();
 
         Collections.sort(mMediaDevices, COMPARATOR);
-        assertThat(mMediaDevices.get(0)).isEqualTo(mBluetoothMediaDevice3);
-        assertThat(mMediaDevices.get(1)).isEqualTo(mInfoMediaDevice1);
-        assertThat(mMediaDevices.get(2)).isEqualTo(mInfoMediaDevice2);
-        assertThat(mMediaDevices.get(3)).isEqualTo(mInfoMediaDevice3);
-        assertThat(mMediaDevices.get(4)).isEqualTo(mPhoneMediaDevice);
+        assertThat(mMediaDevices.get(0)).isEqualTo(mPhoneMediaDevice);
+        assertThat(mMediaDevices.get(1)).isEqualTo(mBluetoothMediaDevice3);
+        assertThat(mMediaDevices.get(2)).isEqualTo(mInfoMediaDevice1);
+        assertThat(mMediaDevices.get(3)).isEqualTo(mInfoMediaDevice2);
+        assertThat(mMediaDevices.get(4)).isEqualTo(mInfoMediaDevice3);
         assertThat(mMediaDevices.get(5)).isEqualTo(mBluetoothMediaDevice1);
         assertThat(mMediaDevices.get(6)).isEqualTo(mBluetoothMediaDevice2);
     }

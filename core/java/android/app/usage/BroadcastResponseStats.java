@@ -23,26 +23,43 @@ import android.app.BroadcastOptions;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * Class containing a collection of stats related to response events started from an app
  * after receiving a broadcast.
  *
+ * @see UsageStatsManager#queryBroadcastResponseStats(String, long)
+ * @see UsageStatsManager#clearBroadcastResponseStats(String, long)
  * @hide
  */
 @SystemApi
 public final class BroadcastResponseStats implements Parcelable {
     private final String mPackageName;
+    private final long mId;
     private int mBroadcastsDispatchedCount;
     private int mNotificationsPostedCount;
     private int mNotificationsUpdatedCount;
     private int mNotificationsCancelledCount;
 
-    public BroadcastResponseStats(@NonNull String packageName) {
+    /**
+     * Creates a new {@link BroadcastResponseStats} object that contain the stats for broadcasts
+     * with {@code id} (specified using
+     * {@link BroadcastOptions#recordResponseEventWhileInBackground(long)} by the sender) that
+     * were sent to {@code packageName}.
+     *
+     * @param packageName the name of the package that broadcasts were sent to.
+     * @param id the ID specified by the sender using
+     *           {@link BroadcastOptions#recordResponseEventWhileInBackground(long)}.
+     */
+    public BroadcastResponseStats(@NonNull String packageName, @IntRange(from = 1) long id) {
         mPackageName = packageName;
+        mId = id;
     }
 
     private BroadcastResponseStats(@NonNull Parcel in) {
         mPackageName = in.readString8();
+        mId = in.readLong();
         mBroadcastsDispatchedCount = in.readInt();
         mNotificationsPostedCount = in.readInt();
         mNotificationsUpdatedCount = in.readInt();
@@ -55,6 +72,14 @@ public final class BroadcastResponseStats implements Parcelable {
     @NonNull
     public String getPackageName() {
         return mPackageName;
+    }
+
+    /**
+     * @return the ID of the broadcasts that the stats in this object correspond to.
+     */
+    @IntRange(from = 1)
+    public long getId() {
+        return mId;
     }
 
     /**
@@ -148,9 +173,35 @@ public final class BroadcastResponseStats implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof BroadcastResponseStats)) {
+            return false;
+        }
+        final BroadcastResponseStats other = (BroadcastResponseStats) obj;
+        return this.mBroadcastsDispatchedCount == other.mBroadcastsDispatchedCount
+                && this.mNotificationsPostedCount == other.mNotificationsPostedCount
+                && this.mNotificationsUpdatedCount == other.mNotificationsUpdatedCount
+                && this.mNotificationsCancelledCount == other.mNotificationsCancelledCount
+                && this.mId == other.mId
+                && this.mPackageName.equals(other.mPackageName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mPackageName, mId, mBroadcastsDispatchedCount,
+                mNotificationsPostedCount, mNotificationsUpdatedCount,
+                mNotificationsCancelledCount);
+    }
+
+    @Override
     public @NonNull String toString() {
         return "stats {"
-                + "broadcastsSent=" + mBroadcastsDispatchedCount
+                + "package=" + mPackageName
+                + ",id=" + mId
+                + ",broadcastsSent=" + mBroadcastsDispatchedCount
                 + ",notificationsPosted=" + mNotificationsPostedCount
                 + ",notificationsUpdated=" + mNotificationsUpdatedCount
                 + ",notificationsCancelled=" + mNotificationsCancelledCount
@@ -165,6 +216,7 @@ public final class BroadcastResponseStats implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, @WriteFlags int flags) {
         dest.writeString8(mPackageName);
+        dest.writeLong(mId);
         dest.writeInt(mBroadcastsDispatchedCount);
         dest.writeInt(mNotificationsPostedCount);
         dest.writeInt(mNotificationsUpdatedCount);

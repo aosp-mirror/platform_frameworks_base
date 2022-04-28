@@ -83,7 +83,7 @@ public abstract class Vibrator {
     /**
      * Vibration effect support: unknown
      *
-     * The hardware doesn't report it's supported effects, so we can't determine whether the
+     * <p>The hardware doesn't report its supported effects, so we can't determine whether the
      * effect is supported or not.
      */
     public static final int VIBRATION_EFFECT_SUPPORT_UNKNOWN = 0;
@@ -91,14 +91,14 @@ public abstract class Vibrator {
     /**
      * Vibration effect support: supported
      *
-     * This effect is supported by the underlying hardware.
+     * <p>This effect is supported by the underlying hardware.
      */
     public static final int VIBRATION_EFFECT_SUPPORT_YES = 1;
 
     /**
      * Vibration effect support: unsupported
      *
-     * This effect is <b>not</b> natively supported by the underlying hardware, although
+     * <p>This effect is <b>not</b> natively supported by the underlying hardware, although
      * the system may still play a fallback vibration.
      */
     public static final int VIBRATION_EFFECT_SUPPORT_NO = 2;
@@ -212,7 +212,9 @@ public abstract class Vibrator {
      *
      * @return True if the hardware can control the frequency of the vibrations independently of
      * the vibration amplitude, false otherwise.
+     * @hide
      */
+    @TestApi
     public boolean hasFrequencyControl() {
         // We currently can only control frequency of the vibration using the compose PWLE method.
         return getInfo().hasCapability(
@@ -236,7 +238,9 @@ public abstract class Vibrator {
      * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown, not
      * applicable, or if this vibrator is a composite of multiple physical devices with different
      * frequencies.
+     * @hide
      */
+    @TestApi
     public float getResonantFrequency() {
         return getInfo().getResonantFrequencyHz();
     }
@@ -247,7 +251,9 @@ public abstract class Vibrator {
      * @return the Q factor of the vibrator, or {@link Float#NaN NaN} if it's unknown, not
      * applicable, or if this vibrator is a composite of multiple physical devices with different
      * Q factors.
+     * @hide
      */
+    @TestApi
     public float getQFactor() {
         return getInfo().getQFactor();
     }
@@ -262,7 +268,9 @@ public abstract class Vibrator {
      * frequency control. If this vibrator is a composite of multiple physical devices then this
      * will return a profile supported in all devices, or null if the intersection is empty or not
      * available.
+     * @hide
      */
+    @TestApi
     @Nullable
     public VibratorFrequencyProfile getFrequencyProfile() {
         VibratorInfo.FrequencyProfile frequencyProfile = getInfo().getFrequencyProfile();
@@ -317,7 +325,7 @@ public abstract class Vibrator {
     /**
      * Vibrate constantly for the specified period of time.
      *
-     * <p>The app should be in foreground for the vibration to happen.</p>
+     * <p>The app should be in the foreground for the vibration to happen.</p>
      *
      * @param milliseconds The number of milliseconds to vibrate.
      * @deprecated Use {@link #vibrate(VibrationEffect)} instead.
@@ -331,7 +339,7 @@ public abstract class Vibrator {
     /**
      * Vibrate constantly for the specified period of time.
      *
-     * <p>The app should be in foreground for the vibration to happen. Background apps should
+     * <p>The app should be in the foreground for the vibration to happen. Background apps should
      * specify a ringtone, notification or alarm usage in order to vibrate.</p>
      *
      * @param milliseconds The number of milliseconds to vibrate.
@@ -368,7 +376,7 @@ public abstract class Vibrator {
      * to start the repeat, or -1 to disable repeating.
      * </p>
      *
-     * <p>The app should be in foreground for the vibration to happen.</p>
+     * <p>The app should be in the foreground for the vibration to happen.</p>
      *
      * @param pattern an array of longs of times for which to turn the vibrator on or off.
      * @param repeat  the index into pattern at which to repeat, or -1 if
@@ -395,7 +403,7 @@ public abstract class Vibrator {
      * to start the repeat, or -1 to disable repeating.
      * </p>
      *
-     * <p>The app should be in foreground for the vibration to happen. Background apps should
+     * <p>The app should be in the foreground for the vibration to happen. Background apps should
      * specify a ringtone, notification or alarm usage in order to vibrate.</p>
      *
      * @param pattern    an array of longs of times for which to turn the vibrator on or off.
@@ -428,7 +436,7 @@ public abstract class Vibrator {
     /**
      * Vibrate with a given effect.
      *
-     * <p>The app should be in foreground for the vibration to happen.</p>
+     * <p>The app should be in the foreground for the vibration to happen.</p>
      *
      * @param vibe {@link VibrationEffect} describing the vibration to be performed.
      */
@@ -440,7 +448,7 @@ public abstract class Vibrator {
     /**
      * Vibrate with a given effect.
      *
-     * <p>The app should be in foreground for the vibration to happen. Background apps should
+     * <p>The app should be in the foreground for the vibration to happen. Background apps should
      * specify a ringtone, notification or alarm usage in order to vibrate.</p>
      *
      * @param vibe       {@link VibrationEffect} describing the vibration to be performed.
@@ -461,7 +469,7 @@ public abstract class Vibrator {
     /**
      * Vibrate with a given effect.
      *
-     * <p>The app should be in foreground for the vibration to happen. Background apps should
+     * <p>The app should be in the foreground for the vibration to happen. Background apps should
      * specify a ringtone, notification or alarm usage in order to vibrate.</p>
      *
      * @param vibe       {@link VibrationEffect} describing the vibration to be performed.
@@ -477,7 +485,7 @@ public abstract class Vibrator {
 
     /**
      * Like {@link #vibrate(VibrationEffect, VibrationAttributes)}, but allows the
-     * caller to specify the vibration is owned by someone else and set reason for vibration.
+     * caller to specify the vibration is owned by someone else and set a reason for vibration.
      *
      * @hide
      */
@@ -519,7 +527,7 @@ public abstract class Vibrator {
     }
 
     /**
-     * Query whether the vibrator supports all of the given effects.
+     * Query whether the vibrator supports all the given effects.
      *
      * <p>If an effect is not supported, the system may still automatically fall back to a simpler
      * vibration instead, which is not optimised for the specific device, however vibration isn't
@@ -533,7 +541,7 @@ public abstract class Vibrator {
      * vibration.
      *
      * <p>If the result is {@link #VIBRATION_EFFECT_SUPPORT_UNKNOWN}, the system doesn't know
-     * whether all of the effects are supported. It may support any or all of the queried effects,
+     * whether all the effects are supported. It may support any or all of the queried effects,
      * but there's no way to programmatically know whether a {@link #vibrate} call will successfully
      * cause a vibration. It's guaranteed, however, that none of the queried effects are
      * definitively unsupported by the hardware.
@@ -541,7 +549,7 @@ public abstract class Vibrator {
      * <p>Use {@link #areEffectsSupported(int...)} to get individual results for each effect.
      *
      * @param effectIds Which effects to query for.
-     * @return Whether all of the effects are natively supported by the device.
+     * @return Whether all the effects are natively supported by the device.
      */
     @VibrationEffectSupport
     public final int areAllEffectsSupported(

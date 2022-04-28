@@ -894,6 +894,22 @@ please see themes_device_defaults.xml.
     <!-- @hide Special theme for the default system Activity-based Alert dialogs. -->
     <style name="Theme.Dialog.Confirmation" parent="Theme.DeviceDefault.Dialog.Alert.DayNight" />
 
+    <!-- @hide Theme for GameSessionTrampolineActivity that prevents showing UI and activity
+         transitions. -->
+    <style name="Theme.GameSessionTrampoline">
+        <item name="backgroundDimEnabled">false</item>
+        <item name="colorBackgroundCacheHint">@null</item>
+        <item name="navigationBarColor">@color/transparent</item>
+        <item name="statusBarColor">@color/transparent</item>
+        <item name="windowAnimationStyle">@null</item>
+        <item name="windowBackground">@null</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="windowDrawsSystemBarBackgrounds">true</item>
+        <item name="windowIsFloating">true</item>
+        <item name="windowIsTranslucent">true</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
     <!-- Theme for a window that looks like a toast. -->
     <style name="Theme.Toast" parent="Theme.DeviceDefault.Dialog">
         <item name="windowBackground">?attr/toastFrameBackground</item>

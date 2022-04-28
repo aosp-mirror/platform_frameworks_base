@@ -30,8 +30,8 @@ package com.android.server.display.config {
     method public final void setWidth(@NonNull java.math.BigInteger);
   }
 
-  public class DensityMap {
-    ctor public DensityMap();
+  public class DensityMapping {
+    ctor public DensityMapping();
     method public java.util.List<com.android.server.display.config.Density> getDensity();
   }
 
@@ -40,7 +40,7 @@ package com.android.server.display.config {
     method @NonNull public final com.android.server.display.config.Thresholds getAmbientBrightnessChangeThresholds();
     method public final java.math.BigInteger getAmbientLightHorizonLong();
     method public final java.math.BigInteger getAmbientLightHorizonShort();
-    method @Nullable public final com.android.server.display.config.DensityMap getDensityMap();
+    method @Nullable public final com.android.server.display.config.DensityMapping getDensityMapping();
     method @NonNull public final com.android.server.display.config.Thresholds getDisplayBrightnessChangeThresholds();
     method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
     method public final com.android.server.display.config.SensorDetails getLightSensor();
@@ -56,7 +56,7 @@ package com.android.server.display.config {
     method public final void setAmbientBrightnessChangeThresholds(@NonNull com.android.server.display.config.Thresholds);
     method public final void setAmbientLightHorizonLong(java.math.BigInteger);
     method public final void setAmbientLightHorizonShort(java.math.BigInteger);
-    method public final void setDensityMap(@Nullable com.android.server.display.config.DensityMap);
+    method public final void setDensityMapping(@Nullable com.android.server.display.config.DensityMapping);
     method public final void setDisplayBrightnessChangeThresholds(@NonNull com.android.server.display.config.Thresholds);
     method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
     method public final void setLightSensor(com.android.server.display.config.SensorDetails);
@@ -108,17 +108,11 @@ package com.android.server.display.config {
     method public final void setTransitionPoint_all(@NonNull java.math.BigDecimal);
   }
 
-  public enum Interpolation {
-    method public String getRawName();
-    enum_constant public static final com.android.server.display.config.Interpolation _default;
-    enum_constant public static final com.android.server.display.config.Interpolation linear;
-  }
-
   public class NitsMap {
     ctor public NitsMap();
-    method public com.android.server.display.config.Interpolation getInterpolation();
+    method public String getInterpolation();
     method @NonNull public final java.util.List<com.android.server.display.config.Point> getPoint();
-    method public void setInterpolation(com.android.server.display.config.Interpolation);
+    method public void setInterpolation(String);
   }
 
   public class Point {

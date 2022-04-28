@@ -44,6 +44,8 @@ import com.android.internal.app.procstats.UidState;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -932,6 +934,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     private void dumpInner(PrintWriter pw, String[] args) {
         final long now = SystemClock.uptimeMillis();
 

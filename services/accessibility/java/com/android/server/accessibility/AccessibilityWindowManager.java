@@ -52,6 +52,7 @@ import com.android.server.wm.WindowManagerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -478,6 +479,9 @@ public class AccessibilityWindowManager {
             if (oldWindow.taskId != newWindow.taskId) {
                 return true;
             }
+            if (!Arrays.equals(oldWindow.mTransformMatrix, newWindow.mTransformMatrix)) {
+                return true;
+            }
             return false;
         }
 
@@ -667,6 +671,10 @@ public class AccessibilityWindowManager {
                 return null;
             }
 
+            // Don't need to add the embedded hierarchy windows into the accessibility windows list.
+            if (mHostEmbeddedMap.size() > 0 && isEmbeddedHierarchyWindowsLocked(windowId)) {
+                return null;
+            }
             final AccessibilityWindowInfo reportedWindow = AccessibilityWindowInfo.obtain();
 
             reportedWindow.setId(windowId);
@@ -697,6 +705,21 @@ public class AccessibilityWindowManager {
             }
 
             return reportedWindow;
+        }
+
+        private boolean isEmbeddedHierarchyWindowsLocked(int windowId) {
+            final IBinder leashToken = mWindowIdMap.get(windowId);
+            if (leashToken == null) {
+                return false;
+            }
+
+            for (int i = 0; i < mHostEmbeddedMap.size(); i++) {
+                if (mHostEmbeddedMap.keyAt(i).equals(leashToken)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private int getTypeForWindowManagerWindowType(int windowType) {
@@ -781,14 +804,24 @@ public class AccessibilityWindowManager {
                         pw.append(',');
                         pw.println();
                     }
-                    pw.append("Window[");
+                    pw.append("A11yWindow[");
                     AccessibilityWindowInfo window = mWindows.get(j);
                     pw.append(window.toString());
                     pw.append(']');
+                    pw.println();
+                    final WindowInfo windowInfo = findWindowInfoByIdLocked(window.getId());
+                    if (windowInfo != null) {
+                        pw.append("WindowInfo[");
+                        pw.append(windowInfo.toString());
+                        pw.append("]");
+                        pw.println();
+                    }
+
                 }
                 pw.println();
             }
         }
+
     }
     /**
      * Interface to send {@link AccessibilityEvent}.

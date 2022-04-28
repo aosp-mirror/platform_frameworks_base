@@ -59,6 +59,7 @@ import android.content.IntentFilter;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
@@ -1943,19 +1944,26 @@ public class PackageParser {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifest);
 
-        String str = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifest_sharedUserId, 0);
-        if (str != null && str.length() > 0) {
-            String nameError = validateName(str, true, true);
-            if (nameError != null && !"android".equals(pkg.packageName)) {
-                outError[0] = "<manifest> specifies bad sharedUserId name \""
-                    + str + "\": " + nameError;
-                mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
-                return null;
+        int maxSdkVersion = 0;
+        if (PackageManager.ENABLE_SHARED_UID_MIGRATION) {
+            maxSdkVersion = sa.getInteger(
+                    com.android.internal.R.styleable.AndroidManifest_sharedUserMaxSdkVersion, 0);
+        }
+        if (maxSdkVersion == 0 || maxSdkVersion >= Build.VERSION.RESOURCES_SDK_INT) {
+            String str = sa.getNonConfigurationString(
+                    com.android.internal.R.styleable.AndroidManifest_sharedUserId, 0);
+            if (str != null && str.length() > 0) {
+                String nameError = validateName(str, true, true);
+                if (nameError != null && !"android".equals(pkg.packageName)) {
+                    outError[0] = "<manifest> specifies bad sharedUserId name \""
+                            + str + "\": " + nameError;
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
+                    return null;
+                }
+                pkg.mSharedUserId = str.intern();
+                pkg.mSharedUserLabel = sa.getResourceId(
+                        com.android.internal.R.styleable.AndroidManifest_sharedUserLabel, 0);
             }
-            pkg.mSharedUserId = str.intern();
-            pkg.mSharedUserLabel = sa.getResourceId(
-                    com.android.internal.R.styleable.AndroidManifest_sharedUserLabel, 0);
         }
 
         pkg.installLocation = sa.getInteger(
@@ -2417,9 +2425,28 @@ public class PackageParser {
             Slog.i(TAG, newPermsMsg.toString());
         }
 
-        final List<PermissionManager.SplitPermissionInfo> splitPermissions =
-                ActivityThread.currentApplication().getSystemService(PermissionManager.class)
-                        .getSplitPermissions();
+        // Must build permission info manually for legacy code, which can be called before
+        // Appication is available through the app process, so the normal API doesn't work.
+        List<SplitPermissionInfoParcelable> splitPermissionParcelables;
+        try {
+            splitPermissionParcelables = ActivityThread.getPermissionManager()
+                    .getSplitPermissions();
+        } catch (RemoteException e) {
+            splitPermissionParcelables = Collections.emptyList();
+        }
+
+        int splitPermissionsSize = splitPermissionParcelables.size();
+        List<PermissionManager.SplitPermissionInfo> splitPermissions =
+                new ArrayList<>(splitPermissionsSize);
+        for (int index = 0; index < splitPermissionsSize; index++) {
+            SplitPermissionInfoParcelable splitPermissionParcelable =
+                    splitPermissionParcelables.get(index);
+            splitPermissions.add(new PermissionManager.SplitPermissionInfo(
+                    splitPermissionParcelable.getSplitPermission(),
+                    splitPermissionParcelable.getNewPermissions(),
+                    splitPermissionParcelable.getTargetSdk()
+            ));
+        }
 
         final int listSize = splitPermissions.size();
         for (int is = 0; is < listSize; is++) {

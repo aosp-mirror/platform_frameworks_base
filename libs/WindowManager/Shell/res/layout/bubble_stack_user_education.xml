@@ -21,8 +21,8 @@
     android:layout_width="wrap_content"
     android:paddingTop="48dp"
     android:paddingBottom="48dp"
-    android:paddingEnd="16dp"
-    android:layout_marginEnd="24dp"
+    android:paddingEnd="@dimen/bubble_user_education_padding_end"
+    android:layout_marginEnd="@dimen/bubble_user_education_margin_end"
     android:orientation="vertical"
     android:background="@drawable/bubble_stack_user_education_bg"
     >

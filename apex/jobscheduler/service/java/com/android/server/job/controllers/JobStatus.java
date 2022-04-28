@@ -56,6 +56,8 @@ import com.android.server.job.JobServerProtoEnums;
 import com.android.server.job.JobStatusDumpProto;
 import com.android.server.job.JobStatusShortInfoProto;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -438,11 +440,6 @@ public final class JobStatus {
 
     /** The reason a job most recently went from ready to not ready. */
     private int mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
-
-    /** Provide a handle to the service that this job will be run on. */
-    public int getServiceToken() {
-        return callingUid;
-    }
 
     /**
      * Core constructor for JobStatus instances.  All other ctors funnel down to this one.
@@ -1314,8 +1311,15 @@ public final class JobStatus {
         if (mExpeditedQuotaApproved == state) {
             return false;
         }
+        final boolean wasReady = !state && isReady();
         mExpeditedQuotaApproved = state;
         updateExpeditedDependencies();
+        final boolean isReady = isReady();
+        if (wasReady && !isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_QUOTA;
+        } else if (!wasReady && isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
+        }
         return true;
     }
 
@@ -1329,8 +1333,15 @@ public final class JobStatus {
         if (mExpeditedTareApproved == state) {
             return false;
         }
+        final boolean wasReady = !state && isReady();
         mExpeditedTareApproved = state;
         updateExpeditedDependencies();
+        final boolean isReady = isReady();
+        if (wasReady && !isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_QUOTA;
+        } else if (!wasReady && isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
+        }
         return true;
     }
 
@@ -1963,14 +1974,15 @@ public final class JobStatus {
             case 2: return "FREQUENT";
             case 3: return "RARE";
             case 4: return "NEVER";
-            case 5:
-                return "RESTRICTED";
+            case 5: return "RESTRICTED";
+            case 6: return "EXEMPTED";
             default:
                 return "Unknown: " + standbyBucket;
         }
     }
 
     // Dumpsys infrastructure
+    @NeverCompile // Avoid size overhead of debugging code.
     public void dump(IndentingPrintWriter pw,  boolean full, long nowElapsed) {
         UserHandle.formatUid(pw, callingUid);
         pw.print(" tag="); pw.println(tag);

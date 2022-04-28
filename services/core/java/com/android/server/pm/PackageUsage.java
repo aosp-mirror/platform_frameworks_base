@@ -66,7 +66,8 @@ class PackageUsage extends AbstractStatsBase<Map<String, PackageSetting>> {
             out.write(sb.toString().getBytes(StandardCharsets.US_ASCII));
 
             for (PackageSetting pkgSetting : pkgSettings.values()) {
-                if (pkgSetting.getPkgState().getLatestPackageUseTimeInMills() == 0L) {
+                if (pkgSetting == null || pkgSetting.getPkgState() == null
+                        || pkgSetting.getPkgState().getLatestPackageUseTimeInMills() == 0L) {
                     continue;
                 }
                 sb.setLength(0);

@@ -19,6 +19,7 @@ package com.android.systemui.monet;
 import android.app.WallpaperColors;
 import android.graphics.Color;
 import android.testing.AndroidTestingRunner;
+import android.util.Log;
 
 import androidx.test.filters.SmallTest;
 
@@ -29,7 +30,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -108,7 +113,7 @@ public class ColorSchemeTest extends SysuiTestCase {
                 Style.SPRITZ /* style */);
         int primaryMid = colorScheme.getAccent1().get(colorScheme.getAccent1().size() / 2);
         Cam cam = Cam.fromInt(primaryMid);
-        Assert.assertEquals(cam.getChroma(), 4.0, 1.0);
+        Assert.assertEquals(cam.getChroma(), 12.0, 1.0);
     }
 
     @Test
@@ -118,7 +123,7 @@ public class ColorSchemeTest extends SysuiTestCase {
                 Style.VIBRANT /* style */);
         int neutralMid = colorScheme.getNeutral1().get(colorScheme.getNeutral1().size() / 2);
         Cam cam = Cam.fromInt(neutralMid);
-        Assert.assertEquals(cam.getChroma(), 8.0, 1.0);
+        Assert.assertTrue(cam.getChroma() <= 8.0);
     }
 
     @Test
@@ -128,6 +133,41 @@ public class ColorSchemeTest extends SysuiTestCase {
                 Style.EXPRESSIVE /* style */);
         int neutralMid = colorScheme.getNeutral1().get(colorScheme.getNeutral1().size() / 2);
         Cam cam = Cam.fromInt(neutralMid);
-        Assert.assertEquals(cam.getChroma(), 16.0, 1.0);
+        Assert.assertTrue(cam.getChroma() <= 8.0);
+    }
+
+    /**
+     * Generate xml for SystemPaletteTest#testThemeStyles().
+     */
+    @Test
+    public void generateThemeStyles() {
+        StringBuilder xml = new StringBuilder();
+        for (int hue = 0; hue < 360; hue += 60) {
+            final int sourceColor = Cam.getInt(hue, 50f, 50f);
+            final String sourceColorHex = Integer.toHexString(sourceColor);
+
+            xml.append("    <theme color=\"").append(sourceColorHex).append("\">\n");
+
+            for (Style style : Style.values()) {
+                String styleName = style.name().toLowerCase();
+                ColorScheme colorScheme = new ColorScheme(sourceColor, false, style);
+                xml.append("        <").append(styleName).append(">");
+
+                List<String> colors = new ArrayList<>();
+                for (Stream<Integer> stream: Arrays.asList(colorScheme.getAccent1().stream(),
+                        colorScheme.getAccent2().stream(),
+                        colorScheme.getAccent3().stream(),
+                        colorScheme.getNeutral1().stream(),
+                        colorScheme.getNeutral2().stream())) {
+                    colors.add("ffffff");
+                    colors.addAll(stream.map(Integer::toHexString).map(s -> s.substring(2)).collect(
+                            Collectors.toList()));
+                }
+                xml.append(String.join(",", colors));
+                xml.append("</").append(styleName).append(">\n");
+            }
+            xml.append("    </theme>\n");
+        }
+        Log.d("ColorSchemeXml", xml.toString());
     }
 }

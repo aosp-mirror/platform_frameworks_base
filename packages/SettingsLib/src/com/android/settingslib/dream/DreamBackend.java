@@ -50,7 +50,6 @@ import java.util.stream.Collectors;
 public class DreamBackend {
     private static final String TAG = "DreamBackend";
     private static final boolean DEBUG = false;
-    private final Drawable mDreamPreviewDefault;
 
     public static class DreamInfo {
         public CharSequence caption;
@@ -135,8 +134,6 @@ public class DreamBackend {
                 com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
         mDreamsActivatedOnDockByDefault = resources.getBoolean(
                 com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
-        mDreamPreviewDefault = resources.getDrawable(
-                com.android.internal.R.drawable.default_dream_preview);
         mDisabledDreams = Arrays.stream(resources.getStringArray(
                         com.android.internal.R.array.config_disabledDreamComponents))
                 .map(ComponentName::unflattenFromString)
@@ -181,9 +178,6 @@ public class DreamBackend {
             if (dreamMetadata != null) {
                 dreamInfo.settingsComponentName = dreamMetadata.settingsActivity;
                 dreamInfo.previewImage = dreamMetadata.previewImage;
-            }
-            if (dreamInfo.previewImage == null) {
-                dreamInfo.previewImage = mDreamPreviewDefault;
             }
             dreamInfos.add(dreamInfo);
         }
@@ -254,9 +248,6 @@ public class DreamBackend {
     }
 
     public @WhenToDream int getWhenToDreamSetting() {
-        if (!isEnabled()) {
-            return NEVER;
-        }
         return isActivatedOnDock() && isActivatedOnSleep() ? EITHER
                 : isActivatedOnDock() ? WHILE_DOCKED
                 : isActivatedOnSleep() ? WHILE_CHARGING

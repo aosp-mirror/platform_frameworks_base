@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams;
 
+import android.service.dreams.DreamService;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -84,6 +85,8 @@ public class DreamOverlayStateController implements
     @Complication.ComplicationType
     private int mAvailableComplicationTypes = Complication.COMPLICATION_TYPE_NONE;
 
+    private boolean mShouldShowComplications = DreamService.DEFAULT_SHOW_COMPLICATIONS;
+
     private final Collection<Complication> mComplications = new HashSet();
 
     @VisibleForTesting
@@ -131,7 +134,12 @@ public class DreamOverlayStateController implements
                 .filter(complication -> {
                     @Complication.ComplicationType
                     final int requiredTypes = complication.getRequiredTypeAvailability();
-                    return (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
+                    // If it should show complications, show ones whose required types are
+                    // available. Otherwise, only show ones that don't require types.
+                    if (mShouldShowComplications) {
+                        return (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
+                    }
+                    return requiredTypes == Complication.COMPLICATION_TYPE_NONE;
                 })
                 .collect(Collectors.toCollection(HashSet::new))
                 : mComplications);
@@ -221,7 +229,24 @@ public class DreamOverlayStateController implements
     public void setAvailableComplicationTypes(@Complication.ComplicationType int types) {
         mExecutor.execute(() -> {
             mAvailableComplicationTypes = types;
-            mCallbacks.forEach(callback -> callback.onAvailableComplicationTypesChanged());
+            mCallbacks.forEach(Callback::onAvailableComplicationTypesChanged);
+        });
+    }
+
+    /**
+     * Returns whether the dream overlay should show complications.
+     */
+    public boolean getShouldShowComplications() {
+        return mShouldShowComplications;
+    }
+
+    /**
+     * Sets whether the dream overlay should show complications.
+     */
+    public void setShouldShowComplications(boolean shouldShowComplications) {
+        mExecutor.execute(() -> {
+            mShouldShowComplications = shouldShowComplications;
+            mCallbacks.forEach(Callback::onAvailableComplicationTypesChanged);
         });
     }
 }

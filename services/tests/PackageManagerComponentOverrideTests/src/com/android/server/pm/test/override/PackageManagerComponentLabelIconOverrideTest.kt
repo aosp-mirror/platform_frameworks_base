@@ -29,11 +29,12 @@ import com.android.server.pm.*
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
+import com.android.server.pm.resolution.ComponentResolver
+import com.android.server.pm.snapshot.PackageDataSnapshot
 import com.android.server.pm.test.override.PackageManagerComponentLabelIconOverrideTest.Companion.Params.AppType
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.mock
 import com.android.server.testutils.mockThrowOnUnmocked
-import com.android.server.testutils.spy
 import com.android.server.testutils.whenever
 import com.android.server.wm.ActivityTaskManagerInternal
 import com.google.common.truth.Truth.assertThat
@@ -45,11 +46,9 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.intThat
-import org.mockito.Mockito.never
 import org.mockito.Mockito.same
-import org.mockito.Mockito.verify
 import org.testng.Assert.assertThrows
 import java.io.File
 import java.util.UUID
@@ -218,11 +217,14 @@ class PackageManagerComponentLabelIconOverrideTest {
     @After
     fun verifyExpectedResult() {
         assertServiceInitialized() ?: return
-        if (params.componentName != null) {
-            val activityInfo = service.getActivityInfo(params.componentName, 0, userId)
-            if (activityInfo != null) {
-                assertThat(activityInfo.nonLocalizedLabel).isEqualTo(params.expectedLabel)
-                assertThat(activityInfo.icon).isEqualTo(params.expectedIcon)
+        if (params.componentName != null && params.result !is Result.Exception) {
+            // Suppress so that failures in @After don't override the actual test failure
+            @Suppress("UNNECESSARY_SAFE_CALL")
+            service?.let {
+                val activityInfo = it.snapshotComputer()
+                    .getActivityInfo(params.componentName, 0, userId)
+                assertThat(activityInfo?.nonLocalizedLabel).isEqualTo(params.expectedLabel)
+                assertThat(activityInfo?.icon).isEqualTo(params.expectedIcon)
             }
         }
     }
@@ -234,9 +236,12 @@ class PackageManagerComponentLabelIconOverrideTest {
             Result.Changed, Result.ChangedWithoutNotify -> {
                 // Suppress so that failures in @After don't override the actual test failure
                 @Suppress("UNNECESSARY_SAFE_CALL")
-                val activityInfo = service?.getActivityInfo(params.componentName, 0, userIdDifferent)
-                assertThat(activityInfo?.nonLocalizedLabel).isEqualTo(DEFAULT_LABEL)
-                assertThat(activityInfo?.icon).isEqualTo(DEFAULT_ICON)
+                service?.let {
+                    val activityInfo = it.snapshotComputer()
+                        ?.getActivityInfo(params.componentName, 0, userIdDifferent)
+                    assertThat(activityInfo?.nonLocalizedLabel).isEqualTo(DEFAULT_LABEL)
+                    assertThat(activityInfo?.icon).isEqualTo(DEFAULT_ICON)
+                }
             }
             Result.NotChanged, is Result.Exception -> {}
         }.run { /*exhaust*/ }
@@ -262,12 +267,14 @@ class PackageManagerComponentLabelIconOverrideTest {
         assertServiceInitialized() ?: return
         when (params.result) {
             is Result.Changed, Result.ChangedWithoutNotify -> {
-                assertThat(mockPendingBroadcasts.get(userId, params.pkgName) ?: emptyList<String>())
+                assertThat(mockPendingBroadcasts.copiedMap()?.get(userId)?.get(params.pkgName)
+                    ?: emptyList<String>())
                         .containsExactly(params.componentName!!.className)
                         .inOrder()
             }
             is Result.NotChanged, is Result.Exception -> {
-                assertThat(mockPendingBroadcasts.get(userId, params.pkgName)).isNull()
+                assertThat(mockPendingBroadcasts.copiedMap()?.get(userId)?.get(params.pkgName))
+                    .isNull()
             }
         }.run { /*exhaust*/ }
     }
@@ -337,8 +344,8 @@ class PackageManagerComponentLabelIconOverrideTest {
         val mockSettings = Settings(mockedPkgSettings)
         val mockComponentResolver: ComponentResolver = mockThrowOnUnmocked {
             params.componentName?.let {
-                whenever(this.componentExists(same(it))) { mockActivity != null }
-                whenever(this.getActivity(same(it))) { mockActivity }
+                doReturn(mockActivity != null).`when`(this).componentExists(same(it))
+                doReturn(mockActivity).`when`(this).getActivity(same(it))
             }
             whenever(this.snapshot()) { this@mockThrowOnUnmocked }
             whenever(registerObserver(any())).thenCallRealMethod()
@@ -354,9 +361,9 @@ class PackageManagerComponentLabelIconOverrideTest {
         val mockActivityTaskManager: ActivityTaskManagerInternal = mockThrowOnUnmocked {
             whenever(this.isCallerRecents(anyInt())) { false }
         }
-        val mockAppsFilter: AppsFilter = mockThrowOnUnmocked {
-            whenever(this.shouldFilterApplication(anyInt(), any<PackageSetting>(),
-                    any<PackageSetting>(), anyInt())) { false }
+        val mockAppsFilter: AppsFilterImpl = mockThrowOnUnmocked {
+            whenever(this.shouldFilterApplication(any<PackageDataSnapshot>(), anyInt(), 
+                    any<PackageSetting>(), any<PackageSetting>(), anyInt())) { false }
             whenever(this.snapshot()) { this@mockThrowOnUnmocked }
             whenever(registerObserver(any())).thenCallRealMethod()
         }

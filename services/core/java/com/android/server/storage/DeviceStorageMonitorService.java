@@ -24,6 +24,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileObserver;
@@ -31,7 +32,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
@@ -49,6 +49,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.PackageManagerService;
 
@@ -187,10 +188,10 @@ public class DeviceStorageMonitorService extends SystemService {
             // when it's within 150% of the threshold, we try trimming usage
             // back to 200% of the threshold.
             if (file.getUsableSpace() < (lowBytes * 3) / 2) {
-                final PackageManagerService pms = (PackageManagerService) ServiceManager
-                        .getService("package");
+                final PackageManagerInternal pm =
+                        LocalServices.getService(PackageManagerInternal.class);
                 try {
-                    pms.freeStorage(vol.getFsUuid(), lowBytes * 2, 0);
+                    pm.freeStorage(vol.getFsUuid(), lowBytes * 2, 0);
                 } catch (IOException e) {
                     Slog.w(TAG, e);
                 }
@@ -264,10 +265,10 @@ public class DeviceStorageMonitorService extends SystemService {
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final File file = vol.getPath();
             if (file.getUsableSpace() < file.getTotalSpace() * storageThresholdPercentHigh / 100) {
-                final PackageManagerService pms = (PackageManagerService) ServiceManager
-                        .getService("package");
+                final PackageManagerInternal pm =
+                        LocalServices.getService(PackageManagerInternal.class);
                 try {
-                    pms.freeAllAppCacheAboveQuota(vol.getFsUuid());
+                    pm.freeAllAppCacheAboveQuota(vol.getFsUuid());
                 } catch (IOException e) {
                     Slog.w(TAG, e);
                 }

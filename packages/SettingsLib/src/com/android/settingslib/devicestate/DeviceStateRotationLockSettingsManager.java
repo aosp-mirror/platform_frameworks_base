@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -51,29 +52,34 @@ public final class DeviceStateRotationLockSettingsManager {
 
     private static DeviceStateRotationLockSettingsManager sSingleton;
 
-    private final ContentResolver mContentResolver;
-    private final Handler mMainHandler = Handler.getMain();
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
     private final Set<DeviceStateRotationLockSettingsListener> mListeners = new HashSet<>();
+    private final SecureSettings mSecureSettings;
     private String[] mDeviceStateRotationLockDefaults;
     private SparseIntArray mDeviceStateRotationLockSettings;
     private SparseIntArray mDeviceStateRotationLockFallbackSettings;
+    private String mLastSettingValue;
     private List<SettableDeviceState> mSettableDeviceStates;
 
-    private DeviceStateRotationLockSettingsManager(Context context) {
-        mContentResolver = context.getContentResolver();
+    @VisibleForTesting
+    DeviceStateRotationLockSettingsManager(Context context, SecureSettings secureSettings) {
+        this.mSecureSettings = secureSettings;
         mDeviceStateRotationLockDefaults =
                 context.getResources()
                         .getStringArray(R.array.config_perDeviceStateRotationLockDefaults);
         loadDefaults();
         initializeInMemoryMap();
-        listenForSettingsChange(context);
+        listenForSettingsChange();
     }
 
     /** Returns a singleton instance of this class */
     public static synchronized DeviceStateRotationLockSettingsManager getInstance(Context context) {
         if (sSingleton == null) {
+            Context applicationContext = context.getApplicationContext();
+            ContentResolver contentResolver = applicationContext.getContentResolver();
+            SecureSettings secureSettings = new AndroidSecureSettings(contentResolver);
             sSingleton =
-                    new DeviceStateRotationLockSettingsManager(context.getApplicationContext());
+                    new DeviceStateRotationLockSettingsManager(applicationContext, secureSettings);
         }
         return sSingleton;
     }
@@ -92,11 +98,11 @@ public final class DeviceStateRotationLockSettingsManager {
                 > 0;
     }
 
-    private void listenForSettingsChange(Context context) {
-        context.getContentResolver()
+    private void listenForSettingsChange() {
+        mSecureSettings
                 .registerContentObserver(
-                        Settings.Secure.getUriFor(Settings.Secure.DEVICE_STATE_ROTATION_LOCK),
-                        /* notifyForDescendents= */ false, //NOTYPO
+                        Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
+                        /* notifyForDescendants= */ false,
                         new ContentObserver(mMainHandler) {
                             @Override
                             public void onChange(boolean selfChange) {
@@ -199,8 +205,7 @@ public final class DeviceStateRotationLockSettingsManager {
 
     private void initializeInMemoryMap() {
         String serializedSetting =
-                Settings.Secure.getStringForUser(
-                        mContentResolver,
+                mSecureSettings.getStringForUser(
                         Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
                         UserHandle.USER_CURRENT);
         if (TextUtils.isEmpty(serializedSetting)) {
@@ -250,11 +255,7 @@ public final class DeviceStateRotationLockSettingsManager {
 
     private void persistSettings() {
         if (mDeviceStateRotationLockSettings.size() == 0) {
-            Settings.Secure.putStringForUser(
-                    mContentResolver,
-                    Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
-                    /* value= */ "",
-                    UserHandle.USER_CURRENT);
+            persistSettingIfChanged(/* newSettingValue= */ "");
             return;
         }
 
@@ -271,10 +272,17 @@ public final class DeviceStateRotationLockSettingsManager {
                     .append(SEPARATOR_REGEX)
                     .append(mDeviceStateRotationLockSettings.valueAt(i));
         }
-        Settings.Secure.putStringForUser(
-                mContentResolver,
+        persistSettingIfChanged(stringBuilder.toString());
+    }
+
+    private void persistSettingIfChanged(String newSettingValue) {
+        if (TextUtils.equals(mLastSettingValue, newSettingValue)) {
+            return;
+        }
+        mLastSettingValue = newSettingValue;
+        mSecureSettings.putStringForUser(
                 Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
-                stringBuilder.toString(),
+                /* value= */ newSettingValue,
                 UserHandle.USER_CURRENT);
     }
 

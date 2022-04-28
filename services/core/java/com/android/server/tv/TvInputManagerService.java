@@ -102,6 +102,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.SystemService;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -2639,6 +2641,7 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
+        @NeverCompile // Avoid size overhead of debugging code.
         @Override
         @SuppressWarnings("resource")
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {

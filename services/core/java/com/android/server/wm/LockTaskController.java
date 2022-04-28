@@ -542,7 +542,7 @@ public class LockTaskController {
         if (mLockTaskModeTasks.isEmpty()) {
             return;
         }
-        task.performClearTaskLocked();
+        task.performClearTaskForReuse(false /* excludingTaskOverlay*/);
         mSupervisor.mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
@@ -740,7 +740,7 @@ public class LockTaskController {
             ProtoLog.d(WM_DEBUG_LOCKTASK, "onLockTaskPackagesUpdated: removing %s"
                     + " mLockTaskAuth()=%s", lockedTask, lockedTask.lockTaskAuthToString());
             removeLockedTask(lockedTask);
-            lockedTask.performClearTaskLocked();
+            lockedTask.performClearTaskForReuse(false /* excludingTaskOverlay*/);
             taskChanged = true;
         }
 

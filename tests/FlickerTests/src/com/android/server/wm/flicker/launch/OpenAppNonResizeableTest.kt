@@ -17,17 +17,18 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
+import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import androidx.test.filters.FlakyTest
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.navBarLayerPositionEnd
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -37,6 +38,8 @@ import org.junit.runners.Parameterized
 
 /**
  * Test launching an app while the device is locked
+ *
+ * This test assumes the device doesn't have AOD enabled
  *
  * To run this test: `atest FlickerTests:OpenAppNonResizeableTest`
  *
@@ -57,7 +60,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
+open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
     : OpenAppFromLockTransition(testSpec) {
     override val testApp = NonResizeableAppHelper(instrumentation)
     private val colorFadComponent = FlickerComponentName("", "ColorFade BLAST#")
@@ -66,7 +69,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
      * Checks that the nav bar layer starts invisible, becomes visible during unlocking animation
      * and remains visible at the end
      */
-    @Postsubmit
+    @FlakyTest(bugId = 227083463)
     @Test
     fun navBarLayerVisibilityChanges() {
         testSpec.assertLayers {
@@ -91,7 +94,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
      * Checks that the nav bar starts the transition invisible, then becomes visible during
      * the unlocking animation and remains visible at the end of the transition
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarWindowsVisibilityChanges() {
         testSpec.assertWm {
@@ -104,8 +107,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
     /**
      * Checks that the status bar layer is visible at the end of the trace
      *
-     * It is not possible to check at the start because the animation is working differently
-     * in devices with and without blur (b/202936526)
+     * It is not possible to check at the start because the screen is off
      */
     @Presubmit
     @Test
@@ -116,7 +118,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
     }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 202936526)
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
@@ -132,10 +134,15 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
         }
     }
 
-    /** {@inheritDoc} */
-    @FlakyTest
+    /**
+     * Checks the position of the navigation bar at the start and end of the transition
+     *
+     * Differently from the normal usage of this assertion, check only the final state of the
+     * transition because the display is off at the start and the NavBar is never visible
+     */
+    @Postsubmit
     @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+    override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerPositionEnd()
 
     /** {@inheritDoc} */
     @FlakyTest
@@ -147,6 +154,11 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
     @FlakyTest
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
+
+    @FlakyTest(bugId = 218470989)
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**

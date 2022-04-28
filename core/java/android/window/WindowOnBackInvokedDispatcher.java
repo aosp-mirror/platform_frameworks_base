@@ -18,30 +18,31 @@ package android.window;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.compat.CompatChanges;
+import android.content.Context;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowSession;
-import android.view.OnBackInvokedCallback;
-import android.view.OnBackInvokedDispatcher;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
 /**
- * Provides window based implementation of {@link android.view.OnBackInvokedDispatcher}.
- *
+ * Provides window based implementation of {@link OnBackInvokedDispatcher}.
+ * <p>
  * Callbacks with higher priorities receive back dispatching first.
  * Within the same priority, callbacks receive back dispatching in the reverse order
  * in which they are added.
- *
+ * <p>
  * When the top priority callback is updated, the new callback is propagated to the Window Manager
  * if the window the instance is associated with has been attached. It is allowed to register /
- * unregister {@link android.view.OnBackInvokedCallback}s before the window is attached, although
+ * unregister {@link OnBackInvokedCallback}s before the window is attached, although
  * callbacks will not receive dispatches until window attachment.
  *
  * @hide
@@ -50,10 +51,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private IWindowSession mWindowSession;
     private IWindow mWindow;
     private static final String TAG = "WindowOnBackDispatcher";
-    private static final boolean DEBUG = false;
-    private static final String BACK_PREDICTABILITY_PROP = "persist.debug.back_predictability";
-    private static final boolean IS_BACK_PREDICTABILITY_ENABLED = SystemProperties
-            .getInt(BACK_PREDICTABILITY_PROP, 0) > 0;
+    private static final boolean ENABLE_PREDICTIVE_BACK = SystemProperties
+            .getInt("persist.wm.debug.predictive_back", 1) != 0;
+    private static final boolean ALWAYS_ENFORCE_PREDICTIVE_BACK = SystemProperties
+            .getInt("persist.wm.debug.predictive_back_always_enforce", 0) != 0;
 
     /** Convenience hashmap to quickly decide if a callback has been added. */
     private final HashMap<OnBackInvokedCallback, Integer> mAllCallbacks = new HashMap<>();
@@ -75,15 +76,15 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     /** Detaches the dispatcher instance from its window. */
     public void detachFromWindow() {
+        clear();
         mWindow = null;
         mWindowSession = null;
-        clear();
     }
 
     // TODO: Take an Executor for the callback to run on.
     @Override
     public void registerOnBackInvokedCallback(
-            @NonNull OnBackInvokedCallback callback, @Priority int priority) {
+            @Priority int priority, @NonNull OnBackInvokedCallback callback) {
         if (priority < 0) {
             throw new IllegalArgumentException("Application registered OnBackInvokedCallback "
                     + "cannot have negative priority. Priority: " + priority);
@@ -160,55 +161,22 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
         try {
             if (callback == null) {
-                mWindowSession.setOnBackInvokedCallback(mWindow, null, PRIORITY_DEFAULT);
+                mWindowSession.setOnBackInvokedCallbackInfo(mWindow, null);
             } else {
                 int priority = mAllCallbacks.get(callback);
-                mWindowSession.setOnBackInvokedCallback(
-                        mWindow, new OnBackInvokedCallbackWrapper(callback, priority), priority);
+                mWindowSession.setOnBackInvokedCallbackInfo(
+                        mWindow, new OnBackInvokedCallbackInfo(
+                                new OnBackInvokedCallbackWrapper(callback), priority));
+            }
+            if (DEBUG && callback == null) {
+                Log.d(TAG, TextUtils.formatSimple("setTopOnBackInvokedCallback(null) Callers:%s",
+                        Debug.getCallers(5, "  ")));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set OnBackInvokedCallback to WM. Error: " + e);
         }
     }
 
-    private class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
-        private final OnBackInvokedCallback mCallback;
-        private final @Priority int mPriority;
-
-        OnBackInvokedCallbackWrapper(
-                @NonNull OnBackInvokedCallback callback, @Priority int priority) {
-            mCallback = callback;
-            mPriority = priority;
-        }
-
-        @NonNull
-        public OnBackInvokedCallback getCallback() {
-            return mCallback;
-        }
-
-        @Override
-        public void onBackStarted() throws RemoteException {
-            Handler.getMain().post(() -> mCallback.onBackStarted());
-        }
-
-        @Override
-        public void onBackProgressed(BackEvent backEvent)
-                throws RemoteException {
-            Handler.getMain().post(() -> mCallback.onBackProgressed(backEvent));
-        }
-
-        @Override
-        public void onBackCancelled() throws RemoteException {
-            Handler.getMain().post(() -> mCallback.onBackCancelled());
-        }
-
-        @Override
-        public void onBackInvoked() throws RemoteException {
-            Handler.getMain().post(() -> mCallback.onBackInvoked());
-        }
-    }
-
-    @Override
     public OnBackInvokedCallback getTopCallback() {
         if (mAllCallbacks.isEmpty()) {
             return null;
@@ -222,15 +190,84 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         return null;
     }
 
+    private static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
+        private final WeakReference<OnBackInvokedCallback> mCallback;
+
+        OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback) {
+            mCallback = new WeakReference<>(callback);
+        }
+
+        @Override
+        public void onBackStarted() {
+            Handler.getMain().post(() -> {
+                final OnBackAnimationCallback callback = getBackAnimationCallback();
+                if (callback != null) {
+                    callback.onBackStarted();
+                }
+            });
+        }
+
+        @Override
+        public void onBackProgressed(BackEvent backEvent) {
+            Handler.getMain().post(() -> {
+                final OnBackAnimationCallback callback = getBackAnimationCallback();
+                if (callback != null) {
+                    callback.onBackProgressed(backEvent);
+                }
+            });
+        }
+
+        @Override
+        public void onBackCancelled() {
+            Handler.getMain().post(() -> {
+                final OnBackAnimationCallback callback = getBackAnimationCallback();
+                if (callback != null) {
+                    callback.onBackCancelled();
+                }
+            });
+        }
+
+        @Override
+        public void onBackInvoked() throws RemoteException {
+            Handler.getMain().post(() -> {
+                final OnBackInvokedCallback callback = mCallback.get();
+                if (callback == null) {
+                    return;
+                }
+
+                callback.onBackInvoked();
+            });
+        }
+
+        @Nullable
+        private OnBackAnimationCallback getBackAnimationCallback() {
+            OnBackInvokedCallback callback = mCallback.get();
+            return callback instanceof OnBackAnimationCallback ? (OnBackAnimationCallback) callback
+                    : null;
+        }
+    }
+
     /**
      * Returns if the legacy back behavior should be used.
-     *
+     * <p>
      * Legacy back behavior dispatches KEYCODE_BACK instead of invoking the application registered
-     * {@link android.view.OnBackInvokedCallback}.
-     *
+     * {@link OnBackInvokedCallback}.
      */
-    public static boolean shouldUseLegacyBack() {
-        return !CompatChanges.isChangeEnabled(DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME)
-                || !IS_BACK_PREDICTABILITY_ENABLED;
+    public static boolean isOnBackInvokedCallbackEnabled(@Nullable Context context) {
+        // new back is enabled if the feature flag is enabled AND the app does not explicitly
+        // request legacy back.
+        boolean featureFlagEnabled = ENABLE_PREDICTIVE_BACK;
+        // If the context is null, we assume true and fallback on the two other conditions.
+        boolean appRequestsPredictiveBack =
+                context != null && context.getApplicationInfo().isOnBackInvokedCallbackEnabled();
+
+        if (DEBUG) {
+            Log.d(TAG, TextUtils.formatSimple("App: %s featureFlagEnabled=%s "
+                            + "appRequestsPredictiveBack=%s alwaysEnforce=%s",
+                    context != null ? context.getApplicationInfo().packageName : "null context",
+                    featureFlagEnabled, appRequestsPredictiveBack, ALWAYS_ENFORCE_PREDICTIVE_BACK));
+        }
+
+        return featureFlagEnabled && (appRequestsPredictiveBack || ALWAYS_ENFORCE_PREDICTIVE_BACK);
     }
 }

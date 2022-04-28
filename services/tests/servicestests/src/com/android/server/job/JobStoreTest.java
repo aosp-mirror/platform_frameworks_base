@@ -330,11 +330,12 @@ public class JobStoreTest {
 
     @Test
     public void testPriorityPersisted() throws Exception {
-        final JobInfo.Builder b = new Builder(92, mComponent)
+        final JobInfo job = new Builder(92, mComponent)
                 .setOverrideDeadline(5000)
                 .setPriority(JobInfo.PRIORITY_MIN)
-                .setPersisted(true);
-        final JobStatus js = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+                .setPersisted(true)
+                .build();
+        final JobStatus js = JobStatus.createFromJobInfo(job, SOME_UID, null, -1, null);
         mTaskStoreUnderTest.add(js);
         waitForPendingIo();
 
@@ -342,7 +343,7 @@ public class JobStoreTest {
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         final JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
         assertEquals("Priority not correctly persisted.",
-                JobInfo.PRIORITY_MIN, loaded.getEffectivePriority());
+                JobInfo.PRIORITY_MIN, job.getPriority());
     }
 
     /**

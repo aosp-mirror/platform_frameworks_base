@@ -486,7 +486,7 @@ public abstract class Context {
 
     /**
      * @hide Flag for {@link #bindService}: For only the case where the binding
-     * is coming from the system, set the process state to FOREGROUND_SERVICE
+     * is coming from the system, set the process state to BOUND_FOREGROUND_SERVICE
      * instead of the normal maximum of IMPORTANT_FOREGROUND.  That is, this is
      * saying that the process shouldn't participate in the normal power reduction
      * modes (removing network access etc).
@@ -2011,9 +2011,9 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
-    @UnsupportedAppUsage
-    public void startActivityAsUser(@RequiresPermission Intent intent, @Nullable Bundle options,
-            UserHandle userId) {
+    @SystemApi
+    public void startActivityAsUser(@RequiresPermission @NonNull Intent intent,
+            @Nullable Bundle options, @NonNull UserHandle userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -3054,13 +3054,11 @@ public abstract class Context {
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.
      * @param filter Selects the Intent broadcasts to be received.
-     * @param flags Additional options for the receiver. For apps targeting
-     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
-     *              either {@link #RECEIVER_EXPORTED} or
-     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
-     *              broadcasts</a> or an exception will be thrown. If
-     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     * @param flags Additional options for the receiver. In a future release, either
+     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
+     *             receiver isn't being registered for <a href="{@docRoot}guide/components
+     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
+     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
      *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
@@ -3137,13 +3135,11 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. For apps targeting
-     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
-     *              either {@link #RECEIVER_EXPORTED} or
-     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
-     *              broadcasts</a> or an exception will be thrown. If
-     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     * @param flags Additional options for the receiver. In a future release, either
+     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
+     *             receiver isn't being registered for <a href="{@docRoot}guide/components
+     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
+     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
      *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
@@ -3207,13 +3203,11 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent. If {@code null}, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. For apps targeting
-     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
-     *              either {@link #RECEIVER_EXPORTED} or
-     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
-     *              broadcasts</a> or an exception will be thrown. If
-     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     * @param flags Additional options for the receiver. In a future release, either
+     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
+     *             receiver isn't being registered for <a href="{@docRoot}guide/components
+     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
+     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
      *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
@@ -3282,13 +3276,11 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. For apps targeting
-     * {@link android.os.Build.VERSION_CODES#TIRAMISU},
-     *              either {@link #RECEIVER_EXPORTED} or
-     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
-     *              for <a href="{@docRoot}guide/components/broadcasts#system-broadcasts">system
-     *              broadcasts</a> or an exception will be thrown. If
-     *              {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
+     * @param flags Additional options for the receiver. In a future release, either
+     * {@link #RECEIVER_EXPORTED} or {@link #RECEIVER_NOT_EXPORTED} must be specified if the
+     *             receiver isn't being registered for <a href="{@docRoot}guide/components
+     *              /broadcasts#system-broadcasts">system broadcasts</a> or an exception will be
+     *              thrown. If {@link #RECEIVER_EXPORTED} is specified, a receiver may additionally
      *              specify {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}. For a complete list of
      *              system broadcast actions, see the BROADCAST_ACTIONS.TXT file in the
      *              Android SDK. If both {@link #RECEIVER_EXPORTED} and
@@ -3525,7 +3517,7 @@ public abstract class Context {
     public abstract boolean stopServiceAsUser(Intent service, UserHandle user);
 
     /**
-     * Connect to an application service, creating it if needed.  This defines
+     * Connects to an application service, creating it if needed.  This defines
      * a dependency between your application and the service.  The given
      * <var>conn</var> will receive the service object when it is created and be
      * told if it dies and restarts.  The service will be considered required
@@ -3540,11 +3532,8 @@ public abstract class Context {
      * will be invoked instead of
      * {@link ServiceConnection#onServiceConnected(ComponentName, IBinder) onServiceConnected()}.
      *
-     * <p>This method will throw {@link SecurityException} if the calling app does not
-     * have permission to bind to the given service.
-     *
-     * <p class="note">Note: this method <em>cannot be called from a
-     * {@link BroadcastReceiver} component</em>.  A pattern you can use to
+     * <p class="note"><b>Note:</b> This method <em>cannot</em> be called from a
+     * {@link BroadcastReceiver} component.  A pattern you can use to
      * communicate from a BroadcastReceiver to a Service is to call
      * {@link #startService} with the arguments containing the command to be
      * sent, with the service calling its
@@ -3559,42 +3548,49 @@ public abstract class Context {
      *      specify an explicit component name.
      * @param conn Receives information as the service is started and stopped.
      *      This must be a valid ServiceConnection object; it must not be null.
-     * @param flags Operation options for the binding.  May be 0,
-     *          {@link #BIND_AUTO_CREATE}, {@link #BIND_DEBUG_UNBIND},
-     *          {@link #BIND_NOT_FOREGROUND}, {@link #BIND_ABOVE_CLIENT},
-     *          {@link #BIND_ALLOW_OOM_MANAGEMENT}, {@link #BIND_WAIVE_PRIORITY}.
-     *          {@link #BIND_IMPORTANT}, {@link #BIND_ADJUST_WITH_ACTIVITY},
-     *          {@link #BIND_NOT_PERCEPTIBLE}, or {@link #BIND_INCLUDE_CAPABILITIES}.
-     * @return {@code true} if the system is in the process of bringing up a
-     *         service that your client has permission to bind to; {@code false}
-     *         if the system couldn't find the service or if your client doesn't
-     *         have permission to bind to it. You should call {@link #unbindService}
-     *         to release the connection even if this method returned {@code false}.
+     * @param flags Operation options for the binding. Can be:
+     *      <ul>
+     *          <li>0
+     *          <li>{@link #BIND_AUTO_CREATE}
+     *          <li>{@link #BIND_DEBUG_UNBIND}
+     *          <li>{@link #BIND_NOT_FOREGROUND}
+     *          <li>{@link #BIND_ABOVE_CLIENT}
+     *          <li>{@link #BIND_ALLOW_OOM_MANAGEMENT}
+     *          <li>{@link #BIND_WAIVE_PRIORITY}
+     *          <li>{@link #BIND_IMPORTANT}
+     *          <li>{@link #BIND_ADJUST_WITH_ACTIVITY}
+     *          <li>{@link #BIND_NOT_PERCEPTIBLE}
+     *          <li>{@link #BIND_INCLUDE_CAPABILITIES}
+     *      </ul>
      *
-     * @throws SecurityException If the caller does not have permission to access the service
-     * or the service can not be found.
+     * @return {@code true} if the system is in the process of bringing up a
+     *      service that your client has permission to bind to; {@code false}
+     *      if the system couldn't find the service or if your client doesn't
+     *      have permission to bind to it. Regardless of the return value, you
+     *      should later call {@link #unbindService} to release the connection.
+     *
+     * @throws SecurityException If the caller does not have permission to
+     *      access the service or the service cannot be found. Call
+     *      {@link #unbindService} to release the connection when this exception
+     *      is thrown.
      *
      * @see #unbindService
      * @see #startService
-     * @see #BIND_AUTO_CREATE
-     * @see #BIND_DEBUG_UNBIND
-     * @see #BIND_NOT_FOREGROUND
-     * @see #BIND_ABOVE_CLIENT
-     * @see #BIND_ALLOW_OOM_MANAGEMENT
-     * @see #BIND_WAIVE_PRIORITY
-     * @see #BIND_IMPORTANT
-     * @see #BIND_ADJUST_WITH_ACTIVITY
-     * @see #BIND_NOT_PERCEPTIBLE
-     * @see #BIND_INCLUDE_CAPABILITIES
      */
     public abstract boolean bindService(@RequiresPermission Intent service,
             @NonNull ServiceConnection conn, @BindServiceFlags int flags);
 
     /**
-     * Same as {@link #bindService(Intent, ServiceConnection, int)} with executor to control
-     * ServiceConnection callbacks.
+     * Same as {@link #bindService(Intent, ServiceConnection, int)
+     * bindService(Intent, ServiceConnection, int)} with executor to control ServiceConnection
+     * callbacks.
+     *
      * @param executor Callbacks on ServiceConnection will be called on executor. Must use same
      *      instance for the same instance of ServiceConnection.
+     *
+     * @return The result of the binding as described in
+     *      {@link #bindService(Intent, ServiceConnection, int)
+     *      bindService(Intent, ServiceConnection, int)}.
      */
     public boolean bindService(@RequiresPermission @NonNull Intent service,
             @BindServiceFlags int flags, @NonNull @CallbackExecutor Executor executor,
@@ -3620,11 +3616,12 @@ public abstract class Context {
      * @param instanceName Unique identifier for the service instance.  Each unique
      *      name here will result in a different service instance being created.  Identifiers
      *      must only contain ASCII letters, digits, underscores, and periods.
-     * @return Returns success of binding as per {@link #bindService}.
      * @param executor Callbacks on ServiceConnection will be called on executor.
      *      Must use same instance for the same instance of ServiceConnection.
      * @param conn Receives information as the service is started and stopped.
      *      This must be a valid ServiceConnection object; it must not be null.
+     *
+     * @return Returns success of binding as per {@link #bindService}.
      *
      * @throws SecurityException If the caller does not have permission to access the service
      * @throws IllegalArgumentException If the instanceName is invalid.
@@ -3640,8 +3637,7 @@ public abstract class Context {
     }
 
     /**
-     * Binds to a service in the given {@code user} in the same manner as
-     * {@link #bindService(Intent, ServiceConnection, int)}.
+     * Binds to a service in the given {@code user} in the same manner as {@link #bindService}.
      *
      * <p>Requires that one of the following conditions are met:
      * <ul>
@@ -3909,6 +3905,7 @@ public abstract class Context {
             MEDIA_METRICS_SERVICE,
             //@hide: ATTESTATION_VERIFICATION_SERVICE,
             //@hide: SAFETY_CENTER_SERVICE,
+            DISPLAY_HASH_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3995,6 +3992,8 @@ public abstract class Context {
      * <dt> {@link #DOMAIN_VERIFICATION_SERVICE} ("domain_verification")
      * <dd> A {@link android.content.pm.verify.domain.DomainVerificationManager} for accessing
      * web domain approval state.
+     * <dt> {@link #DISPLAY_HASH_SERVICE} ("display_hash")
+     * <dd> A {@link android.view.displayhash.DisplayHashManager} for management of display hashes.
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -4078,6 +4077,8 @@ public abstract class Context {
      * @see #HARDWARE_PROPERTIES_SERVICE
      * @see #DOMAIN_VERIFICATION_SERVICE
      * @see android.content.pm.verify.domain.DomainVerificationManager
+     * @see #DISPLAY_HASH_SERVICE
+     * @see android.view.displayhash.DisplayHashManager
      */
     public abstract @Nullable Object getSystemService(@ServiceName @NonNull String name);
 
@@ -4098,7 +4099,8 @@ public abstract class Context {
      * {@link android.app.UiModeManager}, {@link android.app.DownloadManager},
      * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler},
      * {@link android.app.usage.NetworkStatsManager},
-     * {@link android.content.pm.verify.domain.DomainVerificationManager}.
+     * {@link android.content.pm.verify.domain.DomainVerificationManager},
+     * {@link android.view.displayhash.DisplayHashManager}.
      * </p>
      *
      * <p>
@@ -6504,22 +6506,22 @@ public abstract class Context {
 
 
     /**
-     * Triggers the asynchronous revocation of a permission.
+     * Triggers the asynchronous revocation of a runtime permission. If the permission is not
+     * currently granted, nothing happens (even if later granted by the user).
      *
      * @param permName The name of the permission to be revoked.
-     * @see #revokeOwnPermissionsOnKill(Collection)
+     * @see #revokeSelfPermissionsOnKill(Collection)
+     * @throws IllegalArgumentException if the permission is not a runtime permission
      */
-    public void revokeOwnPermissionOnKill(@NonNull String permName) {
-        revokeOwnPermissionsOnKill(Collections.singletonList(permName));
+    public void revokeSelfPermissionOnKill(@NonNull String permName) {
+        revokeSelfPermissionsOnKill(Collections.singletonList(permName));
     }
 
     /**
      * Triggers the revocation of one or more permissions for the calling package. A package is only
-     * able to revoke a permission under the following conditions:
-     * <ul>
-     * <li>Each permission in {@code permissions} must be granted to the calling package.
-     * <li>Each permission in {@code permissions} must be a runtime permission.
-     * </ul>
+     * able to revoke runtime permissions. If a permission is not currently granted, it is ignored
+     * and will not get revoked (even if later granted by the user). Ultimately, you should never
+     * make assumptions about a permission status as users may grant or revoke them at any time.
      * <p>
      * Background permissions which have no corresponding foreground permission still granted once
      * the revocation is effective will also be revoked.
@@ -6545,8 +6547,9 @@ public abstract class Context {
      * @param permissions Collection of permissions to be revoked.
      * @see PackageManager#getGroupOfPlatformPermission(String, Executor, Consumer)
      * @see PackageManager#getPlatformPermissionsForGroup(String, Executor, Consumer)
+     * @throws IllegalArgumentException if any of the permissions is not a runtime permission
      */
-    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
+    public void revokeSelfPermissionsOnKill(@NonNull Collection<String> permissions) {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 
@@ -7141,8 +7144,9 @@ public abstract class Context {
     }
 
     /**
-     * Returns token if the {@link Context} is a {@link android.app.WindowContext}. Returns
-     * {@code null} otherwise.
+     * Returns the {@link IBinder} representing the associated
+     * {@link com.android.server.wm.WindowToken} if the {@link Context} is a
+     * {@link android.app.WindowContext}. Returns {@code null} otherwise.
      *
      * @hide
      */

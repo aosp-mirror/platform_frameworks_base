@@ -229,8 +229,8 @@ public class LockSettingsStrongAuthTest {
     }
 
     private void verifyAlarm(long when, String tag, AlarmManager.OnAlarmListener alarm) {
-        verify(mAlarmManager).set(
-                eq(AlarmManager.ELAPSED_REALTIME),
+        verify(mAlarmManager).setExact(
+                eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
                 eq(when),
                 eq(tag),
                 eq(alarm),

@@ -1239,6 +1239,35 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         verify(listener, never()).onProjectionStateChanged(anyInt(), any());
     }
 
+    @Test
+    public void enableCarMode_failsForBogusPackageName() throws Exception {
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.CALLING_UID + 1);
+
+        assertThrows(SecurityException.class, () -> mService.enableCarMode(0, 0, PACKAGE_NAME));
+        assertThat(mService.getCurrentModeType()).isNotEqualTo(Configuration.UI_MODE_TYPE_CAR);
+    }
+
+    @Test
+    public void disableCarMode_failsForBogusPackageName() throws Exception {
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.CALLING_UID);
+        mService.enableCarMode(0, 0, PACKAGE_NAME);
+        assertThat(mService.getCurrentModeType()).isEqualTo(Configuration.UI_MODE_TYPE_CAR);
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.CALLING_UID + 1);
+
+        assertThrows(SecurityException.class,
+            () -> mService.disableCarModeByCallingPackage(0, PACKAGE_NAME));
+        assertThat(mService.getCurrentModeType()).isEqualTo(Configuration.UI_MODE_TYPE_CAR);
+
+        // Clean up
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.CALLING_UID);
+         mService.disableCarModeByCallingPackage(0, PACKAGE_NAME);
+        assertThat(mService.getCurrentModeType()).isNotEqualTo(Configuration.UI_MODE_TYPE_CAR);
+    }
+
     private void requestAllPossibleProjectionTypes() throws RemoteException {
         for (int i = 0; i < Integer.SIZE; ++i) {
             mService.requestProjection(mBinder, 1 << i, PACKAGE_NAME);

@@ -136,9 +136,9 @@ public final class SensorPrivacyManager {
         public static final int OTHER = SensorPrivacyToggleSourceProto.OTHER;
 
         /**
-         * Constant for SAFETY_HUB.
+         * Constant for SAFETY_CENTER.
          */
-        public static final int SAFETY_HUB = SensorPrivacyToggleSourceProto.SAFETY_HUB;
+        public static final int SAFETY_CENTER = SensorPrivacyToggleSourceProto.SAFETY_CENTER;
 
         /**
          * Source for toggling sensors
@@ -151,43 +151,37 @@ public final class SensorPrivacyManager {
                 DIALOG,
                 SHELL,
                 OTHER,
-                SAFETY_HUB
+                SAFETY_CENTER
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Source {}
 
     }
 
+
+    /**
+     * Constant for software toggle.
+     */
+    public static final int TOGGLE_TYPE_SOFTWARE =
+            SensorPrivacyIndividualEnabledSensorProto.SOFTWARE;
+
+    /**
+     * Constant for hardware toggle.
+     */
+    public static final int TOGGLE_TYPE_HARDWARE =
+            SensorPrivacyIndividualEnabledSensorProto.HARDWARE;
+
     /**
      * Types of toggles which can exist for sensor privacy
+     *
      * @hide
      */
-    public static class ToggleTypes {
-        private ToggleTypes() {}
-
-        /**
-         * Constant for software toggle.
-         */
-        public static final int SOFTWARE = SensorPrivacyIndividualEnabledSensorProto.SOFTWARE;
-
-        /**
-         * Constant for hardware toggle.
-         */
-        public static final int HARDWARE = SensorPrivacyIndividualEnabledSensorProto.HARDWARE;
-
-        /**
-         * Types of toggles which can exist for sensor privacy
-         *
-         * @hide
-         */
-        @IntDef(value = {
-                SOFTWARE,
-                HARDWARE
-        })
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface ToggleType {}
-
-    }
+    @IntDef(value = {
+            TOGGLE_TYPE_SOFTWARE,
+            TOGGLE_TYPE_HARDWARE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ToggleType {}
 
     /**
      * Types of state which can exist for the sensor privacy toggle
@@ -232,20 +226,23 @@ public final class SensorPrivacyManager {
         /**
          * Callback invoked when the sensor privacy state changes.
          *
+         * @param params Parameters describing the new state
+         */
+        default void onSensorPrivacyChanged(@NonNull SensorPrivacyChangedParams params) {
+            onSensorPrivacyChanged(params.mSensor, params.mEnabled);
+        }
+
+        /**
+         * Callback invoked when the sensor privacy state changes.
+         *
          * @param sensor the sensor whose state is changing
          * @param enabled true if sensor privacy is enabled, false otherwise.
+         *
+         * @deprecated Please use
+         * {@link #onSensorPrivacyChanged(SensorPrivacyChangedParams)}
          */
+        @Deprecated
         void onSensorPrivacyChanged(int sensor, boolean enabled);
-    }
-
-    /**
-     * A class implementing this interface can register with the {@link
-     * android.hardware.SensorPrivacyManager} to receive notification when the sensor privacy
-     * state changes.
-     *
-     * @hide
-     */
-    public interface OnToggleSensorPrivacyChangedListener {
 
         /**
          * A class containing information about what the sensor privacy state has changed to.
@@ -262,7 +259,7 @@ public final class SensorPrivacyManager {
                 mEnabled = enabled;
             }
 
-            public @ToggleTypes.ToggleType int getToggleType() {
+            public @ToggleType int getToggleType() {
                 return mToggleType;
             }
 
@@ -274,13 +271,6 @@ public final class SensorPrivacyManager {
                 return mEnabled;
             }
         }
-
-        /**
-         * Callback invoked when the sensor privacy state changes.
-         *
-         * @param params Parameters describing the new state
-         */
-        void onSensorPrivacyChanged(@NonNull SensorPrivacyChangedParams params);
     }
 
     private static final Object sInstanceLock = new Object();
@@ -305,15 +295,15 @@ public final class SensorPrivacyManager {
     /** Registered listeners */
     @GuardedBy("mLock")
     @NonNull
-    private final ArrayMap<OnToggleSensorPrivacyChangedListener, Executor> mToggleListeners =
+    private final ArrayMap<OnSensorPrivacyChangedListener, Executor> mToggleListeners =
             new ArrayMap<>();
 
     /** Listeners registered using the deprecated APIs and which
-     * OnToggleSensorPrivacyChangedListener they're using. */
+     * OnSensorPrivacyChangedListener they're using. */
     @GuardedBy("mLock")
     @NonNull
     private final ArrayMap<Pair<Integer, OnSensorPrivacyChangedListener>,
-            OnToggleSensorPrivacyChangedListener> mLegacyToggleListeners = new ArrayMap<>();
+            OnSensorPrivacyChangedListener> mLegacyToggleListeners = new ArrayMap<>();
 
     /** The singleton ISensorPrivacyListener for IPC which will be used to dispatch to local
      * listeners */
@@ -323,9 +313,9 @@ public final class SensorPrivacyManager {
         public void onSensorPrivacyChanged(int toggleType, int sensor, boolean enabled) {
             synchronized (mLock) {
                 for (int i = 0; i < mToggleListeners.size(); i++) {
-                    OnToggleSensorPrivacyChangedListener listener = mToggleListeners.keyAt(i);
+                    OnSensorPrivacyChangedListener listener = mToggleListeners.keyAt(i);
                     mToggleListeners.valueAt(i).execute(() -> listener
-                            .onSensorPrivacyChanged(new OnToggleSensorPrivacyChangedListener
+                            .onSensorPrivacyChanged(new OnSensorPrivacyChangedListener
                                     .SensorPrivacyChangedParams(toggleType, sensor, enabled)));
                 }
             }
@@ -367,12 +357,24 @@ public final class SensorPrivacyManager {
     }
 
     /**
+     * Returns the single instance of the SensorPrivacyManager.
+     *
+     * @hide
+     */
+    public static SensorPrivacyManager getInstance(Context context, ISensorPrivacyManager service) {
+        synchronized (sInstanceLock) {
+            sInstance = new SensorPrivacyManager(context, service);
+            return sInstance;
+        }
+    }
+
+    /**
      * Checks if the given toggle is supported on this device
      * @param sensor The sensor to check
      * @return whether the toggle for the sensor is supported on this device.
      */
     public boolean supportsSensorToggle(@Sensors.Sensor int sensor) {
-        return supportsSensorToggle(ToggleTypes.SOFTWARE, sensor);
+        return supportsSensorToggle(TOGGLE_TYPE_SOFTWARE, sensor);
     }
 
     /**
@@ -380,10 +382,8 @@ public final class SensorPrivacyManager {
      * @param sensor The sensor to check
      * @return whether the toggle for the sensor is supported on this device.
      *
-     * @hide
      */
-    public boolean supportsSensorToggle(@ToggleTypes.ToggleType int toggleType,
-            @Sensors.Sensor int sensor) {
+    public boolean supportsSensorToggle(@ToggleType int toggleType, @Sensors.Sensor int sensor) {
         try {
             Pair key = new Pair(toggleType, sensor);
             synchronized (mLock) {
@@ -408,8 +408,6 @@ public final class SensorPrivacyManager {
      * @param listener the OnSensorPrivacyChangedListener to be notified when the state of sensor
      *                       privacy changes.
      *
-     * {@link #addSensorPrivacyListener(OnToggleSensorPrivacyChangedListener)}
-     *
      * @hide
      */
     @SystemApi
@@ -429,8 +427,6 @@ public final class SensorPrivacyManager {
      * @param listener the OnSensorPrivacyChangedListener to be notified when the state of sensor
      *                 privacy changes.
      *
-     * {@link #addSensorPrivacyListener(OnToggleSensorPrivacyChangedListener)}
-     *
      * @hide
      */
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
@@ -449,19 +445,22 @@ public final class SensorPrivacyManager {
      * @param listener the OnSensorPrivacyChangedListener to be notified when the state of sensor
      *                       privacy changes.
      *
-     * {@link #addSensorPrivacyListener(Executor, OnToggleSensorPrivacyChangedListener)}
-     *
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public void addSensorPrivacyListener(@Sensors.Sensor int sensor, @NonNull Executor executor,
             @NonNull OnSensorPrivacyChangedListener listener) {
-
         Pair<Integer, OnSensorPrivacyChangedListener> pair = new Pair(sensor, listener);
-        OnToggleSensorPrivacyChangedListener toggleListener = params -> {
-            if (params.getSensor() == sensor) {
-                listener.onSensorPrivacyChanged(params.getSensor(), params.isEnabled());
+        OnSensorPrivacyChangedListener toggleListener = new OnSensorPrivacyChangedListener() {
+            @Override
+            public void onSensorPrivacyChanged(SensorPrivacyChangedParams params) {
+                if (params.getSensor() == sensor) {
+                    listener.onSensorPrivacyChanged(params.getSensor(), params.isEnabled());
+                }
+            }
+            @Override
+            public void onSensorPrivacyChanged(int sensor, boolean enabled) {
             }
         };
 
@@ -476,13 +475,14 @@ public final class SensorPrivacyManager {
      * Registers a new listener to receive notification when the state of sensor privacy
      * changes.
      *
-     * @param listener the OnToggleSensorPrivacyChangedListener to be notified when the state of
+     * @param listener the OnSensorPrivacyChangedListener to be notified when the state of
      *                 sensor privacy changes.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
-    public void addSensorPrivacyListener(@NonNull OnToggleSensorPrivacyChangedListener listener) {
+    public void addSensorPrivacyListener(@NonNull OnSensorPrivacyChangedListener listener) {
         addSensorPrivacyListener(mContext.getMainExecutor(), listener);
     }
 
@@ -492,14 +492,15 @@ public final class SensorPrivacyManager {
      * changes.
      *
      * @param executor the executor to dispatch the callback on
-     * @param listener the OnToggleSensorPrivacyChangedListener to be notified when the state of
+     * @param listener the OnSensorPrivacyChangedListener to be notified when the state of
      *                 sensor privacy changes.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public void addSensorPrivacyListener(@NonNull Executor executor,
-            @NonNull OnToggleSensorPrivacyChangedListener listener) {
+            @NonNull OnSensorPrivacyChangedListener listener) {
         synchronized (mLock) {
             addSensorPrivacyListenerLocked(executor, listener);
         }
@@ -507,7 +508,7 @@ public final class SensorPrivacyManager {
 
     @GuardedBy("mLock")
     private void addSensorPrivacyListenerLocked(@NonNull Executor executor,
-            @NonNull OnToggleSensorPrivacyChangedListener listener) {
+            @NonNull OnSensorPrivacyChangedListener listener) {
         if (!mToggleListenerRegistered) {
             try {
                 mService.addToggleSensorPrivacyListener(mIToggleListener);
@@ -529,10 +530,6 @@ public final class SensorPrivacyManager {
      * @param listener the OnSensorPrivacyChangedListener to be unregistered from notifications when
      *                 sensor privacy changes.
      *
-     * {@link #removeSensorPrivacyListener(OnToggleSensorPrivacyChangedListener)} with
-     * {@link #addSensorPrivacyListener(OnToggleSensorPrivacyChangedListener)} or
-     * {@link #addSensorPrivacyListener(Executor, OnToggleSensorPrivacyChangedListener)}
-     *
      * @hide
      */
     @SystemApi
@@ -541,7 +538,7 @@ public final class SensorPrivacyManager {
             @NonNull OnSensorPrivacyChangedListener listener) {
         Pair<Integer, OnSensorPrivacyChangedListener> pair = new Pair(sensor, listener);
         synchronized (mLock) {
-            OnToggleSensorPrivacyChangedListener onToggleSensorPrivacyChangedListener =
+            OnSensorPrivacyChangedListener onToggleSensorPrivacyChangedListener =
                     mLegacyToggleListeners.remove(pair);
             if (onToggleSensorPrivacyChangedListener != null) {
                 removeSensorPrivacyListenerLocked(onToggleSensorPrivacyChangedListener);
@@ -553,14 +550,15 @@ public final class SensorPrivacyManager {
      * Unregisters the specified listener from receiving notifications when the state of any sensor
      * privacy changes.
      *
-     * @param listener the {@link OnToggleSensorPrivacyChangedListener} to be unregistered from
+     * @param listener the {@link OnSensorPrivacyChangedListener} to be unregistered from
      *                 notifications when sensor privacy changes.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public void removeSensorPrivacyListener(
-            @NonNull OnToggleSensorPrivacyChangedListener listener) {
+            @NonNull OnSensorPrivacyChangedListener listener) {
         synchronized (mLock) {
             removeSensorPrivacyListenerLocked(listener);
         }
@@ -568,7 +566,7 @@ public final class SensorPrivacyManager {
 
     @GuardedBy("mLock")
     private void removeSensorPrivacyListenerLocked(
-            @NonNull OnToggleSensorPrivacyChangedListener listener) {
+            @NonNull OnSensorPrivacyChangedListener listener) {
         mToggleListeners.remove(listener);
         if (mToggleListeners.size() == 0) {
             try {
@@ -586,12 +584,15 @@ public final class SensorPrivacyManager {
      *
      * @return true if sensor privacy is currently enabled, false otherwise.
      *
+     * @deprecated Prefer to use {@link #isSensorPrivacyEnabled(int, int)}
+     *
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public boolean isSensorPrivacyEnabled(@Sensors.Sensor int sensor) {
-        return isSensorPrivacyEnabled(ToggleTypes.SOFTWARE, sensor);
+        return isSensorPrivacyEnabled(TOGGLE_TYPE_SOFTWARE, sensor);
     }
 
     /**
@@ -601,8 +602,9 @@ public final class SensorPrivacyManager {
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
-    public boolean isSensorPrivacyEnabled(@ToggleTypes.ToggleType int toggleType,
+    public boolean isSensorPrivacyEnabled(@ToggleType int toggleType,
             @Sensors.Sensor int sensor) {
         try {
             return mService.isToggleSensorPrivacyEnabled(toggleType, sensor);
@@ -613,14 +615,16 @@ public final class SensorPrivacyManager {
 
     /**
      * Returns whether sensor privacy is currently enabled for a specific sensor.
-     * Combines the state of the SW + HW toggles and returns the actual privacy state.
+     * Combines the state of the SW + HW toggles and returns true if either the
+     * SOFTWARE or the HARDWARE toggles are enabled.
      *
      * @return true if sensor privacy is currently enabled, false otherwise.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
-    public boolean isToggleSensorPrivacyEnabled(@Sensors.Sensor int sensor) {
+    public boolean areAnySensorPrivacyTogglesEnabled(@Sensors.Sensor int sensor) {
         try {
             return mService.isCombinedToggleSensorPrivacyEnabled(sensor);
         } catch (RemoteException e) {
@@ -648,7 +652,7 @@ public final class SensorPrivacyManager {
         String packageName = mContext.getOpPackageName();
         if (Objects.equals(packageName,
                 mContext.getPackageManager().getPermissionControllerPackageName())) {
-            return Sources.SAFETY_HUB;
+            return Sources.SAFETY_CENTER;
         }
         return Sources.OTHER;
     }

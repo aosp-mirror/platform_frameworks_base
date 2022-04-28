@@ -37,7 +37,7 @@ public class BaseComponentAliasTest {
     protected static final Context sContext = InstrumentationRegistry.getTargetContext();
 
     protected static final DeviceConfigStateHelper sDeviceConfig = new DeviceConfigStateHelper(
-            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER);
+            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS);
     @Before
     public void enableComponentAliasWithCompatFlag() throws Exception {
         Assume.assumeTrue(Build.isDebuggable());
@@ -46,11 +46,15 @@ public class BaseComponentAliasTest {
         sDeviceConfig.set("enable_experimental_component_alias", "");
         sDeviceConfig.set("component_alias_overrides", "");
 
-        // Make sure the feature is actually enabled.
+        // Make sure the feature is actually enabled, and the aliases are loaded.
         TestUtils.waitUntil("Wait until component alias is actually enabled", () -> {
-            return ShellUtils.runShellCommand("dumpsys activity component-alias")
-                    .indexOf("Enabled: true") > 0;
+            String out = ShellUtils.runShellCommand("dumpsys activity component-alias");
+
+            return out.contains("Enabled: true")
+                    && out.contains("android.content.componentalias.tests/.b.Alias04")
+                    && out.contains("android.content.componentalias.tests/.s.Alias04");
         });
+        ShellUtils.runShellCommand("am wait-for-broadcast-idle");
     }
 
     @AfterClass
