@@ -41,8 +41,10 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
@@ -1165,6 +1167,20 @@ public class DisplayContentTests extends WindowTestsBase {
         // Expect null means no change IME parent when the IME layering target not yet
         // request IME to be the input target.
         assertNull(mDisplayContent.computeImeParent());
+    }
+
+    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @Test
+    public void testComputeImeParent_updateParentWhenTargetNotUseIme() throws Exception {
+        WindowState overlay = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlay");
+        overlay.setBounds(100, 100, 200, 200);
+        overlay.mAttrs.flags = FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM;
+        WindowState app = createWindow(null, TYPE_BASE_APPLICATION, "app");
+        mDisplayContent.setImeLayeringTarget(overlay);
+        mDisplayContent.setImeInputTarget(app);
+        assertFalse(mDisplayContent.shouldImeAttachedToApp());
+        assertEquals(mDisplayContent.getImeContainer().getParentSurfaceControl(),
+                mDisplayContent.computeImeParent());
     }
 
     @Test
