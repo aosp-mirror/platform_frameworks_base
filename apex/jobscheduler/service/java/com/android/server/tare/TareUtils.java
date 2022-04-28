@@ -16,6 +16,8 @@
 
 package com.android.server.tare;
 
+import static android.app.tare.EconomyManager.CAKE_IN_ARC;
+
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.util.IndentingPrintWriter;
@@ -26,18 +28,12 @@ import java.text.SimpleDateFormat;
 import java.time.Clock;
 
 class TareUtils {
-    private static final long CAKE_IN_ARC = 1_000_000_000L;
-
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat sDumpDateFormat =
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     @VisibleForTesting
     static Clock sSystemClock = Clock.systemUTC();
-
-    static long arcToCake(int arcs) {
-        return arcs * CAKE_IN_ARC;
-    }
 
     static void dumpTime(IndentingPrintWriter pw, long time) {
         pw.print(sDumpDateFormat.format(time));
@@ -56,7 +52,7 @@ class TareUtils {
         if (cakes == 0) {
             return "0 ARCs";
         }
-        final long sub = Math.abs(cakes) % CAKE_IN_ARC;
+        final long sub = cakes % CAKE_IN_ARC;
         final long arcs = cakeToArc(cakes);
         if (arcs == 0) {
             return sub == 1
@@ -65,11 +61,11 @@ class TareUtils {
         }
         StringBuilder sb = new StringBuilder();
         sb.append(arcs);
-        if (sub > 0) {
-            sb.append(".").append(sub / (CAKE_IN_ARC / 1000));
+        if (sub != 0) {
+            sb.append(".").append(String.format("%03d", Math.abs(sub) / (CAKE_IN_ARC / 1000)));
         }
         sb.append(" ARC");
-        if (arcs != 1 || sub > 0) {
+        if (arcs != 1 || sub != 0) {
             sb.append("s");
         }
         return sb.toString();

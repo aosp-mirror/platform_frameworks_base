@@ -18,16 +18,17 @@ The key tenets of TARE are:
 In an ideal world, the system could be said to most efficiently allocate resources by maximizing its
 profits &mdash; by maximizing the aggregate sum of the difference between an action's price (that
 the app ends up paying) and the cost to produce by the system. This assumes that more important
-actions have a higher price than less important actions. With this assumption, maximizing profits
-implies that the system runs the most important work first and proceeds in decreasing order of
-importance. Of course, that also means the system will not run anything where an app would pay less
-for the action than the system's cost to produce that action. Some of this breaks down when we throw
-TOP apps into the mix &mdash; TOP apps pay 0 for all actions, even though the CTP may be greater
-than 0. This is to ensure ideal user experience for the app the user is actively interacting with.
-Similar caveats exist for system-critical processes (such as the OS itself) and apps running
-foreground services (since those could be critical to user experience, as is the case for media and
-navigation apps). Excluding those caveats/special situations, maximizing profits of actions
-performed by apps in the background should be the target.
+actions have a higher price than less important actions and all actors have perfect information and
+convey that information accurately. With these assumptions, maximizing profits implies that the
+system runs the most important work first and proceeds in decreasing order of importance. Of course,
+that also means the system will not run anything where an app would pay less for the action than the
+system's cost to produce that action. Some of this breaks down when we throw TOP apps into the mix
+&mdash; TOP apps pay 0 for all actions, even though the CTP may be greater than 0. This is to ensure
+ideal user experience for the app the user is actively interacting with. Similar caveats exist for
+system-critical processes (such as the OS itself) and apps running foreground services (since those
+could be critical to user experience, as is the case for media and navigation apps). Excluding those
+caveats/special situations, maximizing profits of actions performed by apps in the background should
+be the target.
 
 To achieve the goal laid out by TARE, we use Android Resource Credits (ARCs for short) as the
 internal/representative currency of the system.
@@ -101,11 +102,37 @@ Tare Improvement Proposal #1 (TIP1) separated allocation (to apps) from supply (
 allowed apps to accrue credits as appropriate while still limiting the total number of credits
 consumed.
 
+# Potential Future Changes
+
+These are some ideas for further changes. There's no guarantee that they'll be implemented.
+
+* Include additional components and policies for them. TARE may benefit from adding policies for
+  components such as broadcast dispatching, network traffic, location requests, and sensor usage.
+* Have a separate "account" for critical/special actions. In other words, have two accounts for each
+  app, where one acts like a special savings account and is only allowed to be used for special
+  actions such as expedited job execution. The second account would have a lower maximum than the
+  main account, but would help to make sure that normal actions don't interfere too much with more
+  critical actions.
+* Transferring credits from one app to another. For apps that rely on others for some pieces of
+  work, it may be beneficial to allow the requesting app to transfer, donate, or somehow make
+  available some of its own credits to the app doing the work in order to make sure the working app
+  has enough credits available to do the work.
+* Formulate values based on device hardware. For example, adjust the consumption limit based on the
+  battery size, or the price and/or CTP of actions based on hardware efficiency.
+* Price discovery via an auction system. Instead of just setting a fixed price that may be modified
+  by device and app states, let an app say how much it's willing to pay for a specific action and
+  then have a small auction when the system needs to decide which app to perform the action for
+  first or how much to charge the app.
+
 # Definitions
 
 * ARC: Android Resource Credits are the "currency" units used as an abstraction layer over the real
   battery drain. They allow the system to standardize costs and prices across various devices.
 * Cake: A lie; also the smallest unit of an ARC (1 cake = one-billionth of an ARC = 1 nano-ARC).
   When the apps request to do something, we shall let them eat cake.
-* NARC: The smallest unit of an ARC. A narc is 1 nano-ARC.
+* Cost to produce (CTP): An economic term that refers to the total cost incurred by a business to
+  produce a specific quantity of a product or offer a service. In TARE's context, CTP is meant to be
+  the estimated cost t ohe system to accomplish a certain action. These "actions" are basically APIs
+  that apps use to get something done. So the idea is to define the base cost for an app to use a
+  specific API.
 * Satiated: used to refer to when the device is fully charged (at 100% battery level)
