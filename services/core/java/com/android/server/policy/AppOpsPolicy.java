@@ -33,6 +33,7 @@ import android.content.pm.ResolveInfo;
 import android.location.LocationManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PackageTagsList;
 import android.os.Process;
@@ -54,6 +55,7 @@ import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
 import com.android.server.LocalServices;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -185,8 +187,12 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
         initializeActivityRecognizersTags();
 
-        // If this device does not have telephony, restrict the phone call ops
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+        // Restrict phone call ops if the TelecomService will not start (conditioned on having
+        // FEATURE_MICROPHONE, FEATURE_TELECOM, or FEATURE_TELEPHONY).
+        PackageManager pm = mContext.getPackageManager();
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+                && !pm.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)
+                && !pm.hasSystemFeature(PackageManager.FEATURE_TELECOM)) {
             AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
             appOps.setUserRestrictionForUser(AppOpsManager.OP_PHONE_CALL_MICROPHONE, true, mToken,
                     null, UserHandle.USER_ALL);
@@ -282,6 +288,33 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
                 attributionSource, skipProxyOperation);
     }
 
+    /**
+     * Write location and activity recognition tags to console.
+     * See also {@code adb shell dumpsys appops}.
+     */
+    public void dumpTags(PrintWriter writer) {
+        if (!mLocationTags.isEmpty()) {
+            writer.println("  AppOps policy location tags:");
+            writeTags(mLocationTags, writer);
+            writer.println();
+        }
+        if (!mActivityRecognitionTags.isEmpty()) {
+            writer.println("  AppOps policy activity recognition tags:");
+            writeTags(mActivityRecognitionTags, writer);
+            writer.println();
+        }
+    }
+
+    private void writeTags(Map<Integer, PackageTagsList> tags, PrintWriter writer) {
+        int counter = 0;
+        for (Map.Entry<Integer, PackageTagsList> tagEntry : tags.entrySet()) {
+            writer.print("    #"); writer.print(counter++); writer.print(": ");
+            writer.print(tagEntry.getKey().toString()); writer.print("=");
+            tagEntry.getValue().dump(writer);
+        }
+    }
+
+
     private int resolveDatasourceOp(int code, int uid, @NonNull String packageName,
             @Nullable String attributionTag) {
         code = resolveRecordAudioOp(code, uid);
@@ -342,8 +375,11 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
                     + Intent.ACTION_ACTIVITY_RECOGNIZER +  ", ignoring!");
             return;
         }
-        final String tagsList = resolvedService.serviceInfo.metaData.getString(
-                ACTIVITY_RECOGNITION_TAGS);
+        final Bundle metaData = resolvedService.serviceInfo.metaData;
+        if (metaData == null) {
+            return;
+        }
+        final String tagsList = metaData.getString(ACTIVITY_RECOGNITION_TAGS);
         if (!TextUtils.isEmpty(tagsList)) {
             PackageTagsList packageTagsList = new PackageTagsList.Builder(1).add(
                     resolvedService.serviceInfo.packageName,

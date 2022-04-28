@@ -28,17 +28,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIWindowManagerAbstract;
+import com.android.wm.shell.transition.Transitions;
 
 /**
  * Window manager for the Letterbox Education.
  */
-// TODO(b/215316431): Add tests
 public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     /**
@@ -49,9 +51,10 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     /**
      * The name of the {@link SharedPreferences} that holds which user has seen the Letterbox
-     * Education for specific packages and which user has seen the full dialog for any package.
+     * Education dialog.
      */
-    private static final String HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME =
+    @VisibleForTesting
+    static final String HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME =
             "has_seen_letterbox_education";
 
     /**
@@ -61,23 +64,53 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     private final LetterboxEduAnimationController mAnimationController;
 
+    private final Transitions mTransitions;
+
+    /**
+     * The id of the current user, to associate with a boolean in {@link
+     * #HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME}, indicating whether that user has already seen the
+     * Letterbox Education dialog.
+     */
+    private final int mUserId;
+
     // Remember the last reported state in case visibility changes due to keyguard or IME updates.
     private boolean mEligibleForLetterboxEducation;
 
     @Nullable
-    private LetterboxEduDialogLayout mLayout;
+    @VisibleForTesting
+    LetterboxEduDialogLayout mLayout;
 
     private final Runnable mOnDismissCallback;
 
+    /**
+     * The vertical margin between the dialog container and the task stable bounds (excluding
+     * insets).
+     */
+    private final int mDialogVerticalMargin;
+
     public LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
-            DisplayLayout displayLayout, Runnable onDismissCallback) {
+            DisplayLayout displayLayout, Transitions transitions,
+            Runnable onDismissCallback) {
+        this(context, taskInfo, syncQueue, taskListener, displayLayout, transitions,
+                onDismissCallback, new LetterboxEduAnimationController(context));
+    }
+
+    @VisibleForTesting
+    LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
+            SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
+            DisplayLayout displayLayout, Transitions transitions, Runnable onDismissCallback,
+            LetterboxEduAnimationController animationController) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
+        mTransitions = transitions;
         mOnDismissCallback = onDismissCallback;
+        mAnimationController = animationController;
+        mUserId = taskInfo.userId;
         mEligibleForLetterboxEducation = taskInfo.topActivityEligibleForLetterboxEducation;
-        mAnimationController = new LetterboxEduAnimationController(context);
         mSharedPreferences = mContext.getSharedPreferences(HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME,
                 Context.MODE_PRIVATE);
+        mDialogVerticalMargin = (int) mContext.getResources().getDimension(
+                R.dimen.letterbox_education_dialog_margin);
     }
 
     @Override
@@ -108,12 +141,11 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected View createLayout() {
-        setSeenLetterboxEducation();
         mLayout = inflateLayout();
         updateDialogMargins();
 
-        mAnimationController.startEnterAnimation(mLayout, /* endCallback= */
-                this::setDismissOnClickListener);
+        // startEnterAnimation will be called immediately if shell-transitions are disabled.
+        mTransitions.runOnIdle(this::startEnterAnimation);
 
         return mLayout;
     }
@@ -124,13 +156,12 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         }
         final View dialogContainer = mLayout.getDialogContainer();
         MarginLayoutParams marginParams = (MarginLayoutParams) dialogContainer.getLayoutParams();
-        int verticalMargin = (int) mContext.getResources().getDimension(
-                R.dimen.letterbox_education_dialog_margin);
 
         final Rect taskBounds = getTaskBounds();
         final Rect taskStableBounds = getTaskStableBounds();
-        marginParams.topMargin = taskStableBounds.top - taskBounds.top + verticalMargin;
-        marginParams.bottomMargin = taskBounds.bottom - taskStableBounds.bottom + verticalMargin;
+        marginParams.topMargin = taskStableBounds.top - taskBounds.top + mDialogVerticalMargin;
+        marginParams.bottomMargin =
+                taskBounds.bottom - taskStableBounds.bottom + mDialogVerticalMargin;
         dialogContainer.setLayoutParams(marginParams);
     }
 
@@ -139,14 +170,31 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
                 R.layout.letterbox_education_dialog_layout, null);
     }
 
-    private void setDismissOnClickListener() {
+    private void startEnterAnimation() {
         if (mLayout == null) {
+            // Dialog has already been released.
             return;
         }
+        mAnimationController.startEnterAnimation(mLayout, /* endCallback= */
+                this::onDialogEnterAnimationEnded);
+    }
+
+    private void onDialogEnterAnimationEnded() {
+        if (mLayout == null) {
+            // Dialog has already been released.
+            return;
+        }
+        setSeenLetterboxEducation();
         mLayout.setDismissOnClickListener(this::onDismiss);
+        // Focus on the dialog title for accessibility.
+        mLayout.getDialogTitle().sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
     }
 
     private void onDismiss() {
+        if (mLayout == null) {
+            return;
+        }
+        mLayout.setDismissOnClickListener(null);
         mAnimationController.startExitAnimation(mLayout, () -> {
             release();
             mOnDismissCallback.run();
@@ -201,10 +249,11 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     }
 
     private String getPrefKey() {
-        return String.valueOf(mContext.getUserId());
+        return String.valueOf(mUserId);
     }
 
-    private boolean isTaskbarEduShowing() {
+    @VisibleForTesting
+    boolean isTaskbarEduShowing() {
         return Settings.Secure.getInt(mContext.getContentResolver(),
                 LAUNCHER_TASKBAR_EDUCATION_SHOWING, /* def= */ 0) == 1;
     }

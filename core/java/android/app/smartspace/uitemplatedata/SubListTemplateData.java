@@ -59,21 +59,18 @@ public final class SubListTemplateData extends BaseTemplateData {
     }
 
     private SubListTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable Text titleText,
-            @Nullable Icon titleIcon,
-            @Nullable Text subtitleText,
-            @Nullable Icon subTitleIcon,
-            @Nullable TapAction primaryTapAction,
-            @Nullable Text supplementalSubtitleText,
-            @Nullable Icon supplementalSubtitleIcon,
-            @Nullable TapAction supplementalSubtitleTapAction,
-            @Nullable Text supplementalAlarmText,
+            @Nullable SubItemInfo primaryItem,
+            @Nullable SubItemInfo subtitleItem,
+            @Nullable SubItemInfo subtitleSupplementalItem,
+            @Nullable SubItemInfo supplementalLineItem,
+            @Nullable SubItemInfo supplementalAlarmItem,
+            int layoutWeight,
             @Nullable Icon subListIcon,
             @NonNull List<Text> subListTexts,
             @Nullable TapAction subListAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
-                supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
-                supplementalAlarmText);
+        super(templateType, primaryItem, subtitleItem, subtitleSupplementalItem,
+                supplementalLineItem, supplementalAlarmItem, layoutWeight);
+
         mSubListIcon = subListIcon;
         mSubListTexts = subListTexts;
         mSubListAction = subListAction;
@@ -195,10 +192,10 @@ public final class SubListTemplateData extends BaseTemplateData {
          */
         @NonNull
         public SubListTemplateData build() {
-            return new SubListTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
-                    getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalAlarmText(), mSubListIcon,
+            return new SubListTemplateData(getTemplateType(), getPrimaryItem(),
+                    getSubtitleItem(), getSubtitleSupplemtnalItem(),
+                    getSupplementalLineItem(), getSupplementalAlarmItem(), getLayoutWeight(),
+                    mSubListIcon,
                     mSubListTexts,
                     mSubListAction);
         }

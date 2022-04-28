@@ -468,7 +468,7 @@ public class NotificationLogger implements StateListener {
     }
 
     /**
-     * Called by StatusBar to notify the logger that the panel expansion has changed.
+     * Called by CentralSurfaces to notify the logger that the panel expansion has changed.
      * The panel may be showing any of the normal notification panel, the AOD, or the bouncer.
      * @param isExpanded True if the panel is expanded.
      */

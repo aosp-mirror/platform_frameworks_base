@@ -199,7 +199,7 @@ public class TaskOrganizer extends WindowOrganizer {
         }
     }
 
-    /** Get the root task which contains the current ime target */
+    /** Get the {@link WindowContainerToken} of the task which contains the current ime target */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
     public WindowContainerToken getImeTarget(int display) {
@@ -247,6 +247,24 @@ public class TaskOrganizer extends WindowOrganizer {
             @CameraCompatControlState int state) {
         try {
             mTaskOrganizerController.updateCameraCompatControlState(task, state);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Controls whether ignore orientation request logic in {@link
+     * com.android.server.wm.DisplayArea} is disabled at runtime.
+     *
+     * @param isDisabled when {@code true}, the system always ignores the value of {@link
+     *                   com.android.server.wm.DisplayArea#getIgnoreOrientationRequest} and app
+     *                   requested orientation is respected.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void setIsIgnoreOrientationRequestDisabled(boolean isDisabled) {
+        try {
+            mTaskOrganizerController.setIsIgnoreOrientationRequestDisabled(isDisabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

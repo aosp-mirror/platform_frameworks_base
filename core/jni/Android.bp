@@ -272,6 +272,7 @@ cc_library_shared {
                 "libinput",
                 "libcamera_client",
                 "libcamera_metadata",
+                "libprocinfo",
                 "libsqlite",
                 "libEGL",
                 "libGLESv1_CM",
@@ -361,7 +362,7 @@ cc_library_shared {
                 "libwuffs_mirror_release_c",
             ],
         },
-        linux_glibc: {
+        host_linux: {
             srcs: [
                 "android_content_res_ApkAssets.cpp",
                 "android_database_CursorWindow.cpp",

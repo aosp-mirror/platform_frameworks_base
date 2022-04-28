@@ -18,12 +18,13 @@ package com.android.server.app;
 
 import android.annotation.NonNull;
 
+import com.android.server.app.GameServiceConfiguration.GameServiceComponentConfiguration;
+
 /**
  * Factory for creating {@link GameServiceProviderInstance}.
  */
 interface GameServiceProviderInstanceFactory {
 
     @NonNull
-    GameServiceProviderInstance create(@NonNull
-            GameServiceProviderConfiguration gameServiceProviderConfiguration);
+    GameServiceProviderInstance create(@NonNull GameServiceComponentConfiguration configuration);
 }

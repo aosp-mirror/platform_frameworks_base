@@ -26,16 +26,20 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.SystemClock;
+import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.am.AppBatteryExemptionTracker.AppBatteryExemptionPolicy;
 import com.android.server.am.AppBatteryExemptionTracker.UidBatteryStates;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
 import com.android.server.am.AppBatteryTracker.BatteryUsage;
 import com.android.server.am.AppBatteryTracker.ImmutableBatteryUsage;
+import com.android.server.am.AppRestrictionController.TrackerType;
 import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
 import com.android.server.am.BaseAppStateTracker.Injector;
 import com.android.server.am.BaseAppStateTracker.StateListener;
@@ -65,6 +69,11 @@ final class AppBatteryExemptionTracker
     // As it's a UID-based tracker, anywhere which requires a package name, use this default name.
     static final String DEFAULT_NAME = "";
 
+    // As it's a UID-based tracker, while the state change event it receives could be
+    // in the combination of UID + package name, we'd have to leverage each package's state.
+    @GuardedBy("mLock")
+    private UidProcessMap<Integer> mUidPackageStates = new UidProcessMap<>();
+
     AppBatteryExemptionTracker(Context context, AppRestrictionController controller) {
         this(context, controller, null, null);
     }
@@ -74,6 +83,11 @@ final class AppBatteryExemptionTracker
             Object outerContext) {
         super(context, controller, injector, outerContext);
         mInjector.setPolicy(new AppBatteryExemptionPolicy(mInjector, this));
+    }
+
+    @Override
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_BATTERY_EXEMPTION;
     }
 
     @Override
@@ -103,12 +117,75 @@ final class AppBatteryExemptionTracker
                 .getUidBatteryUsage(uid);
         final int stateTypeIndex = stateTypeToIndex(stateType);
         synchronized (mLock) {
-            UidBatteryStates pkg = mPkgEvents.get(uid, DEFAULT_NAME);
-            if (pkg == null) {
-                pkg = createAppStateEvents(uid, DEFAULT_NAME);
-                mPkgEvents.put(uid, DEFAULT_NAME, pkg);
+            final SparseArray<ArrayMap<String, Integer>> map = mUidPackageStates.getMap();
+            ArrayMap<String, Integer> pkgsStates = map.get(uid);
+            if (pkgsStates == null) {
+                pkgsStates = new ArrayMap<>();
+                map.put(uid, pkgsStates);
             }
-            pkg.addEvent(start, now, batteryUsage, stateTypeIndex);
+            int states = 0;
+            int indexOfPkg = pkgsStates.indexOfKey(packageName);
+            if (indexOfPkg >= 0) {
+                states = pkgsStates.valueAt(indexOfPkg);
+            } else {
+                pkgsStates.put(packageName, 0);
+                indexOfPkg = pkgsStates.indexOfKey(packageName);
+            }
+            boolean addEvent = false;
+            if (start) {
+                // Check if there is another package within this UID with this type of event start.
+                boolean alreadyStarted = false;
+                for (int i = pkgsStates.size() - 1; i >= 0; i--) {
+                    final int s = pkgsStates.valueAt(i);
+                    if ((s & stateType) != 0) {
+                        alreadyStarted = true;
+                        break;
+                    }
+                }
+                pkgsStates.setValueAt(indexOfPkg, states | stateType);
+                if (!alreadyStarted) {
+                    // This is the first package within this UID with this type of event start.
+                    addEvent = true;
+                }
+            } else {
+                states &= ~stateType;
+                pkgsStates.setValueAt(indexOfPkg, states);
+                boolean allStopped = true;
+                for (int i = pkgsStates.size() - 1; i >= 0; i--) {
+                    final int s = pkgsStates.valueAt(i);
+                    if ((s & stateType) != 0) {
+                        allStopped = false;
+                        break;
+                    }
+                }
+                if (allStopped) {
+                    // None of the packages in this UID has an active event of this type.
+                    addEvent = true;
+                }
+                if (states == 0) { // None of the states of this package are active, prune it.
+                    pkgsStates.removeAt(indexOfPkg);
+                    if (pkgsStates.size() == 0) {
+                        map.remove(uid);
+                    }
+                }
+            }
+            if (addEvent) {
+                UidBatteryStates pkg = mPkgEvents.get(uid, DEFAULT_NAME);
+                if (pkg == null) {
+                    pkg = createAppStateEvents(uid, DEFAULT_NAME);
+                    mPkgEvents.put(uid, DEFAULT_NAME, pkg);
+                }
+                pkg.addEvent(start, now, batteryUsage, stateTypeIndex);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    @Override
+    void reset() {
+        super.reset();
+        synchronized (mLock) {
+            mUidPackageStates.clear();
         }
     }
 
@@ -116,6 +193,7 @@ final class AppBatteryExemptionTracker
         if (!enabled) {
             synchronized (mLock) {
                 mPkgEvents.clear();
+                mUidPackageStates.clear();
             }
         }
     }

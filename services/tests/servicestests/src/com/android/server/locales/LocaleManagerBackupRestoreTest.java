@@ -22,7 +22,6 @@ import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -39,9 +38,10 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.HandlerThread;
 import android.os.LocaleList;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SimpleClock;
 import android.util.SparseArray;
@@ -78,6 +78,7 @@ import java.util.Map;
  */
 @RunWith(AndroidJUnit4.class)
 public class LocaleManagerBackupRestoreTest {
+    private static final String TAG = "LocaleManagerBackupRestoreTest";
     private static final String DEFAULT_PACKAGE_NAME = "com.android.myapp";
     private static final String DEFAULT_LOCALE_TAGS = "en-XC,ar-XB";
     private static final String TEST_LOCALES_XML_TAG = "locales";
@@ -99,11 +100,10 @@ public class LocaleManagerBackupRestoreTest {
     @Mock
     private Context mMockContext;
     @Mock
-    private PackageManagerInternal mMockPackageManagerInternal;
-    @Mock
     private PackageManager mMockPackageManager;
     @Mock
     private LocaleManagerService mMockLocaleManagerService;
+
     BroadcastReceiver mUserMonitor;
     PackageMonitor mPackageMonitor;
 
@@ -125,18 +125,24 @@ public class LocaleManagerBackupRestoreTest {
     @Before
     public void setUp() throws Exception {
         mMockContext = mock(Context.class);
-        mMockPackageManagerInternal = mock(PackageManagerInternal.class);
         mMockPackageManager = mock(PackageManager.class);
         mMockLocaleManagerService = mock(LocaleManagerService.class);
+        SystemAppUpdateTracker systemAppUpdateTracker = mock(SystemAppUpdateTracker.class);
 
         doReturn(mMockPackageManager).when(mMockContext).getPackageManager();
 
+        HandlerThread broadcastHandlerThread = new HandlerThread(TAG,
+                Process.THREAD_PRIORITY_BACKGROUND);
+        broadcastHandlerThread.start();
+
         mBackupHelper = spy(new ShadowLocaleManagerBackupHelper(mMockContext,
-                mMockLocaleManagerService, mMockPackageManagerInternal, mClock, STAGE_DATA));
+                mMockLocaleManagerService, mMockPackageManager, mClock, STAGE_DATA,
+                broadcastHandlerThread));
         doNothing().when(mBackupHelper).notifyBackupManager();
 
         mUserMonitor = mBackupHelper.getUserMonitor();
-        mPackageMonitor = mBackupHelper.getPackageMonitor();
+        mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper,
+            systemAppUpdateTracker);
         setCurrentTimeMillis(DEFAULT_CREATION_TIME_MILLIS);
     }
 
@@ -147,8 +153,8 @@ public class LocaleManagerBackupRestoreTest {
 
     @Test
     public void testBackupPayload_noAppsInstalled_returnsNull() throws Exception {
-        doReturn(List.of()).when(mMockPackageManagerInternal)
-                .getInstalledApplications(anyLong(), anyInt(), anyInt());
+        doReturn(List.of()).when(mMockPackageManager)
+                .getInstalledApplicationsAsUser(any(), anyInt());
 
         assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
     }
@@ -187,8 +193,8 @@ public class LocaleManagerBackupRestoreTest {
         ApplicationInfo anotherAppInfo = new ApplicationInfo();
         defaultAppInfo.packageName = DEFAULT_PACKAGE_NAME;
         anotherAppInfo.packageName = "com.android.anotherapp";
-        doReturn(List.of(defaultAppInfo, anotherAppInfo)).when(mMockPackageManagerInternal)
-                .getInstalledApplications(anyLong(), anyInt(), anyInt());
+        doReturn(List.of(defaultAppInfo, anotherAppInfo)).when(mMockPackageManager)
+                .getInstalledApplicationsAsUser(any(), anyInt());
 
         setUpLocalesForPackage(DEFAULT_PACKAGE_NAME, DEFAULT_LOCALES);
         // Exception when getting locales for anotherApp.
@@ -436,8 +442,8 @@ public class LocaleManagerBackupRestoreTest {
         // Retention period has not elapsed.
         setCurrentTimeMillis(
                 DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.minusHours(1).toMillis());
-        doReturn(List.of()).when(mMockPackageManagerInternal)
-                .getInstalledApplications(anyLong(), anyInt(), anyInt());
+        doReturn(List.of()).when(mMockPackageManager)
+                .getInstalledApplicationsAsUser(any(), anyInt());
         assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
 
         checkStageDataExists(DEFAULT_USER_ID);
@@ -445,8 +451,8 @@ public class LocaleManagerBackupRestoreTest {
         // Exactly RETENTION_PERIOD amount of time has passed so stage data should still not be
         // removed.
         setCurrentTimeMillis(DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.toMillis());
-        doReturn(List.of()).when(mMockPackageManagerInternal)
-                .getInstalledApplications(anyLong(), anyInt(), anyInt());
+        doReturn(List.of()).when(mMockPackageManager)
+                .getInstalledApplicationsAsUser(any(), anyInt());
         assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
 
         checkStageDataExists(DEFAULT_USER_ID);
@@ -454,8 +460,8 @@ public class LocaleManagerBackupRestoreTest {
         // Retention period has now expired, stage data should be deleted.
         setCurrentTimeMillis(
                 DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.plusSeconds(1).toMillis());
-        doReturn(List.of()).when(mMockPackageManagerInternal)
-                .getInstalledApplications(anyLong(), anyInt(), anyInt());
+        doReturn(List.of()).when(mMockPackageManager)
+                .getInstalledApplicationsAsUser(any(), anyInt());
         assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
 
         checkStageDataDoesNotExist(DEFAULT_USER_ID);
@@ -566,8 +572,8 @@ public class LocaleManagerBackupRestoreTest {
     private void setUpDummyAppForPackageManager(String packageName) {
         ApplicationInfo dummyApp = new ApplicationInfo();
         dummyApp.packageName = packageName;
-        doReturn(List.of(dummyApp)).when(mMockPackageManagerInternal)
-                .getInstalledApplications(anyLong(), anyInt(), anyInt());
+        doReturn(List.of(dummyApp)).when(mMockPackageManager)
+                .getInstalledApplicationsAsUser(any(), anyInt());
     }
 
     /**

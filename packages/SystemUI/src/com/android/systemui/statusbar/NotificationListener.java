@@ -32,10 +32,10 @@ import android.util.Log;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.time.SystemClock;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ import javax.inject.Inject;
 @SuppressLint("OverrideAbstract")
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
-    private static final boolean DEBUG = StatusBar.DEBUG;
+    private static final boolean DEBUG = CentralSurfaces.DEBUG;
     private static final long MAX_RANKING_DELAY_MILLIS = 500L;
 
     private final Context mContext;
@@ -69,7 +69,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     private long mSkippingRankingUpdatesSince = -1;
 
     /**
-     * Injected constructor. See {@link StatusBarModule}.
+     * Injected constructor. See {@link CentralSurfacesModule}.
      */
     @Inject
     public NotificationListener(

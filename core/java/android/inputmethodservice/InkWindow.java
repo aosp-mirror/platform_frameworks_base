@@ -27,6 +27,8 @@ import android.content.Context;
 import android.os.IBinder;
 import android.util.Slog;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
 import com.android.internal.policy.PhoneWindow;
@@ -40,6 +42,9 @@ final class InkWindow extends PhoneWindow {
 
     private final WindowManager mWindowManager;
     private boolean mIsViewAdded;
+    private View mInkView;
+    private InkVisibilityListener mInkViewVisibilityListener;
+    private ViewTreeObserver.OnGlobalLayoutListener mGlobalLayoutListener;
 
     public InkWindow(@NonNull Context context) {
         super(context);
@@ -101,5 +106,78 @@ final class InkWindow extends PhoneWindow {
         WindowManager.LayoutParams lp = getAttributes();
         lp.token = token;
         setAttributes(lp);
+    }
+
+    @Override
+    public void addContentView(View view, ViewGroup.LayoutParams params) {
+        if (mInkView == null) {
+            mInkView = view;
+        } else if (mInkView != view) {
+            throw new IllegalStateException("Only one Child Inking view is permitted.");
+        }
+        super.addContentView(view, params);
+        initInkViewVisibilityListener();
+    }
+
+    @Override
+    public void setContentView(View view, ViewGroup.LayoutParams params) {
+        mInkView = view;
+        super.setContentView(view, params);
+        initInkViewVisibilityListener();
+    }
+
+    @Override
+    public void setContentView(View view) {
+        mInkView = view;
+        super.setContentView(view);
+        initInkViewVisibilityListener();
+    }
+
+    @Override
+    public void clearContentView() {
+        if (mGlobalLayoutListener != null && mInkView != null) {
+            mInkView.getViewTreeObserver().removeOnGlobalLayoutListener(mGlobalLayoutListener);
+        }
+        mGlobalLayoutListener = null;
+        mInkView = null;
+        super.clearContentView();
+    }
+
+    /**
+    * Listener used by InkWindow to time the dispatching of {@link MotionEvent}s to Ink view, once
+    * it is visible to user.
+    */
+    interface InkVisibilityListener {
+        void onInkViewVisible();
+    }
+
+    void setInkViewVisibilityListener(InkVisibilityListener listener) {
+        mInkViewVisibilityListener = listener;
+        initInkViewVisibilityListener();
+    }
+
+    void initInkViewVisibilityListener() {
+        if (mInkView == null || mInkViewVisibilityListener == null
+                || mGlobalLayoutListener != null) {
+            return;
+        }
+        mGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (mInkView.isVisibleToUser()) {
+                    if (mInkViewVisibilityListener != null) {
+                        mInkViewVisibilityListener.onInkViewVisible();
+                    }
+                    mInkView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    mGlobalLayoutListener = null;
+                }
+            }
+        };
+        mInkView.getViewTreeObserver().addOnGlobalLayoutListener(mGlobalLayoutListener);
+    }
+
+    boolean isInkViewVisible() {
+        return getDecorView().getVisibility() == View.VISIBLE
+                && mInkView != null && mInkView.isVisibleToUser();
     }
 }

@@ -29,18 +29,28 @@ import com.android.wm.shell.R;
 /**
  * Custom layout for Letterbox Education dialog action.
  */
-// TODO(b/215316431): Add tests
 class LetterboxEduDialogActionLayout extends FrameLayout {
 
-    LetterboxEduDialogActionLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    public LetterboxEduDialogActionLayout(Context context) {
+        this(context, null);
+    }
+
+    public LetterboxEduDialogActionLayout(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public LetterboxEduDialogActionLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public LetterboxEduDialogActionLayout(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         TypedArray styledAttributes =
                 context.getTheme().obtainStyledAttributes(
-                        attrs,
-                        R.styleable.LetterboxEduDialogActionLayout,
-                        /* defStyleAttr= */ 0,
-                        /* defStyleRes= */ 0);
+                        attrs, R.styleable.LetterboxEduDialogActionLayout, defStyleAttr,
+                        defStyleRes);
         int iconId = styledAttributes.getResourceId(
                 R.styleable.LetterboxEduDialogActionLayout_icon, 0);
         String text = styledAttributes.getString(

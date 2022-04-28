@@ -49,7 +49,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
     private val shouldDrawCutout: Boolean = DisplayCutout.getFillBuiltInDisplayCutout(
             context.resources, context.display?.uniqueId)
     private var displayMode: Display.Mode? = null
-    private val location = IntArray(2)
+    protected val location = IntArray(2)
     protected var displayRotation = 0
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
@@ -65,7 +65,8 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
     @JvmField val protectionPath: Path = Path()
     private val protectionRectOrig: RectF = RectF()
     private val protectionPathOrig: Path = Path()
-    private var cameraProtectionProgress: Float = HIDDEN_CAMERA_PROTECTION_SCALE
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    var cameraProtectionProgress: Float = HIDDEN_CAMERA_PROTECTION_SCALE
     private var cameraProtectionAnimator: ValueAnimator? = null
 
     constructor(context: Context) : super(context)
@@ -78,6 +79,8 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         updateCutout()
+        updateProtectionBoundingPath()
+        onUpdate()
     }
 
     fun onDisplayChanged(displayId: Int) {
@@ -92,6 +95,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
         if (displayId == display.displayId) {
             updateCutout()
             updateProtectionBoundingPath()
+            onUpdate()
         }
     }
 
@@ -99,7 +103,12 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
         displayRotation = rotation
         updateCutout()
         updateProtectionBoundingPath()
+        onUpdate()
     }
+
+    // Called after the cutout and protection bounding path change. Subclasses
+    // should make any changes that need to happen based on the change.
+    open fun onUpdate() = Unit
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onDraw(canvas: Canvas) {

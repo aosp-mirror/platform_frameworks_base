@@ -19,6 +19,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.pm.PackageManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -225,6 +226,9 @@ public class UiccSlotInfo implements Parcelable {
     /**
      * Get Information regarding port, iccid and its active status.
      *
+     * For device which support {@link PackageManager#FEATURE_TELEPHONY_EUICC_MEP}, it should return
+     * more than one {@link UiccPortInfo} object if the card is eUICC.
+     *
      * @return Collection of {@link UiccPortInfo}
      */
     public @NonNull Collection<UiccPortInfo> getPorts() {
@@ -275,7 +279,7 @@ public class UiccSlotInfo implements Parcelable {
                 + ", mIsEuicc="
                 + mIsEuicc
                 + ", mCardId="
-                + mCardId
+                + SubscriptionInfo.givePrintableIccid(mCardId)
                 + ", cardState="
                 + mCardStateInfo
                 + ", mIsExtendedApduSupported="

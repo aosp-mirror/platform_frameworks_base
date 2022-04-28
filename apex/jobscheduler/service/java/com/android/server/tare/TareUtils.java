@@ -16,6 +16,8 @@
 
 package com.android.server.tare;
 
+import static android.app.tare.EconomyManager.CAKE_IN_ARC;
+
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.util.IndentingPrintWriter;
@@ -26,18 +28,12 @@ import java.text.SimpleDateFormat;
 import java.time.Clock;
 
 class TareUtils {
-    private static final long NARC_IN_ARC = 1_000_000_000L;
-
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat sDumpDateFormat =
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     @VisibleForTesting
     static Clock sSystemClock = Clock.systemUTC();
-
-    static long arcToNarc(int arcs) {
-        return arcs * NARC_IN_ARC;
-    }
 
     static void dumpTime(IndentingPrintWriter pw, long time) {
         pw.print(sDumpDateFormat.format(time));
@@ -47,29 +43,29 @@ class TareUtils {
         return sSystemClock.millis();
     }
 
-    static int narcToArc(long narcs) {
-        return (int) (narcs / NARC_IN_ARC);
+    static int cakeToArc(long cakes) {
+        return (int) (cakes / CAKE_IN_ARC);
     }
 
     @NonNull
-    static String narcToString(long narcs) {
-        if (narcs == 0) {
+    static String cakeToString(long cakes) {
+        if (cakes == 0) {
             return "0 ARCs";
         }
-        final long sub = Math.abs(narcs) % NARC_IN_ARC;
-        final long arcs = narcToArc(narcs);
+        final long sub = cakes % CAKE_IN_ARC;
+        final long arcs = cakeToArc(cakes);
         if (arcs == 0) {
             return sub == 1
-                    ? sub + " narc"
-                    : sub + " narcs";
+                    ? sub + " cake"
+                    : sub + " cakes";
         }
         StringBuilder sb = new StringBuilder();
         sb.append(arcs);
-        if (sub > 0) {
-            sb.append(".").append(sub / (NARC_IN_ARC / 1000));
+        if (sub != 0) {
+            sb.append(".").append(String.format("%03d", Math.abs(sub) / (CAKE_IN_ARC / 1000)));
         }
         sb.append(" ARC");
-        if (arcs != 1 || sub > 0) {
+        if (arcs != 1 || sub != 0) {
             sb.append("s");
         }
         return sb.toString();

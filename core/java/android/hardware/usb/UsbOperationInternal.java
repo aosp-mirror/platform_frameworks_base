@@ -15,6 +15,7 @@
  */
 package android.hardware.usb;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.hardware.usb.IUsbOperationInternal;
 import android.hardware.usb.UsbPort;
@@ -24,7 +25,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 /**
  * UsbOperationInternal allows UsbPort to support both synchronous and
  * asynchronous function irrespective of whether the underlying hal
@@ -39,6 +42,10 @@ public final class UsbOperationInternal extends IUsbOperationInternal.Stub {
     private final String mId;
     // True implies operation did not timeout.
     private boolean mOperationComplete;
+    private boolean mAsynchronous = false;
+    private Executor mExecutor;
+    private Consumer<Integer> mConsumer;
+    private int mResult = 0;
     private @UsbOperationStatus int mStatus;
     final ReentrantLock mLock = new ReentrantLock();
     final Condition mOperationWait  = mLock.newCondition();
@@ -78,6 +85,15 @@ public final class UsbOperationInternal extends IUsbOperationInternal.Stub {
     @Retention(RetentionPolicy.SOURCE)
     @interface UsbOperationStatus{}
 
+    UsbOperationInternal(int operationID, String id,
+        Executor executor, Consumer<Integer> consumer) {
+        this.mOperationID = operationID;
+        this.mId = id;
+        this.mExecutor = executor;
+        this.mConsumer = consumer;
+        this.mAsynchronous = true;
+    }
+
     UsbOperationInternal(int operationID, String id) {
         this.mOperationID = operationID;
         this.mId = id;
@@ -94,7 +110,27 @@ public final class UsbOperationInternal extends IUsbOperationInternal.Stub {
             mOperationComplete = true;
             mStatus = status;
             Log.i(TAG, "Port:" + mId + " opID:" + mOperationID + " status:" + mStatus);
-            mOperationWait.signal();
+            if (mAsynchronous) {
+                switch (mStatus) {
+                    case USB_OPERATION_SUCCESS:
+                        mResult = UsbPort.RESET_USB_PORT_SUCCESS;
+                        break;
+                    case USB_OPERATION_ERROR_INTERNAL:
+                        mResult = UsbPort.RESET_USB_PORT_ERROR_INTERNAL;
+                        break;
+                    case USB_OPERATION_ERROR_NOT_SUPPORTED:
+                        mResult = UsbPort.RESET_USB_PORT_ERROR_NOT_SUPPORTED;
+                        break;
+                    case USB_OPERATION_ERROR_PORT_MISMATCH:
+                        mResult = UsbPort.RESET_USB_PORT_ERROR_PORT_MISMATCH;
+                        break;
+                    default:
+                        mResult = UsbPort.RESET_USB_PORT_ERROR_OTHER;
+                }
+                mExecutor.execute(() -> mConsumer.accept(mResult));
+            } else {
+                mOperationWait.signal();
+            }
         } finally {
             mLock.unlock();
         }

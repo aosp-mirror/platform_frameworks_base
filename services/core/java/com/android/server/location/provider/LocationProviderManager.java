@@ -201,18 +201,54 @@ public class LocationProviderManager extends
         @Override
         public void deliverOnLocationChanged(LocationResult locationResult,
                 @Nullable IRemoteCallback onCompleteCallback) throws RemoteException {
-            mListener.onLocationChanged(locationResult.asList(), onCompleteCallback);
+            try {
+                mListener.onLocationChanged(locationResult.asList(), onCompleteCallback);
+            } catch (RuntimeException e) {
+                // the only way a runtime exception can be thrown here is if the client is in the
+                // system server process (so that the binder call is executed directly, rather than
+                // asynchronously in another process), and the client is using a direct executor (so
+                // any client exceptions bubble directly back to us). we move any exception onto
+                // another thread so that it can't cause further problems
+                RuntimeException wrapper = new RuntimeException(e);
+                FgThread.getExecutor().execute(() -> {
+                    throw wrapper;
+                });
+            }
         }
 
         @Override
         public void deliverOnFlushComplete(int requestCode) throws RemoteException {
-            mListener.onFlushComplete(requestCode);
+            try {
+                mListener.onFlushComplete(requestCode);
+            } catch (RuntimeException e) {
+                // the only way a runtime exception can be thrown here is if the client is in the
+                // system server process (so that the binder call is executed directly, rather than
+                // asynchronously in another process), and the client is using a direct executor (so
+                // any client exceptions bubble directly back to us). we move any exception onto
+                // another thread so that it can't cause further problems
+                RuntimeException wrapper = new RuntimeException(e);
+                FgThread.getExecutor().execute(() -> {
+                    throw wrapper;
+                });
+            }
         }
 
         @Override
         public void deliverOnProviderEnabledChanged(String provider, boolean enabled)
                 throws RemoteException {
-            mListener.onProviderEnabledChanged(provider, enabled);
+            try {
+                mListener.onProviderEnabledChanged(provider, enabled);
+            } catch (RuntimeException e) {
+                // the only way a runtime exception can be thrown here is if the client is in the
+                // system server process (so that the binder call is executed directly, rather than
+                // asynchronously in another process), and the client is using a direct executor (so
+                // any client exceptions bubble directly back to us). we move any exception onto
+                // another thread so that it can't cause further problems
+                RuntimeException wrapper = new RuntimeException(e);
+                FgThread.getExecutor().execute(() -> {
+                    throw wrapper;
+                });
+            }
         }
     }
 
@@ -294,10 +330,23 @@ public class LocationProviderManager extends
                 throws RemoteException {
             // ILocationCallback doesn't currently support completion callbacks
             Preconditions.checkState(onCompleteCallback == null);
-            if (locationResult != null) {
-                mCallback.onLocation(locationResult.getLastLocation());
-            } else {
-                mCallback.onLocation(null);
+
+            try {
+                if (locationResult != null) {
+                    mCallback.onLocation(locationResult.getLastLocation());
+                } else {
+                    mCallback.onLocation(null);
+                }
+            } catch (RuntimeException e) {
+                // the only way a runtime exception can be thrown here is if the client is in the
+                // system server process (so that the binder call is executed directly, rather than
+                // asynchronously in another process), and the client is using a direct executor (so
+                // any client exceptions bubble directly back to us). we move any exception onto
+                // another thread so that it can't cause further problems
+                RuntimeException wrapper = new RuntimeException(e);
+                FgThread.getExecutor().execute(() -> {
+                    throw wrapper;
+                });
             }
         }
 
@@ -649,6 +698,9 @@ public class LocationProviderManager extends
                     adasGnssBypass = false;
                 } else if (!mLocationSettings.getUserSettings(
                         getIdentity().getUserId()).isAdasGnssLocationEnabled()) {
+                    adasGnssBypass = false;
+                } else if (!mSettingsHelper.getAdasAllowlist().contains(
+                        getIdentity().getPackageName(), getIdentity().getAttributionTag())) {
                     adasGnssBypass = false;
                 }
 
@@ -1357,6 +1409,8 @@ public class LocationProviderManager extends
             this::onAppForegroundChanged;
     private final GlobalSettingChangedListener mBackgroundThrottleIntervalChangedListener =
             this::onBackgroundThrottleIntervalChanged;
+    private final GlobalSettingChangedListener mAdasPackageAllowlistChangedListener =
+            this::onAdasAllowlistChanged;
     private final GlobalSettingChangedListener mIgnoreSettingsPackageWhitelistChangedListener =
             this::onIgnoreSettingsWhitelistChanged;
     private final LocationPowerSaveModeChangedListener mLocationPowerSaveModeChangedListener =
@@ -1468,7 +1522,7 @@ public class LocationProviderManager extends
         return mProvider.getState();
     }
 
-    public @Nullable CallerIdentity getIdentity() {
+    public @Nullable CallerIdentity getProviderIdentity() {
         return mProvider.getState().identity;
     }
 
@@ -1607,6 +1661,8 @@ public class LocationProviderManager extends
 
     public @Nullable Location getLastLocation(LastLocationRequest request,
             CallerIdentity identity, @PermissionLevel int permissionLevel) {
+        request = calculateLastLocationRequest(request, identity);
+
         if (!isActive(request.isBypass(), identity)) {
             return null;
         }
@@ -1632,6 +1688,42 @@ public class LocationProviderManager extends
         }
 
         return location;
+    }
+
+    private LastLocationRequest calculateLastLocationRequest(LastLocationRequest baseRequest,
+            CallerIdentity identity) {
+        LastLocationRequest.Builder builder = new LastLocationRequest.Builder(baseRequest);
+
+        boolean locationSettingsIgnored = baseRequest.isLocationSettingsIgnored();
+        if (locationSettingsIgnored) {
+            // if we are not currently allowed use location settings ignored, disable it
+            if (!mSettingsHelper.getIgnoreSettingsAllowlist().contains(
+                    identity.getPackageName(), identity.getAttributionTag())
+                    && !mLocationManagerInternal.isProvider(null, identity)) {
+                locationSettingsIgnored = false;
+            }
+
+            builder.setLocationSettingsIgnored(locationSettingsIgnored);
+        }
+
+        boolean adasGnssBypass = baseRequest.isAdasGnssBypass();
+        if (adasGnssBypass) {
+            // if we are not currently allowed use adas gnss bypass, disable it
+            if (!GPS_PROVIDER.equals(mName)) {
+                Log.e(TAG, "adas gnss bypass request received in non-gps provider");
+                adasGnssBypass = false;
+            } else if (!mLocationSettings.getUserSettings(
+                    identity.getUserId()).isAdasGnssLocationEnabled()) {
+                adasGnssBypass = false;
+            } else if (!mSettingsHelper.getAdasAllowlist().contains(
+                    identity.getPackageName(), identity.getAttributionTag())) {
+                adasGnssBypass = false;
+            }
+
+            builder.setAdasGnssBypass(adasGnssBypass);
+        }
+
+        return builder.build();
     }
 
     /**
@@ -1895,6 +1987,8 @@ public class LocationProviderManager extends
                 mBackgroundThrottlePackageWhitelistChangedListener);
         mSettingsHelper.addOnLocationPackageBlacklistChangedListener(
                 mLocationPackageBlacklistChangedListener);
+        mSettingsHelper.addAdasAllowlistChangedListener(
+                mAdasPackageAllowlistChangedListener);
         mSettingsHelper.addIgnoreSettingsAllowlistChangedListener(
                 mIgnoreSettingsPackageWhitelistChangedListener);
         mLocationPermissionsHelper.addListener(mLocationPermissionsListener);
@@ -1916,6 +2010,7 @@ public class LocationProviderManager extends
                 mBackgroundThrottlePackageWhitelistChangedListener);
         mSettingsHelper.removeOnLocationPackageBlacklistChangedListener(
                 mLocationPackageBlacklistChangedListener);
+        mSettingsHelper.removeAdasAllowlistChangedListener(mAdasPackageAllowlistChangedListener);
         mSettingsHelper.removeIgnoreSettingsAllowlistChangedListener(
                 mIgnoreSettingsPackageWhitelistChangedListener);
         mLocationPermissionsHelper.removeListener(mLocationPermissionsListener);
@@ -2335,6 +2430,12 @@ public class LocationProviderManager extends
     private void onAppForegroundChanged(int uid, boolean foreground) {
         synchronized (mLock) {
             updateRegistrations(registration -> registration.onForegroundChanged(uid, foreground));
+        }
+    }
+
+    private void onAdasAllowlistChanged() {
+        synchronized (mLock) {
+            updateRegistrations(Registration::onProviderLocationRequestChanged);
         }
     }
 

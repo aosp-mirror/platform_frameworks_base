@@ -112,6 +112,43 @@ public abstract class VibrationEffectSegment implements Parcelable {
     @NonNull
     public abstract <T extends VibrationEffectSegment> T applyEffectStrength(int effectStrength);
 
+    /**
+     * Checks the given frequency argument is valid to represent a vibration effect frequency in
+     * hertz, i.e. a finite non-negative value.
+     *
+     * @param value the frequency argument value to be checked
+     * @param name the argument name for the error message.
+     *
+     * @hide
+     */
+    public static void checkFrequencyArgument(float value, @NonNull String name) {
+        // Similar to combining Preconditions checkArgumentFinite + checkArgumentNonnegative,
+        // but this implementation doesn't create the error message unless a check fail.
+        if (Float.isNaN(value)) {
+            throw new IllegalArgumentException(name + " must not be NaN");
+        }
+        if (Float.isInfinite(value)) {
+            throw new IllegalArgumentException(name + " must not be infinite");
+        }
+        if (value < 0) {
+            throw new IllegalArgumentException(name + " must be >= 0, got " + value);
+        }
+    }
+
+    /**
+     * Checks the given duration argument is valid, i.e. a non-negative value.
+     *
+     * @param value the duration value to be checked
+     * @param name the argument name for the error message.
+     *
+     * @hide
+     */
+    public static void checkDurationArgument(long value, @NonNull String name) {
+        if (value < 0) {
+            throw new IllegalArgumentException(name + " must be >= 0, got " + value);
+        }
+    }
+
     @NonNull
     public static final Creator<VibrationEffectSegment> CREATOR =
             new Creator<VibrationEffectSegment>() {

@@ -1179,8 +1179,15 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
-            (new MediaShellCommand()).exec(this, in, out, err, args, callback,
-                    resultReceiver);
+            String[] packageNames =
+                    mContext.getPackageManager().getPackagesForUid(Binder.getCallingUid());
+            String packageName = packageNames != null && packageNames.length > 0
+                    ? packageNames[0]
+                    : "com.android.shell"; // We should not need this branch, but defaulting to the
+                                           // current shell package name for robustness. See
+                                           // b/227109905.
+            new MediaShellCommand(packageName)
+                    .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
         @Override

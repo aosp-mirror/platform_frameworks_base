@@ -103,8 +103,8 @@ public class QuickStepContract {
     // enabled (since it's used to navigate back within the bubbled app, or to collapse the bubble
     // stack.
     public static final int SYSUI_STATE_BUBBLES_EXPANDED = 1 << 14;
-    // The global actions dialog is showing
-    public static final int SYSUI_STATE_GLOBAL_ACTIONS_SHOWING = 1 << 15;
+    // A SysUI dialog is showing.
+    public static final int SYSUI_STATE_DIALOG_SHOWING = 1 << 15;
     // The one-handed mode is active
     public static final int SYSUI_STATE_ONE_HANDED_ACTIVE = 1 << 16;
     // Allow system gesture no matter the system bar(s) is visible or not
@@ -140,7 +140,7 @@ public class QuickStepContract {
             SYSUI_STATE_TRACING_ENABLED,
             SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
             SYSUI_STATE_BUBBLES_EXPANDED,
-            SYSUI_STATE_GLOBAL_ACTIONS_SHOWING,
+            SYSUI_STATE_DIALOG_SHOWING,
             SYSUI_STATE_ONE_HANDED_ACTIVE,
             SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
             SYSUI_STATE_IME_SHOWING,
@@ -166,7 +166,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED) != 0
                 ? "keygrd_occluded" : "");
         str.add((flags & SYSUI_STATE_BOUNCER_SHOWING) != 0 ? "bouncer_visible" : "");
-        str.add((flags & SYSUI_STATE_GLOBAL_ACTIONS_SHOWING) != 0 ? "global_actions" : "");
+        str.add((flags & SYSUI_STATE_DIALOG_SHOWING) != 0 ? "dialog_showing" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0 ? "a11y_click" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0 ? "a11y_long_click" : "");
         str.add((flags & SYSUI_STATE_TRACING_ENABLED) != 0 ? "tracing" : "");
@@ -256,7 +256,7 @@ public class QuickStepContract {
     public static boolean isBackGestureDisabled(int sysuiStateFlags) {
         // Always allow when the bouncer/global actions is showing (even on top of the keyguard)
         if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0
-                || (sysuiStateFlags & SYSUI_STATE_GLOBAL_ACTIONS_SHOWING) != 0) {
+                || (sysuiStateFlags & SYSUI_STATE_DIALOG_SHOWING) != 0) {
             return false;
         }
         if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {

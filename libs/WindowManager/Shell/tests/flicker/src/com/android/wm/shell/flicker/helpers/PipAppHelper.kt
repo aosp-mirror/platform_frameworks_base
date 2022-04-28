@@ -58,16 +58,26 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         }
     }
 
-    /** {@inheritDoc}  */
-    override fun launchViaIntent(
+    /**
+     * Launches the app through an intent instead of interacting with the launcher and waits
+     * until the app window is in PIP mode
+     */
+    @JvmOverloads
+    fun launchViaIntentAndWaitForPip(
         wmHelper: WindowManagerStateHelper,
-        expectedWindowName: String,
-        action: String?,
+        expectedWindowName: String = "",
+        action: String? = null,
         stringExtras: Map<String, String>
     ) {
-        super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras)
-        wmHelper.waitPipShown()
+        launchViaIntentAndWaitShown(wmHelper, expectedWindowName, action, stringExtras,
+            waitConditions = arrayOf(WindowManagerStateHelper.pipShownCondition))
     }
+
+    /**
+     * Expand the PIP window back to full screen via intent and wait until the app is visible
+     */
+    fun exitPipToFullScreenViaIntent(wmHelper: WindowManagerStateHelper) =
+        launchViaIntentAndWaitShown(wmHelper)
 
     private fun focusOnObject(selector: BySelector): Boolean {
         // We expect all the focusable UI elements to be arranged in a way so that it is possible

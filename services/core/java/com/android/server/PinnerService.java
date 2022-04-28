@@ -18,6 +18,7 @@ package com.android.server;
 
 import static android.app.ActivityManager.UID_OBSERVER_ACTIVE;
 import static android.app.ActivityManager.UID_OBSERVER_GONE;
+import static android.os.Process.SYSTEM_UID;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -261,6 +262,37 @@ public final class PinnerService extends SystemService {
         }
     }
 
+    /** Returns information about pinned files and sizes for StatsPullAtomService. */
+    public List<PinnedFileStats> dumpDataForStatsd() {
+        List<PinnedFileStats> pinnedFileStats = new ArrayList<>();
+        synchronized (PinnerService.this) {
+            for (PinnedFile pinnedFile : mPinnedFiles) {
+                pinnedFileStats.add(new PinnedFileStats(SYSTEM_UID, pinnedFile));
+            }
+
+            for (int key : mPinnedApps.keySet()) {
+                PinnedApp app = mPinnedApps.get(key);
+                for (PinnedFile pinnedFile : mPinnedApps.get(key).mFiles) {
+                    pinnedFileStats.add(new PinnedFileStats(app.uid, pinnedFile));
+                }
+            }
+        }
+        return pinnedFileStats;
+    }
+
+    /** Wrapper class for statistics for a pinned file. */
+    public static class PinnedFileStats {
+        public final int uid;
+        public final String filename;
+        public final int sizeKb;
+
+        protected PinnedFileStats(int uid, PinnedFile file) {
+            this.uid = uid;
+            this.filename = file.fileName.substring(file.fileName.lastIndexOf('/') + 1);
+            this.sizeKb = file.bytesPinned / 1024;
+        }
+    }
+
     /**
      * Handler for on start pinning message
      */
@@ -352,6 +384,10 @@ public final class PinnerService extends SystemService {
 
                 @Override
                 public void onUidCachedChanged(int uid, boolean cached) throws RemoteException {
+                }
+
+                @Override
+                public void onUidProcAdjChanged(int uid) throws RemoteException {
                 }
             }, UID_OBSERVER_GONE | UID_OBSERVER_ACTIVE, 0, null);
         } catch (RemoteException e) {

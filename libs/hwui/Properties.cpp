@@ -69,7 +69,6 @@ RenderPipelineType Properties::sRenderPipelineType = RenderPipelineType::NotInit
 bool Properties::enableHighContrastText = false;
 
 bool Properties::waitForGpuCompletion = false;
-bool Properties::forceDrawFrame = false;
 
 bool Properties::filterOutTestOverhead = false;
 bool Properties::disableVsync = false;
@@ -135,7 +134,7 @@ bool Properties::load() {
     skpCaptureEnabled = debuggingEnabled && base::GetBoolProperty(PROPERTY_CAPTURE_SKP_ENABLED, false);
 
     SkAndroidFrameworkTraceUtil::setEnableTracing(
-            base::GetBoolProperty(PROPERTY_SKIA_ATRACE_ENABLED, false));
+            base::GetBoolProperty(PROPERTY_SKIA_ATRACE_ENABLED, true));
 
     runningInEmulator = base::GetBoolProperty(PROPERTY_IS_EMULATOR, false);
 

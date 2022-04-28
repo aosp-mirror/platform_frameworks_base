@@ -21,32 +21,23 @@ import static com.android.server.pm.PackageManagerService.DOMAIN_VERIFICATION;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Message;
 import android.os.UserHandle;
 
-import com.android.internal.util.FunctionalUtils;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV2;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 public final class DomainVerificationConnection implements DomainVerificationService.Connection,
         DomainVerificationProxyV1.Connection, DomainVerificationProxyV2.Connection {
     final PackageManagerService mPm;
-    final PackageManagerInternal mPmInternal;
     final UserManagerInternal mUmInternal;
 
-    // TODO(b/198166813): remove PMS dependency
     DomainVerificationConnection(PackageManagerService pm) {
         mPm = pm;
-        mPmInternal = mPm.mInjector.getLocalService(PackageManagerInternal.class);
         mUmInternal = mPm.mInjector.getLocalService(UserManagerInternal.class);
     }
 
@@ -87,18 +78,18 @@ public final class DomainVerificationConnection implements DomainVerificationSer
     @Override
     public boolean isCallerPackage(int callingUid, @NonNull String packageName) {
         final int callingUserId = UserHandle.getUserId(callingUid);
-        return callingUid == mPmInternal.getPackageUid(packageName, 0, callingUserId);
+        return callingUid == mPm.snapshotComputer().getPackageUid(packageName, 0, callingUserId);
     }
 
     @Nullable
     @Override
     public AndroidPackage getPackage(@NonNull String packageName) {
-        return mPmInternal.getPackage(packageName);
+        return mPm.snapshotComputer().getPackage(packageName);
     }
 
     @Override
     public boolean filterAppAccess(String packageName, int callingUid, int userId) {
-        return mPmInternal.filterAppAccess(packageName, callingUid, userId);
+        return mPm.snapshotComputer().filterAppAccess(packageName, callingUid, userId);
     }
 
     @Override
@@ -111,42 +102,8 @@ public final class DomainVerificationConnection implements DomainVerificationSer
         return mUmInternal.exists(userId);
     }
 
-    @Override
-    public void withPackageSettingsSnapshot(
-            @NonNull Consumer<Function<String, PackageStateInternal>> block) {
-        mPmInternal.withPackageSettingsSnapshot(block);
-    }
-
-    @Override
-    public <Output> Output withPackageSettingsSnapshotReturning(
-            @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageStateInternal>,
-                    Output> block) {
-        return mPmInternal.withPackageSettingsSnapshotReturning(block);
-    }
-
-    @Override
-    public <ExceptionType extends Exception> void withPackageSettingsSnapshotThrowing(
-            @NonNull FunctionalUtils.ThrowingCheckedConsumer<Function<String, PackageStateInternal>,
-                    ExceptionType> block) throws ExceptionType {
-        mPmInternal.withPackageSettingsSnapshotThrowing(block);
-    }
-
-    @Override
-    public <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
-            withPackageSettingsSnapshotThrowing2(
-                    @NonNull FunctionalUtils.ThrowingChecked2Consumer<
-                            Function<String, PackageStateInternal>, ExceptionOne,
-                            ExceptionTwo> block)
-            throws ExceptionOne, ExceptionTwo {
-        mPmInternal.withPackageSettingsSnapshotThrowing2(block);
-    }
-
-    @Override
-    public <Output, ExceptionType extends Exception> Output
-            withPackageSettingsSnapshotReturningThrowing(
-            @NonNull FunctionalUtils.ThrowingCheckedFunction<
-                    Function<String, PackageStateInternal>, Output, ExceptionType> block)
-            throws ExceptionType {
-        return mPmInternal.withPackageSettingsSnapshotReturningThrowing(block);
+    @NonNull
+    public Computer snapshot() {
+        return mPm.snapshotComputer();
     }
 }

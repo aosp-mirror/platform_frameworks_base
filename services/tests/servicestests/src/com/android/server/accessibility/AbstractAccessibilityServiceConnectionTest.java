@@ -58,6 +58,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -435,7 +436,7 @@ public class AbstractAccessibilityServiceConnectionTest {
                 VIEWID_RESOURCE_NAME, INTERACTION_ID, mMockCallback, TID);
         verify(mMockIA11yInteractionConnection).findAccessibilityNodeInfosByViewId(
                 eq(ROOT_NODE_ID), eq(VIEWID_RESOURCE_NAME), any(), eq(INTERACTION_ID),
-                captor.capture(), anyInt(), eq(PID), eq(TID), any());
+                captor.capture(), anyInt(), eq(PID), eq(TID), any(), nullable(float[].class));
         verify(mMockSecurityPolicy).computeValidReportedPackages(any(), anyInt());
         verifyReplaceActions(captor.getValue());
     }
@@ -449,7 +450,7 @@ public class AbstractAccessibilityServiceConnectionTest {
                 VIEW_TEXT, INTERACTION_ID, mMockCallback, TID);
         verify(mMockIA11yInteractionConnection).findAccessibilityNodeInfosByText(
                 eq(ROOT_NODE_ID), eq(VIEW_TEXT), any(), eq(INTERACTION_ID),
-                captor.capture(), anyInt(), eq(PID), eq(TID), any());
+                captor.capture(), anyInt(), eq(PID), eq(TID), any(), nullable(float[].class));
         verify(mMockSecurityPolicy).computeValidReportedPackages(any(), anyInt());
         verifyReplaceActions(captor.getValue());
     }
@@ -463,7 +464,7 @@ public class AbstractAccessibilityServiceConnectionTest {
                 INTERACTION_ID, mMockCallback, 0, TID, null);
         verify(mMockIA11yInteractionConnection).findAccessibilityNodeInfoByAccessibilityId(
                 eq(ROOT_NODE_ID), any(), eq(INTERACTION_ID), captor.capture(), anyInt(),
-                eq(PID), eq(TID), any(), any());
+                eq(PID), eq(TID), any(),  nullable(float[].class), any());
         verify(mMockSecurityPolicy).computeValidReportedPackages(any(), anyInt());
         verifyReplaceActions(captor.getValue());
     }
@@ -476,7 +477,8 @@ public class AbstractAccessibilityServiceConnectionTest {
         mServiceConnection.findFocus(PIP_WINDOWID, ROOT_NODE_ID, FOCUS_INPUT, INTERACTION_ID,
                 mMockCallback, TID);
         verify(mMockIA11yInteractionConnection).findFocus(eq(ROOT_NODE_ID), eq(FOCUS_INPUT),
-                any(), eq(INTERACTION_ID), captor.capture(), anyInt(), eq(PID), eq(TID), any());
+                any(), eq(INTERACTION_ID), captor.capture(), anyInt(), eq(PID), eq(TID), any(),
+                nullable(float[].class));
         verify(mMockSecurityPolicy).computeValidReportedPackages(any(), anyInt());
         verifyReplaceActions(captor.getValue());
     }
@@ -489,7 +491,8 @@ public class AbstractAccessibilityServiceConnectionTest {
         mServiceConnection.focusSearch(PIP_WINDOWID, ROOT_NODE_ID, FOCUS_DOWN, INTERACTION_ID,
                 mMockCallback, TID);
         verify(mMockIA11yInteractionConnection).focusSearch(eq(ROOT_NODE_ID), eq(FOCUS_DOWN),
-                any(), eq(INTERACTION_ID), captor.capture(), anyInt(), eq(PID), eq(TID), any());
+                any(), eq(INTERACTION_ID), captor.capture(), anyInt(), eq(PID), eq(TID), any(),
+                nullable(float[].class));
         verify(mMockSecurityPolicy).computeValidReportedPackages(any(), anyInt());
         verifyReplaceActions(captor.getValue());
     }

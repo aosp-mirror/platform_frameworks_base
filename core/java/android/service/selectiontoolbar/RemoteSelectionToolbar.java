@@ -58,6 +58,7 @@ import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 
+import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -1318,6 +1319,7 @@ final class RemoteSelectionToolbar {
         contentContainer.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         contentContainer.setTag(FloatingToolbar.FLOATING_TOOLBAR_TAG);
+        contentContainer.setContentDescription(FloatingToolbar.FLOATING_TOOLBAR_TAG);
         contentContainer.setClipToOutline(true);
         return contentContainer;
     }
@@ -1369,6 +1371,34 @@ final class RemoteSelectionToolbar {
     private static void debugLog(String message) {
         if (Log.isLoggable(FloatingToolbar.FLOATING_TOOLBAR_TAG, Log.DEBUG)) {
             Log.v(TAG, message);
+        }
+    }
+
+    void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.print("toolbar token: "); pw.println(mSelectionToolbarToken);
+        pw.print(prefix); pw.print("dismissed: "); pw.println(mDismissed);
+        pw.print(prefix); pw.print("hidden: "); pw.println(mHidden);
+        pw.print(prefix); pw.print("popup width: "); pw.println(mPopupWidth);
+        pw.print(prefix); pw.print("popup height: "); pw.println(mPopupHeight);
+        pw.print(prefix); pw.print("relative coords: "); pw.println(mRelativeCoordsForToolbar);
+        pw.print(prefix); pw.print("main panel size: "); pw.println(mMainPanelSize);
+        boolean hasOverflow = hasOverflow();
+        pw.print(prefix); pw.print("has overflow: "); pw.println(hasOverflow);
+        if (hasOverflow) {
+            pw.print(prefix); pw.print("overflow open: "); pw.println(mIsOverflowOpen);
+            pw.print(prefix); pw.print("overflow size: "); pw.println(mOverflowPanelSize);
+        }
+        if (mSurfaceControlViewHost != null) {
+            FloatingToolbarRoot root = (FloatingToolbarRoot) mSurfaceControlViewHost.getView();
+            root.dump(prefix, pw);
+        }
+        if (mMenuItems != null) {
+            int menuItemSize = mMenuItems.size();
+            pw.print(prefix); pw.print("number menu items: "); pw.println(menuItemSize);
+            for (int i = 0; i < menuItemSize; i++) {
+                pw.print(prefix); pw.print("#"); pw.println(i);
+                pw.print(prefix + "  "); pw.println(mMenuItems.get(i));
+            }
         }
     }
 }

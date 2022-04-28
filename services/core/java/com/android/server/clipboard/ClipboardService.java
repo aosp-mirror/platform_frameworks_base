@@ -389,7 +389,7 @@ public class ClipboardService extends SystemService {
             final long oldIdentity = Binder.clearCallingIdentity();
             try {
                 if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CLIPBOARD,
-                        PROPERTY_AUTO_CLEAR_ENABLED, false)) {
+                        PROPERTY_AUTO_CLEAR_ENABLED, true)) {
                     mClipboardClearHandler.removeEqualMessages(ClipboardClearHandler.MSG_CLEAR,
                             userId);
                     Message clearMessage = Message.obtain(mClipboardClearHandler,
@@ -665,7 +665,7 @@ public class ClipboardService extends SystemService {
 
     void setPrimaryClipInternal(PerUserClipboard clipboard, @Nullable ClipData clip,
             int uid) {
-        synchronized ("mLock") {
+        synchronized (mLock) {
             setPrimaryClipInternalLocked(clipboard, clip, uid, null);
         }
     }

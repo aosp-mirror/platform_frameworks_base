@@ -1054,6 +1054,14 @@ public final class DisplayManagerGlobal {
         @Nullable private final VirtualDisplay.Callback mCallback;
         @Nullable private final Executor mExecutor;
 
+        /**
+         * Creates a virtual display callback.
+         *
+         * @param callback The callback to call for virtual display events, or {@code null} if the
+         * caller does not wish to receive callback events.
+         * @param executor The executor to call the {@code callback} on. Must not be {@code null} if
+         * the callback is not {@code null}.
+         */
         VirtualDisplayCallback(VirtualDisplay.Callback callback, Executor executor) {
             mCallback = callback;
             mExecutor = mCallback != null ? Objects.requireNonNull(executor) : null;

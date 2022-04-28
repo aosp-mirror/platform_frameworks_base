@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -96,8 +97,8 @@ public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
         return sameAs(message.getMessage());
     }
 
-    default void removeMessage() {
-        getGroup().removeMessage(this);
+    default void removeMessage(ArrayList<MessagingLinearLayout.MessagingChild> toRecycle) {
+        getGroup().removeMessage(this, toRecycle);
     }
 
     default void setMessagingGroup(MessagingGroup group) {
