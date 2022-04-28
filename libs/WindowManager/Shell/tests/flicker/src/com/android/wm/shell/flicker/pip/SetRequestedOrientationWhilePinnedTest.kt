@@ -25,10 +25,13 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
+import com.android.wm.shell.flicker.testapp.Components
 import com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION
-import com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,7 +39,7 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test Pip with orientation changes.
+ * Test exiting Pip with orientation changes.
  * To run this test: `atest WMShellFlickerTests:SetRequestedOrientationWhilePinnedTest`
  */
 @RequiresDevice
@@ -44,7 +47,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-class SetRequestedOrientationWhilePinnedTest(
+open class SetRequestedOrientationWhilePinnedTest(
     testSpec: FlickerTestParameter
 ) : PipTransition(testSpec) {
     private val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
@@ -52,30 +55,41 @@ class SetRequestedOrientationWhilePinnedTest(
 
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            setupAndTeardown(this)
-
             setup {
+                test {
+                    removeAllTasksButHome()
+                    device.wakeUpAndGoToHomeScreen()
+                }
                 eachRun {
-                    // Launch the PiP activity fixed as landscape
+                    // Launch the PiP activity fixed as landscape.
                     pipApp.launchViaIntent(wmHelper, stringExtras = mapOf(
-                        EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString(),
-                        EXTRA_ENTER_PIP to "true"))
+                        EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString()))
+                    // Enter PiP.
+                    broadcastActionTrigger.doAction(Components.PipActivity.ACTION_ENTER_PIP)
+                    wmHelper.waitPipShown()
+                    wmHelper.waitForRotation(Surface.ROTATION_0)
+                    wmHelper.waitForAppTransitionIdle()
+                    // System bar may fade out during fixed rotation.
+                    wmHelper.waitForNavBarStatusBarVisible()
                 }
             }
             teardown {
                 eachRun {
                     pipApp.exit(wmHelper)
+                    setRotation(Surface.ROTATION_0)
+                }
+                test {
+                    removeAllTasksButHome()
                 }
             }
             transitions {
-                // Request that the orientation is set to landscape
-                broadcastActionTrigger.requestOrientationForPip(ORIENTATION_LANDSCAPE)
-
-                // Launch the activity back into fullscreen and
-                // ensure that it is now in landscape
+                // Launch the activity back into fullscreen and ensure that it is now in landscape
                 pipApp.launchViaIntent(wmHelper)
                 wmHelper.waitForFullScreenApp(pipApp.component)
                 wmHelper.waitForRotation(Surface.ROTATION_90)
+                wmHelper.waitForAppTransitionIdle()
+                // System bar may fade out during fixed rotation.
+                wmHelper.waitForNavBarStatusBarVisible()
             }
         }
 

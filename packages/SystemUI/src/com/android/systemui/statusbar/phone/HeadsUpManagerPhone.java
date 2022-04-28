@@ -33,7 +33,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -41,7 +42,6 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -52,7 +52,7 @@ import java.util.Stack;
  * A implementation of HeadsUpManager for phone and car.
  */
 public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
-        VisualStabilityManager.Callback, OnHeadsUpChangedListener {
+        OnHeadsUpChangedListener {
     private static final String TAG = "HeadsUpManagerPhone";
 
     @VisibleForTesting
@@ -60,8 +60,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private final KeyguardBypassController mBypassController;
     private final GroupMembershipManager mGroupMembershipManager;
     private final List<OnHeadsUpPhoneListenerChange> mHeadsUpPhoneListeners = new ArrayList<>();
-    // TODO (b/162832756): remove visual stability manager when migrating to new pipeline
-    private VisualStabilityManager mVisualStabilityManager;
+    private final VisualStabilityProvider mVisualStabilityProvider;
     private boolean mReleaseOnExpandFinish;
 
     private boolean mTrackingHeadsUp;
@@ -104,6 +103,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             StatusBarStateController statusBarStateController,
             KeyguardBypassController bypassController,
             GroupMembershipManager groupMembershipManager,
+            VisualStabilityProvider visualStabilityProvider,
             ConfigurationController configurationController) {
         super(context, logger);
         Resources resources = mContext.getResources();
@@ -111,6 +111,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         statusBarStateController.addCallback(mStatusBarStateListener);
         mBypassController = bypassController;
         mGroupMembershipManager = groupMembershipManager;
+        mVisualStabilityProvider = visualStabilityProvider;
 
         updateResources();
         configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
@@ -124,10 +125,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                 updateResources();
             }
         });
-    }
-
-    void setup(VisualStabilityManager visualStabilityManager) {
-        mVisualStabilityManager = visualStabilityManager;
     }
 
     public void setAnimationStateHandler(AnimationStateHandler handler) {
@@ -323,9 +320,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     //  Dumpable overrides:
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("HeadsUpManagerPhone state:");
-        dumpInternal(fd, pw, args);
+        dumpInternal(pw, args);
     }
 
     @Override
@@ -333,14 +330,13 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         // We should not defer the removal if reordering isn't allowed since otherwise
         // these won't disappear until reordering is allowed again, which happens only once
         // the notification panel is collapsed again.
-        return mVisualStabilityManager.isReorderingAllowed() && super.shouldExtendLifetime(entry);
+        return mVisualStabilityProvider.isReorderingAllowed() && super.shouldExtendLifetime(entry);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    //  VisualStabilityManager.Callback overrides:
+    //  OnReorderingAllowedListener:
 
-    @Override
-    public void onChangeAllowed() {
+    private final OnReorderingAllowedListener mOnReorderingAllowedListener = () -> {
         mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (isAlerting(entry.getKey())) {
@@ -350,7 +346,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         }
         mEntriesToRemoveWhenReorderingAllowed.clear();
         mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(true);
-    }
+    };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //  HeadsUpManager utility (protected) methods overrides:
@@ -376,8 +372,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     }
 
     @Override
-    protected void dumpInternal(FileDescriptor fd, PrintWriter pw, String[] args) {
-        super.dumpInternal(fd, pw, args);
+    protected void dumpInternal(PrintWriter pw, String[] args) {
+        super.dumpInternal(pw, args);
         pw.print("  mBarState=");
         pw.println(mStatusBarState);
         pw.print("  mTouchableRegion=");
@@ -431,13 +427,13 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
         public void setEntry(@NonNull final NotificationEntry entry) {
             Runnable removeHeadsUpRunnable = () -> {
-                if (!mVisualStabilityManager.isReorderingAllowed()
+                if (!mVisualStabilityProvider.isReorderingAllowed()
                         // We don't want to allow reordering while pulsing, but headsup need to
                         // time out anyway
                         && !entry.showingPulsing()) {
                     mEntriesToRemoveWhenReorderingAllowed.add(entry);
-                    mVisualStabilityManager.addReorderingAllowedCallback(HeadsUpManagerPhone.this,
-                            false  /* persistent */);
+                    mVisualStabilityProvider.addTemporaryReorderingAllowedListener(
+                            mOnReorderingAllowedListener);
                 } else if (mTrackingHeadsUp) {
                     mEntriesToRemoveAfterExpand.add(entry);
                 } else {

@@ -32,12 +32,15 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+import android.window.OnBackInvokedCallback;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Parcelling;
@@ -52,7 +55,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -62,6 +67,8 @@ import java.util.UUID;
  */
 public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     private static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
+    private static final Parcelling.BuiltIn.ForStringSet sForStringSet =
+            Parcelling.Cache.getOrCreate(Parcelling.BuiltIn.ForStringSet.class);
 
     /**
      * Default task affinity of all activities in this application. See
@@ -796,11 +803,24 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE = 1 << 2;
 
+
+    /**
+     * If false, {@link android.view.KeyEvent#KEYCODE_BACK} related events will be forwarded to
+     * the Activities, Dialogs and Views and {@link android.app.Activity#onBackPressed()},
+     * {@link android.app.Dialog#onBackPressed} will be called. Otherwise, those events will be
+     * replaced by a call to {@link OnBackInvokedCallback#onBackInvoked()} on the focused window.
+     *
+     * @hide
+     * @see android.R.styleable.AndroidManifestApplication_enableOnBackInvokedCallback
+     */
+    public static final int PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK = 1 << 3;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_EXT_" }, value = {
             PRIVATE_FLAG_EXT_PROFILEABLE,
             PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION,
             PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE,
+            PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlagsExt {}
@@ -1550,6 +1570,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     private int localeConfigRes;
 
+    /**
+     * Optional set of a certificates identifying apps that are allowed to embed activities of this
+     * application. From the "knownActivityEmbeddingCerts" attribute.
+     */
+    @Nullable
+    private Set<String> mKnownActivityEmbeddingCerts;
+
     public void dump(Printer pw, String prefix) {
         dump(pw, prefix, DUMP_FLAG_ALL);
     }
@@ -1671,8 +1698,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 pw.println(prefix + "localeConfigRes=0x"
                         + Integer.toHexString(localeConfigRes));
             }
+            pw.println(prefix + "enableOnBackInvokedCallback=" + isOnBackInvokedCallbackEnabled());
         }
         pw.println(prefix + "createTimestamp=" + createTimestamp);
+        if (mKnownActivityEmbeddingCerts != null) {
+            pw.println(prefix + "knownActivityEmbeddingCerts=" + mKnownActivityEmbeddingCerts);
+        }
         super.dumpBack(pw, prefix);
     }
 
@@ -1787,6 +1818,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
             proto.end(detailToken);
         }
+        if (!ArrayUtils.isEmpty(mKnownActivityEmbeddingCerts)) {
+            for (String knownCert : mKnownActivityEmbeddingCerts) {
+                proto.write(ApplicationInfoProto.KNOWN_ACTIVITY_EMBEDDING_CERTS, knownCert);
+            }
+        }
         proto.end(token);
     }
 
@@ -1830,13 +1866,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     public ApplicationInfo() {
-        createTimestamp = System.currentTimeMillis();
+        createTimestamp = SystemClock.uptimeMillis();
     }
 
     public ApplicationInfo(ApplicationInfo orig) {
         super(orig);
         taskAffinity = orig.taskAffinity;
         permission = orig.permission;
+        mKnownActivityEmbeddingCerts = orig.mKnownActivityEmbeddingCerts;
         processName = orig.processName;
         className = orig.className;
         theme = orig.theme;
@@ -1903,7 +1940,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         nativeHeapZeroInitialized = orig.nativeHeapZeroInitialized;
         requestRawExternalStorageAccess = orig.requestRawExternalStorageAccess;
         localeConfigRes = orig.localeConfigRes;
-        createTimestamp = System.currentTimeMillis();
+        createTimestamp = SystemClock.uptimeMillis();
     }
 
     public String toString() {
@@ -2006,6 +2043,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
         }
         dest.writeInt(localeConfigRes);
+        sForStringSet.parcel(mKnownActivityEmbeddingCerts, dest, flags);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ApplicationInfo> CREATOR
@@ -2046,7 +2084,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         splitNames = source.createString8Array();
         splitSourceDirs = source.createString8Array();
         splitPublicSourceDirs = source.createString8Array();
-        splitDependencies = source.readSparseArray(null);
+        splitDependencies = source.readSparseArray(null, int[].class);
         nativeLibraryDir = source.readString8();
         secondaryNativeLibraryDir = source.readString8();
         nativeLibraryRootDir = source.readString8();
@@ -2102,6 +2140,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
         }
         localeConfigRes = source.readInt();
+        mKnownActivityEmbeddingCerts = sForStringSet.unparcel(source);
+        if (mKnownActivityEmbeddingCerts.isEmpty()) {
+            mKnownActivityEmbeddingCerts = null;
+        }
     }
 
     /**
@@ -2540,6 +2582,17 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /**
+     * Returns whether the application will use the {@link android.window.OnBackInvokedCallback}
+     * navigation system instead of the {@link android.view.KeyEvent#KEYCODE_BACK} and related
+     * callbacks.
+     *
+     * @hide
+     */
+    public boolean isOnBackInvokedCallbackEnabled() {
+        return ((privateFlagsExt & PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK)) != 0;
+    }
+
+    /**
      * @hide
      */
     @Override protected ApplicationInfo getApplicationInfo() {
@@ -2658,7 +2711,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return localeConfigRes;
     }
 
-
     /**
      *  List of all shared libraries this application is linked against. This
      *  list will only be set if the {@link PackageManager#GET_SHARED_LIBRARY_FILES
@@ -2675,4 +2727,29 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return sharedLibraryInfos;
     }
 
+    /**
+     * Gets the trusted host certificate digests of apps that are allowed to embed activities of
+     * this application. The digests are computed using the SHA-256 digest algorithm.
+     * @see android.R.attr#knownActivityEmbeddingCerts
+     */
+    @NonNull
+    public Set<String> getKnownActivityEmbeddingCerts() {
+        return mKnownActivityEmbeddingCerts == null ? Collections.emptySet()
+                : mKnownActivityEmbeddingCerts;
+    }
+
+    /**
+     * Sets the trusted host certificates of apps that are allowed to embed activities of this
+     * application.
+     * @see #getKnownActivityEmbeddingCerts()
+     * @hide
+     */
+    public void setKnownActivityEmbeddingCerts(@NonNull Set<String> knownActivityEmbeddingCerts) {
+        // Convert the provided digest to upper case for consistent Set membership
+        // checks when verifying the signing certificate digests of requesting apps.
+        mKnownActivityEmbeddingCerts = new ArraySet<>();
+        for (String knownCert : knownActivityEmbeddingCerts) {
+            mKnownActivityEmbeddingCerts.add(knownCert.toUpperCase(Locale.US));
+        }
+    }
 }

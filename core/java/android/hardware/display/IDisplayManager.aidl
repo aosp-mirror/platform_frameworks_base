@@ -22,6 +22,7 @@ import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
+import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
@@ -183,5 +184,5 @@ interface IDisplayManager {
     int getRefreshRateSwitchingType();
 
     // Query for DISPLAY_DECORATION support.
-    boolean getDisplayDecorationSupport(int displayId);
+    DisplayDecorationSupport getDisplayDecorationSupport(int displayId);
 }

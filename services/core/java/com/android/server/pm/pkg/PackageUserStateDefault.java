@@ -21,13 +21,14 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.overlay.OverlayPaths;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 
+import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.WatchedArraySet;
+
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 class PackageUserStateDefault implements PackageUserStateInternal {
 
@@ -59,14 +60,14 @@ class PackageUserStateDefault implements PackageUserStateInternal {
 
     @NonNull
     @Override
-    public Set<String> getDisabledComponents() {
-        return Collections.emptySet();
+    public ArraySet<String> getDisabledComponents() {
+        return new ArraySet<>();
     }
 
     @NonNull
     @Override
-    public Set<String> getEnabledComponents() {
-        return Collections.emptySet();
+    public ArraySet<String> getEnabledComponents() {
+        return new ArraySet<>();
     }
 
     @Override
@@ -156,19 +157,19 @@ class PackageUserStateDefault implements PackageUserStateInternal {
 
     @Nullable
     @Override
-    public ArrayMap<String, SuspendParams> getSuspendParams() {
+    public WatchedArrayMap<String, SuspendParams> getSuspendParams() {
         return null;
     }
 
     @Nullable
     @Override
-    public ArraySet<String> getDisabledComponentsNoCopy() {
+    public WatchedArraySet<String> getDisabledComponentsNoCopy() {
         return null;
     }
 
     @Nullable
     @Override
-    public ArraySet<String> getEnabledComponentsNoCopy() {
+    public WatchedArraySet<String> getEnabledComponentsNoCopy() {
         return null;
     }
 

@@ -24,6 +24,10 @@ import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.MagnificationConfig;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.inputmethod.EditorInfo;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 
 /**
  * Top-level interface to an accessibility service component.
@@ -63,4 +67,15 @@ import android.view.MotionEvent;
     void onAccessibilityButtonAvailabilityChanged(boolean available);
 
     void onSystemActionsChanged();
+
+    void createImeSession(in IAccessibilityInputMethodSessionCallback callback);
+
+    void setImeSessionEnabled(in IAccessibilityInputMethodSession session, boolean enabled);
+
+    void bindInput();
+
+    void unbindInput();
+
+    void startInput(in IRemoteAccessibilityInputConnection connection, in EditorInfo editorInfo,
+            boolean restarting);
 }

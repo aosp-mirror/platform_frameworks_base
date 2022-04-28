@@ -92,7 +92,6 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Ra
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -139,6 +138,7 @@ public class NotifCollection implements Dumpable {
     private final NotifCollectionLogger mLogger;
     private final Handler mMainHandler;
     private final LogBufferEulogizer mEulogizer;
+    private final DumpManager mDumpManager;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
     private final Collection<NotificationEntry> mReadOnlyNotificationSet =
@@ -164,15 +164,13 @@ public class NotifCollection implements Dumpable {
             @Main Handler mainHandler,
             LogBufferEulogizer logBufferEulogizer,
             DumpManager dumpManager) {
-        Assert.isMainThread();
         mStatusBarService = statusBarService;
         mClock = clock;
         mNotifPipelineFlags = notifPipelineFlags;
         mLogger = logger;
         mMainHandler = mainHandler;
         mEulogizer = logBufferEulogizer;
-
-        dumpManager.registerDumpable(TAG, this);
+        mDumpManager = dumpManager;
     }
 
     /** Initializes the NotifCollection and registers it to receive notification events. */
@@ -182,7 +180,7 @@ public class NotifCollection implements Dumpable {
             throw new RuntimeException("attach() called twice");
         }
         mAttached = true;
-
+        mDumpManager.registerDumpable(TAG, this);
         groupCoalescer.setNotificationHandler(mNotifHandler);
     }
 
@@ -211,6 +209,12 @@ public class NotifCollection implements Dumpable {
     void addCollectionListener(NotifCollectionListener listener) {
         Assert.isMainThread();
         mNotifCollectionListeners.add(listener);
+    }
+
+    /** @see NotifPipeline#removeCollectionListener(NotifCollectionListener) */
+    void removeCollectionListener(NotifCollectionListener listener) {
+        Assert.isMainThread();
+        mNotifCollectionListeners.remove(listener);
     }
 
     /** @see NotifPipeline#addNotificationLifetimeExtender(NotifLifetimeExtender) */
@@ -805,7 +809,7 @@ public class NotifCollection implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, PrintWriter pw, @NonNull String[] args) {
+    public void dump(PrintWriter pw, @NonNull String[] args) {
         final List<NotificationEntry> entries = new ArrayList<>(getAllNotifs());
 
         pw.println("\t" + TAG + " unsorted/unfiltered notifications:");

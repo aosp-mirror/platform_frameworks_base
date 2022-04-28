@@ -16,9 +16,16 @@
 
 package com.android.systemui.statusbar.phone.userswitcher
 
+import android.content.Intent
+import android.os.UserHandle
 import android.view.View
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.FalsingManager
 
 import com.android.systemui.qs.user.UserSwitchDialogController
+import com.android.systemui.user.UserSwitcherActivity
 import com.android.systemui.util.ViewController
 
 import javax.inject.Inject
@@ -30,7 +37,10 @@ class StatusBarUserSwitcherControllerImpl @Inject constructor(
     view: StatusBarUserSwitcherContainer,
     private val tracker: StatusBarUserInfoTracker,
     private val featureController: StatusBarUserSwitcherFeatureController,
-    private val userSwitcherDialogController: UserSwitchDialogController
+    private val userSwitcherDialogController: UserSwitchDialogController,
+    private val featureFlags: FeatureFlags,
+    private val activityStarter: ActivityStarter,
+    private val falsingManager: FalsingManager
 ) : ViewController<StatusBarUserSwitcherContainer>(view),
         StatusBarUserSwitcherController {
     private val listener = object : CurrentUserChipInfoUpdatedListener {
@@ -49,11 +59,24 @@ class StatusBarUserSwitcherControllerImpl @Inject constructor(
         }
     }
 
-    override fun onViewAttached() {
+    public override fun onViewAttached() {
         tracker.addCallback(listener)
         featureController.addCallback(featureFlagListener)
-        mView.setOnClickListener {
-            userSwitcherDialogController.showDialog(it)
+        mView.setOnClickListener { view: View ->
+            if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                return@setOnClickListener
+            }
+
+            if (featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
+                val intent = Intent(context, UserSwitcherActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+
+                activityStarter.startActivity(intent, true /* dismissShade */,
+                        null /* ActivityLaunchAnimator.Controller */,
+                        true /* showOverlockscreenwhenlocked */, UserHandle.SYSTEM)
+            } else {
+                userSwitcherDialogController.showDialog(view)
+            }
         }
 
         updateEnabled()

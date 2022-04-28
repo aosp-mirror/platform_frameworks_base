@@ -32,11 +32,11 @@ class DarkReceiverImpl @JvmOverloads constructor(
     private val dualToneHandler = DualToneHandler(context)
 
     init {
-        onDarkChanged(Rect(), 1f, DarkIconDispatcher.DEFAULT_ICON_TINT)
+        onDarkChanged(ArrayList<Rect>(), 1f, DarkIconDispatcher.DEFAULT_ICON_TINT)
     }
 
-    override fun onDarkChanged(area: Rect?, darkIntensity: Float, tint: Int) {
-        val intensity = if (DarkIconDispatcher.isInArea(area, this)) darkIntensity else 0f
+    override fun onDarkChanged(areas: ArrayList<Rect>?, darkIntensity: Float, tint: Int) {
+        val intensity = if (DarkIconDispatcher.isInAreas(areas, this)) darkIntensity else 0f
         setBackgroundColor(dualToneHandler.getSingleColor(intensity))
     }
 }

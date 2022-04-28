@@ -18,14 +18,12 @@ package com.android.server.pm.pkg;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.UserHandle;
+import android.util.ArraySet;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The API surface for {@link PackageUserStateInternal}, for use by in-process mainline consumers.
@@ -59,7 +57,7 @@ public interface PackageUserState {
      * Fully qualified class names of components explicitly disabled.
      */
     @NonNull
-    Set<String> getDisabledComponents();
+    ArraySet<String> getDisabledComponents();
 
     @PackageManager.DistractionRestriction
     int getDistractionFlags();
@@ -68,7 +66,7 @@ public interface PackageUserState {
      * Fully qualified class names of components explicitly enabled.
      */
     @NonNull
-    Set<String> getEnabledComponents();
+    ArraySet<String> getEnabledComponents();
 
     /**
      * Retrieve the effective enabled state of the package itself.

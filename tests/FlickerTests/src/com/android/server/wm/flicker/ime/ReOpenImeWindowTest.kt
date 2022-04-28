@@ -46,6 +46,7 @@ import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,7 +62,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group2
-class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
+open class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
 
@@ -70,6 +71,11 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         WindowManagerConditionsFactory.hasLayersAnimating().negate(),
         WindowManagerConditionsFactory.isHomeActivityVisible()
     ))
+
+    @Before
+    open fun before() {
+        assumeFalse(isShellTransitionsEnabled)
+    }
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -238,7 +244,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 5,
+                    repetitions = 3,
                     supportedRotations = listOf(Surface.ROTATION_0)
                 )
         }

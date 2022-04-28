@@ -158,7 +158,7 @@ public class Transformation {
     }
 
     /**
-     * @return The 3x3 Matrix representing the trnasformation to apply to the
+     * @return The 3x3 Matrix representing the transformation to apply to the
      * coordinates of the object being animated
      */
     public Matrix getMatrix() {
@@ -167,7 +167,7 @@ public class Transformation {
 
     /**
      * Sets the degree of transparency
-     * @param alpha 1.0 means fully opaqe and 0.0 means fully transparent
+     * @param alpha 1.0 means fully opaque and 0.0 means fully transparent
      */
     public void setAlpha(@FloatRange(from=0.0, to=1.0) float alpha) {
         mAlpha = alpha;

@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -92,17 +91,6 @@ abstract class ExitPipTransition(testSpec: FlickerTestParameter) : PipTransition
                 .then()
                 .isInvisible(pipApp.component)
                 .isVisible(LAUNCHER_COMPONENT)
-        }
-    }
-
-    /**
-     * Checks that the focus doesn't change between windows during the transition
-     */
-    @Postsubmit
-    @Test
-    open fun focusDoesNotChange() {
-        testSpec.assertEventLog {
-            this.focusDoesNotChange()
         }
     }
 }

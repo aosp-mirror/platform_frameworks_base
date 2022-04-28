@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData;
+import android.app.smartspace.uitemplatedata.BaseTemplateData;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.net.Uri;
@@ -133,7 +133,7 @@ public final class SmartspaceTarget implements Parcelable {
     private final AppWidgetProviderInfo mWidget;
 
     @Nullable
-    private final SmartspaceDefaultUiTemplateData mTemplateData;
+    private final BaseTemplateData mTemplateData;
 
     public static final int FEATURE_UNDEFINED = 0;
     public static final int FEATURE_WEATHER = 1;
@@ -159,6 +159,24 @@ public final class SmartspaceTarget implements Parcelable {
     public static final int FEATURE_TIMER = 21;
     public static final int FEATURE_STOPWATCH = 22;
     public static final int FEATURE_UPCOMING_ALARM = 23;
+    public static final int FEATURE_GAS_STATION_PAYMENT = 24;
+    public static final int FEATURE_PAIRED_DEVICE_STATE = 25;
+    public static final int FEATURE_DRIVING_MODE = 26;
+    public static final int FEATURE_SLEEP_SUMMARY = 27;
+    public static final int FEATURE_FLASHLIGHT = 28;
+    public static final int FEATURE_TIME_TO_LEAVE = 29;
+    public static final int FEATURE_DOORBELL = 30;
+    public static final int FEATURE_MEDIA_RESUME = 31;
+    public static final int FEATURE_CROSS_DEVICE_TIMER = 32;
+    public static final int FEATURE_SEVERE_WEATHER_ALERT = 33;
+    public static final int FEATURE_HOLIDAY_ALARM = 34;
+    public static final int FEATURE_SAFETY_CHECK = 35;
+    public static final int FEATURE_MEDIA_HEADS_UP = 36;
+    public static final int FEATURE_STEP_COUNTING = 37;
+    public static final int FEATURE_EARTHQUAKE_ALERT = 38;
+    public static final int FEATURE_STEP_DATE = 39;
+    public static final int FEATURE_BLAZE_BUILD_PROGRESS = 40;
+    public static final int FEATURE_EARTHQUAKE_OCCURRED = 41;
 
     /**
      * @hide
@@ -187,22 +205,50 @@ public final class SmartspaceTarget implements Parcelable {
             FEATURE_PACKAGE_TRACKING,
             FEATURE_TIMER,
             FEATURE_STOPWATCH,
-            FEATURE_UPCOMING_ALARM
+            FEATURE_UPCOMING_ALARM,
+            FEATURE_GAS_STATION_PAYMENT,
+            FEATURE_PAIRED_DEVICE_STATE,
+            FEATURE_DRIVING_MODE,
+            FEATURE_SLEEP_SUMMARY,
+            FEATURE_FLASHLIGHT,
+            FEATURE_TIME_TO_LEAVE,
+            FEATURE_DOORBELL,
+            FEATURE_MEDIA_RESUME,
+            FEATURE_CROSS_DEVICE_TIMER,
+            FEATURE_SEVERE_WEATHER_ALERT,
+            FEATURE_HOLIDAY_ALARM,
+            FEATURE_SAFETY_CHECK,
+            FEATURE_MEDIA_HEADS_UP,
+            FEATURE_STEP_COUNTING,
+            FEATURE_EARTHQUAKE_ALERT,
+            FEATURE_STEP_DATE,
+            FEATURE_BLAZE_BUILD_PROGRESS,
+            FEATURE_EARTHQUAKE_OCCURRED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FeatureType {
     }
 
     public static final int UI_TEMPLATE_UNDEFINED = 0;
+    // Default template whose data is represented by {@link BaseTemplateData}. The default
+    // template is also a base card for the other types of templates.
     public static final int UI_TEMPLATE_DEFAULT = 1;
+    // Sub-image template whose data is represented by {@link SubImageTemplateData}
     public static final int UI_TEMPLATE_SUB_IMAGE = 2;
+    // Sub-list template whose data is represented by {@link SubListTemplateData}
     public static final int UI_TEMPLATE_SUB_LIST = 3;
+    // Carousel template whose data is represented by {@link CarouselTemplateData}
     public static final int UI_TEMPLATE_CAROUSEL = 4;
+    // Head-to-head template whose data is represented by {@link HeadToHeadTemplateData}
     public static final int UI_TEMPLATE_HEAD_TO_HEAD = 5;
+    // Combined-cards template whose data is represented by {@link CombinedCardsTemplateData}
     public static final int UI_TEMPLATE_COMBINED_CARDS = 6;
+    // Sub-card template whose data is represented by {@link SubCardTemplateData}
     public static final int UI_TEMPLATE_SUB_CARD = 7;
 
     /**
+     * The types of the Smartspace ui templates.
+     *
      * @hide
      */
     @IntDef(prefix = {"UI_TEMPLATE_"}, value = {
@@ -237,7 +283,7 @@ public final class SmartspaceTarget implements Parcelable {
         this.mAssociatedSmartspaceTargetId = in.readString();
         this.mSliceUri = in.readTypedObject(Uri.CREATOR);
         this.mWidget = in.readTypedObject(AppWidgetProviderInfo.CREATOR);
-        this.mTemplateData = in.readTypedObject(SmartspaceDefaultUiTemplateData.CREATOR);
+        this.mTemplateData = in.readTypedObject(BaseTemplateData.CREATOR);
     }
 
     private SmartspaceTarget(String smartspaceTargetId,
@@ -248,7 +294,7 @@ public final class SmartspaceTarget implements Parcelable {
             boolean shouldShowExpanded, String sourceNotificationKey,
             ComponentName componentName, UserHandle userHandle,
             String associatedSmartspaceTargetId, Uri sliceUri,
-            AppWidgetProviderInfo widget, SmartspaceDefaultUiTemplateData templateData) {
+            AppWidgetProviderInfo widget, BaseTemplateData templateData) {
         mSmartspaceTargetId = smartspaceTargetId;
         mHeaderAction = headerAction;
         mBaseAction = baseAction;
@@ -406,7 +452,7 @@ public final class SmartspaceTarget implements Parcelable {
      * Returns the UI template data.
      */
     @Nullable
-    public SmartspaceDefaultUiTemplateData getTemplateData() {
+    public BaseTemplateData getTemplateData() {
         return mTemplateData;
     }
 
@@ -536,7 +582,7 @@ public final class SmartspaceTarget implements Parcelable {
         private String mAssociatedSmartspaceTargetId;
         private Uri mSliceUri;
         private AppWidgetProviderInfo mWidget;
-        private SmartspaceDefaultUiTemplateData mTemplateData;
+        private BaseTemplateData mTemplateData;
 
         /**
          * A builder for {@link SmartspaceTarget}.
@@ -689,7 +735,7 @@ public final class SmartspaceTarget implements Parcelable {
          */
         @NonNull
         public Builder setTemplateData(
-                @Nullable SmartspaceDefaultUiTemplateData templateData) {
+                @Nullable BaseTemplateData templateData) {
             mTemplateData = templateData;
             return this;
         }

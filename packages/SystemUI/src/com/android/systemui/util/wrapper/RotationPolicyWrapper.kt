@@ -21,6 +21,7 @@ import android.provider.Settings.Secure.CAMERA_AUTOROTATE
 import com.android.internal.view.RotationPolicy
 import com.android.internal.view.RotationPolicy.RotationPolicyListener
 import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
@@ -44,7 +45,9 @@ class RotationPolicyWrapperImpl @Inject constructor(
         RotationPolicyWrapper {
 
     override fun setRotationLock(enabled: Boolean) {
-        RotationPolicy.setRotationLock(context, enabled)
+        traceSection("RotationPolicyWrapperImpl#setRotationLock") {
+            RotationPolicy.setRotationLock(context, enabled)
+        }
     }
 
     override fun setRotationLockAtAngle(enabled: Boolean, rotation: Int) {

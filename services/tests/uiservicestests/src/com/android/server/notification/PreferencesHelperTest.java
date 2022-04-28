@@ -789,6 +789,73 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadXml_oldXml_migration_NoUid() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        String xml = "<ranking version=\"2\">\n"
+                + "<package name=\"something\" show_badge=\"true\">\n"
+                + "<channel id=\"idn\" name=\"name\" importance=\"2\"/>\n"
+                + "</package>\n"
+                + "</ranking>\n";
+        NotificationChannel idn = new NotificationChannel("idn", "name", IMPORTANCE_LOW);
+        idn.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        idn.setShowBadge(false);
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+        verify(mPermissionHelper, never()).setNotificationPermission(any());
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(1234);
+        final ApplicationInfo app = new ApplicationInfo();
+        app.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
+        when(mPm.getApplicationInfoAsUser(eq("something"), anyInt(), anyInt())).thenReturn(app);
+
+        mHelper.onPackagesChanged(false, 0, new String[] {"something"}, new int[] {1234});
+
+
+        verify(mPermissionHelper, times(1)).setNotificationPermission(any());
+    }
+
+    @Test
+    public void testReadXml_newXml_noMigration_NoUid() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        String xml = "<ranking version=\"3\">\n"
+                + "<package name=\"something\" show_badge=\"true\">\n"
+                + "<channel id=\"idn\" name=\"name\" importance=\"2\"/>\n"
+                + "</package>\n"
+                + "</ranking>\n";
+        NotificationChannel idn = new NotificationChannel("idn", "name", IMPORTANCE_LOW);
+        idn.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        idn.setShowBadge(false);
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(1234);
+        final ApplicationInfo app = new ApplicationInfo();
+        app.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
+        when(mPm.getApplicationInfoAsUser(eq("something"), anyInt(), anyInt())).thenReturn(app);
+
+        mHelper.onPackagesChanged(false, 0, new String[] {"something"}, new int[] {1234});
+
+
+        verify(mPermissionHelper, never()).setNotificationPermission(any());
+    }
+
+    @Test
     public void testChannelXmlForNonBackup_postMigration() throws Exception {
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
@@ -1801,66 +1868,48 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testUpdateChannelsBypassingDnd_onUserSwitch_onUserUnlocked() throws Exception {
-        int user = USER.getIdentifier();
-        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
-        NotificationChannel channel1 = new NotificationChannel("id1", "name1",
-                NotificationManager.IMPORTANCE_MAX);
-        channel1.setBypassDnd(true);
-        channel1.setGroup(ncg.getId());
-
-        // channel is associated with a group, then group is deleted
-        mHelper.createNotificationChannelGroup(PKG_N_MR1, user, ncg,  /* fromTargetApp */ true);
-        mHelper.createNotificationChannel(PKG_N_MR1, user, channel1, true, /*has DND access*/ true);
-        mHelper.deleteNotificationChannelGroup(PKG_N_MR1, user, ncg.getId());
-
-        mHelper.onUserSwitched(user);
-        mHelper.onUserUnlocked(user);
-    }
-
-    @Test
     public void testGetChannelsBypassingDndCount_noChannelsBypassing() throws Exception {
         assertEquals(0, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
-                USER.getIdentifier()).getList().size());
+                UID_N_MR1).getList().size());
     }
 
     @Test
-    public void testGetChannelsBypassingDnd_noChannelsForUserIdBypassing()
+    public void testGetChannelsBypassingDnd_noChannelsForUidBypassing()
             throws Exception {
-        int user = 9;
+        int uid = 222;
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_MAX);
         channel.setBypassDnd(true);
         mHelper.createNotificationChannel(PKG_N_MR1, 111, channel, true, true);
 
         assertEquals(0, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
-                user).getList().size());
+                uid).getList().size());
     }
 
     @Test
     public void testGetChannelsBypassingDndCount_oneChannelBypassing_groupBlocked() {
-        int user = USER.getIdentifier();
+        int uid = UID_N_MR1;
         NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
         NotificationChannel channel1 = new NotificationChannel("id1", "name1",
                 NotificationManager.IMPORTANCE_MAX);
         channel1.setBypassDnd(true);
         channel1.setGroup(ncg.getId());
-        mHelper.createNotificationChannelGroup(PKG_N_MR1, user, ncg,  /* fromTargetApp */ true);
-        mHelper.createNotificationChannel(PKG_N_MR1, user, channel1, true, /*has DND access*/ true);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, uid, ncg,  /* fromTargetApp */ true);
+        mHelper.createNotificationChannel(PKG_N_MR1, uid, channel1, true, /*has DND access*/ true);
 
         assertEquals(1, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
-                user).getList().size());
+                uid).getList().size());
 
         // disable group
         ncg.setBlocked(true);
-        mHelper.createNotificationChannelGroup(PKG_N_MR1, user, ncg,  /* fromTargetApp */ false);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, uid, ncg,  /* fromTargetApp */ false);
         assertEquals(0, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
-                user).getList().size());
+                uid).getList().size());
     }
 
     @Test
     public void testGetChannelsBypassingDndCount_multipleChannelsBypassing() {
-        int user = USER.getIdentifier();
+        int uid = UID_N_MR1;
         NotificationChannel channel1 = new NotificationChannel("id1", "name1",
                 NotificationManager.IMPORTANCE_MAX);
         NotificationChannel channel2 = new NotificationChannel("id2", "name2",
@@ -1871,22 +1920,22 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel2.setBypassDnd(true);
         channel3.setBypassDnd(true);
         // has DND access, so can set bypassDnd attribute
-        mHelper.createNotificationChannel(PKG_N_MR1, user, channel1, true, /*has DND access*/ true);
-        mHelper.createNotificationChannel(PKG_N_MR1, user, channel2, true, true);
-        mHelper.createNotificationChannel(PKG_N_MR1, user, channel3, true, true);
+        mHelper.createNotificationChannel(PKG_N_MR1, uid, channel1, true, /*has DND access*/ true);
+        mHelper.createNotificationChannel(PKG_N_MR1, uid, channel2, true, true);
+        mHelper.createNotificationChannel(PKG_N_MR1, uid, channel3, true, true);
         assertEquals(3, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
-                user).getList().size());
+                uid).getList().size());
 
         // setBypassDnd false for some channels
         channel1.setBypassDnd(false);
         channel2.setBypassDnd(false);
         assertEquals(1, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
-                user).getList().size());
+                uid).getList().size());
 
         // setBypassDnd false for rest of the channels
         channel3.setBypassDnd(false);
         assertEquals(0, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
-                user).getList().size());
+                uid).getList().size());
     }
 
     @Test

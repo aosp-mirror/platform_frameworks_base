@@ -16,7 +16,8 @@
 
 package com.android.systemui.util.condition;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -73,7 +74,8 @@ public class ConditionTest extends SysuiTestCase {
 
         final Condition.Callback callback2 = mock(Condition.Callback.class);
         mCondition.addCallback(callback2);
-        verify(callback2).onConditionChanged(mCondition, true);
+        verify(callback2).onConditionChanged(mCondition);
+        assertThat(mCondition.isConditionMet()).isTrue();
     }
 
     @Test
@@ -94,7 +96,8 @@ public class ConditionTest extends SysuiTestCase {
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(true);
-        verify(callback).onConditionChanged(eq(mCondition), eq(true));
+        verify(callback).onConditionChanged(eq(mCondition));
+        assertThat(mCondition.isConditionMet()).isTrue();
     }
 
     @Test
@@ -105,7 +108,8 @@ public class ConditionTest extends SysuiTestCase {
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(false);
-        verify(callback).onConditionChanged(eq(mCondition), eq(false));
+        verify(callback).onConditionChanged(eq(mCondition));
+        assertThat(mCondition.isConditionMet()).isFalse();
     }
 
     @Test
@@ -116,7 +120,7 @@ public class ConditionTest extends SysuiTestCase {
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(true);
-        verify(callback, never()).onConditionChanged(eq(mCondition), anyBoolean());
+        verify(callback, never()).onConditionChanged(eq(mCondition));
     }
 
     @Test
@@ -127,6 +131,6 @@ public class ConditionTest extends SysuiTestCase {
         mCondition.addCallback(callback);
 
         mCondition.fakeUpdateCondition(false);
-        verify(callback, never()).onConditionChanged(eq(mCondition), anyBoolean());
+        verify(callback, never()).onConditionChanged(eq(mCondition));
     }
 }

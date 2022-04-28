@@ -35,7 +35,8 @@ import java.util.Objects;
 /**
  * A VibratorInfo describes the capabilities of a {@link Vibrator}.
  *
- * This description includes its capabilities, list of supported effects and composition primitives.
+ * <p>This description includes its capabilities, list of supported effects and composition
+ * primitives.
  *
  * @hide
  */

@@ -37,11 +37,14 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
@@ -56,6 +59,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
@@ -68,7 +73,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private DragDownHelper mDragDownHelper;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private ShadeController mShadeController;
-    @Mock private StatusBar mStatusBar;
+    @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private DockManager mDockManager;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;
@@ -79,6 +84,9 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Mock private LockIconViewController mLockIconViewController;
+    @Mock private LowLightClockController mLowLightClockController;
+    @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    @Mock private AmbientState mAmbientState;
 
     @Captor private ArgumentCaptor<NotificationShadeWindowView.InteractionEventHandler>
             mInteractionEventHandlerCaptor;
@@ -110,9 +118,13 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mNotificationStackScrollLayoutController,
                 mStatusBarKeyguardViewManager,
                 mStatusBarWindowStateController,
-                mLockIconViewController);
+                mLockIconViewController,
+                Optional.of(mLowLightClockController),
+                mCentralSurfaces,
+                mNotificationShadeWindowController,
+                mKeyguardUnlockAnimationController,
+                mAmbientState);
         mController.setupExpandedStatusBar();
-        mController.setService(mStatusBar, mNotificationShadeWindowController);
         mController.setDragDownHelper(mDragDownHelper);
     }
 

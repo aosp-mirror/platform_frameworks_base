@@ -963,6 +963,25 @@ public class WifiNl80211Manager {
     }
 
     /**
+     * Get the max number of SSIDs that the driver supports per scan.
+     *
+     * @param ifaceName Name of the interface.
+     */
+    public int getMaxSsidsPerScan(@NonNull String ifaceName) {
+        IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
+        if (scannerImpl == null) {
+            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
+            return 0;
+        }
+        try {
+            return scannerImpl.getMaxSsidsPerScan();
+        } catch (RemoteException e1) {
+            Log.e(TAG, "Failed to getMaxSsidsPerScan");
+        }
+        return 0;
+    }
+
+    /**
      * Return scan type for the parcelable {@link SingleScanSettings}
      */
     private static int getScanType(@WifiAnnotations.ScanType int scanType) {
@@ -1269,18 +1288,19 @@ public class WifiNl80211Manager {
      * support the NL80211_CMD_REG_CHANGED (otherwise it will find out on its own). The wificond
      * updates in internal state in response to this Country Code update.
      *
-     * @return true on success, false otherwise.
+     * @param newCountryCode new country code. An ISO-3166-alpha2 country code which is 2-Character
+     *                       alphanumeric.
      */
-    public boolean notifyCountryCodeChanged() {
-        try {
-            if (mWificond != null) {
-                mWificond.notifyCountryCodeChanged();
-                return true;
-            }
-        } catch (RemoteException e1) {
-            Log.e(TAG, "Failed to notify country code changed due to remote exception");
+    public void notifyCountryCodeChanged(@Nullable String newCountryCode) {
+        if (mWificond == null) {
+            new RemoteException("Wificond service doesn't exist!").rethrowFromSystemServer();
         }
-        return false;
+        try {
+            mWificond.notifyCountryCodeChanged();
+            Log.i(TAG, "Receive country code change to " + newCountryCode);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
     }
 
     /**

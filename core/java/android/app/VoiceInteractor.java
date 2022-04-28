@@ -1168,6 +1168,23 @@ public final class VoiceInteractor {
         }
     }
 
+    /**
+     * @return the package name of the service providing the VoiceInteractionService.
+     */
+    @NonNull
+    public String getPackageName() {
+        String packageName = null;
+        if (mActivity != null && mInteractor != null) {
+            try {
+                packageName = ActivityTaskManager.getService()
+                    .getVoiceInteractorPackageName(mInteractor.asBinder());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return packageName == null ? "" : packageName;
+    }
+
     void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
         String innerPrefix = prefix + "    ";
         if (mActiveRequests.size() > 0) {

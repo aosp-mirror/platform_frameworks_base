@@ -17,6 +17,8 @@
 package android.app;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
@@ -44,7 +46,10 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
+import android.content.ComponentCallbacksController;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -115,9 +120,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.OnBackInvokedCallback;
-import android.view.OnBackInvokedDispatcher;
-import android.view.OnBackInvokedDispatcherOwner;
 import android.view.RemoteAnimationDefinition;
 import android.view.SearchEvent;
 import android.view.View;
@@ -144,6 +146,8 @@ import android.view.translation.UiTranslationSpec;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 import android.window.SplashScreen;
 import android.window.WindowOnBackInvokedDispatcher;
 
@@ -744,8 +748,7 @@ public class Activity extends ContextThemeWrapper
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
         Window.OnWindowDismissedCallback,
-        ContentCaptureManager.ContentCaptureClient,
-        OnBackInvokedDispatcherOwner {
+        ContentCaptureManager.ContentCaptureClient {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -809,6 +812,13 @@ public class Activity extends ContextThemeWrapper
         Dialog mDialog;
         Bundle mArgs;
     }
+
+    /** @hide */ public static final String DUMP_ARG_AUTOFILL = "--autofill";
+    /** @hide */ public static final String DUMP_ARG_CONTENT_CAPTURE = "--contentcapture";
+    /** @hide */ public static final String DUMP_ARG_TRANSLATION = "--translation";
+    /** @hide */ @TestApi public static final String DUMP_ARG_LIST_DUMPABLES = "--list-dumpables";
+    /** @hide */ @TestApi public static final String DUMP_ARG_DUMP_DUMPABLE = "--dump-dumpable";
+
     private SparseArray<ManagedDialog> mManagedDialogs;
 
     // set by the thread after the constructor and before onCreate(Bundle savedInstanceState) is called.
@@ -860,7 +870,7 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage
     /*package*/ int mConfigChangeFlags;
     @UnsupportedAppUsage
-    /*package*/ Configuration mCurrentConfig;
+    /*package*/ Configuration mCurrentConfig = Configuration.EMPTY;
     private SearchManager mSearchManager;
     private MenuInflater mMenuInflater;
 
@@ -972,12 +982,16 @@ public class Activity extends ContextThemeWrapper
     private boolean mIsInMultiWindowMode;
     private boolean mIsInPictureInPictureMode;
 
+    private boolean mShouldDockBigOverlays;
+
     private UiTranslationController mUiTranslationController;
 
     private SplashScreen mSplashScreen;
 
     @Nullable
     private DumpableContainerImpl mDumpableContainer;
+
+    private ComponentCallbacksController mCallbacksController;
 
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
@@ -1320,6 +1334,28 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    @Override
+    public void registerComponentCallbacks(ComponentCallbacks callback) {
+        if (CompatChanges.isChangeEnabled(OVERRIDABLE_COMPONENT_CALLBACKS)
+                && mCallbacksController == null) {
+            mCallbacksController = new ComponentCallbacksController();
+        }
+        if (mCallbacksController != null) {
+            mCallbacksController.registerCallbacks(callback);
+        } else {
+            super.registerComponentCallbacks(callback);
+        }
+    }
+
+    @Override
+    public void unregisterComponentCallbacks(ComponentCallbacks callback) {
+        if (mCallbacksController != null) {
+            mCallbacksController.unregisterCallbacks(callback);
+        } else {
+            super.unregisterComponentCallbacks(callback);
+        }
+    }
+
     private void dispatchActivityPreCreated(@Nullable Bundle savedInstanceState) {
         getApplication().dispatchActivityPreCreated(this, savedInstanceState);
         Object[] callbacks = collectActivityLifecycleCallbacks();
@@ -1620,14 +1656,12 @@ public class Activity extends ContextThemeWrapper
         }
         mRestoredFromBundle = savedInstanceState != null;
         mCalled = true;
-        if (!WindowOnBackInvokedDispatcher.shouldUseLegacyBack()) {
+
+        boolean aheadOfTimeBack = WindowOnBackInvokedDispatcher
+                .isOnBackInvokedCallbackEnabled(this);
+        if (aheadOfTimeBack) {
             // Add onBackPressed as default back behavior.
-            mDefaultBackCallback = new OnBackInvokedCallback() {
-                @Override
-                public void onBackInvoked() {
-                    navigateBack();
-                }
-            };
+            mDefaultBackCallback = this::navigateBack;
             getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(mDefaultBackCallback);
         }
     }
@@ -2665,9 +2699,12 @@ public class Activity extends ContextThemeWrapper
         if (mUiTranslationController != null) {
             mUiTranslationController.onActivityDestroyed();
         }
-
         if (mDefaultBackCallback != null) {
             getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mDefaultBackCallback);
+            mDefaultBackCallback = null;
+        }
+        if (mCallbacksController != null) {
+            mCallbacksController.clearCallbacks();
         }
     }
 
@@ -2923,6 +2960,42 @@ public class Activity extends ContextThemeWrapper
         return false;
     }
 
+    /**
+     * Specifies a preference to dock big overlays like the expanded picture-in-picture on TV
+     * (see {@link PictureInPictureParams.Builder#setExpandedAspectRatio}). Docking puts the
+     * big overlay side-by-side next to this activity, so that both windows are fully visible to
+     * the user.
+     *
+     * <p> If unspecified, whether the overlay window will be docked or not, will be defined
+     * by the system.
+     *
+     * <p> If specified, the system will try to respect the preference, but it may be
+     * overridden by a user preference.
+     *
+     * @param shouldDockBigOverlays indicates that big overlays should be docked next to the
+     *                              activity instead of overlay its content
+     *
+     * @see PictureInPictureParams.Builder#setExpandedAspectRatio
+     * @see #shouldDockBigOverlays
+     */
+    public void setShouldDockBigOverlays(boolean shouldDockBigOverlays) {
+        ActivityClient.getInstance().setShouldDockBigOverlays(mToken, shouldDockBigOverlays);
+        mShouldDockBigOverlays = shouldDockBigOverlays;
+    }
+
+    /**
+     * Returns whether big overlays should be docked next to the activity as set by
+     * {@link #setShouldDockBigOverlays}.
+     *
+     * @return {@code true} if big overlays should be docked next to the activity instead
+     *         of overlay its content
+     *
+     * @see #setShouldDockBigOverlays
+     */
+    public boolean shouldDockBigOverlays() {
+        return mShouldDockBigOverlays;
+    }
+
     void dispatchMovedToDisplay(int displayId, Configuration config) {
         updateDisplay(displayId);
         onMovedToDisplay(displayId, config);
@@ -2988,6 +3061,9 @@ public class Activity extends ContextThemeWrapper
         }
 
         dispatchActivityConfigurationChanged();
+        if (mCallbacksController != null) {
+            mCallbacksController.dispatchConfigurationChanged(newConfig);
+        }
     }
 
     /**
@@ -3159,12 +3235,18 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onLowMemory " + this);
         mCalled = true;
         mFragments.dispatchLowMemory();
+        if (mCallbacksController != null) {
+            mCallbacksController.dispatchLowMemory();
+        }
     }
 
     public void onTrimMemory(int level) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onTrimMemory " + this + ": " + level);
         mCalled = true;
         mFragments.dispatchTrimMemory(level);
+        if (mCallbacksController != null) {
+            mCallbacksController.dispatchTrimMemory(level);
+        }
     }
 
     /**
@@ -3849,7 +3931,11 @@ public class Activity extends ContextThemeWrapper
      * </ul>
      *
      * @see #moveTaskToBack(boolean)
+     *
+     * @deprecated Use {@link OnBackInvokedCallback} or
+     * {@code androidx.activity.OnBackPressedCallback} to handle back navigation instead.
      */
+    @Deprecated
     public void onBackPressed() {
         if (mActionBar != null && mActionBar.collapseActionView()) {
             return;
@@ -5435,26 +5521,115 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Launch an activity for which you would like a result when it finished.
+     * When this activity exits, your
+     * onActivityResult() method will be called with the given requestCode.
+     * Using a negative requestCode is the same as calling
+     * {@link #startActivity} (the activity is not launched as a sub-activity).
+     *
+     * <p>Note that this method should only be used with Intent protocols
+     * that are defined to return a result.  In other protocols (such as
+     * {@link Intent#ACTION_MAIN} or {@link Intent#ACTION_VIEW}), you may
+     * not get the result when you expect.  For example, if the activity you
+     * are launching uses {@link Intent#FLAG_ACTIVITY_NEW_TASK}, it will not
+     * run in your task and thus you will immediately receive a cancel result.
+     *
+     * <p>As a special case, if you call startActivityForResult() with a requestCode
+     * >= 0 during the initial onCreate(Bundle savedInstanceState)/onResume() of your
+     * activity, then your window will not be displayed until a result is
+     * returned back from the started activity.  This is to avoid visible
+     * flickering when redirecting to another activity.
+     *
+     * <p>This method throws {@link android.content.ActivityNotFoundException}
+     * if there was no Activity found to run the given Intent.
+     *
+     * @param intent      The intent to start.
+     * @param requestCode If >= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param user        The user to start the intent as.
      * @hide Implement to provide correct calling token.
      */
-    @UnsupportedAppUsage
-    public void startActivityForResultAsUser(Intent intent, int requestCode, UserHandle user) {
+    @SystemApi
+    @RequiresPermission(anyOf = {INTERACT_ACROSS_USERS, INTERACT_ACROSS_USERS_FULL})
+    public void startActivityForResultAsUser(@NonNull Intent intent, int requestCode,
+            @NonNull UserHandle user) {
         startActivityForResultAsUser(intent, requestCode, null, user);
     }
 
     /**
+     * Launch an activity for which you would like a result when it finished.
+     * When this activity exits, your
+     * onActivityResult() method will be called with the given requestCode.
+     * Using a negative requestCode is the same as calling
+     * {@link #startActivity} (the activity is not launched as a sub-activity).
+     *
+     * <p>Note that this method should only be used with Intent protocols
+     * that are defined to return a result.  In other protocols (such as
+     * {@link Intent#ACTION_MAIN} or {@link Intent#ACTION_VIEW}), you may
+     * not get the result when you expect.  For example, if the activity you
+     * are launching uses {@link Intent#FLAG_ACTIVITY_NEW_TASK}, it will not
+     * run in your task and thus you will immediately receive a cancel result.
+     *
+     * <p>As a special case, if you call startActivityForResult() with a requestCode
+     * >= 0 during the initial onCreate(Bundle savedInstanceState)/onResume() of your
+     * activity, then your window will not be displayed until a result is
+     * returned back from the started activity.  This is to avoid visible
+     * flickering when redirecting to another activity.
+     *
+     * <p>This method throws {@link android.content.ActivityNotFoundException}
+     * if there was no Activity found to run the given Intent.
+     *
+     * @param intent      The intent to start.
+     * @param requestCode If >= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param options     Additional options for how the Activity should be started. See {@link
+     *                    android.content.Context#startActivity(Intent, Bundle)} for more details.
+     * @param user        The user to start the intent as.
      * @hide Implement to provide correct calling token.
      */
-    public void startActivityForResultAsUser(Intent intent, int requestCode,
-            @Nullable Bundle options, UserHandle user) {
+    @SystemApi
+    @RequiresPermission(anyOf = {INTERACT_ACROSS_USERS, INTERACT_ACROSS_USERS_FULL})
+    public void startActivityForResultAsUser(@NonNull Intent intent, int requestCode,
+            @Nullable Bundle options, @NonNull UserHandle user) {
         startActivityForResultAsUser(intent, mEmbeddedID, requestCode, options, user);
     }
 
     /**
+     * Launch an activity for which you would like a result when it finished.
+     * When this activity exits, your
+     * onActivityResult() method will be called with the given requestCode.
+     * Using a negative requestCode is the same as calling
+     * {@link #startActivity} (the activity is not launched as a sub-activity).
+     *
+     * <p>Note that this method should only be used with Intent protocols
+     * that are defined to return a result.  In other protocols (such as
+     * {@link Intent#ACTION_MAIN} or {@link Intent#ACTION_VIEW}), you may
+     * not get the result when you expect.  For example, if the activity you
+     * are launching uses {@link Intent#FLAG_ACTIVITY_NEW_TASK}, it will not
+     * run in your task and thus you will immediately receive a cancel result.
+     *
+     * <p>As a special case, if you call startActivityForResult() with a requestCode
+     * >= 0 during the initial onCreate(Bundle savedInstanceState)/onResume() of your
+     * activity, then your window will not be displayed until a result is
+     * returned back from the started activity.  This is to avoid visible
+     * flickering when redirecting to another activity.
+     *
+     * <p>This method throws {@link android.content.ActivityNotFoundException}
+     * if there was no Activity found to run the given Intent.
+     *
+     * @param intent      The intent to start.
+     * @param requestCode If >= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param options     Additional options for how the Activity should be started. See {@link
+     *                    android.content.Context#startActivity(Intent, Bundle)} for more details.
+     * @param user        The user to start the intent as.
      * @hide Implement to provide correct calling token.
      */
-    public void startActivityForResultAsUser(Intent intent, String resultWho, int requestCode,
-            @Nullable Bundle options, UserHandle user) {
+    @SystemApi
+    @RequiresPermission(anyOf = {INTERACT_ACROSS_USERS, INTERACT_ACROSS_USERS_FULL})
+    public void startActivityForResultAsUser(@NonNull Intent intent, @NonNull String resultWho,
+            int requestCode,
+            @Nullable Bundle options, @NonNull UserHandle user) {
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
@@ -5464,7 +5639,7 @@ public class Activity extends ContextThemeWrapper
                 options, user);
         if (ar != null) {
             mMainThread.sendActivityResult(
-                mToken, mEmbeddedID, requestCode, ar.getResultCode(), ar.getResultData());
+                    mToken, mEmbeddedID, requestCode, ar.getResultCode(), ar.getResultData());
         }
         if (requestCode >= 0) {
             // If this start is requesting a result, we can avoid making
@@ -5489,9 +5664,22 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @hide Implement to provide correct calling token.
+     * Version of {@link #startActivity(Intent, Bundle)} that allows you to specify the
+     * user the activity will be started for.  This is not available to applications
+     * that are not pre-installed on the system image.
+     * @param intent The description of the activity to start.
+     *
+     * @param user The UserHandle of the user to start this activity for.
+     * @param options Additional options for how the Activity should be started.
+     *          May be null if there are no options.  See {@link android.app.ActivityOptions}
+     *          for how to build the Bundle supplied here; there are no supported definitions
+     *          for building it manually.
+     * @throws ActivityNotFoundException &nbsp;
+     * @hide
      */
-    public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
+    @RequiresPermission(anyOf = {INTERACT_ACROSS_USERS, INTERACT_ACROSS_USERS_FULL})
+    public void startActivityAsUser(@NonNull Intent intent,
+            @Nullable Bundle options, @NonNull UserHandle user) {
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
@@ -5516,7 +5704,6 @@ public class Activity extends ContextThemeWrapper
      * their launch had come from the original activity.
      * @param intent The Intent to start.
      * @param options ActivityOptions or null.
-     * @param permissionToken Token received from the system that permits this call to be made.
      * @param ignoreTargetSecurity If true, the activity manager will not check whether the
      * caller it is doing the start is, is actually allowed to start the target activity.
      * If you set this to true, you must set an explicit component in the Intent and do any
@@ -5525,18 +5712,18 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
-            IBinder permissionToken, boolean ignoreTargetSecurity, int userId) {
-        startActivityAsCaller(intent, options, permissionToken, ignoreTargetSecurity, userId, -1);
+            boolean ignoreTargetSecurity, int userId) {
+        startActivityAsCaller(intent, options, ignoreTargetSecurity, userId, -1);
     }
 
     /**
-     * @see #startActivityAsCaller(Intent, Bundle, IBinder, boolean, int)
+     * @see #startActivityAsCaller(Intent, Bundle, boolean, int)
      * @param requestCode The request code used for returning a result or -1 if no result should be
      *                    returned.
      * @hide
      */
     public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
-            IBinder permissionToken, boolean ignoreTargetSecurity, int userId, int requestCode) {
+            boolean ignoreTargetSecurity, int userId, int requestCode) {
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
@@ -5544,8 +5731,7 @@ public class Activity extends ContextThemeWrapper
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivityAsCaller(
                         this, mMainThread.getApplicationThread(), mToken, this,
-                        intent, requestCode, options, permissionToken, ignoreTargetSecurity,
-                        userId);
+                        intent, requestCode, options, ignoreTargetSecurity, userId);
         if (ar != null) {
             mMainThread.sendActivityResult(
                     mToken, mEmbeddedID, requestCode, ar.getResultCode(), ar.getResultData());
@@ -7204,43 +7390,71 @@ public class Activity extends ContextThemeWrapper
     public void dumpInternal(@NonNull String prefix,
             @SuppressLint("UseParcelFileDescriptor") @Nullable FileDescriptor fd,
             @NonNull PrintWriter writer, @Nullable String[] args) {
-        if (args != null && args.length > 0
-                && CompatChanges.isChangeEnabled(DUMP_IGNORES_SPECIAL_ARGS)) {
+
+        // Lazy-load mDumpableContainer with Dumpables activity might already have a reference to
+        if (mAutofillClientController != null) {
+            addDumpable(mAutofillClientController);
+        }
+        if (mUiTranslationController != null) {
+            addDumpable(mUiTranslationController);
+        }
+        if (mContentCaptureManager != null) {
+            mContentCaptureManager.addDumpable(this);
+        }
+
+        boolean dumpInternalState = true;
+        String arg = null;
+        if (args != null && args.length > 0) {
+            arg = args[0];
+            boolean isSpecialCase = true;
             // Handle special cases
-            switch (args[0]) {
-                case "--autofill":
-                    dumpAutofillManager(prefix, writer, args);
+            switch (arg) {
+                case DUMP_ARG_AUTOFILL:
+                    dumpLegacyDumpable(prefix, writer, arg,
+                            AutofillClientController.DUMPABLE_NAME);
                     return;
-                case "--contentcapture":
-                    dumpContentCaptureManager(prefix, writer);
+                case DUMP_ARG_CONTENT_CAPTURE:
+                    dumpLegacyDumpable(prefix, writer, arg,
+                            ContentCaptureManager.DUMPABLE_NAME);
                     return;
-                case "--translation":
-                    dumpUiTranslation(prefix, writer);
+                case DUMP_ARG_TRANSLATION:
+                    dumpLegacyDumpable(prefix, writer, arg,
+                            UiTranslationController.DUMPABLE_NAME);
                     return;
-                case "--list-dumpables":
+                case DUMP_ARG_LIST_DUMPABLES:
                     if (mDumpableContainer == null) {
                         writer.print(prefix); writer.println("No dumpables");
-                        return;
+                    } else {
+                        mDumpableContainer.listDumpables(prefix, writer);
                     }
-                    mDumpableContainer.listDumpables(prefix, writer);
                     return;
-                case "--dump-dumpable":
+                case DUMP_ARG_DUMP_DUMPABLE:
                     if (args.length == 1) {
-                        writer.println("--dump-dumpable requires the dumpable name");
-                        return;
-                    }
-                    if (mDumpableContainer == null) {
+                        writer.print(DUMP_ARG_DUMP_DUMPABLE);
+                        writer.println(" requires the dumpable name");
+                    } else if (mDumpableContainer == null) {
                         writer.println("no dumpables");
-                        return;
+                    } else {
+                        // Strips --dump-dumpable NAME
+                        String[] prunedArgs = new String[args.length - 2];
+                        System.arraycopy(args, 2, prunedArgs, 0, prunedArgs.length);
+                        mDumpableContainer.dumpOneDumpable(prefix, writer, args[1], prunedArgs);
                     }
-                    // Strips --dump-dumpable NAME
-                    String[] prunedArgs = new String[args.length - 2];
-                    System.arraycopy(args, 2, prunedArgs, 0, prunedArgs.length);
-                    mDumpableContainer.dumpOneDumpable(prefix, writer, args[1], prunedArgs);
-                    return;
+                    break;
+                default:
+                    isSpecialCase = false;
+                    break;
+            }
+            if (isSpecialCase) {
+                dumpInternalState = !CompatChanges.isChangeEnabled(DUMP_IGNORES_SPECIAL_ARGS);
             }
         }
-        dump(prefix, fd, writer, args);
+
+        if (dumpInternalState) {
+            dump(prefix, fd, writer, args);
+        } else {
+            Log.i(TAG, "Not calling dump() on " + this + " because of special argument " + arg);
+        }
     }
 
     void dumpInner(@NonNull String prefix, @Nullable FileDescriptor fd,
@@ -7284,26 +7498,10 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    private void dumpContentCaptureManager(String prefix, PrintWriter writer) {
-        getContentCaptureManager();
-        dumpLegacyDumpable(prefix, writer, ContentCaptureManager.DUMPABLE_NAME, /* args= */ null);
-    }
-
-    private void dumpUiTranslation(String prefix, PrintWriter writer) {
-        dumpLegacyDumpable(prefix, writer, UiTranslationController.DUMPABLE_NAME, /* args= */ null);
-    }
-
-    private void dumpAutofillManager(String prefix, PrintWriter writer, String[] args) {
-        dumpLegacyDumpable(prefix, writer, AutofillClientController.DUMPABLE_NAME, args);
-    }
-
-    private void dumpLegacyDumpable(@NonNull String prefix, @NonNull PrintWriter writer,
-            @NonNull String dumpableName, @Nullable String[] args) {
-        if (mDumpableContainer == null) {
-            writer.print(prefix); writer.print("no "); writer.println(dumpableName);
-            return;
-        }
-        mDumpableContainer.dumpOneDumpable(prefix, writer, dumpableName, args);
+    private void dumpLegacyDumpable(String prefix, PrintWriter writer, String legacyOption,
+            String dumpableName) {
+        writer.printf("%s%s option deprecated. Use %s %s instead\n", prefix, legacyOption,
+                DUMP_ARG_DUMP_DUMPABLE, dumpableName);
     }
 
     /**
@@ -8062,6 +8260,7 @@ public class Activity extends ContextThemeWrapper
                 .getWindowingMode();
         mIsInMultiWindowMode = inMultiWindowMode(windowingMode);
         mIsInPictureInPictureMode = windowingMode == WINDOWING_MODE_PINNED;
+        mShouldDockBigOverlays = getResources().getBoolean(R.bool.config_dockBigOverlayWindows);
         restoreHasCurrentPermissionRequest(icicle);
         if (persistentState != null) {
             onCreate(icicle, persistentState);
@@ -8556,8 +8755,18 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * If set to true, this indicates to the system that it should never take a
-     * screenshot of the activity to be used as a representation while it is not in a started state.
+     * @hide
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.S,
+            publicAlternatives = "Use {@link #setRecentsScreenshotEnabled(boolean)} instead.")
+    public void setDisablePreviewScreenshots(boolean disable) {
+        setRecentsScreenshotEnabled(!disable);
+    }
+
+    /**
+     * If set to false, this indicates to the system that it should never take a
+     * screenshot of the activity to be used as a representation in recents screen. By default, this
+     * value is {@code true}.
      * <p>
      * Note that the system may use the window background of the theme instead to represent
      * the window when it is not running.
@@ -8570,12 +8779,10 @@ public class Activity extends ContextThemeWrapper
      * {@link android.service.voice.VoiceInteractionService} requests a screenshot via
      * {@link android.service.voice.VoiceInteractionSession#SHOW_WITH_SCREENSHOT}.
      *
-     * @param disable {@code true} to disable preview screenshots; {@code false} otherwise.
-     * @hide
+     * @param enabled {@code true} to enable recents screenshots; {@code false} otherwise.
      */
-    @UnsupportedAppUsage
-    public void setDisablePreviewScreenshots(boolean disable) {
-        ActivityClient.getInstance().setDisablePreviewScreenshots(mToken, disable);
+    public void setRecentsScreenshotEnabled(boolean enabled) {
+        ActivityClient.getInstance().setRecentsScreenshotEnabled(mToken, enabled);
     }
 
     /**
@@ -8784,12 +8991,11 @@ public class Activity extends ContextThemeWrapper
      * @throws IllegalStateException if this Activity is not visual.
      */
     @NonNull
-    @Override
     public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
         if (mWindow == null) {
             throw new IllegalStateException("OnBackInvokedDispatcher are not available on "
                     + "non-visual activities");
         }
-        return ((OnBackInvokedDispatcherOwner) mWindow).getOnBackInvokedDispatcher();
+        return mWindow.getOnBackInvokedDispatcher();
     }
 }

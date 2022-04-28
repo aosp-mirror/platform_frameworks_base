@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -38,19 +39,22 @@ import android.util.DumpableContainer;
 import android.util.Log;
 import android.util.TimingsTraceLog;
 import android.view.SurfaceControl;
+import android.view.ThreadedRenderer;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.ContextComponentHelper;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.shared.system.ThreadedRendererCompat;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.inject.Provider;
 
 /**
  * Application class for SystemUI.
@@ -102,6 +106,10 @@ public class SystemUIApplication extends Application implements
         mBootCompleteCache = mSysUIComponent.provideBootCacheImpl();
         log.traceEnd();
 
+        // Enable Looper trace points.
+        // This allows us to see Handler callbacks on traces.
+        Looper.getMainLooper().setTraceTag(Trace.TRACE_TAG_APP);
+
         // Set the application theme that is inherited by all services. Note that setting the
         // application theme in the manifest does only work for activities. Keep this in sync with
         // the theme set there.
@@ -115,11 +123,11 @@ public class SystemUIApplication extends Application implements
             // The priority is defaulted at medium.
             int sfPriority = SurfaceControl.getGPUContextPriority();
             Log.i(TAG, "Found SurfaceFlinger's GPU Priority: " + sfPriority);
-            if (sfPriority == ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_REALTIME_NV) {
+            if (sfPriority == ThreadedRenderer.EGL_CONTEXT_PRIORITY_REALTIME_NV) {
                 Log.i(TAG, "Setting SysUI's GPU Context priority to: "
-                        + ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
-                ThreadedRendererCompat.setContextPriority(
-                        ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
+                        + ThreadedRenderer.EGL_CONTEXT_PRIORITY_HIGH_IMG);
+                ThreadedRenderer.setContextPriority(
+                        ThreadedRenderer.EGL_CONTEXT_PRIORITY_HIGH_IMG);
             }
 
             // Enable binder tracing on system server for calls originating from SysUI
@@ -181,17 +189,17 @@ public class SystemUIApplication extends Application implements
      */
 
     public void startServicesIfNeeded() {
-        final String[] names = SystemUIFactory.getInstance()
-                .getSystemUIServiceComponents(getResources());
-        final String[] additionalNames = SystemUIFactory.getInstance()
-                .getAdditionalSystemUIServiceComponents(getResources());
+        final String vendorComponent = SystemUIFactory.getInstance()
+                .getVendorComponent(getResources());
 
-        final ArrayList<String> serviceComponents = new ArrayList<>();
-        Collections.addAll(serviceComponents, names);
-        Collections.addAll(serviceComponents, additionalNames);
-
-        startServicesIfNeeded(/* metricsPrefix= */ "StartServices",
-                serviceComponents.toArray(new String[serviceComponents.size()]));
+        // Sort the startables so that we get a deterministic ordering.
+        // TODO: make #start idempotent and require users of CoreStartable to call it.
+        Map<Class<?>, Provider<CoreStartable>> sortedStartables = new TreeMap<>(
+                Comparator.comparing(Class::getName));
+        sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponents());
+        sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponentsPerUser());
+        startServicesIfNeeded(
+                sortedStartables, "StartServices", vendorComponent);
     }
 
     /**
@@ -201,16 +209,22 @@ public class SystemUIApplication extends Application implements
      * <p>This method must only be called from the main thread.</p>
      */
     void startSecondaryUserServicesIfNeeded() {
-        String[] names = SystemUIFactory.getInstance().getSystemUIServiceComponentsPerUser(
-                getResources());
-        startServicesIfNeeded(/* metricsPrefix= */ "StartSecondaryServices", names);
+        // Sort the startables so that we get a deterministic ordering.
+        Map<Class<?>, Provider<CoreStartable>> sortedStartables = new TreeMap<>(
+                Comparator.comparing(Class::getName));
+        sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponentsPerUser());
+        startServicesIfNeeded(
+                sortedStartables, "StartSecondaryServices", null);
     }
 
-    private void startServicesIfNeeded(String metricsPrefix, String[] services) {
+    private void startServicesIfNeeded(
+            Map<Class<?>, Provider<CoreStartable>> startables,
+            String metricsPrefix,
+            String vendorComponent) {
         if (mServicesStarted) {
             return;
         }
-        mServices = new CoreStartable[services.length];
+        mServices = new CoreStartable[startables.size() + (vendorComponent == null ? 0 : 1)];
 
         if (!mBootCompleteCache.isBootComplete()) {
             // check to see if maybe it was already completed long before we began
@@ -230,36 +244,29 @@ public class SystemUIApplication extends Application implements
         TimingsTraceLog log = new TimingsTraceLog("SystemUIBootTiming",
                 Trace.TRACE_TAG_APP);
         log.traceBegin(metricsPrefix);
-        final int N = services.length;
-        for (int i = 0; i < N; i++) {
-            String clsName = services[i];
-            if (DEBUG) Log.d(TAG, "loading: " + clsName);
-            log.traceBegin(metricsPrefix + clsName);
-            long ti = System.currentTimeMillis();
-            try {
-                CoreStartable obj = mComponentHelper.resolveCoreStartable(clsName);
-                if (obj == null) {
-                    Constructor constructor = Class.forName(clsName).getConstructor(Context.class);
-                    obj = (CoreStartable) constructor.newInstance(this);
-                }
-                mServices[i] = obj;
-            } catch (ClassNotFoundException
-                    | NoSuchMethodException
-                    | IllegalAccessException
-                    | InstantiationException
-                    | InvocationTargetException ex) {
-                throw new RuntimeException(ex);
-            }
 
-            if (DEBUG) Log.d(TAG, "running: " + mServices[i]);
-            mServices[i].start();
-            log.traceEnd();
+        int i = 0;
+        for (Map.Entry<Class<?>, Provider<CoreStartable>> entry : startables.entrySet()) {
+            String clsName = entry.getKey().getName();
+            int j = i;  // Copied to make lambda happy.
+            timeInitialization(
+                    clsName,
+                    () -> mServices[j] = startStartable(clsName, entry.getValue()),
+                    log,
+                    metricsPrefix);
+            i++;
+        }
 
-            // Warn if initialization of component takes too long
-            ti = System.currentTimeMillis() - ti;
-            if (ti > 1000) {
-                Log.w(TAG, "Initialization of " + clsName + " took " + ti + " ms");
-            }
+        if (vendorComponent != null) {
+            timeInitialization(
+                    vendorComponent,
+                    () -> mServices[mServices.length - 1] =
+                            startAdditionalStartable(vendorComponent),
+                    log,
+                    metricsPrefix);
+        }
+
+        for (i = 0; i < mServices.length; i++) {
             if (mBootCompleteCache.isBootComplete()) {
                 mServices[i].onBootCompleted();
             }
@@ -272,7 +279,51 @@ public class SystemUIApplication extends Application implements
         mServicesStarted = true;
     }
 
-    // TODO(b/149254050): add unit tests? There doesn't seem to be a SystemUiApplicationTest...
+    private void timeInitialization(String clsName, Runnable init, TimingsTraceLog log,
+            String metricsPrefix) {
+        long ti = System.currentTimeMillis();
+        log.traceBegin(metricsPrefix + " " + clsName);
+        init.run();
+        log.traceEnd();
+
+        // Warn if initialization of component takes too long
+        ti = System.currentTimeMillis() - ti;
+        if (ti > 1000) {
+            Log.w(TAG, "Initialization of " + clsName + " took " + ti + " ms");
+        }
+    }
+
+    private CoreStartable startAdditionalStartable(String clsName) {
+        CoreStartable startable;
+        if (DEBUG) Log.d(TAG, "loading: " + clsName);
+        try {
+            Constructor<?> constructor = Class.forName(clsName).getConstructor(
+                    Context.class);
+            startable = (CoreStartable) constructor.newInstance(this);
+        } catch (ClassNotFoundException
+                | NoSuchMethodException
+                | IllegalAccessException
+                | InstantiationException
+                | InvocationTargetException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        return startStartable(startable);
+    }
+
+    private CoreStartable startStartable(String clsName, Provider<CoreStartable> provider) {
+        if (DEBUG) Log.d(TAG, "loading: " + clsName);
+        return startStartable(provider.get());
+    }
+
+    private CoreStartable startStartable(CoreStartable startable) {
+        if (DEBUG) Log.d(TAG, "running: " + startable);
+        startable.start();
+
+        return startable;
+    }
+
+    // TODO(b/217567642): add unit tests? There doesn't seem to be a SystemUiApplicationTest...
     @Override
     public boolean addDumpable(Dumpable dumpable) {
         String name = dumpable.getDumpableName();
@@ -288,11 +339,18 @@ public class SystemUIApplication extends Application implements
         if (DEBUG) Log.d(TAG, "addDumpable(): adding '" + name + "' = " + dumpable);
         mDumpables.put(name, dumpable);
 
-        // TODO(b/149254050): replace com.android.systemui.dump.Dumpable by
+        // TODO(b/217567642): replace com.android.systemui.dump.Dumpable by
         // com.android.util.Dumpable and get rid of the intermediate lambda
-        mDumpManager.registerDumpable(dumpable.getDumpableName(),
-                (fd, pw, args) -> dumpable.dump(pw, args));
+        mDumpManager.registerDumpable(dumpable.getDumpableName(), dumpable::dump);
         return true;
+    }
+
+    // TODO(b/217567642): implement
+    @Override
+    public boolean removeDumpable(Dumpable dumpable) {
+        Log.w(TAG, "removeDumpable(" + dumpable + "): not implemented");
+
+        return false;
     }
 
     @Override

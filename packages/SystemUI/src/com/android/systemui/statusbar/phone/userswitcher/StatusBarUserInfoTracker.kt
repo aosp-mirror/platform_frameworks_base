@@ -18,13 +18,16 @@ package com.android.systemui.statusbar.phone.userswitcher
 
 import android.graphics.drawable.Drawable
 import android.os.UserManager
-
-import com.android.systemui.DejankUtils.whitelistIpcs
+import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener
-
+import java.io.PrintWriter
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
@@ -34,8 +37,11 @@ import javax.inject.Inject
 @SysUISingleton
 class StatusBarUserInfoTracker @Inject constructor(
     private val userInfoController: UserInfoController,
-    private val userManager: UserManager
-) : CallbackController<CurrentUserChipInfoUpdatedListener> {
+    private val userManager: UserManager,
+    private val dumpManager: DumpManager,
+    @Main private val mainExecutor: Executor,
+    @Background private val backgroundExecutor: Executor
+) : CallbackController<CurrentUserChipInfoUpdatedListener>, Dumpable {
     var currentUserName: String? = null
         private set
     var currentUserAvatar: Drawable? = null
@@ -53,7 +59,7 @@ class StatusBarUserInfoTracker @Inject constructor(
     }
 
     init {
-        startListening()
+        dumpManager.registerDumpable(TAG, this)
     }
 
     override fun addCallback(listener: CurrentUserChipInfoUpdatedListener) {
@@ -96,23 +102,27 @@ class StatusBarUserInfoTracker @Inject constructor(
         userInfoController.removeCallback(userInfoChangedListener)
     }
 
-    private fun checkUserSwitcherEnabled() {
-        whitelistIpcs {
-            userSwitcherEnabled = userManager.isUserSwitcherEnabled
-        }
-    }
-
     /**
      * Force a check to [UserManager.isUserSwitcherEnabled], and update listeners if the value has
      * changed
      */
     fun checkEnabled() {
-        val wasEnabled = userSwitcherEnabled
-        checkUserSwitcherEnabled()
+        backgroundExecutor.execute {
+            // Check on a background thread to avoid main thread Binder calls
+            val wasEnabled = userSwitcherEnabled
+            userSwitcherEnabled = userManager.isUserSwitcherEnabled
 
-        if (wasEnabled != userSwitcherEnabled) {
-            notifyListenersSettingChanged()
+            if (wasEnabled != userSwitcherEnabled) {
+                mainExecutor.execute {
+                    notifyListenersSettingChanged()
+                }
+            }
         }
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println("  userSwitcherEnabled=$userSwitcherEnabled")
+        pw.println("  listening=$listening")
     }
 }
 
@@ -120,3 +130,5 @@ interface CurrentUserChipInfoUpdatedListener {
     fun onCurrentUserChipInfoUpdated()
     fun onStatusBarUserSwitcherSettingChanged(enabled: Boolean) {}
 }
+
+private const val TAG = "StatusBarUserInfoTracker"

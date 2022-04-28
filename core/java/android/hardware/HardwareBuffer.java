@@ -63,6 +63,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             D_FP32,
             DS_FP32UI8,
             S_UI8,
+            YCBCR_P010,
     })
     public @interface Format {
     }
@@ -96,6 +97,14 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final int DS_FP32UI8   = 0x34;
     /** Format: 8 bits stencil */
     public static final int S_UI8        = 0x35;
+    /**
+     * <p>Android YUV P010 format.</p>
+     *
+     * P010 is a 4:2:0 YCbCr semiplanar format comprised of a WxH Y plane
+     * followed by a Wx(H/2) CbCr plane. Each sample is represented by a 16-bit
+     * little-endian value, with the lower 6 bits set to zero.
+     */
+    public static final int YCBCR_P010 = 0x36;
 
     // Note: do not rename, this field is used by native code
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -131,7 +140,8 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     /** Usage: The buffer will be written to by the GPU */
     public static final long USAGE_GPU_COLOR_OUTPUT       = 1 << 9;
     /**
-     * The buffer will be used as a composer HAL overlay layer.
+     * The buffer will be used as a hardware composer overlay layer. That is, it will be displayed
+     * using the system compositor via {@link SurfaceControl}
      *
      * This flag is currently only needed when using
      * {@link android.view.SurfaceControl.Transaction#setBuffer(SurfaceControl, HardwareBuffer)}
@@ -421,6 +431,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             case D_FP32:
             case DS_FP32UI8:
             case S_UI8:
+            case YCBCR_P010:
                 return true;
         }
         return false;

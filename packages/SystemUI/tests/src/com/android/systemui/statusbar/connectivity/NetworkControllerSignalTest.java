@@ -84,6 +84,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 mMockBd,
                 mDemoModeController,
                 mCarrierConfigTracker,
+                mMainHandler,
                 mFeatureFlags,
                 mock(DumpManager.class)
         );
@@ -117,6 +118,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 mMockBd,
                 mDemoModeController,
                 mCarrierConfigTracker,
+                mMainHandler,
                 mFeatureFlags,
                 mock(DumpManager.class)
         );
@@ -136,7 +138,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags,
+                mDemoModeController, mock(CarrierConfigTracker.class),
+                mMainHandler, mFeatureFlags,
                 mock(DumpManager.class));
         setupNetworkController();
 
@@ -157,8 +160,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags,
-                mock(DumpManager.class));
+                mDemoModeController, mock(CarrierConfigTracker.class),
+                mMainHandler, mFeatureFlags, mock(DumpManager.class));
         mNetworkController.registerListeners();
 
         // Wait for the main looper to execute the previous command
@@ -226,8 +229,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags,
-                mock(DumpManager.class));
+                mDemoModeController, mock(CarrierConfigTracker.class),
+                mMainHandler, mFeatureFlags, mock(DumpManager.class));
         setupNetworkController();
 
         // No Subscriptions.

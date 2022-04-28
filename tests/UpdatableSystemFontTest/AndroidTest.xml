@@ -28,11 +28,7 @@
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
         <option name="cleanup" value="true" />
         <option name="push" value="UpdatableSystemFontTestCert.der->/data/local/tmp/UpdatableSystemFontTestCert.der" />
-        <option name="push" value="NotoColorEmoji.ttf->/data/local/tmp/NotoColorEmoji.ttf" />
-        <option name="push" value="NotoSerif-Regular.ttf->/data/local/tmp/NotoSerif-Regular.ttf" />
-        <option name="push" value="NotoSerif-Bold.ttf->/data/local/tmp/NotoSerif-Bold.ttf" />
-        <option name="push" value="UpdatableSystemFontTest_NotoSerif-Regular.sig->/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Regular.sig" />
-        <option name="push" value="UpdatableSystemFontTest_NotoSerif-Bold.sig->/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Bold.sig" />
+        <option name="push" value="UpdatableSystemFontTest_NotoColorEmoji.ttf->/data/local/tmp/UpdatableSystemFontTest_NotoColorEmoji.ttf" />
         <option name="push" value="UpdatableSystemFontTest_NotoColorEmoji.sig->/data/local/tmp/UpdatableSystemFontTest_NotoColorEmoji.sig" />
         <option name="push" value="UpdatableSystemFontTest_NotoColorEmojiV0.ttf->/data/local/tmp/UpdatableSystemFontTest_NotoColorEmojiV0.ttf" />
         <option name="push" value="UpdatableSystemFontTest_NotoColorEmojiV0.sig->/data/local/tmp/UpdatableSystemFontTest_NotoColorEmojiV0.sig" />
@@ -40,6 +36,10 @@
         <option name="push" value="UpdatableSystemFontTest_NotoColorEmojiVPlus1.sig->/data/local/tmp/UpdatableSystemFontTest_NotoColorEmojiVPlus1.sig" />
         <option name="push" value="UpdatableSystemFontTest_NotoColorEmojiVPlus2.ttf->/data/local/tmp/UpdatableSystemFontTest_NotoColorEmojiVPlus2.ttf" />
         <option name="push" value="UpdatableSystemFontTest_NotoColorEmojiVPlus2.sig->/data/local/tmp/UpdatableSystemFontTest_NotoColorEmojiVPlus2.sig" />
+        <option name="push" value="UpdatableSystemFontTest_NotoSerif-Regular.ttf->/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Regular.ttf" />
+        <option name="push" value="UpdatableSystemFontTest_NotoSerif-Regular.sig->/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Regular.sig" />
+        <option name="push" value="UpdatableSystemFontTest_NotoSerif-Bold.sig->/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Bold.sig" />
+        <option name="push" value="UpdatableSystemFontTest_NotoSerif-Bold.ttf->/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Bold.ttf" />
     </target_preparer>
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">

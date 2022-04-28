@@ -16,41 +16,68 @@
 
 package com.android.companiondevicemanager;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
+import static com.android.companiondevicemanager.Utils.getIcon;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
-
 /**
  * Adapter for the list of "found" devices.
  */
-class DeviceListAdapter extends BaseAdapter implements Observer<List<DeviceFilterPair<?>>> {
+class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolder> {
+    public int mSelectedPosition = RecyclerView.NO_POSITION;
+
     private final Context mContext;
 
     // List if pairs (display name, address)
     private List<DeviceFilterPair<?>> mDevices;
 
-    DeviceListAdapter(Context context) {
+    private OnItemClickListener mListener;
+
+    private static final int TYPE_WIFI = 0;
+    private static final int TYPE_BT = 1;
+
+    DeviceListAdapter(Context context, OnItemClickListener listener) {
         mContext = context;
+        mListener = listener;
     }
 
-    @Override
-    public int getCount() {
-        return mDevices != null ? mDevices.size() : 0;
-    }
-
-    @Override
     public DeviceFilterPair<?> getItem(int position) {
         return mDevices.get(position);
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(
+                R.layout.list_item_device, parent, false);
+        ViewHolder viewHolder = new ViewHolder(view);
+        if (viewType == TYPE_WIFI) {
+            viewHolder.mImageView.setImageDrawable(
+                    getIcon(mContext, com.android.internal.R.drawable.ic_wifi_signal_3));
+        } else {
+            viewHolder.mImageView.setImageDrawable(
+                    getIcon(mContext, android.R.drawable.stat_sys_data_bluetooth));
+        }
+        return viewHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        holder.itemView.setSelected(mSelectedPosition == position);
+        holder.mTextView.setText(mDevices.get(position).getDisplayName());
+        holder.itemView.setOnClickListener(v -> mListener.onItemClick(position));
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return isWifiDevice(position) ? TYPE_WIFI : TYPE_BT;
     }
 
     @Override
@@ -59,34 +86,34 @@ class DeviceListAdapter extends BaseAdapter implements Observer<List<DeviceFilte
     }
 
     @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        final View view = convertView != null
-                ? convertView
-                : LayoutInflater.from(mContext).inflate(R.layout.list_item_device, parent, false);
-
-        final DeviceFilterPair<?> item = getItem(position);
-        bindView(view, item);
-
-        return view;
+    public int getItemCount() {
+        return mDevices != null ? mDevices.size() : 0;
     }
 
-    private void bindView(@NonNull View view, DeviceFilterPair<?> item) {
-        final TextView textView = view.findViewById(android.R.id.text1);
-        textView.setText(item.getDisplayName());
-
-        final ImageView iconView = view.findViewById(android.R.id.icon);
-
-        // TODO(b/211417476): Set either Bluetooth or WiFi icon.
-        iconView.setVisibility(View.GONE);
-        // final int iconRes = isBt ? android.R.drawable.stat_sys_data_bluetooth
-        //        : com.android.internal.R.drawable.ic_wifi_signal_3;
-        // final Drawable icon = getTintedIcon(mResources, iconRes);
-        // iconView.setImageDrawable(icon);
+    public void setSelectedPosition(int position) {
+        mSelectedPosition = position;
     }
 
-    @Override
-    public void onChanged(List<DeviceFilterPair<?>> deviceFilterPairs) {
-        mDevices = deviceFilterPairs;
+    void setDevices(List<DeviceFilterPair<?>> devices) {
+        mDevices = devices;
         notifyDataSetChanged();
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        private TextView mTextView;
+        private ImageView mImageView;
+        ViewHolder(View itemView) {
+            super(itemView);
+            mTextView = itemView.findViewById(android.R.id.text1);
+            mImageView = itemView.findViewById(android.R.id.icon);
+        }
+    }
+
+    private boolean isWifiDevice(int position) {
+        return mDevices.get(position).getDevice() instanceof android.net.wifi.ScanResult;
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(int position);
     }
 }

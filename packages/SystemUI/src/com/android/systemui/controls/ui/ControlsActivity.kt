@@ -77,8 +77,8 @@ class ControlsActivity @Inject constructor(
         initBroadcastReceiver()
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
 
         parent = requireViewById<ViewGroup>(R.id.global_actions_controls)
         parent.alpha = 0f
@@ -91,8 +91,8 @@ class ControlsActivity @Inject constructor(
         finish()
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
+        super.onStop()
 
         uiController.hide()
     }

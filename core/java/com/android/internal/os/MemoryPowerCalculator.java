@@ -4,11 +4,7 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.UserHandle;
 import android.util.LongSparseArray;
-import android.util.SparseArray;
-
-import java.util.List;
 
 public class MemoryPowerCalculator extends PowerCalculator {
     public static final String TAG = "MemoryPowerCalculator";
@@ -39,20 +35,6 @@ public class MemoryPowerCalculator extends PowerCalculator {
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MEMORY, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MEMORY, powerMah);
-    }
-
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        final long durationMs = calculateDuration(batteryStats, rawRealtimeUs, statsType);
-        final double powerMah = calculatePower(batteryStats, rawRealtimeUs, statsType);
-        BatterySipper memory = new BatterySipper(BatterySipper.DrainType.MEMORY, null, 0);
-        memory.usageTimeMs = durationMs;
-        memory.usagePowerMah = powerMah;
-        memory.sumPower();
-        if (memory.totalPowerMah > 0) {
-            sippers.add(memory);
-        }
     }
 
     private long calculateDuration(BatteryStats batteryStats, long rawRealtimeUs, int statsType) {

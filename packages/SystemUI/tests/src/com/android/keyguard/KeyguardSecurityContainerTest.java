@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Insets;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Gravity;
@@ -69,9 +70,8 @@ import java.util.ArrayList;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper()
 public class KeyguardSecurityContainerTest extends SysuiTestCase {
-    private static final int SCREEN_WIDTH = 1600;
-    private static final int FAKE_MEASURE_SPEC =
-            View.MeasureSpec.makeMeasureSpec(SCREEN_WIDTH, View.MeasureSpec.EXACTLY);
+    private int mScreenWidth;
+    private int mFakeMeasureSpec;
 
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
@@ -113,6 +113,10 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         when(mUserSwitcherController.getKeyguardStateController())
                 .thenReturn(mKeyguardStateController);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+
+        mScreenWidth = getUiDevice().getDisplayWidth();
+        mFakeMeasureSpec = View
+                .MeasureSpec.makeMeasureSpec(mScreenWidth, View.MeasureSpec.EXACTLY);
     }
 
     @Test
@@ -121,10 +125,10 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
                 mUserSwitcherController);
 
         int halfWidthMeasureSpec =
-                View.MeasureSpec.makeMeasureSpec(SCREEN_WIDTH / 2, View.MeasureSpec.EXACTLY);
-        mKeyguardSecurityContainer.onMeasure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
+                View.MeasureSpec.makeMeasureSpec(mScreenWidth / 2, View.MeasureSpec.EXACTLY);
+        mKeyguardSecurityContainer.onMeasure(mFakeMeasureSpec, mFakeMeasureSpec);
 
-        verify(mSecurityViewFlipper).measure(halfWidthMeasureSpec, FAKE_MEASURE_SPEC);
+        verify(mSecurityViewFlipper).measure(halfWidthMeasureSpec, mFakeMeasureSpec);
     }
 
     @Test
@@ -132,14 +136,16 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
                 mUserSwitcherController);
 
-        mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
-        verify(mSecurityViewFlipper).measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
+        mKeyguardSecurityContainer.measure(mFakeMeasureSpec, mFakeMeasureSpec);
+        verify(mSecurityViewFlipper).measure(mFakeMeasureSpec, mFakeMeasureSpec);
     }
 
     @Test
     public void onMeasure_respectsViewInsets() {
-        int imeInsetAmount = 100;
-        int systemBarInsetAmount = 10;
+        int paddingBottom = getContext().getResources()
+                .getDimensionPixelSize(R.dimen.keyguard_security_view_bottom_margin);
+        int imeInsetAmount = paddingBottom + 1;
+        int systemBarInsetAmount = 0;
 
         mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
                 mUserSwitcherController);
@@ -154,17 +160,19 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
         // It's reduced by the max of the systembar and IME, so just subtract IME inset.
         int expectedHeightMeasureSpec = View.MeasureSpec.makeMeasureSpec(
-                SCREEN_WIDTH - imeInsetAmount, View.MeasureSpec.EXACTLY);
+                mScreenWidth - imeInsetAmount, View.MeasureSpec.EXACTLY);
 
         mKeyguardSecurityContainer.onApplyWindowInsets(insets);
-        mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
-        verify(mSecurityViewFlipper).measure(FAKE_MEASURE_SPEC, expectedHeightMeasureSpec);
+        mKeyguardSecurityContainer.measure(mFakeMeasureSpec, mFakeMeasureSpec);
+        verify(mSecurityViewFlipper).measure(mFakeMeasureSpec, expectedHeightMeasureSpec);
     }
 
     @Test
     public void onMeasure_respectsViewInsets_largerSystembar() {
         int imeInsetAmount = 0;
-        int systemBarInsetAmount = 10;
+        int paddingBottom = getContext().getResources()
+                .getDimensionPixelSize(R.dimen.keyguard_security_view_bottom_margin);
+        int systemBarInsetAmount = paddingBottom + 1;
 
         mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
                 mUserSwitcherController);
@@ -178,11 +186,11 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
                 .build();
 
         int expectedHeightMeasureSpec = View.MeasureSpec.makeMeasureSpec(
-                SCREEN_WIDTH - systemBarInsetAmount, View.MeasureSpec.EXACTLY);
+                mScreenWidth - systemBarInsetAmount, View.MeasureSpec.EXACTLY);
 
         mKeyguardSecurityContainer.onApplyWindowInsets(insets);
-        mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
-        verify(mSecurityViewFlipper).measure(FAKE_MEASURE_SPEC, expectedHeightMeasureSpec);
+        mKeyguardSecurityContainer.measure(mFakeMeasureSpec, mFakeMeasureSpec);
+        verify(mSecurityViewFlipper).measure(mFakeMeasureSpec, expectedHeightMeasureSpec);
     }
 
     private void setupForUpdateKeyguardPosition(boolean oneHandedMode) {
@@ -190,8 +198,8 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         mKeyguardSecurityContainer.initMode(mode, mGlobalSettings, mFalsingManager,
                 mUserSwitcherController);
 
-        mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
-        mKeyguardSecurityContainer.layout(0, 0, SCREEN_WIDTH, SCREEN_WIDTH);
+        mKeyguardSecurityContainer.measure(mFakeMeasureSpec, mFakeMeasureSpec);
+        mKeyguardSecurityContainer.layout(0, 0, mScreenWidth, mScreenWidth);
 
         // Clear any interactions with the mock so we know the interactions definitely come from the
         // below testing.
@@ -204,10 +212,14 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         mKeyguardSecurityContainer.updatePositionByTouchX(
                 mKeyguardSecurityContainer.getWidth() - 1f);
 
+        verify(mGlobalSettings).putInt(Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
+                Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
         verify(mSecurityViewFlipper).setTranslationX(
                 mKeyguardSecurityContainer.getWidth() - mSecurityViewFlipper.getWidth());
 
         mKeyguardSecurityContainer.updatePositionByTouchX(1f);
+        verify(mGlobalSettings).putInt(Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
+                Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT);
 
         verify(mSecurityViewFlipper).setTranslationX(0.0f);
     }
@@ -286,7 +298,9 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     @Test
     public void testTwoOrMoreUsersDoesAllowDropDown() {
         // GIVEN one user has been setup
-        when(mUserSwitcherController.getUsers()).thenReturn(buildUserRecords(2));
+        ArrayList<UserRecord> records = buildUserRecords(2);
+        when(mUserSwitcherController.getCurrentUserRecord()).thenReturn(records.get(0));
+        when(mUserSwitcherController.getUsers()).thenReturn(records);
 
         // WHEN UserSwitcherViewMode is initialized
         setupUserSwitcher();
@@ -307,7 +321,8 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
             UserInfo info = new UserInfo(i /* id */, "Name: " + i, null /* iconPath */,
                     0 /* flags */);
             users.add(new UserRecord(info, null, false /* isGuest */, false /* isCurrent */,
-                    false /* isAddUser */, false /* isRestricted */, true /* isSwitchToEnabled */));
+                    false /* isAddUser */, false /* isRestricted */, true /* isSwitchToEnabled */,
+                    false /* isAddSupervisedUser */));
         }
         return users;
     }

@@ -26,40 +26,29 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.CommunalStateController
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.qs.tiles.UserDetailView
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger
-import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import javax.inject.Provider
 
 @SmallTest
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner::class)
 class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
     @Mock
-    private lateinit var screenLifecycle: ScreenLifecycle
-
-    @Mock
     private lateinit var userSwitcherController: UserSwitcherController
-
-    @Mock
-    private lateinit var communalStateController: CommunalStateController
 
     @Mock
     private lateinit var keyguardStateController: KeyguardStateController
@@ -77,22 +66,13 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
     private lateinit var dozeParameters: DozeParameters
 
     @Mock
-    private lateinit var userDetailViewAdapterProvider: Provider<UserDetailView.Adapter>
-
-    @Mock
     private lateinit var screenOffAnimationController: ScreenOffAnimationController
-
-    @Mock
-    private lateinit var featureFlags: FeatureFlags
 
     @Mock
     private lateinit var userSwitchDialogController: UserSwitchDialogController
 
     @Mock
     private lateinit var uiEventLogger: UiEventLogger
-
-    @Mock
-    private lateinit var notificationPanelViewController: NotificationPanelViewController
 
     private lateinit var view: FrameLayout
     private lateinit var testableLooper: TestableLooper
@@ -110,26 +90,22 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
                 view,
                 context,
                 context.resources,
-                screenLifecycle,
                 userSwitcherController,
-                communalStateController,
                 keyguardStateController,
                 falsingManager,
                 configurationController,
                 statusBarStateController,
                 dozeParameters,
-                userDetailViewAdapterProvider,
                 screenOffAnimationController,
-                featureFlags,
                 userSwitchDialogController,
                 uiEventLogger)
 
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
-        keyguardQsUserSwitchController
-                .setNotificationPanelViewController(notificationPanelViewController)
         `when`(userSwitcherController.keyguardStateController).thenReturn(keyguardStateController)
         `when`(userSwitcherController.keyguardStateController.isShowing).thenReturn(true)
+        `when`(keyguardStateController.isShowing).thenReturn(true)
+        `when`(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
         keyguardQsUserSwitchController.init()
     }
 
@@ -143,5 +119,29 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
         view.findViewById<View>(R.id.kg_multi_user_avatar)?.performClick()
         verify(uiEventLogger, times(1))
                 .log(LockscreenGestureLogger.LockscreenUiEvent.LOCKSCREEN_SWITCH_USER_TAP)
+    }
+
+    @Test
+    fun testAvatarExistsWhenKeyguardGoingAway() {
+        `when`(keyguardStateController.isShowing).thenReturn(false)
+        `when`(keyguardStateController.isKeyguardGoingAway).thenReturn(true)
+        keyguardQsUserSwitchController.updateKeyguardShowing(true /* forceViewUpdate */)
+        assertThat(keyguardQsUserSwitchController.mUserAvatarView.isEmpty).isFalse()
+    }
+
+    @Test
+    fun testAvatarExistsWhenKeyguardShown() {
+        `when`(keyguardStateController.isShowing).thenReturn(true)
+        `when`(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
+        keyguardQsUserSwitchController.updateKeyguardShowing(true /* forceViewUpdate */)
+        assertThat(keyguardQsUserSwitchController.mUserAvatarView.isEmpty).isFalse()
+    }
+
+    @Test
+    fun testAvatarGoneWhenKeyguardGone() {
+        `when`(keyguardStateController.isShowing).thenReturn(false)
+        `when`(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
+        keyguardQsUserSwitchController.updateKeyguardShowing(true /* forceViewUpdate */)
+        assertThat(keyguardQsUserSwitchController.mUserAvatarView.isEmpty).isTrue()
     }
 }

@@ -16,15 +16,18 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.view.Surface
 import androidx.test.filters.FlakyTest
-import androidx.test.filters.RequiresDevice
+import android.platform.test.annotations.RequiresDevice
+import android.view.Surface
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.traces.region.RegionSubject
+import org.junit.Assume
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,6 +61,11 @@ import org.junit.runners.Parameterized
 class MovePipUpShelfHeightChangeTest(
     testSpec: FlickerTestParameter
 ) : MovePipShelfHeightTransition(testSpec) {
+    @Before
+    fun before() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+    }
+
     /**
      * Defines the transition used to run the test
      */
@@ -96,7 +104,7 @@ class MovePipUpShelfHeightChangeTest(
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0), repetitions = 5)
+                supportedRotations = listOf(Surface.ROTATION_0), repetitions = 3)
         }
     }
 }

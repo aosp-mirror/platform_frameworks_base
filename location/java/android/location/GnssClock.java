@@ -23,9 +23,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A class containing a GPS clock timestamp.
+ * A class containing a GNSS clock timestamp.
  *
- * <p>It represents a measurement of the GPS receiver's clock.
+ * <p>It represents a measurement of the GNSS receiver's clock.
  */
 public final class GnssClock implements Parcelable {
     // The following enumerations must be in sync with the values declared in gps.h

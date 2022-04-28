@@ -93,6 +93,7 @@ import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
+import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import dalvik.system.VMRuntime;
@@ -505,6 +506,7 @@ public class PackageManagerServiceUtils {
      * @throws PackageManagerException if the signatures did not match.
      */
     public static boolean verifySignatures(PackageSetting pkgSetting,
+            @Nullable SharedUserSetting sharedUserSetting,
             PackageSetting disabledPkgSetting, SigningDetails parsedSignatures,
             boolean compareCompat, boolean compareRecover, boolean isRollback)
             throws PackageManagerException {
@@ -555,10 +557,8 @@ public class PackageManagerServiceUtils {
             }
         }
         // Check for shared user signatures
-        if (pkgSetting.getSharedUser() != null
-                && pkgSetting.getSharedUser().signatures.mSigningDetails
-                        != SigningDetails.UNKNOWN) {
-
+        if (sharedUserSetting != null
+                && sharedUserSetting.getSigningDetails() != SigningDetails.UNKNOWN) {
             // Already existing package. Make sure signatures match.  In case of signing certificate
             // rotation, the packages with newer certs need to be ok with being sharedUserId with
             // the older ones.  We check to see if either the new package is signed by an older cert
@@ -566,32 +566,33 @@ public class PackageManagerServiceUtils {
             // with being sharedUser with the existing signing cert.
             boolean match =
                     parsedSignatures.checkCapability(
-                            pkgSetting.getSharedUser().signatures.mSigningDetails,
+                            sharedUserSetting.getSigningDetails(),
                             SigningDetails.CertCapabilities.SHARED_USER_ID)
-                    || pkgSetting.getSharedUser().signatures.mSigningDetails.checkCapability(
+                    || sharedUserSetting.getSigningDetails().checkCapability(
                             parsedSignatures,
                             SigningDetails.CertCapabilities.SHARED_USER_ID);
             // Special case: if the sharedUserId capability check failed it could be due to this
             // being the only package in the sharedUserId so far and the lineage being updated to
             // deny the sharedUserId capability of the previous key in the lineage.
-            if (!match && pkgSetting.getSharedUser().packages.size() == 1
-                    && pkgSetting.getSharedUser().packages
-                            .valueAt(0).getPackageName().equals(packageName)) {
+            final ArraySet<PackageStateInternal> susPackageStates =
+                    (ArraySet<PackageStateInternal>) sharedUserSetting.getPackageStates();
+            if (!match && susPackageStates.size() == 1
+                    && susPackageStates.valueAt(0).getPackageName().equals(packageName)) {
                 match = true;
             }
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(
-                        packageName, pkgSetting.getSharedUser().signatures, parsedSignatures);
+                        packageName, sharedUserSetting.signatures, parsedSignatures);
             }
             if (!match && compareRecover) {
                 match =
                         matchSignaturesRecover(packageName,
-                                pkgSetting.getSharedUser().signatures.mSigningDetails,
+                                sharedUserSetting.signatures.mSigningDetails,
                                 parsedSignatures,
                                 SigningDetails.CertCapabilities.SHARED_USER_ID)
                         || matchSignaturesRecover(packageName,
                                 parsedSignatures,
-                                pkgSetting.getSharedUser().signatures.mSigningDetails,
+                                sharedUserSetting.signatures.mSigningDetails,
                                 SigningDetails.CertCapabilities.SHARED_USER_ID);
                 compatMatch |= match;
             }
@@ -599,14 +600,15 @@ public class PackageManagerServiceUtils {
                 throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
                         "Package " + packageName
                         + " has no signatures that match those in shared user "
-                        + pkgSetting.getSharedUser().name + "; ignoring!");
+                        + sharedUserSetting.name + "; ignoring!");
             }
             // It is possible that this package contains a lineage that blocks sharedUserId access
             // to an already installed package in the sharedUserId signed with a previous key.
             // Iterate over all of the packages in the sharedUserId and ensure any that are signed
             // with a key in this package's lineage have the SHARED_USER_ID capability granted.
             if (parsedSignatures.hasPastSigningCertificates()) {
-                for (PackageSetting shUidPkgSetting : pkgSetting.getSharedUser().packages) {
+                for (int i = 0; i < susPackageStates.size(); i++) {
+                    PackageStateInternal shUidPkgSetting = susPackageStates.valueAt(i);
                     // if the current package in the sharedUserId is the package being updated then
                     // skip this check as the update may revoke the sharedUserId capability from
                     // the key with which this app was previously signed.
@@ -633,7 +635,7 @@ public class PackageManagerServiceUtils {
             // If the lineage of this package diverges from the lineage of the sharedUserId then
             // do not allow the installation to proceed.
             if (!parsedSignatures.hasCommonAncestor(
-                    pkgSetting.getSharedUser().signatures.mSigningDetails)) {
+                    sharedUserSetting.signatures.mSigningDetails)) {
                 throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
                         "Package " + packageName + " has a signing lineage "
                                 + "that diverges from the lineage of the sharedUserId");
@@ -848,6 +850,8 @@ public class PackageManagerServiceUtils {
         ret.recommendedInstallLocation = recommendedInstallLocation;
         ret.multiArch = pkg.isMultiArch();
         ret.debuggable = pkg.isDebuggable();
+        ret.isSdkLibrary = pkg.isIsSdkLibrary();
+
         return ret;
     }
 
@@ -1063,7 +1067,7 @@ public class PackageManagerServiceUtils {
 
     // Static to give access to ComputeEngine
     public static void applyEnforceIntentFilterMatching(
-            PlatformCompat compat, ComponentResolver resolver,
+            PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
         // Do not enforce filter matching when the caller is system or root.
@@ -1241,10 +1245,25 @@ public class PackageManagerServiceUtils {
      * @throws SecurityException if the caller is not system or shell
      */
     public static void enforceSystemOrRootOrShell(String message) {
-        final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != Process.ROOT_UID && uid != Process.SHELL_UID) {
+        if (!isSystemOrRootOrShell()) {
             throw new SecurityException(message);
         }
+    }
+
+    /**
+     * Check if the Binder caller is system UID, root's UID, or shell's UID.
+     */
+    public static boolean isSystemOrRootOrShell() {
+        final int uid = Binder.getCallingUid();
+        return uid == Process.SYSTEM_UID || uid == Process.ROOT_UID || uid == Process.SHELL_UID;
+    }
+
+    /**
+     * Check if the Binder caller is system UID or root's UID.
+     */
+    public static boolean isSystemOrRoot() {
+        final int uid = Binder.getCallingUid();
+        return uid == Process.SYSTEM_UID || uid == Process.ROOT_UID;
     }
 
     /**
@@ -1255,8 +1274,7 @@ public class PackageManagerServiceUtils {
      * @throws SecurityException if the caller is not system or root
      */
     public static void enforceSystemOrRoot(String message) {
-        final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != Process.ROOT_UID) {
+        if (!isSystemOrRoot()) {
             throw new SecurityException(message);
         }
     }

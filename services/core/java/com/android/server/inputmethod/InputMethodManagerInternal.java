@@ -19,10 +19,12 @@ package com.android.server.inputmethod;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
 
+import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
@@ -149,6 +151,30 @@ public abstract class InputMethodManagerInternal {
     public abstract void updateImeWindowStatus(boolean disableImeIcon);
 
     /**
+     * Finish stylus handwriting by calling {@link InputMethodService#finishStylusHandwriting()} if
+     * there is an ongoing handwriting session.
+     */
+    public abstract void maybeFinishStylusHandwriting();
+
+    /**
+     * Callback when the IInputMethodSession from the accessibility service with the specified
+     * accessibilityConnectionId is created.
+     *
+     * @param accessibilityConnectionId The connection id of the accessibility service.
+     * @param session The session passed back from the accessibility service.
+     */
+    public abstract void onSessionForAccessibilityCreated(int accessibilityConnectionId,
+            IAccessibilityInputMethodSession session);
+
+    /**
+     * Unbind the accessibility service with the specified accessibilityConnectionId from current
+     * client.
+     *
+     * @param accessibilityConnectionId The connection id of the accessibility service.
+     */
+    public abstract void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId);
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -210,6 +236,19 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void updateImeWindowStatus(boolean disableImeIcon) {
+                }
+
+                @Override
+                public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
+                        IAccessibilityInputMethodSession session) {
+                }
+
+                @Override
+                public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId) {
+                }
+
+                @Override
+                public void maybeFinishStylusHandwriting() {
                 }
             };
 

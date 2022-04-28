@@ -19,6 +19,7 @@
     android:id="@+id/system_icons"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
+    android:layout_gravity="center_vertical|end"
     android:gravity="center_vertical">
 
     <com.android.systemui.statusbar.phone.StatusIconContainer android:id="@+id/statusIcons"

@@ -44,7 +44,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @Group4
-class DismissBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
+open class DismissBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
     private val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private val displaySize = DisplayMetrics()
@@ -68,7 +68,7 @@ class DismissBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(tes
 
     @Presubmit
     @Test
-    fun testAppIsAlwaysVisible() {
+    open fun testAppIsAlwaysVisible() {
         testSpec.assertLayers {
             this.isVisible(testApp.component)
         }

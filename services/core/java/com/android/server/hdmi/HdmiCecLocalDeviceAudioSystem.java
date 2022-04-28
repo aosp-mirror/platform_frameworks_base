@@ -117,6 +117,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         mSystemAudioControlFeatureEnabled = mService.getHdmiCecConfig().getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL)
                     == HdmiControlManager.SYSTEM_AUDIO_CONTROL_ENABLED;
+        mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
     }
 
     private static final String SHORT_AUDIO_DESCRIPTOR_CONFIG_PATH = "/vendor/etc/sadConfig.xml";

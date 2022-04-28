@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Потребна е лозинка за дополнителна безбедност"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Уредот е заклучен од администраторот"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Уредот е заклучен рачно"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Непознат"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Непознат"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"За да користите „Отклучување со лик“, вклучете "<b>"Пристап до камерата"</b>" во „Поставки &gt; Приватност“"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

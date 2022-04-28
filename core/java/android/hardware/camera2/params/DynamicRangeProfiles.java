@@ -16,7 +16,7 @@
 
 package android.hardware.camera2.params;
 
-import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 
 import android.hardware.camera2.CameraMetadata;
@@ -27,7 +27,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -44,20 +43,20 @@ import java.util.Set;
  *
  * <p>Some devices may not be able to support 8-bit and/or 10-bit output with different dynamic
  * range profiles within the same capture request. Such device specific constraints can be queried
- * by calling {@link #getProfileCaptureRequestConstraints(int)}. Do note that unsupported
+ * by calling {@link #getProfileCaptureRequestConstraints}. Do note that unsupported
  * combinations will result in {@link IllegalArgumentException} when trying to submit a capture
  * request. Capture requests that only reference outputs configured using the same dynamic range
  * profile value will never fail due to such constraints.</p>
  *
- * @see OutputConfiguration#setDynamicRangeProfile(int)
+ * @see OutputConfiguration#setDynamicRangeProfile
  */
 public final class DynamicRangeProfiles {
     /**
      * This the default 8-bit standard profile that will be used in case where camera clients do not
      * explicitly configure a supported dynamic range profile by calling
-     * {@link OutputConfiguration#setDynamicRangeProfile(int)}.
+     * {@link OutputConfiguration#setDynamicRangeProfile}.
      */
-    public static final int STANDARD =
+    public static final long STANDARD =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_STANDARD;
 
     /**
@@ -65,7 +64,7 @@ public final class DynamicRangeProfiles {
      *
      * <p>All 10-bit output capable devices are required to support this profile.</p>
      */
-    public static final int HLG10  =
+    public static final long HLG10  =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HLG10;
 
     /**
@@ -74,7 +73,7 @@ public final class DynamicRangeProfiles {
      * <p>This profile utilizes internal static metadata to increase the quality
      * of the capture.</p>
      */
-    public static final int HDR10  =
+    public static final long HDR10  =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HDR10;
 
     /**
@@ -83,7 +82,7 @@ public final class DynamicRangeProfiles {
      * <p>In contrast to HDR10, this profile uses internal per-frame metadata
      * to further enhance the quality of the capture.</p>
      */
-    public static final int HDR10_PLUS =
+    public static final long HDR10_PLUS =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_HDR10_PLUS;
 
     /**
@@ -91,13 +90,13 @@ public final class DynamicRangeProfiles {
      * accurate capture. This would typically differ from what a specific device
      * might want to tune for a consumer optimized Dolby Vision general capture.</p>
      */
-    public static final int DOLBY_VISION_10B_HDR_REF =
+    public static final long DOLBY_VISION_10B_HDR_REF =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_REF;
 
     /**
      * <p>This is the power optimized mode for 10-bit Dolby Vision HDR Reference Mode.</p>
      */
-    public static final int DOLBY_VISION_10B_HDR_REF_PO =
+    public static final long DOLBY_VISION_10B_HDR_REF_PO =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_REF_PO;
 
     /**
@@ -107,52 +106,52 @@ public final class DynamicRangeProfiles {
      * that each specific device would have a different look for their default
      * Dolby Vision capture.</p>
      */
-    public static final int DOLBY_VISION_10B_HDR_OEM =
+    public static final long DOLBY_VISION_10B_HDR_OEM =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_OEM;
 
     /**
      * <p>This is the power optimized mode for 10-bit Dolby Vision HDR device specific capture
      * Mode.</p>
      */
-    public static final int DOLBY_VISION_10B_HDR_OEM_PO =
+    public static final long DOLBY_VISION_10B_HDR_OEM_PO =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_10B_HDR_OEM_PO;
 
     /**
      * <p>This is the 8-bit version of the Dolby Vision reference capture mode optimized
      * for scene accuracy.</p>
      */
-    public static final int DOLBY_VISION_8B_HDR_REF =
+    public static final long DOLBY_VISION_8B_HDR_REF =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_REF;
 
     /**
      * <p>This is the power optimized mode for 8-bit Dolby Vision HDR Reference Mode.</p>
      */
-    public static final int DOLBY_VISION_8B_HDR_REF_PO =
+    public static final long DOLBY_VISION_8B_HDR_REF_PO =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_REF_PO;
 
     /**
      * <p>This is the 8-bit version of device specific tuned and optimized Dolby Vision
      * capture mode.</p>
      */
-    public static final int DOLBY_VISION_8B_HDR_OEM =
+    public static final long DOLBY_VISION_8B_HDR_OEM =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_OEM;
 
     /**
      * <p>This is the power optimized mode for 8-bit Dolby Vision HDR device specific
      * capture Mode.</p>
      */
-    public static final int DOLBY_VISION_8B_HDR_OEM_PO =
+    public static final long DOLBY_VISION_8B_HDR_OEM_PO =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_DOLBY_VISION_8B_HDR_OEM_PO;
 
     /*
      * @hide
      */
-    public static final int PUBLIC_MAX =
+    public static final long PUBLIC_MAX =
             CameraMetadata.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_MAX;
 
      /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"PROFILE_"}, value =
+    @LongDef(prefix = {"PROFILE_"}, value =
             {STANDARD,
              HLG10,
              HDR10,
@@ -168,7 +167,8 @@ public final class DynamicRangeProfiles {
     public @interface Profile {
     }
 
-    private final HashMap<Integer, Set<Integer>> mProfileMap = new HashMap<>();
+    private final HashMap<Long, Set<Long>> mProfileMap = new HashMap<>();
+    private final HashMap<Long, Boolean> mLookahedLatencyMap = new HashMap<>();
 
     /**
      * Create a new immutable DynamicRangeProfiles instance.
@@ -193,23 +193,23 @@ public final class DynamicRangeProfiles {
      *            if {@code elements} is {@code null}
      *
      */
-    public DynamicRangeProfiles(@NonNull final int[] elements) {
-        if ((elements.length % 2) != 0) {
+    public DynamicRangeProfiles(@NonNull final long[] elements) {
+        if ((elements.length % 3) != 0) {
             throw new IllegalArgumentException("Dynamic range profile map length " +
                     elements.length + " is not even!");
         }
 
-        for (int i = 0; i < elements.length; i += 2) {
+        for (int i = 0; i < elements.length; i += 3) {
             checkProfileValue(elements[i]);
             // STANDARD is not expected to be included
             if (elements[i] == STANDARD) {
                 throw new IllegalArgumentException("Dynamic range profile map must not include a"
                         + " STANDARD profile entry!");
             }
-            HashSet<Integer> profiles = new HashSet<>();
+            HashSet<Long> profiles = new HashSet<>();
 
             if (elements[i+1] != 0) {
-                for (int profile = STANDARD; profile < PUBLIC_MAX; profile <<= 1) {
+                for (long profile = STANDARD; profile < PUBLIC_MAX; profile <<= 1) {
                     if ((elements[i+1] & profile) != 0) {
                         profiles.add(profile);
                     }
@@ -217,42 +217,35 @@ public final class DynamicRangeProfiles {
             }
 
             mProfileMap.put(elements[i], profiles);
+            mLookahedLatencyMap.put(elements[i], elements[i+2] != 0L);
         }
 
         // Build the STANDARD constraints depending on the advertised 10-bit limitations
-        HashSet<Integer> standardConstraints = new HashSet<>();
+        HashSet<Long> standardConstraints = new HashSet<>();
         standardConstraints.add(STANDARD);
-        for(Integer profile : mProfileMap.keySet()) {
+        for(Long profile : mProfileMap.keySet()) {
             if (mProfileMap.get(profile).isEmpty() || mProfileMap.get(profile).contains(STANDARD)) {
                 standardConstraints.add(profile);
             }
         }
 
         mProfileMap.put(STANDARD, standardConstraints);
+        mLookahedLatencyMap.put(STANDARD, false);
     }
 
 
     /**
      * @hide
      */
-    public static void checkProfileValue(int profile) {
-        switch (profile) {
-            case STANDARD:
-            case HLG10:
-            case HDR10:
-            case HDR10_PLUS:
-            case DOLBY_VISION_10B_HDR_REF:
-            case DOLBY_VISION_10B_HDR_REF_PO:
-            case DOLBY_VISION_10B_HDR_OEM:
-            case DOLBY_VISION_10B_HDR_OEM_PO:
-            case DOLBY_VISION_8B_HDR_REF:
-            case DOLBY_VISION_8B_HDR_REF_PO:
-            case DOLBY_VISION_8B_HDR_OEM:
-            case DOLBY_VISION_8B_HDR_OEM_PO:
-                //No-op
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown profile " + profile);
+    public static void checkProfileValue(long profile) {
+        if (profile == STANDARD || profile == HLG10 || profile == HDR10 || profile == HDR10_PLUS
+                || profile == DOLBY_VISION_10B_HDR_REF || profile == DOLBY_VISION_10B_HDR_REF_PO
+                || profile == DOLBY_VISION_10B_HDR_OEM || profile == DOLBY_VISION_10B_HDR_OEM_PO
+                || profile == DOLBY_VISION_8B_HDR_REF || profile == DOLBY_VISION_8B_HDR_REF_PO
+                || profile == DOLBY_VISION_8B_HDR_OEM
+                || profile == DOLBY_VISION_8B_HDR_OEM_PO) {//No-op
+        } else {
+            throw new IllegalArgumentException("Unknown profile " + profile);
         }
     }
 
@@ -261,7 +254,7 @@ public final class DynamicRangeProfiles {
      *
      * @return non-modifiable set of dynamic range profiles
      */
-     public @NonNull Set<Integer> getSupportedProfiles() {
+     public @NonNull Set<Long> getSupportedProfiles() {
          return Collections.unmodifiableSet(mProfileMap.keySet());
      }
 
@@ -272,7 +265,7 @@ public final class DynamicRangeProfiles {
      *
      * <p>For example if assume that a particular 10-bit output capable device
      * returns ({@link #STANDARD}, {@link #HLG10}, {@link #HDR10}) as result from calling
-     * {@link #getSupportedProfiles()} and {@link #getProfileCaptureRequestConstraints(int)}
+     * {@link #getSupportedProfiles()} and {@link #getProfileCaptureRequestConstraints}
      * returns ({@link #STANDARD}, {@link #HLG10}) when given an argument of {@link #STANDARD}.
      * This means that the corresponding camera device will only accept and process capture requests
      * that reference outputs configured using {@link #HDR10} dynamic profile or alternatively
@@ -288,14 +281,40 @@ public final class DynamicRangeProfiles {
      *                                    within the list returned by
      *                                    getSupportedProfiles()
      *
-     * @see OutputConfiguration#setDynamicRangeProfile(int)
+     * @see OutputConfiguration#setDynamicRangeProfile
      */
-     public @NonNull Set<Integer> getProfileCaptureRequestConstraints(@Profile int profile) {
-         Set<Integer> ret = mProfileMap.get(profile);
+     public @NonNull Set<Long> getProfileCaptureRequestConstraints(@Profile long profile) {
+         Set<Long> ret = mProfileMap.get(profile);
          if (ret == null) {
              throw new IllegalArgumentException("Unsupported profile!");
          }
 
          return Collections.unmodifiableSet(ret);
      }
+
+    /**
+     * Check whether a given dynamic range profile is suitable for latency sensitive use cases.
+     *
+     * <p>Due to internal lookahead logic, camera outputs configured with some dynamic range
+     * profiles may experience additional latency greater than 3 buffers. Using camera outputs
+     * with such profiles for latency sensitive use cases such as camera preview is not
+     * recommended. Profiles that have such extra streaming delay are typically utilized for
+     * scenarios such as offscreen video recording.</p>
+     *
+     * @return true if the given profile is not suitable for latency sensitive use cases, false
+     *         otherwise
+     * @throws IllegalArgumentException - If the profile argument is not
+     *                                    within the list returned by
+     *                                    getSupportedProfiles()
+     *
+     * @see OutputConfiguration#setDynamicRangeProfile
+     */
+    public boolean isExtraLatencyPresent(@Profile long profile) {
+        Boolean ret = mLookahedLatencyMap.get(profile);
+        if (ret == null) {
+            throw new IllegalArgumentException("Unsupported profile!");
+        }
+
+        return ret;
+    }
 }

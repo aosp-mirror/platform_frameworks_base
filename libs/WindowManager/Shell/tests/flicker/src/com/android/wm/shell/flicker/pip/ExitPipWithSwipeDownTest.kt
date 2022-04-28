@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -81,6 +82,17 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
     @Test
     override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
+    /**
+     * Checks that the focus doesn't change between windows during the transition
+     */
+    @Presubmit
+    @Test
+    fun focusDoesNotChange() {
+        testSpec.assertEventLog {
+            this.focusDoesNotChange()
+        }
+    }
+
     companion object {
         /**
          * Creates the test configurations.
@@ -93,7 +105,7 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                            repetitions = 5)
+                            repetitions = 3)
         }
     }
 }

@@ -60,6 +60,20 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS =
             "settings_enable_monitor_phantom_procs";
 
+    /**
+     * Support dark theme activation at Bedtime.
+     * @hide
+     */
+    public static final String SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME =
+            "settings_app_allow_dark_theme_activation_at_bedtime";
+
+    /**
+     * Hide back key in the Settings two pane design.
+     * @hide
+     */
+    public static final String SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE =
+            "settings_hide_second_layer_page_navigate_up_button_in_two_pane";
+
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -81,9 +95,11 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "true");
         DEFAULT_FLAGS.put(SETTINGS_SUPPORT_LARGE_SCREEN, "true");
-        DEFAULT_FLAGS.put("settings_search_always_expand", "false");
-        DEFAULT_FLAGS.put(SETTINGS_APP_LANGUAGE_SELECTION, "false");
+        DEFAULT_FLAGS.put("settings_search_always_expand", "true");
+        DEFAULT_FLAGS.put(SETTINGS_APP_LANGUAGE_SELECTION, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
+        DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
+        DEFAULT_FLAGS.put(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE, "true");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
@@ -92,6 +108,8 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_APP_LANGUAGE_SELECTION);
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
+        PERSISTENT_FLAGS.add(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME);
+        PERSISTENT_FLAGS.add(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE);
     }
 
     /**

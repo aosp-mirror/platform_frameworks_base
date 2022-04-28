@@ -63,7 +63,6 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -271,7 +270,7 @@ public class GarbageMonitor implements Dumpable {
     }
 
     @Override
-    public void dump(@Nullable FileDescriptor fd, PrintWriter pw, @Nullable String[] args) {
+    public void dump(PrintWriter pw, @Nullable String[] args) {
         pw.println("GarbageMonitor params:");
         pw.println(String.format("   mHeapLimit=%d KB", mHeapLimit));
         pw.println(String.format("   GARBAGE_INSPECTION_INTERVAL=%d (%.1f mins)",
@@ -290,7 +289,7 @@ public class GarbageMonitor implements Dumpable {
         for (long pid : mPids) {
             final ProcessMemInfo pmi = mData.get(pid);
             if (pmi != null) {
-                pmi.dump(fd, pw, args);
+                pmi.dump(pw, args);
             }
         }
     }
@@ -545,7 +544,7 @@ public class GarbageMonitor implements Dumpable {
         }
 
         @Override
-        public void dump(@Nullable FileDescriptor fd, PrintWriter pw, @Nullable String[] args) {
+        public void dump(PrintWriter pw, @Nullable String[] args) {
             pw.print("{ \"pid\": ");
             pw.print(pid);
             pw.print(", \"name\": \"");
@@ -589,8 +588,8 @@ public class GarbageMonitor implements Dumpable {
         }
 
         @Override
-        public void dump(@Nullable FileDescriptor fd, PrintWriter pw, @Nullable String[] args) {
-            if (mGarbageMonitor != null) mGarbageMonitor.dump(fd, pw, args);
+        public void dump(PrintWriter pw, @Nullable String[] args) {
+            if (mGarbageMonitor != null) mGarbageMonitor.dump(pw, args);
         }
     }
 

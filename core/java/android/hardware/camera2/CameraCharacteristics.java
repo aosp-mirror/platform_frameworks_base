@@ -2448,8 +2448,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_MAX
      * @hide
      */
-    public static final Key<int[]> REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP =
-            new Key<int[]>("android.request.availableDynamicRangeProfilesMap", int[].class);
+    public static final Key<long[]> REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP =
+            new Key<long[]>("android.request.availableDynamicRangeProfilesMap", long[].class);
 
     /**
      * <p>Recommended 10-bit dynamic range profile.</p>
@@ -2464,8 +2464,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    public static final Key<Integer> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE =
-            new Key<Integer>("android.request.recommendedTenBitDynamicRangeProfile", int.class);
+    public static final Key<Long> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE =
+            new Key<Long>("android.request.recommendedTenBitDynamicRangeProfile", long.class);
 
     /**
      * <p>The list of image formats that are supported by this
@@ -3455,6 +3455,30 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryTenBitOutputStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
 
     /**
+     * <p>An array of mandatory stream combinations which are applicable when device lists
+     * {@code PREVIEW_STABILIZATION} in {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES android.control.availableVideoStabilizationModes}.
+     * This is an app-readable conversion of the maximum resolution mandatory stream combination
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
+     * <p>The array of
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
+     * generated according to the documented
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline} for each
+     * device which supports {@code PREVIEW_STABILIZATION}
+     * Clients can use the array as a quick reference to find an appropriate camera stream
+     * combination.
+     * The mandatory stream combination array will be {@code null} in case the device does not
+     * list {@code PREVIEW_STABILIZATION} in {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES android.control.availableVideoStabilizationModes}.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_PREVIEW_STABILIZATION_OUTPUT_STREAM_COMBINATIONS =
+            new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryPreviewStabilizationOutputStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
+
+    /**
      * <p>Whether the camera device supports multi-resolution input or output streams</p>
      * <p>A logical multi-camera or an ultra high resolution camera may support multi-resolution
      * input or output streams. With multi-resolution output streams, the camera device is able
@@ -3539,8 +3563,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    public static final Key<int[]> SCALER_AVAILABLE_STREAM_USE_CASES =
-            new Key<int[]>("android.scaler.availableStreamUseCases", int[].class);
+    public static final Key<long[]> SCALER_AVAILABLE_STREAM_USE_CASES =
+            new Key<long[]>("android.scaler.availableStreamUseCases", long[].class);
 
     /**
      * <p>An array of mandatory stream combinations with stream use cases.

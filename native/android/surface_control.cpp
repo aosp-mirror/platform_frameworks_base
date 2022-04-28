@@ -17,18 +17,15 @@
 #include <android/hardware/configstore/1.0/ISurfaceFlingerConfigs.h>
 #include <android/native_window.h>
 #include <android/surface_control.h>
-#include <surface_control_private.h>
-
 #include <configstore/Utils.h>
-
 #include <gui/HdrMetadata.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SurfaceControl.h>
-
+#include <private/android/choreographer.h>
+#include <surface_control_private.h>
 #include <ui/DynamicDisplayInfo.h>
-
 #include <utils/Timers.h>
 
 using namespace android::hardware::configstore;
@@ -141,7 +138,7 @@ void ASurfaceControl_release(ASurfaceControl* aSurfaceControl) {
 }
 
 struct ASurfaceControlStats {
-    int64_t acquireTime;
+    std::variant<int64_t, sp<Fence>> acquireTimeOrFence;
     sp<Fence> previousReleaseFence;
     uint64_t frameNumber;
 };
@@ -153,7 +150,7 @@ void ASurfaceControl_registerSurfaceStatsListener(ASurfaceControl* control, int3
                                                const SurfaceStats& surfaceStats) {
         ASurfaceControlStats aSurfaceControlStats;
 
-        aSurfaceControlStats.acquireTime = surfaceStats.acquireTime;
+        aSurfaceControlStats.acquireTimeOrFence = surfaceStats.acquireTimeOrFence;
         aSurfaceControlStats.previousReleaseFence = surfaceStats.previousReleaseFence;
         aSurfaceControlStats.frameNumber = surfaceStats.eventStats.frameNumber;
 
@@ -171,7 +168,15 @@ void ASurfaceControl_unregisterSurfaceStatsListener(void* context,
 }
 
 int64_t ASurfaceControlStats_getAcquireTime(ASurfaceControlStats* stats) {
-    return stats->acquireTime;
+    if (const auto* fence = std::get_if<sp<Fence>>(&stats->acquireTimeOrFence)) {
+        // We got a fence instead of the acquire time due to latch unsignaled.
+        // Ideally the client could just get the acquire time dericly from
+        // the fence instead of calling this function which needs to block.
+        (*fence)->waitForever("ASurfaceControlStats_getAcquireTime");
+        return (*fence)->getSignalTime();
+    }
+
+    return std::get<int64_t>(stats->acquireTimeOrFence);
 }
 
 uint64_t ASurfaceControlStats_getFrameNumber(ASurfaceControlStats* stats) {
@@ -250,7 +255,7 @@ int64_t ASurfaceTransactionStats_getAcquireTime(ASurfaceTransactionStats* aSurfa
             aSurfaceControlStats == aSurfaceTransactionStats->aSurfaceControlStats.end(),
             "ASurfaceControl not found");
 
-    return aSurfaceControlStats->second.acquireTime;
+    return ASurfaceControlStats_getAcquireTime(&aSurfaceControlStats->second);
 }
 
 int ASurfaceTransactionStats_getPreviousReleaseFenceFd(
@@ -294,9 +299,10 @@ void ASurfaceTransaction_setOnComplete(ASurfaceTransaction* aSurfaceTransaction,
 
         auto& aSurfaceControlStats = aSurfaceTransactionStats.aSurfaceControlStats;
 
-        for (const auto& [surfaceControl, latchTime, acquireTime, presentFence, previousReleaseFence, transformHint, frameEvents] : surfaceControlStats) {
+        for (const auto& [surfaceControl, latchTime, acquireTimeOrFence, presentFence,
+                          previousReleaseFence, transformHint, frameEvents] : surfaceControlStats) {
             ASurfaceControl* aSurfaceControl = reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
-            aSurfaceControlStats[aSurfaceControl].acquireTime = acquireTime;
+            aSurfaceControlStats[aSurfaceControl].acquireTimeOrFence = acquireTimeOrFence;
             aSurfaceControlStats[aSurfaceControl].previousReleaseFence = previousReleaseFence;
         }
 
@@ -643,13 +649,12 @@ void ASurfaceTransaction_setOnCommit(ASurfaceTransaction* aSurfaceTransaction, v
                 aSurfaceTransactionStats.transactionCompleted = false;
 
                 auto& aSurfaceControlStats = aSurfaceTransactionStats.aSurfaceControlStats;
-                for (const auto&
-                             [surfaceControl, latchTime, acquireTime, presentFence,
-                              previousReleaseFence, transformHint,
-                              frameEvents] : surfaceControlStats) {
+                for (const auto& [surfaceControl, latchTime, acquireTimeOrFence, presentFence,
+                                  previousReleaseFence, transformHint, frameEvents] :
+                     surfaceControlStats) {
                     ASurfaceControl* aSurfaceControl =
                             reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
-                    aSurfaceControlStats[aSurfaceControl].acquireTime = acquireTime;
+                    aSurfaceControlStats[aSurfaceControl].acquireTimeOrFence = acquireTimeOrFence;
                 }
 
                 (*func)(callback_context, &aSurfaceTransactionStats);
@@ -663,7 +668,7 @@ void ASurfaceTransaction_setOnCommit(ASurfaceTransaction* aSurfaceTransaction, v
 void ASurfaceTransaction_setFrameTimeline(ASurfaceTransaction* aSurfaceTransaction,
                                           AVsyncId vsyncId) {
     CHECK_NOT_NULL(aSurfaceTransaction);
-    // TODO(b/210043506): Get start time from platform.
+    const auto startTime = AChoreographer_getStartTimeNanosForVsyncId(vsyncId);
     ASurfaceTransaction_to_Transaction(aSurfaceTransaction)
-            ->setFrameTimelineInfo({.vsyncId = vsyncId, .startTimeNanos = 0});
+            ->setFrameTimelineInfo({.vsyncId = vsyncId, .startTimeNanos = startTime});
 }

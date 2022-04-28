@@ -71,51 +71,76 @@ public final class SearchResult implements Parcelable {
             EXTRAINFO_APP_BADGES,
             EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING,
             EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING,
+            EXTRAINFO_ACTION_APP_CARD,
+            EXTRAINFO_ACTION_INSTALL_BUTTON,
+            EXTRAINFO_APP_PACKAGE_NAME,
+            EXTRAINFO_APP_INSTALL_COUNT,
             EXTRAINFO_WEB_URL,
             EXTRAINFO_WEB_ICON})
     public @interface SearchResultExtraInfoKey {}
     /** This App developer website's domain URL, String value expected. */
-    public static final String EXTRAINFO_APP_DOMAIN_URL = "APP_DOMAIN_URL";
+    public static final String EXTRAINFO_APP_DOMAIN_URL = "android.app.cloudsearch.APP_DOMAIN_URL";
     /** This App icon, android.graphics.drawable.Icon expected. */
-    public static final String EXTRAINFO_APP_ICON = "APP_ICON";
+    public static final String EXTRAINFO_APP_ICON = "android.app.cloudsearch.APP_ICON";
     /** This App developer's name, String value expected. */
-    public static final String EXTRAINFO_APP_DEVELOPER_NAME = "APP_DEVELOPER_NAME";
+    public static final String EXTRAINFO_APP_DEVELOPER_NAME =
+            "android.app.cloudsearch.APP_DEVELOPER_NAME";
     /** This App's pkg size in bytes, Double value expected. */
-    public static final String EXTRAINFO_APP_SIZE_BYTES = "APP_SIZE_BYTES";
+    public static final String EXTRAINFO_APP_SIZE_BYTES = "android.app.cloudsearch.APP_SIZE_BYTES";
     /** This App developer's name, Double value expected. */
-    public static final String EXTRAINFO_APP_STAR_RATING = "APP_STAR_RATING";
+    public static final String EXTRAINFO_APP_STAR_RATING =
+            "android.app.cloudsearch.APP_STAR_RATING";
     /** This App's IARC rating, String value expected.
      * IARC (International Age Rating Coalition) is partnered globally with major
      * content rating organizations to provide a centralized and one-stop-shop for
      * rating content on a global scale.
      */
-    public static final String EXTRAINFO_APP_IARC = "APP_IARC";
+    public static final String EXTRAINFO_APP_IARC = "android.app.cloudsearch.APP_IARC";
     /** This App's review count, Double value expected. */
-    public static final String EXTRAINFO_APP_REVIEW_COUNT = "APP_REVIEW_COUNT";
+    public static final String EXTRAINFO_APP_REVIEW_COUNT =
+            "android.app.cloudsearch.APP_REVIEW_COUNT";
     /** If this App contains the Ads Disclaimer, Boolean value expected. */
     public static final String EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER =
-            "APP_CONTAINS_ADS_DISCLAIMER";
+            "android.app.cloudsearch.APP_CONTAINS_ADS_DISCLAIMER";
     /** If this App contains the IAP Disclaimer, Boolean value expected. */
     public static final String EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER =
-            "APP_CONTAINS_IAP_DISCLAIMER";
+            "android.app.cloudsearch.APP_CONTAINS_IAP_DISCLAIMER";
     /** This App's short description, String value expected. */
-    public static final String EXTRAINFO_SHORT_DESCRIPTION = "SHORT_DESCRIPTION";
+    public static final String EXTRAINFO_SHORT_DESCRIPTION =
+            "android.app.cloudsearch.SHORT_DESCRIPTION";
     /** This App's long description, String value expected. */
-    public static final String EXTRAINFO_LONG_DESCRIPTION = "LONG_DESCRIPTION";
-    /** This App's screenshots, List<ImageLoadingBundle> value expected. */
-    public static final String EXTRAINFO_SCREENSHOTS = "SCREENSHOTS";
-    /** Editor's choices for this App, ArrayList<String> value expected. */
-    public static final String EXTRAINFO_APP_BADGES = "APP_BADGES";
+    public static final String EXTRAINFO_LONG_DESCRIPTION =
+            "android.app.cloudsearch.LONG_DESCRIPTION";
+    /** This App's screenshots, {@code List<ImageLoadingBundle>} value expected. */
+    public static final String EXTRAINFO_SCREENSHOTS = "android.app.cloudsearch.SCREENSHOTS";
+    /** Editor's choices for this App, {@code ArrayList<String>} value expected. */
+    public static final String EXTRAINFO_APP_BADGES = "android.app.cloudsearch.APP_BADGES";
     /** Pre-registration game's action button text, String value expected. */
     @SuppressLint("IntentName")
-    public static final String EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING = "ACTION_BUTTON_TEXT";
+    public static final String EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING =
+            "android.app.cloudsearch.ACTION_BUTTON_TEXT";
     /** Pre-registration game's action button image, ImageLoadingBundle value expected. */
     @SuppressLint("IntentName")
-    public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING = "ACTION_BUTTON_IMAGE";
+    public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING =
+            "android.app.cloudsearch.ACTION_BUTTON_IMAGE";
+    /** Intent for tapping the app card, PendingIntent expected. */
+    @SuppressLint("IntentName")
+    public static final String EXTRAINFO_ACTION_APP_CARD =
+            "android.app.cloudsearch.ACTION_APP_CARD";
+    /** Intent for tapping the install button, PendingIntent expected. */
+    @SuppressLint("IntentName")
+    public static final String EXTRAINFO_ACTION_INSTALL_BUTTON =
+            "android.app.cloudsearch.ACTION_INSTALL_BUTTON";
+    /** App's package name, String value expected. */
+    public static final String EXTRAINFO_APP_PACKAGE_NAME =
+            "android.app.cloudsearch.APP_PACKAGE_NAME";
+    /** App's install count, double value expected. */
+    public static final String EXTRAINFO_APP_INSTALL_COUNT =
+            "android.app.cloudsearch.APP_INSTALL_COUNT";
     /** Web content's URL, String value expected. */
-    public static final String EXTRAINFO_WEB_URL = "WEB_URL";
+    public static final String EXTRAINFO_WEB_URL = "android.app.cloudsearch.WEB_URL";
     /** Web content's domain icon, android.graphics.drawable.Icon expected. */
-    public static final String EXTRAINFO_WEB_ICON = "WEB_ICON";
+    public static final String EXTRAINFO_WEB_ICON = "android.app.cloudsearch.WEB_ICON";
 
     @NonNull
     private Bundle mExtraInfos;

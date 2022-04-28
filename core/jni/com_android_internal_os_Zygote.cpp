@@ -110,6 +110,8 @@ using android::base::GetBoolProperty;
 
 using android::zygote::ZygoteFailure;
 
+using Action = android_mallopt_gwp_asan_options_t::Action;
+
 // This type is duplicated in fd_utils.h
 typedef const std::function<void(std::string)>& fail_fn_t;
 
@@ -346,7 +348,7 @@ enum RuntimeFlags : uint32_t {
     GWP_ASAN_LEVEL_NEVER = 0 << 21,
     GWP_ASAN_LEVEL_LOTTERY = 1 << 21,
     GWP_ASAN_LEVEL_ALWAYS = 2 << 21,
-    NATIVE_HEAP_ZERO_INIT = 1 << 23,
+    NATIVE_HEAP_ZERO_INIT_ENABLED = 1 << 23,
     PROFILEABLE = 1 << 24,
 };
 
@@ -895,7 +897,7 @@ void SetThreadName(const std::string& thread_name) {
 
   // pthread_setname_np fails rather than truncating long strings.
   char buf[16];       // MAX_TASK_COMM_LEN=16 is hard-coded into bionic
-  strlcpy(buf, name_start_ptr, sizeof(buf) - 1);
+  strlcpy(buf, name_start_ptr, sizeof(buf));
   errno = pthread_setname_np(pthread_self(), buf);
   if (errno != 0) {
     ALOGW("Unable to set the name of current thread to '%s': %s", buf, strerror(errno));
@@ -1626,7 +1628,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
         }
         // Also prefetch standalone system server jars. The reason for doing this here is the same
         // as above.
-        env->CallStaticObjectMethod(gZygoteInitClass, gPrefetchStandaloneSystemServerJars);
+        env->CallStaticVoidMethod(gZygoteInitClass, gPrefetchStandaloneSystemServerJars);
         if (env->ExceptionCheck()) {
             env->ExceptionClear();
         }
@@ -1709,24 +1711,32 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     // would be nice to have them for apps, we will have to wait until they are
     // proven out, have more efficient hardware, and/or apply them only to new
     // applications.
-    if (!(runtime_flags & RuntimeFlags::NATIVE_HEAP_ZERO_INIT)) {
+    if (!(runtime_flags & RuntimeFlags::NATIVE_HEAP_ZERO_INIT_ENABLED)) {
         mallopt(M_BIONIC_ZERO_INIT, 0);
     }
 
     // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART
     // runtime.
-    runtime_flags &= ~RuntimeFlags::NATIVE_HEAP_ZERO_INIT;
+    runtime_flags &= ~RuntimeFlags::NATIVE_HEAP_ZERO_INIT_ENABLED;
 
-    bool forceEnableGwpAsan = false;
+    const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
+    android_mallopt_gwp_asan_options_t gwp_asan_options;
+    // The system server doesn't have its nice name set by the time SpecializeCommon is called.
+    gwp_asan_options.program_name = nice_name_ptr ?: process_name;
     switch (runtime_flags & RuntimeFlags::GWP_ASAN_LEVEL_MASK) {
         default:
         case RuntimeFlags::GWP_ASAN_LEVEL_NEVER:
+            gwp_asan_options.desire = Action::DONT_TURN_ON_UNLESS_OVERRIDDEN;
+            android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
             break;
         case RuntimeFlags::GWP_ASAN_LEVEL_ALWAYS:
-            forceEnableGwpAsan = true;
-            [[fallthrough]];
+            gwp_asan_options.desire = Action::TURN_ON_FOR_APP;
+            android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
+            break;
         case RuntimeFlags::GWP_ASAN_LEVEL_LOTTERY:
-            android_mallopt(M_INITIALIZE_GWP_ASAN, &forceEnableGwpAsan, sizeof(forceEnableGwpAsan));
+            gwp_asan_options.desire = Action::TURN_ON_WITH_SAMPLING;
+            android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
+            break;
     }
     // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART
     // runtime.
@@ -1739,7 +1749,6 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     AStatsSocket_close();
 
     const char* se_info_ptr = se_info.has_value() ? se_info.value().c_str() : nullptr;
-    const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
 
     if (selinux_android_setcontext(uid, is_system_server, se_info_ptr, nice_name_ptr) == -1) {
         fail_fn(CREATE_ERROR("selinux_android_setcontext(%d, %d, \"%s\", \"%s\") failed", uid,

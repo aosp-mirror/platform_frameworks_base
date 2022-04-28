@@ -287,8 +287,8 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setInstallLocation(int installLocation);
 
-    /** @see R#styleable.AndroidManifest_inheritKeyStoreKeys */
-    ParsingPackage setInheritKeyStoreKeys(boolean inheritKeyStoreKeys);
+    /** @see R#styleable.AndroidManifest_sharedUserMaxSdkVersion */
+    ParsingPackage setLeavingSharedUid(boolean leavingSharedUid);
 
     ParsingPackage setLabelRes(int labelRes);
 
@@ -301,6 +301,8 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage setMinExtensionVersions(@Nullable SparseIntArray minExtensionVersions);
 
     ParsingPackage setMinSdkVersion(int minSdkVersion);
+
+    ParsingPackage setMaxSdkVersion(int maxSdkVersion);
 
     ParsingPackage setNetworkSecurityConfigRes(int networkSecurityConfigRes);
 
@@ -380,6 +382,14 @@ public interface ParsingPackage extends ParsingPackageRead {
             boolean resetEnabledSettingsOnAppDataCleared);
 
     ParsingPackage setLocaleConfigRes(int localeConfigRes);
+
+    /**
+     * Sets the trusted host certificates of apps that are allowed to embed activities of this
+     * application.
+     */
+    ParsingPackage setKnownActivityEmbeddingCerts(Set<String> knownActivityEmbeddingCerts);
+
+    ParsingPackage setOnBackInvokedCallbackEnabled(boolean enableOnBackInvokedCallback);
 
     // TODO(b/135203078): This class no longer has access to ParsedPackage, find a replacement
     //  for moving to the next step

@@ -45,6 +45,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.metrics.LogMaker;
+import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -190,8 +191,6 @@ public class PreferencesHelper implements RankingConfig {
 
     private Map<String, List<String>> mOemLockedApps = new HashMap();
 
-    private int mCurrentUserId = UserHandle.USER_NULL;
-
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, PermissionHelper permHelper,
             NotificationChannelLogger notificationChannelLogger,
@@ -215,7 +214,6 @@ public class PreferencesHelper implements RankingConfig {
         updateBadgingEnabled();
         updateBubblesEnabled();
         updateMediaNotificationFilteringEnabled();
-        mCurrentUserId = ActivityManager.getCurrentUser();
         syncChannelsBypassingDnd();
     }
 
@@ -393,6 +391,7 @@ public class PreferencesHelper implements RankingConfig {
 
                             if (migrateToPermission) {
                                 r.importance = appImportance;
+                                r.migrateToPm = true;
                                 if (r.uid != UNKNOWN_UID) {
                                     // Don't call into permission system until we have a valid uid
                                     PackagePermission pkgPerm = new PackagePermission(
@@ -602,8 +601,10 @@ public class PreferencesHelper implements RankingConfig {
                 out.attribute(null, ATT_NAME, r.pkg);
                 if (!notifPermissions.isEmpty()) {
                     Pair<Integer, String> app = new Pair(r.uid, r.pkg);
+                    final Pair<Boolean, Boolean> permission = notifPermissions.get(app);
                     out.attributeInt(null, ATT_IMPORTANCE,
-                            notifPermissions.get(app).first ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
+                            permission != null && permission.first ? IMPORTANCE_DEFAULT
+                                    : IMPORTANCE_NONE);
                     notifPermissions.remove(app);
                 } else {
                     if (r.importance != DEFAULT_IMPORTANCE) {
@@ -1670,14 +1671,14 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     /**
-     * Gets all notification channels associated with the given pkg and userId that can bypass dnd
+     * Gets all notification channels associated with the given pkg and uid that can bypass dnd
      */
     public ParceledListSlice<NotificationChannel> getNotificationChannelsBypassingDnd(String pkg,
-            int userId) {
+            int uid) {
         List<NotificationChannel> channels = new ArrayList<>();
         synchronized (mPackagePreferences) {
             final PackagePreferences r = mPackagePreferences.get(
-                    packagePreferencesKey(pkg, userId));
+                    packagePreferencesKey(pkg, uid));
             if (r != null) {
                 for (NotificationChannel channel : r.channels.values()) {
                     if (channelIsLiveLocked(r, channel) && channel.canBypassDnd()) {
@@ -1762,12 +1763,13 @@ public class PreferencesHelper implements RankingConfig {
     private void updateChannelsBypassingDnd() {
         ArraySet<Pair<String, Integer>> candidatePkgs = new ArraySet<>();
 
+        final int currentUserId = getCurrentUser();
         synchronized (mPackagePreferences) {
             final int numPackagePreferences = mPackagePreferences.size();
             for (int i = 0; i < numPackagePreferences; i++) {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
                 // Package isn't associated with the current userId
-                if (mCurrentUserId != UserHandle.getUserId(r.uid)) {
+                if (currentUserId != UserHandle.getUserId(r.uid)) {
                     continue;
                 }
 
@@ -1802,6 +1804,13 @@ public class PreferencesHelper implements RankingConfig {
             mAreChannelsBypassingDnd = haveBypassingApps;
             updateZenPolicy(mAreChannelsBypassingDnd);
         }
+    }
+
+    private int getCurrentUser() {
+        final long identity = Binder.clearCallingIdentity();
+        int currentUserId = ActivityManager.getCurrentUser();
+        Binder.restoreCallingIdentity(identity);
+        return currentUserId;
     }
 
     private boolean channelIsLiveLocked(PackagePreferences pkgPref, NotificationChannel channel) {
@@ -2509,22 +2518,6 @@ public class PreferencesHelper implements RankingConfig {
         return packageChannels;
     }
 
-    /**
-     * Called when user switches
-     */
-    public void onUserSwitched(int userId) {
-        mCurrentUserId = userId;
-        syncChannelsBypassingDnd();
-    }
-
-    /**
-     * Called when user is unlocked
-     */
-    public void onUserUnlocked(int userId) {
-        mCurrentUserId = userId;
-        syncChannelsBypassingDnd();
-    }
-
     public void onUserRemoved(int userId) {
         synchronized (mPackagePreferences) {
             int N = mPackagePreferences.size();
@@ -2585,7 +2578,7 @@ public class PreferencesHelper implements RankingConfig {
                         synchronized (mPackagePreferences) {
                             mPackagePreferences.put(packagePreferencesKey(r.pkg, r.uid), r);
                         }
-                        if (mPermissionHelper.isMigrationEnabled()) {
+                        if (mPermissionHelper.isMigrationEnabled() && r.migrateToPm) {
                             try {
                                 PackagePermission p = new PackagePermission(
                                         r.pkg, UserHandle.getUserId(r.uid),
@@ -2850,6 +2843,8 @@ public class PreferencesHelper implements RankingConfig {
         // note: only valid while hasSentMessage is false and hasSentInvalidMessage is true
         boolean userDemotedMsgApp = false;
         boolean hasSentValidBubble = false;
+
+        boolean migrateToPm = false;
 
         Delegate delegate = null;
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();

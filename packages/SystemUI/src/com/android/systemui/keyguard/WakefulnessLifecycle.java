@@ -34,7 +34,6 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -170,7 +169,7 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("WakefulnessLifecycle:");
         pw.println("  mWakefulness=" + mWakefulness);
     }

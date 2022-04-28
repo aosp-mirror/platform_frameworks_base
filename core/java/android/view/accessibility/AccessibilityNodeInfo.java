@@ -23,8 +23,10 @@ import static java.util.Collections.EMPTY_LIST;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
@@ -62,6 +64,8 @@ import com.android.internal.R;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -128,23 +132,99 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final long LEASHED_NODE_ID = makeNodeId(LEASHED_ITEM_ID,
             AccessibilityNodeProvider.HOST_VIEW_ID);
 
-    /** @hide */
-    public static final int FLAG_PREFETCH_PREDECESSORS = 0x00000001;
+    /**
+     * Prefetching strategy that prefetches the ancestors of the requested node.
+     * <p> Ancestors will be prefetched before siblings and descendants.
+     *
+     * @see #getChild(int, int)
+     * @see #getParent(int)
+     * @see AccessibilityWindowInfo#getRoot(int)
+     * @see AccessibilityService#getRootInActiveWindow(int)
+     * @see AccessibilityEvent#getSource(int)
+     */
+    public static final int FLAG_PREFETCH_ANCESTORS = 0x00000001;
 
-    /** @hide */
+    /**
+     * Prefetching strategy that prefetches the siblings of the requested node.
+     * <p> To avoid disconnected trees, this flag will also prefetch the parent. Siblings will be
+     * prefetched before descendants.
+     *
+     * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
+     */
     public static final int FLAG_PREFETCH_SIBLINGS = 0x00000002;
 
-    /** @hide */
-    public static final int FLAG_PREFETCH_DESCENDANTS = 0x00000004;
+    /**
+     * Prefetching strategy that prefetches the descendants in a hybrid depth first and breadth
+     * first approach.
+     * <p> The children of the root node is prefetched before recursing on the children. This
+     * must not be combined with {@link #FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST} or
+     * {@link #FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST} or this will trigger an
+     * IllegalArgumentException.
+     *
+     * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
+     */
+    public static final int FLAG_PREFETCH_DESCENDANTS_HYBRID = 0x00000004;
+
+    /**
+     * Prefetching strategy that prefetches the descendants of the requested node depth-first.
+     * <p> This must not be combined with {@link #FLAG_PREFETCH_DESCENDANTS_HYBRID} or
+     * {@link #FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST} or this will trigger an
+     * IllegalArgumentException.
+     *
+     * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
+     */
+    public static final int FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST = 0x00000008;
+
+    /**
+     * Prefetching strategy that prefetches the descendants of the requested node breadth-first.
+     * <p> This must not be combined with {@link #FLAG_PREFETCH_DESCENDANTS_HYBRID} or
+     * {@link #FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST} or this will trigger an
+     * IllegalArgumentException.
+     *
+     * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
+     */
+    public static final int FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST = 0x00000010;
+
+    /**
+     * Prefetching flag that specifies prefetching should not be interrupted by a request to
+     * retrieve a node or perform an action on a node.
+     *
+     * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
+     */
+    public static final int FLAG_PREFETCH_UNINTERRUPTIBLE = 0x00000020;
 
     /** @hide */
-    public static final int FLAG_PREFETCH_MASK = 0x00000007;
+    public static final int FLAG_PREFETCH_MASK = 0x0000003f;
 
     /** @hide */
-    public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x00000008;
+    public static final int FLAG_PREFETCH_DESCENDANTS_MASK = 0x0000001C;
+
+    /**
+     * Maximum batch size of prefetched nodes for a request.
+     */
+    @SuppressLint("MinMaxConstant")
+    public static final int MAX_NUMBER_OF_PREFETCHED_NODES = 50;
 
     /** @hide */
-    public static final int FLAG_REPORT_VIEW_IDS = 0x00000010;
+    @IntDef(flag = true, prefix = { "FLAG_PREFETCH" }, value = {
+            FLAG_PREFETCH_ANCESTORS,
+            FLAG_PREFETCH_SIBLINGS,
+            FLAG_PREFETCH_DESCENDANTS_HYBRID,
+            FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST,
+            FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST,
+            FLAG_PREFETCH_UNINTERRUPTIBLE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PrefetchingStrategy {}
+
+    /** @hide */
+    public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x00000080;
+
+    /** @hide */
+    public static final int FLAG_REPORT_VIEW_IDS = 0x00000100;
+
+    /** @hide */
+    public static final int FLAG_REPORT_MASK = 0x00000180;
 
     // Actions.
 
@@ -978,11 +1058,6 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Refreshes this info with the latest state of the view it represents.
-     * <p>
-     * <strong>Note:</strong> If this method returns false this info is obsolete
-     * since it represents a view that is no longer in the view tree and should
-     * be recycled.
-     * </p>
      *
      * @param bypassCache Whether to bypass the cache.
      * @return Whether the refresh succeeded.
@@ -1009,8 +1084,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Refreshes this info with the latest state of the view it represents.
      *
      * @return {@code true} if the refresh succeeded. {@code false} if the {@link View} represented
-     * by this node is no longer in the view tree (and thus this node is obsolete and should be
-     * recycled).
+     * by this node is no longer in the view tree (and thus this node is obsolete).
      */
     public boolean refresh() {
         return refresh(null, true);
@@ -1029,8 +1103,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param args A bundle of arguments for the request. These depend on the particular request.
      *
      * @return {@code true} if the refresh succeeded. {@code false} if the {@link View} represented
-     * by this node is no longer in the view tree (and thus this node is obsolete and should be
-     * recycled).
+     * by this node is no longer in the view tree (and thus this node is obsolete).
      */
     public boolean refreshWithExtraData(String extraDataKey, Bundle args) {
         // limits the text location length to make sure the rectangle array allocation avoids
@@ -1079,11 +1152,6 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Get the child at given index.
-     * <p>
-     *   <strong>Note:</strong> It is a client responsibility to recycle the
-     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-     *     to avoid creating of multiple instances.
-     * </p>
      *
      * @param index The child index.
      * @return The child node.
@@ -1092,6 +1160,23 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      */
     public AccessibilityNodeInfo getChild(int index) {
+        return getChild(index, FLAG_PREFETCH_DESCENDANTS_HYBRID);
+    }
+
+
+    /**
+     * Get the child at given index.
+     *
+     * @param index The child index.
+     * @param prefetchingStrategy the prefetching strategy.
+     * @return The child node.
+     *
+     * @throws IllegalStateException If called outside of an AccessibilityService.
+     *
+     * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
+     */
+    @Nullable
+    public AccessibilityNodeInfo getChild(int index, @PrefetchingStrategy int prefetchingStrategy) {
         enforceSealed();
         if (mChildNodeIds == null) {
             return null;
@@ -1103,11 +1188,11 @@ public class AccessibilityNodeInfo implements Parcelable {
         final AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         if (mLeashedChild != null && childId == LEASHED_NODE_ID) {
             return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mLeashedChild,
-                    ROOT_NODE_ID, false, FLAG_PREFETCH_DESCENDANTS, null);
+                    ROOT_NODE_ID, false, prefetchingStrategy, null);
         }
 
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mWindowId,
-                childId, false, FLAG_PREFETCH_DESCENDANTS, null);
+                childId, false, prefetchingStrategy, null);
     }
 
     /**
@@ -1731,11 +1816,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * this info is the root of the traversed tree.
      *
      * <p>
-     *   <strong>Note:</strong> It is a client responsibility to recycle the
-     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-     *     to avoid creating of multiple instances.
-     * </p>
-     * <p>
      * <strong>Note:</strong> If this view hierarchy has a {@link SurfaceView} embedding another
      * view hierarchy via {@link SurfaceView#setChildSurfacePackage}, there is a limitation that
      * this API won't be able to find the node for the view on the embedded view hierarchy. It's
@@ -1762,11 +1842,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * For example, if the target application's package is "foo.bar" and the id
      * resource name is "baz", the fully qualified resource id is "foo.bar:id/baz".
      *
-     * <p>
-     *   <strong>Note:</strong> It is a client responsibility to recycle the
-     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-     *     to avoid creating of multiple instances.
-     * </p>
      * <p>
      *   <strong>Note:</strong> The primary usage of this API is for UI test automation
      *   and in order to report the fully qualified view id if an {@link AccessibilityNodeInfo}
@@ -1816,20 +1891,53 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Gets the parent.
-     * <p>
-     *   <strong>Note:</strong> It is a client responsibility to recycle the
-     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-     *     to avoid creating of multiple instances.
-     * </p>
      *
      * @return The parent.
      */
     public AccessibilityNodeInfo getParent() {
         enforceSealed();
         if (mLeashedParent != null && mLeashedParentNodeId != UNDEFINED_NODE_ID) {
-            return getNodeForAccessibilityId(mConnectionId, mLeashedParent, mLeashedParentNodeId);
+            return getNodeForAccessibilityId(mConnectionId, mLeashedParent, mLeashedParentNodeId,
+                    FLAG_PREFETCH_ANCESTORS | FLAG_PREFETCH_SIBLINGS);
         }
         return getNodeForAccessibilityId(mConnectionId, mWindowId, mParentNodeId);
+    }
+
+    /**
+     * Gets the parent.
+     *
+     * <p>
+     * Use {@code prefetchingStrategy} to determine the types of
+     * nodes prefetched from the app if the requested node is not in the cache and must be retrieved
+     * by the app. The default strategy for {@link #getParent()} is a combination of ancestor and
+     * sibling strategies. The app will prefetch until all nodes fulfilling the strategies are
+     * fetched, another node request is sent, or the maximum prefetch batch size of
+     * {@link #MAX_NUMBER_OF_PREFETCHED_NODES} nodes is reached. To prevent interruption by another
+     * request and to force prefetching of the max batch size, use
+     * {@link AccessibilityNodeInfo#FLAG_PREFETCH_UNINTERRUPTIBLE}.
+     * </p>
+     *
+     * @param prefetchingStrategy the prefetching strategy.
+     * @return The parent.
+     *
+     * @throws IllegalStateException If called outside of an AccessibilityService.
+     *
+     * @see #FLAG_PREFETCH_ANCESTORS
+     * @see #FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST
+     * @see #FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST
+     * @see #FLAG_PREFETCH_DESCENDANTS_HYBRID
+     * @see #FLAG_PREFETCH_SIBLINGS
+     * @see #FLAG_PREFETCH_UNINTERRUPTIBLE
+     */
+    @Nullable
+    public AccessibilityNodeInfo getParent(@PrefetchingStrategy int prefetchingStrategy) {
+        enforceSealed();
+        if (mLeashedParent != null && mLeashedParentNodeId != UNDEFINED_NODE_ID) {
+            return getNodeForAccessibilityId(mConnectionId, mLeashedParent, mLeashedParentNodeId,
+                    prefetchingStrategy);
+        }
+        return getNodeForAccessibilityId(mConnectionId, mWindowId, mParentNodeId,
+                prefetchingStrategy);
     }
 
     /**
@@ -3157,11 +3265,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Gets the node info for which the view represented by this info serves as
      * a label for accessibility purposes.
-     * <p>
-     *   <strong>Note:</strong> It is a client responsibility to recycle the
-     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-     *     to avoid creating of multiple instances.
-     * </p>
      *
      * @return The labeled info.
      */
@@ -3209,11 +3312,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Gets the node info which serves as the label of the view represented by
      * this info for accessibility purposes.
-     * <p>
-     *   <strong>Note:</strong> It is a client responsibility to recycle the
-     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-     *     to avoid creating of multiple instances.
-     * </p>
      *
      * @return The label.
      */
@@ -4362,8 +4460,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             case R.id.accessibilityActionDragDrop:
                 return "ACTION_DROP";
             default: {
-                if (action == R.id.accessibilityActionShowSuggestions) {
-                    return "ACTION_SHOW_SUGGESTIONS";
+                if (action == R.id.accessibilityActionShowTextSuggestions) {
+                    return "ACTION_SHOW_TEXT_SUGGESTIONS";
                 }
                 return "ACTION_UNKNOWN";
             }
@@ -4507,17 +4605,31 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static AccessibilityNodeInfo getNodeForAccessibilityId(int connectionId,
             int windowId, long accessibilityId) {
+        return getNodeForAccessibilityId(connectionId, windowId, accessibilityId,
+                FLAG_PREFETCH_ANCESTORS
+                        | FLAG_PREFETCH_DESCENDANTS_HYBRID | FLAG_PREFETCH_SIBLINGS);
+    }
+
+    private static AccessibilityNodeInfo getNodeForAccessibilityId(int connectionId,
+            int windowId, long accessibilityId, @PrefetchingStrategy int prefetchingStrategy) {
         if (!canPerformRequestOverConnection(connectionId, windowId, accessibilityId)) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(connectionId,
-                windowId, accessibilityId, false, FLAG_PREFETCH_PREDECESSORS
-                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS, null);
+                windowId, accessibilityId, false, prefetchingStrategy, null);
     }
 
     private static AccessibilityNodeInfo getNodeForAccessibilityId(int connectionId,
             IBinder leashToken, long accessibilityId) {
+        return getNodeForAccessibilityId(connectionId, leashToken, accessibilityId,
+                FLAG_PREFETCH_ANCESTORS
+                        | FLAG_PREFETCH_DESCENDANTS_HYBRID | FLAG_PREFETCH_SIBLINGS);
+    }
+
+    private static AccessibilityNodeInfo getNodeForAccessibilityId(int connectionId,
+            IBinder leashToken, long accessibilityId,
+            @PrefetchingStrategy int prefetchingStrategy) {
         if (!((leashToken != null)
                 && (getAccessibilityViewId(accessibilityId) != UNDEFINED_ITEM_ID)
                 && (connectionId != UNDEFINED_CONNECTION_ID))) {
@@ -4525,8 +4637,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(connectionId,
-                leashToken, accessibilityId, false, FLAG_PREFETCH_PREDECESSORS
-                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS, null);
+                leashToken, accessibilityId, false, prefetchingStrategy, null);
     }
 
     /** @hide */
@@ -5051,34 +5162,10 @@ public class AccessibilityNodeInfo implements Parcelable {
                 new AccessibilityAction(R.id.accessibilityActionDragCancel);
 
         /**
-         * Action to perform a left swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_LEFT =
-                new AccessibilityAction(R.id.accessibilityActionSwipeLeft);
-
-        /**
-         * Action to perform a right swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_RIGHT =
-            new AccessibilityAction(R.id.accessibilityActionSwipeRight);
-
-        /**
-         * Action to perform an up swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_UP =
-            new AccessibilityAction(R.id.accessibilityActionSwipeUp);
-
-        /**
-         * Action to perform a down swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_DOWN =
-            new AccessibilityAction(R.id.accessibilityActionSwipeDown);
-
-        /**
          * Action to show suggestions for editable text.
          */
-        @NonNull public static final AccessibilityAction ACTION_SHOW_SUGGESTIONS =
-                new AccessibilityAction(R.id.accessibilityActionShowSuggestions);
+        @NonNull public static final AccessibilityAction ACTION_SHOW_TEXT_SUGGESTIONS =
+                new AccessibilityAction(R.id.accessibilityActionShowTextSuggestions);
 
         private final int mActionId;
         private final CharSequence mLabel;
@@ -5198,9 +5285,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Class with information if a node is a range. Use
-     * {@link RangeInfo#obtain(int, float, float, float)} to get an instance. Recycling is
-     * handled by the {@link AccessibilityNodeInfo} to which this object is attached.
+     * Class with information if a node is a range.
      */
     public static final class RangeInfo {
 
@@ -5309,9 +5394,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Class with information if a node is a collection. Use
-     * {@link CollectionInfo#obtain(int, int, boolean)} to get an instance. Recycling is
-     * handled by the {@link AccessibilityNodeInfo} to which this object is attached.
+     * Class with information if a node is a collection.
      * <p>
      * A collection of items has rows and columns and may be hierarchical.
      * For example, a horizontal list is a collection with one column, as
@@ -5477,10 +5560,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Class with information if a node is a collection item. Use
-     * {@link CollectionItemInfo#obtain(int, int, int, int, boolean)}
-     * to get an instance. Recycling is handled by the {@link AccessibilityNodeInfo} to which this
-     * object is attached.
+     * Class with information if a node is a collection item.
      * <p>
      * A collection item is contained in a collection, it starts at
      * a given row and column in the collection, and spans one or
@@ -5568,6 +5648,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param heading Whether the item is a heading. (Prefer
          *                {@link AccessibilityNodeInfo#setHeading(boolean)})
          * @param selected Whether the item is selected.
+         * @removed
          */
         @Deprecated
         @NonNull
@@ -5969,11 +6050,6 @@ public class AccessibilityNodeInfo implements Parcelable {
          * Return the target {@link AccessibilityNodeInfo} for the given {@link Region}.
          * <p>
          *   <strong>Note:</strong> This api can only be called from {@link AccessibilityService}.
-         * </p>
-         * <p>
-         *   <strong>Note:</strong> It is a client responsibility to recycle the
-         *     received info by calling {@link AccessibilityNodeInfo#recycle()}
-         *     to avoid creating of multiple instances.
          * </p>
          *
          * @param region The region retrieved from {@link #getRegionAt(int)}.

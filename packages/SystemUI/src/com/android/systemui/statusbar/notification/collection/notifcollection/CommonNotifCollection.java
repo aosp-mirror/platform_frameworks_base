@@ -41,6 +41,11 @@ public interface CommonNotifCollection {
     void addCollectionListener(@NonNull NotifCollectionListener listener);
 
     /**
+     * Unregisters a listener previously added with {@link #addCollectionListener}
+     */
+    void removeCollectionListener(@NonNull NotifCollectionListener listener);
+
+    /**
      * Returns the list of all known notifications, i.e. the notifications that are currently posted
      * to the phone. In general, this tracks closely to the list maintained by NotificationManager,
      * but it can diverge slightly due to lifetime extenders.

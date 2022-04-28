@@ -34,14 +34,4 @@
         android:textAppearance="?android:attr/textAppearanceListItemSmall"
         android:textColor="?android:attr/textColorAlertDialogListItem" />
 
-    <ImageView
-        android:id="@+id/restricted_icon"
-        android:layout_width="@*android:dimen/config_restrictedIconSize"
-        android:layout_height="@*android:dimen/config_restrictedIconSize"
-        android:layout_alignParentRight="true"
-        android:scaleType="centerInside"
-        android:src="@*android:drawable/ic_info"
-        android:tint="?android:attr/colorAccent"
-        android:visibility="gone" />
-
 </RelativeLayout>

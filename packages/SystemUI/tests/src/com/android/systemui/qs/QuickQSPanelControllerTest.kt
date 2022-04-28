@@ -23,7 +23,6 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.MediaFlags
 import com.android.systemui.media.MediaHost
 import com.android.systemui.media.MediaHostState
 import com.android.systemui.plugins.qs.QSTile
@@ -58,8 +57,6 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var mediaHost: MediaHost
     @Mock
-    private lateinit var mediaFlags: MediaFlags
-    @Mock
     private lateinit var metricsLogger: MetricsLogger
     private val uiEventLogger = UiEventLoggerFake()
     @Mock
@@ -71,8 +68,6 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     private lateinit var tileLayout: TileLayout
     @Mock
     private lateinit var tileView: QSTileView
-    @Mock
-    private lateinit var quickQsBrightnessController: QuickQSBrightnessController
     @Captor
     private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
 
@@ -87,7 +82,6 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         `when`(quickQSPanel.dumpableTag).thenReturn("")
         `when`(quickQSPanel.resources).thenReturn(mContext.resources)
         `when`(qsTileHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
-        `when`(mediaFlags.useMediaSessionLayout()).thenReturn(false)
 
         controller = TestQuickQSPanelController(
                 quickQSPanel,
@@ -96,12 +90,10 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 false,
                 mediaHost,
                 true,
-                mediaFlags,
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
-                dumpManager,
-                quickQsBrightnessController
+                dumpManager
         )
 
         controller.init()
@@ -133,31 +125,18 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testBrightnessRefreshedWhenConfigurationChanged() {
-        // times(2) because both controller and base controller are registering their listeners
-        verify(quickQSPanel, times(2)).addOnConfigurationChangedListener(captor.capture())
-
-        captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
-
-        verify(quickQsBrightnessController).refreshVisibility(anyBoolean())
-    }
-
-    @Test
     fun testMediaExpansionUpdatedWhenConfigurationChanged() {
-        `when`(mediaFlags.useMediaSessionLayout()).thenReturn(true)
-
         // times(2) because both controller and base controller are registering their listeners
         verify(quickQSPanel, times(2)).addOnConfigurationChangedListener(captor.capture())
 
-        captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
+        // verify that media starts in the expanded state by default
         verify(mediaHost).expansion = MediaHostState.EXPANDED
 
         // Rotate device, verify media size updated
         controller.setRotation(RotationUtils.ROTATION_LANDSCAPE)
         captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
 
-        // times(2) because init will have set to collapsed because the flag was off
-        verify(mediaHost, times(2)).expansion = MediaHostState.COLLAPSED
+        verify(mediaHost).expansion = MediaHostState.COLLAPSED
     }
 
     class TestQuickQSPanelController(
@@ -167,15 +146,13 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         usingMediaPlayer: Boolean,
         mediaHost: MediaHost,
         usingCollapsedLandscapeMedia: Boolean,
-        mediaFlags: MediaFlags,
         metricsLogger: MetricsLogger,
         uiEventLogger: UiEventLoggerFake,
         qsLogger: QSLogger,
-        dumpManager: DumpManager,
-        quickQSBrightnessController: QuickQSBrightnessController
+        dumpManager: DumpManager
     ) : QuickQSPanelController(view, qsTileHost, qsCustomizerController, usingMediaPlayer,
-        mediaHost, usingCollapsedLandscapeMedia, mediaFlags, metricsLogger, uiEventLogger, qsLogger,
-        dumpManager, quickQSBrightnessController) {
+        mediaHost, usingCollapsedLandscapeMedia, metricsLogger, uiEventLogger, qsLogger,
+        dumpManager) {
 
         private var rotation = RotationUtils.ROTATION_NONE
 

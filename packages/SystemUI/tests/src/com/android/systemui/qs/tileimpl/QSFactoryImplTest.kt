@@ -48,7 +48,6 @@ import com.android.systemui.qs.tiles.ReduceBrightColorsTile
 import com.android.systemui.qs.tiles.RotationLockTile
 import com.android.systemui.qs.tiles.ScreenRecordTile
 import com.android.systemui.qs.tiles.UiModeNightTile
-import com.android.systemui.qs.tiles.UserTile
 import com.android.systemui.qs.tiles.WifiTile
 import com.android.systemui.qs.tiles.WorkModeTile
 import com.android.systemui.util.leak.GarbageMonitor
@@ -76,7 +75,6 @@ private val specMap = mapOf(
         "location" to LocationTile::class.java,
         "cast" to CastTile::class.java,
         "hotspot" to HotspotTile::class.java,
-        "user" to UserTile::class.java,
         "battery" to BatterySaverTile::class.java,
         "saver" to DataSaverTile::class.java,
         "night" to NightDisplayTile::class.java,
@@ -115,7 +113,6 @@ class QSFactoryImplTest : SysuiTestCase() {
     @Mock private lateinit var locationTile: LocationTile
     @Mock private lateinit var castTile: CastTile
     @Mock private lateinit var hotspotTile: HotspotTile
-    @Mock private lateinit var userTile: UserTile
     @Mock private lateinit var batterySaverTile: BatterySaverTile
     @Mock private lateinit var dataSaverTile: DataSaverTile
     @Mock private lateinit var nightDisplayTile: NightDisplayTile
@@ -159,7 +156,6 @@ class QSFactoryImplTest : SysuiTestCase() {
                 { locationTile },
                 { castTile },
                 { hotspotTile },
-                { userTile },
                 { batterySaverTile },
                 { dataSaverTile },
                 { nightDisplayTile },

@@ -19,6 +19,7 @@ package android.view.stylus;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
+import static android.view.stylus.HandwritingTestUtil.createView;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -38,7 +39,6 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -60,7 +60,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class HandwritingInitiatorTest {
     private static final int TOUCH_SLOP = 8;
-    private static final long TAP_TIMEOUT = ViewConfiguration.getTapTimeout();
+    private static final long TIMEOUT = ViewConfiguration.getLongPressTimeout();
     private static final Rect sHwArea = new Rect(100, 200, 500, 500);
 
     private HandwritingInitiator mHandwritingInitiator;
@@ -78,7 +78,8 @@ public class HandwritingInitiatorTest {
         mHandwritingInitiator =
                 spy(new HandwritingInitiator(viewConfiguration, inputMethodManager));
 
-        mTestView = createMockView(sHwArea, true);
+        mTestView = createView(sHwArea, true);
+        mHandwritingInitiator.updateHandwritingAreasForView(mTestView);
     }
 
     @Test
@@ -176,7 +177,7 @@ public class HandwritingInitiatorTest {
     }
 
     @Test
-    public void onTouchEvent_notStartHandwriting_when_stylusMove_afterTapTimeOut() {
+    public void onTouchEvent_notStartHandwriting_when_stylusMove_afterTimeOut() {
         mHandwritingInitiator.onInputConnectionCreated(mTestView);
         final int x1 = 10;
         final int y1 = 10;
@@ -186,7 +187,7 @@ public class HandwritingInitiatorTest {
 
         final int x2 = x1 + TOUCH_SLOP * 2;
         final int y2 = y1;
-        final long time2 = time1 + TAP_TIMEOUT + 10L;
+        final long time2 = time1 + TIMEOUT + 10L;
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, time2);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
@@ -195,8 +196,25 @@ public class HandwritingInitiatorTest {
     }
 
     @Test
+    public void onTouchEvent_focusView_stylusMoveOnce_withinHWArea() {
+        final int x1 = (sHwArea.left + sHwArea.right) / 2;
+        final int y1 = (sHwArea.top + sHwArea.bottom) / 2;
+        MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent1);
+
+        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int y2 = y1;
+
+        MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent2);
+
+        // HandwritingInitiator will request focus for the registered view.
+        verify(mTestView, times(1)).requestFocus();
+    }
+
+    @Test
     public void autoHandwriting_whenDisabled_wontStartHW() {
-        View mockView = createMockView(sHwArea, false);
+        View mockView = createView(sHwArea, false);
         mHandwritingInitiator.onInputConnectionCreated(mockView);
         final int x1 = (sHwArea.left + sHwArea.right) / 2;
         final int y1 = (sHwArea.top + sHwArea.bottom) / 2;
@@ -272,26 +290,5 @@ public class HandwritingInitiatorTest {
                 properties, coords, 0 /* metaState */, 0 /* buttonState */, 1 /* xPrecision */,
                 1 /* yPrecision */, 0 /* deviceId */, 0 /* edgeFlags */,
                 InputDevice.SOURCE_TOUCHSCREEN, 0 /* flags */);
-    }
-
-    private View createMockView(Rect viewBound, boolean autoHandwritingEnabled) {
-        // mock a parent so that HandwritingInitiator can get
-        ViewGroup parent = new ViewGroup(mContext) {
-            @Override
-            protected void onLayout(boolean changed, int l, int t, int r, int b) {
-                // We don't layout this view.
-            }
-            @Override
-            public boolean getChildVisibleRect(View child, Rect r, android.graphics.Point offset) {
-                r.set(viewBound);
-                return true;
-            }
-        };
-
-        View mockView = mock(View.class);
-        when(mockView.isAttachedToWindow()).thenReturn(true);
-        when(mockView.isAutoHandwritingEnabled()).thenReturn(autoHandwritingEnabled);
-        parent.addView(mockView);
-        return mockView;
     }
 }

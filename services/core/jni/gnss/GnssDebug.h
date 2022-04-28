@@ -75,7 +75,7 @@ struct GnssDebugUtil {
     static uint32_t getConstellationType(const std::vector<T>& satelliteDataArray, size_t i);
 
     template <class T>
-    static uint32_t getTimeEstimateMs(const T& data);
+    static int64_t getTimeEstimateMs(const T& data);
 
     template <class T_DebugData, class T_SatelliteData>
     static jstring parseDebugData(JNIEnv* env, std::stringstream& internalState,
@@ -109,14 +109,8 @@ uint32_t GnssDebugUtil::getConstellationType(const std::vector<T>& satelliteData
 }
 
 template <class T>
-uint32_t GnssDebugUtil::getTimeEstimateMs(const T& data) {
+int64_t GnssDebugUtil::getTimeEstimateMs(const T& data) {
     return data.time.timeEstimate;
-}
-
-template <>
-uint32_t GnssDebugUtil::getTimeEstimateMs(
-        const android::hardware::gnss::IGnssDebug::DebugData& data) {
-    return data.time.timeEstimateMs;
 }
 
 template <class T_DebugData, class T_SatelliteData>

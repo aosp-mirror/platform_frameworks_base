@@ -532,7 +532,7 @@ public class ShortcutManager {
      * app.
      *
      * <p><b>Note:</b> See also the support library counterpart
-     * {@link android.support.v4.content.pm.ShortcutManagerCompat#isRequestPinShortcutSupported(
+     * {@link androidx.core.content.pm.ShortcutManagerCompat#isRequestPinShortcutSupported(
      * Context)}, which supports Android versions lower than {@link VERSION_CODES#O} using the
      * legacy private intent {@code com.android.launcher.action.INSTALL_SHORTCUT}.
      *
@@ -561,7 +561,7 @@ public class ShortcutManager {
      * previous requests.
      *
      * <p><b>Note:</b> See also the support library counterpart
-     * {@link android.support.v4.content.pm.ShortcutManagerCompat#requestPinShortcut(
+     * {@link androidx.core.content.pm.ShortcutManagerCompat#requestPinShortcut(
      * Context, ShortcutInfoCompat, IntentSender)},
      * which supports Android versions lower than {@link VERSION_CODES#O} using the
      * legacy private intent {@code com.android.launcher.action.INSTALL_SHORTCUT}.
@@ -767,7 +767,7 @@ public class ShortcutManager {
      * order to make sure shortcuts exist and are up-to-date, without the need to explicitly handle
      * the shortcut count limit.
      * @see android.app.NotificationManager#notify(int, Notification)
-     * @see Notification.Builder#setShortcutId(String)
+     * @see android.app.Notification.Builder#setShortcutId(String)
      *
      * <p>If {@link #getMaxShortcutCountPerActivity()} is already reached, an existing shortcut with
      * the lowest rank will be removed to add space for the new shortcut.

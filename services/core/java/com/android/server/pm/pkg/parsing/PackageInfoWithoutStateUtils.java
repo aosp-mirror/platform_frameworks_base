@@ -549,6 +549,7 @@ public class PackageInfoWithoutStateUtils {
             ai.metaData = a.getMetaData();
         }
         ai.applicationInfo = applicationInfo;
+        ai.setKnownActivityEmbeddingCerts(a.getKnownActivityEmbeddingCerts());
         return ai;
     }
 
@@ -886,7 +887,9 @@ public class PackageInfoWithoutStateUtils {
                 | flag(pkg.hasRequestForegroundServiceExemption(),
                         ApplicationInfo.PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION)
                 | flag(pkg.areAttributionsUserVisible(),
-                        ApplicationInfo.PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE);
+                        ApplicationInfo.PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE)
+                | flag(pkg.isOnBackInvokedCallbackEnabled(),
+                        ApplicationInfo.PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK);
         // @formatter:on
         return privateFlagsExt;
     }

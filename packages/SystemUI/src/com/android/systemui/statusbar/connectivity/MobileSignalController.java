@@ -828,6 +828,8 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                     + (mMobileStatusHistoryIndex + STATUS_HISTORY_SIZE - i) + "): "
                     + mMobileStatusHistory[i & (STATUS_HISTORY_SIZE - 1)]);
         }
+
+        dumpTableData(pw);
     }
 
     /** Box for QS icon info */
@@ -843,7 +845,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         }
     }
 
-    /** Box for StatusBar icon info */
+    /** Box for status bar icon info */
     private static final class SbInfo {
         final boolean showTriangle;
         final int ratTypeIcon;

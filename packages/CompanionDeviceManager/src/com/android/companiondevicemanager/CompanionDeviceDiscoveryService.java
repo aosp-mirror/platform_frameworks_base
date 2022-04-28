@@ -103,6 +103,8 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     private final Runnable mTimeoutRunnable = this::timeout;
 
+    private boolean mStopAfterFirstMatch;;
+
     /**
      * A state enum for devices' discovery.
      */
@@ -148,6 +150,8 @@ public class CompanionDeviceDiscoveryService extends Service {
         mBtAdapter = mBtManager.getAdapter();
         mBleScanner = mBtAdapter.getBluetoothLeScanner();
         mWifiManager = getSystemService(WifiManager.class);
+
+        sScanResultsLiveData.setValue(Collections.emptyList());
     }
 
     @Override
@@ -163,8 +167,7 @@ public class CompanionDeviceDiscoveryService extends Service {
                 break;
 
             case ACTION_STOP_DISCOVERY:
-                stopDiscoveryAndFinish();
-                sStateLiveData.setValue(DiscoveryState.FINISHED_STOPPED);
+                stopDiscoveryAndFinish(/* timeout */ false);
                 break;
         }
         return START_NOT_STICKY;
@@ -182,9 +185,9 @@ public class CompanionDeviceDiscoveryService extends Service {
         requireNonNull(request);
 
         if (mDiscoveryStarted) throw new RuntimeException("Discovery in progress.");
+        mStopAfterFirstMatch = request.isSingleDevice();
         mDiscoveryStarted = true;
         sStateLiveData.setValue(DiscoveryState.DISCOVERY_IN_PROGRESS);
-        sScanResultsLiveData.setValue(Collections.emptyList());
 
         final List<DeviceFilter<?>> allFilters = request.getDeviceFilters();
         final List<BluetoothDeviceFilter> btFilters =
@@ -208,7 +211,7 @@ public class CompanionDeviceDiscoveryService extends Service {
     }
 
     @MainThread
-    private void stopDiscoveryAndFinish() {
+    private void stopDiscoveryAndFinish(boolean timeout) {
         if (DEBUG) Log.i(TAG, "stopDiscovery()");
 
         if (!mDiscoveryStarted) {
@@ -242,6 +245,12 @@ public class CompanionDeviceDiscoveryService extends Service {
         }
 
         Handler.getMain().removeCallbacks(mTimeoutRunnable);
+
+        if (timeout) {
+            sStateLiveData.setValue(DiscoveryState.FINISHED_TIMEOUT);
+        } else {
+            sStateLiveData.setValue(DiscoveryState.FINISHED_STOPPED);
+        }
 
         // "Finish".
         stopSelf();
@@ -332,6 +341,7 @@ public class CompanionDeviceDiscoveryService extends Service {
     private void onDeviceFound(@NonNull DeviceFilterPair<?> device) {
         runOnMainThread(() -> {
             if (DEBUG) Log.v(TAG, "onDeviceFound() " + device);
+            if (mDiscoveryStopped) return;
             if (mDevicesFound.contains(device)) {
                 // TODO: update the device instead of ignoring (new found device may contain
                 //  additional/updated info, eg. name of the device).
@@ -347,6 +357,10 @@ public class CompanionDeviceDiscoveryService extends Service {
             mDevicesFound.add(device);
             // Then: notify observers.
             sScanResultsLiveData.setValue(mDevicesFound);
+            // Stop discovery when there's one device found for singleDevice.
+            if (mStopAfterFirstMatch) {
+                stopDiscoveryAndFinish(/* timeout */ false);
+            }
         });
     }
 
@@ -378,8 +392,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     private void timeout() {
         if (DEBUG) Log.i(TAG, "timeout()");
-        stopDiscoveryAndFinish();
-        sStateLiveData.setValue(DiscoveryState.FINISHED_TIMEOUT);
+        stopDiscoveryAndFinish(/* timeout */ true);
     }
 
     @Override

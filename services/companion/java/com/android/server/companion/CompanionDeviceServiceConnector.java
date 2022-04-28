@@ -16,7 +16,9 @@
 
 package com.android.server.companion;
 
+import static android.content.Context.BIND_ALMOST_PERCEPTIBLE;
 import static android.content.Context.BIND_IMPORTANT;
+import static android.os.Process.THREAD_PRIORITY_DEFAULT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,10 +30,12 @@ import android.companion.ICompanionDeviceService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.android.internal.infra.ServiceConnector;
+import com.android.server.ServiceThread;
 
 /**
  * Manages a connection (binding) to an instance of {@link CompanionDeviceService} running in the
@@ -41,7 +45,6 @@ import com.android.internal.infra.ServiceConnector;
 class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDeviceService> {
     private static final String TAG = "CompanionDevice_ServiceConnector";
     private static final boolean DEBUG = false;
-    private static final int BINDING_FLAGS = BIND_IMPORTANT;
 
     /** Listener for changes to the state of the {@link CompanionDeviceServiceConnector}  */
     interface Listener {
@@ -50,11 +53,35 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
 
     private final @UserIdInt int mUserId;
     private final @NonNull ComponentName mComponentName;
+    // IMPORTANT: this can (and will!) be null (at the moment, CompanionApplicationController only
+    // installs a listener to the primary ServiceConnector), hence we should always null-check the
+    // reference before calling on it.
     private @Nullable Listener mListener;
 
-    CompanionDeviceServiceConnector(@NonNull Context context, @UserIdInt int userId,
-            @NonNull ComponentName componentName) {
-        super(context, buildIntent(componentName), BINDING_FLAGS, userId, null);
+    /**
+     * Create a CompanionDeviceServiceConnector instance.
+     *
+     * When bindImportant is false, the binding flag will be BIND_ALMOST_PERCEPTIBLE
+     * (oom_score_adj = PERCEPTIBLE_MEDIUM_APP = 225). The target service will be treated
+     * as important as a perceptible app (IMPORTANCE_VISIBLE = 200), and will be unbound when
+     * the app is removed from task manager.
+     * When bindImportant is true, the binding flag will be BIND_IMPORTANT
+     * (oom_score_adj = PERCEPTIBLE_MEDIUM_APP = -700). The target service will
+     * have the highest priority to avoid being killed (IMPORTANCE_FOREGROUND = 100).
+     *
+     * One time permission's importance level to keep session alive is
+     * IMPORTANCE_FOREGROUND_SERVICE = 125. In order to kill the one time permission session, the
+     * service importance level should be higher than 125.
+     */
+    static CompanionDeviceServiceConnector newInstance(@NonNull Context context,
+            @UserIdInt int userId, @NonNull ComponentName componentName, boolean bindImportant) {
+        final int bindingFlags = bindImportant ? BIND_IMPORTANT : BIND_ALMOST_PERCEPTIBLE;
+        return new CompanionDeviceServiceConnector(context, userId, componentName, bindingFlags);
+    }
+
+    private CompanionDeviceServiceConnector(@NonNull Context context, @UserIdInt int userId,
+            @NonNull ComponentName componentName, int bindingFlags) {
+        super(context, buildIntent(componentName), bindingFlags, userId, null);
         mUserId = userId;
         mComponentName = componentName;
     }
@@ -98,12 +125,27 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
 
         if (DEBUG) Log.d(TAG, "onBindingDied() " + mComponentName.toShortString());
 
-        mListener.onBindingDied(mUserId, mComponentName.getPackageName());
+        if (mListener != null) {
+            mListener.onBindingDied(mUserId, mComponentName.getPackageName());
+        }
     }
 
     @Override
     protected ICompanionDeviceService binderAsInterface(@NonNull IBinder service) {
         return ICompanionDeviceService.Stub.asInterface(service);
+    }
+
+    /**
+     * Overrides {@link ServiceConnector.Impl#getJobHandler()} to provide an alternative Thread
+     * ("in form of" a {@link Handler}) to process jobs on.
+     * <p>
+     * (By default, {@link ServiceConnector.Impl} process jobs on the
+     * {@link android.os.Looper#getMainLooper() MainThread} which is a shared singleton thread
+     * within system_server and thus tends to get heavily congested)
+     */
+    @Override
+    protected @NonNull Handler getJobHandler() {
+        return getServiceThread().getThreadHandler();
     }
 
     @Override
@@ -116,4 +158,25 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         return new Intent(CompanionDeviceService.SERVICE_INTERFACE)
                 .setComponent(componentName);
     }
+
+    private static @NonNull ServiceThread getServiceThread() {
+        if (sServiceThread == null) {
+            synchronized (CompanionDeviceManagerService.class) {
+                if (sServiceThread == null) {
+                    sServiceThread = new ServiceThread("companion-device-service-connector",
+                            THREAD_PRIORITY_DEFAULT, /* allowIo */ false);
+                    sServiceThread.start();
+                }
+            }
+        }
+        return sServiceThread;
+    }
+
+    /**
+     * A worker thread for the {@link ServiceConnector} to process jobs on.
+     *
+     * <p>
+     *  Do NOT reference directly, use {@link #getServiceThread()} method instead.
+     */
+    private static volatile @Nullable ServiceThread sServiceThread;
 }

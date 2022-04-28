@@ -18,6 +18,11 @@
 
 package android.opengl;
 
+import android.annotation.NonNull;
+import android.hardware.SyncFence;
+import android.os.ParcelFileDescriptor;
+import android.util.Log;
+
 /**
  * EGL Extensions
  */
@@ -29,6 +34,12 @@ public class EGLExt {
     public static final int EGL_CONTEXT_FLAGS_KHR           = 0x30FC;
     public static final int EGL_OPENGL_ES3_BIT_KHR          = 0x0040;
     public static final int EGL_RECORDABLE_ANDROID          = 0x3142;
+
+    // EGL_ANDROID_native_fence_sync
+    public static final int EGL_SYNC_NATIVE_FENCE_ANDROID     = 0x3144;
+    public static final int EGL_SYNC_NATIVE_FENCE_FD_ANDROID  = 0x3145;
+    public static final int EGL_SYNC_NATIVE_FENCE_SIGNALED_ANDROID = 0x3146;
+    public static final int EGL_NO_NATIVE_FENCE_FD_ANDROID    = -1;
 
     native private static void _nativeClassInit();
     static {
@@ -43,4 +54,33 @@ public class EGLExt {
         long time
     );
 
+    /**
+     * Retrieves the SyncFence for an EGLSync created with EGL_SYNC_NATIVE_FENCE_ANDROID
+     *
+     * See <a href="https://www.khronos.org/registry/EGL/extensions/ANDROID/EGL_ANDROID_native_fence_sync.txt">
+     *     EGL_ANDROID_native_fence_sync</a> extension for more details
+     * @param display The EGLDisplay connection
+     * @param sync The EGLSync to fetch the SyncFence from
+     * @return A SyncFence representing the native fence.
+     *       * If <sync> is not a valid sync object for <display>,
+     *         an {@link SyncFence#isValid() invalid} SyncFence is returned and an EGL_BAD_PARAMETER
+     *         error is generated.
+     *       * If the EGL_SYNC_NATIVE_FENCE_FD_ANDROID attribute of <sync> is
+     *         EGL_NO_NATIVE_FENCE_FD_ANDROID, an {@link SyncFence#isValid() invalid} SyncFence is
+     *         returned and an EGL_BAD_PARAMETER error is generated.
+     *       * If <display> does not match the display passed to eglCreateSync
+     *         when <sync> was created, the behaviour is undefined.
+     */
+    public static @NonNull SyncFence eglDupNativeFenceFDANDROID(@NonNull EGLDisplay display,
+            @NonNull EGLSync sync) {
+        int fd = eglDupNativeFenceFDANDROIDImpl(display, sync);
+        Log.d("EGL", "eglDupNativeFence returned " + fd);
+        if (fd >= 0) {
+            return SyncFence.create(ParcelFileDescriptor.adoptFd(fd));
+        } else {
+            return SyncFence.createEmpty();
+        }
+    }
+
+    private static native int eglDupNativeFenceFDANDROIDImpl(EGLDisplay display, EGLSync sync);
 }

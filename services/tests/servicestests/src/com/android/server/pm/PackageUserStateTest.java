@@ -39,6 +39,7 @@ import com.android.server.pm.pkg.PackageStateUnserialized;
 import com.android.server.pm.pkg.PackageUserStateImpl;
 import com.android.server.pm.pkg.SuspendParams;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -84,7 +85,7 @@ public class PackageUserStateTest {
 
         oldUserState = new PackageUserStateImpl();
         oldUserState.putSuspendParams("suspendingPackage",
-                SuspendParams.getInstanceOrNull(null, new PersistableBundle(), null));
+                new SuspendParams(null, new PersistableBundle(), null));
         assertThat(testUserState.equals(oldUserState), is(false));
 
         oldUserState = new PackageUserStateImpl();
@@ -184,7 +185,7 @@ public class PackageUserStateTest {
 
     private static SuspendParams createSuspendParams(SuspendDialogInfo dialogInfo,
             PersistableBundle appExtras, PersistableBundle launcherExtras) {
-        return SuspendParams.getInstanceOrNull(dialogInfo, appExtras, launcherExtras);
+        return new SuspendParams(dialogInfo, appExtras, launcherExtras);
     }
 
     private static PersistableBundle createPersistableBundle(String lKey, long lValue, String sKey,
@@ -238,9 +239,12 @@ public class PackageUserStateTest {
         PackageUserStateImpl testUserState2 =
                 new PackageUserStateImpl(null, testUserState1);
         assertThat(testUserState1.equals(testUserState2), is(true));
-        testUserState2.setSuspendParams(paramsMap2);
-        // Should not be equal since suspendParams maps are different
-        assertThat(testUserState1.equals(testUserState2), is(false));
+        try {
+            testUserState2.setSuspendParams(paramsMap2);
+            Assert.fail("Changing sealed snapshot of suspendParams should throw");
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage().contains("attempt to change a sealed object"), is(true));
+        }
     }
 
     @Test

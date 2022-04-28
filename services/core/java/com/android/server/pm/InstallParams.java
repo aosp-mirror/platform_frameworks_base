@@ -74,12 +74,13 @@ final class InstallParams extends HandlerParams {
     final boolean mForceQueryableOverride;
     final int mDataLoaderType;
     final long mRequiredInstalledVersionCode;
+    final int mPackageSource;
     final PackageLite mPackageLite;
 
     InstallParams(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
             int installFlags, InstallSource installSource, String volumeUuid,
-            UserHandle user, String packageAbiOverride, PackageLite packageLite,
-            PackageManagerService pm) {
+            UserHandle user, String packageAbiOverride, int packageSource,
+            PackageLite packageLite, PackageManagerService pm) {
         super(user, pm);
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
@@ -98,6 +99,7 @@ final class InstallParams extends HandlerParams {
         mForceQueryableOverride = false;
         mDataLoaderType = DataLoaderType.NONE;
         mRequiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
+        mPackageSource = packageSource;
         mPackageLite = packageLite;
     }
 
@@ -124,6 +126,7 @@ final class InstallParams extends HandlerParams {
         mDataLoaderType = (sessionParams.dataLoaderParams != null)
                 ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
         mRequiredInstalledVersionCode = sessionParams.requiredInstalledVersionCode;
+        mPackageSource = sessionParams.packageSource;
         mPackageLite = packageLite;
     }
 
@@ -286,8 +289,8 @@ final class InstallParams extends HandlerParams {
      */
     private int fixUpInstallReason(String installerPackageName, int installerUid,
             int installReason) {
-        if (mPm.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES, installerUid)
-                == PERMISSION_GRANTED) {
+        if (mPm.snapshotComputer().checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES,
+                installerUid) == PERMISSION_GRANTED) {
             // If the install is being performed by a system app, we trust that app to have set the
             // install reason correctly.
             return installReason;

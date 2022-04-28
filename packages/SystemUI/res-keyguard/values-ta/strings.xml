@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"கூடுதல் பாதுகாப்பிற்கு, கடவுச்சொல்லை உள்ளிட வேண்டும்"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"நிர்வாகி சாதனத்தைப் பூட்டியுள்ளார்"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"பயனர் சாதனத்தைப் பூட்டியுள்ளார்"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"அடையாளங்காணபடவில்லை"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"அடையாளங்காணபடவில்லை"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"முகம் காட்டித் திறத்தல் அம்சத்தைப் பயன்படுத்த, அமைப்புகள் &gt; தனியுரிமை என்பதற்குச் சென்று "<b>"கேமரா அணுகலை"</b>" இயக்கவும்"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

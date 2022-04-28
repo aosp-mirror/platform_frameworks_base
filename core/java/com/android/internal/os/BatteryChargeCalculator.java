@@ -20,10 +20,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.UserHandle;
-import android.util.SparseArray;
-
-import java.util.List;
 
 /**
  * Estimates the battery discharge amounts.
@@ -80,11 +76,5 @@ public class BatteryChargeCalculator extends PowerCalculator {
         builder.getAggregateBatteryConsumerBuilder(
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .setConsumedPower(dischargeMah);
-    }
-
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        // Not implemented. The computation is done by BatteryStatsHelper
     }
 }

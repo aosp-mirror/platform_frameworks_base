@@ -79,7 +79,6 @@ import android.util.StatsEvent;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.BatteryUsageStatsProvider;
 import com.android.internal.os.BatteryUsageStatsStore;
@@ -800,6 +799,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     final BatteryUsageStatsQuery querySinceReset =
                             new BatteryUsageStatsQuery.Builder()
                                     .includeProcessStateData()
+                                    .includeVirtualUids()
                                     .build();
                     bus = getBatteryUsageStats(List.of(querySinceReset)).get(0);
                     break;
@@ -807,6 +807,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     final BatteryUsageStatsQuery queryPowerProfile =
                             new BatteryUsageStatsQuery.Builder()
                                     .includeProcessStateData()
+                                    .includeVirtualUids()
                                     .powerProfileModeledOnly()
                                     .build();
                     bus = getBatteryUsageStats(List.of(queryPowerProfile)).get(0);
@@ -822,6 +823,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     final BatteryUsageStatsQuery queryBeforeReset =
                             new BatteryUsageStatsQuery.Builder()
                                     .includeProcessStateData()
+                                    .includeVirtualUids()
                                     .aggregateSnapshots(sessionStart, sessionEnd)
                                     .build();
                     bus = getBatteryUsageStats(List.of(queryBeforeReset)).get(0);
@@ -2023,7 +2025,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mHandler.post(() -> {
                 synchronized (mStats) {
                     mStats.noteBluetoothScanStoppedFromSourceLocked(localWs, isUnoptimized,
-                            uptime, elapsedRealtime);
+                            elapsedRealtime, uptime);
                 }
             });
         }
@@ -2488,7 +2490,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (BatteryStatsHelper.checkWifiOnly(mContext)) {
+            if (BatteryStats.checkWifiOnly(mContext)) {
                 flags |= BatteryStats.DUMP_DEVICE_WIFI_ONLY;
             }
             awaitCompletion();

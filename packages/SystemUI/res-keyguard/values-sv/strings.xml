@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Ange pinkoden"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Ange det grafiska lösenordet"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Ange mönstret"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Ange ditt lösenord"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ogiltigt kort."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Laddat"</string>
@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Du måste ange lösenord för ytterligare säkerhet"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administratören har låst enheten"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Enheten har låsts manuellt"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Identifierades inte"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Identifierades inte"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Om du vill använda ansiktslås aktiverar du "<b>"Kameraåtkomst"</b>" i Inställningar &gt; Integritet"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

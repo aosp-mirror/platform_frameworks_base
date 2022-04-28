@@ -26,6 +26,7 @@ import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANI
 import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
 import android.graphics.Region;
+import android.util.Slog;
 import android.view.Display;
 
 import java.io.PrintWriter;
@@ -55,6 +56,9 @@ import java.util.ArrayList;
  * @see FullScreenMagnificationController
  */
 public class MagnificationProcessor {
+
+    private static final String TAG = "MagnificationProcessor";
+    private static final boolean DEBUG = false;
 
     private final MagnificationController mController;
 
@@ -103,6 +107,9 @@ public class MagnificationProcessor {
      */
     public boolean setMagnificationConfig(int displayId, @NonNull MagnificationConfig config,
             boolean animate, int id) {
+        if (DEBUG) {
+            Slog.d(TAG, "setMagnificationConfig config=" + config);
+        }
         if (transitionModeIfNeeded(displayId, config, animate, id)) {
             return true;
         }
@@ -125,15 +132,13 @@ public class MagnificationProcessor {
     }
 
     private boolean setScaleAndCenterForFullScreenMagnification(int displayId, float scale,
-            float centerX, float centerY,
-            boolean animate, int id) {
+            float centerX, float centerY, boolean animate, int id) {
+
         if (!isRegistered(displayId)) {
             register(displayId);
         }
         return mController.getFullScreenMagnificationController().setScaleAndCenter(
-                displayId,
-                scale,
-                centerX, centerY, animate, id);
+                displayId, scale, centerX, centerY, animate, id);
     }
 
     /**
@@ -143,8 +148,12 @@ public class MagnificationProcessor {
     private boolean transitionModeIfNeeded(int displayId, MagnificationConfig config,
             boolean animate, int id) {
         int currentMode = getControllingMode(displayId);
-        if (currentMode == config.getMode()
-                || !mController.hasDisableMagnificationCallback(displayId)) {
+        if (config.getMode() == MagnificationConfig.MAGNIFICATION_MODE_DEFAULT) {
+            return false;
+        }
+        // Target mode is as same as current mode and is not transitioning.
+        if (currentMode == config.getMode() && !mController.hasDisableMagnificationCallback(
+                displayId)) {
             return false;
         }
         mController.transitionMagnificationConfigMode(displayId, config, animate, id);
@@ -332,7 +341,8 @@ public class MagnificationProcessor {
                 ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)) {
             return MAGNIFICATION_MODE_FULLSCREEN;
         } else {
-            return (mController.getLastActivatedMode() == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)
+            return (mController.getLastMagnificationActivatedMode(displayId)
+                    == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)
                     ? MAGNIFICATION_MODE_WINDOW
                     : MAGNIFICATION_MODE_FULLSCREEN;
         }
@@ -387,6 +397,10 @@ public class MagnificationProcessor {
 
             dumpTrackingTypingFocusEnabledState(pw, displayId, config.getMode());
         }
+        pw.append("    SupportWindowMagnification="
+                + mController.supportWindowMagnification()).println();
+        pw.append("    WindowMagnificationConnectionState="
+                + mController.getWindowMagnificationMgr().getConnectionState()).println();
     }
 
     private int getIdOfLastServiceToMagnify(int mode, int displayId) {

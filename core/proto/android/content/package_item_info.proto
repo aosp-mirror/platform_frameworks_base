@@ -115,4 +115,5 @@ message ApplicationInfoProto {
     }
     optional Detail detail = 17;
     repeated string overlay_paths = 18;
+    repeated string known_activity_embedding_certs = 19;
 }

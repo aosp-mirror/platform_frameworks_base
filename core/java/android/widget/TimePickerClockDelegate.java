@@ -373,6 +373,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
             // Generate a non-activated color using the disabled alpha.
             final TypedArray ta = mContext.obtainStyledAttributes(ATTRS_DISABLED_ALPHA);
             final float disabledAlpha = ta.getFloat(0, 0.30f);
+            ta.recycle();
             defaultColor = multiplyAlphaComponent(activatedColor, disabledAlpha);
         }
 

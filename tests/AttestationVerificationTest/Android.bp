@@ -40,5 +40,6 @@ android_test {
         "androidx.test.rules",
         "androidx.test.ext.junit",
         "platform-test-annotations",
+        "services.core",
     ],
 }

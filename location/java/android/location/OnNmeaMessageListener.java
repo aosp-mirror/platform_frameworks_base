@@ -31,9 +31,8 @@ public interface OnNmeaMessageListener {
     /**
      * Called when an NMEA message is received.
      * @param message NMEA message
-     * @param timestamp Date and time of the location fix, as reported by the GNSS
-     *                  chipset. The value is specified in milliseconds since 0:00
-     *                  UTC 1 January 1970.
+     * @param timestamp Timestamp of the location fix, as reported by the GNSS chipset. The value
+     *                  is specified in Unix time milliseconds since 1st January 1970, 00:00:00 UTC
      */
     void onNmeaMessage(String message, long timestamp);
 }

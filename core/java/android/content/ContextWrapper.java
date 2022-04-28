@@ -25,8 +25,6 @@ import android.annotation.UiContext;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.compat.CompatChanges;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -72,16 +70,6 @@ import java.util.concurrent.Executor;
 public class ContextWrapper extends Context {
     @UnsupportedAppUsage
     Context mBase;
-
-    /**
-     * After {@link Build.VERSION_CODES#TIRAMISU},
-     * {@link #registerComponentCallbacks(ComponentCallbacks)} will delegate to
-     * {@link #getBaseContext()} instead of {@link #getApplicationContext()}.
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
-    @VisibleForTesting
-    static final long COMPONENT_CALLBACK_ON_WRAPPER = 193247900L;
 
     /**
      * A list to store {@link ComponentCallbacks} which
@@ -1048,8 +1036,8 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
-        mBase.revokeOwnPermissionsOnKill(permissions);
+    public void revokeSelfPermissionsOnKill(@NonNull Collection<String> permissions) {
+        mBase.revokeSelfPermissionsOnKill(permissions);
     }
 
     @Override
@@ -1355,7 +1343,7 @@ public class ContextWrapper extends Context {
     public void registerComponentCallbacks(ComponentCallbacks callback) {
         if (mBase != null) {
             mBase.registerComponentCallbacks(callback);
-        } else if (!CompatChanges.isChangeEnabled(COMPONENT_CALLBACK_ON_WRAPPER)) {
+        } else if (!CompatChanges.isChangeEnabled(OVERRIDABLE_COMPONENT_CALLBACKS)) {
             super.registerComponentCallbacks(callback);
             synchronized (mLock) {
                 // Also register ComponentCallbacks to ContextWrapper, so we can find the correct
@@ -1397,7 +1385,7 @@ public class ContextWrapper extends Context {
                 mCallbacksRegisteredToSuper.remove(callback);
             } else if (mBase != null) {
                 mBase.unregisterComponentCallbacks(callback);
-            } else if (CompatChanges.isChangeEnabled(COMPONENT_CALLBACK_ON_WRAPPER)) {
+            } else if (CompatChanges.isChangeEnabled(OVERRIDABLE_COMPONENT_CALLBACKS)) {
                 // Throw exception for Application that is targeting S-v2+
                 throw new IllegalStateException("ComponentCallbacks must be unregistered after "
                         + "this ContextWrapper is attached to a base Context.");

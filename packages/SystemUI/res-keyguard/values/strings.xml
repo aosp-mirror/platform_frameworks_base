@@ -217,9 +217,6 @@
      the force lock button. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_user_request">Device was locked manually</string>
 
-    <!-- Fingerprint hint message when finger was not recognized.-->
-    <string name="kg_fingerprint_not_recognized">Not recognized</string>
-
     <!-- Face hint message when finger was not recognized. [CHAR LIMIT=20] -->
     <string name="kg_face_not_recognized">Not recognized</string>
 

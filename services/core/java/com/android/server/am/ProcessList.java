@@ -70,7 +70,6 @@ import android.app.IApplicationThread;
 import android.app.IProcessObserver;
 import android.app.IUidObserver;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -181,22 +180,22 @@ public final class ProcessList {
     // OOM adjustments for processes in various states:
 
     // Uninitialized value for any major or minor adj fields
-    static final int INVALID_ADJ = -10000;
+    public static final int INVALID_ADJ = -10000;
 
     // Adjustment used in certain places where we don't know it yet.
     // (Generally this is something that is going to be cached, but we
     // don't know the exact value in the cached range to assign yet.)
-    static final int UNKNOWN_ADJ = 1001;
+    public static final int UNKNOWN_ADJ = 1001;
 
     // This is a process only hosting activities that are not visible,
     // so it can be killed without any disruption.
-    static final int CACHED_APP_MAX_ADJ = 999;
-    static final int CACHED_APP_MIN_ADJ = 900;
+    public static final int CACHED_APP_MAX_ADJ = 999;
+    public static final int CACHED_APP_MIN_ADJ = 900;
 
     // This is the oom_adj level that we allow to die first. This cannot be equal to
     // CACHED_APP_MAX_ADJ unless processes are actively being assigned an oom_score_adj of
     // CACHED_APP_MAX_ADJ.
-    static final int CACHED_APP_LMK_FIRST_ADJ = 950;
+    public static final int CACHED_APP_LMK_FIRST_ADJ = 950;
 
     // Number of levels we have available for different service connection group importance
     // levels.
@@ -204,7 +203,7 @@ public final class ProcessList {
 
     // The B list of SERVICE_ADJ -- these are the old and decrepit
     // services that aren't as shiny and interesting as the ones in the A list.
-    static final int SERVICE_B_ADJ = 800;
+    public static final int SERVICE_B_ADJ = 800;
 
     // This is the process of the previous application that the user was in.
     // This process is kept above other things, because it is very common to
@@ -212,68 +211,68 @@ public final class ProcessList {
     // task switch (toggling between the two top recent apps) as well as normal
     // UI flow such as clicking on a URI in the e-mail app to view in the browser,
     // and then pressing back to return to e-mail.
-    static final int PREVIOUS_APP_ADJ = 700;
+    public static final int PREVIOUS_APP_ADJ = 700;
 
     // This is a process holding the home application -- we want to try
     // avoiding killing it, even if it would normally be in the background,
     // because the user interacts with it so much.
-    static final int HOME_APP_ADJ = 600;
+    public static final int HOME_APP_ADJ = 600;
 
     // This is a process holding an application service -- killing it will not
     // have much of an impact as far as the user is concerned.
-    static final int SERVICE_ADJ = 500;
+    public static final int SERVICE_ADJ = 500;
 
     // This is a process with a heavy-weight application.  It is in the
     // background, but we want to try to avoid killing it.  Value set in
     // system/rootdir/init.rc on startup.
-    static final int HEAVY_WEIGHT_APP_ADJ = 400;
+    public static final int HEAVY_WEIGHT_APP_ADJ = 400;
 
     // This is a process currently hosting a backup operation.  Killing it
     // is not entirely fatal but is generally a bad idea.
-    static final int BACKUP_APP_ADJ = 300;
+    public static final int BACKUP_APP_ADJ = 300;
 
     // This is a process bound by the system (or other app) that's more important than services but
     // not so perceptible that it affects the user immediately if killed.
-    static final int PERCEPTIBLE_LOW_APP_ADJ = 250;
+    public static final int PERCEPTIBLE_LOW_APP_ADJ = 250;
 
     // This is a process hosting services that are not perceptible to the user but the
     // client (system) binding to it requested to treat it as if it is perceptible and avoid killing
     // it if possible.
-    static final int PERCEPTIBLE_MEDIUM_APP_ADJ = 225;
+    public static final int PERCEPTIBLE_MEDIUM_APP_ADJ = 225;
 
     // This is a process only hosting components that are perceptible to the
     // user, and we really want to avoid killing them, but they are not
     // immediately visible. An example is background music playback.
-    static final int PERCEPTIBLE_APP_ADJ = 200;
+    public static final int PERCEPTIBLE_APP_ADJ = 200;
 
     // This is a process only hosting activities that are visible to the
     // user, so we'd prefer they don't disappear.
-    static final int VISIBLE_APP_ADJ = 100;
+    public static final int VISIBLE_APP_ADJ = 100;
     static final int VISIBLE_APP_LAYER_MAX = PERCEPTIBLE_APP_ADJ - VISIBLE_APP_ADJ - 1;
 
     // This is a process that was recently TOP and moved to FGS. Continue to treat it almost
     // like a foreground app for a while.
     // @see TOP_TO_FGS_GRACE_PERIOD
-    static final int PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ = 50;
+    public static final int PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ = 50;
 
     // This is the process running the current foreground app.  We'd really
     // rather not kill it!
-    static final int FOREGROUND_APP_ADJ = 0;
+    public static final int FOREGROUND_APP_ADJ = 0;
 
     // This is a process that the system or a persistent process has bound to,
     // and indicated it is important.
-    static final int PERSISTENT_SERVICE_ADJ = -700;
+    public static final int PERSISTENT_SERVICE_ADJ = -700;
 
     // This is a system persistent process, such as telephony.  Definitely
     // don't want to kill it, but doing so is not completely fatal.
-    static final int PERSISTENT_PROC_ADJ = -800;
+    public static final int PERSISTENT_PROC_ADJ = -800;
 
     // The system process runs at the default adjustment.
-    static final int SYSTEM_ADJ = -900;
+    public static final int SYSTEM_ADJ = -900;
 
     // Special code for native processes that are not being managed by the system (so
     // don't have an oom adj assigned by the system).
-    static final int NATIVE_ADJ = -1000;
+    public static final int NATIVE_ADJ = -1000;
 
     // Memory pages are 4K.
     static final int PAGE_SIZE = 4 * 1024;
@@ -293,9 +292,6 @@ public final class ProcessList {
     // The minimum number of cached apps we want to be able to keep around,
     // without empty apps being able to push them out of memory.
     static final int MIN_CACHED_APPS = 2;
-
-    // We allow empty processes to stick around for at most 30 minutes.
-    static final long MAX_EMPTY_TIME = 30 * 60 * 1000;
 
     // Threshold of number of cached+empty where we consider memory critical.
     static final int TRIM_CRITICAL_THRESHOLD = 3;
@@ -363,59 +359,6 @@ public final class ProcessList {
     private static final long LMKD_RECONNECT_DELAY_MS = 1000;
 
     /**
-     * Native heap allocations will now have a non-zero tag in the most significant byte.
-     * @see <a href="https://source.android.com/devices/tech/debug/tagged-pointers">Tagged
-     * Pointers</a>
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
-    private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
-
-    /**
-     * Native heap allocations in AppZygote process and its descendants will now have a
-     * non-zero tag in the most significant byte.
-     * @see <a href="https://source.android.com/devices/tech/debug/tagged-pointers">Tagged
-     * Pointers</a>
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S)
-    private static final long NATIVE_HEAP_POINTER_TAGGING_APP_ZYGOTE = 207557677;
-
-    /**
-     * Enable asynchronous (ASYNC) memory tag checking in this process. This
-     * flag will only have an effect on hardware supporting the ARM Memory
-     * Tagging Extension (MTE).
-     */
-    @ChangeId
-    @Disabled
-    private static final long NATIVE_MEMTAG_ASYNC = 135772972; // This is a bug id.
-
-    /**
-     * Enable synchronous (SYNC) memory tag checking in this process. This flag
-     * will only have an effect on hardware supporting the ARM Memory Tagging
-     * Extension (MTE). If both NATIVE_MEMTAG_ASYNC and this option is selected,
-     * this option takes preference and MTE is enabled in SYNC mode.
-     */
-    @ChangeId
-    @Disabled
-    private static final long NATIVE_MEMTAG_SYNC = 177438394; // This is a bug id.
-
-    /**
-     * Enable automatic zero-initialization of native heap memory allocations.
-     */
-    @ChangeId
-    @Disabled
-    private static final long NATIVE_HEAP_ZERO_INIT = 178038272; // This is a bug id.
-
-    /**
-     * Enable sampled memory bug detection in the app.
-     * @see <a href="https://source.android.com/devices/tech/debug/gwp-asan">GWP-ASan</a>.
-     */
-    @ChangeId
-    @Disabled
-    private static final long GWP_ASAN = 135634846; // This is a bug id.
-
-    /**
      * Apps have no access to the private data directories of any other app, even if the other
      * app has made them world-readable.
      */
@@ -480,9 +423,8 @@ public final class ProcessList {
      * Having a global counter ensures that seq numbers are monotonically increasing for a
      * particular uid even when the uidRecord is re-created.
      */
-    @GuardedBy("mService")
     @VisibleForTesting
-    long mProcStateSeqCounter = 0;
+    volatile long mProcStateSeqCounter = 0;
 
     /**
      * A global counter for generating sequence numbers to uniquely identify pending process starts.
@@ -1681,129 +1623,6 @@ public final class ProcessList {
         return gidArray;
     }
 
-    private int memtagModeToZygoteMemtagLevel(int memtagMode) {
-        switch (memtagMode) {
-            case ApplicationInfo.MEMTAG_ASYNC:
-                return Zygote.MEMORY_TAG_LEVEL_ASYNC;
-            case ApplicationInfo.MEMTAG_SYNC:
-                return Zygote.MEMORY_TAG_LEVEL_SYNC;
-            default:
-                return Zygote.MEMORY_TAG_LEVEL_NONE;
-        }
-    }
-
-    // Returns the requested memory tagging level.
-    private int getRequestedMemtagLevel(ProcessRecord app) {
-        // Look at the process attribute first.
-        if (app.processInfo != null
-                && app.processInfo.memtagMode != ApplicationInfo.MEMTAG_DEFAULT) {
-            return memtagModeToZygoteMemtagLevel(app.processInfo.memtagMode);
-        }
-
-        // Then at the application attribute.
-        if (app.info.getMemtagMode() != ApplicationInfo.MEMTAG_DEFAULT) {
-            return memtagModeToZygoteMemtagLevel(app.info.getMemtagMode());
-        }
-
-        if (mPlatformCompat.isChangeEnabled(NATIVE_MEMTAG_SYNC, app.info)) {
-            return Zygote.MEMORY_TAG_LEVEL_SYNC;
-        }
-
-        if (mPlatformCompat.isChangeEnabled(NATIVE_MEMTAG_ASYNC, app.info)) {
-            return Zygote.MEMORY_TAG_LEVEL_ASYNC;
-        }
-
-        // Check to ensure the app hasn't explicitly opted-out of TBI via. the manifest attribute.
-        if (!app.info.allowsNativeHeapPointerTagging()) {
-            return Zygote.MEMORY_TAG_LEVEL_NONE;
-        }
-
-        // Check to see that the compat feature for TBI is enabled.
-        if (mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
-            return Zygote.MEMORY_TAG_LEVEL_TBI;
-        }
-
-        return Zygote.MEMORY_TAG_LEVEL_NONE;
-    }
-
-    private int decideTaggingLevel(ProcessRecord app) {
-        // Get the desired tagging level (app manifest + compat features).
-        int level = getRequestedMemtagLevel(app);
-
-        // Take into account the hardware capabilities.
-        if (Zygote.nativeSupportsMemoryTagging()) {
-            // MTE devices can not do TBI, because the Zygote process already has live MTE
-            // allocations. Downgrade TBI to NONE.
-            if (level == Zygote.MEMORY_TAG_LEVEL_TBI) {
-                level = Zygote.MEMORY_TAG_LEVEL_NONE;
-            }
-        } else if (Zygote.nativeSupportsTaggedPointers()) {
-            // TBI-but-not-MTE devices downgrade MTE modes to TBI.
-            // The idea is that if an app opts into full hardware tagging (MTE), it must be ok with
-            // the "fake" pointer tagging (TBI).
-            if (level == Zygote.MEMORY_TAG_LEVEL_ASYNC || level == Zygote.MEMORY_TAG_LEVEL_SYNC) {
-                level = Zygote.MEMORY_TAG_LEVEL_TBI;
-            }
-        } else {
-            // Otherwise disable all tagging.
-            level = Zygote.MEMORY_TAG_LEVEL_NONE;
-        }
-
-        return level;
-    }
-
-    private int decideTaggingLevelForAppZygote(ProcessRecord app) {
-        int level = decideTaggingLevel(app);
-        // TBI ("fake" pointer tagging) in AppZygote is controlled by a separate compat feature.
-        if (!mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING_APP_ZYGOTE, app.info)
-                && level == Zygote.MEMORY_TAG_LEVEL_TBI) {
-            level = Zygote.MEMORY_TAG_LEVEL_NONE;
-        }
-        return level;
-    }
-
-    private int decideGwpAsanLevel(ProcessRecord app) {
-        // Look at the process attribute first.
-       if (app.processInfo != null
-                && app.processInfo.gwpAsanMode != ApplicationInfo.GWP_ASAN_DEFAULT) {
-            return app.processInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_ALWAYS
-                    ? Zygote.GWP_ASAN_LEVEL_ALWAYS
-                    : Zygote.GWP_ASAN_LEVEL_NEVER;
-        }
-        // Then at the application attribute.
-        if (app.info.getGwpAsanMode() != ApplicationInfo.GWP_ASAN_DEFAULT) {
-            return app.info.getGwpAsanMode() == ApplicationInfo.GWP_ASAN_ALWAYS
-                    ? Zygote.GWP_ASAN_LEVEL_ALWAYS
-                    : Zygote.GWP_ASAN_LEVEL_NEVER;
-        }
-        // If the app does not specify gwpAsanMode, the default behavior is lottery among the
-        // system apps, and disabled for user apps, unless overwritten by the compat feature.
-        if (mPlatformCompat.isChangeEnabled(GWP_ASAN, app.info)) {
-            return Zygote.GWP_ASAN_LEVEL_ALWAYS;
-        }
-        if ((app.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            return Zygote.GWP_ASAN_LEVEL_LOTTERY;
-        }
-        return Zygote.GWP_ASAN_LEVEL_NEVER;
-    }
-
-    private boolean enableNativeHeapZeroInit(ProcessRecord app) {
-        // Look at the process attribute first.
-        if (app.processInfo != null
-                && app.processInfo.nativeHeapZeroInitialized != ApplicationInfo.ZEROINIT_DEFAULT) {
-            return app.processInfo.nativeHeapZeroInitialized == ApplicationInfo.ZEROINIT_ENABLED;
-        }
-        // Then at the application attribute.
-        if (app.info.getNativeHeapZeroInitialized() != ApplicationInfo.ZEROINIT_DEFAULT) {
-            return app.info.getNativeHeapZeroInitialized() == ApplicationInfo.ZEROINIT_ENABLED;
-        }
-        // Compat feature last.
-        if (mPlatformCompat.isChangeEnabled(NATIVE_HEAP_ZERO_INIT, app.info)) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * @return {@code true} if process start is successful, false otherwise.
      */
@@ -1896,7 +1715,21 @@ public final class ProcessList {
                 uid = 0;
             }
             int runtimeFlags = 0;
-            if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+
+            boolean debuggableFlag = (app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+            boolean isProfileableByShell = app.info.isProfileableByShell();
+            boolean isProfileable = app.info.isProfileable();
+
+            if (app.isSdkSandbox) {
+                ApplicationInfo clientInfo = app.getClientInfoForSdkSandbox();
+                if (clientInfo != null) {
+                    debuggableFlag |= (clientInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                    isProfileableByShell |= clientInfo.isProfileableByShell();
+                    isProfileable |= clientInfo.isProfileable();
+                }
+            }
+
+            if (debuggableFlag) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
                 runtimeFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
                 // Also turn on CheckJNI for debuggable apps. It's quite
@@ -1915,10 +1748,10 @@ public final class ProcessList {
             if ((app.info.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0 || mService.mSafeMode) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
             }
-            if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PROFILEABLE_BY_SHELL) != 0) {
+            if (isProfileableByShell) {
                 runtimeFlags |= Zygote.PROFILE_FROM_SHELL;
             }
-            if ((app.info.privateFlagsExt & ApplicationInfo.PRIVATE_FLAG_EXT_PROFILEABLE) != 0) {
+            if (isProfileable) {
                 runtimeFlags |= Zygote.PROFILEABLE;
             }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
@@ -1985,10 +1818,8 @@ public final class ProcessList {
                 runtimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
             }
 
-            runtimeFlags |= decideGwpAsanLevel(app);
-
             String invokeWith = null;
-            if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            if (debuggableFlag) {
                 // Debuggable apps may include a wrapper script with their library directory.
                 String wrapperFileName = app.info.nativeLibraryDir + "/wrap.sh";
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
@@ -2017,23 +1848,21 @@ public final class ProcessList {
             app.setRequiredAbi(requiredAbi);
             app.setInstructionSet(instructionSet);
 
-            // If instructionSet is non-null, this indicates that the system_server is spawning a
-            // process with an ISA that may be different from its own. System (kernel and hardware)
-            // compatibility for these features is checked in the decideTaggingLevel in the
-            // system_server process (not the child process). As both MTE and TBI are only supported
-            // in aarch64, we can simply ensure that the new process is also aarch64. This prevents
-            // the mismatch where a 64-bit system server spawns a 32-bit child that thinks it should
-            // enable some tagging variant. Theoretically, a 32-bit system server could exist that
-            // spawns 64-bit processes, in which case the new process won't get any tagging. This is
-            // fine as we haven't seen this configuration in practice, and we can reasonable assume
-            // that if tagging is desired, the system server will be 64-bit.
-            if (instructionSet == null || instructionSet.equals("arm64")) {
-                runtimeFlags |= decideTaggingLevel(app);
+            // If this was an external service, the package name and uid in the passed in
+            // ApplicationInfo have been changed to match those of the calling package;
+            // that will incorrectly apply compat feature overrides for the calling package instead
+            // of the defining one.
+            ApplicationInfo definingAppInfo;
+            if (hostingRecord.getDefiningPackageName() != null) {
+                definingAppInfo = new ApplicationInfo(app.info);
+                definingAppInfo.packageName = hostingRecord.getDefiningPackageName();
+                definingAppInfo.uid = uid;
+            } else {
+                definingAppInfo = app.info;
             }
 
-            if (enableNativeHeapZeroInit(app)) {
-                runtimeFlags |= Zygote.NATIVE_HEAP_ZERO_INIT;
-            }
+            runtimeFlags |= Zygote.getMemorySafetyRuntimeFlags(
+                    definingAppInfo, app.processInfo, instructionSet, mPlatformCompat);
 
             // the per-user SELinux context must be set
             if (TextUtils.isEmpty(app.info.seInfoUser)) {
@@ -2064,6 +1893,7 @@ public final class ProcessList {
             return false;
         }
     }
+
 
     @GuardedBy("mService")
     boolean startProcessLocked(HostingRecord hostingRecord, String entryPoint, ProcessRecord app,
@@ -2292,8 +2122,7 @@ public final class ProcessList {
                 // not the calling one.
                 appInfo.packageName = app.getHostingRecord().getDefiningPackageName();
                 appInfo.uid = uid;
-                int runtimeFlags = decideTaggingLevelForAppZygote(app);
-                appZygote = new AppZygote(appInfo, uid, firstUid, lastUid, runtimeFlags);
+                appZygote = new AppZygote(appInfo, app.processInfo, uid, firstUid, lastUid);
                 mAppZygotes.put(app.info.processName, uid, appZygote);
                 zygoteProcessList = new ArrayList<ProcessRecord>();
                 mAppZygoteProcesses.put(appZygote, zygoteProcessList);
@@ -2525,6 +2354,7 @@ public final class ProcessList {
     ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
             boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
             int zygotePolicyFlags, boolean allowWhileBooting, boolean isolated, int isolatedUid,
+            boolean isSdkSandbox, int sdkSandboxUid, String sdkSandboxClientAppPackage,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
         long startTime = SystemClock.uptimeMillis();
         ProcessRecord app;
@@ -2618,7 +2448,8 @@ public final class ProcessList {
 
         if (app == null) {
             checkSlow(startTime, "startProcess: creating new process record");
-            app = newProcessRecordLocked(info, processName, isolated, isolatedUid, hostingRecord);
+            app = newProcessRecordLocked(info, processName, isolated, isolatedUid, isSdkSandbox,
+                    sdkSandboxUid, sdkSandboxClientAppPackage, hostingRecord);
             if (app == null) {
                 Slog.w(TAG, "Failed making new process record for "
                         + processName + "/" + info.uid + " isolated=" + isolated);
@@ -3113,10 +2944,14 @@ public final class ProcessList {
 
     @GuardedBy("mService")
     ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
-            boolean isolated, int isolatedUid, HostingRecord hostingRecord) {
+            boolean isolated, int isolatedUid, boolean isSdkSandbox, int sdkSandboxUid,
+            String sdkSandboxClientAppPackage, HostingRecord hostingRecord) {
         String proc = customProcess != null ? customProcess : info.processName;
         final int userId = UserHandle.getUserId(info.uid);
         int uid = info.uid;
+        if (isSdkSandbox) {
+            uid = sdkSandboxUid;
+        }
         if (isolated) {
             if (isolatedUid == 0) {
                 IsolatedUidRange uidRange = getOrCreateIsolatedUidRangeLocked(info, hostingRecord);
@@ -3145,7 +2980,9 @@ public final class ProcessList {
             FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, info.uid, uid,
                     FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
-        final ProcessRecord r = new ProcessRecord(mService, info, proc, uid);
+        final ProcessRecord r = new ProcessRecord(mService, info, proc, uid,
+                sdkSandboxClientAppPackage,
+                hostingRecord.getDefiningUid(), hostingRecord.getDefiningProcessName());
         final ProcessStateRecord state = r.mState;
 
         if (!mService.mBooted && !mService.mBooting
@@ -3193,7 +3030,7 @@ public final class ProcessList {
                             Slog.i(TAG_UID_OBSERVERS, "No more processes in " + uidRecord);
                         }
                         mService.enqueueUidChangeLocked(uidRecord, -1,
-                                UidRecord.CHANGE_GONE);
+                                UidRecord.CHANGE_GONE | UidRecord.CHANGE_PROCSTATE);
                         EventLogTags.writeAmUidStopped(uid);
                         mActiveUids.remove(uid);
                         mService.mFgsStartTempAllowList.removeUid(record.info.uid);
@@ -4944,14 +4781,18 @@ public final class ProcessList {
     }
 
     /**
-     * Checks if any uid is coming from background to foreground or vice versa and if so, increments
-     * the {@link UidRecord#curProcStateSeq} corresponding to that uid using global seq counter
-     * {@link ProcessList#mProcStateSeqCounter} and notifies the app if it needs to block.
+     * Increments the {@link UidRecord#curProcStateSeq} for all uids using global seq counter
+     * {@link ProcessList#mProcStateSeqCounter} and checks if any uid is coming
+     * from background to foreground or vice versa and if so, notifies the app if it needs to block.
      */
     @VisibleForTesting
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     void incrementProcStateSeqAndNotifyAppsLOSP(ActiveUids activeUids) {
-        if (mService.mWaitForNetworkTimeoutMs <= 0) {
+        for (int i = activeUids.size() - 1; i >= 0; --i) {
+            final UidRecord uidRec = activeUids.valueAt(i);
+            uidRec.curProcStateSeq = getNextProcStateSeq();
+        }
+        if (mService.mConstants.mNetworkAccessTimeoutMs <= 0) {
             return;
         }
         // Used for identifying which uids need to block for network.
@@ -4977,7 +4818,6 @@ public final class ProcessList {
                 continue;
             }
             synchronized (uidRec.networkStateLock) {
-                uidRec.curProcStateSeq = ++mProcStateSeqCounter; // TODO: use method
                 if (blockState == NETWORK_STATE_BLOCK) {
                     if (blockingUids == null) {
                         blockingUids = new ArrayList<>();
@@ -4988,7 +4828,7 @@ public final class ProcessList {
                         Slog.d(TAG_NETWORK, "uid going to background, notifying all blocking"
                                 + " threads for uid: " + uidRec);
                     }
-                    if (uidRec.waitingForNetwork) {
+                    if (uidRec.procStateSeqWaitingForNetwork != 0) {
                         uidRec.networkStateLock.notifyAll();
                     }
                 }
@@ -5020,6 +4860,10 @@ public final class ProcessList {
                 }
             }
         }
+    }
+
+    long getNextProcStateSeq() {
+        return ++mProcStateSeqCounter;
     }
 
     /**
@@ -5544,6 +5388,10 @@ public final class ProcessList {
 
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
+        }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) {
         }
     };
 }

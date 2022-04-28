@@ -46,10 +46,15 @@ import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.util.NotificationChannels;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+/** */
+@SysUISingleton
 public class StorageNotification extends CoreStartable {
     private static final String TAG = "StorageNotification";
 
@@ -61,6 +66,7 @@ public class StorageNotification extends CoreStartable {
     private NotificationManager mNotificationManager;
     private StorageManager mStorageManager;
 
+    @Inject
     public StorageNotification(Context context) {
         super(context);
     }

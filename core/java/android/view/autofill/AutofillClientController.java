@@ -76,7 +76,6 @@ public final class AutofillClientController implements AutofillManager.AutofillC
      */
     public AutofillClientController(Activity activity) {
         mActivity = activity;
-        activity.addDumpable(this);
     }
 
     private AutofillManager getAutofillManager() {

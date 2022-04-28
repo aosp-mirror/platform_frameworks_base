@@ -85,6 +85,10 @@ public class HeadsUpViewBinder {
         CancellationSignal signal = mStage.requestRebind(entry, en -> {
             mLogger.entryBoundSuccessfully(entry.getKey());
             en.getRow().setUsesIncreasedHeadsUpHeight(params.useIncreasedHeadsUpHeight());
+            // requestRebing promises that if we called cancel before this callback would be
+            // invoked, then we will not enter this callback, and because we always cancel before
+            // adding to this map, we know this will remove the correct signal.
+            mOngoingBindCallbacks.remove(entry);
             if (callback != null) {
                 callback.onBindFinished(en);
             }

@@ -47,6 +47,7 @@ import android.os.HidlMemoryUtil;
 import android.os.ParcelFileDescriptor;
 import android.os.SharedMemory;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -80,6 +81,19 @@ class TestUtil {
                 ConversionUtil.hidl2aidlUuid(model.header.vendorUuid));
         assertArrayEquals(new byte[]{91, 92, 93, 94, 95},
                 HidlMemoryUtil.hidlMemoryToByteArray(model.data));
+    }
+
+    static android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel dupModel_2_1(
+            android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel model) {
+        android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel dup =
+                new android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel();
+        dup.header = model.header;
+        try {
+            dup.data = model.data.dup();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return dup;
     }
 
     private static void validateSoundModel_2_0(
@@ -121,6 +135,15 @@ class TestUtil {
         validatePhrases_2_0(model.phrases);
     }
 
+    static android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel dupPhraseModel_2_1(
+            android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel model) {
+        android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel dup =
+                new android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel();
+        dup.common = dupModel_2_1(model.common);
+        dup.phrases = model.phrases;
+        return dup;
+    }
+
     static void validatePhraseSoundModel_2_0(
             android.hardware.soundtrigger.V2_0.ISoundTriggerHw.PhraseSoundModel model) {
         validateSoundModel_2_0(model.common,
@@ -139,8 +162,8 @@ class TestUtil {
                 phrases.get(0).recognitionModes);
     }
 
-    static android.hardware.soundtrigger.V2_0.ISoundTriggerHw.Properties createDefaultProperties_2_0(
-            boolean supportConcurrentCapture) {
+    static android.hardware.soundtrigger.V2_0.ISoundTriggerHw.Properties
+            createDefaultProperties_2_0() {
         android.hardware.soundtrigger.V2_0.ISoundTriggerHw.Properties properties =
                 new android.hardware.soundtrigger.V2_0.ISoundTriggerHw.Properties();
         properties.implementor = "implementor";
@@ -162,17 +185,16 @@ class TestUtil {
                         | android.hardware.soundtrigger.V2_0.RecognitionMode.GENERIC_TRIGGER;
         properties.captureTransition = true;
         properties.maxBufferMs = 321;
-        properties.concurrentCapture = supportConcurrentCapture;
+        properties.concurrentCapture = true;
         properties.triggerInEvent = true;
         properties.powerConsumptionMw = 432;
         return properties;
     }
 
-    static android.hardware.soundtrigger.V2_3.Properties createDefaultProperties_2_3(
-            boolean supportConcurrentCapture) {
+    static android.hardware.soundtrigger.V2_3.Properties createDefaultProperties_2_3() {
         android.hardware.soundtrigger.V2_3.Properties properties =
                 new android.hardware.soundtrigger.V2_3.Properties();
-        properties.base = createDefaultProperties_2_0(supportConcurrentCapture);
+        properties.base = createDefaultProperties_2_0();
         properties.supportedModelArch = "supportedModelArch";
         properties.audioCapabilities =
                 android.hardware.soundtrigger.V2_3.AudioCapabilities.ECHO_CANCELLATION
@@ -180,7 +202,7 @@ class TestUtil {
         return properties;
     }
 
-    static Properties createDefaultProperties(boolean supportConcurrentCapture) {
+    static Properties createDefaultProperties() {
         Properties properties = new Properties();
         properties.implementor = "implementor";
         properties.description = "description";
@@ -190,31 +212,27 @@ class TestUtil {
         properties.maxKeyPhrases = 567;
         properties.maxUsers = 678;
         properties.recognitionModes =
-                RecognitionMode.VOICE_TRIGGER
-                        | RecognitionMode.USER_IDENTIFICATION
-                        | RecognitionMode.USER_AUTHENTICATION
-                        | RecognitionMode.GENERIC_TRIGGER;
+                RecognitionMode.VOICE_TRIGGER | RecognitionMode.USER_IDENTIFICATION
+                        | RecognitionMode.USER_AUTHENTICATION | RecognitionMode.GENERIC_TRIGGER;
         properties.captureTransition = true;
         properties.maxBufferMs = 321;
-        properties.concurrentCapture = supportConcurrentCapture;
+        properties.concurrentCapture = true;
         properties.triggerInEvent = true;
         properties.powerConsumptionMw = 432;
         properties.supportedModelArch = "supportedModelArch";
-        properties.audioCapabilities = AudioCapabilities.ECHO_CANCELLATION
-                | AudioCapabilities.NOISE_SUPPRESSION;
+        properties.audioCapabilities =
+                AudioCapabilities.ECHO_CANCELLATION | AudioCapabilities.NOISE_SUPPRESSION;
         return properties;
     }
 
-    static void validateDefaultProperties(Properties properties,
-            boolean supportConcurrentCapture) {
-        validateDefaultProperties(properties, supportConcurrentCapture,
+    static void validateDefaultProperties(Properties properties) {
+        validateDefaultProperties(properties,
                 AudioCapabilities.ECHO_CANCELLATION | AudioCapabilities.NOISE_SUPPRESSION,
                 "supportedModelArch");
     }
 
     static void validateDefaultProperties(Properties properties,
-            boolean supportConcurrentCapture, @AudioCapabilities int audioCapabilities,
-            @NonNull String supportedModelArch) {
+            @AudioCapabilities int audioCapabilities, @NonNull String supportedModelArch) {
         assertEquals("implementor", properties.implementor);
         assertEquals("description", properties.description);
         assertEquals(123, properties.version);
@@ -222,13 +240,12 @@ class TestUtil {
         assertEquals(456, properties.maxSoundModels);
         assertEquals(567, properties.maxKeyPhrases);
         assertEquals(678, properties.maxUsers);
-        assertEquals(RecognitionMode.GENERIC_TRIGGER
-                | RecognitionMode.USER_AUTHENTICATION
-                | RecognitionMode.USER_IDENTIFICATION
-                | RecognitionMode.VOICE_TRIGGER, properties.recognitionModes);
+        assertEquals(RecognitionMode.GENERIC_TRIGGER | RecognitionMode.USER_AUTHENTICATION
+                        | RecognitionMode.USER_IDENTIFICATION | RecognitionMode.VOICE_TRIGGER,
+                properties.recognitionModes);
         assertTrue(properties.captureTransition);
         assertEquals(321, properties.maxBufferMs);
-        assertEquals(supportConcurrentCapture, properties.concurrentCapture);
+        assertEquals(true, properties.concurrentCapture);
         assertTrue(properties.triggerInEvent);
         assertEquals(432, properties.powerConsumptionMw);
         assertEquals(supportedModelArch, properties.supportedModelArch);
@@ -246,8 +263,8 @@ class TestUtil {
         config.phraseRecognitionExtras[0].levels[0].userId = 234;
         config.phraseRecognitionExtras[0].levels[0].levelPercent = 34;
         config.data = new byte[]{5, 4, 3, 2, 1};
-        config.audioCapabilities = AudioCapabilities.ECHO_CANCELLATION
-                | AudioCapabilities.NOISE_SUPPRESSION;
+        config.audioCapabilities =
+                AudioCapabilities.ECHO_CANCELLATION | AudioCapabilities.NOISE_SUPPRESSION;
         return config;
     }
 
@@ -295,13 +312,12 @@ class TestUtil {
             int captureHandle) {
         validateRecognitionConfig_2_1(config.base, captureDevice, captureHandle);
 
-        assertEquals(AudioCapabilities.ECHO_CANCELLATION
-                | AudioCapabilities.NOISE_SUPPRESSION, config.audioCapabilities);
+        assertEquals(AudioCapabilities.ECHO_CANCELLATION | AudioCapabilities.NOISE_SUPPRESSION,
+                config.audioCapabilities);
     }
 
     static android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionEvent createRecognitionEvent_2_0(
-            int hwHandle,
-            int status) {
+            int hwHandle, int status) {
         android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionEvent halEvent =
                 new android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionEvent();
         halEvent.status = status;
@@ -351,8 +367,7 @@ class TestUtil {
         return event;
     }
 
-    static ISoundTriggerHwCallback.RecognitionEvent createRecognitionEvent_2_1(
-            int hwHandle,
+    static ISoundTriggerHwCallback.RecognitionEvent createRecognitionEvent_2_1(int hwHandle,
             int status) {
         ISoundTriggerHwCallback.RecognitionEvent halEvent =
                 new ISoundTriggerHwCallback.RecognitionEvent();
@@ -386,8 +401,7 @@ class TestUtil {
         PhraseRecognitionExtra extra = new PhraseRecognitionExtra();
         extra.id = 123;
         extra.confidenceLevel = 52;
-        extra.recognitionModes = RecognitionMode.VOICE_TRIGGER
-                | RecognitionMode.GENERIC_TRIGGER;
+        extra.recognitionModes = RecognitionMode.VOICE_TRIGGER | RecognitionMode.GENERIC_TRIGGER;
         ConfidenceLevel level = new ConfidenceLevel();
         level.userId = 31;
         level.levelPercent = 43;
@@ -396,8 +410,8 @@ class TestUtil {
         return event;
     }
 
-    static android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.PhraseRecognitionEvent
-    createPhraseRecognitionEvent_2_0(int hwHandle, int status) {
+    static android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.PhraseRecognitionEvent createPhraseRecognitionEvent_2_0(
+            int hwHandle, int status) {
         android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.PhraseRecognitionEvent halEvent =
                 new android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.PhraseRecognitionEvent();
         halEvent.common = createRecognitionEvent_2_0(hwHandle, status);

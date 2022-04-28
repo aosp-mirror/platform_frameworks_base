@@ -17,6 +17,7 @@
 package com.android.server.app;
 
 
+import android.annotation.Nullable;
 import android.os.IInterface;
 
 import com.android.internal.infra.AndroidFuture;
@@ -30,9 +31,10 @@ import java.util.concurrent.CompletableFuture;
  * Tests provide a service instance via {@link #FakeServiceConnector(IInterface)} that will be
  * connected to and used to fulfill service jobs.
  */
-final class FakeServiceConnector<T extends IInterface> implements
-        ServiceConnector<T> {
+final class FakeServiceConnector<T extends IInterface> implements ServiceConnector<T> {
     private final T mService;
+    @Nullable
+    private ServiceLifecycleCallbacks mServiceLifecycleCallbacks;
     private boolean mIsConnected;
     private int mConnectCount = 0;
 
@@ -96,7 +98,15 @@ final class FakeServiceConnector<T extends IInterface> implements
 
     @Override
     public void unbind() {
+        if (mServiceLifecycleCallbacks != null) {
+            mServiceLifecycleCallbacks.onDisconnected(mService);
+        }
         mIsConnected = false;
+    }
+
+    @Override
+    public void setServiceLifecycleCallbacks(@Nullable ServiceLifecycleCallbacks<T> callbacks) {
+        mServiceLifecycleCallbacks = callbacks;
     }
 
     private void markPossibleConnection() {
@@ -106,6 +116,21 @@ final class FakeServiceConnector<T extends IInterface> implements
 
         mConnectCount += 1;
         mIsConnected = true;
+
+        if (mServiceLifecycleCallbacks != null) {
+            mServiceLifecycleCallbacks.onConnected(mService);
+        }
+    }
+
+    public void killServiceProcess() {
+        if (!mIsConnected) {
+            return;
+        }
+        mIsConnected = false;
+
+        if (mServiceLifecycleCallbacks != null) {
+            mServiceLifecycleCallbacks.onBinderDied();
+        }
     }
 
     /**

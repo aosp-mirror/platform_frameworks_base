@@ -184,7 +184,11 @@ abstract class BaseAppStateEventsTracker
                 }
             }
         }
+        dumpOthers(pw, prefix);
         policy.dump(pw, prefix);
+    }
+
+    void dumpOthers(PrintWriter pw, String prefix) {
     }
 
     @GuardedBy("mLock")

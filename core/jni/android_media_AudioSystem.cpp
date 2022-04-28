@@ -829,13 +829,6 @@ android_media_AudioSystem_getMasterBalance(JNIEnv *env, jobject thiz)
 }
 
 static jint
-android_media_AudioSystem_getDevicesForStream(JNIEnv *env, jobject thiz, jint stream)
-{
-    return (jint)deviceTypesToBitMask(
-            AudioSystem::getDevicesForStream(static_cast<audio_stream_type_t>(stream)));
-}
-
-static jint
 android_media_AudioSystem_getPrimaryOutputSamplingRate(JNIEnv *env, jobject clazz)
 {
     return (jint) AudioSystem::getPrimaryOutputSamplingRate();
@@ -2476,37 +2469,47 @@ static jint android_media_AudioSystem_getMinSampleRate(JNIEnv *env, jobject thiz
     return 4000; // SAMPLE_RATE_HZ_MIN  (for API)
 }
 
-static jint
-android_media_AudioSystem_setAssistantUid(JNIEnv *env, jobject thiz, jint uid)
-{
-    status_t status = AudioSystem::setAssistantUid(uid);
+static std::vector<uid_t> convertJIntArrayToUidVector(JNIEnv *env, jintArray jArray) {
+    std::vector<uid_t> nativeVector;
+    if (jArray != nullptr) {
+        jsize len = env->GetArrayLength(jArray);
+
+        if (len > 0) {
+            int *nativeArray = nullptr;
+            nativeArray = env->GetIntArrayElements(jArray, 0);
+            if (nativeArray != nullptr) {
+                for (size_t i = 0; i < len; i++) {
+                    nativeVector.push_back(nativeArray[i]);
+                }
+                env->ReleaseIntArrayElements(jArray, nativeArray, 0);
+            }
+        }
+    }
+    return nativeVector;
+}
+
+static jint android_media_AudioSystem_setAssistantServicesUids(JNIEnv *env, jobject thiz,
+                                                               jintArray uids) {
+    std::vector<uid_t> nativeUidsVector = convertJIntArrayToUidVector(env, uids);
+
+    status_t status = AudioSystem::setAssistantServicesUids(nativeUidsVector);
+
     return (jint)nativeToJavaStatus(status);
 }
 
-static jint android_media_AudioSystem_setHotwordDetectionServiceUid(JNIEnv *env, jobject thiz,
-                                                                    jint uid) {
-    status_t status = AudioSystem::setHotwordDetectionServiceUid(uid);
+static jint android_media_AudioSystem_setActiveAssistantServicesUids(JNIEnv *env, jobject thiz,
+                                                                     jintArray activeUids) {
+    std::vector<uid_t> nativeActiveUidsVector = convertJIntArrayToUidVector(env, activeUids);
+
+    status_t status = AudioSystem::setActiveAssistantServicesUids(nativeActiveUidsVector);
+
     return (jint)nativeToJavaStatus(status);
 }
 
 static jint
 android_media_AudioSystem_setA11yServicesUids(JNIEnv *env, jobject thiz, jintArray uids) {
-    std::vector<uid_t> nativeUidsVector;
+    std::vector<uid_t> nativeUidsVector = convertJIntArrayToUidVector(env, uids);
 
-    if (uids != nullptr) {
-       jsize len = env->GetArrayLength(uids);
-
-       if (len > 0) {
-           int *nativeUids = nullptr;
-           nativeUids = env->GetIntArrayElements(uids, 0);
-           if (nativeUids != nullptr) {
-               for (size_t i = 0; i < len; i++) {
-                   nativeUidsVector.push_back(nativeUids[i]);
-               }
-               env->ReleaseIntArrayElements(uids, nativeUids, 0);
-           }
-       }
-    }
     status_t status = AudioSystem::setA11yServicesUids(nativeUidsVector);
     return (jint)nativeToJavaStatus(status);
 }
@@ -2702,10 +2705,10 @@ static jint android_media_AudioSystem_getDevicesForRoleAndCapturePreset(JNIEnv *
     return AUDIO_JAVA_SUCCESS;
 }
 
-static jint
-android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
-        jobject jaa, jobjectArray jDeviceArray)
-{
+static jint android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
+                                                              jobject jaa,
+                                                              jobjectArray jDeviceArray,
+                                                              jboolean forVolume) {
     const jsize maxResultSize = env->GetArrayLength(jDeviceArray);
     // the JNI is always expected to provide us with an array capable of holding enough
     // devices i.e. the most we ever route a track to. This is preferred over receiving an ArrayList
@@ -2724,7 +2727,7 @@ android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
 
     AudioDeviceTypeAddrVector devices;
     jStatus = check_AudioSystem_Command(
-            AudioSystem::getDevicesForAttributes(*(paa.get()), &devices));
+            AudioSystem::getDevicesForAttributes(*(paa.get()), &devices, forVolume));
     if (jStatus != NO_ERROR) {
         return jStatus;
     }
@@ -2949,7 +2952,6 @@ static const JNINativeMethod gMethods[] =
          {"getMasterMono", "()Z", (void *)android_media_AudioSystem_getMasterMono},
          {"setMasterBalance", "(F)I", (void *)android_media_AudioSystem_setMasterBalance},
          {"getMasterBalance", "()F", (void *)android_media_AudioSystem_getMasterBalance},
-         {"getDevicesForStream", "(I)I", (void *)android_media_AudioSystem_getDevicesForStream},
          {"getPrimaryOutputSamplingRate", "()I",
           (void *)android_media_AudioSystem_getPrimaryOutputSamplingRate},
          {"getPrimaryOutputFrameCount", "()I",
@@ -3000,9 +3002,10 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_getReportedSurroundFormats},
          {"setSurroundFormatEnabled", "(IZ)I",
           (void *)android_media_AudioSystem_setSurroundFormatEnabled},
-         {"setAssistantUid", "(I)I", (void *)android_media_AudioSystem_setAssistantUid},
-         {"setHotwordDetectionServiceUid", "(I)I",
-          (void *)android_media_AudioSystem_setHotwordDetectionServiceUid},
+         {"setAssistantServicesUids", "([I)I",
+          (void *)android_media_AudioSystem_setAssistantServicesUids},
+         {"setActiveAssistantServicesUids", "([I)I",
+          (void *)android_media_AudioSystem_setActiveAssistantServicesUids},
          {"setA11yServicesUids", "([I)I", (void *)android_media_AudioSystem_setA11yServicesUids},
          {"isHapticPlaybackSupported", "()Z",
           (void *)android_media_AudioSystem_isHapticPlaybackSupported},
@@ -3034,7 +3037,7 @@ static const JNINativeMethod gMethods[] =
          {"getDevicesForRoleAndCapturePreset", "(IILjava/util/List;)I",
           (void *)android_media_AudioSystem_getDevicesForRoleAndCapturePreset},
          {"getDevicesForAttributes",
-          "(Landroid/media/AudioAttributes;[Landroid/media/AudioDeviceAttributes;)I",
+          "(Landroid/media/AudioAttributes;[Landroid/media/AudioDeviceAttributes;Z)I",
           (void *)android_media_AudioSystem_getDevicesForAttributes},
          {"setUserIdDeviceAffinities", "(I[I[Ljava/lang/String;)I",
           (void *)android_media_AudioSystem_setUserIdDeviceAffinities},

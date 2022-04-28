@@ -60,21 +60,21 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * MediaRouter allows applications to control the routing of media channels
+ * This API is not recommended for new applications. Use the
+ * <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/mediarouter/media/package-summary.html">Media Router
+ * Library</a> for consistent behavior across all devices.
+ *
+ * <p>MediaRouter allows applications to control the routing of media channels
  * and streams from the current device to external speakers and destination devices.
  *
  * <p>A MediaRouter is retrieved through {@link Context#getSystemService(String)
  * Context.getSystemService()} of a {@link Context#MEDIA_ROUTER_SERVICE
  * Context.MEDIA_ROUTER_SERVICE}.
  *
- * <p>The media router API is not thread-safe; all interactions with it must be
- * done from the main thread of the process.</p>
- *
- * <p>
- * We recommend using {@link android.media.MediaRouter2} APIs for new applications.
- * </p>
+ * <p>This API is not thread-safe; all interactions with it must be done from the main thread of the
+ * process.
  */
-//TODO: Link androidx.media2.MediaRouter when we are ready.
 @SystemService(Context.MEDIA_ROUTER_SERVICE)
 public class MediaRouter {
     private static final String TAG = "MediaRouter";

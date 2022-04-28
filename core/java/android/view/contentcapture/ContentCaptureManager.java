@@ -218,6 +218,7 @@ public final class ContentCaptureManager {
     public static final boolean DEBUG = false;
 
     /** @hide */
+    @TestApi
     public static final String DUMPABLE_NAME = "ContentCaptureManager";
 
     /** Error happened during the data sharing session. */
@@ -391,6 +392,9 @@ public final class ContentCaptureManager {
     @GuardedBy("mLock")
     private MainContentCaptureSession mMainSession;
 
+    @Nullable // set on-demand by addDumpable()
+    private Dumper mDumpable;
+
     /** @hide */
     public interface ContentCaptureClient {
         /**
@@ -407,9 +411,6 @@ public final class ContentCaptureManager {
         mService = Objects.requireNonNull(service, "service cannot be null");
         mOptions = Objects.requireNonNull(options, "options cannot be null");
 
-        if (context instanceof Activity) {
-            ((Activity) context).addDumpable(new Dumper());
-        }
         ContentCaptureHelper.setLoggingLevel(mOptions.loggingLevel);
 
         if (sVerbose) Log.v(TAG, "Constructor for " + context.getPackageName());
@@ -746,6 +747,14 @@ public final class ContentCaptureManager {
             throw new RuntimeException("Fail to get syn run result from SyncResultReceiver.");
         }
         return resultReceiver;
+    }
+
+    /** @hide */
+    public void addDumpable(Activity activity) {
+        if (mDumpable == null) {
+            mDumpable = new Dumper();
+        }
+        activity.addDumpable(mDumpable);
     }
 
     // NOTE: ContentCaptureManager cannot implement it directly as it would be exposed as public API

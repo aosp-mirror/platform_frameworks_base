@@ -23,7 +23,8 @@ import android.os.RemoteException;
 import android.util.IntArray;
 import android.view.IDisplayWindowListener;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Manages dispatch of relevant hierarchy changes to interested listeners. Listeners are assumed
@@ -120,13 +121,13 @@ class DisplayWindowListenerController {
         mDisplayListeners.finishBroadcast();
     }
 
-    void dispatchKeepClearAreasChanged(DisplayContent display, List<Rect> restricted,
-            List<Rect> unrestricted) {
+    void dispatchKeepClearAreasChanged(DisplayContent display, Set<Rect> restricted,
+            Set<Rect> unrestricted) {
         int count = mDisplayListeners.beginBroadcast();
         for (int i = 0; i < count; ++i) {
             try {
-                mDisplayListeners.getBroadcastItem(i).onKeepClearAreasChanged(
-                        display.mDisplayId, restricted, unrestricted);
+                mDisplayListeners.getBroadcastItem(i).onKeepClearAreasChanged(display.mDisplayId,
+                        new ArrayList<>(restricted), new ArrayList<>(unrestricted));
             } catch (RemoteException e) {
             }
         }

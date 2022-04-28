@@ -20,6 +20,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 
 import static com.android.server.accessibility.AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID;
+import static com.android.server.wm.WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,14 +33,15 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.MagnificationConfig;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -80,7 +82,6 @@ public class MagnificationControllerTest {
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
     private static final int TEST_SERVICE_ID = 1;
-    private static final Region MAGNIFICATION_REGION = new Region(0, 0, 500, 600);
     private static final Rect TEST_RECT = new Rect(0, 50, 100, 51);
     private static final float MAGNIFIED_CENTER_X = 100;
     private static final float MAGNIFIED_CENTER_Y = 200;
@@ -100,6 +101,8 @@ public class MagnificationControllerTest {
     @Mock
     private Context mContext;
     @Mock
+    PackageManager mPackageManager;
+    @Mock
     private FullScreenMagnificationController mScreenMagnificationController;
     private MagnificationScaleProvider mScaleProvider;
     @Captor
@@ -109,7 +112,8 @@ public class MagnificationControllerTest {
     private WindowMagnificationManager mWindowMagnificationManager;
     private MockContentResolver mMockResolver;
     private MagnificationController mMagnificationController;
-    private FullScreenMagnificationControllerStubber mScreenMagnificationControllerStubber;
+    private final WindowMagnificationMgrCallbackDelegate mCallbackDelegate =
+            new WindowMagnificationMgrCallbackDelegate();
 
     @Mock
     private WindowManagerInternal mMockWindowManagerInternal;
@@ -135,23 +139,24 @@ public class MagnificationControllerTest {
         mMockResolver = new MockContentResolver();
         mMockResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mMockResolver);
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
         Settings.Secure.putFloatForUser(mMockResolver,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, DEFAULT_SCALE,
                 CURRENT_USER_ID);
         mScaleProvider = spy(new MagnificationScaleProvider(mContext));
         mWindowMagnificationManager = Mockito.spy(
                 new WindowMagnificationManager(mContext, globalLock,
-                        mock(WindowMagnificationManager.Callback.class), mTraceManager,
-                        mScaleProvider));
+                        mCallbackDelegate, mTraceManager, mScaleProvider));
         mMockConnection = new MockWindowMagnificationConnection(true);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        mScreenMagnificationControllerStubber = new FullScreenMagnificationControllerStubber(
-                mScreenMagnificationController);
         mMagnificationController = new MagnificationController(mService, globalLock, mContext,
                 mScreenMagnificationController, mWindowMagnificationManager, mScaleProvider);
+        new FullScreenMagnificationControllerStubber(mScreenMagnificationController,
+                mMagnificationController);
 
         mMagnificationController.setMagnificationCapabilities(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        mCallbackDelegate.setDelegate(mMagnificationController);
     }
 
     @After
@@ -193,6 +198,31 @@ public class MagnificationControllerTest {
     }
 
     @Test
+    public void transitionToWindowModeFailedByReset_fullScreenMagnifying_notifyTransitionFailed()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_FULLSCREEN);
+
+        mMagnificationController.transitionMagnificationModeLocked(TEST_DISPLAY,
+                MODE_WINDOW,
+                mTransitionCallBack);
+
+        verify(mScreenMagnificationController).reset(eq(TEST_DISPLAY),
+                mCallbackArgumentCaptor.capture());
+        // The transition is interrupted and failed by calling reset.
+        mCallbackArgumentCaptor.getValue().onResult(false);
+        verify(mTransitionCallBack).onResult(TEST_DISPLAY, false);
+        final ArgumentCaptor<MagnificationConfig> configCaptor = ArgumentCaptor.forClass(
+                MagnificationConfig.class);
+        // The first time is for notifying full-screen enabled and the second time is for notifying
+        // the target mode transitions failed.
+        verify(mService, times(2)).notifyMagnificationChanged(eq(TEST_DISPLAY), any(Region.class),
+                configCaptor.capture());
+        final MagnificationConfig actualConfig = configCaptor.getValue();
+        assertEquals(MODE_FULLSCREEN, actualConfig.getMode(), 0);
+        assertEquals(1.0f, actualConfig.getScale(), 0);
+    }
+
+    @Test
     public void transitionToWindowMode_disablingWindowMode_enablingWindowWithFormerCenter()
             throws RemoteException {
         setMagnificationEnabled(MODE_WINDOW);
@@ -222,8 +252,10 @@ public class MagnificationControllerTest {
                 MODE_WINDOW,
                 mTransitionCallBack);
 
-        mMockConnection.invokeCallbacks();
-        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
+        // The first time is triggered when window mode is activated, the second time is triggered
+        // when activating the window mode again. The third time is triggered when the transition is
+        // completed.
+        verify(mWindowMagnificationManager, times(3)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
     }
 
@@ -247,7 +279,8 @@ public class MagnificationControllerTest {
     @Test
     public void transitionToFullScreen_centerNotInTheBounds_magnifyBoundsCenter()
             throws RemoteException {
-        final Rect magnificationBounds = MAGNIFICATION_REGION.getBounds();
+        final Rect magnificationBounds =
+                FullScreenMagnificationControllerStubber.MAGNIFICATION_REGION.getBounds();
         final PointF magnifiedCenter = new PointF(magnificationBounds.right + 100,
                 magnificationBounds.bottom + 100);
         setMagnificationEnabled(MODE_WINDOW, magnifiedCenter.x, magnifiedCenter.y);
@@ -430,19 +463,131 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void onSourceBoundsChanged_notifyMagnificationChanged() {
-        Rect rect = new Rect(0, 0, 100, 120);
-        Region region = new Region(rect);
-
-        mMagnificationController.onSourceBoundsChanged(TEST_DISPLAY, rect);
+    public void enableWindowMode_notifyMagnificationChanged() throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
 
         final ArgumentCaptor<MagnificationConfig> configCaptor = ArgumentCaptor.forClass(
                 MagnificationConfig.class);
-        verify(mService).notifyMagnificationChanged(eq(TEST_DISPLAY), eq(region),
+        final ArgumentCaptor<Region> regionCaptor = ArgumentCaptor.forClass(
+                Region.class);
+        verify(mService).notifyMagnificationChanged(eq(TEST_DISPLAY), regionCaptor.capture(),
                 configCaptor.capture());
-        assertEquals(rect.exactCenterX(), configCaptor.getValue().getCenterX(), 0);
-        assertEquals(rect.exactCenterY(), configCaptor.getValue().getCenterY(), 0);
+
+        final Rect actualRect = regionCaptor.getValue().getBounds();
+        final MagnificationConfig actualConfig = configCaptor.getValue();
+        assertEquals(actualRect.exactCenterX(), actualConfig.getCenterX(), 0);
+        assertEquals(actualRect.exactCenterY(), actualConfig.getCenterY(), 0);
+        assertEquals(DEFAULT_SCALE, actualConfig.getScale(), 0);
     }
+
+    @Test
+    public void onFullScreenMagnificationChanged_fullScreenEnabled_notifyMagnificationChanged()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_FULLSCREEN);
+
+        final MagnificationConfig config = obtainMagnificationConfig(MODE_FULLSCREEN);
+        mScreenMagnificationController.setScaleAndCenter(TEST_DISPLAY,
+                config.getScale(), config.getCenterX(), config.getCenterY(),
+                true, TEST_SERVICE_ID);
+
+        // The first time is triggered when setting magnification enabled. And the second time is
+        // triggered when calling setScaleAndCenter.
+        final ArgumentCaptor<MagnificationConfig> configCaptor = ArgumentCaptor.forClass(
+                MagnificationConfig.class);
+        verify(mService, times(2)).notifyMagnificationChanged(eq(TEST_DISPLAY),
+                eq(FullScreenMagnificationControllerStubber.MAGNIFICATION_REGION),
+                configCaptor.capture());
+        final MagnificationConfig actualConfig = configCaptor.getValue();
+        assertEquals(config.getCenterX(), actualConfig.getCenterX(), 0);
+        assertEquals(config.getCenterY(), actualConfig.getCenterY(), 0);
+        assertEquals(config.getScale(), actualConfig.getScale(), 0);
+    }
+
+    @Test
+    public void transitionMagnificationMode_windowEnabled_notifyTargetMagnificationChanged()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
+
+        mMagnificationController.transitionMagnificationModeLocked(TEST_DISPLAY,
+                MODE_FULLSCREEN, mTransitionCallBack);
+        mMockConnection.invokeCallbacks();
+
+        final ArgumentCaptor<MagnificationConfig> configCaptor = ArgumentCaptor.forClass(
+                MagnificationConfig.class);
+        // The first time is for notifying window enabled and the second time is for notifying
+        // the target mode transitions.
+        verify(mService, times(2)).notifyMagnificationChanged(eq(TEST_DISPLAY), any(Region.class),
+                configCaptor.capture());
+        final MagnificationConfig actualConfig = configCaptor.getValue();
+        assertEquals(MODE_FULLSCREEN, actualConfig.getMode(), 0);
+    }
+
+    @Test
+    public void transitionConfigMode_windowEnabled_notifyTargetMagnificationChanged()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
+
+        final MagnificationConfig config = obtainMagnificationConfig(MODE_FULLSCREEN);
+        mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
+                config, true, TEST_SERVICE_ID);
+        mMockConnection.invokeCallbacks();
+
+        final ArgumentCaptor<MagnificationConfig> configCaptor = ArgumentCaptor.forClass(
+                MagnificationConfig.class);
+        // The first time is for notifying window enabled and the second time is for notifying
+        // the target mode transitions.
+        verify(mService, times(2)).notifyMagnificationChanged(eq(TEST_DISPLAY), any(Region.class),
+                configCaptor.capture());
+        final MagnificationConfig actualConfig = configCaptor.getValue();
+        assertEquals(config.getCenterX(), actualConfig.getCenterX(), 0);
+        assertEquals(config.getCenterY(), actualConfig.getCenterY(), 0);
+        assertEquals(config.getScale(), actualConfig.getScale(), 0);
+    }
+
+    @Test
+    public void transitionMagnificationMode_fullScreenEnabled_notifyTargetMagnificationChanged()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_FULLSCREEN);
+
+        mMagnificationController.transitionMagnificationModeLocked(TEST_DISPLAY,
+                MODE_WINDOW, mTransitionCallBack);
+        verify(mScreenMagnificationController).reset(eq(TEST_DISPLAY),
+                mCallbackArgumentCaptor.capture());
+        mCallbackArgumentCaptor.getValue().onResult(true);
+        mMockConnection.invokeCallbacks();
+
+        final ArgumentCaptor<MagnificationConfig> configCaptor = ArgumentCaptor.forClass(
+                MagnificationConfig.class);
+        // The first time is for notifying full-screen enabled and the second time is for notifying
+        // the target mode transitions.
+        verify(mService, times(2)).notifyMagnificationChanged(eq(TEST_DISPLAY), any(Region.class),
+                configCaptor.capture());
+        final MagnificationConfig actualConfig = configCaptor.getValue();
+        assertEquals(MODE_WINDOW, actualConfig.getMode(), 0);
+    }
+
+    @Test
+    public void transitionConfigMode_fullScreenEnabled_notifyTargetMagnificationChanged()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_FULLSCREEN);
+
+        final MagnificationConfig config = obtainMagnificationConfig(MODE_WINDOW);
+        mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
+                config, true, TEST_SERVICE_ID);
+        mMockConnection.invokeCallbacks();
+
+        final ArgumentCaptor<MagnificationConfig> configCaptor = ArgumentCaptor.forClass(
+                MagnificationConfig.class);
+        // The first time is for notifying full-screen enabled and the second time is for notifying
+        // the target mode transitions.
+        verify(mService, times(2)).notifyMagnificationChanged(eq(TEST_DISPLAY), any(Region.class),
+                configCaptor.capture());
+        final MagnificationConfig actualConfig = configCaptor.getValue();
+        assertEquals(config.getCenterX(), actualConfig.getCenterX(), 0);
+        assertEquals(config.getCenterY(), actualConfig.getCenterY(), 0);
+        assertEquals(config.getScale(), actualConfig.getScale(), 0);
+    }
+
 
     @Test
     public void onAccessibilityActionPerformed_magnifierEnabled_showMagnificationButton()
@@ -451,7 +596,8 @@ public class MagnificationControllerTest {
 
         mMagnificationController.onAccessibilityActionPerformed(TEST_DISPLAY);
 
-        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
+        // The first time is triggered when window mode is activated.
+        verify(mWindowMagnificationManager, times(2)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
     }
 
@@ -464,7 +610,8 @@ public class MagnificationControllerTest {
 
         mMagnificationController.onAccessibilityActionPerformed(TEST_DISPLAY);
 
-        verify(mWindowMagnificationManager).removeMagnificationButton(eq(TEST_DISPLAY));
+        // The first time is triggered when window mode is activated.
+        verify(mWindowMagnificationManager, times(2)).removeMagnificationButton(eq(TEST_DISPLAY));
     }
 
     @Test
@@ -490,8 +637,7 @@ public class MagnificationControllerTest {
     public void onRectangleOnScreenRequested_fullScreenIsActivated_fullScreenDispatchEvent() {
         mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY,
                 true);
-        WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks
-                callbacks = getUiChangesForAccessibilityCallbacks();
+        UiChangesForAccessibilityCallbacks callbacks = getUiChangesForAccessibilityCallbacks();
 
         callbacks.onRectangleOnScreenRequested(TEST_DISPLAY,
                 TEST_RECT.left, TEST_RECT.top, TEST_RECT.right, TEST_RECT.bottom);
@@ -508,8 +654,7 @@ public class MagnificationControllerTest {
                 true);
         mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY,
                 false);
-        WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks
-                callbacks = getUiChangesForAccessibilityCallbacks();
+        UiChangesForAccessibilityCallbacks callbacks = getUiChangesForAccessibilityCallbacks();
 
         callbacks.onRectangleOnScreenRequested(TEST_DISPLAY,
                 TEST_RECT.left, TEST_RECT.top, TEST_RECT.right, TEST_RECT.bottom);
@@ -521,9 +666,23 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void onRectangleOnScreenRequested_NoneIsActivated_noneDispatchEvent() {
-        WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks
-                callbacks = getUiChangesForAccessibilityCallbacks();
+    public void onRectangleOnScreenRequested_noneIsActivated_noneDispatchEvent() {
+        UiChangesForAccessibilityCallbacks callbacks = getUiChangesForAccessibilityCallbacks();
+
+        callbacks.onRectangleOnScreenRequested(TEST_DISPLAY,
+                TEST_RECT.left, TEST_RECT.top, TEST_RECT.right, TEST_RECT.bottom);
+
+        verify(mScreenMagnificationController, never()).onRectangleOnScreenRequested(
+                eq(TEST_DISPLAY), anyInt(), anyInt(), anyInt(), anyInt());
+        verify(mWindowMagnificationManager, never()).onRectangleOnScreenRequested(anyInt(),
+                anyInt(), anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void onRectangleOnScreenRequested_otherDisplayIsActivated_noneEventOnDefaultDisplay() {
+        mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY + 1,
+                true);
+        UiChangesForAccessibilityCallbacks callbacks = getUiChangesForAccessibilityCallbacks();
 
         callbacks.onRectangleOnScreenRequested(TEST_DISPLAY,
                 TEST_RECT.left, TEST_RECT.top, TEST_RECT.right, TEST_RECT.bottom);
@@ -546,8 +705,42 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void
-            onFullScreenMagnificationActivationState_fullScreenActivated_logFullScreenDuration() {
+    public void getLastActivatedMode_switchMode_returnExpectedLastActivatedMode()
+            throws RemoteException {
+        activateMagnifier(MODE_WINDOW, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
+
+        final int lastActivatedMode = mMagnificationController
+                .getLastMagnificationActivatedMode(TEST_DISPLAY);
+
+        assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW, lastActivatedMode);
+    }
+
+    @Test
+    public void getLastActivatedMode_switchModeAtOtherDisplay_returnExpectedLastActivatedMode()
+            throws RemoteException {
+        activateMagnifier(TEST_DISPLAY, MODE_WINDOW, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
+        activateMagnifier(TEST_DISPLAY + 1, MODE_FULLSCREEN, MAGNIFIED_CENTER_X,
+                MAGNIFIED_CENTER_Y);
+
+        final int lastActivatedMode = mMagnificationController
+                .getLastMagnificationActivatedMode(TEST_DISPLAY);
+
+        assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW, lastActivatedMode);
+    }
+
+    @Test
+    public void getLastActivatedMode_otherDisplayIsActivated_defaultModeOnDefaultDisplay()
+            throws RemoteException {
+        activateMagnifier(TEST_DISPLAY + 1, MODE_WINDOW, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
+
+        int lastActivatedMode = mMagnificationController
+                .getLastMagnificationActivatedMode(TEST_DISPLAY);
+
+        assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN, lastActivatedMode);
+    }
+
+    @Test
+    public void onFullScreenMagnificationActivationState_fullScreenEnabled_logFullScreenDuration() {
         MagnificationController spyController = spy(mMagnificationController);
         spyController.onFullScreenMagnificationActivationState(TEST_DISPLAY, true);
 
@@ -596,7 +789,8 @@ public class MagnificationControllerTest {
 
         mMagnificationController.onTouchInteractionStart(TEST_DISPLAY, MODE_WINDOW);
 
-        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
+        // The first time is triggered when the window mode is activated.
+        verify(mWindowMagnificationManager, times(2)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
     }
 
@@ -607,7 +801,8 @@ public class MagnificationControllerTest {
 
         mMagnificationController.onTouchInteractionEnd(TEST_DISPLAY, MODE_WINDOW);
 
-        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
+        // The first time is triggered when the window mode is activated.
+        verify(mWindowMagnificationManager, times(2)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
     }
 
@@ -639,11 +834,9 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void onWindowActivated_windowModeEnabledAndCapabilitiesAll_showMagnificationButton()
+    public void enableWindowMode_showMagnificationButton()
             throws RemoteException {
         setMagnificationEnabled(MODE_WINDOW);
-
-        mMagnificationController.onWindowMagnificationActivationState(TEST_DISPLAY, true);
 
         verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
@@ -661,22 +854,21 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void onWindowDeactivated_windowModeInactive_removeMagnificationButton()
+    public void disableWindowMode_windowEnabled_removeMagnificationButton()
             throws RemoteException {
         setMagnificationEnabled(MODE_WINDOW);
-        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false);
 
-        mMagnificationController.onWindowMagnificationActivationState(TEST_DISPLAY, false);
+        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false);
 
         verify(mWindowMagnificationManager).removeMagnificationButton(eq(TEST_DISPLAY));
     }
 
     @Test
-    public void onFullScreenDeactivated_fullscreenModeInactive_removeMagnificationButton()
+    public void onFullScreenDeactivated_fullScreenEnabled_removeMagnificationButton()
             throws RemoteException {
         setMagnificationEnabled(MODE_FULLSCREEN);
         mScreenMagnificationController.setScaleAndCenter(TEST_DISPLAY,
-                /* scale= */1, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
+                /* scale= */ 1, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
                 true, TEST_SERVICE_ID);
 
         mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY, false);
@@ -685,7 +877,7 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void transitionToFullScreenMode_fullscreenModeActivated_showMagnificationButton()
+    public void transitionToFullScreenMode_windowEnabled_showMagnificationButton()
             throws RemoteException {
         setMagnificationEnabled(MODE_WINDOW);
 
@@ -698,7 +890,7 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void transitionToWindow_windowModeActivated_showMagnificationButton()
+    public void transitionToWindow_fullScreenEnabled_showMagnificationButton()
             throws RemoteException {
         setMagnificationEnabled(MODE_FULLSCREEN);
 
@@ -709,7 +901,10 @@ public class MagnificationControllerTest {
                 mCallbackArgumentCaptor.capture());
         mCallbackArgumentCaptor.getValue().onResult(true);
         mMockConnection.invokeCallbacks();
-        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
+
+        // The first time is triggered when window mode is activated, the second time is triggered
+        // when the disable-magnification callback is triggered.
+        verify(mWindowMagnificationManager, times(2)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
     }
 
@@ -718,7 +913,7 @@ public class MagnificationControllerTest {
         MagnificationController spyController = spy(mMagnificationController);
         spyController.onWindowMagnificationActivationState(TEST_DISPLAY, true);
 
-        spyController.onImeWindowVisibilityChanged(true);
+        spyController.onImeWindowVisibilityChanged(TEST_DISPLAY, true);
 
         verify(spyController).logMagnificationModeWithIme(
                 eq(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW));
@@ -729,7 +924,7 @@ public class MagnificationControllerTest {
         MagnificationController spyController = spy(mMagnificationController);
         spyController.onFullScreenMagnificationActivationState(TEST_DISPLAY, true);
 
-        spyController.onImeWindowVisibilityChanged(true);
+        spyController.onImeWindowVisibilityChanged(TEST_DISPLAY, true);
 
         verify(spyController).logMagnificationModeWithIme(
                 eq(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN));
@@ -738,7 +933,7 @@ public class MagnificationControllerTest {
     @Test
     public void imeWindowStateShown_noMagnifying_noLogAnyMode() {
         MagnificationController spyController = spy(mMagnificationController);
-        spyController.onImeWindowVisibilityChanged(true);
+        spyController.onImeWindowVisibilityChanged(TEST_DISPLAY, true);
 
         verify(spyController, never()).logMagnificationModeWithIme(anyInt());
     }
@@ -784,18 +979,22 @@ public class MagnificationControllerTest {
     }
 
     private void activateMagnifier(int mode, float centerX, float centerY) throws RemoteException {
-        mScreenMagnificationControllerStubber.resetAndStubMethods();
+        activateMagnifier(TEST_DISPLAY, mode, centerX, centerY);
+    }
+
+    private void activateMagnifier(int displayId, int mode, float centerX, float centerY)
+            throws RemoteException {
         final boolean windowMagnifying = mWindowMagnificationManager.isWindowMagnifierEnabled(
-                TEST_DISPLAY);
+                displayId);
         if (windowMagnifying) {
-            mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false);
+            mWindowMagnificationManager.disableWindowMagnification(displayId, false);
             mMockConnection.invokeCallbacks();
         }
         if (mode == MODE_FULLSCREEN) {
-            mScreenMagnificationController.setScaleAndCenter(TEST_DISPLAY, DEFAULT_SCALE, centerX,
+            mScreenMagnificationController.setScaleAndCenter(displayId, DEFAULT_SCALE, centerX,
                     centerY, true, AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
         } else {
-            mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, DEFAULT_SCALE,
+            mWindowMagnificationManager.enableWindowMagnification(displayId, DEFAULT_SCALE,
                     centerX, centerY, null, TEST_SERVICE_ID);
             mMockConnection.invokeCallbacks();
         }
@@ -806,13 +1005,20 @@ public class MagnificationControllerTest {
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, mode, CURRENT_USER_ID);
     }
 
-    private MagnificationConfig obtainMagnificationConfig(int mode) {
-        return new MagnificationConfig.Builder().setMode(mode).setScale(DEFAULT_SCALE).setCenterX(
-                MAGNIFIED_CENTER_X).setCenterY(MAGNIFIED_CENTER_Y).build();
+    private static MagnificationConfig obtainMagnificationConfig(int mode) {
+        return obtainMagnificationConfig(mode, true);
     }
 
-    private WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks
-            getUiChangesForAccessibilityCallbacks() {
+    private static MagnificationConfig obtainMagnificationConfig(int mode, boolean defaultScale) {
+        MagnificationConfig.Builder builder = new MagnificationConfig.Builder();
+        if (defaultScale) {
+            builder = builder.setScale(DEFAULT_SCALE);
+        }
+        return builder.setMode(mode).setCenterX(MAGNIFIED_CENTER_X)
+                .setCenterY(MAGNIFIED_CENTER_Y).build();
+    }
+
+    private UiChangesForAccessibilityCallbacks getUiChangesForAccessibilityCallbacks() {
         ArgumentCaptor<WindowManagerInternal.AccessibilityControllerInternal
                 .UiChangesForAccessibilityCallbacks> captor = ArgumentCaptor.forClass(
                 WindowManagerInternal.AccessibilityControllerInternal
@@ -822,21 +1028,69 @@ public class MagnificationControllerTest {
         return captor.getValue();
     }
 
+    private static class WindowMagnificationMgrCallbackDelegate implements
+            WindowMagnificationManager.Callback {
+        private WindowMagnificationManager.Callback mCallback;
+
+        public void setDelegate(WindowMagnificationManager.Callback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void onPerformScaleAction(int displayId, float scale) {
+            if (mCallback != null) {
+                mCallback.onPerformScaleAction(displayId, scale);
+            }
+        }
+
+        @Override
+        public void onAccessibilityActionPerformed(int displayId) {
+            if (mCallback != null) {
+                mCallback.onAccessibilityActionPerformed(displayId);
+            }
+        }
+
+        @Override
+        public void onWindowMagnificationActivationState(int displayId, boolean activated) {
+            if (mCallback != null) {
+                mCallback.onWindowMagnificationActivationState(displayId, activated);
+            }
+        }
+
+        @Override
+        public void onSourceBoundsChanged(int displayId, Rect bounds) {
+            if (mCallback != null) {
+                mCallback.onSourceBoundsChanged(displayId, bounds);
+            }
+        }
+
+        @Override
+        public void onChangeMagnificationMode(int displayId, int magnificationMode) {
+            if (mCallback != null) {
+                mCallback.onChangeMagnificationMode(displayId, magnificationMode);
+            }
+        }
+    }
+
     /**
-     * Stubs public methods to simulate the real beahviours.
+     * Stubs public methods to simulate the real behaviours.
      */
     private static class FullScreenMagnificationControllerStubber {
+        private static final Region MAGNIFICATION_REGION = new Region(0, 0, 500, 600);
         private final FullScreenMagnificationController mScreenMagnificationController;
+        private final FullScreenMagnificationController.MagnificationInfoChangedCallback
+                mMagnificationChangedCallback;
         private boolean mIsMagnifying = false;
         private float mScale = 1.0f;
-        private float mCenterX = 0;
-        private float mCenterY = 0;
+        private float mCenterX = MAGNIFICATION_REGION.getBounds().exactCenterX();
+        private float mCenterY = MAGNIFICATION_REGION.getBounds().exactCenterY();
         private int mServiceId = -1;
 
         FullScreenMagnificationControllerStubber(
-                FullScreenMagnificationController screenMagnificationController) {
+                FullScreenMagnificationController screenMagnificationController,
+                FullScreenMagnificationController.MagnificationInfoChangedCallback callback) {
             mScreenMagnificationController = screenMagnificationController;
-            resetCenter();
+            mMagnificationChangedCallback = callback;
             stubMethods();
         }
 
@@ -872,9 +1126,15 @@ public class MagnificationControllerTest {
                     mCenterY = invocation.getArgument(3);
                     mServiceId = invocation.getArgument(5);
                 } else {
-                    mServiceId = -1;
-                    resetCenter();
+                    reset();
                 }
+
+                final MagnificationConfig config = new MagnificationConfig.Builder().setMode(
+                        MODE_FULLSCREEN).setScale(mScale).setCenterX(mCenterX).setCenterY(
+                        mCenterY).build();
+                mMagnificationChangedCallback.onFullScreenMagnificationChanged(TEST_DISPLAY,
+                        FullScreenMagnificationControllerStubber.MAGNIFICATION_REGION,
+                        config);
                 return true;
             };
             doAnswer(setScaleAndCenterStubAnswer).when(
@@ -886,26 +1146,21 @@ public class MagnificationControllerTest {
                     anyFloat(), anyFloat(), anyFloat(), anyBoolean(), anyInt());
 
             Answer resetStubAnswer = invocation -> {
-                mScale = 1.0f;
-                mIsMagnifying = false;
-                mServiceId = -1;
-                resetCenter();
+                reset();
                 return true;
             };
             doAnswer(resetStubAnswer).when(mScreenMagnificationController).reset(eq(TEST_DISPLAY),
-                    any());
+                    any(MagnificationAnimationCallback.class));
             doAnswer(resetStubAnswer).when(mScreenMagnificationController).reset(eq(TEST_DISPLAY),
                     anyBoolean());
         }
 
-        private void resetCenter() {
+        private void reset() {
+            mScale = 1.0f;
+            mIsMagnifying = false;
+            mServiceId = -1;
             mCenterX = MAGNIFICATION_REGION.getBounds().exactCenterX();
             mCenterY = MAGNIFICATION_REGION.getBounds().exactCenterY();
-        }
-
-        public void resetAndStubMethods() {
-            Mockito.reset(mScreenMagnificationController);
-            stubMethods();
         }
     }
 }

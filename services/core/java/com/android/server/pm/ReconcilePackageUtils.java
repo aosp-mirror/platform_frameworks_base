@@ -18,23 +18,23 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+import static android.content.pm.SigningDetails.CapabilityMergeRule.MERGE_RESTRICTED_CAPABILITY;
 
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
 import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
-import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedLongSparseArray;
 
 import java.util.List;
@@ -43,7 +43,7 @@ import java.util.Map;
 final class ReconcilePackageUtils {
     public static Map<String, ReconciledPackage> reconcilePackages(
             final ReconcileRequest request, SharedLibrariesImpl sharedLibraries,
-            KeySetManagerService ksms)
+            KeySetManagerService ksms, Settings settings)
             throws ReconcileFailure {
         final Map<String, ScanResult> scannedPackages = request.mScannedPackages;
 
@@ -121,7 +121,10 @@ final class ReconcilePackageUtils {
             boolean removeAppKeySetData = false;
             boolean sharedUserSignaturesChanged = false;
             SigningDetails signingDetails = null;
-            if (ksms.shouldCheckUpgradeKeySetLocked(signatureCheckPs, scanFlags)) {
+            SharedUserSetting sharedUserSetting = settings.getSharedUserSettingLPr(
+                    signatureCheckPs);
+            if (ksms.shouldCheckUpgradeKeySetLocked(
+                    signatureCheckPs, sharedUserSetting, scanFlags)) {
                 if (ksms.checkUpgradeKeySetLocked(signatureCheckPs, parsedPackage)) {
                     // We just determined the app is signed correctly, so bring
                     // over the latest parsed certs.
@@ -139,6 +142,7 @@ final class ReconcilePackageUtils {
                 }
                 signingDetails = parsedPackage.getSigningDetails();
             } else {
+
                 try {
                     final Settings.VersionInfo versionInfo =
                             request.mVersionInfos.get(installPackageName);
@@ -146,9 +150,11 @@ final class ReconcilePackageUtils {
                     final boolean compareRecover = isRecoverSignatureUpdateNeeded(versionInfo);
                     final boolean isRollback = installArgs != null
                             && installArgs.mInstallReason == PackageManager.INSTALL_REASON_ROLLBACK;
-                    final boolean compatMatch = verifySignatures(signatureCheckPs,
-                            disabledPkgSetting, parsedPackage.getSigningDetails(), compareCompat,
-                            compareRecover, isRollback);
+                    final boolean compatMatch =
+                            PackageManagerServiceUtils.verifySignatures(signatureCheckPs,
+                                    sharedUserSetting, disabledPkgSetting,
+                                    parsedPackage.getSigningDetails(), compareCompat,
+                                    compareRecover, isRollback);
                     // The new KeySets will be re-added later in the scanning process.
                     if (compatMatch) {
                         removeAppKeySetData = true;
@@ -161,21 +167,34 @@ final class ReconcilePackageUtils {
                     // newer
                     // signing certificate than the existing one, and if so, copy over the new
                     // details
-                    if (signatureCheckPs.getSharedUser() != null) {
+                    if (sharedUserSetting != null) {
                         // Attempt to merge the existing lineage for the shared SigningDetails with
                         // the lineage of the new package; if the shared SigningDetails are not
                         // returned this indicates the new package added new signers to the lineage
                         // and/or changed the capabilities of existing signers in the lineage.
                         SigningDetails sharedSigningDetails =
-                                signatureCheckPs.getSharedUser().signatures.mSigningDetails;
+                                sharedUserSetting.signatures.mSigningDetails;
                         SigningDetails mergedDetails = sharedSigningDetails.mergeLineageWith(
                                 signingDetails);
                         if (mergedDetails != sharedSigningDetails) {
-                            signatureCheckPs.getSharedUser().signatures.mSigningDetails =
+                            // Use the restricted merge rule with the signing lineages from the
+                            // other packages in the sharedUserId to ensure if any revoke a
+                            // capability from a previous signer then this is reflected in the
+                            // shared lineage.
+                            for (AndroidPackage androidPackage : sharedUserSetting.getPackages()) {
+                                if (androidPackage.getPackageName() != null
+                                        && !androidPackage.getPackageName().equals(
+                                        parsedPackage.getPackageName())) {
+                                    mergedDetails = mergedDetails.mergeLineageWith(
+                                            androidPackage.getSigningDetails(),
+                                            MERGE_RESTRICTED_CAPABILITY);
+                                }
+                            }
+                            sharedUserSetting.signatures.mSigningDetails =
                                     mergedDetails;
                         }
-                        if (signatureCheckPs.getSharedUser().signaturesChanged == null) {
-                            signatureCheckPs.getSharedUser().signaturesChanged = Boolean.FALSE;
+                        if (sharedUserSetting.signaturesChanged == null) {
+                            sharedUserSetting.signaturesChanged = Boolean.FALSE;
                         }
                     }
                 } catch (PackageManagerException e) {
@@ -192,10 +211,10 @@ final class ReconcilePackageUtils {
                     // updating
                     // the signatures on the first package scanned for the shared user (i.e. if the
                     // signaturesChanged state hasn't been initialized yet in SharedUserSetting).
-                    if (signatureCheckPs.getSharedUser() != null) {
-                        final Signature[] sharedUserSignatures = signatureCheckPs.getSharedUser()
+                    if (sharedUserSetting != null) {
+                        final Signature[] sharedUserSignatures = sharedUserSetting
                                 .signatures.mSigningDetails.getSignatures();
-                        if (signatureCheckPs.getSharedUser().signaturesChanged != null
+                        if (sharedUserSetting.signaturesChanged != null
                                 && compareSignatures(sharedUserSignatures,
                                 parsedPackage.getSigningDetails().getSignatures())
                                 != PackageManager.SIGNATURE_MATCH) {
@@ -209,7 +228,7 @@ final class ReconcilePackageUtils {
                                 throw new ReconcileFailure(
                                         INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
                                         "Signature mismatch for shared user: "
-                                                + scanResult.mPkgSetting.getSharedUser());
+                                                + sharedUserSetting);
                             } else {
                                 // Treat mismatched signatures on system packages using a shared
                                 // UID as
@@ -219,14 +238,14 @@ final class ReconcilePackageUtils {
                                         "Signature mismatch on system package "
                                                 + parsedPackage.getPackageName()
                                                 + " for shared user "
-                                                + scanResult.mPkgSetting.getSharedUser());
+                                                + sharedUserSetting);
                             }
                         }
 
                         sharedUserSignaturesChanged = true;
-                        signatureCheckPs.getSharedUser().signatures.mSigningDetails =
+                        sharedUserSetting.signatures.mSigningDetails =
                                 parsedPackage.getSigningDetails();
-                        signatureCheckPs.getSharedUser().signaturesChanged = Boolean.TRUE;
+                        sharedUserSetting.signaturesChanged = Boolean.TRUE;
                     }
                     // File a report about this.
                     String msg = "System package " + parsedPackage.getPackageName()

@@ -249,7 +249,7 @@ public class DumpUtils {
         dump.write("is_power_transfer_limited", UsbPortStatusProto.IS_POWER_TRANSFER_LIMITED,
                 status.isPowerTransferLimited());
         dump.write("usb_power_brick_status", UsbPortStatusProto.USB_POWER_BRICK_STATUS,
-                UsbPort.powerBrickStatusToString(status.getPowerBrickStatus()));
+                UsbPort.powerBrickConnectionStatusToString(status.getPowerBrickConnectionStatus()));
         dump.end(token);
     }
 }

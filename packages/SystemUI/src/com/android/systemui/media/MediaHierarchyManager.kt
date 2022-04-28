@@ -28,6 +28,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import androidx.annotation.VisibleForTesting
+import com.android.keyguard.KeyguardViewController
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
@@ -40,10 +41,9 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.Utils
+import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.animation.UniqueObjectHostView
 import javax.inject.Inject
 
@@ -83,7 +83,7 @@ class MediaHierarchyManager @Inject constructor(
     private val notifLockscreenUserManager: NotificationLockscreenUserManager,
     configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
-    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
+    private val keyguardViewController: KeyguardViewController,
     private val dreamOverlayStateController: DreamOverlayStateController
 ) {
 
@@ -97,6 +97,10 @@ class MediaHierarchyManager @Inject constructor(
     private var rootView: View? = null
     private var currentBounds = Rect()
     private var animationStartBounds: Rect = Rect()
+
+    private var animationStartClipping = Rect()
+    private var currentClipping = Rect()
+    private var targetClipping = Rect()
 
     /**
      * The cross fade progress at the start of the animation. 0.5f means it's just switching between
@@ -144,7 +148,8 @@ class MediaHierarchyManager @Inject constructor(
             }
             interpolateBounds(animationStartBounds, targetBounds, boundsProgress,
                     result = currentBounds)
-            applyState(currentBounds, currentAlpha)
+            resolveClipping(currentClipping)
+            applyState(currentBounds, currentAlpha, clipBounds = currentClipping)
         }
         addListener(object : AnimatorListenerAdapter() {
             private var cancelled: Boolean = false
@@ -167,6 +172,12 @@ class MediaHierarchyManager @Inject constructor(
                 animationPending = false
             }
         })
+    }
+
+    private fun resolveClipping(result: Rect) {
+        if (animationStartClipping.isEmpty) result.set(targetClipping)
+        else if (targetClipping.isEmpty) result.set(animationStartClipping)
+        else result.setIntersect(animationStartClipping, targetClipping)
     }
 
     private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_DREAM_OVERLAY + 1)
@@ -289,6 +300,18 @@ class MediaHierarchyManager @Inject constructor(
         // have it aligned with the rest of the animation
         val progress = MathUtils.saturate(value / distanceForFullShadeTransition)
         fullShadeTransitionProgress = progress
+    }
+
+    /**
+     * Returns the amount of translationY of the media container, during the current guided
+     * transformation, if running. If there is no guided transformation running, it will return 0.
+     */
+    fun getGuidedTransformationTranslationY(): Int {
+        if (!isCurrentlyInGuidedTransformation()) {
+            return -1
+        }
+        val startHost = getHost(previousLocation) ?: return 0
+        return targetBounds.top - startHost.currentBounds.top
     }
 
     /**
@@ -491,7 +514,7 @@ class MediaHierarchyManager @Inject constructor(
     private fun updateConfiguration() {
         distanceForFullShadeTransition = context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_media_transition_distance)
-        inSplitShade = Utils.shouldUseSplitNotificationShade(context.resources)
+        inSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
     }
 
     /**
@@ -617,10 +640,12 @@ class MediaHierarchyManager @Inject constructor(
                 // We also go in here in case the view was detached, since the bounds wouldn't
                 // be correct anymore
                 animationStartBounds.set(currentBounds)
+                animationStartClipping.set(currentClipping)
             } else {
                 // otherwise, let's take the freshest state, since the current one could
                 // be outdated
                 animationStartBounds.set(previousHost.currentBounds)
+                animationStartClipping.set(previousHost.currentClipping)
             }
             val transformationType = calculateTransformationType()
             var needsCrossFade = transformationType == TRANSFORMATION_TYPE_FADE
@@ -733,7 +758,7 @@ class MediaHierarchyManager @Inject constructor(
             // Let's immediately apply the target state (which is interpolated) if there is
             // no animation running. Otherwise the animation update will already update
             // the location
-            applyState(targetBounds, carouselAlpha)
+            applyState(targetBounds, carouselAlpha, clipBounds = targetClipping)
         }
     }
 
@@ -741,10 +766,11 @@ class MediaHierarchyManager @Inject constructor(
      * Updates the bounds that the view wants to be in at the end of the animation.
      */
     private fun updateTargetState() {
-        if (isCurrentlyInGuidedTransformation() && !isCurrentlyFading()) {
+        var starthost = getHost(previousLocation)
+        var endHost = getHost(desiredLocation)
+        if (isCurrentlyInGuidedTransformation() && !isCurrentlyFading() && starthost != null &&
+            endHost != null) {
             val progress = getTransformationProgress()
-            var endHost = getHost(desiredLocation)!!
-            var starthost = getHost(previousLocation)!!
             // If either of the hosts are invisible, let's keep them at the other host location to
             // have a nicer disappear animation. Otherwise the currentBounds of the state might
             // be undefined
@@ -756,9 +782,11 @@ class MediaHierarchyManager @Inject constructor(
             val newBounds = endHost.currentBounds
             val previousBounds = starthost.currentBounds
             targetBounds = interpolateBounds(previousBounds, newBounds, progress)
-        } else {
-            val bounds = getHost(desiredLocation)?.currentBounds ?: return
+            targetClipping = endHost.currentClipping
+        } else if (endHost != null) {
+            val bounds = endHost.currentBounds
             targetBounds.set(bounds)
+            targetClipping = endHost.currentClipping
         }
     }
 
@@ -781,11 +809,15 @@ class MediaHierarchyManager @Inject constructor(
         return resultBounds
     }
 
-    /**
-     * @return true if this transformation is guided by an external progress like a finger
-     */
-    private fun isCurrentlyInGuidedTransformation(): Boolean {
-        return getTransformationProgress() >= 0
+    /** @return true if this transformation is guided by an external progress like a finger */
+    fun isCurrentlyInGuidedTransformation(): Boolean {
+        return hasValidStartAndEndLocations() &&
+                getTransformationProgress() >= 0 &&
+                areGuidedTransitionHostsVisible()
+    }
+
+    private fun hasValidStartAndEndLocations(): Boolean {
+        return previousLocation != -1 && desiredLocation != -1
     }
 
     /**
@@ -795,6 +827,9 @@ class MediaHierarchyManager @Inject constructor(
     @TransformationType
     fun calculateTransformationType(): Int {
         if (isTransitioningToFullShade) {
+            if (inSplitShade && areGuidedTransitionHostsVisible()) {
+                return TRANSFORMATION_TYPE_TRANSITION
+            }
             return TRANSFORMATION_TYPE_FADE
         }
         if (previousLocation == LOCATION_LOCKSCREEN && desiredLocation == LOCATION_QS ||
@@ -807,6 +842,11 @@ class MediaHierarchyManager @Inject constructor(
             return TRANSFORMATION_TYPE_FADE
         }
         return TRANSFORMATION_TYPE_TRANSITION
+    }
+
+    private fun areGuidedTransitionHostsVisible(): Boolean {
+        return getHost(previousLocation)?.visible == true &&
+                getHost(desiredLocation)?.visible == true
     }
 
     /**
@@ -854,8 +894,14 @@ class MediaHierarchyManager @Inject constructor(
     /**
      * Apply the current state to the view, updating it's bounds and desired state
      */
-    private fun applyState(bounds: Rect, alpha: Float, immediately: Boolean = false) {
+    private fun applyState(
+        bounds: Rect,
+        alpha: Float,
+        immediately: Boolean = false,
+        clipBounds: Rect = EMPTY_RECT
+    ) {
         currentBounds.set(bounds)
+        currentClipping = clipBounds
         carouselAlpha = if (isCurrentlyFading()) alpha else 1.0f
         val onlyUseEndState = !isCurrentlyInGuidedTransformation() || isCurrentlyFading()
         val startLocation = if (onlyUseEndState) -1 else previousLocation
@@ -864,6 +910,10 @@ class MediaHierarchyManager @Inject constructor(
         mediaCarouselController.setCurrentState(startLocation, endLocation, progress, immediately)
         updateHostAttachment()
         if (currentAttachmentLocation == IN_OVERLAY) {
+            // Setting the clipping on the hierarchy of `mediaFrame` does not work
+            if (!currentClipping.isEmpty) {
+                currentBounds.intersect(currentClipping)
+            }
             mediaFrame.setLeftTopRightBottom(
                     currentBounds.left,
                     currentBounds.top,
@@ -961,6 +1011,7 @@ class MediaHierarchyManager @Inject constructor(
             (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
             qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
             !hasActiveMedia -> LOCATION_QS
+            onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
             onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
             onLockscreen && allowedOnLockscreen -> LOCATION_LOCKSCREEN
             else -> LOCATION_QQS
@@ -986,11 +1037,19 @@ class MediaHierarchyManager @Inject constructor(
         return location
     }
 
+    private fun isSplitShadeExpanding(): Boolean {
+        return inSplitShade && isTransitioningToFullShade
+    }
+
     /**
      * Are we currently transforming to the full shade and already in QQS
      */
     private fun isTransformingToFullShadeAndInQQS(): Boolean {
         if (!isTransitioningToFullShade) {
+            return false
+        }
+        if (inSplitShade) {
+            // Split shade doesn't use QQS.
             return false
         }
         return fullShadeTransitionProgress > 0.5f
@@ -1000,6 +1059,10 @@ class MediaHierarchyManager @Inject constructor(
      * Is the current transformationType fading
      */
     private fun isCurrentlyFading(): Boolean {
+        if (isSplitShadeExpanding()) {
+            // Split shade always uses transition instead of fade.
+            return false
+        }
         if (isTransitioningToFullShade) {
             return true
         }
@@ -1016,7 +1079,7 @@ class MediaHierarchyManager @Inject constructor(
 
     private fun isLockScreenVisibleToUser(): Boolean {
         return !statusBarStateController.isDozing &&
-                !statusBarKeyguardViewManager.isBouncerShowing &&
+                !keyguardViewController.isBouncerShowing &&
                 statusBarStateController.state == StatusBarState.KEYGUARD &&
                 notifLockscreenUserManager.shouldShowLockscreenNotifications() &&
                 statusBarStateController.isExpanded &&
@@ -1025,7 +1088,7 @@ class MediaHierarchyManager @Inject constructor(
 
     private fun isLockScreenShadeVisibleToUser(): Boolean {
         return !statusBarStateController.isDozing &&
-                !statusBarKeyguardViewManager.isBouncerShowing &&
+                !keyguardViewController.isBouncerShowing &&
                 (statusBarStateController.state == StatusBarState.SHADE_LOCKED ||
                         (statusBarStateController.state == StatusBarState.KEYGUARD && qsExpanded))
     }
@@ -1075,6 +1138,7 @@ class MediaHierarchyManager @Inject constructor(
         const val TRANSFORMATION_TYPE_FADE = 1
     }
 }
+private val EMPTY_RECT = Rect()
 
 @IntDef(prefix = ["TRANSFORMATION_TYPE_"], value = [
     MediaHierarchyManager.TRANSFORMATION_TYPE_TRANSITION,
@@ -1082,7 +1146,10 @@ class MediaHierarchyManager @Inject constructor(
 @Retention(AnnotationRetention.SOURCE)
 private annotation class TransformationType
 
-@IntDef(prefix = ["LOCATION_"], value = [MediaHierarchyManager.LOCATION_QS,
-    MediaHierarchyManager.LOCATION_QQS, MediaHierarchyManager.LOCATION_LOCKSCREEN])
+@IntDef(prefix = ["LOCATION_"], value = [
+    MediaHierarchyManager.LOCATION_QS,
+    MediaHierarchyManager.LOCATION_QQS,
+    MediaHierarchyManager.LOCATION_LOCKSCREEN,
+    MediaHierarchyManager.LOCATION_DREAM_OVERLAY])
 @Retention(AnnotationRetention.SOURCE)
 annotation class MediaLocation

@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.policy.SystemBarUtils;
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -53,6 +54,7 @@ public class StackScrollAlgorithm {
 
     private int mPaddingBetweenElements;
     private int mGapHeight;
+    private int mGapHeightOnLockscreen;
     private int mCollapsedSize;
 
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
@@ -86,6 +88,8 @@ public class StackScrollAlgorithm {
         mPinnedZTranslationExtra = res.getDimensionPixelSize(
                 R.dimen.heads_up_pinned_elevation);
         mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
+        mGapHeightOnLockscreen = res.getDimensionPixelSize(
+                R.dimen.notification_section_divider_height_lockscreen);
         mNotificationScrimPadding = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
         mMarginBottom = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
     }
@@ -192,6 +196,7 @@ public class StackScrollAlgorithm {
         float clipStart = 0;
         int childCount = algorithmState.visibleChildren.size();
         boolean firstHeadsUp = true;
+        float firstHeadsUpEnd = 0;
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState state = child.getViewState();
@@ -203,14 +208,18 @@ public class StackScrollAlgorithm {
             float newNotificationEnd = newYTranslation + newHeight;
             boolean isHeadsUp = (child instanceof ExpandableNotificationRow) && child.isPinned();
             if (mClipNotificationScrollToTop
-                    && (!state.inShelf || (isHeadsUp && !firstHeadsUp))
-                    && newYTranslation < clipStart
-                    && !ambientState.isShadeOpening()) {
-                // The previous view is overlapping on top, clip!
-                float overlapAmount = clipStart - newYTranslation;
-                state.clipTopAmount = (int) overlapAmount;
+                    && ((isHeadsUp && !firstHeadsUp) || child.isHeadsUpAnimatingAway())
+                    && newNotificationEnd > firstHeadsUpEnd
+                    && !ambientState.isShadeExpanded()) {
+                // The bottom of this view is peeking out from under the previous view.
+                // Clip the part that is peeking out.
+                float overlapAmount = newNotificationEnd - firstHeadsUpEnd;
+                state.clipBottomAmount = (int) overlapAmount;
             } else {
-                state.clipTopAmount = 0;
+                state.clipBottomAmount = 0;
+            }
+            if (firstHeadsUp) {
+                firstHeadsUpEnd = newNotificationEnd;
             }
             if (isHeadsUp) {
                 firstHeadsUp = false;
@@ -299,7 +308,8 @@ public class StackScrollAlgorithm {
                     ambientState.getSectionProvider(), i,
                     view, getPreviousView(i, state));
             if (applyGapHeight) {
-                currentY += mGapHeight;
+                currentY += getGapForLocation(
+                        ambientState.getFractionToShade(), ambientState.isOnKeyguard());
             }
 
             if (ambientState.getShelf() != null) {
@@ -376,6 +386,11 @@ public class StackScrollAlgorithm {
 
         final float stackHeight = ambientState.getStackHeight()  - shelfHeight - scrimPadding;
         final float stackEndHeight = ambientState.getStackEndHeight() - shelfHeight - scrimPadding;
+        if (stackEndHeight == 0f) {
+            // This should not happen, since even when the shade is empty we show EmptyShadeView
+            // but check just in case, so we don't return infinity or NaN.
+            return 0f;
+        }
         return stackHeight / stackEndHeight;
     }
 
@@ -421,7 +436,9 @@ public class StackScrollAlgorithm {
         } else if (ambientState.isExpansionChanging()) {
             // Adjust alpha for shade open & close.
             float expansion = ambientState.getExpansionFraction();
-            viewState.alpha = ShadeInterpolation.getContentAlpha(expansion);
+            viewState.alpha = ambientState.isBouncerInTransit()
+                    ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion)
+                    : ShadeInterpolation.getContentAlpha(expansion);
         }
 
         if (ambientState.isShadeExpanded() && view.mustStayOnScreen()
@@ -441,8 +458,10 @@ public class StackScrollAlgorithm {
                         ambientState.getSectionProvider(), i,
                         view, getPreviousView(i, algorithmState));
         if (applyGapHeight) {
-            algorithmState.mCurrentYPosition += expansionFraction * mGapHeight;
-            algorithmState.mCurrentExpandedYPosition += mGapHeight;
+            final float gap = getGapForLocation(
+                    ambientState.getFractionToShade(), ambientState.isOnKeyguard());
+            algorithmState.mCurrentYPosition += expansionFraction * gap;
+            algorithmState.mCurrentExpandedYPosition += gap;
         }
 
         viewState.yTranslation = algorithmState.mCurrentYPosition;
@@ -526,14 +545,27 @@ public class StackScrollAlgorithm {
             SectionProvider sectionProvider,
             int visibleIndex,
             View child,
-            View previousChild) {
+            View previousChild,
+            float fractionToShade,
+            boolean onKeyguard) {
 
         if (childNeedsGapHeight(sectionProvider, visibleIndex, child,
                 previousChild)) {
-            return mGapHeight;
+            return getGapForLocation(fractionToShade, onKeyguard);
         } else {
             return 0;
         }
+    }
+
+    @VisibleForTesting
+    float getGapForLocation(float fractionToShade, boolean onKeyguard) {
+        if (fractionToShade > 0f) {
+            return MathUtils.lerp(mGapHeightOnLockscreen, mGapHeight, fractionToShade);
+        }
+        if (onKeyguard) {
+            return mGapHeightOnLockscreen;
+        }
+        return mGapHeight;
     }
 
     /**
@@ -630,8 +662,6 @@ public class StackScrollAlgorithm {
                     // Ensure that a headsUp doesn't vertically extend further than the heads-up at
                     // the top most z-position
                     childState.height = row.getIntrinsicHeight();
-                    childState.yTranslation = Math.min(topState.yTranslation + topState.height
-                            - childState.height, childState.yTranslation);
                 }
 
                 // heads up notification show and this row is the top entry of heads up

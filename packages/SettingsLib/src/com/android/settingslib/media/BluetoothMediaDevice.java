@@ -19,6 +19,7 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 
@@ -34,11 +35,13 @@ public class BluetoothMediaDevice extends MediaDevice {
     private static final String TAG = "BluetoothMediaDevice";
 
     private CachedBluetoothDevice mCachedDevice;
+    private final AudioManager mAudioManager;
 
     BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
             MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName) {
         super(context, routerManager, info, packageName);
         mCachedDevice = device;
+        mAudioManager = context.getSystemService(AudioManager.class);
         initDeviceRecord();
     }
 
@@ -95,6 +98,12 @@ public class BluetoothMediaDevice extends MediaDevice {
         return mCachedDevice != null
                 && BluetoothUtils.getBooleanMetaData(
                 mCachedDevice.getDevice(), BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET);
+    }
+
+    @Override
+    public boolean isMutingExpectedDevice() {
+        return mAudioManager.getMutingExpectedDevice() != null && mCachedDevice.getAddress().equals(
+                mAudioManager.getMutingExpectedDevice().getAddress());
     }
 
     @Override

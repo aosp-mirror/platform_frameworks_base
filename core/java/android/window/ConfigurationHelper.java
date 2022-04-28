@@ -48,24 +48,6 @@ public class ConfigurationHelper {
     }
 
     /**
-     * A helper method to filter out {@link ActivityInfo#CONFIG_SCREEN_SIZE} if the
-     * {@link Configuration#diffPublicOnly(Configuration) diff} of two {@link Configuration}
-     * doesn't cross the boundary.
-     *
-     * @see SizeConfigurationBuckets#filterDiff(int, Configuration, Configuration,
-     * SizeConfigurationBuckets)
-     */
-    public static int diffPublicWithSizeBuckets(@Nullable Configuration currentConfig,
-            @NonNull Configuration newConfig, @Nullable SizeConfigurationBuckets buckets) {
-        // If current configuration is null, it is definitely different from updated Configuration.
-        if (currentConfig == null) {
-            return 0xffffffff;
-        }
-        int publicDiff = currentConfig.diffPublicOnly(newConfig);
-        return SizeConfigurationBuckets.filterDiff(publicDiff, currentConfig, newConfig, buckets);
-    }
-
-    /**
      * Returns {@code true} if the {@link android.content.res.Resources} associated with
      * a {@code token} needs to be updated.
      *

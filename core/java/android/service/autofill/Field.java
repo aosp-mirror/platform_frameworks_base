@@ -18,8 +18,6 @@ package android.service.autofill;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
-import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
 import com.android.internal.util.DataClass;
@@ -27,10 +25,9 @@ import com.android.internal.util.DataClass;
 import java.util.regex.Pattern;
 
 /**
- * This class is used to set all information of a field. Such as the
- * {@link AutofillId} of the field, the {@link AutofillValue} to be autofilled,
- * a <a href="#Filtering">explicit filter</a>, and presentations to be visualized,
- * etc.
+ * This class is used to set all information of a field. Such as the {@link AutofillValue}
+ * to be autofilled, a <a href="#Filtering">explicit filter</a>, and presentations to be
+ * visualized, etc.
  */
 public final class Field {
 
@@ -86,8 +83,18 @@ public final class Field {
      * @see Dataset.DatasetFieldFilter
      * @hide
      */
-    public @Nullable Dataset.DatasetFieldFilter getFilter() {
+    public @Nullable Dataset.DatasetFieldFilter getDatasetFieldFilter() {
         return mFilter;
+    }
+
+    /**
+     * Regex used to determine if the dataset should be shown in the autofill UI;
+     * when {@code null}, it disables filtering on that dataset (this is the recommended
+     * approach when {@code value} is not {@code null} and field contains sensitive data
+     * such as passwords).
+     */
+    public @Nullable Pattern getFilter() {
+        return mFilter == null ? null : mFilter.pattern;
     }
 
     /**
@@ -127,7 +134,6 @@ public final class Field {
          * approach when {@code value} is not {@code null} and field contains sensitive data
          * such as passwords).
          */
-        @SuppressLint("MissingGetterMatchingBuilder")
         public @NonNull Builder setFilter(@Nullable Pattern value) {
             checkNotUsed();
             mFilter = new Dataset.DatasetFieldFilter(value);

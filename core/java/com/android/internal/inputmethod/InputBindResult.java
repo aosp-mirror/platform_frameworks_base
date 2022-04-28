@@ -19,12 +19,15 @@ package com.android.internal.inputmethod;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Matrix;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.SparseArray;
 import android.view.InputChannel;
 
 import com.android.internal.view.IInputMethodSession;
@@ -53,7 +56,8 @@ public final class InputBindResult implements Parcelable {
             ResultCode.ERROR_NOT_IME_TARGET_WINDOW,
             ResultCode.ERROR_NO_EDITOR,
             ResultCode.ERROR_DISPLAY_ID_MISMATCH,
-            ResultCode.ERROR_INVALID_DISPLAY_ID
+            ResultCode.ERROR_INVALID_DISPLAY_ID,
+            ResultCode.SUCCESS_WITH_ACCESSIBILITY_SESSION
     })
     public @interface ResultCode {
         /**
@@ -168,6 +172,7 @@ public final class InputBindResult implements Parcelable {
          * display.
          */
         int ERROR_INVALID_DISPLAY_ID = 15;
+        int SUCCESS_WITH_ACCESSIBILITY_SESSION = 16;
     }
 
     @ResultCode
@@ -177,6 +182,11 @@ public final class InputBindResult implements Parcelable {
      * The input method service.
      */
     public final IInputMethodSession method;
+
+    /**
+     * The accessibility services.
+     */
+    public SparseArray<IAccessibilityInputMethodSession> accessibilitySessions;
 
     /**
      * The input channel used to send input events to this IME.
@@ -194,16 +204,35 @@ public final class InputBindResult implements Parcelable {
      */
     public final int sequence;
 
+    @Nullable
+    private final float[] mVirtualDisplayToScreenMatrixValues;
+
     /**
      * {@code true} if the IME explicitly specifies {@code suppressesSpellChecker="true"}.
      */
     public final boolean isInputMethodSuppressingSpellChecker;
 
     /**
+     * @return {@link Matrix} that corresponds to {@link #mVirtualDisplayToScreenMatrixValues}.
+     *         {@code null} if {@link #mVirtualDisplayToScreenMatrixValues} is {@code null}.
+     */
+    @Nullable
+    public Matrix getVirtualDisplayToScreenMatrix() {
+        if (mVirtualDisplayToScreenMatrixValues == null) {
+            return null;
+        }
+        final Matrix matrix = new Matrix();
+        matrix.setValues(mVirtualDisplayToScreenMatrixValues);
+        return matrix;
+    }
+
+    /**
      * Creates a new instance of {@link InputBindResult}.
      *
      * @param result A result code defined in {@link ResultCode}.
      * @param method {@link IInputMethodSession} to interact with the IME.
+     * @param accessibilitySessions {@link IAccessibilityInputMethodSession} to interact with
+     *                              accessibility services.
      * @param channel {@link InputChannel} to forward input events to the IME.
      * @param id The {@link String} representations of the IME, which is the same as
      *           {@link android.view.inputmethod.InputMethodInfo#getId()} and
@@ -213,19 +242,43 @@ public final class InputBindResult implements Parcelable {
      *                                             {@code suppressesSpellChecker="true"}.
      */
     public InputBindResult(@ResultCode int result,
-            IInputMethodSession method, InputChannel channel, String id, int sequence,
+            IInputMethodSession method,
+            SparseArray<IAccessibilityInputMethodSession> accessibilitySessions,
+            InputChannel channel, String id, int sequence,
+            @Nullable Matrix virtualDisplayToScreenMatrix,
             boolean isInputMethodSuppressingSpellChecker) {
         this.result = result;
         this.method = method;
+        this.accessibilitySessions = accessibilitySessions;
         this.channel = channel;
         this.id = id;
         this.sequence = sequence;
+        if (virtualDisplayToScreenMatrix == null) {
+            mVirtualDisplayToScreenMatrixValues = null;
+        } else {
+            mVirtualDisplayToScreenMatrixValues = new float[9];
+            virtualDisplayToScreenMatrix.getValues(mVirtualDisplayToScreenMatrixValues);
+        }
         this.isInputMethodSuppressingSpellChecker = isInputMethodSuppressingSpellChecker;
     }
 
     private InputBindResult(Parcel source) {
         result = source.readInt();
         method = IInputMethodSession.Stub.asInterface(source.readStrongBinder());
+        int n = source.readInt();
+        if (n < 0) {
+            accessibilitySessions = null;
+        } else {
+            accessibilitySessions = new SparseArray<>(n);
+            while (n > 0) {
+                int key = source.readInt();
+                IAccessibilityInputMethodSession value =
+                        IAccessibilityInputMethodSession.Stub.asInterface(
+                                source.readStrongBinder());
+                accessibilitySessions.append(key, value);
+                n--;
+            }
+        }
         if (source.readInt() != 0) {
             channel = InputChannel.CREATOR.createFromParcel(source);
         } else {
@@ -233,6 +286,7 @@ public final class InputBindResult implements Parcelable {
         }
         id = source.readString();
         sequence = source.readInt();
+        mVirtualDisplayToScreenMatrixValues = source.createFloatArray();
         isInputMethodSuppressingSpellChecker = source.readBoolean();
     }
 
@@ -243,6 +297,7 @@ public final class InputBindResult implements Parcelable {
     public String toString() {
         return "InputBindResult{result=" + getResultString() + " method=" + method + " id=" + id
                 + " sequence=" + sequence
+                + " virtualDisplayToScreenMatrix=" + getVirtualDisplayToScreenMatrix()
                 + " isInputMethodSuppressingSpellChecker=" + isInputMethodSuppressingSpellChecker
                 + "}";
     }
@@ -254,6 +309,18 @@ public final class InputBindResult implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(result);
         dest.writeStrongInterface(method);
+        if (accessibilitySessions == null) {
+            dest.writeInt(-1);
+        } else {
+            int n = accessibilitySessions.size();
+            dest.writeInt(n);
+            int i = 0;
+            while (i < n) {
+                dest.writeInt(accessibilitySessions.keyAt(i));
+                dest.writeStrongInterface(accessibilitySessions.valueAt(i));
+                i++;
+            }
+        }
         if (channel != null) {
             dest.writeInt(1);
             channel.writeToParcel(dest, flags);
@@ -262,6 +329,7 @@ public final class InputBindResult implements Parcelable {
         }
         dest.writeString(id);
         dest.writeInt(sequence);
+        dest.writeFloatArray(mVirtualDisplayToScreenMatrixValues);
         dest.writeBoolean(isInputMethodSuppressingSpellChecker);
     }
 
@@ -329,7 +397,7 @@ public final class InputBindResult implements Parcelable {
     }
 
     private static InputBindResult error(@ResultCode int result) {
-        return new InputBindResult(result, null, null, null, -1, false);
+        return new InputBindResult(result, null, null, null, null, -1, null, false);
     }
 
     /**

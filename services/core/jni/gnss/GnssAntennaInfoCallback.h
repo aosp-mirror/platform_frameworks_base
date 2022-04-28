@@ -24,7 +24,9 @@
 #endif
 
 #include <android/hardware/gnss/2.1/IGnssAntennaInfo.h>
+#include <android/hardware/gnss/BnGnssAntennaInfoCallback.h>
 #include <log/log.h>
+
 #include "Utils.h"
 #include "jni.h"
 
@@ -33,50 +35,86 @@ namespace android::gnss {
 void GnssAntennaInfo_class_init_once(JNIEnv* env, jclass& clazz);
 
 /*
- * GnssAntennaInfoCallback implements the callback methods required for the
- * GnssAntennaInfo interface.
+ * GnssAntennaInfoCallbackAidl implements the callback methods required for the
+ * android::hardware::gnss::IGnssAntennaInfo interface.
  */
-struct GnssAntennaInfoCallback : public android::hardware::gnss::V2_1::IGnssAntennaInfoCallback {
-    GnssAntennaInfoCallback(jobject& callbacksObj) : mCallbacksObj(callbacksObj) {}
+class GnssAntennaInfoCallbackAidl : public android::hardware::gnss::BnGnssAntennaInfoCallback {
+public:
+    binder::Status gnssAntennaInfoCb(const std::vector<GnssAntennaInfo>& gnssAntennaInfos) override;
+};
+
+/*
+ * GnssAntennaInfoCallback implements the callback methods required for the
+ * V2_1::GnssAntennaInfo interface.
+ */
+class GnssAntennaInfoCallback_V2_1
+      : public android::hardware::gnss::V2_1::IGnssAntennaInfoCallback {
+public:
     // Methods from V2_1::GnssAntennaInfoCallback follow.
     hardware::Return<void> gnssAntennaInfoCb(
             const hardware::hidl_vec<
                     android::hardware::gnss::V2_1::IGnssAntennaInfoCallback::GnssAntennaInfo>&
-                    gnssAntennaInfos);
+                    gnssAntennaInfos) override;
+};
+
+class GnssAntennaInfoCallback {
+public:
+    GnssAntennaInfoCallback() {}
+    sp<GnssAntennaInfoCallbackAidl> getAidl() {
+        if (callbackAidl == nullptr) {
+            callbackAidl = sp<GnssAntennaInfoCallbackAidl>::make();
+        }
+        return callbackAidl;
+    }
+
+    sp<GnssAntennaInfoCallback_V2_1> getV2_1() {
+        if (callbackV2_1 == nullptr) {
+            callbackV2_1 = sp<GnssAntennaInfoCallback_V2_1>::make();
+        }
+        return callbackV2_1;
+    }
 
 private:
-    jobject translateAllGnssAntennaInfos(
-            JNIEnv* env,
-            const hardware::hidl_vec<
-                    android::hardware::gnss::V2_1::IGnssAntennaInfoCallback::GnssAntennaInfo>&
-                    gnssAntennaInfos);
-    jobject translateSingleGnssAntennaInfo(
-            JNIEnv* env,
-            const android::hardware::gnss::V2_1::IGnssAntennaInfoCallback::GnssAntennaInfo&
-                    gnssAntennaInfo);
-    jobject translatePhaseCenterOffset(
-            JNIEnv* env,
-            const android::hardware::gnss::V2_1::IGnssAntennaInfoCallback::GnssAntennaInfo&
-                    gnssAntennaInfo);
-    jobject translatePhaseCenterVariationCorrections(
-            JNIEnv* env,
-            const android::hardware::gnss::V2_1::IGnssAntennaInfoCallback::GnssAntennaInfo&
-                    gnssAntennaInfo);
-    jobject translateSignalGainCorrections(
-            JNIEnv* env,
-            const android::hardware::gnss::V2_1::IGnssAntennaInfoCallback::GnssAntennaInfo&
-                    gnssAntennaInfo);
-    jobjectArray translate2dDoubleArray(
-            JNIEnv* env,
-            const hardware::hidl_vec<android::hardware::gnss::V2_1::IGnssAntennaInfoCallback::Row>&
-                    array);
-    void translateAndReportGnssAntennaInfo(
-            const hardware::hidl_vec<
-                    android::hardware::gnss::V2_1::IGnssAntennaInfoCallback::GnssAntennaInfo>&
-                    gnssAntennaInfos);
-    void reportAntennaInfo(JNIEnv* env, const jobject antennaInfosArray);
+    sp<GnssAntennaInfoCallbackAidl> callbackAidl;
+    sp<GnssAntennaInfoCallback_V2_1> callbackV2_1;
+};
 
-    jobject& mCallbacksObj;
+struct GnssAntennaInfoCallbackUtil {
+    template <template <class...> class T_vector, class T_info>
+    static jobject translateAllGnssAntennaInfos(JNIEnv* env,
+                                                const T_vector<T_info>& gnssAntennaInfos);
+
+    template <class T>
+    static jobject translateSingleGnssAntennaInfo(JNIEnv* env, const T& gnssAntennaInfo);
+
+    template <class T>
+    static jobject translatePhaseCenterOffset(JNIEnv* env, const T& gnssAntennaInfo);
+
+    template <class T>
+    static jobject translatePhaseCenterVariationCorrections(JNIEnv* env, const T& gnssAntennaInfo);
+
+    template <class T>
+    static jobject translateSignalGainCorrections(JNIEnv* env, const T& gnssAntennaInfo);
+
+    template <template <class...> class T_vector, class T_info>
+    static jobjectArray translate2dDoubleArray(JNIEnv* env, const T_vector<T_info>& array);
+
+    template <template <class...> class T_vector, class T_info>
+    static void translateAndReportGnssAntennaInfo(const T_vector<T_info>& gnssAntennaInfos);
+
+    static void reportAntennaInfo(JNIEnv* env, const jobject antennaInfosArray);
+
+    static double getCarrierFrequencyMHz(
+            const android::hardware::gnss::IGnssAntennaInfoCallback::GnssAntennaInfo&
+                    gnssAntennaInfo) {
+        return gnssAntennaInfo.carrierFrequencyHz * 1e-6;
+    };
+
+    static double getCarrierFrequencyMHz(
+            const android::hardware::gnss::V2_1::IGnssAntennaInfoCallback::GnssAntennaInfo&
+                    gnssAntennaInfo) {
+        return gnssAntennaInfo.carrierFrequencyMHz;
+    };
 };
 
 } // namespace android::gnss

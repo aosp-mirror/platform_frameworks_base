@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.text.LineBreakConfig;
 import android.graphics.text.MeasuredText;
@@ -98,7 +99,7 @@ public class PrecomputedText implements Spannable {
         private final @Layout.HyphenationFrequency int mHyphenationFrequency;
 
         // The line break configuration for calculating text wrapping.
-        private final @Nullable LineBreakConfig mLineBreakConfig;
+        private final @NonNull LineBreakConfig mLineBreakConfig;
 
         /**
          * A builder for creating {@link Params}.
@@ -118,7 +119,7 @@ public class PrecomputedText implements Spannable {
                     Layout.HYPHENATION_FREQUENCY_NORMAL;
 
             // The line break configuration for calculating text wrapping.
-            private @Nullable LineBreakConfig mLineBreakConfig;
+            private @NonNull LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
 
             /**
              * Builder constructor.
@@ -211,7 +212,7 @@ public class PrecomputedText implements Spannable {
         // For the external developers, use Builder instead.
         /** @hide */
         public Params(@NonNull TextPaint paint,
-                @Nullable LineBreakConfig lineBreakConfig,
+                @NonNull LineBreakConfig lineBreakConfig,
                 @NonNull TextDirectionHeuristic textDir,
                 @Layout.BreakStrategy int strategy,
                 @Layout.HyphenationFrequency int frequency) {
@@ -259,11 +260,12 @@ public class PrecomputedText implements Spannable {
         }
 
         /**
-         * Return the line break configuration for this text.
+         * Returns the {@link LineBreakConfig} for this text.
          *
-         * @return the current line break configuration, null if no line break configuration is set.
+         * @return the current line break configuration. The {@link LineBreakConfig} with default
+         * values will be returned if no line break configuration is set.
          */
-        public @Nullable LineBreakConfig getLineBreakConfig() {
+        public @NonNull LineBreakConfig getLineBreakConfig() {
             return mLineBreakConfig;
         }
 
@@ -296,37 +298,14 @@ public class PrecomputedText implements Spannable {
         /** @hide */
         public @CheckResultUsableResult int checkResultUsable(@NonNull TextPaint paint,
                 @NonNull TextDirectionHeuristic textDir, @Layout.BreakStrategy int strategy,
-                @Layout.HyphenationFrequency int frequency, @Nullable LineBreakConfig lbConfig) {
+                @Layout.HyphenationFrequency int frequency, @NonNull LineBreakConfig lbConfig) {
             if (mBreakStrategy == strategy && mHyphenationFrequency == frequency
-                    && isLineBreakEquals(mLineBreakConfig, lbConfig)
+                    && mLineBreakConfig.equals(lbConfig)
                     && mPaint.equalsForTextMeasurement(paint)) {
                 return mTextDir == textDir ? USABLE : NEED_RECOMPUTE;
             } else {
                 return UNUSABLE;
             }
-        }
-
-        /**
-         * Check the two LineBreakConfig instances are equal.
-         * This method assumes they are equal if one parameter is null and the other parameter has
-         * a LineBreakStyle value of LineBreakConfig.LINE_BREAK_STYLE_NONE.
-         *
-         * @param o1 the first LineBreakConfig instance.
-         * @param o2 the second LineBreakConfig instance.
-         * @return true if the two LineBreakConfig instances are equal.
-         */
-        private boolean isLineBreakEquals(LineBreakConfig o1, LineBreakConfig o2) {
-            if (Objects.equals(o1, o2)) {
-                return true;
-            }
-            if (o1 == null && (o2 != null
-                    && o2.getLineBreakStyle() == LineBreakConfig.LINE_BREAK_STYLE_NONE)) {
-                return true;
-            } else if (o2 == null && (o1 != null
-                    && o1.getLineBreakStyle() == LineBreakConfig.LINE_BREAK_STYLE_NONE)) {
-                return true;
-            }
-            return false;
         }
 
         /**
@@ -694,6 +673,38 @@ public class PrecomputedText implements Spannable {
                 + "request: (" + start + ", " + end + ")");
         }
         getMeasuredParagraph(paraIndex).getBounds(start - paraStart, end - paraStart, bounds);
+    }
+
+    /**
+     * Retrieves the text font metrics for the given range.
+     * Both {@code start} and {@code end} offset need to be in the same paragraph, otherwise
+     * IllegalArgumentException will be thrown.
+     *
+     * @param start the inclusive start offset in the text
+     * @param end the exclusive end offset in the text
+     * @param outMetrics the output font metrics
+     * @throws IllegalArgumentException if start and end offset are in the different paragraph.
+     */
+    public void getFontMetricsInt(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
+            @NonNull Paint.FontMetricsInt outMetrics) {
+        Preconditions.checkArgument(0 <= start && start <= mText.length(), "invalid start offset");
+        Preconditions.checkArgument(0 <= end && end <= mText.length(), "invalid end offset");
+        Preconditions.checkArgument(start <= end, "start offset can not be larger than end offset");
+        Objects.requireNonNull(outMetrics);
+        if (start == end) {
+            mParams.getTextPaint().getFontMetricsInt(outMetrics);
+            return;
+        }
+        final int paraIndex = findParaIndex(start);
+        final int paraStart = getParagraphStart(paraIndex);
+        final int paraEnd = getParagraphEnd(paraIndex);
+        if (start < paraStart || paraEnd < end) {
+            throw new IllegalArgumentException("Cannot measured across the paragraph:"
+                    + "para: (" + paraStart + ", " + paraEnd + "), "
+                    + "request: (" + start + ", " + end + ")");
+        }
+        getMeasuredParagraph(paraIndex).getFontMetricsInt(start - paraStart,
+                end - paraStart, outMetrics);
     }
 
     /**

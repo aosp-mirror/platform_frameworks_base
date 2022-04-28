@@ -74,10 +74,9 @@ public class AccessibilityRecord {
     private static final int PROPERTY_IMPORTANT_FOR_ACCESSIBILITY = 0x00000200;
 
     private static final int GET_SOURCE_PREFETCH_FLAGS =
-        AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS
-        | AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS
-        | AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS;
-
+            AccessibilityNodeInfo.FLAG_PREFETCH_ANCESTORS
+                    | AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS
+                    | AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID;
 
     @UnsupportedAppUsage
     boolean mSealed;
@@ -185,16 +184,30 @@ public class AccessibilityRecord {
      * @return The info of the source.
      */
     public @Nullable AccessibilityNodeInfo getSource() {
+        return getSource(GET_SOURCE_PREFETCH_FLAGS);
+    }
+
+    /**
+     * Gets the {@link AccessibilityNodeInfo} of the event source.
+     *
+     * @param prefetchingStrategy the prefetching strategy.
+     * @return The info of the source.
+     *
+     * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
+     */
+    @Nullable
+    public AccessibilityNodeInfo getSource(
+            @AccessibilityNodeInfo.PrefetchingStrategy int prefetchingStrategy) {
         enforceSealed();
         if ((mConnectionId == UNDEFINED)
                 || (mSourceWindowId == AccessibilityWindowInfo.UNDEFINED_WINDOW_ID)
                 || (AccessibilityNodeInfo.getAccessibilityViewId(mSourceNodeId)
-                        == AccessibilityNodeInfo.UNDEFINED_ITEM_ID)) {
+                == AccessibilityNodeInfo.UNDEFINED_ITEM_ID)) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mSourceWindowId,
-                mSourceNodeId, false, GET_SOURCE_PREFETCH_FLAGS, null);
+                mSourceNodeId, false, prefetchingStrategy, null);
     }
 
     /**

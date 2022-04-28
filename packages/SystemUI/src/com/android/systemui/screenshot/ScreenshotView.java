@@ -141,7 +141,7 @@ public class ScreenshotView extends FrameLayout implements
 
     private ScreenshotSelectorView mScreenshotSelectorView;
     private ImageView mScrollingScrim;
-    private View mScreenshotStatic;
+    private DraggableConstraintLayout mScreenshotStatic;
     private ImageView mScreenshotPreview;
     private View mScreenshotPreviewBorder;
     private ImageView mScrollablePreview;
@@ -159,7 +159,6 @@ public class ScreenshotView extends FrameLayout implements
     private UiEventLogger mUiEventLogger;
     private ScreenshotViewCallback mCallbacks;
     private boolean mPendingSharedTransition;
-    private SwipeDismissHandler mSwipeDismissHandler;
     private InputMonitorCompat mInputMonitor;
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
     private boolean mShowScrollablePreview;
@@ -263,22 +262,29 @@ public class ScreenshotView extends FrameLayout implements
         inoutInfo.touchableRegion.set(getTouchRegion(true));
     }
 
-    private Region getTouchRegion(boolean includeScrim) {
-        Region touchRegion = new Region();
+    private Region getSwipeRegion() {
+        Region swipeRegion = new Region();
 
         final Rect tmpRect = new Rect();
         mScreenshotPreview.getBoundsOnScreen(tmpRect);
         tmpRect.inset((int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP),
                 (int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP));
-        touchRegion.op(tmpRect, Region.Op.UNION);
+        swipeRegion.op(tmpRect, Region.Op.UNION);
         mActionsContainerBackground.getBoundsOnScreen(tmpRect);
         tmpRect.inset((int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP),
                 (int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP));
-        touchRegion.op(tmpRect, Region.Op.UNION);
+        swipeRegion.op(tmpRect, Region.Op.UNION);
         mDismissButton.getBoundsOnScreen(tmpRect);
-        touchRegion.op(tmpRect, Region.Op.UNION);
+        swipeRegion.op(tmpRect, Region.Op.UNION);
+
+        return swipeRegion;
+    }
+
+    private Region getTouchRegion(boolean includeScrim) {
+        Region touchRegion = getSwipeRegion();
 
         if (includeScrim && mScrollingScrim.getVisibility() == View.VISIBLE) {
+            final Rect tmpRect = new Rect();
             mScrollingScrim.getBoundsOnScreen(tmpRect);
             touchRegion.op(tmpRect, Region.Op.UNION);
         }
@@ -325,19 +331,6 @@ public class ScreenshotView extends FrameLayout implements
         }
     }
 
-    @Override // ViewGroup
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        // scrolling scrim should not be swipeable; return early if we're on the scrim
-        if (!getTouchRegion(false).contains((int) ev.getRawX(), (int) ev.getRawY())) {
-            return false;
-        }
-        // always pass through the down event so the swipe handler knows the initial state
-        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            mSwipeDismissHandler.onTouch(this, ev);
-        }
-        return mSwipeDetector.onTouchEvent(ev);
-    }
-
     @Override // View
     protected void onFinishInflate() {
         mScrollingScrim = requireNonNull(findViewById(R.id.screenshot_scrolling_scrim));
@@ -349,8 +342,8 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotPreview.setClipToOutline(true);
 
         mActionsContainerBackground = requireNonNull(findViewById(
-                R.id.screenshot_actions_container_background));
-        mActionsContainer = requireNonNull(findViewById(R.id.screenshot_actions_container));
+                R.id.actions_container_background));
+        mActionsContainer = requireNonNull(findViewById(R.id.actions_container));
         mActionsView = requireNonNull(findViewById(R.id.screenshot_actions));
         mBackgroundProtection = requireNonNull(
                 findViewById(R.id.screenshot_actions_background));
@@ -388,23 +381,34 @@ public class ScreenshotView extends FrameLayout implements
         setFocusableInTouchMode(true);
         requestFocus();
 
-        mSwipeDismissHandler = new SwipeDismissHandler(mContext, mScreenshotStatic,
-                new SwipeDismissHandler.SwipeDismissCallbacks() {
-                    @Override
-                    public void onInteraction() {
-                        mCallbacks.onUserInteraction();
-                    }
+        mScreenshotStatic.setCallbacks(new DraggableConstraintLayout.SwipeDismissCallbacks() {
+            @Override
+            public void onInteraction() {
+                mCallbacks.onUserInteraction();
+            }
 
+            @Override
+            public void onSwipeDismissInitiated(Animator animator) {
+                if (DEBUG_DISMISS) {
+                    Log.d(ScreenshotView.TAG, "dismiss triggered via swipe gesture");
+                }
+                mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED, 0,
+                        mPackageName);
+                animator.addListener(new AnimatorListenerAdapter() {
                     @Override
-                    public void onDismiss() {
-                        if (DEBUG_DISMISS) {
-                            Log.d(ScreenshotView.TAG, "dismiss triggered via swipe gesture");
-                        }
-                        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED, 0,
-                                mPackageName);
-                        mCallbacks.onDismiss();
+                    public void onAnimationStart(Animator animation) {
+                        super.onAnimationStart(animation);
+                        mBackgroundProtection.animate()
+                                .alpha(0).setDuration(animation.getDuration()).start();
                     }
                 });
+            }
+
+            @Override
+            public void onDismissComplete() {
+                mCallbacks.onDismiss();
+            }
+        });
     }
 
     View getScreenshotPreview() {
@@ -629,8 +633,6 @@ public class ScreenshotView extends FrameLayout implements
                 requestLayout();
 
                 createScreenshotActionsShadeAnimation().start();
-
-                setOnTouchListener(mSwipeDismissHandler);
             }
         });
 
@@ -939,7 +941,7 @@ public class ScreenshotView extends FrameLayout implements
     }
 
     boolean isDismissing() {
-        return mSwipeDismissHandler.isDismissing();
+        return mScreenshotStatic.isDismissing();
     }
 
     boolean isPendingSharedTransition() {
@@ -947,15 +949,14 @@ public class ScreenshotView extends FrameLayout implements
     }
 
     void animateDismissal() {
-        mSwipeDismissHandler.dismiss();
+        mScreenshotStatic.dismiss();
     }
 
     void reset() {
         if (DEBUG_UI) {
             Log.d(TAG, "reset screenshot view");
         }
-
-        mSwipeDismissHandler.cancel();
+        mScreenshotStatic.cancelDismissal();
         if (DEBUG_WINDOW) {
             Log.d(TAG, "removing OnComputeInternalInsetsListener");
         }
@@ -988,6 +989,7 @@ public class ScreenshotView extends FrameLayout implements
         mSmartChips.clear();
         mQuickShareChip = null;
         setAlpha(1);
+        mScreenshotStatic.setAlpha(1);
         mScreenshotSelectorView.stop();
     }
 

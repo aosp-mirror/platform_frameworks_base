@@ -16,23 +16,32 @@
 
 package com.android.wm.shell.compatui.letterboxedu;
 
+import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Configuration.Orientation;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.wm.shell.R;
 
 /**
- * Container for Letterbox Education Dialog.
+ * Container for Letterbox Education Dialog and background dim.
+ *
+ * <p>This layout should fill the entire task and the background around the dialog acts as the
+ * background dim which dismisses the dialog when clicked.
  */
-// TODO(b/215316431): Add tests
-public class LetterboxEduDialogLayout extends FrameLayout {
+class LetterboxEduDialogLayout extends ConstraintLayout {
+
+    // The alpha of a background is a number between 0 (fully transparent) to 255 (fully opaque).
+    // 204 is simply 255 * 0.8.
+    static final int BACKGROUND_DIM_ALPHA = 204;
+
+    private View mDialogContainer;
+    private TextView mDialogTitle;
+    private Drawable mBackgroundDim;
 
     public LetterboxEduDialogLayout(Context context) {
         this(context, null);
@@ -51,44 +60,40 @@ public class LetterboxEduDialogLayout extends FrameLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    /**
-     * Register a callback for the dismiss button.
-     * @param callback The callback to register
-     */
-    void setDismissOnClickListener(Runnable callback) {
-        findViewById(R.id.letterbox_education_dialog_dismiss).setOnClickListener(
-                view -> callback.run());
+    View getDialogContainer() {
+        return mDialogContainer;
+    }
+
+    TextView getDialogTitle() {
+        return mDialogTitle;
+    }
+
+    Drawable getBackgroundDim() {
+        return mBackgroundDim;
     }
 
     /**
-     * Updates the layout with the given app info.
-     * @param appIcon The name of the app
-     * @param appIcon The icon of the app
+     * Register a callback for the dismiss button and background dim.
+     *
+     * @param callback The callback to register or null if all on click listeners should be removed.
      */
-    void updateAppInfo(String appName, Drawable appIcon) {
-        ((ImageView) findViewById(R.id.letterbox_education_icon)).setImageDrawable(appIcon);
-        ((TextView) findViewById(R.id.letterbox_education_dialog_title)).setText(
-                getResources().getString(R.string.letterbox_education_dialog_title, appName));
+    void setDismissOnClickListener(@Nullable Runnable callback) {
+        final OnClickListener listener = callback == null ? null : view -> callback.run();
+        findViewById(R.id.letterbox_education_dialog_dismiss_button).setOnClickListener(listener);
+        // Clicks on the background dim should also dismiss the dialog.
+        setOnClickListener(listener);
+        // We add a no-op on-click listener to the dialog container so that clicks on it won't
+        // propagate to the listener of the layout (which represents the background dim).
+        mDialogContainer.setOnClickListener(callback == null ? null : view -> {});
     }
 
-    /**
-     * Updates the layout according to the given orientation.
-     * @param orientation The orientation of the display
-     */
-    void updateDisplayOrientation(@Orientation int orientation) {
-        boolean isOrientationPortrait = orientation == Configuration.ORIENTATION_PORTRAIT;
-        ((LetterboxEduDialogActionLayout) findViewById(
-                R.id.letterbox_education_dialog_screen_rotation_action)).setText(
-                isOrientationPortrait
-                        ? R.string.letterbox_education_screen_rotation_landscape_text
-                        : R.string.letterbox_education_screen_rotation_portrait_text);
-
-        if (isOrientationPortrait) {
-            ((LetterboxEduDialogActionLayout) findViewById(
-                    R.id.letterbox_education_dialog_split_screen_action)).setIconRotation(90f);
-        }
-
-        findViewById(R.id.letterbox_education_dialog_reposition_action).setVisibility(
-                isOrientationPortrait ? View.GONE : View.VISIBLE);
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mDialogContainer = findViewById(R.id.letterbox_education_dialog_container);
+        mDialogTitle = findViewById(R.id.letterbox_education_dialog_title);
+        mBackgroundDim = getBackground().mutate();
+        // Set the alpha of the background dim to 0 for enter animation.
+        mBackgroundDim.setAlpha(0);
     }
 }

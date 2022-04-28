@@ -364,6 +364,11 @@ public class PhysicsAnimationLayout extends FrameLayout {
         final int oldIndex = indexOfChild(view);
 
         super.removeView(view);
+        if (view.getParent() != null) {
+            // View still has a parent. This could have been added as a transient view.
+            // Remove it from transient views.
+            super.removeTransientView(view);
+        }
         addViewInternal(view, index, view.getLayoutParams(), true /* isReorder */);
 
         if (mController != null) {

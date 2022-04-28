@@ -77,10 +77,11 @@ import java.util.Objects;
  * {@link #onDeviceAppeared(AssociationInfo)} and {@link #onDeviceDisappeared(AssociationInfo)}
  * only to one "primary" services.
  * Applications that declare multiple {@link CompanionDeviceService}-s should indicate the "primary"
- * service using "android.companion.primary" tag.
+ * service using "android.companion.PROPERTY_PRIMARY_COMPANION_DEVICE_SERVICE" service level
+ * property.
  * <pre>{@code
- * <meta-data
- *       android:name="android.companion.primary"
+ * <property
+ *       android:name="android.companion.PROPERTY_PRIMARY_COMPANION_DEVICE_SERVICE"
  *       android:value="true" />
  * }</pre>
  *

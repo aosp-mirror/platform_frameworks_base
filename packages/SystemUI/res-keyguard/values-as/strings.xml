@@ -80,7 +80,7 @@
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"ছিম পিনৰ জৰিয়তে আনলক কৰিব পৰা নগ\'ল!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"ছিম PUKৰ জৰিয়তে আনলক কৰিব পৰা নগ\'ল!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ইনপুট পদ্ধতি সলনি কৰক"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"এয়াৰপ্লেন ম\'ড"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"এয়াৰপ্লে’ন ম’ড"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত আৰ্হি দিয়াটো বাধ্যতামূলক"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত পিন দিয়াটো বাধ্যতামূলক"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত পাছৱৰ্ড দিয়াটো বাধ্যতামূলক"</string>
@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"অতিৰিক্ত সুৰক্ষাৰ বাবে পাছৱর্ড দিয়াটো বাধ্যতামূলক"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"প্ৰশাসকে ডিভাইচ লক কৰি ৰাখিছে"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ডিভাইচটো মেনুৱেলভাৱে লক কৰা হৈছিল"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"চিনাক্ত কৰিব পৰা নাই"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"চিনাক্ত কৰিব পৰা নাই"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ফেচ আনলক সুবিধাটো ব্যৱহাৰ কৰিবলৈ ছেটিং &gt; গোপনীয়তাত "<b>"কেমেৰাৰ এক্সেছ"</b>" অন কৰক"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

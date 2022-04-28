@@ -26,8 +26,6 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.os.PowerCalculator;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -170,7 +168,7 @@ class PowerComponents {
                 separator = " ";
                 sb.append(key.toShortString());
                 sb.append("=");
-                sb.append(PowerCalculator.formatCharge(componentPower));
+                sb.append(BatteryStats.formatCharge(componentPower));
 
                 if (durationMs != 0) {
                     sb.append(" (");
@@ -194,7 +192,7 @@ class PowerComponents {
             separator = " ";
             sb.append(getCustomPowerComponentName(customComponentId));
             sb.append("=");
-            sb.append(PowerCalculator.formatCharge(customComponentPower));
+            sb.append(BatteryStats.formatCharge(customComponentPower));
         }
 
         pw.print(sb);
@@ -293,6 +291,10 @@ class PowerComponents {
             case BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE:
                 procState = BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsageSlice
                         .FOREGROUND_SERVICE;
+                break;
+            case BatteryConsumer.PROCESS_STATE_CACHED:
+                procState = BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsageSlice
+                        .CACHED;
                 break;
             default:
                 throw new IllegalArgumentException("Unknown process state: " + processState);

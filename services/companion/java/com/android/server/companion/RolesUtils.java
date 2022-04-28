@@ -19,6 +19,7 @@ package com.android.server.companion;
 import static android.app.role.RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP;
 
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
+import static com.android.server.companion.CompanionDeviceManagerService.TAG;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -35,7 +36,6 @@ import java.util.List;
 /** Utility methods for accessing {@link RoleManager} APIs. */
 @SuppressLint("LongLogTag")
 final class RolesUtils {
-    private static final String TAG = CompanionDeviceManagerService.LOG_TAG;
 
     static boolean isRoleHolder(@NonNull Context context, @UserIdInt int userId,
             @NonNull String packageName, @NonNull String role) {

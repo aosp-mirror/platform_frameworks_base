@@ -20,6 +20,7 @@ import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 
 import android.annotation.MainThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -81,6 +82,7 @@ public class QSCarrierGroupController {
     private final CarrierConfigTracker mCarrierConfigTracker;
 
     private boolean mIsSingleCarrier;
+    @Nullable
     private OnSingleCarrierChangedListener mOnSingleCarrierChangedListener;
 
     private final SlotIndexResolver mSlotIndexResolver;
@@ -294,7 +296,8 @@ public class QSCarrierGroupController {
      * This will get notified when the number of carriers changes between 1 and "not one".
      * @param listener
      */
-    public void setOnSingleCarrierChangedListener(OnSingleCarrierChangedListener listener) {
+    public void setOnSingleCarrierChangedListener(
+            @Nullable OnSingleCarrierChangedListener listener) {
         mOnSingleCarrierChangedListener = listener;
     }
 

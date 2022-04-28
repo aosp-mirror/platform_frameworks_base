@@ -80,7 +80,7 @@
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"No se ha podido desbloquear la tarjeta SIM con el código PIN."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"No se ha podido desbloquear la tarjeta SIM con el código PUK."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Cambiar método de introducción"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"Modo avión"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"Modo Avión"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Debes introducir el patrón después de reiniciar el dispositivo"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Debes introducir el PIN después de reiniciar el dispositivo"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Debes introducir la contraseña después de reiniciar el dispositivo"</string>
@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Debes introducir la contraseña como medida de seguridad adicional"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispositivo bloqueado por el administrador"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"El dispositivo se ha bloqueado manualmente"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"No se reconoce"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"No se reconoce"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Para usar Desbloqueo Facial, habilita el "<b>"acceso a la cámara"</b>" en Ajustes y privacidad"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

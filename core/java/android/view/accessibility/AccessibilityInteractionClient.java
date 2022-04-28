@@ -19,6 +19,8 @@ package android.view.accessibility;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_INTERACTION_CLIENT;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION_CALLBACK;
 import static android.os.Build.VERSION_CODES.S;
+import static android.view.accessibility.AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_MASK;
+import static android.view.accessibility.AccessibilityNodeInfo.FLAG_PREFETCH_MASK;
 
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
@@ -44,11 +46,11 @@ import android.view.ViewConfiguration;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -301,10 +303,11 @@ public final class AccessibilityInteractionClient
      * @param connectionId The id of a connection for interacting with the system.
      * @return The root {@link AccessibilityNodeInfo} if found, null otherwise.
      */
-    public AccessibilityNodeInfo getRootInActiveWindow(int connectionId) {
+    public AccessibilityNodeInfo getRootInActiveWindow(int connectionId,
+            @AccessibilityNodeInfo.PrefetchingStrategy int strategy) {
         return findAccessibilityNodeInfoByAccessibilityId(connectionId,
                 AccessibilityWindowInfo.ACTIVE_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID,
-                false, AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS, null);
+                false, strategy, null);
     }
 
     /**
@@ -529,11 +532,6 @@ public final class AccessibilityInteractionClient
     public @Nullable AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(
             int connectionId, int accessibilityWindowId, long accessibilityNodeId,
             boolean bypassCache, int prefetchFlags, Bundle arguments) {
-        if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS) != 0
-                && (prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS) == 0) {
-            throw new IllegalArgumentException("FLAG_PREFETCH_SIBLINGS"
-                + " requires FLAG_PREFETCH_PREDECESSORS");
-        }
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
@@ -560,7 +558,7 @@ public final class AccessibilityInteractionClient
                         }
                         if (!cache.isEnabled()) {
                             // Skip prefetching if cache is disabled.
-                            prefetchFlags &= ~AccessibilityNodeInfo.FLAG_PREFETCH_MASK;
+                            prefetchFlags &= ~FLAG_PREFETCH_MASK;
                         }
                         if (DEBUG) {
                             Log.i(LOG_TAG, "Node cache miss for "
@@ -573,12 +571,18 @@ public final class AccessibilityInteractionClient
                     }
                 } else {
                     // No need to prefech nodes in bypass cache case.
-                    prefetchFlags &= ~AccessibilityNodeInfo.FLAG_PREFETCH_MASK;
+                    prefetchFlags &= ~FLAG_PREFETCH_MASK;
                 }
                 // Skip prefetching if window is scrolling.
-                if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_MASK) != 0
+                if ((prefetchFlags & FLAG_PREFETCH_MASK) != 0
                         && isWindowScrolling(accessibilityWindowId)) {
-                    prefetchFlags &= ~AccessibilityNodeInfo.FLAG_PREFETCH_MASK;
+                    prefetchFlags &= ~FLAG_PREFETCH_MASK;
+                }
+
+                final int descendantPrefetchFlags = prefetchFlags & FLAG_PREFETCH_DESCENDANTS_MASK;
+                if ((descendantPrefetchFlags & (descendantPrefetchFlags - 1)) != 0) {
+                    throw new IllegalArgumentException("There can be no more than one descendant"
+                            + " prefetching strategy");
                 }
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 if (shouldTraceClient()) {
@@ -599,21 +603,41 @@ public final class AccessibilityInteractionClient
                     Binder.restoreCallingIdentity(identityToken);
                 }
                 if (packageNames != null) {
-                    AccessibilityNodeInfo info =
-                            getFindAccessibilityNodeInfoResultAndClear(interactionId);
-                    if (shouldTraceCallback()) {
-                        logTraceCallback(connection, "findAccessibilityNodeInfoByAccessibilityId",
-                                "InteractionId:" + interactionId + ";connectionId="
-                                + connectionId + ";Result: " + info);
+                    if ((prefetchFlags
+                            & AccessibilityNodeInfo.FLAG_PREFETCH_UNINTERRUPTIBLE) != 0) {
+                        List<AccessibilityNodeInfo> infos =
+                                getFindAccessibilityNodeInfosResultAndClear(
+                                interactionId);
+                        if (shouldTraceCallback()) {
+                            logTraceCallback(connection,
+                                    "findAccessibilityNodeInfoByAccessibilityId",
+                                    "InteractionId:" + interactionId + ";connectionId="
+                                            + connectionId + ";Result: " + infos);
+                        }
+                        finalizeAndCacheAccessibilityNodeInfos(infos, connectionId,
+                                bypassCache, packageNames);
+                        if (infos != null && !infos.isEmpty()) {
+                            return infos.get(0);
+                        }
+                    } else {
+                        AccessibilityNodeInfo info =
+                                getFindAccessibilityNodeInfoResultAndClear(interactionId);
+                        if (shouldTraceCallback()) {
+                            logTraceCallback(connection,
+                                    "findAccessibilityNodeInfoByAccessibilityId",
+                                    "InteractionId:" + interactionId + ";connectionId="
+                                            + connectionId + ";Result: " + info);
+                        }
+                        if ((prefetchFlags & FLAG_PREFETCH_MASK) != 0
+                                && info != null) {
+                            setInteractionWaitingForPrefetchResult(interactionId, connectionId,
+                                    packageNames);
+                        }
+                        finalizeAndCacheAccessibilityNodeInfo(info, connectionId,
+                                bypassCache, packageNames);
+                        return info;
                     }
-                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_MASK) != 0
-                            && info != null) {
-                        setInteractionWaitingForPrefetchResult(interactionId, connectionId,
-                                packageNames);
-                    }
-                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId,
-                            bypassCache, packageNames);
-                    return info;
+
                 }
             } else {
                 if (DEBUG) {
@@ -1142,7 +1166,7 @@ public final class AccessibilityInteractionClient
                         + connectionIdWaitingForPrefetchResultCopy + ";Result: " + infos,
                         Binder.getCallingUid(),
                         Arrays.asList(Thread.currentThread().getStackTrace()),
-                        new HashSet<String>(Arrays.asList("getStackTrace")),
+                        new HashSet<>(Collections.singletonList("getStackTrace")),
                         FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION_CALLBACK);
             }
         } else if (DEBUG) {
@@ -1324,7 +1348,7 @@ public final class AccessibilityInteractionClient
         }
         // Check for duplicates.
         HashSet<AccessibilityNodeInfo> seen = new HashSet<>();
-        Queue<AccessibilityNodeInfo> fringe = new LinkedList<>();
+        Queue<AccessibilityNodeInfo> fringe = new ArrayDeque<>();
         fringe.add(root);
         while (!fringe.isEmpty()) {
             AccessibilityNodeInfo current = fringe.poll();

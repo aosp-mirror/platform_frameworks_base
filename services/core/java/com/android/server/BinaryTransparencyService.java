@@ -18,14 +18,22 @@ package com.android.server;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.app.job.JobInfo;
+import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
+import android.app.job.JobService;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemProperties;
@@ -36,15 +44,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.util.FrameworkStatsLog;
 
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +58,7 @@ import java.util.stream.Collectors;
  */
 public class BinaryTransparencyService extends SystemService {
     private static final String TAG = "TransparencyService";
+    private static final String EXTRA_SERVICE = "service";
 
     @VisibleForTesting
     static final String VBMETA_DIGEST_UNINITIALIZED = "vbmeta-digest-uninitialized";
@@ -260,7 +267,6 @@ public class BinaryTransparencyService extends SystemService {
                                 pw.println("");
                             }
                         } catch (PackageManager.NameNotFoundException e) {
-                            pw.println(packageName);
                             pw.println(packageName
                                     + ";ERROR:Unable to find PackageInfo for this module.");
                             if (verbose) {
@@ -369,10 +375,81 @@ public class BinaryTransparencyService extends SystemService {
 
         // we are only interested in doing things at PHASE_BOOT_COMPLETED
         if (phase == PHASE_BOOT_COMPLETED) {
-            // due to potentially long computation that holds up boot time, apex sha computations
-            // are deferred to first call
             Slog.i(TAG, "Boot completed. Getting VBMeta Digest.");
             getVBMetaDigestInformation();
+
+            // due to potentially long computation that holds up boot time, computations for
+            // SHA256 digests of APEX and Module packages are scheduled here,
+            // but only executed when device is idle.
+            Slog.i(TAG, "Scheduling APEX and Module measurements to be updated.");
+            UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
+                    BinaryTransparencyService.this);
+        }
+    }
+
+    /**
+     * JobService to update binary measurements and update internal cache.
+     */
+    public static class UpdateMeasurementsJobService extends JobService {
+        private static final int COMPUTE_APEX_MODULE_SHA256_JOB_ID =
+                BinaryTransparencyService.UpdateMeasurementsJobService.class.hashCode();
+
+        @Override
+        public boolean onStartJob(JobParameters params) {
+            Slog.d(TAG, "Job to update binary measurements started.");
+            if (params.getJobId() != COMPUTE_APEX_MODULE_SHA256_JOB_ID) {
+                return false;
+            }
+
+            // we'll still update the measurements via threads to be mindful of low-end devices
+            // where this operation might take longer than expected, and so that we don't block
+            // system_server's main thread.
+            Executors.defaultThreadFactory().newThread(() -> {
+                // since we can't call updateBinaryMeasurements() directly, calling
+                // getApexInfo() achieves the same effect, and we simply discard the return
+                // value
+
+                IBinder b = ServiceManager.getService(Context.BINARY_TRANSPARENCY_SERVICE);
+                IBinaryTransparencyService iBtsService =
+                        IBinaryTransparencyService.Stub.asInterface(b);
+                try {
+                    iBtsService.getApexInfo();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Updating binary measurements was interrupted.", e);
+                    return;
+                }
+                jobFinished(params, false);
+            }).start();
+
+            return true;
+        }
+
+        @Override
+        public boolean onStopJob(JobParameters params) {
+            return false;
+        }
+
+        @SuppressLint("DefaultLocale")
+        static void scheduleBinaryMeasurements(Context context, BinaryTransparencyService service) {
+            Slog.i(TAG, "Scheduling APEX & Module SHA256 digest computation job");
+            final JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+            if (jobScheduler == null) {
+                Slog.e(TAG, "Failed to obtain an instance of JobScheduler.");
+                return;
+            }
+
+            final JobInfo jobInfo = new JobInfo.Builder(COMPUTE_APEX_MODULE_SHA256_JOB_ID,
+                    new ComponentName(context, UpdateMeasurementsJobService.class))
+                    .setRequiresDeviceIdle(true)
+                    .setRequiresCharging(true)
+                    .build();
+            if (jobScheduler.schedule(jobInfo) != JobScheduler.RESULT_SUCCESS) {
+                Slog.e(TAG, "Failed to schedule job to update binary measurements.");
+                return;
+            }
+            Slog.d(TAG, String.format(
+                    "Job %d to update binary measurements scheduled successfully.",
+                    COMPUTE_APEX_MODULE_SHA256_JOB_ID));
         }
     }
 
@@ -384,7 +461,7 @@ public class BinaryTransparencyService extends SystemService {
 
     @NonNull
     private List<PackageInfo> getInstalledApexs() {
-        List<PackageInfo> results = new ArrayList<PackageInfo>();
+        List<PackageInfo> results = new ArrayList<>();
         PackageManager pm = mContext.getPackageManager();
         if (pm == null) {
             Slog.e(TAG, "Error obtaining an instance of PackageManager.");
@@ -435,7 +512,7 @@ public class BinaryTransparencyService extends SystemService {
                     entry.setValue(packageInfo.lastUpdateTime);
 
                     // compute the digest for the updated package
-                    String sha256digest = computeSha256DigestOfFile(
+                    String sha256digest = PackageUtils.computeSha256DigestForLargeFile(
                             packageInfo.applicationInfo.sourceDir);
                     if (sha256digest == null) {
                         Slog.e(TAG, "Failed to compute SHA256sum for file at "
@@ -472,7 +549,7 @@ public class BinaryTransparencyService extends SystemService {
             ApplicationInfo appInfo = packageInfo.applicationInfo;
 
             // compute SHA256 for these APEXs
-            String sha256digest = computeSha256DigestOfFile(appInfo.sourceDir);
+            String sha256digest = PackageUtils.computeSha256DigestForLargeFile(appInfo.sourceDir);
             if (sha256digest == null) {
                 Slog.e(TAG, String.format("Failed to compute SHA256 digest for %s",
                         packageInfo.packageName));
@@ -507,7 +584,8 @@ public class BinaryTransparencyService extends SystemService {
                 ApplicationInfo appInfo = packageInfo.applicationInfo;
 
                 // compute SHA256 digest for these modules
-                String sha256digest = computeSha256DigestOfFile(appInfo.sourceDir);
+                String sha256digest = PackageUtils.computeSha256DigestForLargeFile(
+                        appInfo.sourceDir);
                 if (sha256digest == null) {
                     Slog.e(TAG, String.format("Failed to compute SHA256 digest for %s",
                             packageName));
@@ -526,16 +604,4 @@ public class BinaryTransparencyService extends SystemService {
         }
     }
 
-    @Nullable
-    private String computeSha256DigestOfFile(@NonNull String pathToFile) {
-        File apexFile = new File(pathToFile);
-
-        try {
-            byte[] apexFileBytes = Files.readAllBytes(apexFile.toPath());
-            return PackageUtils.computeSha256Digest(apexFileBytes);
-        } catch (IOException e) {
-            Slog.e(TAG, String.format("I/O error occurs when reading from %s", pathToFile));
-            return null;
-        }
-    }
 }

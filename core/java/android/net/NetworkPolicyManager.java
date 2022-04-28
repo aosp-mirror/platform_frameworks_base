@@ -167,12 +167,17 @@ public class NetworkPolicyManager {
     public static final String FIREWALL_CHAIN_NAME_POWERSAVE = "powersave";
     /** @hide */
     public static final String FIREWALL_CHAIN_NAME_RESTRICTED = "restricted";
+    /** @hide */
+    public static final String FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY = "low_power_standby";
 
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 
     /** @hide */
     public static final int FOREGROUND_THRESHOLD_STATE =
             ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+
+    /** @hide */
+    public static final int TOP_THRESHOLD_STATE = ActivityManager.PROCESS_STATE_BOUND_TOP;
 
     /**
      * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it
@@ -244,6 +249,20 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static final int ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS = 1 << 4;
+    /**
+     * Flag to indicate that app is exempt from certain network restrictions because of it being
+     * in the bound top or top procstate.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_TOP = 1 << 5;
+    /**
+     * Flag to indicate that app is exempt from low power standby restrictions because of it being
+     * allowlisted.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST = 1 << 6;
     /**
      * Flag to indicate that app is exempt from certain metered network restrictions because user
      * explicitly exempted it.
@@ -561,6 +580,24 @@ public class NetworkPolicyManager {
     }
 
     /**
+     * Notifies that the specified {@link NetworkStatsProvider} has reached its warning threshold
+     * which was set through {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void notifyStatsProviderWarningReached() {
+        try {
+            mService.notifyStatsProviderWarningOrLimitReached();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Notifies that the specified {@link NetworkStatsProvider} has reached its quota
      * which was set through {@link NetworkStatsProvider#onSetLimit(String, long)} or
      * {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
@@ -571,7 +608,7 @@ public class NetworkPolicyManager {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void notifyStatsProviderWarningOrLimitReached() {
+    public void notifyStatsProviderLimitReached() {
         try {
             mService.notifyStatsProviderWarningOrLimitReached();
         } catch (RemoteException e) {
@@ -750,6 +787,14 @@ public class NetworkPolicyManager {
                 || (capability & ActivityManager.PROCESS_CAPABILITY_NETWORK) != 0;
     }
 
+    /** @hide */
+    public static boolean isProcStateAllowedWhileInLowPowerStandby(@Nullable UidState uidState) {
+        if (uidState == null) {
+            return false;
+        }
+        return uidState.procState <= TOP_THRESHOLD_STATE;
+    }
+
     /**
      * Returns true if {@param procState} is considered foreground and as such will be allowed
      * to access network when the device is in data saver mode. Otherwise, false.
@@ -772,11 +817,13 @@ public class NetworkPolicyManager {
     public static final class UidState {
         public int uid;
         public int procState;
+        public long procStateSeq;
         public int capability;
 
-        public UidState(int uid, int procState, int capability) {
+        public UidState(int uid, int procState, long procStateSeq, int capability) {
             this.uid = uid;
             this.procState = procState;
+            this.procStateSeq = procStateSeq;
             this.capability = capability;
         }
 
@@ -785,6 +832,8 @@ public class NetworkPolicyManager {
             final StringBuilder sb = new StringBuilder();
             sb.append("{procState=");
             sb.append(procStateToString(procState));
+            sb.append(",seq=");
+            sb.append(procStateSeq);
             sb.append(",cap=");
             ActivityManager.printCapabilitiesSummary(sb, capability);
             sb.append("}");

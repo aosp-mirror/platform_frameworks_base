@@ -22,6 +22,7 @@ import static android.view.Display.HdrCapabilities.HdrType;
 import android.Manifest;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -38,6 +39,8 @@ import android.graphics.Point;
 import android.media.projection.MediaProjection;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.Looper;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -48,6 +51,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -103,6 +107,25 @@ public final class DisplayManager {
      */
     public static final String DISPLAY_CATEGORY_PRESENTATION =
             "android.hardware.display.category.PRESENTATION";
+
+    /** @hide **/
+    @IntDef(prefix = "VIRTUAL_DISPLAY_FLAG_", flag = true, value = {
+            VIRTUAL_DISPLAY_FLAG_PUBLIC,
+            VIRTUAL_DISPLAY_FLAG_PRESENTATION,
+            VIRTUAL_DISPLAY_FLAG_SECURE,
+            VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY,
+            VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+            VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD,
+            VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH,
+            VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT,
+            VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL,
+            VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS,
+            VIRTUAL_DISPLAY_FLAG_TRUSTED,
+            VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP,
+            VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VirtualDisplayFlag {}
 
     /**
      * Virtual display flag: Create a public display.
@@ -333,7 +356,6 @@ public final class DisplayManager {
      * @see #VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1 << 10;
 
@@ -820,7 +842,11 @@ public final class DisplayManager {
      * VirtualDisplay.Callback, Handler)
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
-            int width, int height, int densityDpi, @Nullable Surface surface, int flags) {
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @IntRange(from = 1) int densityDpi,
+            @Nullable Surface surface,
+            @VirtualDisplayFlag int flags) {
         return createVirtualDisplay(name, width, height, densityDpi, surface, flags, null, null);
     }
 
@@ -868,8 +894,13 @@ public final class DisplayManager {
      * a virtual display with the specified flags.
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
-            int width, int height, int densityDpi, @Nullable Surface surface, int flags,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @IntRange(from = 1) int densityDpi,
+            @Nullable Surface surface,
+            @VirtualDisplayFlag int flags,
+            @Nullable VirtualDisplay.Callback callback,
+            @Nullable Handler handler) {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
                 height, densityDpi);
         builder.setFlags(flags);
@@ -882,9 +913,16 @@ public final class DisplayManager {
 
     // TODO : Remove this hidden API after remove all callers. (Refer to MultiDisplayService)
     /** @hide */
-    public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
-            @NonNull String name, int width, int height, int densityDpi, @Nullable Surface surface,
-            int flags, @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
+    public VirtualDisplay createVirtualDisplay(
+            @Nullable MediaProjection projection,
+            @NonNull String name,
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @IntRange(from = 1) int densityDpi,
+            @Nullable Surface surface,
+            @VirtualDisplayFlag int flags,
+            @Nullable VirtualDisplay.Callback callback,
+            @Nullable Handler handler,
             @Nullable String uniqueId) {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
                 height, densityDpi);
@@ -904,16 +942,24 @@ public final class DisplayManager {
             @NonNull VirtualDisplayConfig virtualDisplayConfig,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
             @Nullable Context windowContext) {
+        Executor executor = null;
+        // If callback is null, the executor will not be used. Avoid creating the handler and the
+        // handler executor.
+        if (callback != null) {
+            executor = new HandlerExecutor(
+                    Handler.createAsync(handler != null ? handler.getLooper() : Looper.myLooper()));
+        }
         return mGlobal.createVirtualDisplay(mContext, projection, null /* virtualDevice */,
-                virtualDisplayConfig, callback, handler, windowContext);
+                virtualDisplayConfig, callback, executor, windowContext);
     }
 
     /** @hide */
     public VirtualDisplay createVirtualDisplay(@Nullable IVirtualDevice virtualDevice,
             @NonNull VirtualDisplayConfig virtualDisplayConfig,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+            @Nullable VirtualDisplay.Callback callback,
+            @Nullable Executor executor) {
         return mGlobal.createVirtualDisplay(mContext, null /* projection */, virtualDevice,
-                virtualDisplayConfig, callback, handler, null);
+                virtualDisplayConfig, callback, executor, null);
     }
 
     /**
@@ -1211,17 +1257,6 @@ public final class DisplayManager {
     @RequiresPermission(Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE)
     public void setRefreshRateSwitchingType(@SwitchingType int newValue) {
         mGlobal.setRefreshRateSwitchingType(newValue);
-    }
-
-    /**
-     * Returns whether the specified display supports DISPLAY_DECORATION.
-     *
-     * @param displayId The display to query support.
-     *
-     * @hide
-     */
-    public boolean getDisplayDecorationSupport(int displayId) {
-        return mGlobal.getDisplayDecorationSupport(displayId);
     }
 
     /**

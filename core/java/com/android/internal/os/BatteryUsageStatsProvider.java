@@ -22,6 +22,7 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
 import android.util.Log;
@@ -73,7 +74,7 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators.add(new CpuPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new MemoryPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));
-                if (!BatteryStatsHelper.checkWifiOnly(mContext)) {
+                if (!BatteryStats.checkWifiOnly(mContext)) {
                     mPowerCalculators.add(new MobileRadioPowerCalculator(mPowerProfile));
                 }
                 mPowerCalculators.add(new WifiPowerCalculator(mPowerProfile));
@@ -162,6 +163,8 @@ public class BatteryUsageStatsProvider {
         final boolean includeProcessStateData = ((query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0)
                 && mStats.isProcessStateDataAvailable();
+        final boolean includeVirtualUids =  ((query.getFlags()
+                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS) != 0);
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
                 mStats.getCustomEnergyConsumerNames(), includePowerModels,
@@ -174,6 +177,10 @@ public class BatteryUsageStatsProvider {
         SparseArray<? extends BatteryStats.Uid> uidStats = mStats.getUidStats();
         for (int i = uidStats.size() - 1; i >= 0; i--) {
             final BatteryStats.Uid uid = uidStats.valueAt(i);
+            if (!includeVirtualUids && uid.getUid() == Process.SDK_SANDBOX_VIRTUAL_UID) {
+                continue;
+            }
+
             batteryUsageStatsBuilder.getOrCreateUidBatteryConsumerBuilder(uid)
                     .setTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND,
                             getProcessBackgroundTimeMs(uid, realtimeUs))

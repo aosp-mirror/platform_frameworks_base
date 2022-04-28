@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.app.ActivityOptions.KEY_SPLASH_SCREEN_THEME;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
@@ -319,8 +320,12 @@ public class LauncherAppsService extends SystemService {
 
         private PackageInstallerService getPackageInstallerService() {
             if (mPackageInstallerService == null) {
-                mPackageInstallerService = ((PackageInstallerService) ((PackageManagerService)
-                        ServiceManager.getService("package")).getPackageInstaller());
+                try {
+                    mPackageInstallerService = ((PackageInstallerService) ((IPackageManager)
+                            ServiceManager.getService("package")).getPackageInstaller());
+                } catch (RemoteException e) {
+                    Slog.wtf(TAG, "Error gettig IPackageInstaller", e);
+                }
             }
             return mPackageInstallerService;
         }
@@ -872,7 +877,7 @@ public class LauncherAppsService extends SystemService {
         PendingIntent injectCreatePendingIntent(int requestCode, @NonNull Intent[] intents,
                 int flags, Bundle options, String ownerPackage, int ownerUserId) {
             return mActivityManagerInternal.getPendingIntentActivityAsApp(requestCode, intents,
-                    flags, options, ownerPackage, ownerUserId);
+                    flags, null /* options */, ownerPackage, ownerUserId);
         }
 
         @Override
@@ -1108,13 +1113,11 @@ public class LauncherAppsService extends SystemService {
             // Note the target activity doesn't have to be exported.
 
             // Flag for bubble
-            if (startActivityOptions != null) {
-                ActivityOptions options = ActivityOptions.fromBundle(startActivityOptions);
-                if (options.isApplyActivityFlagsForBubbles()) {
-                    // Flag for bubble to make behaviour match documentLaunchMode=always.
-                    intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
-                    intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
-                }
+            ActivityOptions options = ActivityOptions.fromBundle(startActivityOptions);
+            if (options != null && options.isApplyActivityFlagsForBubbles()) {
+                // Flag for bubble to make behaviour match documentLaunchMode=always.
+                intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
+                intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
             }
 
             intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1218,8 +1221,9 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public PendingIntent getActivityLaunchIntent(ComponentName component, Bundle opts,
+        public PendingIntent getActivityLaunchIntent(String callingPackage, ComponentName component,
                 UserHandle user) {
+            ensureShortcutPermission(callingPackage);
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
                 throw new ActivityNotFoundException("Activity could not be found");
             }
@@ -1237,7 +1241,7 @@ public class LauncherAppsService extends SystemService {
                 // calling identity to mirror the startActivityAsUser() call which does not validate
                 // the calling user
                 return PendingIntent.getActivityAsUser(mContext, 0 /* requestCode */, launchIntent,
-                        FLAG_IMMUTABLE, opts, user);
+                        FLAG_MUTABLE, null /* opts */, user);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

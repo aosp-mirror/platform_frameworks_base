@@ -18,15 +18,16 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.ArraySet;
 import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.File;
-import java.util.Set;
 
 
 
@@ -74,8 +75,8 @@ public interface PackageAbiHelper {
      *         belonging to the shared user.
      */
     @Nullable
-    String getAdjustedAbiForSharedUser(
-            Set<PackageSetting> packagesForUser, AndroidPackage scannedPackage);
+    String getAdjustedAbiForSharedUser(ArraySet<? extends PackageStateInternal> packagesForUser,
+            AndroidPackage scannedPackage);
 
     /**
      * The native library paths and related properties that should be set on a

@@ -61,7 +61,6 @@ import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.connectivity.WifiIcons;
 import com.android.systemui.statusbar.connectivity.WifiIndicators;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
@@ -411,10 +410,6 @@ public class InternetTile extends QSTileImpl<SignalState> {
         }
         boolean wifiConnected = cb.mEnabled && (cb.mWifiSignalIconId > 0) && (cb.mSsid != null);
         boolean wifiNotConnected = (cb.mWifiSignalIconId > 0) && (cb.mSsid == null);
-        boolean enabledChanging = state.value != cb.mEnabled;
-        if (enabledChanging) {
-            fireToggleStateChanged(cb.mEnabled);
-        }
         if (state.slash == null) {
             state.slash = new SlashState();
             state.slash.rotation = 6;
@@ -596,7 +591,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
      * Dumps the state of this tile along with its name.
      */
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(this.getClass().getSimpleName() + ":");
         pw.print("    "); pw.println(getState().toString());
         pw.print("    "); pw.println("mLastTileState=" + mLastTileState);

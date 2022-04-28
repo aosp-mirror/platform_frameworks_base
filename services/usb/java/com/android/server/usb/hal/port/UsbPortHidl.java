@@ -33,8 +33,8 @@ import static android.hardware.usb.UsbPortStatus.MODE_UFP;
 import static android.hardware.usb.UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN;
 import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SINK;
 import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SOURCE;
-import static android.hardware.usb.UsbPortStatus.USB_DATA_STATUS_DISABLED_FORCE;
-import static android.hardware.usb.UsbPortStatus.USB_DATA_STATUS_UNKNOWN;
+import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
+import static android.hardware.usb.UsbPortStatus.DATA_STATUS_UNKNOWN;
 
 
 import static com.android.server.usb.UsbPortManager.logAndPrint;
@@ -85,7 +85,7 @@ public final class UsbPortHidl implements UsbPortHal {
     private HALCallback mHALCallback;
     private boolean mSystemReady;
     // Workaround since HIDL HAL versions report UsbDataEnabled status in UsbPortStatus;
-    private static int sUsbDataStatus = USB_DATA_STATUS_UNKNOWN;
+    private static int sUsbDataStatus = DATA_STATUS_UNKNOWN;
 
     public @UsbHalVersion int getUsbHalVersion() throws RemoteException {
         int version;
@@ -318,7 +318,7 @@ public final class UsbPortHidl implements UsbPortHal {
     }
 
     @Override
-    public boolean resetUsbPort(String portName, long transactionId,
+    public void resetUsbPort(String portName, long transactionId,
             IUsbOperationInternal callback) {
         try {
             callback.onOperationComplete(USB_OPERATION_ERROR_NOT_SUPPORTED);
@@ -327,7 +327,6 @@ public final class UsbPortHidl implements UsbPortHal {
                     + transactionId
                     + " portId:" + portName, e);
         }
-        return false;
     }
 
     @Override
@@ -375,7 +374,7 @@ public final class UsbPortHidl implements UsbPortHal {
             }
         }
         if (success) {
-            sUsbDataStatus = enable ? USB_DATA_STATUS_UNKNOWN : USB_DATA_STATUS_DISABLED_FORCE;
+            sUsbDataStatus = enable ? DATA_STATUS_UNKNOWN : DATA_STATUS_DISABLED_FORCE;
         }
         try {
             callback.onOperationComplete(success
@@ -421,7 +420,7 @@ public final class UsbPortHidl implements UsbPortHal {
                         current.canChangePowerRole,
                         current.currentDataRole, current.canChangeDataRole,
                         false, CONTAMINANT_PROTECTION_NONE,
-                        false, CONTAMINANT_DETECTION_NOT_SUPPORTED, new int[sUsbDataStatus],
+                        false, CONTAMINANT_DETECTION_NOT_SUPPORTED, sUsbDataStatus,
                         false, POWER_BRICK_STATUS_UNKNOWN);
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_0: "
@@ -455,7 +454,7 @@ public final class UsbPortHidl implements UsbPortHal {
                         current.status.canChangePowerRole,
                         current.status.currentDataRole, current.status.canChangeDataRole,
                         false, CONTAMINANT_PROTECTION_NONE,
-                        false, CONTAMINANT_DETECTION_NOT_SUPPORTED, new int[sUsbDataStatus],
+                        false, CONTAMINANT_DETECTION_NOT_SUPPORTED, sUsbDataStatus,
                         false, POWER_BRICK_STATUS_UNKNOWN);
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_1: "
@@ -493,7 +492,7 @@ public final class UsbPortHidl implements UsbPortHal {
                         current.contaminantProtectionStatus,
                         current.supportsEnableContaminantPresenceDetection,
                         current.contaminantDetectionStatus,
-                        new int[sUsbDataStatus],
+                        sUsbDataStatus,
                         false, POWER_BRICK_STATUS_UNKNOWN);
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_2: "

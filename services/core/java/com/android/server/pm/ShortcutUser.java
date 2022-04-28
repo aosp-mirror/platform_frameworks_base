@@ -33,6 +33,7 @@ import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
@@ -50,7 +51,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -137,6 +140,11 @@ class ShortcutUser {
 
     private String mLastAppScanOsFingerprint;
     private String mRestoreFromOsFingerprint;
+
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private final ArrayList<AndroidFuture<AppSearchSession>> mInFlightSessions = new ArrayList<>();
 
     public ShortcutUser(ShortcutService service, int userId) {
         mService = service;
@@ -718,6 +726,10 @@ class ShortcutUser {
     AndroidFuture<AppSearchSession> getAppSearch(
             @NonNull final AppSearchManager.SearchContext searchContext) {
         final AndroidFuture<AppSearchSession> future = new AndroidFuture<>();
+        synchronized (mLock) {
+            mInFlightSessions.removeIf(CompletableFuture::isDone);
+            mInFlightSessions.add(future);
+        }
         if (mAppSearchManager == null) {
             future.completeExceptionally(new RuntimeException("app search manager is null"));
             return future;
@@ -742,5 +754,14 @@ class ShortcutUser {
             Binder.restoreCallingIdentity(callingIdentity);
         }
         return future;
+    }
+
+    void cancelAllInFlightTasks() {
+        synchronized (mLock) {
+            for (AndroidFuture<AppSearchSession> session : mInFlightSessions) {
+                session.cancel(true);
+            }
+            mInFlightSessions.clear();
+        }
     }
 }

@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.service.quickaccesswallet.GetWalletCardsError;
 import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -53,7 +54,6 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
-import com.android.systemui.wallet.ui.WalletActivity;
 
 import java.util.List;
 
@@ -128,25 +128,9 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 view == null ? null : ActivityLaunchAnimator.Controller.fromView(view,
                         InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE);
 
-        mUiHandler.post(() -> {
-            if (mSelectedCard != null) {
-                Intent intent = new Intent(mContext, WalletActivity.class)
-                        .setAction(Intent.ACTION_VIEW)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                mActivityStarter.startActivity(intent, true /* dismissShade */,
-                        animationController, true /* showOverLockscreenWhenLocked */);
-            } else {
-                Intent intent = mController.getWalletClient().createWalletIntent();
-                if (intent == null) {
-                    Log.w(TAG, "Could not get intent of the wallet app.");
-                    return;
-                }
-                mActivityStarter.postStartActivityDismissingKeyguard(
-                        intent,
-                        /* delay= */ 0,
-                        animationController);
-            }
-        });
+        mUiHandler.post(
+                () -> mController.startQuickAccessUiIntent(
+                        mActivityStarter, animationController, mSelectedCard != null));
     }
 
     @Override
@@ -199,7 +183,8 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     public boolean isAvailable() {
         return mPackageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
                 && !mPackageManager.hasSystemFeature(FEATURE_CHROME_OS)
-                && mSecureSettings.getString(NFC_PAYMENT_DEFAULT_COMPONENT) != null;
+                && mSecureSettings.getStringForUser(NFC_PAYMENT_DEFAULT_COMPONENT,
+                    UserHandle.USER_CURRENT) != null;
     }
 
     @Nullable

@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import android.graphics.drawable.Drawable
 import android.media.MediaRouter2Manager
 import android.media.session.MediaController
 import androidx.annotation.AnyThread
@@ -27,7 +28,8 @@ import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import java.io.FileDescriptor
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -41,6 +43,7 @@ class MediaDeviceManager @Inject constructor(
     private val controllerFactory: MediaControllerFactory,
     private val localMediaManagerFactory: LocalMediaManagerFactory,
     private val mr2manager: MediaRouter2Manager,
+    private val muteAwaitConnectionManagerFactory: MediaMuteAwaitConnectionManagerFactory,
     @Main private val fgExecutor: Executor,
     @Background private val bgExecutor: Executor,
     dumpManager: DumpManager
@@ -68,7 +71,8 @@ class MediaDeviceManager @Inject constructor(
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
-        receivedSmartspaceCardLatency: Int
+        receivedSmartspaceCardLatency: Int,
+        isSsReactivated: Boolean
     ) {
         if (oldKey != null && oldKey != key) {
             val oldEntry = entries.remove(oldKey)
@@ -77,11 +81,25 @@ class MediaDeviceManager @Inject constructor(
         var entry = entries[key]
         if (entry == null || entry?.token != data.token) {
             entry?.stop()
+            if (data.device != null) {
+                // If we were already provided device info (e.g. from RCN), keep that and don't
+                // listen for updates, but process once to push updates to listeners
+                processDevice(key, oldKey, data.device)
+                return
+            }
             val controller = data.token?.let {
                 controllerFactory.create(it)
             }
-            entry = Entry(key, oldKey, controller,
-                    localMediaManagerFactory.create(data.packageName))
+            val localMediaManager = localMediaManagerFactory.create(data.packageName)
+            val muteAwaitConnectionManager =
+                    muteAwaitConnectionManagerFactory.create(localMediaManager)
+            entry = Entry(
+                key,
+                oldKey,
+                controller,
+                localMediaManager,
+                muteAwaitConnectionManager
+            )
             entries[key] = entry
             entry.start()
         }
@@ -97,13 +115,13 @@ class MediaDeviceManager @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+    override fun dump(pw: PrintWriter, args: Array<String>) {
         with(pw) {
             println("MediaDeviceManager state:")
             entries.forEach {
                 key, entry ->
                 println("  key=$key")
-                entry.dump(fd, pw, args)
+                entry.dump(pw, args)
             }
         }
     }
@@ -126,7 +144,8 @@ class MediaDeviceManager @Inject constructor(
         val key: String,
         val oldKey: String?,
         val controller: MediaController?,
-        val localMediaManager: LocalMediaManager
+        val localMediaManager: LocalMediaManager,
+        val muteAwaitConnectionManager: MediaMuteAwaitConnectionManager?
     ) : LocalMediaManager.DeviceCallback, MediaController.Callback() {
 
         val token
@@ -142,11 +161,15 @@ class MediaDeviceManager @Inject constructor(
                     }
                 }
             }
+        // A device that is not yet connected but is expected to connect imminently. Because it's
+        // expected to connect imminently, it should be displayed as the current device.
+        private var aboutToConnectDeviceOverride: AboutToConnectDevice? = null
 
         @AnyThread
         fun start() = bgExecutor.execute {
             localMediaManager.registerCallback(this)
             localMediaManager.startScan()
+            muteAwaitConnectionManager?.startListening()
             playbackType = controller?.playbackInfo?.playbackType ?: PLAYBACK_TYPE_UNKNOWN
             controller?.registerCallback(this)
             updateCurrent()
@@ -159,9 +182,10 @@ class MediaDeviceManager @Inject constructor(
             controller?.unregisterCallback(this)
             localMediaManager.stopScan()
             localMediaManager.unregisterCallback(this)
+            muteAwaitConnectionManager?.stopListening()
         }
 
-        fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+        fun dump(pw: PrintWriter, args: Array<String>) {
             val routingSession = controller?.let {
                 mr2manager.getRoutingSessionForMediaController(it)
             }
@@ -197,9 +221,34 @@ class MediaDeviceManager @Inject constructor(
             }
         }
 
+        override fun onAboutToConnectDeviceAdded(
+            deviceAddress: String,
+            deviceName: String,
+            deviceIcon: Drawable?
+        ) {
+            aboutToConnectDeviceOverride = AboutToConnectDevice(
+                fullMediaDevice = localMediaManager.getMediaDeviceById(deviceAddress),
+                backupMediaDeviceData = MediaDeviceData(enabled = true, deviceIcon, deviceName)
+            )
+            updateCurrent()
+        }
+
+        override fun onAboutToConnectDeviceRemoved() {
+            aboutToConnectDeviceOverride = null
+            updateCurrent()
+        }
+
         @WorkerThread
         private fun updateCurrent() {
-            val device = localMediaManager.currentConnectedDevice
+            val aboutToConnect = aboutToConnectDeviceOverride
+            if (aboutToConnect != null &&
+                aboutToConnect.fullMediaDevice == null &&
+                aboutToConnect.backupMediaDeviceData != null) {
+                    // Only use [backupMediaDeviceData] when we don't have [fullMediaDevice].
+                    current = aboutToConnect.backupMediaDeviceData
+                    return
+            }
+            val device = aboutToConnect?.fullMediaDevice ?: localMediaManager.currentConnectedDevice
             val route = controller?.let { mr2manager.getRoutingSessionForMediaController(it) }
 
             // If we have a controller but get a null route, then don't trust the device
@@ -209,3 +258,17 @@ class MediaDeviceManager @Inject constructor(
         }
     }
 }
+
+/**
+ * A class storing information for the about-to-connect device. See
+ * [LocalMediaManager.DeviceCallback.onAboutToConnectDeviceAdded] for more information.
+ *
+ * @property fullMediaDevice a full-fledged [MediaDevice] object representing the device. If
+ *   non-null, prefer using [fullMediaDevice] over [backupMediaDeviceData].
+ * @property backupMediaDeviceData a backup [MediaDeviceData] object containing the minimum
+ *   information required to display the device. Only use if [fullMediaDevice] is null.
+ */
+private data class AboutToConnectDevice(
+    val fullMediaDevice: MediaDevice? = null,
+    val backupMediaDeviceData: MediaDeviceData? = null
+)

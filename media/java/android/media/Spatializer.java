@@ -108,6 +108,122 @@ public class Spatializer {
         }
     }
 
+    /**
+     * @hide
+     * Returns whether spatialization is available for a given audio device
+     * Reasons for spatialization being unavailable include situations where audio output is
+     * incompatible with sound spatialization, such as the device being a monophonic speaker, or
+     * the spatializer effect not supporting transaural processing when querying for speaker.
+     * @param device the audio device for which spatializer availability is queried
+     * @return {@code true} if the spatializer effect is available and capable
+     *         of processing the audio over the given audio device,
+     *         {@code false} otherwise.
+     * @see #isEnabled()
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public boolean isAvailableForDevice(@NonNull AudioDeviceAttributes device)  {
+        Objects.requireNonNull(device);
+        try {
+            return mAm.getService().isSpatializerAvailableForDevice(device);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     * Returns whether the given device has an associated headtracker
+     * @param device the audio device to query
+     * @return true if the device has a head tracker, false otherwise
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public boolean hasHeadTracker(@NonNull AudioDeviceAttributes device) {
+        Objects.requireNonNull(device);
+        try {
+            return mAm.getService().hasHeadTracker(device);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     * Enables or disables the head tracker of the given device
+     * @param enabled true to enable, false to disable
+     * @param device the device whose head tracker state is changed
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void setHeadTrackerEnabled(boolean enabled, @NonNull AudioDeviceAttributes device) {
+        Objects.requireNonNull(device);
+        try {
+            mAm.getService().setHeadTrackerEnabled(enabled, device);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns whether the head tracker of the device is enabled
+     * @param device the device to query
+     * @return true if the head tracker is enabled, false if disabled or if there isn't one
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public boolean isHeadTrackerEnabled(@NonNull AudioDeviceAttributes device) {
+        Objects.requireNonNull(device);
+        try {
+            return mAm.getService().isHeadTrackerEnabled(device);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether a head tracker is currently available for the audio device used by the
+     * spatializer effect.
+     * @return true if a head tracker is available and the effect is enabled, false otherwise.
+     * @see OnHeadTrackerAvailableListener
+     * @see #addOnHeadTrackerAvailableListener(Executor, OnHeadTrackerAvailableListener)
+     */
+    public boolean isHeadTrackerAvailable() {
+        try {
+            return mAm.getService().isHeadTrackerAvailable();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
+     * Adds a listener to be notified of changes to the availability of a head tracker.
+     * @param executor the {@code Executor} handling the callback
+     * @param listener the listener to receive availability updates
+     * @see #removeOnHeadTrackerAvailableListener(OnHeadTrackerAvailableListener)
+     */
+    public void addOnHeadTrackerAvailableListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OnHeadTrackerAvailableListener listener) {
+        mHeadTrackerListenerMgr.addListener(executor, listener,
+                "addOnHeadTrackerAvailableListener",
+                () -> new SpatializerHeadTrackerAvailableDispatcherStub());
+    }
+
+    /**
+     * Removes a previously registered listener for the availability of a head tracker.
+     * @param listener the listener previously registered with
+     *      {@link #addOnHeadTrackerAvailableListener(Executor, OnHeadTrackerAvailableListener)}
+     */
+    public void removeOnHeadTrackerAvailableListener(
+            @NonNull OnHeadTrackerAvailableListener listener) {
+        mHeadTrackerListenerMgr.removeListener(listener, "removeOnHeadTrackerAvailableListener");
+    }
+
     /** @hide */
     @IntDef(flag = false, value = {
             SPATIALIZER_IMMERSIVE_LEVEL_OTHER,
@@ -324,6 +440,22 @@ public class Spatializer {
                 @HeadTrackingModeSet int mode);
     }
 
+    /**
+     * Interface to be notified of changes to the availability of a head tracker on the audio
+     * device to be used by the spatializer effect.
+     */
+    public interface OnHeadTrackerAvailableListener {
+        /**
+         * Called when the availability of the head tracker changed.
+         * @param spatializer the {@code Spatializer} instance for which the head tracker
+         *                    availability was updated
+         * @param available true if the audio device that would output audio processed by
+         *                  the {@code Spatializer} has a head tracker associated with it, false
+         *                  otherwise.
+         */
+        void onHeadTrackerAvailableChanged(@NonNull Spatializer spatializer,
+                boolean available);
+    }
 
     /**
      * @hide
@@ -750,8 +882,12 @@ public class Spatializer {
 
     /**
      * @hide
-     * Returns the id of the output stream used for the spatializer effect playback
+     * Returns the id of the output stream used for the spatializer effect playback.
+     * This getter or associated listener {@link OnSpatializerOutputChangedListener} can be used for
+     * handling spatializer output-specific configurations (e.g. disabling speaker post-processing
+     * to avoid double-processing of the spatialized path).
      * @return id of the output stream, or 0 if no spatializer playback is active
+     * @see #setOnSpatializerOutputChangedListener(Executor, OnSpatializerOutputChangedListener)
      */
     @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
     @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
@@ -788,6 +924,8 @@ public class Spatializer {
             mOutputDispatcher = new SpatializerOutputDispatcherStub();
             try {
                 mAm.getService().registerSpatializerOutputCallback(mOutputDispatcher);
+                // immediately report the current output
+                mOutputDispatcher.dispatchSpatializerOutputChanged(getOutput());
             } catch (RemoteException e) {
                 mOutputListener = null;
                 mOutputDispatcher = null;
@@ -854,6 +992,36 @@ public class Spatializer {
             mHeadTrackingListenerMgr.callListeners(
                     (listener) -> listener.onDesiredHeadTrackingModeChanged(
                             Spatializer.this, mode));
+        }
+    }
+
+    //-----------------------------------------------------------------------------
+    // head tracker availability callback management and stub
+    /**
+     * manages the OnHeadTrackerAvailableListener listeners and the
+     * SpatializerHeadTrackerAvailableDispatcherStub
+     */
+    private final CallbackUtil.LazyListenerManager<OnHeadTrackerAvailableListener>
+            mHeadTrackerListenerMgr = new CallbackUtil.LazyListenerManager();
+
+    private final class SpatializerHeadTrackerAvailableDispatcherStub
+            extends ISpatializerHeadTrackerAvailableCallback.Stub
+            implements CallbackUtil.DispatcherStub {
+        @Override
+        public void register(boolean register) {
+            try {
+                mAm.getService().registerSpatializerHeadTrackerAvailableCallback(this, register);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        @SuppressLint("GuardedBy") // lock applied inside callListeners method
+        public void dispatchSpatializerHeadTrackerAvailable(boolean available) {
+            mHeadTrackerListenerMgr.callListeners(
+                    (listener) -> listener.onHeadTrackerAvailableChanged(
+                            Spatializer.this, available));
         }
     }
 

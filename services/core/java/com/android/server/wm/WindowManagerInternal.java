@@ -33,6 +33,7 @@ import android.view.IInputFilter;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IWindow;
 import android.view.InputChannel;
+import android.view.InputWindowHandle;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -408,21 +409,6 @@ public abstract class WindowManagerInternal {
     public abstract void getMagnificationRegion(int displayId, @NonNull Region magnificationRegion);
 
     /**
-     * Gets the magnification and translation applied to a window given its token.
-     * Not all windows are magnified and the window manager policy determines which
-     * windows are magnified. The returned result also takes into account the compat
-     * scale if necessary.
-     *
-     * @param windowToken The window's token.
-     *
-     * @return The magnification spec for the window.
-     *
-     * @see #setMagnificationCallbacks(int, MagnificationCallbacks)
-     */
-    public abstract MagnificationSpec getCompatibleMagnificationSpecForWindow(
-            IBinder windowToken);
-
-    /**
      * Sets a callback for observing which windows are touchable for the purposes
      * of accessibility on specified display.
      *
@@ -725,17 +711,18 @@ public abstract class WindowManagerInternal {
     public abstract void hideIme(IBinder imeTargetWindowToken, int displayId);
 
     /**
-     * Tell window manager about a package that should not be running with high refresh rate
-     * setting until removeNonHighRefreshRatePackage is called for the same package.
+     * Tell window manager about a package that should be running with a restricted range of
+     * refresh rate setting until removeRefreshRateRangeForPackage is called for the same package.
      *
      * This must not be called again for the same package.
      */
-    public abstract void addNonHighRefreshRatePackage(@NonNull String packageName);
+    public abstract void addRefreshRateRangeForPackage(@NonNull String packageName,
+            float minRefreshRate, float maxRefreshRate);
 
     /**
      * Tell window manager to stop constraining refresh rate for the given package.
      */
-    public abstract void removeNonHighRefreshRatePackage(@NonNull String packageName);
+    public abstract void removeRefreshRateRangeForPackage(@NonNull String packageName);
 
     /**
      * Checks if the device supports touch or faketouch.
@@ -852,4 +839,26 @@ public abstract class WindowManagerInternal {
      * support handwriting (Scribe) by the IME.
      */
     public abstract SurfaceControl getHandwritingSurfaceForDisplay(int displayId);
+
+    /**
+     * Replaces the touchable region of the provided input surface with the crop of the window with
+     * the provided token. This method will associate the inputSurface with a copy of
+     * the given inputWindowHandle, where the copy is configured using
+     * {@link InputWindowHandle#replaceTouchableRegionWithCrop(SurfaceControl)} with the surface
+     * of the provided windowToken.
+     *
+     * This is a no-op if windowToken is not valid or the window is not found.
+     *
+     * This does not change any other properties of the inputSurface.
+     *
+     * This method exists to avoid leaking the window's SurfaceControl outside WindowManagerService.
+     *
+     * @param inputSurface The surface for which the touchable region should be set.
+     * @param inputWindowHandle The {@link InputWindowHandle} for the input surface.
+     * @param windowToken The window whose bounds should be used as the touchable region for the
+     *                    inputSurface.
+     */
+    public abstract void replaceInputSurfaceTouchableRegionWithWindowCrop(
+            @NonNull SurfaceControl inputSurface, @NonNull InputWindowHandle inputWindowHandle,
+            @NonNull IBinder windowToken);
 }

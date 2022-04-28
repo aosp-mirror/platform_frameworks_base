@@ -28,6 +28,8 @@ import static android.app.UiModeManager.PROJECTION_TYPE_ALL;
 import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
 import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
 
+import static com.android.server.UiModeManagerService.SUPPORTED_NIGHT_MODE_CUSTOM_TYPES;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.TestCase.assertFalse;
@@ -292,6 +294,24 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
         assertThrows(SecurityException.class,
                 () -> mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME));
+    }
+
+    @Test
+    public void setNightModeCustomType_customTypeUnknown_shouldThrow() throws RemoteException {
+        assertThrows(IllegalArgumentException.class,
+                () -> mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_UNKNOWN));
+    }
+
+    @Test
+    public void setNightModeCustomType_customTypeUnsupported_shouldThrow() throws RemoteException {
+        assertThrows(IllegalArgumentException.class,
+                () -> {
+                    int maxSupportedCustomType = 0;
+                    for (Integer supportedType : SUPPORTED_NIGHT_MODE_CUSTOM_TYPES) {
+                        maxSupportedCustomType = Math.max(maxSupportedCustomType, supportedType);
+                    }
+                    mService.setNightModeCustomType(maxSupportedCustomType + 1);
+                });
     }
 
     @Test
@@ -777,7 +797,6 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
 
-
     @Test
     public void customTime_darkThemeOn_beforeStartEnd() throws RemoteException {
         LocalTime now = LocalTime.now();
@@ -1218,6 +1237,35 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(TestInjector.CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         verify(listener, never()).onProjectionStateChanged(anyInt(), any());
+    }
+
+    @Test
+    public void enableCarMode_failsForBogusPackageName() throws Exception {
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.CALLING_UID + 1);
+
+        assertThrows(SecurityException.class, () -> mService.enableCarMode(0, 0, PACKAGE_NAME));
+        assertThat(mService.getCurrentModeType()).isNotEqualTo(Configuration.UI_MODE_TYPE_CAR);
+    }
+
+    @Test
+    public void disableCarMode_failsForBogusPackageName() throws Exception {
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.CALLING_UID);
+        mService.enableCarMode(0, 0, PACKAGE_NAME);
+        assertThat(mService.getCurrentModeType()).isEqualTo(Configuration.UI_MODE_TYPE_CAR);
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.CALLING_UID + 1);
+
+        assertThrows(SecurityException.class,
+            () -> mService.disableCarModeByCallingPackage(0, PACKAGE_NAME));
+        assertThat(mService.getCurrentModeType()).isEqualTo(Configuration.UI_MODE_TYPE_CAR);
+
+        // Clean up
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.CALLING_UID);
+         mService.disableCarModeByCallingPackage(0, PACKAGE_NAME);
+        assertThat(mService.getCurrentModeType()).isNotEqualTo(Configuration.UI_MODE_TYPE_CAR);
     }
 
     private void requestAllPossibleProjectionTypes() throws RemoteException {

@@ -42,7 +42,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @Group4
-class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
+open class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
@@ -61,7 +61,7 @@ class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(test
 
     @Presubmit
     @Test
-    fun testAppIsAlwaysVisible() {
+    open fun testAppIsAlwaysVisible() {
         testSpec.assertLayers {
             this.isVisible(testApp.component)
         }

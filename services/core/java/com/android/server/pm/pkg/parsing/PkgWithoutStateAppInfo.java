@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.util.SparseArray;
 
+import java.util.Set;
+
 /**
  * Container for fields that are eventually exposed through {@link ApplicationInfo}.
  * <p>
@@ -248,6 +250,11 @@ public interface PkgWithoutStateAppInfo {
     int getMinSdkVersion();
 
     /**
+     * @see R.styleable#AndroidManifestUsesSdk_maxSdkVersion
+     */
+    int getMaxSdkVersion();
+
+    /**
      * @see ApplicationInfo#getNativeHeapZeroInitialized()
      * @see R.styleable#AndroidManifestApplication_nativeHeapZeroInitialized
      */
@@ -283,6 +290,13 @@ public interface PkgWithoutStateAppInfo {
      */
     @Nullable
     String getPermission();
+
+    /**
+     * @see ApplicationInfo#knownActivityEmbeddingCerts
+     * @see R.styleable#AndroidManifestApplication_knownActivityEmbeddingCerts
+     */
+    @NonNull
+    Set<String> getKnownActivityEmbeddingCerts();
 
     /**
      * @see ApplicationInfo#processName

@@ -21,6 +21,7 @@ import android.app.StatusBarManager
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.graphics.drawable.Icon
+import android.os.RemoteException
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.internal.statusbar.IAddTileResultCallback
@@ -32,6 +33,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.R
 import com.android.systemui.statusbar.CommandQueue
 import java.io.PrintWriter
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.function.Consumer
 import javax.inject.Inject
 
@@ -67,7 +69,11 @@ class TileServiceRequestController constructor(
             callback: IAddTileResultCallback
         ) {
             requestTileAdd(componentName, appName, label, icon) {
-                callback.onTileRequest(it)
+                try {
+                    callback.onTileRequest(it)
+                } catch (e: RemoteException) {
+                    Log.e(TAG, "Couldn't respond to request", e)
+                }
             }
         }
 
@@ -105,7 +111,7 @@ class TileServiceRequestController constructor(
             eventLogger.logTileAlreadyAdded(packageName, instanceId)
             return
         }
-        val dialogResponse = Consumer<Int> { response ->
+        val dialogResponse = SingleShotConsumer<Int> { response ->
             if (response == ADD_TILE) {
                 addTile(componentName)
             }
@@ -127,7 +133,7 @@ class TileServiceRequestController constructor(
 
     private fun createDialog(
         tileData: TileRequestDialog.TileData,
-        responseHandler: Consumer<Int>
+        responseHandler: SingleShotConsumer<Int>
     ): SystemUIDialog {
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             if (which == Dialog.BUTTON_POSITIVE) {
@@ -141,6 +147,10 @@ class TileServiceRequestController constructor(
             setShowForAllUsers(true)
             setCanceledOnTouchOutside(true)
             setOnCancelListener { responseHandler.accept(DISMISSED) }
+            // We want this in case the dialog is dismissed without it being cancelled (for example
+            // by going home or locking the device). We use a SingleShotConsumer so the response
+            // is only sent once, with the first value.
+            setOnDismissListener { responseHandler.accept(DISMISSED) }
             setPositiveButton(R.string.qs_tile_request_dialog_add, dialogClickListener)
             setNegativeButton(R.string.qs_tile_request_dialog_not_add, dialogClickListener)
         }
@@ -166,6 +176,16 @@ class TileServiceRequestController constructor(
         override fun help(pw: PrintWriter) {
             pw.println("Usage: adb shell cmd statusbar tile-service-add " +
                     "<componentName> <appName> <label>")
+        }
+    }
+
+    private class SingleShotConsumer<T>(private val consumer: Consumer<T>) : Consumer<T> {
+        private val dispatched = AtomicBoolean(false)
+
+        override fun accept(t: T) {
+            if (dispatched.compareAndSet(false, true)) {
+                consumer.accept(t)
+            }
         }
     }
 

@@ -21,12 +21,12 @@ import static java.lang.System.out;
 import android.annotation.NonNull;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
-import android.app.ambientcontext.AmbientContextEventResponse;
 import android.content.ComponentName;
 import android.os.Binder;
 import android.os.RemoteCallback;
 import android.os.ShellCommand;
-import android.service.ambientcontext.AmbientContextDetectionService;
+import android.service.ambientcontext.AmbientContextDetectionResult;
+import android.service.ambientcontext.AmbientContextDetectionServiceStatus;
 
 import java.io.PrintWriter;
 
@@ -34,6 +34,12 @@ import java.io.PrintWriter;
  * Shell command for {@link AmbientContextManagerService}.
  */
 final class AmbientContextShellCommand extends ShellCommand {
+
+    private static final AmbientContextEventRequest REQUEST =
+            new AmbientContextEventRequest.Builder()
+                    .addEventType(AmbientContextEvent.EVENT_COUGH)
+                    .addEventType(AmbientContextEvent.EVENT_SNORE)
+                    .build();
 
     @NonNull
     private final AmbientContextManagerService mService;
@@ -44,22 +50,43 @@ final class AmbientContextShellCommand extends ShellCommand {
 
     /** Callbacks for AmbientContextEventService results used internally for testing. */
     static class TestableCallbackInternal {
-        private AmbientContextEventResponse mLastResponse;
+        private AmbientContextDetectionResult mLastResult;
+        private AmbientContextDetectionServiceStatus mLastStatus;
 
-        public AmbientContextEventResponse getLastResponse() {
-            return mLastResponse;
+        public AmbientContextDetectionResult getLastResult() {
+            return mLastResult;
+        }
+
+        public AmbientContextDetectionServiceStatus getLastStatus() {
+            return mLastStatus;
         }
 
         @NonNull
-        private RemoteCallback createRemoteCallback() {
+        private RemoteCallback createRemoteDetectionResultCallback() {
             return new RemoteCallback(result -> {
-                AmbientContextEventResponse response =
-                        (AmbientContextEventResponse) result.get(
-                                AmbientContextDetectionService.RESPONSE_BUNDLE_KEY);
+                AmbientContextDetectionResult detectionResult =
+                        (AmbientContextDetectionResult) result.get(
+                                AmbientContextDetectionResult.RESULT_RESPONSE_BUNDLE_KEY);
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    mLastResponse = response;
-                    out.println("Response available: " + response);
+                    mLastResult = detectionResult;
+                    out.println("Detection result available: " + detectionResult);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            });
+        }
+
+        @NonNull
+        private RemoteCallback createRemoteStatusCallback() {
+            return new RemoteCallback(result -> {
+                AmbientContextDetectionServiceStatus status =
+                        (AmbientContextDetectionServiceStatus) result.get(
+                                AmbientContextDetectionServiceStatus.STATUS_RESPONSE_BUNDLE_KEY);
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mLastStatus = status;
+                    out.println("Status available: " + status);
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
@@ -83,6 +110,10 @@ final class AmbientContextShellCommand extends ShellCommand {
                 return runStopDetection();
             case "get-last-status-code":
                 return getLastStatusCode();
+            case "get-last-package-name":
+                return getLastPackageName();
+            case "query-service-status":
+                return runQueryServiceStatus();
             case "get-bound-package":
                 return getBoundPackageName();
             case "set-temporary-service":
@@ -95,13 +126,9 @@ final class AmbientContextShellCommand extends ShellCommand {
     private int runStartDetection() {
         final int userId = Integer.parseInt(getNextArgRequired());
         final String packageName = getNextArgRequired();
-        AmbientContextEventRequest request = new AmbientContextEventRequest.Builder()
-                .addEventType(AmbientContextEvent.EVENT_COUGH)
-                .addEventType(AmbientContextEvent.EVENT_SNORE)
-                .build();
-
-        mService.startAmbientContextEvent(userId, request, packageName,
-                sTestableCallbackInternal.createRemoteCallback());
+        mService.startDetection(userId, REQUEST, packageName,
+                sTestableCallbackInternal.createRemoteDetectionResultCallback(),
+                sTestableCallbackInternal.createRemoteStatusCallback());
         return 0;
     }
 
@@ -112,12 +139,31 @@ final class AmbientContextShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runQueryServiceStatus() {
+        final int userId = Integer.parseInt(getNextArgRequired());
+        final String packageName = getNextArgRequired();
+        int[] types = new int[] {
+                AmbientContextEvent.EVENT_COUGH,
+                AmbientContextEvent.EVENT_SNORE};
+        mService.queryServiceStatus(userId, packageName, types,
+                sTestableCallbackInternal.createRemoteStatusCallback());
+        return 0;
+    }
+
     private int getLastStatusCode() {
-        AmbientContextEventResponse lastResponse = sTestableCallbackInternal.getLastResponse();
+        AmbientContextDetectionServiceStatus lastResponse =
+                sTestableCallbackInternal.getLastStatus();
         if (lastResponse == null) {
             return -1;
         }
         return lastResponse.getStatusCode();
+    }
+
+    private int getLastPackageName() {
+        AmbientContextDetectionServiceStatus lastResponse =
+                sTestableCallbackInternal.getLastStatus();
+        out.println(lastResponse == null ? "" : lastResponse.getPackageName());
+        return 0;
     }
 
     @Override
@@ -130,6 +176,8 @@ final class AmbientContextShellCommand extends ShellCommand {
         pw.println("  start-detection USER_ID PACKAGE_NAME: Starts AmbientContextEvent detection.");
         pw.println("  stop-detection USER_ID: Stops AmbientContextEvent detection.");
         pw.println("  get-last-status-code: Prints the latest request status code.");
+        pw.println("  get-last-package-name: Prints the latest request package name.");
+        pw.println("  query-event-status USER_ID PACKAGE_NAME: Prints the event status code.");
         pw.println("  get-bound-package USER_ID:"
                 + "     Print the bound package that implements the service.");
         pw.println("  set-temporary-service USER_ID [COMPONENT_NAME DURATION]");

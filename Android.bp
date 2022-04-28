@@ -25,18 +25,6 @@
 //
 // READ ME: ########################################################
 
-// TODO(b/21090328): Remove filter after we are ready to.
-soong_config_module_type {
-    name: "java_library_with_nonpublic_deps",
-    module_type: "java_library",
-    config_namespace: "ANDROID",
-    bool_variables: ["include_nonpublic_framework_api"],
-    properties: [
-        "static_libs",
-        "libs",
-    ],
-}
-
 package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
@@ -77,7 +65,6 @@ filegroup {
         // Java/AIDL sources under frameworks/base
         ":framework-annotations",
         ":framework-blobstore-sources",
-        ":framework-connectivity-tiramisu-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
         ":framework-graphics-nonupdatable-sources",
@@ -109,7 +96,9 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
-        ":android.hardware.security.keymint-V1-java-source",
+        ":android.hardware.gnss-V2-java-source",
+        ":android.hardware.graphics.common-V3-java-source",
+        ":android.hardware.security.keymint-V2-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
         ":android.hardware.tv.tuner-V1-java-source",
         ":android.security.apc-java-source",
@@ -131,7 +120,6 @@ filegroup {
         ":installd_aidl",
         ":libaudioclient_aidl",
         ":libbinder_aidl",
-        ":libbluetooth-binder-aidl",
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
         ":libupdate_engine_aidl",
@@ -151,7 +139,7 @@ filegroup {
     ],
 }
 
-java_library_with_nonpublic_deps {
+java_library {
     name: "framework-all",
     installable: false,
     static_libs: [
@@ -190,7 +178,6 @@ java_defaults {
             "sax/java",
             "telecomm/java",
 
-            "apex/media/aidl/stable",
             // TODO(b/147699819): remove this
             "telephony/java",
         ],
@@ -273,7 +260,6 @@ java_defaults {
     defaults: ["framework-aidl-export-defaults"],
     srcs: [
         ":framework-non-updatable-sources",
-        ":framework-bluetooth-sources", // TODO(b/214988855) : Remove once framework-bluetooth jar is ready
         "core/java/**/*.logtags",
         ":apex-info-list",
     ],
@@ -285,9 +271,10 @@ java_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
-            // TODO: remove when moved to the below package
-            "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
+            "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
+            "hardware/interfaces/graphics/common/aidl",
         ],
     },
     dxflags: [
@@ -336,9 +323,11 @@ java_defaults {
         "av-types-aidl-java",
         "tv_tuner_resource_manager_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
+        "modules-utils-build",
         "modules-utils-preconditions",
         "modules-utils-synchronous-result-receiver",
         "modules-utils-os",
+        "modules-utils-uieventlogger-interface",
         "framework-permission-aidl-java",
         "spatializer-aidl-java",
         "audiopolicy-types-aidl-java",
@@ -355,7 +344,6 @@ java_library {
     visibility: [
         "//frameworks/base",
         // TODO(b/147128803) remove the below lines
-        "//frameworks/base/apex/appsearch/framework",
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
         "//frameworks/base/packages/Tethering/tests/unit",
@@ -474,21 +462,28 @@ java_library {
 }
 
 // TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
-metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
-    "--hide-package com.android.server " +
-    "--hide-package android.audio.policy.configuration.V7_0 " +
-    "--error UnhiddenSystemApi " +
-    "--hide RequiresPermission " +
-    "--hide CallbackInterface " +
-    "--hide MissingPermission --hide BroadcastBehavior " +
-    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
-    "--error NoSettingsProvider " +
-    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
+metalava_framework_docs_args = "" +
     "--api-lint-ignore-prefix android.icu. " +
     "--api-lint-ignore-prefix java. " +
     "--api-lint-ignore-prefix junit. " +
-    "--api-lint-ignore-prefix org. "
+    "--api-lint-ignore-prefix org. " +
+    "--error NoSettingsProvider " +
+    "--error UnhiddenSystemApi " +
+    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
+    "--hide BroadcastBehavior " +
+    "--hide CallbackInterface " +
+    "--hide DeprecationMismatch " +
+    "--hide HiddenSuperclass " +
+    "--hide HiddenTypeParameter " +
+    "--hide MissingPermission " +
+    "--hide-package android.audio.policy.configuration.V7_0 " +
+    "--hide-package com.android.server " +
+    "--hide RequiresPermission " +
+    "--hide SdkConstant " +
+    "--hide Todo " +
+    "--hide Typo " +
+    "--hide UnavailableSymbol " +
+    "--manifest $(location core/res/AndroidManifest.xml) "
 
 packages_to_document = [
     "android",
@@ -534,9 +529,10 @@ stubs_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
-            // TODO: remove when moved to the below package
-            "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
+            "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
+            "hardware/interfaces/graphics/common/aidl",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)
@@ -572,17 +568,16 @@ stubs_defaults {
 stubs_defaults {
     name: "module-classpath-stubs-defaults",
     aidl: {
-        local_include_dirs: [
-            "apex/media/aidl/stable",
-        ],
         include_dirs: [
+            "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
         ],
     },
     libs: [
         "art.module.public.api",
         "sdk_module-lib_current_framework-tethering",
-        "sdk_module-lib_current_framework-connectivity-tiramisu",
+        "sdk_module-lib_current_framework-connectivity-t",
         "sdk_public_current_framework-bluetooth",
         // There are a few classes from modules used by the core that
         // need to be resolved by metalava. We use a prebuilt stub of the

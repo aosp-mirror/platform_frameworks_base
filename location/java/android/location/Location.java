@@ -45,8 +45,8 @@ import java.util.StringTokenizer;
  * timestamp, accuracy, and other information such as bearing, altitude and velocity.
  *
  * <p>All locations generated through {@link LocationManager} are guaranteed to have a valid
- * latitude, longitude, timestamp (both UTC time and elapsed real-time since boot), and accuracy.
- * All other parameters are optional.
+ * latitude, longitude, timestamp (both Unix epoch time and elapsed realtime since boot), and
+ * accuracy. All other parameters are optional.
  */
 public class Location implements Parcelable {
 
@@ -132,31 +132,31 @@ public class Location implements Parcelable {
     }
 
     /**
-     * Construct a new Location object that is copied from an existing one.
+     * Constructs a new location copied from the given location.
      */
-    public Location(@NonNull Location l) {
-        set(l);
+    public Location(@NonNull Location location) {
+        set(location);
     }
 
     /**
      * Turns this location into a copy of the given location.
      */
-    public void set(@NonNull Location l) {
-        mFieldsMask = l.mFieldsMask;
-        mProvider = l.mProvider;
-        mTimeMs = l.mTimeMs;
-        mElapsedRealtimeNs = l.mElapsedRealtimeNs;
-        mElapsedRealtimeUncertaintyNs = l.mElapsedRealtimeUncertaintyNs;
-        mLatitudeDegrees = l.mLatitudeDegrees;
-        mLongitudeDegrees = l.mLongitudeDegrees;
-        mHorizontalAccuracyMeters = l.mHorizontalAccuracyMeters;
-        mAltitudeMeters = l.mAltitudeMeters;
-        mAltitudeAccuracyMeters = l.mAltitudeAccuracyMeters;
-        mSpeedMetersPerSecond = l.mSpeedMetersPerSecond;
-        mSpeedAccuracyMetersPerSecond = l.mSpeedAccuracyMetersPerSecond;
-        mBearingDegrees = l.mBearingDegrees;
-        mBearingAccuracyDegrees = l.mBearingAccuracyDegrees;
-        mExtras = (l.mExtras == null) ? null : new Bundle(l.mExtras);
+    public void set(@NonNull Location location) {
+        mFieldsMask = location.mFieldsMask;
+        mProvider = location.mProvider;
+        mTimeMs = location.mTimeMs;
+        mElapsedRealtimeNs = location.mElapsedRealtimeNs;
+        mElapsedRealtimeUncertaintyNs = location.mElapsedRealtimeUncertaintyNs;
+        mLatitudeDegrees = location.mLatitudeDegrees;
+        mLongitudeDegrees = location.mLongitudeDegrees;
+        mHorizontalAccuracyMeters = location.mHorizontalAccuracyMeters;
+        mAltitudeMeters = location.mAltitudeMeters;
+        mAltitudeAccuracyMeters = location.mAltitudeAccuracyMeters;
+        mSpeedMetersPerSecond = location.mSpeedMetersPerSecond;
+        mSpeedAccuracyMetersPerSecond = location.mSpeedAccuracyMetersPerSecond;
+        mBearingDegrees = location.mBearingDegrees;
+        mBearingAccuracyDegrees = location.mBearingAccuracyDegrees;
+        mExtras = (location.mExtras == null) ? null : new Bundle(location.mExtras);
     }
 
     /**
@@ -182,14 +182,13 @@ public class Location implements Parcelable {
     }
 
     /**
-     * Returns the approximate distance in meters between this
-     * location and the given location.  Distance is defined using
-     * the WGS84 ellipsoid.
+     * Returns the approximate distance in meters between this location and the given location.
+     * Distance is defined using the WGS84 ellipsoid.
      *
      * @param dest the destination location
      * @return the approximate distance in meters
      */
-    public @FloatRange float distanceTo(@NonNull Location dest) {
+    public @FloatRange(from = 0.0) float distanceTo(@NonNull Location dest) {
         BearingDistanceCache cache = sBearingDistanceCache.get();
         // See if we already have the result
         if (mLatitudeDegrees != cache.mLat1 || mLongitudeDegrees != cache.mLon1
@@ -201,11 +200,10 @@ public class Location implements Parcelable {
     }
 
     /**
-     * Returns the approximate initial bearing in degrees East of true
-     * North when traveling along the shortest path between this
-     * location and the given location.  The shortest path is defined
-     * using the WGS84 ellipsoid.  Locations that are (nearly)
-     * antipodal may produce meaningless results.
+     * Returns the approximate initial bearing in degrees east of true north when traveling along
+     * the shortest path between this location and the given location. The shortest path is defined
+     * using the WGS84 ellipsoid. Locations that are (nearly) antipodal may produce meaningless
+     * results.
      *
      * @param dest the destination location
      * @return the initial bearing in degrees
@@ -240,45 +238,47 @@ public class Location implements Parcelable {
     }
 
     /**
-     * Return the UTC time of this location fix, in milliseconds since epoch (January 1, 1970).
+     * Returns the Unix epoch time of this location fix, in milliseconds since the start of the Unix
+     * epoch (00:00:00 January 1, 1970 UTC).
      *
      * <p>There is no guarantee that different locations have times set from the same clock.
      * Locations derived from the {@link LocationManager#GPS_PROVIDER} are guaranteed to have their
-     * time set from the clock in use by the satellite constellation that provided the fix.
+     * time originate from the clock in use by the satellite constellation that provided the fix.
      * Locations derived from other providers may use any clock to set their time, though it is most
-     * common to use the device clock (which may be incorrect).
+     * common to use the device's Unix epoch time system clock (which may be incorrect).
      *
-     * <p>Note that the device clock UTC time is not monotonic; it can jump forwards or backwards
-     * unpredictably and may be changed at any time by the user, so this time should not be used to
-     * order or compare locations. Prefer {@link #getElapsedRealtimeNanos} for that purpose, as this
-     * clock is guaranteed to be monotonic.
+     * <p>Note that the device's Unix epoch time system clock is not monotonic; it can jump forwards
+     * or backwards unpredictably and may be changed at any time by the user, so this time should
+     * not be used to order or compare locations. Prefer {@link #getElapsedRealtimeNanos} for that
+     * purpose, as the elapsed realtime clock is guaranteed to be monotonic.
      *
-     * <p>On the other hand, this method may be useful for presenting a human readable time to the
+     * <p>On the other hand, this method may be useful for presenting a human-readable time to the
      * user, or as a heuristic for comparing location fixes across reboot or across devices.
      *
-     * <p>All locations generated by the {@link LocationManager} are guaranteed to have a UTC time
-     * set, however remember that the device clock may have changed since the location was
+     * <p>All locations generated by the {@link LocationManager} are guaranteed to have this time
+     * set, however remember that the device's system clock may have changed since the location was
      * generated.
      *
-     * @return UTC time of this location
+     * @return the Unix epoch time of this location
      */
-    public @IntRange long getTime() {
+    public @IntRange(from = 0) long getTime() {
         return mTimeMs;
     }
 
     /**
-     * Set the UTC time of this location, in milliseconds since epoch (January 1, 1970).
+     * Sets the Unix epoch time of this location fix, in milliseconds since the start of the Unix
+     * epoch (00:00:00 January 1 1970 UTC).
      *
-     * @param timeMs UTC time of this location
+     * @param timeMs the Unix epoch time of this location
      */
-    public void setTime(@IntRange long timeMs) {
+    public void setTime(@IntRange(from = 0) long timeMs) {
         mTimeMs = timeMs;
     }
 
     /**
      * Return the time of this fix in nanoseconds of elapsed realtime since system boot.
      *
-     * <p>This value can be compared with {@link android.os.SystemClock#elapsedRealtimeNanos}, to
+     * <p>This value can be compared with {@link android.os.SystemClock#elapsedRealtimeNanos} to
      * reliably order or compare locations. This is reliable because elapsed realtime is guaranteed
      * to be monotonic and continues to increment even when the system is in deep sleep (unlike
      * {@link #getTime}). However, since elapsed realtime is with reference to system boot, it does
@@ -289,7 +289,7 @@ public class Location implements Parcelable {
      *
      * @return elapsed realtime of this location in nanoseconds
      */
-    public @IntRange long getElapsedRealtimeNanos() {
+    public @IntRange(from = 0) long getElapsedRealtimeNanos() {
         return mElapsedRealtimeNs;
     }
 
@@ -299,7 +299,7 @@ public class Location implements Parcelable {
      * @return elapsed realtime of this location in milliseconds
      * @see #getElapsedRealtimeNanos()
      */
-    public @IntRange long getElapsedRealtimeMillis() {
+    public @IntRange(from = 0) long getElapsedRealtimeMillis() {
         return NANOSECONDS.toMillis(mElapsedRealtimeNs);
     }
 
@@ -309,7 +309,7 @@ public class Location implements Parcelable {
      *
      * @return age of this location in milliseconds
      */
-    public @IntRange long getElapsedRealtimeAgeMillis() {
+    public @IntRange(from = 0) long getElapsedRealtimeAgeMillis() {
         return getElapsedRealtimeAgeMillis(SystemClock.elapsedRealtime());
     }
 
@@ -320,7 +320,8 @@ public class Location implements Parcelable {
      * @param referenceRealtimeMs reference realtime in milliseconds
      * @return age of this location in milliseconds
      */
-    public @IntRange long getElapsedRealtimeAgeMillis(@IntRange long referenceRealtimeMs) {
+    public long getElapsedRealtimeAgeMillis(
+            @IntRange(from = 0) long referenceRealtimeMs) {
         return referenceRealtimeMs - getElapsedRealtimeMillis();
     }
 
@@ -329,7 +330,7 @@ public class Location implements Parcelable {
      *
      * @param elapsedRealtimeNs elapsed realtime in nanoseconds
      */
-    public void setElapsedRealtimeNanos(@IntRange long elapsedRealtimeNs) {
+    public void setElapsedRealtimeNanos(@IntRange(from = 0) long elapsedRealtimeNs) {
         mElapsedRealtimeNs = elapsedRealtimeNs;
     }
 
@@ -343,7 +344,7 @@ public class Location implements Parcelable {
      *
      * @return uncertainty in nanoseconds of the elapsed realtime of this location
      */
-    public @FloatRange double getElapsedRealtimeUncertaintyNanos() {
+    public @FloatRange(from = 0.0) double getElapsedRealtimeUncertaintyNanos() {
         return mElapsedRealtimeUncertaintyNs;
     }
 
@@ -355,20 +356,20 @@ public class Location implements Parcelable {
      *                                     this location
      */
     public void setElapsedRealtimeUncertaintyNanos(
-            @FloatRange double elapsedRealtimeUncertaintyNs) {
+            @FloatRange(from = 0.0) double elapsedRealtimeUncertaintyNs) {
         mElapsedRealtimeUncertaintyNs = elapsedRealtimeUncertaintyNs;
         mFieldsMask |= HAS_ELAPSED_REALTIME_UNCERTAINTY_MASK;
     }
 
     /**
-     * True if this location has a elapsed realtime uncertainty, false otherwise.
+     * True if this location has an elapsed realtime uncertainty, false otherwise.
      */
     public boolean hasElapsedRealtimeUncertaintyNanos() {
         return (mFieldsMask & HAS_ELAPSED_REALTIME_UNCERTAINTY_MASK) != 0;
     }
 
     /**
-     * Removes the elapsed realtime uncertainy from this location.
+     * Removes the elapsed realtime uncertainty from this location.
      */
     public void removeElapsedRealtimeUncertaintyNanos() {
         mFieldsMask &= ~HAS_ELAPSED_REALTIME_UNCERTAINTY_MASK;
@@ -380,7 +381,7 @@ public class Location implements Parcelable {
      *
      * @return latitude of this location
      */
-    public @FloatRange double getLatitude() {
+    public @FloatRange(from = -90.0, to = 90.0) double getLatitude() {
         return mLatitudeDegrees;
     }
 
@@ -389,7 +390,7 @@ public class Location implements Parcelable {
      *
      * @param latitudeDegrees latitude in degrees
      */
-    public void setLatitude(@FloatRange double latitudeDegrees) {
+    public void setLatitude(@FloatRange(from = -90.0, to = 90.0) double latitudeDegrees) {
         mLatitudeDegrees = latitudeDegrees;
     }
 
@@ -399,7 +400,7 @@ public class Location implements Parcelable {
      *
      * @return longitude of this location
      */
-    public @FloatRange double getLongitude() {
+    public @FloatRange(from = -180.0, to = 180.0) double getLongitude() {
         return mLongitudeDegrees;
     }
 
@@ -408,7 +409,7 @@ public class Location implements Parcelable {
      *
      * @param longitudeDegrees longitude in degrees
      */
-    public void setLongitude(@FloatRange double longitudeDegrees) {
+    public void setLongitude(@FloatRange(from = -180.0, to = 180.0) double longitudeDegrees) {
         mLongitudeDegrees = longitudeDegrees;
     }
 
@@ -420,12 +421,12 @@ public class Location implements Parcelable {
      * reported location, there is a 68% chance that the true location falls within this circle.
      * This accuracy value is only valid for horizontal positioning, and not vertical positioning.
      *
-     * <p>This is only valid if {@link #hasSpeed()} is true. All locations generated by the
+     * <p>This is only valid if {@link #hasAccuracy()} is true. All locations generated by the
      * {@link LocationManager} include horizontal accuracy.
      *
      * @return horizontal accuracy of this location
      */
-    public @FloatRange float getAccuracy() {
+    public @FloatRange(from = 0.0) float getAccuracy() {
         return mHorizontalAccuracyMeters;
     }
 
@@ -434,7 +435,7 @@ public class Location implements Parcelable {
      *
      * @param horizontalAccuracyMeters horizontal altitude in meters
      */
-    public void setAccuracy(@FloatRange float horizontalAccuracyMeters) {
+    public void setAccuracy(@FloatRange(from = 0.0) float horizontalAccuracyMeters) {
         mHorizontalAccuracyMeters = horizontalAccuracyMeters;
         mFieldsMask |= HAS_HORIZONTAL_ACCURACY_MASK;
     }
@@ -497,7 +498,7 @@ public class Location implements Parcelable {
      *
      * @return vertical accuracy of this location
      */
-    public @FloatRange float getVerticalAccuracyMeters() {
+    public @FloatRange(from = 0.0) float getVerticalAccuracyMeters() {
         return mAltitudeAccuracyMeters;
     }
 
@@ -506,7 +507,7 @@ public class Location implements Parcelable {
      *
      * @param altitudeAccuracyMeters altitude accuracy in meters
      */
-    public void setVerticalAccuracyMeters(@FloatRange float altitudeAccuracyMeters) {
+    public void setVerticalAccuracyMeters(@FloatRange(from = 0.0) float altitudeAccuracyMeters) {
         mAltitudeAccuracyMeters = altitudeAccuracyMeters;
         mFieldsMask |= HAS_ALTITUDE_ACCURACY_MASK;
     }
@@ -535,17 +536,16 @@ public class Location implements Parcelable {
      *
      * @return speed at the time of this location
      */
-    public @FloatRange float getSpeed() {
+    public @FloatRange(from = 0.0) float getSpeed() {
         return mSpeedMetersPerSecond;
     }
 
     /**
-     * Set the speed at the time of this location, in meters per second. Prefer not to set negative
-     * speeds.
+     * Set the speed at the time of this location, in meters per second.
      *
      * @param speedMetersPerSecond speed in meters per second
      */
-    public void setSpeed(@FloatRange float speedMetersPerSecond) {
+    public void setSpeed(@FloatRange(from = 0.0) float speedMetersPerSecond) {
         mSpeedMetersPerSecond = speedMetersPerSecond;
         mFieldsMask |= HAS_SPEED_MASK;
     }
@@ -573,7 +573,7 @@ public class Location implements Parcelable {
      *
      * @return vertical accuracy of this location
      */
-    public @FloatRange float getSpeedAccuracyMetersPerSecond() {
+    public @FloatRange(from = 0.0) float getSpeedAccuracyMetersPerSecond() {
         return mSpeedAccuracyMetersPerSecond;
     }
 
@@ -582,7 +582,8 @@ public class Location implements Parcelable {
      *
      * @param speedAccuracyMeterPerSecond speed accuracy in meters per second
      */
-    public void setSpeedAccuracyMetersPerSecond(@FloatRange float speedAccuracyMeterPerSecond) {
+    public void setSpeedAccuracyMetersPerSecond(
+            @FloatRange(from = 0.0) float speedAccuracyMeterPerSecond) {
         mSpeedAccuracyMetersPerSecond = speedAccuracyMeterPerSecond;
         mFieldsMask |= HAS_SPEED_ACCURACY_MASK;
     }
@@ -610,7 +611,7 @@ public class Location implements Parcelable {
      *
      * @return bearing at the time of this location
      */
-    public @FloatRange(from = 0f, to = 360f, toInclusive = false) float getBearing() {
+    public @FloatRange(from = 0.0, to = 360.0, toInclusive = false) float getBearing() {
         return mBearingDegrees;
     }
 
@@ -660,7 +661,7 @@ public class Location implements Parcelable {
      *
      * @return bearing accuracy in degrees of this location
      */
-    public @FloatRange float getBearingAccuracyDegrees() {
+    public @FloatRange(from = 0.0) float getBearingAccuracyDegrees() {
         return mBearingAccuracyDegrees;
     }
 
@@ -669,7 +670,7 @@ public class Location implements Parcelable {
      *
      * @param bearingAccuracyDegrees bearing accuracy in degrees
      */
-    public void setBearingAccuracyDegrees(@FloatRange float bearingAccuracyDegrees) {
+    public void setBearingAccuracyDegrees(@FloatRange(from = 0.0) float bearingAccuracyDegrees) {
         mBearingAccuracyDegrees = bearingAccuracyDegrees;
         mFieldsMask |= HAS_BEARING_ACCURACY_MASK;
     }
@@ -689,9 +690,11 @@ public class Location implements Parcelable {
     }
 
     /**
-     * Returns true if the Location came from a mock provider.
+     * Returns true if this is a mock location. If this location comes from the Android framework,
+     * this indicates that the location was provided by a test location provider, and thus may not
+     * be related to the actual location of the device.
      *
-     * @return true if this Location came from a mock provider, false otherwise
+     * @return true if this location came from a mock provider, false otherwise
      * @deprecated Prefer {@link #isMock()} instead.
      */
     @Deprecated
@@ -700,9 +703,9 @@ public class Location implements Parcelable {
     }
 
     /**
-     * Flag this Location as having come from a mock provider or not.
+     * Flag this location as having come from a mock provider or not.
      *
-     * @param isFromMockProvider true if this Location came from a mock provider, false otherwise
+     * @param isFromMockProvider true if this location came from a mock provider, false otherwise
      * @deprecated Prefer {@link #setMock(boolean)} instead.
      * @hide
      */
@@ -742,7 +745,7 @@ public class Location implements Parcelable {
      * will be present for any location.
      *
      * <ul>
-     * <li> satellites - the number of satellites used to derive the GNSS fix
+     * <li> satellites - the number of satellites used to derive a GNSS fix
      * </ul>
      */
     public @Nullable Bundle getExtras() {
@@ -896,7 +899,13 @@ public class Location implements Parcelable {
         return s.toString();
     }
 
-    /** Dumps location. */
+    /**
+     * Dumps location information to the given Printer.
+     *
+     * @deprecated Prefer to use {@link #toString()} along with whatever custom formatting is
+     * required instead of this method. It is not this class's job to manage print representations.
+     */
+    @Deprecated
     public void dump(@NonNull Printer pw, @Nullable String prefix) {
         pw.println(prefix + this);
     }
@@ -1206,10 +1215,10 @@ public class Location implements Parcelable {
      * @throws IllegalArgumentException if results is null or has length < 1
      */
     public static void distanceBetween(
-            @FloatRange double startLatitude,
-            @FloatRange double startLongitude,
-            @FloatRange double endLatitude,
-            @FloatRange double endLongitude,
+            @FloatRange(from = -90.0, to = 90.0) double startLatitude,
+            @FloatRange(from = -180.0, to = 180.0) double startLongitude,
+            @FloatRange(from = -90.0, to = 90.0) double endLatitude,
+            @FloatRange(from = -180.0, to = 180.0)  double endLongitude,
             float[] results) {
         if (results == null || results.length < 1) {
             throw new IllegalArgumentException("results is null or has length < 1");

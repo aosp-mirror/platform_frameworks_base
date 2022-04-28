@@ -59,7 +59,7 @@ public class PrimarySwitchPreference extends RestrictedPreference {
 
     @Override
     protected int getSecondTargetResId() {
-        return R.layout.restricted_preference_widget_primary_switch;
+        return R.layout.preference_widget_primary_switch;
     }
 
     @Override
@@ -67,7 +67,6 @@ public class PrimarySwitchPreference extends RestrictedPreference {
         super.onBindViewHolder(holder);
         final View switchWidget = holder.findViewById(R.id.switchWidget);
         if (switchWidget != null) {
-            switchWidget.setVisibility(isDisabledByAdmin() ? View.GONE : View.VISIBLE);
             switchWidget.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {

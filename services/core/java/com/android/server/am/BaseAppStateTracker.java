@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActiveServices.SERVICE_START_FOREGROUND_TIMEOUT;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -28,19 +27,27 @@ import android.app.AppOpsManager;
 import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.media.session.MediaSessionManager;
 import android.os.BatteryManagerInternal;
 import android.os.BatteryStatsInternal;
 import android.os.Handler;
+import android.os.ServiceManager;
+import android.permission.PermissionManager;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.app.IAppOpsService;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.am.AppRestrictionController.TrackerType;
+import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 
 /**
  * Base class to track certain state of the app, could be used to determine the restriction level.
@@ -54,11 +61,29 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
     static final long ONE_HOUR = 60 * ONE_MINUTE;
     static final long ONE_DAY = 24 * ONE_HOUR;
 
+    static final int STATE_TYPE_MEDIA_SESSION = 1;
+    static final int STATE_TYPE_FGS_MEDIA_PLAYBACK = 1 << 1;
+    static final int STATE_TYPE_FGS_LOCATION = 1 << 2;
+    static final int STATE_TYPE_FGS_WITH_NOTIFICATION = 1 << 3;
+    static final int STATE_TYPE_PERMISSION = 1 << 4;
+    static final int STATE_TYPE_NUM = 5;
+
+    static final int STATE_TYPE_INDEX_MEDIA_SESSION = 0;
+    static final int STATE_TYPE_INDEX_FGS_MEDIA_PLAYBACK = 1;
+    static final int STATE_TYPE_INDEX_FGS_LOCATION = 2;
+    static final int STATE_TYPE_INDEX_FGS_WITH_NOTIFICATION = 3;
+    static final int STATE_TYPE_INDEX_PERMISSION = 4;
+
     protected final AppRestrictionController mAppRestrictionController;
     protected final Injector<T> mInjector;
     protected final Context mContext;
     protected final Handler mBgHandler;
     protected final Object mLock;
+    protected final ArrayList<StateListener> mStateListeners = new ArrayList<>();
+
+    interface StateListener {
+        void onStateChange(int uid, String packageName, boolean start, long now, int stateType);
+    }
 
     BaseAppStateTracker(Context context, AppRestrictionController controller,
             @Nullable Constructor<? extends Injector<T>> injector, Object outerContext) {
@@ -77,6 +102,77 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
             }
             mInjector = (localInjector == null) ? new Injector<>() : localInjector;
         }
+    }
+
+    static int stateTypeToIndex(int stateType) {
+        return Integer.numberOfTrailingZeros(stateType);
+    }
+
+    static int stateIndexToType(int stateTypeIndex) {
+        return 1 << stateTypeIndex;
+    }
+
+    static String stateTypesToString(int stateTypes) {
+        final StringBuilder sb = new StringBuilder("[");
+        boolean needDelimiter = false;
+        for (int stateType = Integer.highestOneBit(stateTypes); stateType != 0;
+                stateType = Integer.highestOneBit(stateTypes)) {
+            if (needDelimiter) {
+                sb.append('|');
+            }
+            needDelimiter = true;
+            switch (stateType) {
+                case STATE_TYPE_MEDIA_SESSION:
+                    sb.append("MEDIA_SESSION");
+                    break;
+                case STATE_TYPE_FGS_MEDIA_PLAYBACK:
+                    sb.append("FGS_MEDIA_PLAYBACK");
+                    break;
+                case STATE_TYPE_FGS_LOCATION:
+                    sb.append("FGS_LOCATION");
+                    break;
+                case STATE_TYPE_FGS_WITH_NOTIFICATION:
+                    sb.append("FGS_NOTIFICATION");
+                    break;
+                case STATE_TYPE_PERMISSION:
+                    sb.append("PERMISSION");
+                    break;
+                default:
+                    return "[UNKNOWN(" + Integer.toHexString(stateTypes) + ")]";
+            }
+            stateTypes &= ~stateType;
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    void registerStateListener(@NonNull StateListener listener) {
+        synchronized (mLock) {
+            mStateListeners.add(listener);
+        }
+    }
+
+    void notifyListenersOnStateChange(int uid, String packageName,
+            boolean start, long now, int stateType) {
+        synchronized (mLock) {
+            for (int i = 0, size = mStateListeners.size(); i < size; i++) {
+                mStateListeners.get(i).onStateChange(uid, packageName, start, now, stateType);
+            }
+        }
+    }
+
+    /**
+     * Return the type of tracker (as defined by AppRestrictionController.TrackerType)
+     */
+    @TrackerType int getType() {
+        return AppRestrictionController.TRACKER_TYPE_UNKNOWN;
+    }
+
+    /**
+     * Return the relevant info object for the tracker for the given uid, used for statsd.
+     */
+    byte[] getTrackerInfoForStatsd(int uid) {
+        return null;
     }
 
     /**
@@ -130,6 +226,12 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
     }
 
     /**
+     * Called when the system sends LOCKED_BOOT_COMPLETED.
+     */
+    void onLockedBootCompleted() {
+    }
+
+    /**
      * Called when a device config property in the activity manager namespace
      * has changed.
      */
@@ -170,6 +272,9 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
         mInjector.getPolicy().dump(pw, "  " + prefix);
     }
 
+    void dumpAsProto(ProtoOutputStream proto, int uid) {
+    }
+
     static class Injector<T extends BaseAppStatePolicy> {
         T mAppStatePolicy;
 
@@ -179,10 +284,14 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
         DeviceIdleInternal mDeviceIdleInternal;
         UserManagerInternal mUserManagerInternal;
         PackageManager mPackageManager;
+        PackageManagerInternal mPackageManagerInternal;
+        PermissionManager mPermissionManager;
         PermissionManagerServiceInternal mPermissionManagerServiceInternal;
         AppOpsManager mAppOpsManager;
         MediaSessionManager mMediaSessionManager;
         RoleManager mRoleManager;
+        NotificationManagerInternal mNotificationManagerInternal;
+        IAppOpsService mIAppOpsService;
 
         void setPolicy(T policy) {
             mAppStatePolicy = policy;
@@ -194,13 +303,19 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
             mBatteryStatsInternal = LocalServices.getService(BatteryStatsInternal.class);
             mDeviceIdleInternal = LocalServices.getService(DeviceIdleInternal.class);
             mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+            mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
             mPermissionManagerServiceInternal = LocalServices.getService(
                     PermissionManagerServiceInternal.class);
             final Context context = mAppStatePolicy.mTracker.mContext;
             mPackageManager = context.getPackageManager();
             mAppOpsManager = context.getSystemService(AppOpsManager.class);
             mMediaSessionManager = context.getSystemService(MediaSessionManager.class);
+            mPermissionManager = context.getSystemService(PermissionManager.class);
             mRoleManager = context.getSystemService(RoleManager.class);
+            mNotificationManagerInternal = LocalServices.getService(
+                    NotificationManagerInternal.class);
+            mIAppOpsService = IAppOpsService.Stub.asInterface(
+                    ServiceManager.getService(Context.APP_OPS_SERVICE));
 
             getPolicy().onSystemReady();
         }
@@ -240,6 +355,14 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
             return mPackageManager;
         }
 
+        PackageManagerInternal getPackageManagerInternal() {
+            return mPackageManagerInternal;
+        }
+
+        PermissionManager getPermissionManager() {
+            return mPermissionManager;
+        }
+
         PermissionManagerServiceInternal getPermissionManagerServiceInternal() {
             return mPermissionManagerServiceInternal;
         }
@@ -253,11 +376,19 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
         }
 
         long getServiceStartForegroundTimeout() {
-            return SERVICE_START_FOREGROUND_TIMEOUT;
+            return mActivityManagerInternal.getServiceStartForegroundTimeout();
         }
 
         RoleManager getRoleManager() {
             return mRoleManager;
+        }
+
+        NotificationManagerInternal getNotificationManagerInternal() {
+            return mNotificationManagerInternal;
+        }
+
+        IAppOpsService getIAppOpsService() {
+            return mIAppOpsService;
         }
     }
 }

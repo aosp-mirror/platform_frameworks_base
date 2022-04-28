@@ -205,15 +205,6 @@ public class TileQueryHelper {
                 finished();
             }
         }
-
-        @Override
-        public void onShowDetail(boolean show) {}
-
-        @Override
-        public void onToggleStateChanged(boolean state) {}
-
-        @Override
-        public void onScanStateChanged(boolean state) {}
     }
 
     private void addPackageTiles(final QSTileHost host) {

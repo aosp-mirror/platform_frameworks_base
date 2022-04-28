@@ -63,8 +63,11 @@ import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
+import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
+import com.android.internal.inputmethod.RemoteAccessibilityInputConnection;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import libcore.io.IoUtils;
@@ -728,7 +731,8 @@ public final class UiAutomation {
         }
         // Calling out without a lock held.
         return AccessibilityInteractionClient.getInstance()
-                .getRootInActiveWindow(connectionId);
+                .getRootInActiveWindow(connectionId,
+                        AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID);
     }
 
     /**
@@ -1203,7 +1207,9 @@ public final class UiAutomation {
      * @see android.view.WindowAnimationFrameStats
      * @see #getWindowAnimationFrameStats()
      * @see android.R.styleable#WindowAnimation
-     * @deprecated animation-frames are no-longer used.
+     * @deprecated animation-frames are no-longer used. Use Shared
+     *         <a href="https://perfetto.dev/docs/data-sources/frametimeline">FrameTimeline</a>
+     *         jank metrics instead.
      */
     @Deprecated
     public void clearWindowAnimationFrameStats() {
@@ -1563,6 +1569,17 @@ public final class UiAutomation {
                 @Override
                 public void onSystemActionsChanged() {
                     /* do nothing */
+                }
+
+                @Override
+                public void createImeSession(IAccessibilityInputMethodSessionCallback callback) {
+                    /* do nothing */
+                }
+
+                @Override
+                public void startInput(
+                        @Nullable RemoteAccessibilityInputConnection inputConnection,
+                        @NonNull EditorInfo editorInfo, boolean restarting) {
                 }
 
                 @Override

@@ -53,7 +53,7 @@ class ParsedActivityTest : ParsedMainComponentTest(
         ParsedActivity::getTaskAffinity,
         ParsedActivity::getTheme,
         ParsedActivity::getUiOptions,
-        ParsedActivity::isSupportsSizeChanges,
+        ParsedActivity::isSupportsSizeChanges
     )
 
     override fun mainComponentSubclassExtraParams() = listOf(
@@ -73,6 +73,7 @@ class ParsedActivityTest : ParsedMainComponentTest(
                     ActivityInfo.WindowLayout::minHeight
                 )
             }
-        )
+        ),
+        getter(ParsedActivity::getKnownActivityEmbeddingCerts, setOf("TESTEMBEDDINGCERT"))
     )
 }

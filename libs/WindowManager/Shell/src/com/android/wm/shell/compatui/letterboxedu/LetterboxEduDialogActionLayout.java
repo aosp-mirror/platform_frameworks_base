@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.compatui.letterboxedu;
 
-import android.annotation.StringRes;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -30,42 +29,39 @@ import com.android.wm.shell.R;
 /**
  * Custom layout for Letterbox Education dialog action.
  */
-// TODO(b/215316431): Add tests
 class LetterboxEduDialogActionLayout extends FrameLayout {
-    private final ImageView mIcon;
-    private final TextView mText;
 
-    LetterboxEduDialogActionLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    public LetterboxEduDialogActionLayout(Context context) {
+        this(context, null);
+    }
+
+    public LetterboxEduDialogActionLayout(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public LetterboxEduDialogActionLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public LetterboxEduDialogActionLayout(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         TypedArray styledAttributes =
                 context.getTheme().obtainStyledAttributes(
-                        attrs,
-                        R.styleable.LetterboxEduDialogActionLayout,
-                        /* defStyleAttr= */ 0,
-                        /* defStyleRes= */ 0);
+                        attrs, R.styleable.LetterboxEduDialogActionLayout, defStyleAttr,
+                        defStyleRes);
         int iconId = styledAttributes.getResourceId(
                 R.styleable.LetterboxEduDialogActionLayout_icon, 0);
-        String optionalText = styledAttributes.getString(
+        String text = styledAttributes.getString(
                 R.styleable.LetterboxEduDialogActionLayout_text);
         styledAttributes.recycle();
 
         View rootView = inflate(getContext(), R.layout.letterbox_education_dialog_action_layout,
                 this);
-
-        mIcon = rootView.findViewById(R.id.letterbox_education_dialog_action_icon);
-        mIcon.setImageResource(iconId);
-        mText = rootView.findViewById(R.id.letterbox_education_dialog_action_text);
-        if (optionalText != null) {
-            mText.setText(optionalText);
-        }
-    }
-
-    void setText(@StringRes int id) {
-        mText.setText(getResources().getString(id));
-    }
-
-    void setIconRotation(float rotation) {
-        mIcon.setRotation(rotation);
+        ((ImageView) rootView.findViewById(
+                R.id.letterbox_education_dialog_action_icon)).setImageResource(iconId);
+        ((TextView) rootView.findViewById(R.id.letterbox_education_dialog_action_text)).setText(
+                text);
     }
 }

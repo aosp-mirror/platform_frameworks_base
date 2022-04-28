@@ -37,6 +37,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Parcelable;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -60,6 +61,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.util.drawable.DrawableSize;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class StatusBarIconView extends AnimatedImageView implements StatusIconDisplayable {
@@ -370,10 +372,13 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         }
         Drawable drawable;
         try {
+            Trace.beginSection("StatusBarIconView#updateDrawable()");
             drawable = getIcon(mIcon);
         } catch (OutOfMemoryError e) {
             Log.w(TAG, "OOM while inflating " + mIcon.icon + " for slot " + mSlot);
             return false;
+        } finally {
+            Trace.endSection();
         }
 
         if (drawable == null) {
@@ -422,15 +427,17 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 typedValue, true);
         float scaleFactor = typedValue.getFloat();
 
-        // We downscale the loaded drawable to reasonable size to protect against applications
-        // using too much memory. The size can be tweaked in config.xml. Drawables
-        // that are already sized properly won't be touched.
-        boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
-        Resources res = sysuiContext.getResources();
-        int maxIconSize = res.getDimensionPixelSize(isLowRamDevice
-                                ? com.android.internal.R.dimen.notification_small_icon_size_low_ram
-                                : com.android.internal.R.dimen.notification_small_icon_size);
-        icon = DrawableSize.downscaleToSize(res, icon, maxIconSize, maxIconSize);
+        if (icon != null) {
+            // We downscale the loaded drawable to reasonable size to protect against applications
+            // using too much memory. The size can be tweaked in config.xml. Drawables that are
+            // already sized properly won't be touched.
+            boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
+            Resources res = sysuiContext.getResources();
+            int maxIconSize = res.getDimensionPixelSize(isLowRamDevice
+                    ? com.android.internal.R.dimen.notification_small_icon_size_low_ram
+                    : com.android.internal.R.dimen.notification_small_icon_size);
+            icon = DrawableSize.downscaleToSize(res, icon, maxIconSize, maxIconSize);
+        }
 
         // No need to scale the icon, so return it as is.
         if (scaleFactor == 1.f) {
@@ -566,11 +573,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         } catch (RuntimeException e) {
             Log.e(TAG, "Unable to recover builder", e);
             // Trying to get the app name from the app info instead.
-            Parcelable appInfo = n.extras.getParcelable(
-                    Notification.EXTRA_BUILDER_APPLICATION_INFO);
-            if (appInfo instanceof ApplicationInfo) {
-                appName = String.valueOf(((ApplicationInfo) appInfo).loadLabel(
-                        c.getPackageManager()));
+            ApplicationInfo appInfo = n.extras.getParcelable(
+                    Notification.EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
+            if (appInfo != null) {
+                appName = String.valueOf(appInfo.loadLabel(c.getPackageManager()));
             }
         }
 
@@ -961,8 +967,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     @Override
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        int areaTint = getTint(area, this, tint);
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        int areaTint = getTint(areas, this, tint);
         ColorStateList color = ColorStateList.valueOf(areaTint);
         setImageTintList(color);
         setDecorColor(areaTint);

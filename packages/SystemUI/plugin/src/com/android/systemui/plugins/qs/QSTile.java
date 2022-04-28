@@ -35,14 +35,12 @@ import java.util.function.Supplier;
 
 @ProvidesInterface(version = QSTile.VERSION)
 @DependsOn(target = QSIconView.class)
-@DependsOn(target = DetailAdapter.class)
 @DependsOn(target = Callback.class)
 @DependsOn(target = Icon.class)
 @DependsOn(target = State.class)
 public interface QSTile {
-    int VERSION = 2;
+    int VERSION = 4;
 
-    DetailAdapter getDetailAdapter();
     String getTileSpec();
 
     boolean isAvailable();
@@ -116,13 +114,16 @@ public interface QSTile {
         return false;
     }
 
+    /**
+     * Return whether the tile is set to its listening state and therefore receiving updates and
+     * refreshes from controllers
+     */
+    boolean isListening();
+
     @ProvidesInterface(version = Callback.VERSION)
-    public interface Callback {
-        public static final int VERSION = 1;
+    interface Callback {
+        static final int VERSION = 2;
         void onStateChanged(State state);
-        void onShowDetail(boolean show);
-        void onToggleStateChanged(boolean state);
-        void onScanStateChanged(boolean state);
     }
 
     @ProvidesInterface(version = Icon.VERSION)

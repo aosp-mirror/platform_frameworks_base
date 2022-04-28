@@ -376,7 +376,7 @@ public abstract class BroadcastReceiver {
      * to run, allowing them to execute for 30 seconds or even a bit more.  This is something that
      * receivers should rarely take advantage of (long work should be punted to another system
      * facility such as {@link android.app.job.JobScheduler}, {@link android.app.Service}, or
-     * see especially {@link android.support.v4.app.JobIntentService}), but can be useful in
+     * see especially {@link androidx.core.app.JobIntentService}), but can be useful in
      * certain rare cases where it is necessary to do some work as soon as the broadcast is
      * delivered.  Keep in mind that the work you do here will block further broadcasts until
      * it completes, so taking advantage of this at all excessively can be counter-productive

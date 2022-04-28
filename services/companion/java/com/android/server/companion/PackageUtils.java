@@ -18,10 +18,9 @@ package com.android.server.companion;
 
 import static android.content.pm.PackageManager.FEATURE_COMPANION_DEVICE_SETUP;
 import static android.content.pm.PackageManager.GET_CONFIGURATIONS;
-import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 
-import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
+import static com.android.server.companion.CompanionDeviceManagerService.TAG;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -53,7 +52,8 @@ import java.util.Map;
 final class PackageUtils {
     private static final Intent COMPANION_SERVICE_INTENT =
             new Intent(CompanionDeviceService.SERVICE_INTERFACE);
-    private static final String META_DATA_PRIMARY_TAG = "android.companion.primary";
+    private static final String PROPERTY_PRIMARY_TAG =
+            "android.companion.PROPERTY_PRIMARY_COMPANION_DEVICE_SERVICE";
 
     static @Nullable PackageInfo getPackageInfo(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName) {
@@ -84,9 +84,8 @@ final class PackageUtils {
     static @NonNull Map<String, List<ComponentName>> getCompanionServicesForUser(
             @NonNull Context context, @UserIdInt int userId) {
         final PackageManager pm = context.getPackageManager();
-        final ResolveInfoFlags flags = ResolveInfoFlags.of(GET_META_DATA);
-        final List<ResolveInfo> companionServices =
-                pm.queryIntentServicesAsUser(COMPANION_SERVICE_INTENT, flags, userId);
+        final List<ResolveInfo> companionServices = pm.queryIntentServicesAsUser(
+                COMPANION_SERVICE_INTENT, ResolveInfoFlags.of(0), userId);
 
         final Map<String, List<ComponentName>> packageNameToServiceInfoList = new HashMap<>();
 
@@ -96,7 +95,7 @@ final class PackageUtils {
             final boolean requiresPermission = Manifest.permission.BIND_COMPANION_DEVICE_SERVICE
                     .equals(resolveInfo.serviceInfo.permission);
             if (!requiresPermission) {
-                Slog.w(LOG_TAG, "CompanionDeviceService "
+                Slog.w(TAG, "CompanionDeviceService "
                         + service.getComponentName().flattenToShortString() + " must require "
                         + "android.permission.BIND_COMPANION_DEVICE_SERVICE");
                 continue;
@@ -109,7 +108,8 @@ final class PackageUtils {
                             service.packageName, it -> new LinkedList<>());
 
             final ComponentName componentName = service.getComponentName();
-            if (isPrimaryCompanionDeviceService(service)) {
+
+            if (isPrimaryCompanionDeviceService(pm, componentName)) {
                 // "Primary" service should be at the head of the list.
                 services.addFirst(componentName);
             } else {
@@ -120,7 +120,12 @@ final class PackageUtils {
         return packageNameToServiceInfoList;
     }
 
-    private static boolean isPrimaryCompanionDeviceService(ServiceInfo service) {
-        return service.metaData != null && service.metaData.getBoolean(META_DATA_PRIMARY_TAG);
+    private static boolean isPrimaryCompanionDeviceService(@NonNull PackageManager pm,
+            @NonNull ComponentName componentName) {
+        try {
+            return pm.getProperty(PROPERTY_PRIMARY_TAG, componentName).getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 }

@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Kërkohet fjalëkalimi për më shumë siguri"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Pajisja është e kyçur nga administratori"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Pajisja është kyçur manualisht"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Nuk njihet"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nuk njihet"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Për të përdorur \"Shkyçjen me fytyrë\", aktivizo "<b>"Qasjen te kamera"</b>" te \"Cilësimet\" &gt; \"Privatësia\""</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

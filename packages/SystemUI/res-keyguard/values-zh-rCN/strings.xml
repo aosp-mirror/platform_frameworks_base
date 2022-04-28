@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"需要输入密码以进一步确保安全"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"管理员已锁定设备"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"此设备已手动锁定"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"无法识别"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"无法识别"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"如需使用人脸解锁功能，请在“设置”&gt;“隐私权”中开启"<b>"摄像头使用权限"</b></string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

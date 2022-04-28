@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"請輸入密碼，以進一步確保資訊安全"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"管理員已鎖定裝置"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"裝置已手動鎖定"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"無法識別"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"無法識別"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"如要使用人臉解鎖功能，請前往「設定」&gt;「隱私權」開啟"<b>"攝影機存取權"</b></string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

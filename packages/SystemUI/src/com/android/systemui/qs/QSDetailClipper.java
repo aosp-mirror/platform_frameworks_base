@@ -25,7 +25,7 @@ import android.view.ViewAnimationUtils;
 
 import androidx.annotation.Nullable;
 
-/** Helper for quick settings detail panel clip animations. **/
+/** Helper for quick settings detail panel clip animations. Currently used by the customizer **/
 public class QSDetailClipper {
 
     private final View mDetail;

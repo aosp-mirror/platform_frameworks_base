@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Yêu cầu mật khẩu để bảo mật thêm"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Thiết bị đã bị quản trị viên khóa"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Thiết bị đã bị khóa theo cách thủ công"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Không nhận dạng được"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Không nhận dạng được"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Để dùng tính năng Mở khoá bằng khuôn mặt, hãy bật tuỳ chọn "<b>"Truy cập máy ảnh"</b>" trong phần Cài đặt &gt; Quyền riêng tư"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

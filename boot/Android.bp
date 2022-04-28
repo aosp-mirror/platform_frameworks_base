@@ -48,6 +48,10 @@ platform_bootclasspath {
     // bootclasspath.
     fragments: [
         {
+            apex: "com.android.adservices",
+            module: "com.android.adservices-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.appsearch",
             module: "com.android.appsearch-bootclasspath-fragment",
         },
@@ -56,8 +60,8 @@ platform_bootclasspath {
             module: "art-bootclasspath-fragment",
         },
         {
-            apex: "com.android.auxiliary",
-            module: "com.android.auxiliary-bootclasspath-fragment",
+            apex: "com.android.bluetooth",
+            module: "com.android.bluetooth-bootclasspath-fragment",
         },
         {
             apex: "com.android.conscrypt",
@@ -80,6 +84,10 @@ platform_bootclasspath {
             module: "com.android.mediaprovider-bootclasspath-fragment",
         },
         {
+            apex: "com.android.ondevicepersonalization",
+            module: "com.android.ondevicepersonalization-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.os.statsd",
             module: "com.android.os.statsd-bootclasspath-fragment",
         },
@@ -94,10 +102,6 @@ platform_bootclasspath {
         {
             apex: "com.android.sdkext",
             module: "com.android.sdkext-bootclasspath-fragment",
-        },
-        {
-            apex: "com.android.supplementalprocess",
-            module: "com.android.supplementalprocess-bootclasspath-fragment",
         },
         {
             apex: "com.android.tethering",

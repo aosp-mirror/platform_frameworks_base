@@ -18,6 +18,7 @@ package com.android.server.tare;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.SparseArray;
@@ -34,7 +35,7 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     private final SparseArray<Reward> mRewards = new SparseArray<>();
     private final int[] mCostModifiers;
     private long mMaxSatiatedBalance;
-    private long mMaxSatiatedCirculation;
+    private long mConsumptionLimit;
 
     CompleteEconomicPolicy(@NonNull InternalResourceService irs) {
         super(irs);
@@ -57,10 +58,10 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    void setup() {
-        super.setup();
+    void setup(@NonNull DeviceConfig.Properties properties) {
+        super.setup(properties);
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
-            mEnabledEconomicPolicies.valueAt(i).setup();
+            mEnabledEconomicPolicies.valueAt(i).setup(properties);
         }
         updateMaxBalances();
     }
@@ -74,9 +75,9 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
 
         max = 0;
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
-            max += mEnabledEconomicPolicies.valueAt(i).getMaxSatiatedCirculation();
+            max += mEnabledEconomicPolicies.valueAt(i).getInitialSatiatedConsumptionLimit();
         }
-        mMaxSatiatedCirculation = max;
+        mConsumptionLimit = max;
     }
 
     @Override
@@ -94,8 +95,13 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-     long getMaxSatiatedCirculation() {
-        return mMaxSatiatedCirculation;
+    long getInitialSatiatedConsumptionLimit() {
+        return mConsumptionLimit;
+    }
+
+    @Override
+    long getHardSatiatedConsumptionLimit() {
+        return mConsumptionLimit;
     }
 
     @NonNull

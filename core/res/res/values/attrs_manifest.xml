@@ -401,15 +401,6 @@
          and before. -->
     <attr name="sharedUserMaxSdkVersion" format="integer" />
 
-    <!-- Whether the application should inherit all AndroidKeyStore keys of its shared user
-         group in the case of leaving its shared user ID in an upgrade.  If set to false, all
-         AndroidKeyStore keys will remain in the shared user group, and the application will no
-         longer have access to those keys after the upgrade. If set to true, all AndroidKeyStore
-         keys owned by the shared user group will be transferred to the upgraded application;
-         other applications in the shared user group will no longer have access to those keys
-         after the migration. The default value is false if not explicitly set. -->
-    <attr name="inheritKeyStoreKeys" format="boolean" />
-
     <!-- Internal version code.  This is the number used to determine whether
          one version is more recent than another: it has no other meaning than
          that higher numbers are more recent.  You could use this number to
@@ -1047,6 +1038,24 @@
 
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="allowEmbedded" format="boolean" />
+
+    <!-- A reference to an array resource containing the signing certificate digests, one of which a
+         client is required to be signed with in order to embed the activity. If the client is not
+         signed with one of the certificates in the set, and the activity does not allow embedding
+         by untrusted hosts via {@link android.R.attr#allowUntrustedActivityEmbedding} flag, the
+         embedding request will fail.
+         <p>The digest should be computed over the DER encoding of the trusted certificate using the
+         SHA-256 digest algorithm.
+         <p>If only a single signer is declared this can also be a string resource, or the digest
+         can be declared inline as the value for this attribute.
+         <p>If the attribute is declared both on the application and the activity level, the value
+         on the activity level takes precedence. -->
+    <attr name="knownActivityEmbeddingCerts" format="reference|string" />
+
+    <!-- Indicate that the activity can be embedded by untrusted hosts. In this case the
+         interactions and visibility of the embedded activity may be limited.
+         <p>The default value of this attribute is <code>false</code>. -->
+    <attr name="allowUntrustedActivityEmbedding" format="boolean" />
 
     <!-- Specifies whether this {@link android.app.Activity} should be shown on
          top of the lock screen whenever the lockscreen is up and this activity has another
@@ -1686,7 +1695,6 @@
         <attr name="sharedUserId" />
         <attr name="sharedUserLabel" />
         <attr name="sharedUserMaxSdkVersion" />
-        <attr name="inheritKeyStoreKeys" />
         <attr name="installLocation" />
         <attr name="isolatedSplits" />
         <attr name="isFeatureSplit" />
@@ -2011,6 +2019,15 @@
              when the application's user data is cleared. The default value is false.
         -->
         <attr name="resetEnabledSettingsOnAppDataCleared" format="boolean" />
+        <attr name="knownActivityEmbeddingCerts" />
+
+        <!-- If false, {@link android.view.KeyEvent#KEYCODE_BACK KEYCODE_BACK} and
+             {@link android.app.Activity#onBackPressed Activity.onBackPressed()}
+             and related event will be forwarded to the Activities and View, otherwise those events
+             will be replaced by a call to
+             {@link android.window.OnBackInvokedCallback#onBackInvoked
+             OnBackInvokedCallback.onBackInvoked()} on the focused window. -->
+        <attr name="enableOnBackInvokedCallback" format="boolean"/>
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.
@@ -3033,6 +3050,8 @@
         <!-- Indicates whether the activity can be displayed on a remote device which may or
              may not be running Android. -->
         <attr name="canDisplayOnRemoteDevices" format="boolean"/>
+        <attr name="allowUntrustedActivityEmbedding" />
+        <attr name="knownActivityEmbeddingCerts" />
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new
@@ -3073,6 +3092,8 @@
         <attr name="exported" />
         <attr name="parentActivityName" />
         <attr name="attributionTags" />
+        <attr name="allowUntrustedActivityEmbedding" />
+        <attr name="knownActivityEmbeddingCerts" />
     </declare-styleable>
 
     <!-- The <code>meta-data</code> tag is used to attach additional

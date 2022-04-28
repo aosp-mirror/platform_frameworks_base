@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
@@ -62,8 +62,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Mock private HeadsUpManagerLogger mHeadsUpManagerLogger;
     @Mock private NotificationGroupManagerLegacy mGroupManager;
     @Mock private View mNotificationShadeWindowView;
-    @Mock private VisualStabilityManager mVSManager;
-    @Mock private StatusBar mBar;
+    @Mock private VisualStabilityProvider mVSProvider;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private KeyguardBypassController mBypassController;
     @Mock private ConfigurationControllerImpl mConfigurationController;
@@ -74,7 +73,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 Context context,
                 HeadsUpManagerLogger headsUpManagerLogger,
                 NotificationGroupManagerLegacy groupManager,
-                VisualStabilityManager vsManager,
+                VisualStabilityProvider visualStabilityProvider,
                 StatusBarStateController statusBarStateController,
                 KeyguardBypassController keyguardBypassController,
                 ConfigurationController configurationController
@@ -85,9 +84,9 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     statusBarStateController,
                     keyguardBypassController,
                     groupManager,
+                    visualStabilityProvider,
                     configurationController
             );
-            setup(vsManager);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
         }
@@ -103,14 +102,14 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
         when(accessibilityMgr.getRecommendedTimeoutMillis(anyInt(), anyInt()))
                 .thenReturn(TEST_AUTO_DISMISS_TIME);
-        when(mVSManager.isReorderingAllowed()).thenReturn(true);
+        when(mVSProvider.isReorderingAllowed()).thenReturn(true);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mDependency.injectMockDependency(ConfigurationController.class);
         mHeadsUpManager = new TestableHeadsUpManagerPhone(
                 mContext,
                 mHeadsUpManagerLogger,
                 mGroupManager,
-                mVSManager,
+                mVSProvider,
                 mStatusBarStateController,
                 mBypassController,
                 mConfigurationController

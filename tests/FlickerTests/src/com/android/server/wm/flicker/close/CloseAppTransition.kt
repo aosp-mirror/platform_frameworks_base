@@ -18,7 +18,6 @@ package com.android.server.wm.flicker.close
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
-import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -35,8 +34,6 @@ import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.flicker.replacesLayer
-import com.android.server.wm.flicker.rules.WMFlickerServiceRuleForTestSpec
-import org.junit.Rule
 import org.junit.Test
 
 /**
@@ -45,9 +42,6 @@ import org.junit.Test
 abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
-
-    @get:Rule
-    val flickerRule = WMFlickerServiceRuleForTestSpec(testSpec)
 
     /**
      * Specification of the test transition to execute
@@ -61,7 +55,7 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
         }
         teardown {
             test {
-                testApp.exit()
+                testApp.exit(wmHelper)
             }
         }
     }
@@ -193,23 +187,5 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
     @Test
     open fun launcherLayerReplacesApp() {
         testSpec.replacesLayer(testApp.component, LAUNCHER_COMPONENT)
-    }
-
-    @FlakyTest
-    @Test
-    fun runPresubmitAssertion() {
-        flickerRule.checkPresubmitAssertions()
-    }
-
-    @FlakyTest
-    @Test
-    fun runPostsubmitAssertion() {
-        flickerRule.checkPostsubmitAssertions()
-    }
-
-    @FlakyTest
-    @Test
-    fun runFlakyAssertion() {
-        flickerRule.checkFlakyAssertions()
     }
 }

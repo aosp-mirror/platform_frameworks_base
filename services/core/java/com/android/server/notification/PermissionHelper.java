@@ -35,6 +35,7 @@ import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.util.Collections;
@@ -54,19 +55,31 @@ public final class PermissionHelper {
     private final PermissionManagerServiceInternal mPmi;
     private final IPackageManager mPackageManager;
     private final IPermissionManager mPermManager;
-    // TODO (b/194833441): Remove when the migration is enabled
+    // TODO (b/194833441): Remove this boolean (but keep the isMigrationEnabled() method)
+    //  when the migration is enabled
     private final boolean mMigrationEnabled;
+    private final boolean mIsTv;
+    private final boolean mForceUserSetOnUpgrade;
 
     public PermissionHelper(PermissionManagerServiceInternal pmi, IPackageManager packageManager,
-            IPermissionManager permManager, boolean migrationEnabled) {
+            IPermissionManager permManager, boolean migrationEnabled,
+            boolean forceUserSetOnUpgrade) {
         mPmi = pmi;
         mPackageManager = packageManager;
         mPermManager = permManager;
         mMigrationEnabled = migrationEnabled;
+        mForceUserSetOnUpgrade = forceUserSetOnUpgrade;
+        boolean isTv;
+        try {
+            isTv = mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK, 0);
+        } catch (RemoteException e) {
+            isTv = false;
+        }
+        mIsTv = isTv;
     }
 
     public boolean isMigrationEnabled() {
-        return mMigrationEnabled;
+        return mMigrationEnabled && !mIsTv;
     }
 
     /**
@@ -179,11 +192,22 @@ public final class PermissionHelper {
         assertFlag();
         final long callingId = Binder.clearCallingIdentity();
         try {
-            if (grant) {
+            // Do not change the permission if the package doesn't request it, do not change fixed
+            // permissions, and do not change non-user set permissions that are granted by default,
+            // or granted by role.
+            if (!packageRequestsNotificationPermission(packageName, userId)
+                    || isPermissionFixed(packageName, userId)
+                    || (isPermissionGrantedByDefaultOrRole(packageName, userId) && !userSet)) {
+                return;
+            }
+
+            boolean currentlyGranted = mPmi.checkPermission(packageName, NOTIFICATION_PERMISSION,
+                    userId) != PackageManager.PERMISSION_DENIED;
+            if (grant && !reviewRequired && !currentlyGranted) {
                 mPermManager.grantRuntimePermission(packageName, NOTIFICATION_PERMISSION, userId);
-            } else {
-                mPermManager.revokeRuntimePermission(packageName, NOTIFICATION_PERMISSION, userId,
-                        TAG);
+            } else if (!grant && currentlyGranted) {
+                mPermManager.revokeRuntimePermission(packageName, NOTIFICATION_PERMISSION,
+                        userId, TAG);
             }
             if (userSet) {
                 mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
@@ -210,8 +234,11 @@ public final class PermissionHelper {
         if (pkgPerm == null || pkgPerm.packageName == null) {
             return;
         }
-        setNotificationPermission(pkgPerm.packageName, pkgPerm.userId, pkgPerm.granted,
-                pkgPerm.userSet, !pkgPerm.userSet);
+        if (!isPermissionFixed(pkgPerm.packageName, pkgPerm.userId)) {
+            boolean userSet = mForceUserSetOnUpgrade ? true : pkgPerm.userModifiedSettings;
+            setNotificationPermission(pkgPerm.packageName, pkgPerm.userId, pkgPerm.granted,
+                    userSet, !userSet);
+        }
     }
 
     public boolean isPermissionFixed(String packageName, @UserIdInt int userId) {
@@ -239,7 +266,8 @@ public final class PermissionHelper {
             try {
                 int flags = mPermManager.getPermissionFlags(packageName, NOTIFICATION_PERMISSION,
                         userId);
-                return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
+                return (flags & (PackageManager.FLAG_PERMISSION_USER_SET
+                        | PackageManager.FLAG_PERMISSION_USER_FIXED)) != 0;
             } catch (RemoteException e) {
                 Slog.e(TAG, "Could not reach system server", e);
             }
@@ -247,6 +275,37 @@ public final class PermissionHelper {
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
+    }
+
+    boolean isPermissionGrantedByDefaultOrRole(String packageName, @UserIdInt int userId) {
+        assertFlag();
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            try {
+                int flags = mPermManager.getPermissionFlags(packageName, NOTIFICATION_PERMISSION,
+                        userId);
+                return (flags & (PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT
+                        | PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE)) != 0;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Could not reach system server", e);
+            }
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    private boolean packageRequestsNotificationPermission(String packageName,
+            @UserIdInt int userId) {
+        assertFlag();
+        try {
+            String[] permissions = mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS,
+                    userId).requestedPermissions;
+            return ArrayUtils.contains(permissions, NOTIFICATION_PERMISSION);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not reach system server", e);
+        }
+        return false;
     }
 
     private void assertFlag() {
@@ -259,13 +318,13 @@ public final class PermissionHelper {
         public final String packageName;
         public final @UserIdInt int userId;
         public final boolean granted;
-        public final boolean userSet;
+        public final boolean userModifiedSettings;
 
         public PackagePermission(String pkg, int userId, boolean granted, boolean userSet) {
             this.packageName = pkg;
             this.userId = userId;
             this.granted = granted;
-            this.userSet = userSet;
+            this.userModifiedSettings = userSet;
         }
 
         @Override
@@ -273,13 +332,14 @@ public final class PermissionHelper {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             PackagePermission that = (PackagePermission) o;
-            return userId == that.userId && granted == that.granted && userSet == that.userSet
+            return userId == that.userId && granted == that.granted && userModifiedSettings
+                    == that.userModifiedSettings
                     && Objects.equals(packageName, that.packageName);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(packageName, userId, granted, userSet);
+            return Objects.hash(packageName, userId, granted, userModifiedSettings);
         }
 
         @Override
@@ -288,7 +348,7 @@ public final class PermissionHelper {
                     "packageName='" + packageName + '\'' +
                     ", userId=" + userId +
                     ", granted=" + granted +
-                    ", userSet=" + userSet +
+                    ", userSet=" + userModifiedSettings +
                     '}';
         }
     }

@@ -749,23 +749,29 @@ public class LauncherApps {
     }
 
     /**
-     * Returns a PendingIntent that would start the same activity started from
-     * {@link #startMainActivity(ComponentName, UserHandle, Rect, Bundle)}.
+     * Returns a mutable PendingIntent that would start the same activity started from
+     * {@link #startMainActivity(ComponentName, UserHandle, Rect, Bundle)}.  The caller needs to
+     * take care in ensuring that the mutable intent returned is not passed to untrusted parties.
      *
      * @param component The ComponentName of the activity to launch
-     * @param startActivityOptions Options to pass to startActivity
+     * @param startActivityOptions This parameter is no longer supported
      * @param user The UserHandle of the profile
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
     @Nullable
     public PendingIntent getMainActivityLaunchIntent(@NonNull ComponentName component,
             @Nullable Bundle startActivityOptions, @NonNull UserHandle user) {
+        if (mContext.checkSelfPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "Only allowed for recents.");
+        }
         logErrorForInvalidProfileAccess(user);
         if (DEBUG) {
             Log.i(TAG, "GetMainActivityLaunchIntent " + component + " " + user);
         }
         try {
-            return mService.getActivityLaunchIntent(component, startActivityOptions, user);
+            return mService.getActivityLaunchIntent(mContext.getPackageName(), component, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -860,7 +866,7 @@ public class LauncherApps {
      *
      * @param packageName The packageName of the shortcut
      * @param shortcutId The id of the shortcut
-     * @param opts Options to pass to the PendingIntent
+     * @param opts This parameter is no longer supported
      * @param user The UserHandle of the profile
      */
     @Nullable
@@ -872,8 +878,9 @@ public class LauncherApps {
             Log.i(TAG, "GetShortcutIntent " + packageName + "/" + shortcutId + " " + user);
         }
         try {
+            // due to b/209607104, opts will be ignored
             return mService.getShortcutIntent(
-                    mContext.getPackageName(), packageName, shortcutId, opts, user);
+                    mContext.getPackageName(), packageName, shortcutId, null /* opts */, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

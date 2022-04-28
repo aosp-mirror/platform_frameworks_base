@@ -22,6 +22,12 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.SystemUIBinder;
 import com.android.systemui.dagger.SystemUIModule;
+import com.android.systemui.statusbar.dagger.CentralSurfacesDependenciesModule;
+import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
+import com.android.systemui.statusbar.notification.row.NotificationRowModule;
+
+import com.android.systemui.keyguard.dagger.KeyguardModule;
+import com.android.systemui.recents.RecentsModule;
 
 import dagger.Subcomponent;
 
@@ -30,12 +36,17 @@ import dagger.Subcomponent;
  */
 @SysUISingleton
 @Subcomponent(modules = {
+        CentralSurfacesDependenciesModule.class,
         DefaultComponentBinder.class,
         DependencyProvider.class,
-        SystemUIBinder.class,
+        KeyguardModule.class,
+        NotificationRowModule.class,
+        NotificationsModule.class,
+        RecentsModule.class,
         SystemUIModule.class,
-        TvSystemUIModule.class,
-        TvSystemUIBinder.class})
+        TvSystemUIBinder.class,
+        TVSystemUICoreStartableModule.class,
+        TvSystemUIModule.class})
 public interface TvSysUIComponent extends SysUIComponent {
 
     /**

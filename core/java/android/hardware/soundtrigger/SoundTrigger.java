@@ -29,6 +29,7 @@ import static android.system.OsConstants.EPIPE;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -61,6 +62,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -1576,33 +1578,61 @@ public class SoundTrigger {
     }
 
     /**
-     *  Additional data conveyed by a {@link KeyphraseRecognitionEvent}
-     *  for a key phrase detection.
-     *
-     * @hide
+     * Additional data conveyed by a {@link KeyphraseRecognitionEvent}
+     * for a key phrase detection.
      */
-    public static class KeyphraseRecognitionExtra implements Parcelable {
-        /** The keyphrase ID */
+    public static final class KeyphraseRecognitionExtra implements Parcelable {
+        /**
+         * The keyphrase ID
+         *
+         * @hide
+         */
         @UnsupportedAppUsage
         public final int id;
 
-        /** Recognition modes matched for this event */
+        /**
+         * Recognition modes matched for this event
+         *
+         * @hide
+         */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public final int recognitionModes;
 
-        /** Confidence level for mode RECOGNITION_MODE_VOICE_TRIGGER when user identification
-         * is not performed */
+        /**
+         * Confidence level for mode RECOGNITION_MODE_VOICE_TRIGGER when user identification
+         * is not performed
+         *
+         * @hide
+         */
         @UnsupportedAppUsage
         public final int coarseConfidenceLevel;
 
-        /** Confidence levels for all users recognized (KeyphraseRecognitionEvent) or to
-         * be recognized (RecognitionConfig) */
+        /**
+         * Confidence levels for all users recognized (KeyphraseRecognitionEvent) or to
+         * be recognized (RecognitionConfig)
+         *
+         * @hide
+         */
         @UnsupportedAppUsage
         @NonNull
         public final ConfidenceLevel[] confidenceLevels;
 
+
+        /**
+         * @hide
+         */
+        @TestApi
+        public KeyphraseRecognitionExtra(int id, @RecognitionModes int recognitionModes,
+                int coarseConfidenceLevel) {
+            this(id, recognitionModes, coarseConfidenceLevel, new ConfidenceLevel[0]);
+        }
+
+        /**
+         * @hide
+         */
         @UnsupportedAppUsage
-        public KeyphraseRecognitionExtra(int id, int recognitionModes, int coarseConfidenceLevel,
+        public KeyphraseRecognitionExtra(int id, int recognitionModes,
+                @IntRange(from = 0, to = 100) int coarseConfidenceLevel,
                 @Nullable ConfidenceLevel[] confidenceLevels) {
             this.id = id;
             this.recognitionModes = recognitionModes;
@@ -1611,7 +1641,48 @@ public class SoundTrigger {
                     confidenceLevels != null ? confidenceLevels : new ConfidenceLevel[0];
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseRecognitionExtra> CREATOR
+        /**
+         * The keyphrase ID associated with this class' additional data
+         */
+        public int getKeyphraseId() {
+            return id;
+        }
+
+        /**
+         * Recognition modes matched for this event
+         */
+        @RecognitionModes
+        public int getRecognitionModes() {
+            return recognitionModes;
+        }
+
+        /**
+         * Confidence level for mode RECOGNITION_MODE_VOICE_TRIGGER when user identification
+         * is not performed
+         *
+         * <p>The confidence level is expressed in percent (0% -100%).
+         */
+        @IntRange(from = 0, to = 100)
+        public int getCoarseConfidenceLevel() {
+            return coarseConfidenceLevel;
+        }
+
+        /**
+         * Detected confidence level for users defined in a keyphrase.
+         *
+         * <p>The confidence level is expressed in percent (0% -100%).
+         *
+         * <p>The user ID is derived from the system ID
+         * {@link android.os.UserHandle#getIdentifier()}.
+         *
+         * @hide
+         */
+        @NonNull
+        public Collection<ConfidenceLevel> getConfidenceLevels() {
+            return Arrays.asList(confidenceLevels);
+        }
+
+        public static final @NonNull Parcelable.Creator<KeyphraseRecognitionExtra> CREATOR
                 = new Parcelable.Creator<KeyphraseRecognitionExtra>() {
             public KeyphraseRecognitionExtra createFromParcel(Parcel in) {
                 return KeyphraseRecognitionExtra.fromParcel(in);
@@ -1632,7 +1703,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(id);
             dest.writeInt(recognitionModes);
             dest.writeInt(coarseConfidenceLevel);
@@ -1657,21 +1728,28 @@ public class SoundTrigger {
 
         @Override
         public boolean equals(@Nullable Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             KeyphraseRecognitionExtra other = (KeyphraseRecognitionExtra) obj;
-            if (!Arrays.equals(confidenceLevels, other.confidenceLevels))
+            if (!Arrays.equals(confidenceLevels, other.confidenceLevels)) {
                 return false;
-            if (id != other.id)
+            }
+            if (id != other.id) {
                 return false;
-            if (recognitionModes != other.recognitionModes)
+            }
+            if (recognitionModes != other.recognitionModes) {
                 return false;
-            if (coarseConfidenceLevel != other.coarseConfidenceLevel)
+            }
+            if (coarseConfidenceLevel != other.coarseConfidenceLevel) {
                 return false;
+            }
             return true;
         }
 
@@ -1715,7 +1793,7 @@ public class SoundTrigger {
                     keyphraseExtras != null ? keyphraseExtras : new KeyphraseRecognitionExtra[0];
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseRecognitionEvent> CREATOR
+        public static final @NonNull Parcelable.Creator<KeyphraseRecognitionEvent> CREATOR
                 = new Parcelable.Creator<KeyphraseRecognitionEvent>() {
             public KeyphraseRecognitionEvent createFromParcel(Parcel in) {
                 return KeyphraseRecognitionEvent.fromParcelForKeyphrase(in);

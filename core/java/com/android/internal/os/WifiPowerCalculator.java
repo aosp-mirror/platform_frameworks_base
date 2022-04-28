@@ -19,21 +19,18 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.Process;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * WiFi power calculator for when BatteryStats supports energy reporting
  * from the WiFi controller.
  */
 public class WifiPowerCalculator extends PowerCalculator {
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = PowerCalculator.DEBUG;
     private static final String TAG = "WifiPowerCalculator";
 
     private static final BatteryConsumer.Key[] UNINITIALIZED_KEYS = new BatteryConsumer.Key[0];
@@ -114,9 +111,10 @@ public class WifiPowerCalculator extends PowerCalculator {
             calculateApp(powerDurationAndTraffic, app.getBatteryStatsUid(), powerModel,
                     rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED,
                     batteryStats.hasWifiActivityReporting(), consumptionUC);
-
-            totalAppDurationMs += powerDurationAndTraffic.durationMs;
-            totalAppPowerMah += powerDurationAndTraffic.powerMah;
+            if (!app.isVirtualUid()) {
+                totalAppDurationMs += powerDurationAndTraffic.durationMs;
+                totalAppPowerMah += powerDurationAndTraffic.powerMah;
+            }
 
             app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI,
                     powerDurationAndTraffic.durationMs);
@@ -154,62 +152,6 @@ public class WifiPowerCalculator extends PowerCalculator {
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI,
                         totalAppPowerMah, powerModel);
-    }
-
-    /**
-     * We do per-app blaming of WiFi activity. If energy info is reported from the controller,
-     * then only the WiFi process gets blamed here since we normalize power calculations and
-     * assign all the power drain to apps. If energy info is not reported, we attribute the
-     * difference between total running time of WiFi for all apps and the actual running time
-     * of WiFi to the WiFi subsystem.
-     */
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-
-        final BatterySipper bs = new BatterySipper(BatterySipper.DrainType.WIFI, null, 0);
-
-        long totalAppDurationMs = 0;
-        double totalAppPowerMah = 0;
-        final PowerDurationAndTraffic powerDurationAndTraffic = new PowerDurationAndTraffic();
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                final long consumptionUC =
-                        app.uidObj.getWifiMeasuredBatteryConsumptionUC();
-                final int powerModel = getPowerModel(consumptionUC);
-                calculateApp(powerDurationAndTraffic, app.uidObj, powerModel, rawRealtimeUs,
-                        statsType, batteryStats.hasWifiActivityReporting(), consumptionUC);
-
-                totalAppDurationMs += powerDurationAndTraffic.durationMs;
-                totalAppPowerMah += powerDurationAndTraffic.powerMah;
-
-                app.wifiPowerMah = powerDurationAndTraffic.powerMah;
-                app.wifiRunningTimeMs = powerDurationAndTraffic.durationMs;
-                app.wifiRxBytes = powerDurationAndTraffic.wifiRxBytes;
-                app.wifiRxPackets = powerDurationAndTraffic.wifiRxPackets;
-                app.wifiTxBytes = powerDurationAndTraffic.wifiTxBytes;
-                app.wifiTxPackets = powerDurationAndTraffic.wifiTxPackets;
-                if (app.getUid() == Process.WIFI_UID) {
-                    if (DEBUG) Log.d(TAG, "WiFi adding sipper " + app + ": cpu=" + app.cpuTimeMs);
-                    app.isAggregated = true;
-                    bs.add(app);
-                }
-            }
-        }
-
-        final long consumptionUC = batteryStats.getWifiMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(consumptionUC);
-        calculateRemaining(powerDurationAndTraffic, powerModel, batteryStats, rawRealtimeUs,
-                statsType, batteryStats.hasWifiActivityReporting(), totalAppDurationMs,
-                totalAppPowerMah, consumptionUC);
-
-        bs.wifiRunningTimeMs += powerDurationAndTraffic.durationMs;
-        bs.wifiPowerMah += powerDurationAndTraffic.powerMah;
-
-        if (bs.sumPower() > 0) {
-            sippers.add(bs);
-        }
     }
 
     private void calculateApp(PowerDurationAndTraffic powerDurationAndTraffic,
@@ -251,7 +193,7 @@ public class WifiPowerCalculator extends PowerCalculator {
 
                 if (DEBUG && powerDurationAndTraffic.powerMah != 0) {
                     Log.d(TAG, "UID " + u.getUid() + ": idle=" + idleTime + "ms rx=" + rxTime
-                            + "ms tx=" + txTime + "ms power=" + formatCharge(
+                            + "ms tx=" + txTime + "ms power=" + BatteryStats.formatCharge(
                             powerDurationAndTraffic.powerMah));
                 }
 
@@ -306,7 +248,7 @@ public class WifiPowerCalculator extends PowerCalculator {
             }
 
             if (DEBUG && powerDurationAndTraffic.powerMah != 0) {
-                Log.d(TAG, "UID " + u.getUid() + ": power=" + formatCharge(
+                Log.d(TAG, "UID " + u.getUid() + ": power=" + BatteryStats.formatCharge(
                         powerDurationAndTraffic.powerMah));
             }
         }
@@ -353,7 +295,8 @@ public class WifiPowerCalculator extends PowerCalculator {
         powerDurationAndTraffic.powerMah = Math.max(0, totalPowerMah - totalAppPowerMah);
 
         if (DEBUG) {
-            Log.d(TAG, "left over WiFi power: " + formatCharge(powerDurationAndTraffic.powerMah));
+            Log.d(TAG, "left over WiFi power: " + BatteryStats.formatCharge(
+                    powerDurationAndTraffic.powerMah));
         }
     }
 

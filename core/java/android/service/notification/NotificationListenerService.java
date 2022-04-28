@@ -256,6 +256,8 @@ public abstract class NotificationListenerService extends Service {
     public static final int REASON_CHANNEL_REMOVED = 20;
     /** Notification was canceled due to the app's storage being cleared */
     public static final int REASON_CLEAR_DATA = 21;
+    /** Notification was canceled due to an assistant adjustment update. */
+    public static final int REASON_ASSISTANT_CANCEL = 22;
 
     /**
      * @hide
@@ -279,7 +281,10 @@ public abstract class NotificationListenerService extends Service {
             REASON_UNAUTOBUNDLED,
             REASON_CHANNEL_BANNED,
             REASON_SNOOZED,
-            REASON_TIMEOUT
+            REASON_TIMEOUT,
+            REASON_CHANNEL_REMOVED,
+            REASON_CLEAR_DATA,
+            REASON_ASSISTANT_CANCEL,
     })
     public @interface NotificationCancelReason{};
 

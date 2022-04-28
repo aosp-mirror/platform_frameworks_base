@@ -171,9 +171,8 @@ public class StagedRollbackTest {
     @Test
     public void testRollbackApexWithApkCrashing_Phase1_Install() throws Exception {
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
-        int sessionId = Install.single(TEST_APEX_WITH_APK_V2_CRASHING).setStaged()
+        Install.single(TEST_APEX_WITH_APK_V2_CRASHING).setStaged()
                 .setEnableRollback().commit();
-        InstallUtils.waitForSessionReady(sessionId);
     }
 
     /**

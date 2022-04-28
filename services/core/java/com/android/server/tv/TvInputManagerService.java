@@ -102,6 +102,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.SystemService;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -1183,6 +1185,7 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public List<String> getAvailableExtensionInterfaceNames(String inputId, int userId) {
+            ensureTisExtensionInterfacePermission();
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
@@ -1228,6 +1231,7 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public IBinder getExtensionInterface(String inputId, String name, int userId) {
+            ensureTisExtensionInterfacePermission();
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
@@ -2541,6 +2545,7 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public int getClientPriority(int useCase, String sessionId) {
+            ensureTunerResourceAccessPermission();
             final int callingPid = Binder.getCallingPid();
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -2628,6 +2633,15 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
+        private void ensureTisExtensionInterfacePermission() {
+            if (mContext.checkCallingPermission(
+                    android.Manifest.permission.TIS_EXTENSION_INTERFACE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires TIS_EXTENSION_INTERFACE permission");
+            }
+        }
+
+        @NeverCompile // Avoid size overhead of debugging code.
         @Override
         @SuppressWarnings("resource")
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {

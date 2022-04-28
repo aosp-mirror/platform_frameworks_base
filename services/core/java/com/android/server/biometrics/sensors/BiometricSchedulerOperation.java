@@ -84,6 +84,8 @@ public class BiometricSchedulerOperation {
     private final BaseClientMonitor mClientMonitor;
     @Nullable
     private final ClientMonitorCallback mClientCallback;
+    @Nullable
+    private ClientMonitorCallback mOnStartCallback;
     @OperationState
     private int mState;
     @VisibleForTesting
@@ -108,7 +110,8 @@ public class BiometricSchedulerOperation {
         mCancelWatchdog = () -> {
             if (!isFinished()) {
                 Slog.e(TAG, "[Watchdog Triggered]: " + this);
-                getWrappedCallback().onClientFinished(mClientMonitor, false /* success */);
+                getWrappedCallback(mOnStartCallback)
+                        .onClientFinished(mClientMonitor, false /* success */);
             }
         };
     }
@@ -120,11 +123,12 @@ public class BiometricSchedulerOperation {
      *
      * @return cookie or 0 if ready/started
      */
-    public int isReadyToStart() {
+    public int isReadyToStart(@NonNull ClientMonitorCallback callback) {
         if (mState == STATE_WAITING_FOR_COOKIE || mState == STATE_WAITING_IN_QUEUE) {
             final int cookie = mClientMonitor.getCookie();
             if (cookie != 0) {
                 mState = STATE_WAITING_FOR_COOKIE;
+                mClientMonitor.waitForCookie(getWrappedCallback(callback));
             }
             return cookie;
         }
@@ -134,7 +138,7 @@ public class BiometricSchedulerOperation {
 
     /**
      * Start this operation without waiting for a cookie
-     * (i.e. {@link #isReadyToStart() returns zero}
+     * (i.e. {@link #isReadyToStart(ClientMonitorCallback)}  returns zero}
      *
      * @param callback lifecycle callback
      * @return if this operation started
@@ -174,6 +178,7 @@ public class BiometricSchedulerOperation {
     }
 
     private boolean doStart(@NonNull ClientMonitorCallback callback) {
+        mOnStartCallback = callback;
         final ClientMonitorCallback cb = getWrappedCallback(callback);
 
         if (mState == STATE_WAITING_IN_QUEUE_CANCELING) {

@@ -407,7 +407,7 @@ public final class MediaController {
     /**
      * Get the session owner's package name.
      *
-     * @return The package name of of the session owner.
+     * @return The package name of the session owner.
      */
     public String getPackageName() {
         if (mPackageName == null) {

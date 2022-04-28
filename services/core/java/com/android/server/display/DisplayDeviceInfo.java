@@ -39,7 +39,7 @@ final class DisplayDeviceInfo {
      * Flag: Indicates that this display device should be considered the default display
      * device of the system.
      */
-    public static final int FLAG_DEFAULT_DISPLAY = 1 << 0;
+    public static final int FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY = 1 << 0;
 
     /**
      * Flag: Indicates that the orientation of this display device is coupled to the
@@ -418,7 +418,7 @@ final class DisplayDeviceInfo {
                 || !Objects.equals(deviceProductInfo, other.deviceProductInfo)
                 || ownerUid != other.ownerUid
                 || !Objects.equals(ownerPackageName, other.ownerPackageName)
-                || !Objects.equals(frameRateOverrides, other.frameRateOverrides)
+                || !Arrays.equals(frameRateOverrides, other.frameRateOverrides)
                 || !BrightnessSynchronizer.floatEquals(brightnessMinimum, other.brightnessMinimum)
                 || !BrightnessSynchronizer.floatEquals(brightnessMaximum, other.brightnessMaximum)
                 || !BrightnessSynchronizer.floatEquals(brightnessDefault,
@@ -538,8 +538,8 @@ final class DisplayDeviceInfo {
 
     private static String flagsToString(int flags) {
         StringBuilder msg = new StringBuilder();
-        if ((flags & FLAG_DEFAULT_DISPLAY) != 0) {
-            msg.append(", FLAG_DEFAULT_DISPLAY");
+        if ((flags & FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY) != 0) {
+            msg.append(", FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY");
         }
         if ((flags & FLAG_ROTATES_WITH_CONTENT) != 0) {
             msg.append(", FLAG_ROTATES_WITH_CONTENT");

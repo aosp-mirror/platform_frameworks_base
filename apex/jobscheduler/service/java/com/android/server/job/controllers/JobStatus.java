@@ -56,6 +56,8 @@ import com.android.server.job.JobServerProtoEnums;
 import com.android.server.job.JobStatusDumpProto;
 import com.android.server.job.JobStatusShortInfoProto;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -261,11 +263,9 @@ public final class JobStatus {
      *
      * Doesn't exempt jobs with a deadline constraint, as they can be started without any content or
      * network changes, in which case this exemption does not make sense.
-     *
-     * TODO(b/149519887): Use a more explicit signal, maybe an API flag, that the scheduling package
-     * needs to provide at the time of scheduling a job.
      */
-    private final boolean mHasMediaBackupExemption;
+    private boolean mHasMediaBackupExemption;
+    private final boolean mHasExemptedMediaUrisOnly;
 
     // Set to true if doze constraint was satisfied due to app being whitelisted.
     boolean appHasDozeExemption;
@@ -441,11 +441,6 @@ public final class JobStatus {
     /** The reason a job most recently went from ready to not ready. */
     private int mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
 
-    /** Provide a handle to the service that this job will be run on. */
-    public int getServiceToken() {
-        return callingUid;
-    }
-
     /**
      * Core constructor for JobStatus instances.  All other ctors funnel down to this one.
      *
@@ -508,11 +503,9 @@ public final class JobStatus {
         this.mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
         this.numFailures = numFailures;
 
-        boolean requiresNetwork = false;
         int requiredConstraints = job.getConstraintFlags();
         if (job.getRequiredNetwork() != null) {
             requiredConstraints |= CONSTRAINT_CONNECTIVITY;
-            requiresNetwork = true;
         }
         if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_TIMING_DELAY;
@@ -531,6 +524,7 @@ public final class JobStatus {
                 }
             }
         }
+        mHasExemptedMediaUrisOnly = exemptedMediaUrisOnly;
         this.requiredConstraints = requiredConstraints;
         mRequiredConstraintsOfInterest = requiredConstraints & CONSTRAINTS_OF_INTEREST;
         addDynamicConstraints(dynamicConstraints);
@@ -563,9 +557,7 @@ public final class JobStatus {
             job = builder.build(false);
         }
 
-        final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
-        mHasMediaBackupExemption = !job.hasLateConstraint() && exemptedMediaUrisOnly
-                && requiresNetwork && this.sourcePackageName.equals(jsi.getMediaBackupPackage());
+        updateMediaBackupExemptionStatus();
     }
 
     /** Copy constructor: used specifically when cloning JobStatus objects for persistence,
@@ -914,6 +906,25 @@ public final class JobStatus {
         mFirstForceBatchedTimeElapsed = now;
     }
 
+    /**
+     * Re-evaluates the media backup exemption status.
+     *
+     * @return true if the exemption status changed
+     */
+    public boolean updateMediaBackupExemptionStatus() {
+        final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
+        boolean hasMediaExemption = mHasExemptedMediaUrisOnly
+                && !job.hasLateConstraint()
+                && job.getRequiredNetwork() != null
+                && getEffectivePriority() >= JobInfo.PRIORITY_DEFAULT
+                && sourcePackageName.equals(jsi.getCloudMediaProviderPackage(sourceUserId));
+        if (mHasMediaBackupExemption == hasMediaExemption) {
+            return false;
+        }
+        mHasMediaBackupExemption = hasMediaExemption;
+        return true;
+    }
+
     public String getSourceTag() {
         return sourceTag;
     }
@@ -1139,11 +1150,12 @@ public final class JobStatus {
      */
     public float getFractionRunTime() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
-        if (earliestRunTimeElapsedMillis == 0 && latestRunTimeElapsedMillis == Long.MAX_VALUE) {
+        if (earliestRunTimeElapsedMillis == NO_EARLIEST_RUNTIME
+                && latestRunTimeElapsedMillis == NO_LATEST_RUNTIME) {
             return 1;
-        } else if (earliestRunTimeElapsedMillis == 0) {
+        } else if (earliestRunTimeElapsedMillis == NO_EARLIEST_RUNTIME) {
             return now >= latestRunTimeElapsedMillis ? 1 : 0;
-        } else if (latestRunTimeElapsedMillis == Long.MAX_VALUE) {
+        } else if (latestRunTimeElapsedMillis == NO_LATEST_RUNTIME) {
             return now >= earliestRunTimeElapsedMillis ? 1 : 0;
         } else {
             if (now <= earliestRunTimeElapsedMillis) {
@@ -1299,8 +1311,15 @@ public final class JobStatus {
         if (mExpeditedQuotaApproved == state) {
             return false;
         }
+        final boolean wasReady = !state && isReady();
         mExpeditedQuotaApproved = state;
         updateExpeditedDependencies();
+        final boolean isReady = isReady();
+        if (wasReady && !isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_QUOTA;
+        } else if (!wasReady && isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
+        }
         return true;
     }
 
@@ -1314,8 +1333,15 @@ public final class JobStatus {
         if (mExpeditedTareApproved == state) {
             return false;
         }
+        final boolean wasReady = !state && isReady();
         mExpeditedTareApproved = state;
         updateExpeditedDependencies();
+        final boolean isReady = isReady();
+        if (wasReady && !isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_QUOTA;
+        } else if (!wasReady && isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
+        }
         return true;
     }
 
@@ -1948,14 +1974,15 @@ public final class JobStatus {
             case 2: return "FREQUENT";
             case 3: return "RARE";
             case 4: return "NEVER";
-            case 5:
-                return "RESTRICTED";
+            case 5: return "RESTRICTED";
+            case 6: return "EXEMPTED";
             default:
                 return "Unknown: " + standbyBucket;
         }
     }
 
     // Dumpsys infrastructure
+    @NeverCompile // Avoid size overhead of debugging code.
     public void dump(IndentingPrintWriter pw,  boolean full, long nowElapsed) {
         UserHandle.formatUid(pw, callingUid);
         pw.print(" tag="); pw.println(tag);
@@ -2026,6 +2053,7 @@ public final class JobStatus {
                     TimeUtils.formatDuration(job.getTriggerContentMaxDelay(), pw);
                     pw.println();
                 }
+                pw.print("Has media backup exemption", mHasMediaBackupExemption).println();
             }
             if (job.getExtras() != null && !job.getExtras().isDefinitelyEmpty()) {
                 pw.print("Extras: ");

@@ -60,13 +60,13 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.TaskView;
 import com.android.wm.shell.common.AlphaOptimizedButton;
 import com.android.wm.shell.common.TriangleShape;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -112,6 +112,7 @@ public class BubbleExpandedView extends LinearLayout {
     private ShapeDrawable mRightPointer;
     private float mCornerRadius = 0f;
     private int mBackgroundColorFloating;
+    private boolean mUsingMaxHeight;
 
     @Nullable private Bubble mBubble;
     private PendingIntent mPendingIntent;
@@ -418,8 +419,9 @@ public class BubbleExpandedView extends LinearLayout {
         mPointerView.setBackground(mCurrentPointer);
     }
 
-    private String getBubbleKey() {
-        return mBubble != null ? mBubble.getKey() : "null";
+    @VisibleForTesting
+    public String getBubbleKey() {
+        return mBubble != null ? mBubble.getKey() : mIsOverflow ? BubbleOverflow.KEY : null;
     }
 
     /**
@@ -620,6 +622,13 @@ public class BubbleExpandedView extends LinearLayout {
         return prevWasIntentBased != newIsIntentBased;
     }
 
+    /**
+     * Whether the bubble is using all available height to display or not.
+     */
+    public boolean isUsingMaxHeight() {
+        return mUsingMaxHeight;
+    }
+
     void updateHeight() {
         if (mExpandedViewContainerLocation == null) {
             return;
@@ -631,6 +640,7 @@ public class BubbleExpandedView extends LinearLayout {
             float height = desiredHeight == MAX_HEIGHT
                     ? maxHeight
                     : Math.min(desiredHeight, maxHeight);
+            mUsingMaxHeight = height == maxHeight;
             FrameLayout.LayoutParams lp = mIsOverflow
                     ? (FrameLayout.LayoutParams) mOverflowView.getLayoutParams()
                     : (FrameLayout.LayoutParams) mTaskView.getLayoutParams();
@@ -690,6 +700,7 @@ public class BubbleExpandedView extends LinearLayout {
      * @param bubblePosition the x position of the bubble if showing on top, the y position of
      *                       the bubble if showing vertically.
      * @param onLeft whether the stack was on the left side of the screen when expanded.
+     * @param animate whether the pointer should animate to this position.
      */
     public void setPointerPosition(float bubblePosition, boolean onLeft, boolean animate) {
         // Pointer gets drawn in the padding
@@ -773,8 +784,7 @@ public class BubbleExpandedView extends LinearLayout {
     /**
      * Description of current expanded view state.
      */
-    public void dump(
-            @NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("BubbleExpandedView");
         pw.print("  taskId:               "); pw.println(mTaskId);
         pw.print("  stackView:            "); pw.println(mStackView);

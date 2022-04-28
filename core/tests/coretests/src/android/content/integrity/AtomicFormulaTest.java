@@ -104,6 +104,17 @@ public class AtomicFormulaTest {
     }
 
     @Test
+    public void testValidAtomicFormula_stringValue_appCertificateLineageIsNotAutoHashed() {
+        String appCert = "cert";
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(AtomicFormula.APP_CERTIFICATE_LINEAGE, appCert);
+
+        assertThat(stringAtomicFormula.getKey()).isEqualTo(AtomicFormula.APP_CERTIFICATE_LINEAGE);
+        assertThat(stringAtomicFormula.getValue()).matches(appCert);
+        assertThat(stringAtomicFormula.getIsHashedValue()).isTrue();
+    }
+
+    @Test
     public void testValidAtomicFormula_stringValue_installerCertificateIsNotAutoHashed() {
         String installerCert = "cert";
         StringAtomicFormula stringAtomicFormula =
@@ -285,6 +296,34 @@ public class AtomicFormulaTest {
     }
 
     @Test
+    public void testFormulaMatches_string_multipleAppCertificateLineage_true() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.APP_CERTIFICATE_LINEAGE, "cert", /* isHashedValue= */ true);
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder()
+                        .setPackageName("com.test.app")
+                        .setAppCertificateLineage(Arrays.asList("test-cert", "cert"))
+                        .build();
+
+        assertThat(stringAtomicFormula.matches(appInstallMetadata)).isTrue();
+    }
+
+    @Test
+    public void testFormulaMatches_string_multipleAppCertificateLineage_false() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.APP_CERTIFICATE_LINEAGE, "cert", /* isHashedValue= */ true);
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder()
+                        .setPackageName("com.test.app")
+                        .setAppCertificateLineage(Arrays.asList("test-cert", "another-cert"))
+                        .build();
+
+        assertThat(stringAtomicFormula.matches(appInstallMetadata)).isFalse();
+    }
+
+    @Test
     public void testFormulaMatches_string_multipleInstallerCertificates_true() {
         StringAtomicFormula stringAtomicFormula =
                 new StringAtomicFormula(
@@ -324,6 +363,15 @@ public class AtomicFormulaTest {
     }
 
     @Test
+    public void testIsAppCertificateLineageFormula_string_true() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.APP_CERTIFICATE_LINEAGE, "cert", /* isHashedValue= */false);
+
+        assertThat(stringAtomicFormula.isAppCertificateLineageFormula()).isTrue();
+    }
+
+    @Test
     public void testIsAppCertificateFormula_string_false() {
         StringAtomicFormula stringAtomicFormula =
                 new StringAtomicFormula(
@@ -331,6 +379,16 @@ public class AtomicFormulaTest {
                         false);
 
         assertThat(stringAtomicFormula.isAppCertificateFormula()).isFalse();
+    }
+
+    @Test
+    public void testIsAppCertificateLineageFormula_string_false() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.PACKAGE_NAME, "com.test.app", /* isHashedValue= */
+                        false);
+
+        assertThat(stringAtomicFormula.isAppCertificateLineageFormula()).isFalse();
     }
 
     @Test
@@ -442,6 +500,15 @@ public class AtomicFormulaTest {
     }
 
     @Test
+    public void testIsAppCertificateLineageFormula_long_false() {
+        LongAtomicFormula longAtomicFormula =
+                new AtomicFormula.LongAtomicFormula(
+                        AtomicFormula.VERSION_CODE, AtomicFormula.GTE, 1);
+
+        assertThat(longAtomicFormula.isAppCertificateLineageFormula()).isFalse();
+    }
+
+    @Test
     public void testIsInstallerFormula_long_false() {
         LongAtomicFormula longAtomicFormula =
                 new LongAtomicFormula(
@@ -479,6 +546,14 @@ public class AtomicFormulaTest {
     }
 
     @Test
+    public void testIsAppCertificateLineageFormula_bool_false() {
+        BooleanAtomicFormula boolFormula =
+                new BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true);
+
+        assertThat(boolFormula.isAppCertificateLineageFormula()).isFalse();
+    }
+
+    @Test
     public void testIsInstallerFormula_bool_false() {
         BooleanAtomicFormula boolFormula =
                 new BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true);
@@ -491,6 +566,7 @@ public class AtomicFormulaTest {
         return new AppInstallMetadata.Builder()
                 .setPackageName("abc")
                 .setAppCertificates(Collections.singletonList("abc"))
+                .setAppCertificateLineage(Collections.singletonList("abc"))
                 .setInstallerCertificates(Collections.singletonList("abc"))
                 .setInstallerName("abc")
                 .setVersionCode(-1)

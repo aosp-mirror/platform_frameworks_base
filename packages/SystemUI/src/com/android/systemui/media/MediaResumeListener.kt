@@ -36,7 +36,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Utils
 import com.android.systemui.util.time.SystemClock
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executor
@@ -184,7 +183,8 @@ class MediaResumeListener @Inject constructor(
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
-        receivedSmartspaceCardLatency: Int
+        receivedSmartspaceCardLatency: Int,
+        isSsReactivated: Boolean
     ) {
         if (useMediaResumption) {
             // If this had been started from a resume state, disconnect now that it's live
@@ -292,7 +292,7 @@ class MediaResumeListener @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.apply {
             println("resumeComponents: $resumeComponents")
         }

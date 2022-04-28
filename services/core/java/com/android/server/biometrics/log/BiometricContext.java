@@ -44,7 +44,7 @@ public interface BiometricContext {
     @Nullable Integer getBiometricPromptSessionId();
 
     /** If the display is in AOD. */
-    boolean isAoD();
+    boolean isAod();
 
     /**
      * Subscribe to context changes.

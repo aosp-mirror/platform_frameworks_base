@@ -586,7 +586,7 @@ public class ZygoteInit {
         }
         for (String jar : envStr.split(":")) {
             try {
-                SystemServerClassLoaderFactory.getOrCreateClassLoader(
+                SystemServerClassLoaderFactory.createClassLoader(
                         jar, getOrCreateSystemServerClassLoader());
             } catch (Error e) {
                 // We don't want the process to crash for this error because prefetching is just an
@@ -713,7 +713,7 @@ public class ZygoteInit {
                 "--setuid=1000",
                 "--setgid=1000",
                 "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1023,"
-                        + "1024,1032,1065,3001,3002,3003,3006,3007,3009,3010,3011,3012",
+                        + "1024,1032,1065,3001,3002,3003,3005,3006,3007,3009,3010,3011,3012",
                 "--capabilities=" + capabilities + "," + capabilities,
                 "--nice-name=system_server",
                 "--runtime-args",
@@ -736,10 +736,13 @@ public class ZygoteInit {
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
             if (Zygote.nativeSupportsMemoryTagging()) {
-                /* The system server has ASYNC MTE by default, in order to allow
-                 * system services to specify their own MTE level later, as you
-                 * can't re-enable MTE once it's disabled. */
-                String mode = SystemProperties.get("arm64.memtag.process.system_server", "async");
+                String mode = SystemProperties.get("arm64.memtag.process.system_server", "");
+                if (mode.isEmpty()) {
+                  /* The system server has ASYNC MTE by default, in order to allow
+                   * system services to specify their own MTE level later, as you
+                   * can't re-enable MTE once it's disabled. */
+                  mode = SystemProperties.get("persist.arm64.memtag.default", "async");
+                }
                 if (mode.equals("async")) {
                     parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_ASYNC;
                 } else if (mode.equals("sync")) {

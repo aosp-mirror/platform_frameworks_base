@@ -52,10 +52,10 @@ public final class SharedFilter implements AutoCloseable {
     private long mNativeContext;
     private SharedFilterCallback mCallback;
     private Executor mExecutor;
-    private final Object mCallbackLock = new Object();
+    private Object mCallbackLock = null;
     private boolean mIsClosed = false;
     private boolean mIsAccessible = true;
-    private final Object mLock = new Object();
+    private Object mLock = null;
 
     private native int nativeStartSharedFilter();
     private native int nativeStopSharedFilter();
@@ -64,7 +64,10 @@ public final class SharedFilter implements AutoCloseable {
     private native int nativeSharedClose();
 
     // Called by JNI
-    private SharedFilter() {}
+    private SharedFilter() {
+        mCallbackLock = new Object();
+        mLock = new Object();
+    }
 
     private void onFilterStatus(int status) {
         synchronized (mLock) {
@@ -199,10 +202,13 @@ public final class SharedFilter implements AutoCloseable {
             if (mIsClosed) {
                 return;
             }
-            mCallback = null;
-            mExecutor = null;
+            synchronized (mCallbackLock) {
+                mCallback = null;
+                mExecutor = null;
+            }
             nativeSharedClose();
             mIsClosed = true;
+            mCallbackLock = null;
          }
     }
 }

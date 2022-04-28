@@ -674,6 +674,10 @@
     <!-- Indicates whether to enable hinge angle sensor when using unfold animation -->
     <bool name="config_unfoldTransitionHingeAngle">false</bool>
 
+    <!-- Indicates the time needed to time out the fold animation if the device stops in half folded
+         mode. -->
+    <integer name="config_unfoldTransitionHalfFoldedTimeout">600</integer>
+
     <!-- Indicates that the device supports having more than one internal display on at the same
          time. Only applicable to devices with more than one internal display. If this option is
          set to false, DisplayManager will make additional effort to ensure no more than 1 internal
@@ -690,6 +694,11 @@
            will apply, regardless of device state. -->
     <string-array name="config_perDeviceStateRotationLockDefaults" />
 
+    <!-- Dock behavior -->
+
+    <!-- Control whether to start dream immediately upon docking even if the lockscreen is unlocked.
+         This defaults to true to be consistent with historical behavior. -->
+    <bool name="config_startDreamImmediatelyOnDock">true</bool>
 
     <!-- Desk dock behavior -->
 
@@ -1207,13 +1216,13 @@
 
     <!-- Display low battery warning when battery level dips to this value.
          Also, the battery stats are flushed to disk when we hit this level.  -->
-    <integer name="config_criticalBatteryWarningLevel">5</integer>
+    <integer name="config_criticalBatteryWarningLevel">10</integer>
 
     <!-- Shutdown if the battery temperature exceeds (this value * 0.1) Celsius. -->
     <integer name="config_shutdownBatteryTemperature">680</integer>
 
     <!-- Display low battery warning when battery level dips to this value -->
-    <integer name="config_lowBatteryWarningLevel">15</integer>
+    <integer name="config_lowBatteryWarningLevel">20</integer>
 
     <!-- The default suggested battery % at which we enable battery saver automatically.  -->
     <integer name="config_lowBatteryAutoTriggerDefaultLevel">15</integer>
@@ -1307,6 +1316,7 @@
     <!-- Control the behavior when the user double-taps the home button.
             0 - Nothing
             1 - Recent apps view in SystemUI
+            2 - Picture-in-picture menu
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
     -->
@@ -1370,10 +1380,6 @@
          that can be set by the user. -->
     <integer name="config_screenBrightnessDoze">1</integer>
     <item name="config_screenBrightnessDozeFloat" format="float" type="dimen">0.0</item>
-
-    <!-- Delay that allows some content to arrive at the display before switching
-         from DOZE to ON. -->
-    <integer name="config_wakeUpDelayDoze">0</integer>
 
     <!-- Whether or not to skip the initial brightness ramps when the display transitions to
          STATE_ON. Setting this to true will skip the brightness ramp to the last stored active
@@ -1521,6 +1527,10 @@
          but also so that we don't erroneously keep the short-term model if the device is dozing
          but the display is fully on. -->
     <integer name="config_autoBrightnessShortTermModelTimeout">300000</integer>
+
+    <!-- Timeout (in milliseconds) after which we start the animation "Android
+         is starting" -->
+    <integer name="config_progressTimeoutFallbackHome">2000</integer>
 
     <!-- Array of output values for LCD backlight corresponding to the lux values
          in the config_autoBrightnessLevels array.  This array should have size one greater
@@ -1854,6 +1864,11 @@
      -->
     <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false"></string>
 
+    <!-- The package name of the default search selector app. Must be granted the POST_NOTIFICATIONS
+         permission.
+    -->
+    <string name="config_defaultSearchSelectorPackageName" translatable="false"></string>
+
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
          config_geocoderProviderPackageName package will be searched for
@@ -2108,7 +2123,7 @@
         TODO(b/189347385) make this a @SystemAPI -->
     <string name="config_systemTelevisionRemoteService" translatable="false">@string/config_tvRemoteServicePackage</string>
     <!-- The name of the package that will hold the device management role -->
-    <string name="config_deviceManager" translatable="false"></string>
+    <string name="config_devicePolicyManagement" translatable="false"></string>
     <!-- The name of the package that will hold the app protection service role. -->
     <string name="config_systemAppProtectionService" translatable="false"></string>
     <!-- The name of the package that will hold the system calendar sync manager role. -->
@@ -2117,7 +2132,7 @@
     <string name="config_defaultAutomotiveNavigation" translatable="false"></string>
 
     <!-- The name of the package that will handle updating the device management role. -->
-    <string name="config_deviceManagerUpdater" translatable="false"></string>
+    <string name="config_devicePolicyManagementUpdater" translatable="false"></string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>
@@ -2330,7 +2345,7 @@
     <!-- Remote server that can provide NTP responses. -->
     <string translatable="false" name="config_ntpServer">time.android.com</string>
     <!-- Normal polling frequency in milliseconds -->
-    <integer name="config_ntpPollingInterval">86400000</integer>
+    <integer name="config_ntpPollingInterval">64800000</integer>
     <!-- Try-again polling interval in milliseconds, in case the network request failed -->
     <integer name="config_ntpPollingIntervalShorter">60000</integer>
     <!-- Number of times to try again with the shorter interval, before backing
@@ -2397,6 +2412,11 @@
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
     <integer name="config_attentionMaximumExtension">900000</integer> <!-- 15 minutes.  -->
+    <!-- Is the system user the only user allowed to dream. -->
+    <bool name="config_dreamsOnlyEnabledForSystemUser">false</bool>
+
+    <!-- The prefix of dream component names that are loggable. If empty, logs "other" for all. -->
+    <string name ="config_loggable_dream_prefix" translatable="false"></string>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -2688,37 +2708,15 @@
          rat-name:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
          If no value is found for the rat-name in use, the system default will be applied.
 
-         This is deprecated. Please use config_tcp_buffers.
+         This is deprecated. Please use config_mobile_tcp_buffers for rat-based TCP buffers sizes or
+         config_tcp_buffers for rat-independent TCP buffer sizes.
     -->
     <string-array name="config_mobile_tcp_buffers">
     </string-array>
 
-    <!-- Configure tcp buffer sizes in the form:
-         rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
-         If this is configured as an empty string, the system default will be applied.
-
-         For now this config is used by mobile data only. In the future it should be
-         used by Wi-Fi as well.
-
-         Note that starting from Android 13, the TCP buffer size is fixed after boot up, and should
-         never be changed based on carriers or the network types. The value should be configured
-         appropriately based on the device's memory and performance. It is recommended to use lower
-         values if the device has low memory or doesn't support high-speed network such like LTE,
-         NR, or Wifi.
-    -->
-    <string name="config_tcp_buffers" translatable="false"></string>
-
     <!-- Configure ethernet tcp buffersizes in the form:
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max -->
     <string name="config_ethernet_tcp_buffers" translatable="false">524288,1048576,3145728,524288,1048576,2097152</string>
-
-    <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
-         Default is bandwidth_estimator.
-         Values are bandwidth_estimator, carrier_config and modem. -->
-    <string name="config_bandwidthEstimateSource">bandwidth_estimator</string>
-
-    <!-- Whether force to enable telephony new data stack or not -->
-    <bool name="config_force_enable_telephony_new_data_stack">false</bool>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
@@ -2897,6 +2895,11 @@
     <string name="config_sensorUseStartedActivity" translatable="false"
             >com.android.systemui/com.android.systemui.sensorprivacy.SensorUseStartedActivity</string>
 
+    <!-- Component name of the activity used to inform a user about a sensory being blocked because
+     of hardware privacy switches. -->
+    <string name="config_sensorUseStartedActivity_hwToggle" translatable="false"
+            >com.android.systemui/com.android.systemui.sensorprivacy.SensorUseStartedActivity</string>
+
     <!-- Component name of the activity used to ask a user to confirm system language change after
          receiving <Set Menu Language> CEC message. -->
     <string name="config_hdmiCecSetMenuLanguageActivity"
@@ -2920,6 +2923,16 @@
 
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
+
+    <!-- System settings intelligence package name -->
+    <string name="config_systemSettingsIntelligence" translatable="false">
+        com.android.settings.intelligence
+    </string>
+
+    <!-- System bluetooth stack package name -->
+    <string name="config_systemBluetoothStack" translatable="false">
+        com.android.bluetooth.services
+    </string>
 
     <!-- Flag indicating that the media framework should not allow changes or mute on any
          stream or global volumes. -->
@@ -2948,6 +2961,14 @@
      the currently focused view is a text editor. -->
     <bool name="config_preventImeStartupUnlessTextEditor">false</bool>
 
+    <!-- These IMEs are known not to behave well when evicted from memory and thus are exempt
+         from the IME startup prevention behavior that is enabled by
+         config_preventImeStartupUnlessTextEditor. -->
+    <string-array name="config_nonPreemptibleInputMethods" translatable="false" />
+
+    <!-- Flag indicating that enhanced confirmation mode is enabled. -->
+    <bool name="config_enhancedConfirmationModeEnabled">true</bool>
+
     <!-- The list of classes that should be added to the notification ranking pipeline.
      See {@link com.android.server.notification.NotificationSignalExtractor}
       If you add a new extractor to this list make sure to update
@@ -2972,6 +2993,12 @@
         <item>com.android.server.notification.CriticalNotificationExtractor</item>
 
     </string-array>
+
+    <!-- When migrating notification settings into the permission framework, whether all existing
+         apps should be marked as 'user-set' (true) or whether only the apps that have explicitly
+         modified notification settings should be marked as 'user-set' (false). Users will not see
+         system generated permission prompts for 'user-set' apps. -->
+    <bool name="config_notificationForceUserSetOnUpgrade">true</bool>
 
     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
     <integer name="config_toastDefaultGravity">0x00000051</integer>
@@ -3278,27 +3305,6 @@
     <!-- String array containing numbers that shouldn't be logged. Country-specific. -->
     <string-array name="unloggable_phone_numbers" />
 
-    <!-- Cellular data service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wwan_data_service_package" translatable="false">com.android.phone</string>
-
-    <!-- IWLAN data service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_data_service_package" translatable="false"></string>
-
-    <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
-         tunnels across service restart. If iwlan tunnels are not persisted across restart,
-         Framework will clean up dangling data connections when service restarts -->
-    <bool name="config_wlan_data_service_conn_persistence_on_restart">true</bool>
-
-    <!-- Cellular data service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wwan_data_service_class" translatable="false"></string>
-
-    <!-- IWLAN data service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_data_service_class" translatable="false"></string>
-
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <!--From SmsMessage-->
@@ -3397,11 +3403,6 @@
         <item>1</item>    <!-- USAGE_SETTING_VOICE_CENTRIC -->
         <item>2</item>    <!-- USAGE_SETTING_DATA_CENTRIC -->
     </integer-array>
-
-    <!-- When a radio power off request is received, we will delay completing the request until
-         either IMS moves to the deregistered state or the timeout defined by this configuration
-         elapses. If 0, this feature is disabled and we do not delay radio power off requests.-->
-    <integer name="config_delay_for_ims_dereg_millis">0</integer>
 
     <!--Thresholds for LTE dbm in status bar-->
     <integer-array translatable="false" name="config_lteDbmThresholds">
@@ -3658,6 +3659,9 @@
     <!-- Controls whether the navigation bar lets through taps. -->
     <bool name="config_navBarTapThrough">false</bool>
 
+    <!-- Controls whether the IME renders the back and IME switcher buttons or not. -->
+    <bool name="config_imeDrawsImeNavBar">false</bool>
+
     <!-- Controls whether the side edge gestures can always trigger the transient nav bar to
          show. -->
     <bool name="config_navBarAlwaysShowOnSideEdgeGesture">false</bool>
@@ -3691,26 +3695,6 @@
          snapped to any position between the first target and the last target. -->
     <bool name="config_dockedStackDividerFreeSnapMode">false</bool>
 
-    <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
-         These values are in DPs and will be converted to pixel sizes internally. -->
-    <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">16x16</string>
-
-    <!-- The percentage of the screen width to use for the default width or height of
-         picture-in-picture windows. Regardless of the percent set here, calculated size will never
-         be smaller than @dimen/default_minimal_size_pip_resizable_task. -->
-    <item name="config_pictureInPictureDefaultSizePercent" format="float" type="dimen">0.23</item>
-
-    <!-- The default aspect ratio for picture-in-picture windows. -->
-    <item name="config_pictureInPictureDefaultAspectRatio" format="float" type="dimen">1.777778</item>
-
-    <!-- This is the limit for the max and min aspect ratio (1 / this value) at which the min size
-         will be used instead of an adaptive size based loosely on area. -->
-    <item name="config_pictureInPictureAspectRatioLimitForMinSize" format="float" type="dimen">1.777778</item>
-
-    <!-- The default gravity for the picture-in-picture window.
-         Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
-    <integer name="config_defaultPictureInPictureGravity">0x55</integer>
-
     <!-- The minimum aspect ratio (width/height) that is supported for picture-in-picture.  Any
          ratio smaller than this is considered too tall and thin to be usable. Currently, this
          is the inverse of the max landscape aspect ratio (1:2.39), but this is an extremely
@@ -3724,6 +3708,10 @@
     <!-- The maximum number of actions that is supported for picture-in-picture. This number
          must be no less than 3 for back compatibility. -->
     <integer name="config_pictureInPictureMaxNumberOfActions">3</integer>
+
+    <!-- The behavior when an activity has not specified a preference to dock big overlays or not.
+         Docking puts the activity side-by-side next to the big overlay windows. -->
+    <bool name="config_dockBigOverlayWindows">false</bool>
 
     <!-- Controls the snap mode for the docked stack divider
              0 - 3 snap targets: left/top has 16:9 ratio, 1:1, and right/bottom has 16:9 ratio
@@ -3827,6 +3815,9 @@
 
     <!-- True if the device supports running activities on secondary displays. -->
     <bool name="config_supportsMultiDisplay">true</bool>
+
+    <!-- Indicates whether the device supports bubble notifications or not. -->
+    <bool name="config_supportsBubble">true</bool>
 
     <!-- True if the device has no home screen. That is a launcher activity
          where the user can launch other applications from.  -->
@@ -4078,11 +4069,15 @@
    -->
     <string name="config_defaultAmbientContextDetectionService" translatable="false"></string>
 
-    <!-- The component name for the system-wide captions service.
-         This service must be trusted, as it controls part of the UI of the volume bar.
-         Example: "com.android.captions/.SystemCaptionsService"
-    -->
-    <string name="config_defaultSystemCaptionsService" translatable="false"></string>
+    <!-- Component name that accepts ACTION_SEND intents for requesting ambient context consent. -->
+    <string translatable="false" name="config_defaultAmbientContextConsentComponent"></string>
+
+    <!-- Intent extra key for the caller's package name while requesting ambient context consent.
+     -->
+    <string translatable="false" name="config_ambientContextPackageNameExtraKey"></string>
+
+    <!-- Intent extra key for the event code int array while requesting ambient context consent. -->
+    <string translatable="false" name="config_ambientContextEventArrayExtraKey"></string>
 
     <!-- The component name for the system-wide captions manager service.
          This service must be trusted, as the system binds to it and keeps it running.
@@ -4123,9 +4118,9 @@
           This service must be trusted, as it can be activated without explicit consent of the user.
           If no service with the specified name exists on the device, cloudsearch will be disabled.
           Example: "com.android.intelligence/.CloudSearchService"
-          config_defaultCloudSearchService is for the single provider case.
+          config_defaultCloudSearchServices is for the multiple provider case.
     -->
-    <string name="config_defaultCloudSearchService" translatable="false"></string>
+    <string-array name="config_defaultCloudSearchServices"></string-array>
 
     <!-- The package name for the system's translation service.
      This service must be trusted, as it can be activated without explicit consent of the user.
@@ -4262,6 +4257,9 @@
     <!-- URI for in call notification sound -->
     <string translatable="false" name="config_inCallNotificationSound">/product/media/audio/ui/InCallNotification.ogg</string>
 
+    <!-- URI for camera shutter sound -->
+    <string translatable="false" name="config_cameraShutterSound">/product/media/audio/ui/camera_click.ogg</string>
+
     <!-- URI for default ringtone sound file to be used for silent ringer vibration -->
     <string translatable="false" name="config_defaultRingtoneVibrationSound"></string>
 
@@ -4372,24 +4370,6 @@
 
     <bool name="config_keepRestrictedProfilesInBackground">true</bool>
 
-    <!-- Cellular network service package name to bind to by default. -->
-    <string name="config_wwan_network_service_package" translatable="false">com.android.phone</string>
-
-    <!-- Cellular network service class name to bind to by default.-->
-    <string name="config_wwan_network_service_class" translatable="false"></string>
-
-    <!-- IWLAN network service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_network_service_package" translatable="false"></string>
-
-    <!-- IWLAN network service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_network_service_class" translatable="false"></string>
-    <!-- Telephony qualified networks service package name to bind to by default. -->
-    <string name="config_qualified_networks_service_package" translatable="false"></string>
-
-    <!-- Telephony qualified networks service class name to bind to by default. -->
-    <string name="config_qualified_networks_service_class" translatable="false"></string>
     <!-- Wear devices: Controls the radios affected by Activity Mode. -->
     <string-array name="config_wearActivityModeRadios">
         <item>"wifi"</item>
@@ -4836,6 +4816,7 @@
         <item>0.25</item>
         <item>0.5</item>
         <item>0.75</item>
+        <item>0.875</item>
     </string-array>
 
     <!-- Messages that should not be shown to the user during face auth enrollment. This should be
@@ -5182,6 +5163,10 @@
          when TextClassifier has not been initialized. -->
     <integer name="config_smartSelectionInitializingTimeoutMillis">500</integer>
 
+    <!-- The delay in milliseconds before focused Views set themselves as preferred to keep clear.
+         Set to -1 if Views should not set themselves as preferred to keep clear. -->
+    <integer name="config_preferKeepClearForFocusDelayMillis">-1</integer>
+
     <!-- Indicates that default fitness tracker app needs to request sensor and location permissions. -->
     <bool name="config_trackerAppNeedsPermissions">false</bool>
 
@@ -5248,9 +5233,9 @@
 
     <bool name="config_cecPowerStateChangeOnActiveSourceLost_userConfigurable">true</bool>
     <bool name="config_cecPowerStateChangeOnActiveSourceLostNone_allowed">true</bool>
-    <bool name="config_cecPowerStateChangeOnActiveSourceLostNone_default">true</bool>
+    <bool name="config_cecPowerStateChangeOnActiveSourceLostNone_default">false</bool>
     <bool name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_allowed">true</bool>
-    <bool name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default">false</bool>
+    <bool name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default">true</bool>
 
     <bool name="config_cecSystemAudioControl_userConfigurable">true</bool>
     <bool name="config_cecSystemAudioControlEnabled_allowed">true</bool>
@@ -5452,10 +5437,16 @@
     <!-- On-device package for providing companion device associations. -->
     <string name="config_systemCompanionDeviceProvider" translatable="false"></string>
 
-    <!-- Whether this device is supporting the microphone toggle -->
+    <!-- Whether this device is supporting the software microphone toggle -->
     <bool name="config_supportsMicToggle">false</bool>
     <!-- Whether this device is supporting the camera toggle -->
     <bool name="config_supportsCamToggle">false</bool>
+    <!-- Whether this device is supporting the hardware microphone toggle -->
+    <bool name="config_supportsHardwareMicToggle">false</bool>
+    <!-- Whether this device is supporting the hardware camera toggle -->
+    <bool name="config_supportsHardwareCamToggle">false</bool>
+    <!-- Whether a camera intent is launched when the lens cover is toggled -->
+    <bool name="config_launchCameraOnCameraLensCoverToggle">true</bool>
 
     <!-- List containing the allowed install sources for accessibility service. -->
     <string-array name="config_accessibility_allowed_install_source" translatable="false"/>
@@ -5683,4 +5674,111 @@
      -->
     <string-array name="config_dockExtconStateMapping">
     </string-array>
+
+    <!-- Whether or not the monitoring on the apps' background battery drain is enabled -->
+    <bool name="config_bg_current_drain_monitor_enabled">true</bool>
+
+    <!-- The threshold of the background current drain (in percentage) to the restricted
+         standby bucket.
+    -->
+    <array name="config_bg_current_drain_threshold_to_restricted_bucket">
+        <item>2.0</item> <!-- regular device -->
+        <item>4.0</item> <!-- low ram device -->
+    </array>
+
+    <!-- The threshold of the background current drain (in percentage) to the background
+         restricted level.
+    -->
+    <array name="config_bg_current_drain_threshold_to_bg_restricted">
+        <item>4.0</item> <!-- regular device -->
+        <item>8.0</item> <!-- low ram device -->
+    </array>
+
+    <!-- The background current drain monitoring window size. -->
+    <integer name="config_bg_current_drain_window">86400</integer>
+
+    <!-- The types of battery drain we're checking on each app; if the sum of the battery drain
+        exceeds the threshold, it'll be moved to restricted standby bucket. The value must be
+        one of or combination of the definitions in AppBatteryPolicy.
+    -->
+    <integer name="config_bg_current_drain_types_to_restricted_bucket">20</integer>
+
+    <!-- The types of battery drain we're checking on each app; if the sum of the battery drain
+        exceeds the threshold, it'll be moved to background restricted level. The value must be
+        one of or combination of the definitions in AppBatteryPolicy.
+    -->
+    <integer name="config_bg_current_drain_types_to_bg_restricted">28</integer>
+
+    <!-- The power usage components we're monitoring. Must one of the definition in BatteryConsumer.
+    -->
+    <integer name="config_bg_current_drain_power_components">-1</integer>
+
+    <!-- Whether or not enable the different threshold based on the durations of
+         certain event type.
+    -->
+    <bool name="config_bg_current_drain_event_duration_based_threshold_enabled">false</bool>
+
+    <!-- The threshold of the background current drain (in percentage) to the restricted
+         standby bucket for legitimate case with higher background current drain.
+    -->
+    <array name="config_bg_current_drain_high_threshold_to_restricted_bucket">
+        <item>30.0</item> <!-- regular device -->
+        <item>60.0</item> <!-- low ram device -->
+    </array>
+
+    <!-- The threshold of the background current drain (in percentage) to the background
+         restricted level for legitimate case with higher background current drain.
+    -->
+    <array name="config_bg_current_drain_high_threshold_to_bg_restricted">
+        <item>20.0</item> <!-- regular device -->
+        <item>40.0</item> <!-- low ram device -->
+    </array>
+
+    <!-- The threshold of minimal time of hosting a foreground service with type "mediaPlayback"
+         or a media session, over the given window, so it'd subject towards the higher background
+         current drain threshold.
+    -->
+    <integer name="config_bg_current_drain_media_playback_min_duration">1800</integer>
+
+    <!-- The threshold of minimal time of hosting a foreground service with type "location"
+         over the given window, so it'd subject towards the higher background
+         current drain threshold.
+    -->
+    <integer name="config_bg_current_drain_location_min_duration">1800</integer>
+
+    <!-- The behavior for an app with a FGS and its notification is still showing, when the system
+         detects it's abusive and should be put into bg restricted level. True - we'll
+         show the prompt to user, False - we'll not show it.
+    -->
+    <bool name="config_bg_prompt_fgs_with_noti_to_bg_restricted">false</bool>
+
+    <!-- The behavior when the system detects it's abusive, should the system prompt the user
+         to put it into the bg restricted level.
+         True - we'll show the prompt to user, False - we'll not show it.
+    -->
+    <bool name="config_bg_prompt_abusive_apps_to_bg_restricted">false</bool>
+
+    <!-- The types of state where we'll exempt its battery usage during that state.
+         The state here must be one or a combination of STATE_TYPE_* in BaseAppStateTracker.
+    -->
+    <integer name="config_bg_current_drain_exempted_types">25</integer>
+
+    <!-- The behavior when an app has the permission ACCESS_BACKGROUND_LOCATION granted,
+         whether or not the system will use a higher threshold towards its background battery usage
+         because of it.
+    -->
+    <bool name="config_bg_current_drain_high_threshold_by_bg_location">false</bool>
+
+    <!-- Start safety protection resources to be overlaid -->
+
+    <!-- Safety protection icon to be overlaid -->
+    <item name="ic_safety_protection" type="drawable">@null</item>
+
+    <!-- Display text for safety protection to be overlaid. This is translatable -->
+    <string name="safety_protection_display_text"></string>
+
+    <!-- End safety protection resources to be overlaid -->
+
+    <!-- List of the labels of requestable device state config values -->
+    <string-array name="config_deviceStatesAvailableForAppRequests"/>
 </resources>

@@ -28,6 +28,7 @@ import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareC
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.server.am.UserController.CLEAR_USER_JOURNEY_SESSION_MSG;
 import static com.android.server.am.UserController.COMPLETE_USER_SWITCH_MSG;
 import static com.android.server.am.UserController.CONTINUE_USER_SWITCH_MSG;
 import static com.android.server.am.UserController.REPORT_LOCKED_BOOT_COMPLETE_MSG;
@@ -410,6 +411,7 @@ public class UserControllerTest {
         expectedCodes.add(COMPLETE_USER_SWITCH_MSG);
         expectedCodes.add(REPORT_USER_SWITCH_COMPLETE_MSG);
         if (backgroundUserStopping) {
+            expectedCodes.add(CLEAR_USER_JOURNEY_SESSION_MSG);
             expectedCodes.add(0); // this is for directly posting in stopping.
         }
         Set<Integer> actualCodes = mInjector.mHandler.getMessageCodes();
@@ -776,8 +778,7 @@ public class UserControllerTest {
         setUpUser(userId, 0);
         mUserController.startUser(userId, /* foreground= */ false);
         verify(mInjector.mStorageManagerMock, times(1))
-                .unlockUserKey(userId, /* serialNumber= */ 0, /* token= */ null, /* secret= */
-                        null);
+                .unlockUserKey(userId, /* serialNumber= */ 0, /* secret= */ null);
         mUserStates.put(userId, mUserController.getStartedUserState(userId));
     }
 
@@ -786,8 +787,7 @@ public class UserControllerTest {
         assertThat(mUserController.startProfile(userId)).isTrue();
 
         verify(mInjector.mStorageManagerMock, times(1))
-                .unlockUserKey(userId, /* serialNumber= */ 0, /* token= */ null, /* secret= */
-                        null);
+                .unlockUserKey(userId, /* serialNumber= */ 0, /* secret= */ null);
         mUserStates.put(userId, mUserController.getStartedUserState(userId));
     }
 

@@ -90,9 +90,9 @@ public interface MediaComplicationComponent {
         static ComplicationLayoutParams provideLayoutParams() {
             return new ComplicationLayoutParams(0,
                     ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ComplicationLayoutParams.POSITION_BOTTOM
-                            | ComplicationLayoutParams.POSITION_END,
-                    ComplicationLayoutParams.DIRECTION_UP,
+                    ComplicationLayoutParams.POSITION_TOP
+                            | ComplicationLayoutParams.POSITION_START,
+                    ComplicationLayoutParams.DIRECTION_DOWN,
                     0,
                     true);
         }

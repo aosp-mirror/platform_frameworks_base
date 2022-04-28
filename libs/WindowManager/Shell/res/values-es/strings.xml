@@ -46,10 +46,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Superior 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Superior 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Pantalla inferior completa"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Usar Modo una mano"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Usar modo Una mano"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Para salir, desliza el dedo hacia arriba desde la parte inferior de la pantalla o toca cualquier zona que haya encima de la aplicación"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Iniciar Modo una mano"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Salir del Modo una mano"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Iniciar modo Una mano"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Salir del modo Una mano"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Ajustes de las burbujas de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Menú adicional"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Volver a añadir a la pila"</string>
@@ -76,10 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"¿Problemas con la cámara?\nToca para reajustar"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"¿No se ha solucionado?\nToca para revertir"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"¿No hay problemas con la cámara? Toca para cerrar."</string>
-    <string name="letterbox_education_dialog_title" msgid="3924745395335329810">"Saca el máximo partido de <xliff:g id="APP_NAME">%s</xliff:g>"</string>
-    <string name="letterbox_education_screen_rotation_portrait_text" msgid="9005616635100891260">"Gira la pantalla para ponerla en el modo de vista vertical"</string>
-    <string name="letterbox_education_screen_rotation_landscape_text" msgid="7619609293250631225">"Gira la pantalla para ponerla en el modo de vista horizontal"</string>
-    <string name="letterbox_education_split_screen_text" msgid="3906978051324735033">"Arrastra otra aplicación para usar la pantalla dividida"</string>
-    <string name="letterbox_education_reposition_text" msgid="8597800472592539168">"Toca dos veces para cambiar de posición"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Algunas aplicaciones funcionan mejor en vertical"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Prueba una de estas opciones para sacar el máximo partido al espacio de tu pantalla"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Gira el dispositivo para ir al modo de pantalla completa"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Toca dos veces junto a una aplicación para cambiar su posición"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Entendido"</string>
 </resources>

@@ -16,7 +16,7 @@
 
 package android.content;
 
-import static android.content.ContextWrapper.COMPONENT_CALLBACK_ON_WRAPPER;
+import static android.content.Context.OVERRIDABLE_COMPONENT_CALLBACKS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
@@ -61,7 +61,7 @@ public class ContextWrapperTest {
      * register {@link ComponentCallbacks} to {@link ContextWrapper#getApplicationContext} before
      * {@link ContextWrapper#attachBaseContext(Context)}.
      */
-    @DisableCompatChanges(COMPONENT_CALLBACK_ON_WRAPPER)
+    @DisableCompatChanges(OVERRIDABLE_COMPONENT_CALLBACKS)
     @Test
     public void testRegisterComponentCallbacksWithoutBaseContextBeforeT() {
         final ContextWrapper wrapper = new TestContextWrapper(null /* base */);

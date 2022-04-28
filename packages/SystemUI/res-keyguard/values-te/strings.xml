@@ -45,7 +45,7 @@
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"పరికరం పాస్‌వర్డ్‌"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"SIM పిన్ ప్రాంతం"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"SIM PUK ప్రాంతం"</string>
-    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"తొలగించు"</string>
+    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"తొలగించండి"</string>
     <string name="disable_carrier_button_text" msgid="7153361131709275746">"eSIMని నిలిపివేయండి"</string>
     <string name="error_disable_esim_title" msgid="3802652622784813119">"eSIMని నిలపడం సాధ్యపడదు"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"ఎర్రర్ కారణంగా eSIMని నిలపడం సాధ్యపడదు."</string>
@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"అదనపు సెక్యూరిటీ కోసం పాస్‌వర్డ్‌ను ఎంటర్ చేయాలి"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"పరికరం నిర్వాహకుల ద్వారా లాక్ చేయబడింది"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"పరికరం మాన్యువల్‌గా లాక్ చేయబడింది"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"గుర్తించలేదు"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"గుర్తించలేదు"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ఫేస్ అన్‌లాక్‌ను ఉపయోగించడానికి, సెట్టింగ్‌లు &gt; గోప్యతలో "<b>"కెమెరా యాక్సెస్"</b>"ను ఆన్ చేయండి"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

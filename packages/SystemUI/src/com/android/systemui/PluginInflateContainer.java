@@ -60,6 +60,7 @@ public class PluginInflateContainer extends AutoReinflateContainer
         super(context, attrs);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PluginInflateContainer);
         String viewType = a.getString(R.styleable.PluginInflateContainer_viewType);
+        a.recycle();
         try {
             mClass = (Class<ViewProvider>) Class.forName(viewType);
         } catch (Exception e) {

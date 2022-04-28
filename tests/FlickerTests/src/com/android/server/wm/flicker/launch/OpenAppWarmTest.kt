@@ -17,14 +17,14 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresDevice
 import androidx.test.filters.FlakyTest
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,7 +54,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
+open class OpenAppWarmTest(testSpec: FlickerTestParameter)
+    : OpenAppFromLauncherTransition(testSpec) {
     /**
      * Defines the transition used to run the test
      */
@@ -112,17 +113,26 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun launcherWindowBecomesInvisible() = super.launcherWindowBecomesInvisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
     override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
+
+    @FlakyTest(bugId = 229735718)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         /**

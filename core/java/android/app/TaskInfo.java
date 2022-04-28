@@ -186,6 +186,18 @@ public class TaskInfo {
     public PictureInPictureParams pictureInPictureParams;
 
     /**
+     * @hide
+     */
+    public boolean shouldDockBigOverlays;
+
+    /**
+     * The task id of the host Task of the launch-into-pip Activity, i.e., it points to the Task
+     * the launch-into-pip Activity is originated from.
+     * @hide
+     */
+    public int launchIntoPipHostTaskId;
+
+    /**
      * The {@link Rect} copied from {@link DisplayCutout#getSafeInsets()} if the cutout is not of
      * (LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES, LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS),
      * {@code null} otherwise.
@@ -379,6 +391,12 @@ public class TaskInfo {
     }
 
     /** @hide */
+    @TestApi
+    public boolean shouldDockBigOverlays() {
+        return shouldDockBigOverlays;
+    }
+
+    /** @hide */
     @WindowConfiguration.WindowingMode
     public int getWindowingMode() {
         return configuration.windowConfiguration.getWindowingMode();
@@ -447,13 +465,15 @@ public class TaskInfo {
                 && displayAreaFeatureId == that.displayAreaFeatureId
                 && Objects.equals(positionInParent, that.positionInParent)
                 && Objects.equals(pictureInPictureParams, that.pictureInPictureParams)
+                && Objects.equals(shouldDockBigOverlays, that.shouldDockBigOverlays)
                 && Objects.equals(displayCutoutInsets, that.displayCutoutInsets)
                 && getWindowingMode() == that.getWindowingMode()
                 && Objects.equals(taskDescription, that.taskDescription)
                 && isFocused == that.isFocused
                 && isVisible == that.isVisible
                 && isSleeping == that.isSleeping
-                && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId);
+                && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId)
+                && parentTaskId == that.parentTaskId;
     }
 
     /**
@@ -503,6 +523,8 @@ public class TaskInfo {
         token = WindowContainerToken.CREATOR.createFromParcel(source);
         topActivityType = source.readInt();
         pictureInPictureParams = source.readTypedObject(PictureInPictureParams.CREATOR);
+        shouldDockBigOverlays = source.readBoolean();
+        launchIntoPipHostTaskId = source.readInt();
         displayCutoutInsets = source.readTypedObject(Rect.CREATOR);
         topActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         isResizeable = source.readBoolean();
@@ -548,6 +570,8 @@ public class TaskInfo {
         token.writeToParcel(dest, flags);
         dest.writeInt(topActivityType);
         dest.writeTypedObject(pictureInPictureParams, flags);
+        dest.writeBoolean(shouldDockBigOverlays);
+        dest.writeInt(launchIntoPipHostTaskId);
         dest.writeTypedObject(displayCutoutInsets, flags);
         dest.writeTypedObject(topActivityInfo, flags);
         dest.writeBoolean(isResizeable);
@@ -587,6 +611,8 @@ public class TaskInfo {
                 + " token=" + token
                 + " topActivityType=" + topActivityType
                 + " pictureInPictureParams=" + pictureInPictureParams
+                + " shouldDockBigOverlays=" + shouldDockBigOverlays
+                + " launchIntoPipHostTaskId=" + launchIntoPipHostTaskId
                 + " displayCutoutSafeInsets=" + displayCutoutInsets
                 + " topActivityInfo=" + topActivityInfo
                 + " launchCookies=" + launchCookies

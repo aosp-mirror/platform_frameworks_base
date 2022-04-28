@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -82,14 +83,24 @@ public final class SearchRequest implements Parcelable {
      *  presubmit is the input before the user finishes the entire query, i.e. push "ENTER" or
      *  "SEARCH" button. After the user finishes the entire query, the behavior is postsubmit.
      */
-    public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION = "IS_PRESUBMIT_SUGGESTION";
+    public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION =
+            "android.app.cloudsearch.IS_PRESUBMIT_SUGGESTION";
     /** The target search provider list of package names(separated by ;), String value expected.
      * If this is not provided or its value is empty, then no filter will be applied.
      */
-    public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER = "SEARCH_PROVIDER_FILTER";
+    public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER =
+            "android.app.cloudsearch.SEARCH_PROVIDER_FILTER";
 
     @NonNull
     private Bundle mSearchConstraints;
+
+    /** Auto set by system servier, and the caller cannot set it.
+     *
+     * The caller's package name.
+     *
+     */
+    @NonNull
+    private String mCallerPackageName;
 
     private SearchRequest(Parcel in) {
         this.mQuery = in.readString();
@@ -98,15 +109,17 @@ public final class SearchRequest implements Parcelable {
         this.mMaxLatencyMillis = in.readFloat();
         this.mSearchConstraints = in.readBundle();
         this.mId = in.readString();
+        this.mCallerPackageName = in.readString();
     }
 
     private SearchRequest(String query, int resultOffset, int resultNumber, float maxLatencyMillis,
-            Bundle searchConstraints) {
+            Bundle searchConstraints, String callerPackageName) {
         mQuery = query;
         mResultOffset = resultOffset;
         mResultNumber = resultNumber;
         mMaxLatencyMillis = maxLatencyMillis;
         mSearchConstraints = searchConstraints;
+        mCallerPackageName = callerPackageName;
     }
 
     /** Returns the original query. */
@@ -136,27 +149,28 @@ public final class SearchRequest implements Parcelable {
         return mSearchConstraints;
     }
 
+    /** Gets the caller's package name. */
+    @NonNull
+    public String getCallerPackageName() {
+        return mCallerPackageName;
+    }
+
     /** Returns the search request id, which is used to identify the request. */
     @NonNull
     public String getRequestId() {
         if (mId == null || mId.length() == 0) {
-            boolean isPresubmit =
-                    mSearchConstraints.containsKey(CONSTRAINT_IS_PRESUBMIT_SUGGESTION)
-                    && mSearchConstraints.getBoolean(CONSTRAINT_IS_PRESUBMIT_SUGGESTION);
-
-            String searchProvider = "EMPTY";
-            if (mSearchConstraints.containsKey(CONSTRAINT_SEARCH_PROVIDER_FILTER)) {
-                searchProvider = mSearchConstraints.getString(CONSTRAINT_SEARCH_PROVIDER_FILTER);
-            }
-
-            String rawContent = String.format("%s\t%d\t%d\t%f\t%b\t%s",
-                    mQuery, mResultOffset, mResultNumber, mMaxLatencyMillis,
-                    isPresubmit, searchProvider);
-
-            mId = String.valueOf(rawContent.hashCode());
+            mId = String.valueOf(toString().hashCode());
         }
 
         return mId;
+    }
+
+    /** Sets the caller, and this will be set by the system server.
+     *
+     * @hide
+     */
+    public void setCallerPackageName(@NonNull String callerPackageName) {
+        this.mCallerPackageName = callerPackageName;
     }
 
     private SearchRequest(Builder b) {
@@ -165,6 +179,7 @@ public final class SearchRequest implements Parcelable {
         mResultNumber = b.mResultNumber;
         mMaxLatencyMillis = b.mMaxLatencyMillis;
         mSearchConstraints = requireNonNull(b.mSearchConstraints);
+        mCallerPackageName = requireNonNull(b.mCallerPackageName);
     }
 
     /**
@@ -192,6 +207,7 @@ public final class SearchRequest implements Parcelable {
         dest.writeFloat(this.mMaxLatencyMillis);
         dest.writeBundle(this.mSearchConstraints);
         dest.writeString(getRequestId());
+        dest.writeString(this.mCallerPackageName);
     }
 
     @Override
@@ -214,13 +230,31 @@ public final class SearchRequest implements Parcelable {
                 && mResultOffset == that.mResultOffset
                 && mResultNumber == that.mResultNumber
                 && mMaxLatencyMillis == that.mMaxLatencyMillis
-                && Objects.equals(mSearchConstraints, that.mSearchConstraints);
+                && Objects.equals(mSearchConstraints, that.mSearchConstraints)
+                && Objects.equals(mCallerPackageName, that.mCallerPackageName);
+    }
+
+    @Override
+    public String toString() {
+        boolean isPresubmit =
+                mSearchConstraints.containsKey(CONSTRAINT_IS_PRESUBMIT_SUGGESTION)
+                        && mSearchConstraints.getBoolean(CONSTRAINT_IS_PRESUBMIT_SUGGESTION);
+
+        String searchProvider = "EMPTY";
+        if (mSearchConstraints.containsKey(CONSTRAINT_SEARCH_PROVIDER_FILTER)) {
+            searchProvider = mSearchConstraints.getString(CONSTRAINT_SEARCH_PROVIDER_FILTER);
+        }
+
+        return String.format("SearchRequest: {query:%s,offset:%d;number:%d;max_latency:%f;"
+                        + "is_presubmit:%b;search_provider:%s;callerPackageName:%s}", mQuery,
+                mResultOffset, mResultNumber, mMaxLatencyMillis, isPresubmit, searchProvider,
+                mCallerPackageName);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mQuery, mResultOffset, mResultNumber, mMaxLatencyMillis,
-                mSearchConstraints);
+                mSearchConstraints, mCallerPackageName);
     }
 
     /**
@@ -235,6 +269,7 @@ public final class SearchRequest implements Parcelable {
         private int mResultNumber;
         private float mMaxLatencyMillis;
         private Bundle mSearchConstraints;
+        private String mCallerPackageName;
 
         /**
          *
@@ -250,6 +285,7 @@ public final class SearchRequest implements Parcelable {
             mResultNumber = 10;
             mMaxLatencyMillis = 200;
             mSearchConstraints = Bundle.EMPTY;
+            mCallerPackageName = "DEFAULT_CALLER";
         }
 
         /** Sets the input query. */
@@ -288,6 +324,17 @@ public final class SearchRequest implements Parcelable {
             return this;
         }
 
+        /** Sets the caller, and this will be set by the system server.
+         *
+         * @hide
+         */
+        @NonNull
+        @TestApi
+        public Builder setCallerPackageName(@NonNull String callerPackageName) {
+            this.mCallerPackageName = callerPackageName;
+            return this;
+        }
+
         /** Builds a SearchRequest based-on the given params. */
         @NonNull
         public SearchRequest build() {
@@ -297,7 +344,7 @@ public final class SearchRequest implements Parcelable {
             }
 
             return new SearchRequest(mQuery, mResultOffset, mResultNumber, mMaxLatencyMillis,
-                               mSearchConstraints);
+                               mSearchConstraints, mCallerPackageName);
         }
     }
 }

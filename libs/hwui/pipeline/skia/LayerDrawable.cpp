@@ -98,7 +98,7 @@ static sk_sp<SkShader> createLinearEffectShader(sk_sp<SkShader> shader,
         effectBuilder.uniform(uniform.name.c_str()).set(uniform.value.data(), uniform.value.size());
     }
 
-    return effectBuilder.makeShader(nullptr, false);
+    return effectBuilder.makeShader();
 }
 
 static bool isHdrDataspace(ui::Dataspace dataspace) {

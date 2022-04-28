@@ -20,6 +20,7 @@ import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 
 import android.annotation.NonNull;
+import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
 import android.content.ComponentName;
 import android.content.Context;
@@ -48,18 +49,26 @@ final class RemoteAmbientContextDetectionService
         connect();
     }
 
+    @Override
+    protected long getAutoDisconnectTimeoutMs() {
+        // Disable automatic unbinding.
+        return -1;
+    }
+
     /**
      * Asks the implementation to start detection.
      *
      * @param request The request with events to detect, and optional detection options.
      * @param packageName The app package that requested the detection
-     * @param callback callback for detection results
+     * @param detectionResultCallback callback for detection results
+     * @param statusCallback callback for service status
      */
     public void startDetection(
             @NonNull AmbientContextEventRequest request, String packageName,
-            RemoteCallback callback) {
+            RemoteCallback detectionResultCallback, RemoteCallback statusCallback) {
         Slog.i(TAG, "Start detection for " + request.getEventTypes());
-        post(service -> service.startDetection(request, packageName, callback));
+        post(service -> service.startDetection(request, packageName, detectionResultCallback,
+                statusCallback));
     }
 
     /**
@@ -70,5 +79,16 @@ final class RemoteAmbientContextDetectionService
     public void stopDetection(String packageName) {
         Slog.i(TAG, "Stop detection for " + packageName);
         post(service -> service.stopDetection(packageName));
+    }
+
+    /**
+     * Asks the implementation to return the event status for the package.
+     */
+    public void queryServiceStatus(
+            @AmbientContextEvent.EventCode int[] eventTypes,
+            String packageName,
+            RemoteCallback callback) {
+        Slog.i(TAG, "Query status for " + packageName);
+        post(service -> service.queryServiceStatus(eventTypes, packageName, callback));
     }
 }

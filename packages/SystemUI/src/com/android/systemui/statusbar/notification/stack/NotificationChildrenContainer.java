@@ -81,7 +81,7 @@ public class NotificationChildrenContainer extends ViewGroup
     private int mNotificationHeaderMargin;
 
     private int mNotificationTopPadding;
-    private float mCollapsedBottompadding;
+    private float mCollapsedBottomPadding;
     private boolean mChildrenExpanded;
     private ExpandableNotificationRow mContainingNotification;
     private TextView mOverflowNumber;
@@ -140,17 +140,17 @@ public class NotificationChildrenContainer extends ViewGroup
 
     private void initDimens() {
         Resources res = getResources();
-        mChildPadding = res.getDimensionPixelSize(R.dimen.notification_children_padding);
-        mDividerHeight = res.getDimensionPixelSize(
+        mChildPadding = res.getDimensionPixelOffset(R.dimen.notification_children_padding);
+        mDividerHeight = res.getDimensionPixelOffset(
                 R.dimen.notification_children_container_divider_height);
         mDividerAlpha = res.getFloat(R.dimen.notification_divider_alpha);
-        mNotificationHeaderMargin = res.getDimensionPixelSize(
+        mNotificationHeaderMargin = res.getDimensionPixelOffset(
                 R.dimen.notification_children_container_margin_top);
-        mNotificationTopPadding = res.getDimensionPixelSize(
+        mNotificationTopPadding = res.getDimensionPixelOffset(
                 R.dimen.notification_children_container_top_padding);
         mHeaderHeight = mNotificationHeaderMargin + mNotificationTopPadding;
-        mCollapsedBottompadding = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin);
+        mCollapsedBottomPadding = res.getDimensionPixelOffset(
+                R.dimen.notification_children_collapsed_bottom_padding);
         mEnableShadowOnChildNotifications =
                 res.getBoolean(R.bool.config_enableShadowOnChildNotifications);
         mShowGroupCountInExpander =
@@ -159,7 +159,7 @@ public class NotificationChildrenContainer extends ViewGroup
                 res.getBoolean(R.bool.config_showDividersWhenGroupNotificationExpanded);
         mHideDividersDuringExpand =
                 res.getBoolean(R.bool.config_hideDividersDuringExpand);
-        mTranslationForHeader = res.getDimensionPixelSize(
+        mTranslationForHeader = res.getDimensionPixelOffset(
                 com.android.internal.R.dimen.notification_content_margin)
                 - mNotificationHeaderMargin;
         mHybridGroupManager.initDimens();
@@ -560,10 +560,10 @@ public class NotificationChildrenContainer extends ViewGroup
             visibleChildren++;
         }
         if (mUserLocked) {
-            intrinsicHeight += NotificationUtils.interpolate(mCollapsedBottompadding, 0.0f,
+            intrinsicHeight += NotificationUtils.interpolate(mCollapsedBottomPadding, 0.0f,
                     expandFactor);
         } else if (!childrenExpanded) {
-            intrinsicHeight += mCollapsedBottompadding;
+            intrinsicHeight += mCollapsedBottomPadding;
         }
         return intrinsicHeight;
     }
@@ -1163,7 +1163,7 @@ public class NotificationChildrenContainer extends ViewGroup
             minExpandHeight += child.getSingleLineView().getHeight();
             visibleChildren++;
         }
-        minExpandHeight += mCollapsedBottompadding;
+        minExpandHeight += mCollapsedBottomPadding;
         return minExpandHeight;
     }
 

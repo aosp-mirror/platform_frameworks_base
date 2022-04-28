@@ -17,7 +17,6 @@
 package com.android.tests.stagedinstallinternal;
 
 import static com.android.cts.install.lib.InstallUtils.getPackageInstaller;
-import static com.android.cts.install.lib.InstallUtils.waitForSessionReady;
 import static com.android.cts.shim.lib.ShimPackage.SHIM_APEX_PACKAGE_NAME;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -35,6 +34,7 @@ import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.StagedApexInfo;
 import android.os.IBinder;
 import android.os.ServiceManager;
@@ -79,6 +79,8 @@ public class StagedInstallInternalTest {
     private static final TestApp TEST_APEX_CLASSPATH = new TestApp("TestApex",
             TEST_APEX_PACKAGE_NAME, 1, /*isApex=*/true,
             "apex.apexd_test_classpath.apex");
+
+    private static final String TEST_APEX_SYSTEM_SERVER_PACKAGE_NAME = "test_com.android.server";
 
     private File mTestStateFile = new File(
             InstrumentationRegistry.getInstrumentation().getContext().getFilesDir(),
@@ -458,7 +460,6 @@ public class StagedInstallInternalTest {
         assertThat(result).hasLength(0);
         // Stage an apex
         int sessionId = Install.single(APEX_V2).setStaged().commit();
-        waitForSessionReady(sessionId);
         result = getPackageManagerNative().getStagedApexModuleNames();
         assertThat(result).hasLength(1);
         assertThat(result).isEqualTo(new String[]{SHIM_APEX_PACKAGE_NAME});
@@ -475,12 +476,21 @@ public class StagedInstallInternalTest {
         assertThat(result).isNull();
         // Stage an apex
         int sessionId = Install.single(TEST_APEX_CLASSPATH).setStaged().commit();
-        waitForSessionReady(sessionId);
         // Query proper module name
         result = getPackageManagerNative().getStagedApexInfo(TEST_APEX_PACKAGE_NAME);
         assertThat(result.moduleName).isEqualTo(TEST_APEX_PACKAGE_NAME);
         assertThat(result.hasClassPathJars).isTrue();
         InstallUtils.openPackageInstallerSession(sessionId).abandon();
+    }
+
+    @Test
+    public void testGetAppInfo_flagTestOnlyIsSet() throws Exception {
+        final PackageManager pm =
+                InstrumentationRegistry.getInstrumentation().getContext().getPackageManager();
+        final ApplicationInfo info = pm.getApplicationInfo(TEST_APEX_SYSTEM_SERVER_PACKAGE_NAME,
+                ApplicationInfoFlags.of(PackageManager.MATCH_APEX));
+        assertThat(info).isNotNull();
+        assertThat((info.flags & ApplicationInfo.FLAG_TEST_ONLY) != 0).isTrue();
     }
 
     public static class MockStagedApexObserver extends IStagedApexObserver.Stub {
@@ -499,7 +509,6 @@ public class StagedInstallInternalTest {
 
         // Stage an apex and verify observer was called
         int sessionId = Install.single(APEX_V2).setStaged().commit();
-        waitForSessionReady(sessionId);
         ArgumentCaptor<ApexStagedEvent> captor = ArgumentCaptor.forClass(ApexStagedEvent.class);
         verify(observer, timeout(5000)).onApexStaged(captor.capture());
         assertThat(captor.getValue().stagedApexModuleNames).isEqualTo(

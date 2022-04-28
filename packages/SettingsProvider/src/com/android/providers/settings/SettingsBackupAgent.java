@@ -652,29 +652,31 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             return Collections.emptySet();
         }
 
-        Cursor cursor = getContentResolver().query(settingsUri, new String[] {
-                Settings.NameValueTable.NAME, Settings.NameValueTable.IS_PRESERVED_IN_RESTORE },
-                /* selection */ null, /* selectionArgs */ null, /* sortOrder */ null);
+        try (Cursor cursor = getContentResolver().query(settingsUri, new String[]{
+                        Settings.NameValueTable.NAME,
+                        Settings.NameValueTable.IS_PRESERVED_IN_RESTORE},
+                /* selection */ null, /* selectionArgs */ null, /* sortOrder */ null)) {
 
-        if (!cursor.moveToFirst()) {
-            Slog.i(TAG, "No settings to be preserved in restore");
-            return Collections.emptySet();
-        }
-
-        int nameIndex = cursor.getColumnIndex(Settings.NameValueTable.NAME);
-        int isPreservedIndex = cursor.getColumnIndex(
-                Settings.NameValueTable.IS_PRESERVED_IN_RESTORE);
-
-        Set<String> preservedSettings = new HashSet<>();
-        while (!cursor.isAfterLast()) {
-            if (Boolean.parseBoolean(cursor.getString(isPreservedIndex))) {
-                preservedSettings.add(getQualifiedKeyForSetting(cursor.getString(nameIndex),
-                        settingsUri));
+            if (!cursor.moveToFirst()) {
+                Slog.i(TAG, "No settings to be preserved in restore");
+                return Collections.emptySet();
             }
-            cursor.moveToNext();
-        }
 
-        return preservedSettings;
+            int nameIndex = cursor.getColumnIndex(Settings.NameValueTable.NAME);
+            int isPreservedIndex = cursor.getColumnIndex(
+                    Settings.NameValueTable.IS_PRESERVED_IN_RESTORE);
+
+            Set<String> preservedSettings = new HashSet<>();
+            while (!cursor.isAfterLast()) {
+                if (Boolean.parseBoolean(cursor.getString(isPreservedIndex))) {
+                    preservedSettings.add(getQualifiedKeyForSetting(cursor.getString(nameIndex),
+                            settingsUri));
+                }
+                cursor.moveToNext();
+            }
+
+            return preservedSettings;
+        }
     }
 
     /**

@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"ຈຳເປັນຕ້ອງມີລະຫັດຜ່ານເພື່ອຄວາມປອດໄພເພີ່ມເຕີມ"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ອຸປະກອນຖືກລັອກໂດຍຜູ້ເບິ່ງແຍງລະບົບ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ອຸປະກອນຖືກສັ່ງໃຫ້ລັອກ"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"ບໍ່ຮູ້ຈັກ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ບໍ່ຮູ້ຈັກ"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ເພື່ອໃຊ້ການປົດລັອກດ້ວຍໜ້າ, ກະລຸນາເປີດໃຊ້ "<b>"ສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບ"</b>" ໃນການຕັ້ງຄ່າ &gt; ຄວາມເປັນສ່ວນຕົວ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

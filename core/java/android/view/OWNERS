@@ -10,6 +10,10 @@ ogunwale@google.com
 jjaggi@google.com
 roosa@google.com
 jreck@google.com
+siyamed@google.com
+
+# Autofill
+per-file ViewStructure.java = file:/core/java/android/service/autofill/OWNERS
 
 # Display
 per-file Display*.java = file:/services/core/java/com/android/server/display/OWNERS
@@ -72,6 +76,8 @@ per-file ContentInfo.java = file:/core/java/android/service/autofill/OWNERS
 per-file ContentInfo.java = file:/core/java/android/widget/OWNERS
 
 # WindowManager
+per-file ContentRecordingSession.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ContentRecordingSession.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file DisplayCutout.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file DisplayCutout.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IDisplay*.aidl = file:/services/core/java/com/android/server/wm/OWNERS

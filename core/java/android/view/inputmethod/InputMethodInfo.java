@@ -64,6 +64,7 @@ import java.util.List;
  * @attr ref android.R.styleable#InputMethod_isDefault
  * @attr ref android.R.styleable#InputMethod_supportsSwitchingToNextInputMethod
  * @attr ref android.R.styleable#InputMethod_supportsInlineSuggestions
+ * @attr ref android.R.styleable#InputMethod_supportsInlineSuggestionsWithTouchExploration
  * @attr ref android.R.styleable#InputMethod_suppressesSpellChecker
  * @attr ref android.R.styleable#InputMethod_showInInputMethodPicker
  * @attr ref android.R.styleable#InputMethod_configChanges
@@ -123,6 +124,11 @@ public final class InputMethodInfo implements Parcelable {
      * The flag whether this IME supports inline suggestions.
      */
     private final boolean mInlineSuggestionsEnabled;
+
+    /**
+     * The flag whether this IME supports inline suggestions when touch exploration is enabled.
+     */
+    private final boolean mSupportsInlineSuggestionsWithTouchExploration;
 
     /**
      * The flag whether this IME suppresses spell checker.
@@ -189,6 +195,7 @@ public final class InputMethodInfo implements Parcelable {
         boolean isAuxIme = true;
         boolean supportsSwitchingToNextInputMethod = false; // false as default
         boolean inlineSuggestionsEnabled = false; // false as default
+        boolean supportsInlineSuggestionsWithTouchExploration = false; // false as default
         boolean suppressesSpellChecker = false; // false as default
         boolean showInInputMethodPicker = true; // true as default
         mForceDefault = false;
@@ -234,6 +241,9 @@ public final class InputMethodInfo implements Parcelable {
                     false);
             inlineSuggestionsEnabled = sa.getBoolean(
                     com.android.internal.R.styleable.InputMethod_supportsInlineSuggestions, false);
+            supportsInlineSuggestionsWithTouchExploration = sa.getBoolean(
+                    com.android.internal.R.styleable
+                            .InputMethod_supportsInlineSuggestionsWithTouchExploration, false);
             suppressesSpellChecker = sa.getBoolean(
                     com.android.internal.R.styleable.InputMethod_suppressesSpellChecker, false);
             showInInputMethodPicker = sa.getBoolean(
@@ -278,6 +288,7 @@ public final class InputMethodInfo implements Parcelable {
                                     .InputMethod_Subtype_subtypeId, 0 /* use Arrays.hashCode */))
                             .setIsAsciiCapable(a.getBoolean(com.android.internal.R.styleable
                                     .InputMethod_Subtype_isAsciiCapable, false)).build();
+                    a.recycle();
                     if (!subtype.isAuxiliary()) {
                         isAuxIme = false;
                     }
@@ -313,6 +324,8 @@ public final class InputMethodInfo implements Parcelable {
         mIsAuxIme = isAuxIme;
         mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
         mInlineSuggestionsEnabled = inlineSuggestionsEnabled;
+        mSupportsInlineSuggestionsWithTouchExploration =
+                supportsInlineSuggestionsWithTouchExploration;
         mSuppressesSpellChecker = suppressesSpellChecker;
         mShowInInputMethodPicker = showInInputMethodPicker;
         mIsVrOnly = isVrOnly;
@@ -325,6 +338,7 @@ public final class InputMethodInfo implements Parcelable {
         mIsAuxIme = source.readInt() == 1;
         mSupportsSwitchingToNextInputMethod = source.readInt() == 1;
         mInlineSuggestionsEnabled = source.readInt() == 1;
+        mSupportsInlineSuggestionsWithTouchExploration = source.readInt() == 1;
         mSuppressesSpellChecker = source.readBoolean();
         mShowInInputMethodPicker = source.readBoolean();
         mIsVrOnly = source.readBoolean();
@@ -344,7 +358,8 @@ public final class InputMethodInfo implements Parcelable {
                 settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
                 false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
                 false /* inlineSuggestionsEnabled */, false /* isVrOnly */,
-                0 /* handledConfigChanges */, false /* supportsStylusHandwriting */);
+                0 /* handledConfigChanges */, false /* supportsStylusHandwriting */,
+                false /* inlineSuggestionsEnabled */);
     }
 
     /**
@@ -359,7 +374,8 @@ public final class InputMethodInfo implements Parcelable {
                 settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
                 false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
                 false /* inlineSuggestionsEnabled */, false /* isVrOnly */, handledConfigChanges,
-                false /* supportsStylusHandwriting */);
+                false /* supportsStylusHandwriting */,
+                false /* inlineSuggestionsEnabled */);
     }
 
     /**
@@ -372,7 +388,8 @@ public final class InputMethodInfo implements Parcelable {
         this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId, forceDefault,
                 true /* supportsSwitchingToNextInputMethod */, false /* inlineSuggestionsEnabled */,
                 false /* isVrOnly */, 0 /* handledconfigChanges */,
-                false /* supportsStylusHandwriting */);
+                false /* supportsStylusHandwriting */,
+                false /* inlineSuggestionsEnabled */);
     }
 
     /**
@@ -384,7 +401,8 @@ public final class InputMethodInfo implements Parcelable {
             boolean supportsSwitchingToNextInputMethod, boolean isVrOnly) {
         this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId, forceDefault,
                 supportsSwitchingToNextInputMethod, false /* inlineSuggestionsEnabled */, isVrOnly,
-                0 /* handledConfigChanges */, false /* supportsStylusHandwriting */);
+                0 /* handledConfigChanges */, false /* supportsStylusHandwriting */,
+                false /* inlineSuggestionsEnabled */);
     }
 
     /**
@@ -394,7 +412,8 @@ public final class InputMethodInfo implements Parcelable {
     public InputMethodInfo(ResolveInfo ri, boolean isAuxIme, String settingsActivity,
             List<InputMethodSubtype> subtypes, int isDefaultResId, boolean forceDefault,
             boolean supportsSwitchingToNextInputMethod, boolean inlineSuggestionsEnabled,
-            boolean isVrOnly, int handledConfigChanges, boolean supportsStylusHandwriting) {
+            boolean isVrOnly, int handledConfigChanges, boolean supportsStylusHandwriting,
+            boolean supportsInlineSuggestionsWithTouchExploration) {
         final ServiceInfo si = ri.serviceInfo;
         mService = ri;
         mId = new ComponentName(si.packageName, si.name).flattenToShortString();
@@ -405,6 +424,8 @@ public final class InputMethodInfo implements Parcelable {
         mForceDefault = forceDefault;
         mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
         mInlineSuggestionsEnabled = inlineSuggestionsEnabled;
+        mSupportsInlineSuggestionsWithTouchExploration =
+                supportsInlineSuggestionsWithTouchExploration;
         mSuppressesSpellChecker = false;
         mShowInInputMethodPicker = true;
         mIsVrOnly = isVrOnly;
@@ -582,6 +603,8 @@ public final class InputMethodInfo implements Parcelable {
                 + " mIsVrOnly=" + mIsVrOnly
                 + " mSupportsSwitchingToNextInputMethod=" + mSupportsSwitchingToNextInputMethod
                 + " mInlineSuggestionsEnabled=" + mInlineSuggestionsEnabled
+                + " mSupportsInlineSuggestionsWithTouchExploration="
+                + mSupportsInlineSuggestionsWithTouchExploration
                 + " mSuppressesSpellChecker=" + mSuppressesSpellChecker
                 + " mShowInInputMethodPicker=" + mShowInInputMethodPicker
                 + " mSupportsStylusHandwriting=" + mSupportsStylusHandwriting);
@@ -653,6 +676,15 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
+     * Returns {@code true} if this input method supports inline suggestions when touch exploration
+     * is enabled.
+     * @hide
+     */
+    public boolean supportsInlineSuggestionsWithTouchExploration() {
+        return mSupportsInlineSuggestionsWithTouchExploration;
+    }
+
+    /**
      * Return {@code true} if this input method suppresses spell checker.
      */
     public boolean suppressesSpellChecker() {
@@ -682,6 +714,7 @@ public final class InputMethodInfo implements Parcelable {
         dest.writeInt(mIsAuxIme ? 1 : 0);
         dest.writeInt(mSupportsSwitchingToNextInputMethod ? 1 : 0);
         dest.writeInt(mInlineSuggestionsEnabled ? 1 : 0);
+        dest.writeInt(mSupportsInlineSuggestionsWithTouchExploration ? 1 : 0);
         dest.writeBoolean(mSuppressesSpellChecker);
         dest.writeBoolean(mShowInInputMethodPicker);
         dest.writeBoolean(mIsVrOnly);

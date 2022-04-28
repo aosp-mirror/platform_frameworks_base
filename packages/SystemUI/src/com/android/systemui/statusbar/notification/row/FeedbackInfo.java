@@ -46,7 +46,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.util.Compile;
 
@@ -62,7 +61,6 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
     private String mPkg;
     private NotificationEntry mEntry;
 
-    private NotificationEntryManager mNotificationEntryManager;
     private IStatusBarService mStatusBarService;
     private AssistantFeedbackController mFeedbackController;
     private NotificationGutsManager mNotificationGutsManager;
@@ -86,7 +84,6 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
         mRanking = entry.getRanking();
         mFeedbackController = controller;
         mAppName = mPkg;
-        mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         mStatusBarService = Dependency.get(IStatusBarService.class);
         mNotificationGutsManager = Dependency.get(NotificationGutsManager.class);
 

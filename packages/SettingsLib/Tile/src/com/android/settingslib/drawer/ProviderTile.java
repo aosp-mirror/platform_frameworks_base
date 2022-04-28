@@ -43,8 +43,7 @@ public class ProviderTile extends Tile {
     private String mKey;
 
     public ProviderTile(ProviderInfo info, String category, Bundle metaData) {
-        super(info, category);
-        setMetaData(metaData);
+        super(info, category, metaData);
         mAuthority = info.authority;
         mKey = metaData.getString(META_DATA_PREFERENCE_KEYHINT);
     }

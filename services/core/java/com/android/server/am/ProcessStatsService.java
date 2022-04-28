@@ -44,6 +44,8 @@ import com.android.internal.app.procstats.UidState;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -787,7 +789,6 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     }
 
     private SparseArray<long[]> getUidProcStateStatsOverTime(long minTime) {
-        final Parcel current = Parcel.obtain();
         final ProcessStats stats = new ProcessStats();
         long curTime;
         synchronized (mLock) {
@@ -933,6 +934,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     private void dumpInner(PrintWriter pw, String[] args) {
         final long now = SystemClock.uptimeMillis();
 

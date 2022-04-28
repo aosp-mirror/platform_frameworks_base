@@ -16,18 +16,22 @@
 
 package com.android.server.tare;
 
+import static android.app.tare.EconomyManager.parseCreditValue;
+
 import static com.android.server.tare.Modifier.COST_MODIFIER_CHARGING;
 import static com.android.server.tare.Modifier.COST_MODIFIER_DEVICE_IDLE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_PROCESS_STATE;
 import static com.android.server.tare.Modifier.NUM_COST_MODIFIERS;
-import static com.android.server.tare.TareUtils.narcToString;
+import static com.android.server.tare.TareUtils.cakeToString;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.provider.DeviceConfig;
 import android.util.IndentingPrintWriter;
+import android.util.KeyValueListParser;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -151,6 +155,16 @@ public abstract class EconomicPolicy {
         }
     }
 
+    static class Cost {
+        public final long costToProduce;
+        public final long price;
+
+        Cost(long costToProduce, long price) {
+            this.costToProduce = costToProduce;
+            this.price = price;
+        }
+    }
+
     private static final Modifier[] COST_MODIFIER_BY_INDEX = new Modifier[NUM_COST_MODIFIERS];
 
     EconomicPolicy(@NonNull InternalResourceService irs) {
@@ -160,7 +174,7 @@ public abstract class EconomicPolicy {
     }
 
     @CallSuper
-    void setup() {
+    void setup(@NonNull DeviceConfig.Properties properties) {
         for (int i = 0; i < NUM_COST_MODIFIERS; ++i) {
             final Modifier modifier = COST_MODIFIER_BY_INDEX[i];
             if (modifier != null) {
@@ -193,10 +207,18 @@ public abstract class EconomicPolicy {
     abstract long getMaxSatiatedBalance();
 
     /**
-     * Returns the maximum number of narcs that should be in circulation at once when the device is
-     * at 100% battery.
+     * Returns the maximum number of cakes that should be consumed during a full 100% discharge
+     * cycle. This is the initial limit. The system may choose to increase the limit over time,
+     * but the increased limit should never exceed the value returned from
+     * {@link #getHardSatiatedConsumptionLimit()}.
      */
-    abstract long getMaxSatiatedCirculation();
+    abstract long getInitialSatiatedConsumptionLimit();
+
+    /**
+     * Returns the maximum number of cakes that should be consumed during a full 100% discharge
+     * cycle. This is the hard limit that should never be exceeded.
+     */
+    abstract long getHardSatiatedConsumptionLimit();
 
     /** Return the set of modifiers that should apply to this policy's costs. */
     @NonNull
@@ -211,10 +233,11 @@ public abstract class EconomicPolicy {
     void dump(IndentingPrintWriter pw) {
     }
 
-    final long getCostOfAction(int actionId, int userId, @NonNull String pkgName) {
+    @NonNull
+    final Cost getCostOfAction(int actionId, int userId, @NonNull String pkgName) {
         final Action action = getAction(actionId);
         if (action == null) {
-            return 0;
+            return new Cost(0, 0);
         }
         long ctp = action.costToProduce;
         long price = action.basePrice;
@@ -235,7 +258,7 @@ public abstract class EconomicPolicy {
                     (ProcessStateModifier) getModifier(COST_MODIFIER_PROCESS_STATE);
             price = processStateModifier.getModifiedPrice(userId, pkgName, ctp, price);
         }
-        return price;
+        return new Cost(ctp, price);
     }
 
     private static void initModifier(@Modifier.CostModifier final int modifierId,
@@ -390,6 +413,22 @@ public abstract class EconomicPolicy {
         return "UNKNOWN_REWARD:" + Integer.toHexString(eventId);
     }
 
+    protected long getConstantAsCake(@NonNull KeyValueListParser parser,
+            @Nullable DeviceConfig.Properties properties, String key, long defaultValCake) {
+        // Don't cross the streams! Mixing Settings/local user config changes with DeviceConfig
+        // config can cause issues since the scales may be different, so use one or the other.
+        if (parser.size() > 0) {
+            // User settings take precedence. Just stick with the Settings constants, even if there
+            // are invalid values. It's not worth the time to evaluate all the key/value pairs to
+            // make sure there are valid ones before deciding.
+            return parseCreditValue(parser.getString(key, null), defaultValCake);
+        }
+        if (properties != null) {
+            return parseCreditValue(properties.getString(key, null), defaultValCake);
+        }
+        return defaultValCake;
+    }
+
     protected static void dumpActiveModifiers(IndentingPrintWriter pw) {
         for (int i = 0; i < NUM_COST_MODIFIERS; ++i) {
             pw.print("Modifier ");
@@ -411,9 +450,9 @@ public abstract class EconomicPolicy {
         pw.print(actionToString(action.id));
         pw.print(": ");
         pw.print("ctp=");
-        pw.print(narcToString(action.costToProduce));
+        pw.print(cakeToString(action.costToProduce));
         pw.print(", basePrice=");
-        pw.print(narcToString(action.basePrice));
+        pw.print(cakeToString(action.basePrice));
         pw.println();
     }
 
@@ -421,11 +460,11 @@ public abstract class EconomicPolicy {
         pw.print(rewardToString(reward.id));
         pw.print(": ");
         pw.print("instant=");
-        pw.print(narcToString(reward.instantReward));
+        pw.print(cakeToString(reward.instantReward));
         pw.print(", ongoing/sec=");
-        pw.print(narcToString(reward.ongoingRewardPerSecond));
+        pw.print(cakeToString(reward.ongoingRewardPerSecond));
         pw.print(", maxDaily=");
-        pw.print(narcToString(reward.maxDailyReward));
+        pw.print(cakeToString(reward.maxDailyReward));
         pw.println();
     }
 }

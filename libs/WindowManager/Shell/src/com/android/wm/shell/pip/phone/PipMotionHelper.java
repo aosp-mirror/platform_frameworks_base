@@ -34,12 +34,12 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Choreographer;
 
 import androidx.dynamicanimation.animation.AnimationHandler;
 import androidx.dynamicanimation.animation.AnimationHandler.FrameCallbackScheduler;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.animation.PhysicsAnimator;
@@ -49,6 +49,7 @@ import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.function.Consumer;
 
@@ -94,6 +95,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 final FrameCallbackScheduler scheduler = new FrameCallbackScheduler() {
                     @Override
                     public void postFrameCallback(@androidx.annotation.NonNull Runnable runnable) {
+                        // TODO(b/222697646): remove getSfInstance usage and use vsyncId for
+                        //  transactions
                         Choreographer.getSfInstance().postFrameCallback(t -> runnable.run());
                     }
 
@@ -354,8 +357,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     private void expandLeavePip(boolean skipAnimation, boolean enterSplit) {
         if (DEBUG) {
-            Log.d(TAG, "exitPip: skipAnimation=" + skipAnimation
-                    + " callers=\n" + Debug.getCallers(5, "    "));
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: exitPip: skipAnimation=%s"
+                            + " callers=\n%s", TAG, skipAnimation, Debug.getCallers(5, "    "));
         }
         cancelPhysicsAnimation();
         mMenuController.hideMenu(ANIM_TYPE_NONE, false /* resize */);
@@ -368,7 +372,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     @Override
     public void dismissPip() {
         if (DEBUG) {
-            Log.d(TAG, "removePip: callers=\n" + Debug.getCallers(5, "    "));
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: removePip: callers=\n%s", TAG, Debug.getCallers(5, "    "));
         }
         cancelPhysicsAnimation();
         mMenuController.hideMenu(ANIM_TYPE_DISMISS, false /* resize */);
@@ -552,8 +557,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     void animateToOffset(Rect originalBounds, int offset) {
         if (DEBUG) {
-            Log.d(TAG, "animateToOffset: originalBounds=" + originalBounds + " offset=" + offset
-                    + " callers=\n" + Debug.getCallers(5, "    "));
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: animateToOffset: originalBounds=%s offset=%s"
+                            + " callers=\n%s", TAG, originalBounds, offset,
+                    Debug.getCallers(5, "    "));
         }
         cancelPhysicsAnimation();
         mPipTaskOrganizer.scheduleOffsetPip(originalBounds, offset, SHIFT_DURATION,
@@ -671,8 +678,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     private void resizePipUnchecked(Rect toBounds) {
         if (DEBUG) {
-            Log.d(TAG, "resizePipUnchecked: toBounds=" + toBounds
-                    + " callers=\n" + Debug.getCallers(5, "    "));
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: resizePipUnchecked: toBounds=%s"
+                            + " callers=\n%s", TAG, toBounds, Debug.getCallers(5, "    "));
         }
         if (!toBounds.equals(getBounds())) {
             mPipTaskOrganizer.scheduleResizePip(toBounds, mUpdateBoundsCallback);
@@ -684,8 +692,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     private void resizeAndAnimatePipUnchecked(Rect toBounds, int duration) {
         if (DEBUG) {
-            Log.d(TAG, "resizeAndAnimatePipUnchecked: toBounds=" + toBounds
-                    + " duration=" + duration + " callers=\n" + Debug.getCallers(5, "    "));
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: resizeAndAnimatePipUnchecked: toBounds=%s"
+                            + " duration=%s callers=\n%s", TAG, toBounds, duration,
+                    Debug.getCallers(5, "    "));
         }
 
         // Intentionally resize here even if the current bounds match the destination bounds.

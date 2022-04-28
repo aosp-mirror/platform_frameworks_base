@@ -23,7 +23,7 @@ import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.systemui.statusbar.phone.StatusBar.ONLY_CORE_APPS;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.ONLY_CORE_APPS;
 
 import android.annotation.Nullable;
 import android.app.ITransientNotificationCallback;
@@ -43,6 +43,7 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.Handler;
@@ -160,6 +161,9 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_SET_BIOMETRICS_LISTENER = 63 << MSG_SHIFT;
     private static final int MSG_MEDIA_TRANSFER_SENDER_STATE = 64 << MSG_SHIFT;
     private static final int MSG_MEDIA_TRANSFER_RECEIVER_STATE = 65 << MSG_SHIFT;
+    private static final int MSG_REGISTER_NEARBY_MEDIA_DEVICE_PROVIDER = 66 << MSG_SHIFT;
+    private static final int MSG_UNREGISTER_NEARBY_MEDIA_DEVICE_PROVIDER = 67 << MSG_SHIFT;
+    private static final int MSG_TILE_SERVICE_REQUEST_LISTENING_STATE = 68 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -307,11 +311,11 @@ public class CommandQueue extends IStatusBar.Stub implements
                 long requestId, @BiometricMultiSensorMode int multiSensorConfig) {
         }
 
-        /** @see IStatusBar#onBiometricAuthenticated() */
-        default void onBiometricAuthenticated() {
+        /** @see IStatusBar#onBiometricAuthenticated(int) */
+        default void onBiometricAuthenticated(@Modality int modality) {
         }
 
-        /** @see IStatusBar#onBiometricHelp(String) */
+        /** @see IStatusBar#onBiometricHelp(int, String) */
         default void onBiometricHelp(@Modality int modality, String message) {
         }
 
@@ -319,7 +323,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void onBiometricError(@Modality int modality, int error, int vendorCode) {
         }
 
-        default void hideAuthenticationDialog() {
+        default void hideAuthenticationDialog(long requestId) {
         }
 
         /**
@@ -430,6 +434,11 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {}
 
         /**
+         * @see IStatusBar#requestTileServiceListeningState
+         */
+        default void requestTileServiceListeningState(@NonNull ComponentName componentName) {}
+
+        /**
          * @see IStatusBar#requestAddTile
          */
         default void requestAddTile(
@@ -453,7 +462,21 @@ public class CommandQueue extends IStatusBar.Stub implements
         /** @see IStatusBar#updateMediaTapToTransferReceiverDisplay */
         default void updateMediaTapToTransferReceiverDisplay(
                 @StatusBarManager.MediaTransferReceiverState int displayState,
-                @NonNull MediaRoute2Info routeInfo) {}
+                @NonNull MediaRoute2Info routeInfo,
+                @Nullable Icon appIcon,
+                @Nullable CharSequence appName) {}
+
+        /**
+         * @see IStatusBar#registerNearbyMediaDevicesProvider
+         */
+        default void registerNearbyMediaDevicesProvider(
+                @NonNull INearbyMediaDevicesProvider provider) {}
+
+        /**
+         * @see IStatusBar#unregisterNearbyMediaDevicesProvider
+         */
+        default void unregisterNearbyMediaDevicesProvider(
+                @NonNull INearbyMediaDevicesProvider provider) {}
     }
 
     public CommandQueue(Context context) {
@@ -946,9 +969,11 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void onBiometricAuthenticated() {
+    public void onBiometricAuthenticated(@Modality int modality) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED).sendToTarget();
+            SomeArgs args = SomeArgs.obtain();
+            args.argi1 = modality;
+            mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED, args).sendToTarget();
         }
     }
 
@@ -974,9 +999,11 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void hideAuthenticationDialog() {
+    public void hideAuthenticationDialog(long requestId) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_BIOMETRIC_HIDE).sendToTarget();
+            final SomeArgs args = SomeArgs.obtain();
+            args.argl1 = requestId;
+            mHandler.obtainMessage(MSG_BIOMETRIC_HIDE, args).sendToTarget();
         }
     }
 
@@ -1171,6 +1198,12 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
+    public void requestTileServiceListeningState(@NonNull ComponentName componentName) {
+        mHandler.obtainMessage(MSG_TILE_SERVICE_REQUEST_LISTENING_STATE, componentName)
+                .sendToTarget();
+    }
+
+    @Override
     public void requestAddTile(
             @NonNull ComponentName componentName,
             @NonNull CharSequence appName,
@@ -1208,11 +1241,27 @@ public class CommandQueue extends IStatusBar.Stub implements
     @Override
     public void updateMediaTapToTransferReceiverDisplay(
             int displayState,
-            MediaRoute2Info routeInfo) {
+            @NonNull MediaRoute2Info routeInfo,
+            @Nullable Icon appIcon,
+            @Nullable CharSequence appName) {
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = displayState;
         args.arg2 = routeInfo;
+        args.arg3 = appIcon;
+        args.arg4 = appName;
         mHandler.obtainMessage(MSG_MEDIA_TRANSFER_RECEIVER_STATE, args).sendToTarget();
+    }
+
+    @Override
+    public void registerNearbyMediaDevicesProvider(@NonNull INearbyMediaDevicesProvider provider) {
+        mHandler.obtainMessage(MSG_REGISTER_NEARBY_MEDIA_DEVICE_PROVIDER, provider).sendToTarget();
+    }
+
+    @Override
+    public void unregisterNearbyMediaDevicesProvider(
+            @NonNull INearbyMediaDevicesProvider provider) {
+        mHandler.obtainMessage(MSG_UNREGISTER_NEARBY_MEDIA_DEVICE_PROVIDER, provider)
+                .sendToTarget();
     }
 
     private final class H extends Handler {
@@ -1432,9 +1481,11 @@ public class CommandQueue extends IStatusBar.Stub implements
                     break;
                 }
                 case MSG_BIOMETRIC_AUTHENTICATED: {
+                    SomeArgs someArgs = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onBiometricAuthenticated();
+                        mCallbacks.get(i).onBiometricAuthenticated(someArgs.argi1 /* modality */);
                     }
+                    someArgs.recycle();
                     break;
                 }
                 case MSG_BIOMETRIC_HELP: {
@@ -1459,11 +1510,14 @@ public class CommandQueue extends IStatusBar.Stub implements
                     someArgs.recycle();
                     break;
                 }
-                case MSG_BIOMETRIC_HIDE:
+                case MSG_BIOMETRIC_HIDE: {
+                    final SomeArgs someArgs = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).hideAuthenticationDialog();
+                        mCallbacks.get(i).hideAuthenticationDialog(someArgs.argl1 /* requestId */);
                     }
+                    someArgs.recycle();
                     break;
+                }
                 case MSG_SET_BIOMETRICS_LISTENER:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).setBiometicContextListener(
@@ -1629,11 +1683,31 @@ public class CommandQueue extends IStatusBar.Stub implements
                     args = (SomeArgs) msg.obj;
                     int receiverDisplayState = (int) args.arg1;
                     MediaRoute2Info receiverRouteInfo = (MediaRoute2Info) args.arg2;
+                    Icon appIcon = (Icon) args.arg3;
+                    appName = (CharSequence) args.arg4;
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).updateMediaTapToTransferReceiverDisplay(
-                                receiverDisplayState, receiverRouteInfo);
+                                receiverDisplayState, receiverRouteInfo, appIcon, appName);
                     }
                     args.recycle();
+                    break;
+                case MSG_REGISTER_NEARBY_MEDIA_DEVICE_PROVIDER:
+                    INearbyMediaDevicesProvider provider = (INearbyMediaDevicesProvider) msg.obj;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).registerNearbyMediaDevicesProvider(provider);
+                    }
+                    break;
+                case MSG_UNREGISTER_NEARBY_MEDIA_DEVICE_PROVIDER:
+                    provider = (INearbyMediaDevicesProvider) msg.obj;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).unregisterNearbyMediaDevicesProvider(provider);
+                    }
+                    break;
+                case MSG_TILE_SERVICE_REQUEST_LISTENING_STATE:
+                    ComponentName component = (ComponentName) msg.obj;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).requestTileServiceListeningState(component);
+                    }
                     break;
             }
         }

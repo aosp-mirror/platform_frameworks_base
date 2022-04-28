@@ -22,7 +22,6 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.graphics.GraphicsProtos.dumpPointProto;
 import static android.hardware.display.DisplayManager.SWITCHING_TYPE_NONE;
@@ -30,13 +29,18 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.ITYPE_INVALID;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.SurfaceControl.getGlobalTransaction;
+import static android.view.ViewRootImpl.LOCAL_LAYOUT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE;
+import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
+import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
+import static android.view.WindowCallbacks.RESIZE_MODE_INVALID;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowLayout.UNSPECIFIED_LENGTH;
@@ -98,13 +102,12 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
-import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED;
-import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -119,7 +122,6 @@ import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.wm.AnimationSpecProto.MOVE;
-import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.DisplayContent.logsGestureExclusionRestrictions;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
@@ -135,14 +137,13 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITIO
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_STARTING_REVEAL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
@@ -181,6 +182,7 @@ import static com.android.server.wm.WindowStateProto.REQUESTED_WIDTH;
 import static com.android.server.wm.WindowStateProto.STACK_ID;
 import static com.android.server.wm.WindowStateProto.SURFACE_INSETS;
 import static com.android.server.wm.WindowStateProto.SURFACE_POSITION;
+import static com.android.server.wm.WindowStateProto.UNRESTRICTED_KEEP_CLEAR_AREAS;
 import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
@@ -213,6 +215,7 @@ import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -246,10 +249,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.window.ClientWindowFrames;
-import android.window.IOnBackInvokedCallback;
+import android.window.OnBackInvokedCallbackInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
+import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ToBooleanFunction;
@@ -257,9 +261,13 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -364,7 +372,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mDragResizingChangeReported = true;
     private int mResizeMode;
     private boolean mRedrawForSyncReported;
-    boolean mNextRelayoutUseSync;
+
+    /**
+     * Used to assosciate a given set of state changes sent from MSG_RESIZED
+     * with a given call to finishDrawing (does this call contain or not contain
+     * those state changes). We need to use it to handle cases like this:
+     * 1. Server changes some state, calls applyWithNextDraw
+     * 2. Client observes state change, begins drawing frame.
+     * 3. Server makes another state change, and calls applyWithNextDraw again
+     * 4. We receive finishDrawing, and it only contains the first frame
+     *    but there was no way for us to know, because we no longer rely
+     *    on a synchronous call to relayout before draw.
+     * We track this by storing seqIds in each draw handler, and increment
+     * this seqId every time we send MSG_RESIZED. The client sends it back
+     * with finishDrawing, and this way we can know is the client replying to
+     * the latest MSG_RESIZED or an earlier one. For a detailed discussion,
+     * examine the git commit message introducing this comment and variable.2
+     */
+    int mSyncSeqId = 0;
+    int mLastSeqIdSentToRelayout = 0;
 
     /**
      * {@code true} when the client was still drawing for sync when the sync-set was finished or
@@ -478,6 +504,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Coordinates are relative to the window's position.
      */
     private final List<Rect> mKeepClearAreas = new ArrayList<>();
+
+    /**
+     * Like mKeepClearAreas, but the unrestricted ones can be trusted to behave nicely.
+     * Floating windows (like Pip) will be moved away from them without applying restrictions.
+     */
+    private final List<Rect> mUnrestrictedKeepClearAreas = new ArrayList<>();
 
     // 0 = left, 1 = right
     private final int[] mLastRequestedExclusionHeight = {0, 0};
@@ -678,9 +710,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final InsetsState mAboveInsetsState = new InsetsState();
 
     /**
-     * The insets sources provided by this window.
+     * The insets state of sources provided by the overrides set on any parent up the hierarchy.
      */
-    final SparseArray<InsetsSource> mProvidedInsetsSources = new SparseArray<>();
+    SparseArray<InsetsSource> mMergedLocalInsetsSources = null;
 
     /**
      * Surface insets from the previous call to relayout(), used to track
@@ -736,7 +768,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private boolean mIsDimming = false;
 
-    private @Nullable InsetsSourceProvider mControllableInsetProvider;
     private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
 
     /**
@@ -766,75 +797,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private final WindowProcessController mWpcForDisplayAreaConfigChanges;
 
-    /**
-     * We split the draw handlers in to a "pending" and "ready" list, in order to solve
-     * sequencing problems. Think of it this way, let's say I update a windows orientation
-     * (in configuration), and then I call applyWithNextDraw. What I'm hoping for is to
-     * apply with the draw that contains the orientation change. However, since the client
-     * can call finishDrawing at any time, it could be about to call a previous call to
-     * finishDrawing (or maybe its already called it, we just haven't handled it). Since this
-     * frame was already completed it had no time to include the orientation change we made.
-     * To solve this problem we accumulate draw handlers in mPendingDrawHandlers, and then force
-     * the client to call relayout. Only the frame post relayout will contain the configuration
-     * change since the window has to relayout), and so in relayout we drain mPendingDrawHandlers
-     * into mReadyDrawHandlers. Finally once we get to finishDrawing we know everything in
-     * mReadyDrawHandlers corresponds to state which was observed by the client and we can
-     * invoke the consumers.
-     *
-     * To see in more detail that this works, we can look at it like this:
-     *
-     * The client is in one of these states:
-     *
-     * 1. Asleep
-     * 2. Traversal scheduled
-     * 3. Starting traversal
-     * 4. In relayout
-     * 5. Already drawing
-     *
-     * The property we want to implement with the draw handlers is:
-     *   If WM code makes a change to client observable state (e.g. configuration),
-     *   and registers a draw handler (without releasing the WM lock in between),
-     *   the FIRST frame reflecting that change, will be in the Transaction passed
-     *   to the draw handler.
-     *
-     * We describe the expected sequencing in each of the possible client states.
-     * We aim to "prove" that the WM can call applyWithNextDraw() with the client
-     * starting in any state, and achieve the desired result.
-     *
-     * 1. Asleep: The client will wake up in response to MSG_RESIZED, call relayout,
-     * observe the changes. Relayout will return BLAST_SYNC, and the client will
-     * send the transaction to finishDrawing. Since the client was asleep. This
-     * will be the first finishDrawing reflecting the change.
-     * 2, 3: traversal scheduled/starting traversal: These two states can be considered
-     *    together. Each has two sub-states:
-     *       a) Traversal will call relayout. In this case we proceed like the starting
-     *          from asleep case.
-     *       b) Traversal will not call relayout. In this case, the client produced
-     *       frame will not include the change. Because there is no call to relayout
-     *       there is no call to prepareDrawHandlers() and even if the client calls
-     *       finish drawing the draw handler will not be invoked. We have to wait
-     *       on the client to receive MSG_RESIZED, and will sync on the next frame
-     * 4. In relayout. In this case we are careful to prepare draw handlers and check
-     *    whether to return the BLAST flag at the end of relayoutWindow. This means if you
-     *    add a draw handler while the client is in relayout, BLAST_SYNC will be
-     *    immediately returned, and the client will submit the frame corresponding
-     *    to what returns from layout. When we prepare the draw handlers we clear the
-     *    flag which would later cause us to report draw for sync. Since we reported
-     *    sync through relayout (by luck the client was calling relayout perhaps)
-     *    there is no need for a MSG_RESIZED.
-     * 5. Already drawing. This works much like cases 2 and 3. If there is no call to
-     *    finishDrawing then of course the draw handlers will not be invoked and we just
-     *    wait on the next frame for sync. If there is a call to finishDrawing,
-     *    the draw handler will not have been prepared (since we did not call relayout)
-     *    and we will have to wait on the next frame.
-     *
-     * By this logic we can see no matter which of the client states we are in when the
-     * draw handler is added, it will always execute on the expected frame.
-     */
-    private final List<Consumer<SurfaceControl.Transaction>> mPendingDrawHandlers
-        = new ArrayList<>();
-    private final List<Consumer<SurfaceControl.Transaction>> mReadyDrawHandlers
-        = new ArrayList<>();
+    class DrawHandler {
+        Consumer<SurfaceControl.Transaction> mConsumer;
+        int mSeqId;
+
+        DrawHandler(int seqId, Consumer<SurfaceControl.Transaction> consumer) {
+            mSeqId = seqId;
+            mConsumer = consumer;
+        }
+    }
+    private final List<DrawHandler> mDrawHandlers = new ArrayList<>();
 
     private final Consumer<SurfaceControl.Transaction> mSeamlessRotationFinishedConsumer = t -> {
         finishSeamlessRotation(t);
@@ -848,10 +820,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     };
 
     /**
-     * @see #setOnBackInvokedCallback(IOnBackInvokedCallback)
+     * @see #setOnBackInvokedCallbackInfo(OnBackInvokedCallbackInfo)
      */
-    private IOnBackInvokedCallback mOnBackInvokedCallback;
-
+    private OnBackInvokedCallbackInfo mOnBackInvokedCallbackInfo;
     @Override
     WindowState asWindowState() {
         return this;
@@ -1020,51 +991,86 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * @return a list of rects that should ideally not be covered by floating windows like pip.
-     *         The returned rect coordinates are relative to the display origin.
+     * Collects all restricted and unrestricted keep-clear areas for this window.
+     * Keep-clear areas are rects that should ideally not be covered by floating windows like Pip.
+     * The system is more careful about restricted ones and may apply restrictions to them, while
+     * the unrestricted ones are considered safe.
+     *
+     * @param outRestricted collection to add restricted keep-clear areas to
+     * @param outUnrestricted collection to add unrestricted keep-clear areas to
      */
-    List<Rect> getKeepClearAreas() {
+    void getKeepClearAreas(Collection<Rect> outRestricted, Collection<Rect> outUnrestricted) {
         final Matrix tmpMatrix = new Matrix();
         final float[] tmpFloat9 = new float[9];
-        return getKeepClearAreas(tmpMatrix, tmpFloat9);
+        getKeepClearAreas(outRestricted, outUnrestricted, tmpMatrix, tmpFloat9);
     }
 
     /**
+     * Collects all restricted and unrestricted keep-clear areas for this window.
+     * Keep-clear areas are rects that should ideally not be covered by floating windows like Pip.
+     * The system is more careful about restricted ones and may apply restrictions to them, while
+     * the unrestricted ones are considered safe.
+     *
+     * @param outRestricted collection to add restricted keep-clear areas to
+     * @param outUnrestricted collection to add unrestricted keep-clear areas to
      * @param tmpMatrix a temporary matrix to be used for transformations
      * @param float9 a temporary array of 9 floats
-     *
-     * @return a list of rects that should ideally not be covered by floating windows like pip.
-     *         The returned rect coordinates are relative to the display origin.
      */
-    List<Rect> getKeepClearAreas(Matrix tmpMatrix, float[] float9) {
+    void getKeepClearAreas(Collection<Rect> outRestricted, Collection<Rect> outUnrestricted,
+            Matrix tmpMatrix, float[] float9) {
+        outRestricted.addAll(getRectsInScreenSpace(mKeepClearAreas, tmpMatrix, float9));
+        outUnrestricted.addAll(
+                getRectsInScreenSpace(mUnrestrictedKeepClearAreas, tmpMatrix, float9));
+    }
+
+    /**
+     * Transforms the given rects from window coordinate space to screen space.
+     */
+    List<Rect> getRectsInScreenSpace(List<Rect> rects, Matrix tmpMatrix, float[] float9) {
         getTransformationMatrix(float9, tmpMatrix);
 
-        // Translate all keep-clear rects to screen coordinates.
-        final List<Rect> transformedKeepClearAreas = new ArrayList<Rect>();
+        final List<Rect> transformedRects = new ArrayList<Rect>();
         final RectF tmpRect = new RectF();
         Rect curr;
-        for (Rect r : mKeepClearAreas) {
+        for (Rect r : rects) {
             tmpRect.set(r);
             tmpMatrix.mapRect(tmpRect);
             curr = new Rect();
             tmpRect.roundOut(curr);
-            transformedKeepClearAreas.add(curr);
+            transformedRects.add(curr);
         }
-        return transformedKeepClearAreas;
+        return transformedRects;
     }
 
     /**
-     * @param keepClearAreas the new keep-clear areas for this window. The rects should be defined
-     *                       in window coordinate space
+     * Sets the new keep-clear areas for this window. The rects should be defined in window
+     * coordinate space.
+     * Keep-clear areas can be restricted or unrestricted, depending on whether the app holds the
+     * {@link android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS} system permission.
+     * Restricted ones will be handled more carefully by the system. Restrictions may be applied.
+     * Unrestricted ones are considered safe. The system should move floating windows away from them
+     * without applying restrictions.
+     *
+     * @param restricted the new restricted keep-clear areas for this window
+     * @param unrestricted the new unrestricted keep-clear areas for this window
      *
      * @return true if there is a change in the list of keep-clear areas; false otherwise
      */
-    boolean setKeepClearAreas(List<Rect> keepClearAreas) {
-        if (mKeepClearAreas.equals(keepClearAreas)) {
+    boolean setKeepClearAreas(List<Rect> restricted, List<Rect> unrestricted) {
+        final boolean newRestrictedAreas = !mKeepClearAreas.equals(restricted);
+        final boolean newUnrestrictedAreas = !mUnrestrictedKeepClearAreas.equals(unrestricted);
+        if (!newRestrictedAreas && !newUnrestrictedAreas) {
             return false;
         }
-        mKeepClearAreas.clear();
-        mKeepClearAreas.addAll(keepClearAreas);
+        if (newRestrictedAreas) {
+            mKeepClearAreas.clear();
+            mKeepClearAreas.addAll(restricted);
+        }
+
+        if (newUnrestrictedAreas) {
+            mUnrestrictedKeepClearAreas.clear();
+            mUnrestrictedKeepClearAreas.addAll(unrestricted);
+        }
         return true;
     }
 
@@ -1073,15 +1079,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * called when a back navigation action is initiated.
      * @see BackNavigationController
      */
-    void setOnBackInvokedCallback(@Nullable IOnBackInvokedCallback onBackInvokedCallback) {
+    void setOnBackInvokedCallbackInfo(
+            @Nullable OnBackInvokedCallbackInfo callbackInfo) {
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "%s: Setting back callback %s",
-                this, onBackInvokedCallback);
-        mOnBackInvokedCallback = onBackInvokedCallback;
+                this, callbackInfo);
+        mOnBackInvokedCallbackInfo = callbackInfo;
     }
 
     @Nullable
-    IOnBackInvokedCallback getOnBackInvokedCallback() {
-        return mOnBackInvokedCallback;
+    OnBackInvokedCallbackInfo getOnBackInvokedCallbackInfo() {
+        return mOnBackInvokedCallbackInfo;
     }
 
     interface PowerManagerWrapper {
@@ -1135,6 +1142,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mActivityRecord != null
                         ? mActivityRecord.getInputApplicationHandle(false /* update */) : null,
                 getDisplayId()));
+        mInputWindowHandle.setFocusable(false);
         mInputWindowHandle.setOwnerPid(s.mPid);
         mInputWindowHandle.setOwnerUid(s.mUid);
         mInputWindowHandle.setName(getName());
@@ -1336,27 +1344,36 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord != null && mActivityRecord.mWaitForEnteringPinnedMode;
     }
 
-    // TODO(b/161810301): Make the frame be passed from the client side.
-    void setFrame() {
-        // TODO(b/161810301): Set the window frame here. We don't have to do it now because
-        //                    DisplayPolicy has already done it for the window.
-
-        mHaveFrame = true;
-
+    void setFrames(ClientWindowFrames clientWindowFrames, int requestedWidth, int requestedHeight) {
         final WindowFrames windowFrames = mWindowFrames;
+        mTmpRect.set(windowFrames.mParentFrame);
 
-        if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight) {
-            mLastRequestedWidth = mRequestedWidth;
-            mLastRequestedHeight = mRequestedHeight;
-            windowFrames.setContentChanged(true);
-        }
+        if (LOCAL_LAYOUT) {
+            windowFrames.mCompatFrame.set(clientWindowFrames.frame);
 
-        windowFrames.mCompatFrame.set(windowFrames.mFrame);
-        if (hasCompatScale()) {
-            // Also the scaled frame that we report to the app needs to be
-            // adjusted to be in its coordinate space.
-            windowFrames.mCompatFrame.scale(mInvGlobalScale);
+            windowFrames.mFrame.set(clientWindowFrames.frame);
+            windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
+            windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
+            if (hasCompatScale()) {
+                // The frames sent from the client need to be adjusted to the real coordinate space.
+                windowFrames.mFrame.scale(mGlobalScale);
+                windowFrames.mDisplayFrame.scale(mGlobalScale);
+                windowFrames.mParentFrame.scale(mGlobalScale);
+            }
+        } else {
+            windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
+            windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
+            windowFrames.mFrame.set(clientWindowFrames.frame);
+
+            windowFrames.mCompatFrame.set(windowFrames.mFrame);
+            if (hasCompatScale()) {
+                // Also, the scaled frame that we report to the app needs to be adjusted to be in
+                // its coordinate space.
+                windowFrames.mCompatFrame.scale(mInvGlobalScale);
+            }
         }
+        windowFrames.setParentFrameWasClippedByDisplayCutout(
+                clientWindowFrames.isParentFrameClippedByDisplayCutout);
 
         // Calculate relative frame
         windowFrames.mRelFrame.set(windowFrames.mFrame);
@@ -1374,14 +1391,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         windowFrames.mRelFrame.offsetTo(windowFrames.mFrame.left - parentLeft,
                 windowFrames.mFrame.top - parentTop);
 
-        if (DEBUG_LAYOUT || DEBUG) {
-            final int pw = windowFrames.mParentFrame.width();
-            final int ph = windowFrames.mParentFrame.height();
-            Slog.v(TAG, "Resolving (mRequestedWidth="
-                    + mRequestedWidth + ", mRequestedheight="
-                    + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
-                    + "): frame=" + windowFrames.mFrame.toShortString()
-                    + " " + mAttrs.getTitle());
+        if (requestedWidth != mLastRequestedWidth || requestedHeight != mLastRequestedHeight
+                || !mTmpRect.equals(windowFrames.mParentFrame)) {
+            mLastRequestedWidth = requestedWidth;
+            mLastRequestedHeight = requestedHeight;
+            windowFrames.setContentChanged(true);
         }
 
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
@@ -1398,9 +1412,32 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
 
-        // Update the source frame to provide insets to other windows during layout.
-        if (mControllableInsetProvider != null) {
-            mControllableInsetProvider.updateSourceFrame();
+        updateSourceFrame(windowFrames.mFrame);
+
+        if (LOCAL_LAYOUT) {
+            if (!mHaveFrame) {
+                // The first frame should not be considered as moved.
+                updateLastFrames();
+            }
+        }
+
+        if (mActivityRecord != null && !mIsChildWindow) {
+            mActivityRecord.layoutLetterbox(this);
+        }
+        mSurfacePlacementNeeded = true;
+        mHaveFrame = true;
+    }
+
+    void updateSourceFrame(Rect winFrame) {
+        if (mGivenInsetsPending) {
+            // The given insets are pending, and they are not reliable for now. The source frame
+            // should be updated after the new given insets are sent to window manager.
+            return;
+        }
+        final SparseArray<InsetsSource> providedSources = getProvidedInsetsSources();
+        final InsetsStateController controller = getDisplayContent().getInsetsStateController();
+        for (int i = providedSources.size() - 1; i >= 0; i--) {
+            controller.getSourceProvider(providedSources.keyAt(i)).updateSourceFrame(winFrame);
         }
     }
 
@@ -1470,12 +1507,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * dimensions or insets have changed.
      */
     void updateResizingWindowIfNeeded() {
-        final WindowStateAnimator winAnimator = mWinAnimator;
-        if (!mHasSurface || getDisplayContent().mLayoutSeq != mLayoutSeq || isGoneForLayout()) {
+        final boolean insetsChanged = mWindowFrames.hasInsetsChanged();
+        if ((!mHasSurface || getDisplayContent().mLayoutSeq != mLayoutSeq || isGoneForLayout())
+                && !insetsChanged) {
             return;
         }
 
-        boolean didFrameInsetsChange = setReportResizeHints();
+        final WindowStateAnimator winAnimator = mWinAnimator;
+        final boolean didFrameInsetsChange = setReportResizeHints();
         // The latest configuration will be returned by the out parameter of relayout, so it is
         // unnecessary to report resize if this window is running relayout.
         final boolean configChanged = !mInRelayout && !isLastConfigReportedToClient();
@@ -1500,6 +1539,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // already. This because the window is waiting on a finishDrawing from the client.
         if (didFrameInsetsChange
                 || configChanged
+                || insetsChanged
                 || dragResizingChanged
                 || mReportOrientationChanged
                 || shouldSendRedrawForSync()) {
@@ -1508,6 +1548,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                                 + "dragResizingChanged=%b reportOrientationChanged=%b",
                         this, mWindowFrames.getInsetsChangedInfo(),
                         configChanged, dragResizingChanged, mReportOrientationChanged);
+
+            if (insetsChanged) {
+                mWindowFrames.setInsetsChanged(false);
+                mWmService.mWindowsInsetsChanged--;
+                if (mWmService.mWindowsInsetsChanged == 0) {
+                    mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
+                }
+            }
 
             // If it's a dead window left on screen, and the configuration changed, there is nothing
             // we can do about it. Remove the window now.
@@ -1588,14 +1636,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    DisplayContent getDisplayContent() {
+    public DisplayContent getDisplayContent() {
         return mToken.getDisplayContent();
     }
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
         if (dc != null && mDisplayContent != null && dc != mDisplayContent
-                && getImeInputTarget() == this) {
+                && mDisplayContent.getImeInputTarget() == this) {
             dc.updateImeInputAndControlTarget(getImeInputTarget());
             mDisplayContent.setImeInputTarget(null);
         }
@@ -1634,11 +1682,51 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Returns the insets state for the window. Its sources may be the copies with visibility
-     * modification according to the state of transient bars.
+     * See {@link WindowState#getInsetsState(boolean)}
      */
     InsetsState getInsetsState() {
-        return getDisplayContent().getInsetsPolicy().getInsetsForWindow(this);
+        return getInsetsState(false);
+    }
+
+    /**
+     * Returns the insets state for the window. Its sources may be the copies with visibility
+     * modification according to the state of transient bars.
+     * This is to get the insets for a window layout on the screen. If the window is not there, use
+     * the {@link InsetsPolicy#getInsetsForWindowMetrics} to get insets instead.
+     * @param includeTransient whether or not the transient types should be included in the
+     *                         insets state.
+     */
+    InsetsState getInsetsState(boolean includeTransient) {
+        final InsetsState rotatedState = mToken.getFixedRotationTransformInsetsState();
+        final InsetsPolicy insetsPolicy = getDisplayContent().getInsetsPolicy();
+        if (rotatedState != null) {
+            return insetsPolicy.adjustInsetsForWindow(this, rotatedState);
+        }
+        final InsetsSourceProvider provider = getControllableInsetProvider();
+        final @InternalInsetsType int insetTypeProvidedByWindow = provider != null
+                ? provider.getSource().getType() : ITYPE_INVALID;
+        final InsetsState rawInsetsState =
+                mFrozenInsetsState != null ? mFrozenInsetsState : getMergedInsetsState();
+        final InsetsState insetsStateForWindow = insetsPolicy
+                .enforceInsetsPolicyForTarget(insetTypeProvidedByWindow,
+                        getWindowingMode(), isAlwaysOnTop(), rawInsetsState);
+        return insetsPolicy.adjustInsetsForWindow(this, insetsStateForWindow,
+                includeTransient);
+    }
+
+    private InsetsState getMergedInsetsState() {
+        final InsetsState globalInsetsState = mAttrs.receiveInsetsIgnoringZOrder
+                ? getDisplayContent().getInsetsStateController().getRawInsetsState()
+                : mAboveInsetsState;
+        if (mMergedLocalInsetsSources == null) {
+            return globalInsetsState;
+        }
+
+        final InsetsState mergedInsetsState = new InsetsState(globalInsetsState);
+        for (int i = 0; i < mMergedLocalInsetsSources.size(); i++) {
+            mergedInsetsState.addSource(mMergedLocalInsetsSources.valueAt(i));
+        }
+        return mergedInsetsState;
     }
 
     /**
@@ -1693,6 +1781,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public int getPid() {
         return mSession.mPid;
+    }
+
+    @Override
+    public int getUid() {
+        return mSession.mUid;
     }
 
     Task getTask() {
@@ -1758,7 +1851,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         bounds.set(mWindowFrames.mFrame);
         bounds.inset(getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                bounds, mAttrs.softInputMode));
+                bounds, mAttrs.type, getWindowingMode(), mAttrs.softInputMode, mAttrs.flags));
         if (intersectWithRootTaskBounds) {
             bounds.intersect(mTmpRect);
         }
@@ -1947,8 +2040,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if ((mAttrs.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
             return true;
         }
-        return !DevicePolicyCache.getInstance().isScreenCaptureAllowed(mShowUserId,
-                mOwnerCanAddInternalSystemWindow);
+        return !DevicePolicyCache.getInstance().isScreenCaptureAllowed(mShowUserId);
     }
 
     /**
@@ -2131,6 +2223,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Mark all relevant flags for that onExitAnimationDone will proceed all the way
             // to actually remove it.
             if (!visible && isVisibleNow && mActivityRecord.isAnimating(PARENTS | TRANSITION)) {
+                ProtoLog.d(WM_DEBUG_ANIM,
+                        "Set animatingExit: reason=onAppVisibilityChanged win=%s", this);
                 mAnimatingExit = true;
                 mRemoveOnExit = true;
                 mWindowRemovalAllowed = true;
@@ -2294,7 +2388,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
-        if (getDisplayContent().getImeTarget(IME_TARGET_INPUT) != this && !isImeLayeringTarget()) {
+        if (getDisplayContent().getImeInputTarget() != this && !isImeLayeringTarget()) {
             super.onConfigurationChanged(newParentConfig);
             return;
         }
@@ -2370,7 +2464,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             dc.setImeLayeringTarget(null);
             dc.computeImeTarget(true /* updateImeTarget */);
         }
-        if (dc.getImeTarget(IME_TARGET_INPUT) == this) {
+        if (dc.getImeInputTarget() == this) {
             dc.updateImeInputAndControlTarget(null);
         }
 
@@ -2385,6 +2479,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         dc.getDisplayPolicy().removeWindowLw(this);
 
         disposeInputChannel();
+        mOnBackInvokedCallbackInfo = null;
 
         mSession.windowRemovedLocked();
         try {
@@ -2438,6 +2533,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         try {
             disposeInputChannel();
+            mOnBackInvokedCallbackInfo = null;
 
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b "
@@ -2466,6 +2562,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     // been removed. We probably need another flag to indicate that window removal
                     // should be deffered vs. overloading the flag that says we are playing an exit
                     // animation.
+                    ProtoLog.v(WM_DEBUG_ANIM,
+                            "Set animatingExit: reason=remove/replaceWindow win=%s", this);
                     mAnimatingExit = true;
                     mReplacingRemoveRequested = true;
                     return;
@@ -2489,11 +2587,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     return;
                 }
 
+                // Remove immediately if there is display transition because the animation is
+                // usually unnoticeable (e.g. covered by rotation animation) and the animation
+                // bounds could be inconsistent, such as depending on when the window applies
+                // its draw transaction with new rotation.
+                final boolean allowExitAnimation = !getDisplayContent().inTransition();
+
                 if (wasVisible) {
                     final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
 
                     // Try starting an animation.
-                    if (mWinAnimator.applyAnimationLocked(transit, false)) {
+                    if (allowExitAnimation && mWinAnimator.applyAnimationLocked(transit, false)) {
+                        ProtoLog.v(WM_DEBUG_ANIM,
+                                "Set animatingExit: reason=remove/applyAnimation win=%s", this);
                         mAnimatingExit = true;
 
                         // mAnimatingExit affects canAffectSystemUiFlags(). Run layout such that
@@ -2505,8 +2611,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController.onWindowTransition(this, transit);
                     }
                 }
-                final boolean isAnimating = mAnimatingExit
-                        || isAnimating(TRANSITION | PARENTS, EXIT_ANIMATING_TYPES);
+                final boolean isAnimating = allowExitAnimation
+                        && (mAnimatingExit || isExitAnimationRunningSelfOrParent());
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
                 // We delay the removal of a window if it has a showing surface that can be used to run
@@ -2521,6 +2627,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     // The exit animation is running or should run... wait for it!
                     ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                             "Not removing %s due to exit animation", this);
+                    ProtoLog.v(WM_DEBUG_ANIM, "Set animatingExit: reason=remove/isAnimating win=%s",
+                            this);
                     setupWindowForRemoveOnExit();
                     if (mActivityRecord != null) {
                         mActivityRecord.updateReportedVisibilityLocked();
@@ -2678,7 +2786,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Move the touch gesture from the currently touched window on this display to this window.
      */
     public boolean transferTouch() {
-        return mWmService.mInputManager.transferTouch(mInputChannelToken);
+        return mWmService.mInputManager.transferTouch(mInputChannelToken, getDisplayId());
     }
 
     void disposeInputChannel() {
@@ -2929,7 +3037,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             boolean canTurnScreenOn = mActivityRecord == null || mActivityRecord.currentLaunchCanTurnScreenOn();
 
             if (allowTheaterMode && canTurnScreenOn
-                        && (mWmService.mAtmInternal.isDreaming()
+                        && (mWmService.mAtmService.isDreaming()
                         || !mPowerManagerWrapper.isInteractive())) {
                 if (DEBUG_VISIBILITY || DEBUG_POWER) {
                     Slog.v(TAG, "Relayout window turning screen on: " + this);
@@ -3392,6 +3500,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     "Setting visibility of " + this + ": " + clientVisible);
             mClient.dispatchAppVisibility(clientVisible);
         } catch (RemoteException e) {
+            Slog.w(TAG, "Exception thrown during dispatchAppVisibility " + this, e);
         }
     }
 
@@ -3480,6 +3589,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Clear animating flags now, since the surface is now gone. (Note this is true even
         // if the surface is saved, to outside world the surface is still NO_SURFACE.)
         mAnimatingExit = false;
+        ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=destroySurface win=%s", this);
+
+        // Clear the flag so the buffer requested for the next new surface won't be dropped by
+        // mistaking the surface size needs to update.
+        mReportOrientationChanged = false;
+
+        if (useBLASTSync()) {
+            immediatelyNotifyBlastSync();
+        }
     }
 
     void onSurfaceShownChanged(boolean shown) {
@@ -3520,11 +3638,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int requested = mLastRequestedExclusionHeight[side];
         final int granted = mLastGrantedExclusionHeight[side];
 
+        final boolean inSplitScreen = getTask() != null && getTask().inSplitScreen();
+
         FrameworkStatsLog.write(FrameworkStatsLog.EXCLUSION_RECT_STATE_CHANGED,
                 mAttrs.packageName, requested, requested - granted /* rejected */,
                 side + 1 /* Sides are 1-indexed in atoms.proto */,
                 (getConfiguration().orientation == ORIENTATION_LANDSCAPE),
-                isSplitScreenWindowingMode(getWindowingMode()), (int) duration);
+                inSplitScreen, (int) duration);
     }
 
     private void initExclusionRestrictions() {
@@ -3750,25 +3870,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outFrames.displayFrame.scale(mInvGlobalScale);
         }
 
-        final Rect backdropFrame = outFrames.backdropFrame;
-        // When the task is docked, we send fullscreen sized backdropFrame as soon as resizing
-        // start even if we haven't received the relayout window, so that the client requests
-        // the relayout sooner. When dragging stops, backdropFrame needs to stay fullscreen
-        // until the window to small size, otherwise the multithread renderer will shift last
-        // one or more frame to wrong offset. So here we send fullscreen backdrop if either
-        // isDragResizing() or isDragResizeChanged() is true.
-        final boolean resizing = isDragResizing() || isDragResizeChanged();
-        if (!resizing || getWindowConfiguration().useWindowFrameForBackdrop()) {
-            // Surface position is now inherited from parent, and BackdropFrameRenderer uses
-            // backdrop frame to position content. Thus we just keep the size of backdrop frame,
-            // and remove the offset to avoid double offset from display origin.
-            backdropFrame.set(outFrames.frame);
-            backdropFrame.offsetTo(0, 0);
-        } else {
-            final DisplayInfo displayInfo = getDisplayInfo();
-            backdropFrame.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
-        }
-
         // Note: in the cases where the window is tied to an activity, we should not send a
         // configuration update when the window has requested to be hidden. Doing so can lead to
         // the client erroneously accepting a configuration that would have otherwise caused an
@@ -3825,17 +3926,34 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 true /* useLatestConfig */, false /* relayoutVisible */);
         final boolean syncRedraw = shouldSendRedrawForSync();
         final boolean reportDraw = syncRedraw || drawPending;
-        final boolean forceRelayout = syncRedraw || reportOrientation || isDragResizeChanged();
+        final boolean isDragResizeChanged = isDragResizeChanged();
+        final boolean forceRelayout = syncRedraw || reportOrientation || isDragResizeChanged;
         final DisplayContent displayContent = getDisplayContent();
         final boolean alwaysConsumeSystemBars =
                 displayContent.getDisplayPolicy().areSystemBarsForcedShownLw();
         final int displayId = displayContent.getDisplayId();
 
+        if (isDragResizeChanged) {
+            setDragResizing();
+        }
+        int resizeMode = RESIZE_MODE_INVALID;
+        if (isDragResizing()) {
+            switch (getResizeMode()) {
+                case DRAG_RESIZE_MODE_FREEFORM:
+                    resizeMode = RESIZE_MODE_FREEFORM;
+                    break;
+                case DRAG_RESIZE_MODE_DOCKED_DIVIDER:
+                    resizeMode = RESIZE_MODE_DOCKED_DIVIDER;
+                    break;
+            }
+        }
+
         markRedrawForSyncReported();
 
         try {
             mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
-                    forceRelayout, alwaysConsumeSystemBars, displayId);
+                    getCompatInsetsState(), forceRelayout, alwaysConsumeSystemBars, displayId,
+                    mSyncSeqId, resizeMode);
             if (drawPending && reportOrientation && mOrientationChanging) {
                 mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -3864,13 +3982,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void notifyInsetsChanged() {
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "notifyInsetsChanged for %s ", this);
-        try {
-            mClient.insetsChanged(getCompatInsetsState(),
-                    hasMoved(),
-                    mWindowFrames.isFrameSizeChangeReported());
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to deliver inset state change w=" + this, e);
-        }
+        mWindowFrames.setInsetsChanged(true);
+
+        // If the new InsetsState won't be dispatched before releasing WM lock, the following
+        // message will be executed.
+        mWmService.mWindowsInsetsChanged++;
+        mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
+        mWmService.mH.sendEmptyMessage(WindowManagerService.H.INSETS_CHANGED);
+
         final WindowContainer p = getParent();
         if (p != null) {
             p.updateOverlayInsetsState(this);
@@ -3887,9 +4006,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 getDisplayContent().getInsetsStateController();
         try {
             mClient.insetsControlChanged(getCompatInsetsState(),
-                    stateController.getControlsForDispatch(this),
-                    hasMoved(),
-                    mWindowFrames.isFrameSizeChangeReported());
+                    stateController.getControlsForDispatch(this));
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change to w=" + this, e);
         }
@@ -4059,8 +4176,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (task == null) {
             return false;
         }
-        if (!inSplitScreenWindowingMode() && !inFreeformWindowingMode()
-                && !task.getRootTask().mCreatedByOrganizer) {
+        if (!inFreeformWindowingMode() && !task.getRootTask().mCreatedByOrganizer) {
             return false;
         }
         // TODO(157912944): formalize drag-resizing so that exceptions aren't hardcoded like this
@@ -4140,8 +4256,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         proto.write(FORCE_SEAMLESS_ROTATION, mForceSeamlesslyRotate);
         proto.write(HAS_COMPAT_SCALE, hasCompatScale());
         proto.write(GLOBAL_SCALE, mGlobalScale);
-        for (Rect r : getKeepClearAreas()) {
+        for (Rect r : mKeepClearAreas) {
             r.dumpDebug(proto, KEEP_CLEAR_AREAS);
+        }
+        for (Rect r : mUnrestrictedKeepClearAreas) {
+            r.dumpDebug(proto, UNRESTRICTED_KEEP_CLEAR_AREAS);
         }
         proto.end(token);
     }
@@ -4163,6 +4282,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         proto.end(token);
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         pw.print(prefix + "mDisplayId=" + getDisplayId());
@@ -4310,7 +4430,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         pw.println(prefix + "isOnScreen=" + isOnScreen());
         pw.println(prefix + "isVisible=" + isVisible());
-        pw.println(prefix + "keepClearAreas=" + getKeepClearAreas());
+        pw.println(prefix + "keepClearAreas: restricted=" + mKeepClearAreas
+                          + ", unrestricted=" + mUnrestrictedKeepClearAreas);
         if (dumpAll) {
             final String visibilityString = mRequestedVisibilities.toString();
             if (!visibilityString.isEmpty()) {
@@ -4542,8 +4663,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // Force the show in the next prepareSurfaceLocked() call.
         mWinAnimator.mLastAlpha = -1;
-        if (DEBUG_ANIM) Slog.v(TAG,
-                "performShowLocked: mDrawState=HAS_DRAWN in " + this);
+        ProtoLog.v(WM_DEBUG_ANIM, "performShowLocked: mDrawState=HAS_DRAWN in %s", this);
         mWinAnimator.mDrawState = HAS_DRAWN;
         mWmService.scheduleAnimationLocked();
 
@@ -4685,6 +4805,58 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return false;
     }
 
+    @Override
+    void updateAboveInsetsState(InsetsState aboveInsetsState,
+            SparseArray<InsetsSourceProvider> localInsetsSourceProvidersFromParent,
+            ArraySet<WindowState> insetsChangedWindows) {
+        SparseArray<InsetsSourceProvider> mergedLocalInsetsSourceProviders =
+                localInsetsSourceProvidersFromParent;
+        if (mLocalInsetsSourceProviders != null && mLocalInsetsSourceProviders.size() != 0) {
+            mergedLocalInsetsSourceProviders = createShallowCopy(mergedLocalInsetsSourceProviders);
+            for (int i = 0; i < mLocalInsetsSourceProviders.size(); i++) {
+                mergedLocalInsetsSourceProviders.put(
+                        mLocalInsetsSourceProviders.keyAt(i),
+                        mLocalInsetsSourceProviders.valueAt(i));
+            }
+        }
+        final SparseArray<InsetsSource> mergedLocalInsetsSourcesFromParent =
+                toInsetsSources(mergedLocalInsetsSourceProviders);
+
+        // Insets provided by the IME window can effect all the windows below it and hence it needs
+        // to be visited in the correct order. Because of which updateAboveInsetsState() can't be
+        // used here and instead forAllWindows() is used.
+        forAllWindows(w -> {
+            if (!w.mAboveInsetsState.equals(aboveInsetsState)) {
+                w.mAboveInsetsState.set(aboveInsetsState);
+                insetsChangedWindows.add(w);
+            }
+
+            if (!mergedLocalInsetsSourcesFromParent.contentEquals(w.mMergedLocalInsetsSources)) {
+                w.mMergedLocalInsetsSources = createShallowCopy(
+                        mergedLocalInsetsSourcesFromParent);
+                insetsChangedWindows.add(w);
+            }
+
+            final SparseArray<InsetsSource> providedSources = w.mProvidedInsetsSources;
+            if (providedSources != null) {
+                for (int i = providedSources.size() - 1; i >= 0; i--) {
+                    aboveInsetsState.addSource(providedSources.valueAt(i));
+                }
+            }
+        }, true /* traverseTopToBottom */);
+    }
+
+    private static SparseArray<InsetsSource> toInsetsSources(
+            SparseArray<InsetsSourceProvider> insetsSourceProviders) {
+        final SparseArray<InsetsSource> insetsSources = new SparseArray<>(
+                insetsSourceProviders.size());
+        for (int i = 0; i < insetsSourceProviders.size(); i++) {
+            insetsSources.append(insetsSourceProviders.keyAt(i),
+                    insetsSourceProviders.valueAt(i).getSource());
+        }
+        return insetsSources;
+    }
+
     private boolean forAllWindowTopToBottom(ToBooleanFunction<WindowState> callback) {
         // We want to consume the positive sublayer children first because they need to appear
         // above the parent, then this window (the parent), and then the negative sublayer children
@@ -4810,6 +4982,27 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return false;
     }
 
+    boolean isExitAnimationRunningSelfOrParent() {
+        return inTransitionSelfOrParent()
+                || isAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION);
+    }
+
+    boolean isExitAnimationRunningSelfOrChild() {
+        return isAnimating(CHILDREN, ANIMATION_TYPE_WINDOW_ANIMATION);
+    }
+
+    /**
+     * @return {@code true} if self or the parent container of the window is in transition.
+     * (e.g. The app or recents transition)
+     */
+    boolean inTransitionSelfOrParent() {
+        if (!mTransitionController.isShellTransitionsEnabled()) {
+            return isAnimating(PARENTS | TRANSITION,
+                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+        }
+        return mTransitionController.inTransition(this);
+    }
+
     private boolean shouldFinishAnimatingExit() {
         // Exit animation might be applied soon.
         if (inTransition()) {
@@ -4821,7 +5014,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return true;
         }
         // Exit animation is running.
-        if (isAnimating(TRANSITION | PARENTS, EXIT_ANIMATING_TYPES)) {
+        if (isExitAnimationRunningSelfOrParent()) {
             ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "shouldWaitAnimatingExit: isAnimating: %s",
                     this);
             return false;
@@ -4853,9 +5046,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void onExitAnimationDone() {
-        if (DEBUG_ANIM) Slog.v(TAG, "onExitAnimationDone in " + this
-                + ": exiting=" + mAnimatingExit + " remove=" + mRemoveOnExit
-                + " selfAnimating=" + isAnimating());
+        if (ProtoLogImpl.isEnabled(WM_DEBUG_ANIM)) {
+            final AnimationAdapter animationAdapter = mSurfaceAnimator.getAnimation();
+            StringWriter sw = new StringWriter();
+            if (animationAdapter != null) {
+                PrintWriter pw = new PrintWriter(sw);
+                animationAdapter.dump(pw, "");
+            }
+            ProtoLog.v(WM_DEBUG_ANIM, "onExitAnimationDone in %s"
+                            + ": exiting=%b remove=%b selfAnimating=%b anim=%s",
+                    this, mAnimatingExit, mRemoveOnExit, isAnimating(), sw);
+        }
 
         if (!mChildren.isEmpty()) {
             // Copying to a different list as multiple children can be removed.
@@ -4880,9 +5081,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (isAnimating()) {
             return;
-        }
-        if (mWmService.mAccessibilityController.hasCallbacks()) {
-            mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(getDisplayId());
         }
 
         if (!isSelfOrAncestorWindowAnimatingExit()) {
@@ -4910,13 +5108,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (hasSurface) {
                 mWmService.mDestroySurface.add(this);
             }
-            if (mRemoveOnExit) {
-                mWmService.mPendingRemove.add(this);
-                mRemoveOnExit = false;
-            }
         }
         mAnimatingExit = false;
+        ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=exitAnimationDone win=%s", this);
         getDisplayContent().mWallpaperController.hideWallpapers(this);
+    }
+
+    @Override
+    boolean handleCompleteDeferredRemoval() {
+        if (mRemoveOnExit && !isSelfAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION)) {
+            mRemoveOnExit = false;
+            removeImmediately();
+        }
+        return super.handleCompleteDeferredRemoval();
     }
 
     boolean clearAnimatingFlags() {
@@ -4938,6 +5142,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // show up with wrong position or scale.
             if (mAnimatingExit) {
                 mAnimatingExit = false;
+                ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=clearAnimatingFlags win=%s",
+                        this);
                 didSomething = true;
             }
             if (mDestroying) {
@@ -5012,6 +5218,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 cancelAnimation();
             }
             mAnimatingExit = false;
+            ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=relayoutVisibleWindow win=%s",
+                    this);
         }
         if (mDestroying) {
             mDestroying = false;
@@ -5032,15 +5240,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
-        if (isDragResizeChanged()) {
-            setDragResizing();
-        }
-        final boolean freeformResizing = isDragResizing()
-                && getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
-        final boolean dockedResizing = isDragResizing()
-                && getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER;
-        result |= freeformResizing ? RELAYOUT_RES_DRAG_RESIZING_FREEFORM : 0;
-        result |= dockedResizing ? RELAYOUT_RES_DRAG_RESIZING_DOCKED : 0;
         return result;
     }
 
@@ -5099,7 +5298,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        if (DEBUG_ANIM) Slog.v(TAG, "Setting move animation on " + this);
+        ProtoLog.v(WM_DEBUG_ANIM, "Setting move animation on %s", this);
         final Point oldPosition = new Point();
         final Point newPosition = new Point();
         transformFrameToSurfacePosition(mWindowFrames.mLastFrame.left, mWindowFrames.mLastFrame.top,
@@ -5322,10 +5521,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         float newHScale = mHScale * mGlobalScale * mWallpaperScale;
         float newVScale = mVScale * mGlobalScale * mWallpaperScale;
-        if (mLastHScale != newHScale ||
-            mLastVScale != newVScale ) {
-            getPendingTransaction().setMatrix(getSurfaceControl(),
-                newHScale, 0, 0, newVScale);
+        if (mLastHScale != newHScale || mLastVScale != newVScale) {
+            getSyncTransaction().setMatrix(mSurfaceControl, newHScale, 0, 0, newVScale);
             mLastHScale = newHScale;
             mLastVScale = newVScale;
         }
@@ -5453,6 +5650,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
+        // We don't need to set the window to be relatively above IME if the IME is not visible.
+        // In case seeing the window is animating above the app transition layer because its
+        // relative layer is above the IME container on the display area but actually not necessary.
+        if (!getDisplayContent().getImeContainer().isVisible()) {
+            return false;
+        }
+
         if (isChildWindow()) {
             // If we are a child of the input method target we need this promotion.
             if (getParentWindow().isImeLayeringTarget()) {
@@ -5483,7 +5687,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @return {@link InsetsControlTarget} of host that controls the IME.
      *         When window is doesn't have a parent, it is returned as-is.
      */
-    InsetsControlTarget getImeControlTarget() {
+    @Override
+    public InsetsControlTarget getImeControlTarget() {
         return getDisplayContent().getImeHostOrFallback(this);
     }
 
@@ -5618,8 +5823,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     WindowState getImeInputTarget() {
-        final InsetsControlTarget target = mDisplayContent.getImeTarget(IME_TARGET_INPUT);
-        return target != null ? target.getWindow() : null;
+        final InputTarget target = mDisplayContent.getImeInputTarget();
+        return target != null ? target.getWindowState() : null;
     }
 
     void forceReportingResized() {
@@ -5633,24 +5838,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void resetContentChanged() {
         mWindowFrames.setContentChanged(false);
-    }
-
-    /**
-     * Set's an {@link InsetsSourceProvider} to be associated with this window, but only if the
-     * provider itself is controllable, as one window can be the provider of more than one inset
-     * type (i.e. gesture insets). If this window is controllable, all its animations must be
-     * controlled by its control target, and the visibility of this window should be taken account
-     * into the state of the control target.
-     *
-     * @param insetProvider the provider which should not be visible to the client.
-     * @see InsetsStateController#getInsetsForWindow(WindowState)
-     */
-    void setControllableInsetProvider(InsetsSourceProvider insetProvider) {
-        mControllableInsetProvider = insetProvider;
-    }
-
-    InsetsSourceProvider getControllableInsetProvider() {
-        return mControllableInsetProvider;
     }
 
     private final class MoveAnimationSpec implements AnimationSpec {
@@ -5762,7 +5949,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // to draw even if the children draw first or don't need to sync, so we start
         // in WAITING state rather than READY.
         mSyncState = SYNC_STATE_WAITING_FOR_DRAW;
-        mNextRelayoutUseSync = true;
+        mSyncSeqId++;
         requestRedrawForSync();
         return true;
     }
@@ -5786,7 +5973,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.finishSync(outMergedTransaction, cancel);
     }
 
-    boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction) {
+    boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction, int syncSeqId) {
         if (mOrientationChangeRedrawRequestTime > 0) {
             final long duration =
                     SystemClock.elapsedRealtime() - mOrientationChangeRedrawRequestTime;
@@ -5804,7 +5991,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     .notifyStartingWindowDrawn(mActivityRecord);
         }
 
-        final boolean hasSyncHandlers = executeDrawHandlers(postDrawTransaction);
+        final boolean hasSyncHandlers = executeDrawHandlers(postDrawTransaction, syncSeqId);
 
         boolean skipLayout = false;
         // Control the timing to switch the appearance of window with different rotations.
@@ -5832,19 +6019,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void immediatelyNotifyBlastSync() {
-        prepareDrawHandlers();
-        finishDrawing(null);
+        // We could be more subtle with Integer.MAX_VALUE and track a seqId in the timeout.
+        finishDrawing(null, Integer.MAX_VALUE);
         mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         if (!useBLASTSync()) return;
-
-        final Task task = getTask();
-        if (task != null) {
-            final SurfaceControl.Transaction t = task.getMainWindowSizeChangeTransaction();
-            if (t != null) {
-                mSyncTransaction.merge(t);
-            }
-            task.setMainWindowSizeChangeTransaction(null);
-        }
     }
 
     @Override
@@ -5881,10 +6059,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mRedrawForSyncReported) {
             return false;
         }
-        final Task task = getTask();
-        if (task != null && task.getMainWindowSizeChangeTransaction() != null) {
-            return true;
-        }
         return useBLASTSync();
     }
 
@@ -5902,7 +6076,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     @Override
     boolean useBLASTSync() {
-        return super.useBLASTSync() || (mPendingDrawHandlers.size() != 0);
+        return super.useBLASTSync() || (mDrawHandlers.size() != 0);
     }
 
     /**
@@ -5914,11 +6088,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      *    2. Call applyWithNextDraw
      *    3. After finishDrawing, our consumer will be passed the Transaction
      *    containing the buffer, and we can merge in additional operations.
-     * See {@link WindowState#mPendingDrawHandlers}
+     * See {@link WindowState#mDrawHandlers}
      */
     void applyWithNextDraw(Consumer<SurfaceControl.Transaction> consumer) {
-        mPendingDrawHandlers.add(consumer);
-        mNextRelayoutUseSync = true;
+        mSyncSeqId++;
+        mDrawHandlers.add(new DrawHandler(mSyncSeqId, consumer));
+
         requestRedrawForSync();
 
         mWmService.mH.sendNewMessageDelayed(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this,
@@ -5926,21 +6101,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Called from relayout, to indicate the next "finishDrawing" will contain
-     * all changes applied by the time mPendingDrawHandlers was populated.
-     *
-     * See {@link WindowState#mPendingDrawHandlers}
-     */
-    void prepareDrawHandlers() {
-        mReadyDrawHandlers.addAll(mPendingDrawHandlers);
-        mPendingDrawHandlers.clear();
-    }
-
-    /**
      * Drain the draw handlers, called from finishDrawing()
      * See {@link WindowState#mPendingDrawHandlers}
      */
-    boolean executeDrawHandlers(SurfaceControl.Transaction t) {
+    boolean executeDrawHandlers(SurfaceControl.Transaction t, int seqId) {
         boolean hadHandlers = false;
         boolean applyHere = false;
         if (t == null) {
@@ -5948,13 +6112,23 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             applyHere = true;
         }
 
-        for (int i = 0; i < mReadyDrawHandlers.size(); i++) {
-            mReadyDrawHandlers.get(i).accept(t);
-            hadHandlers = true;
+        final List<DrawHandler> handlersToRemove = new ArrayList<>();
+        // Iterate forwards to ensure we process in the same order
+        // we added.
+        for (int i = 0; i < mDrawHandlers.size(); i++) {
+            final DrawHandler h = mDrawHandlers.get(i);
+            if (h.mSeqId <= seqId) {
+                h.mConsumer.accept(t);
+                handlersToRemove.add(h);
+                hadHandlers = true;
+            }
+        }
+        for (int i = 0; i < handlersToRemove.size(); i++) {
+            final DrawHandler h = handlersToRemove.get(i);
+            mDrawHandlers.remove(h);
         }
 
         if (hadHandlers) {
-            mReadyDrawHandlers.clear();
             mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         }
 
@@ -6021,5 +6195,38 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void clearClientTouchableRegion() {
         mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
         mGivenTouchableRegion.setEmpty();
+    }
+
+    @Override
+    public boolean shouldControlIme() {
+        return !inMultiWindowMode();
+    }
+
+    @Override
+    public boolean canScreenshotIme() {
+        return !isSecureLocked();
+    }
+
+    @Override
+    public ActivityRecord getActivityRecord() {
+        return mActivityRecord;
+    }
+
+    @Override
+    public void unfreezeInsetsAfterStartInput() {
+        if (mActivityRecord != null) {
+            mActivityRecord.mImeInsetsFrozenUntilStartInput = false;
+        }
+    }
+
+    @Override
+    public boolean isInputMethodClientFocus(int uid, int pid) {
+        return getDisplayContent().isInputMethodClientFocus(uid, pid);
+    }
+
+    @Override
+    public void dumpProto(ProtoOutputStream proto, long fieldId,
+                          @WindowTraceLogLevel int logLevel) {
+        dumpDebug(proto, fieldId, logLevel);
     }
 }

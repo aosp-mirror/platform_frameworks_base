@@ -96,8 +96,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @GuardedBy("mLock")
     private boolean mSystemAudioMute = false;
 
-    private final HdmiCecStandbyModeHandler mStandbyHandler;
-
     // If true, do not do routing control/send active source for internal source.
     // Set to true when the device was woken up by <Text/Image View On>.
     private boolean mSkipRoutingControl;
@@ -656,14 +654,17 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected int handleTextViewOn(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
-        // Note that <Text View On> (and <Image View On>) command won't be handled here in
-        // most cases. A dedicated microcontroller should be in charge while Android system
-        // is in sleep mode, and the command need not be passed up to this service.
-        // The only situation where the command reaches this handler is that sleep mode is
-        // implemented in such a way that Android system is not really put to standby mode
-        // but only the display is set to blank. Then the command leads to the effect of
+        // Note that if the device is in sleep mode, the <Text View On> (and <Image View On>)
+        // command won't be handled here in most cases. A dedicated microcontroller should be in
+        // charge while the Android system is in sleep mode, and the command doesn't need to be
+        // passed up to this service.
+        // The only situations where the command reaches this handler are
+        // 1. if sleep mode is implemented in such a way that Android system is not really put to
+        // standby mode but only the display is set to blank. Then the command leads to
         // turning on the display by the invocation of PowerManager.wakeUp().
-        if (mService.isPowerStandbyOrTransient() && getAutoWakeup()) {
+        // 2. if the device is in dream mode, not sleep mode. Then this command leads to
+        // waking up the device from dream mode by the invocation of PowerManager.wakeUp().
+        if (getAutoWakeup()) {
             mService.wakeUp();
         }
         return Constants.HANDLED;
@@ -1165,6 +1166,19 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return Constants.HANDLED;
     }
 
+    @Override
+    @Constants.HandleMessageResult
+    protected int handleSetAudioVolumeLevel(SetAudioVolumeLevelMessage message) {
+        // <Set Audio Volume Level> should only be sent to the System Audio device, so we don't
+        // handle it when System Audio Mode is enabled.
+        if (mService.isSystemAudioActivated()) {
+            return Constants.ABORT_NOT_IN_CORRECT_MODE;
+        } else {
+            mService.setStreamMusicVolume(message.getAudioVolumeLevel(), 0);
+            return Constants.HANDLED;
+        }
+    }
+
     void announceOneTouchRecordResult(int recorderAddress, int result) {
         mService.invokeOneTouchRecordResult(recorderAddress, result);
     }
@@ -1199,6 +1213,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @Nullable
     HdmiDeviceInfo getSafeAvrDeviceInfo() {
         return mService.getHdmiCecNetwork().getSafeCecDeviceInfo(Constants.ADDR_AUDIO_SYSTEM);
+    }
+
+    /**
+     * Returns the audio output device used for System Audio Mode.
+     */
+    AudioDeviceAttributes getSystemAudioOutputDevice() {
+        return HdmiControlService.AUDIO_OUTPUT_DEVICE_HDMI_ARC;
     }
 
 
@@ -1244,6 +1265,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
+
+        if (!connected) {
+            mService.getHdmiCecNetwork().removeCecSwitches(portId);
+        }
+
         // Turning System Audio Mode off when the AVR is unlugged or standby.
         // When the device is not unplugged but reawaken from standby, we check if the System
         // Audio Control Feature is enabled or not then decide if turning SAM on/off accordingly.
@@ -1290,6 +1316,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(OneTouchRecordAction.class);
         removeAction(TimerRecordingAction.class);
         removeAction(NewDeviceAction.class);
+        removeAction(AbsoluteVolumeAudioStatusAction.class);
 
         disableSystemAudioIfExist();
         disableArcIfExist();
@@ -1312,7 +1339,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(SystemAudioActionFromAvr.class);
         removeAction(SystemAudioActionFromTv.class);
         removeAction(SystemAudioAutoInitiationAction.class);
-        removeAction(SystemAudioStatusAction.class);
         removeAction(VolumeControlAction.class);
 
         if (!mService.isControlEnabled()) {
@@ -1583,6 +1609,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return DeviceFeatures.NO_FEATURES_SUPPORTED.toBuilder()
                 .setRecordTvScreenSupport(FEATURE_SUPPORTED)
                 .setArcTxSupport(hasArcPort ? FEATURE_SUPPORTED : FEATURE_NOT_SUPPORTED)
+                .setSetAudioVolumeLevelSupport(FEATURE_SUPPORTED)
                 .build();
     }
 

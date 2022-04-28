@@ -76,10 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"కెమెరా సమస్యలు ఉన్నాయా?\nరీఫిట్ చేయడానికి ట్యాప్ చేయండి"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"దాని సమస్యను పరిష్కరించలేదా?\nపూర్వస్థితికి మార్చడానికి ట్యాప్ చేయండి"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"కెమెరా సమస్యలు లేవా? తీసివేయడానికి ట్యాప్ చేయండి."</string>
-    <string name="letterbox_education_dialog_title" msgid="3924745395335329810">"<xliff:g id="APP_NAME">%s</xliff:g> నుండి మరిన్ని పొందండి"</string>
-    <string name="letterbox_education_screen_rotation_portrait_text" msgid="9005616635100891260">"మీ స్క్రీన్‌ను పోర్ట్రెయిట్‌కు తిప్పండి"</string>
-    <string name="letterbox_education_screen_rotation_landscape_text" msgid="7619609293250631225">"మీ స్క్రీన్‌ను ల్యాండ్‌స్కేప్‌కు తిప్పండి"</string>
-    <string name="letterbox_education_split_screen_text" msgid="3906978051324735033">"స్ప్లిట్ స్క్రీన్‌ను ఉపయోగించడానికి మరొక యాప్‌లోకి లాగండి"</string>
-    <string name="letterbox_education_reposition_text" msgid="8597800472592539168">"స్థానాన్ని మార్చడానికి రెండుసార్లు నొక్కండి"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"కొన్ని యాప్‌లు పోర్ట్రెయిట్‌లో ఉత్తమంగా పని చేస్తాయి"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"మీ ప్రదేశాన్ని ఎక్కువగా ఉపయోగించుకోవడానికి ఈ ఆప్షన్‌లలో ఒకదాన్ని ట్రై చేయండి"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"ఫుల్ స్క్రీన్‌కు వెళ్లడానికి మీ పరికరాన్ని తిప్పండి"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"యాప్ స్థానాన్ని మార్చడానికి దాని పక్కన డబుల్-ట్యాప్ చేయండి"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"అర్థమైంది"</string>
 </resources>

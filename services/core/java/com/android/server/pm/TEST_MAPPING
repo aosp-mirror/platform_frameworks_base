@@ -52,6 +52,9 @@
       "options": [
         {
           "include-filter": "com.google.android.security.gts.PackageVerifierTest"
+        },
+        {
+          "exclude-filter": "com.google.android.security.gts.PackageVerifierTest#testAdbInstall_timeout_allowed"
         }
       ]
     },
@@ -69,6 +72,14 @@
       "options": [
         {
           "include-filter": "com.android.server.pm.test.OverlayActorVisibilityTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsSharedUserMigrationTestCases",
+      "options": [
+        {
+          "include-filter": "android.uidmigration.cts"
         }
       ]
     }

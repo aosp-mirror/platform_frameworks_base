@@ -105,6 +105,8 @@ public class VpnConfig implements Parcelable {
     public boolean allowIPv4;
     public boolean allowIPv6;
     public boolean isMetered = true;
+    public boolean requiresInternetValidation = false;
+    public boolean excludeLocalRoutes = false;
     public Network[] underlyingNetworks;
     public ProxyInfo proxyInfo;
 
@@ -131,6 +133,8 @@ public class VpnConfig implements Parcelable {
         allowIPv4 = other.allowIPv4;
         allowIPv6 = other.allowIPv6;
         isMetered = other.isMetered;
+        requiresInternetValidation = other.requiresInternetValidation;
+        excludeLocalRoutes = other.excludeLocalRoutes;
         underlyingNetworks = other.underlyingNetworks != null ? Arrays.copyOf(
                 other.underlyingNetworks, other.underlyingNetworks.length) : null;
         proxyInfo = other.proxyInfo;
@@ -189,6 +193,8 @@ public class VpnConfig implements Parcelable {
         out.writeInt(allowIPv4 ? 1 : 0);
         out.writeInt(allowIPv6 ? 1 : 0);
         out.writeInt(isMetered ? 1 : 0);
+        out.writeInt(requiresInternetValidation ? 1 : 0);
+        out.writeInt(excludeLocalRoutes ? 1 : 0);
         out.writeTypedArray(underlyingNetworks, flags);
         out.writeParcelable(proxyInfo, flags);
     }
@@ -216,6 +222,8 @@ public class VpnConfig implements Parcelable {
             config.allowIPv4 = in.readInt() != 0;
             config.allowIPv6 = in.readInt() != 0;
             config.isMetered = in.readInt() != 0;
+            config.requiresInternetValidation = in.readInt() != 0;
+            config.excludeLocalRoutes = in.readInt() != 0;
             config.underlyingNetworks = in.createTypedArray(Network.CREATOR);
             config.proxyInfo = in.readParcelable(null, android.net.ProxyInfo.class);
             return config;
@@ -248,6 +256,9 @@ public class VpnConfig implements Parcelable {
                 .append(", allowBypass=").append(allowBypass)
                 .append(", allowIPv4=").append(allowIPv4)
                 .append(", allowIPv6=").append(allowIPv6)
+                .append(", isMetered=").append(isMetered)
+                .append(", requiresInternetValidation=").append(requiresInternetValidation)
+                .append(", excludeLocalRoutes=").append(excludeLocalRoutes)
                 .append(", underlyingNetworks=").append(Arrays.toString(underlyingNetworks))
                 .append(", proxyInfo=").append(proxyInfo)
                 .append("}")

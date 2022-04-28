@@ -24,10 +24,11 @@ import android.util.Log;
 import java.io.PrintWriter;
 import java.util.Objects;
 
-// TODO(b/149254050): add unit tests
 /**
  * Helper class for {@link DumpableContainer} implementations - they can "implement it by
  * association", i.e., by delegating the interface methods to a {@code DumpableContainerImpl}.
+ *
+ * <p>This class is not thread safe.
  *
  * @hide
  */
@@ -46,8 +47,10 @@ public final class DumpableContainerImpl implements DumpableContainer {
         Objects.requireNonNull(name, () -> "name of" + dumpable);
 
         if (mDumpables.containsKey(name)) {
-            Log.e(TAG, "addDumpable(): ignoring " + dumpable + " as there is already a dumpable"
-                    + " with that name (" + name + "): " + mDumpables.get(name));
+            if (DEBUG) {
+                Log.d(TAG, "addDumpable(): ignoring " + dumpable + " as there is already a dumpable"
+                        + " with that name (" + name + "): " + mDumpables.get(name));
+            }
             return false;
         }
 
@@ -55,6 +58,38 @@ public final class DumpableContainerImpl implements DumpableContainer {
             Log.d(TAG, "Adding " + name + " -> " + dumpable);
         }
         mDumpables.put(name,  dumpable);
+        return true;
+    }
+
+    @Override
+    public boolean removeDumpable(Dumpable dumpable) {
+        Objects.requireNonNull(dumpable, "dumpable");
+        String name = dumpable.getDumpableName();
+        if (name == null) {
+            if (DEBUG) {
+                Log.d(TAG, "Tried to remove nameless dumpable: " + dumpable);
+            }
+            return false;
+        }
+
+        Dumpable candidate = mDumpables.get(name);
+        if (candidate == null) {
+            if (DEBUG) {
+                Log.d(TAG, "Dumpable with name " + name + " not found");
+            }
+            return false;
+        }
+
+        // Make sure it's the right one
+        if (candidate != dumpable) {
+            Log.w(TAG, "removeDumpable(): passed dumpable (" + dumpable + ") named " + name
+                    + ", but internal dumpable with that name is " + candidate);
+            return false;
+        }
+        if (DEBUG) {
+            Log.d(TAG, "Removing dumpable named " + name);
+        }
+        mDumpables.remove(name);
         return true;
     }
 

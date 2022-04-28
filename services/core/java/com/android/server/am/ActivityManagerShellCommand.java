@@ -31,8 +31,10 @@ import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MOD
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_COUNT;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -101,11 +103,12 @@ import android.view.Display;
 import android.window.SplashScreen;
 
 import com.android.internal.compat.CompatibilityChangeConfig;
-import com.android.internal.util.HexDump;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.utils.Slogf;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -180,6 +183,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mAsync;
     private BroadcastOptions mBroadcastOptions;
     private boolean mShowSplashScreen;
+    private boolean mDismissKeyguardIfInsecure;
 
     final boolean mDumping;
 
@@ -340,6 +344,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetStopUserOnSwitch(pw);
                 case "set-bg-abusive-uids":
                     return runSetBgAbusiveUids(pw);
+                case "list-bg-exemptions-config":
+                    return runListBgExemptionsConfig(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -434,6 +440,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mAsync = true;
                 } else if (opt.equals("--splashscreen-show-icon")) {
                     mShowSplashScreen = true;
+                } else if (opt.equals("--dismiss-keyguard-if-insecure")) {
+                    mDismissKeyguardIfInsecure = true;
                 } else {
                     return false;
                 }
@@ -577,6 +585,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     options = ActivityOptions.makeBasic();
                 }
                 options.setSplashScreenStyle(SplashScreen.SPLASH_SCREEN_STYLE_ICON);
+            }
+            if (mDismissKeyguardIfInsecure) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setDismissKeyguardIfInsecure();
             }
             if (mWaitOption) {
                 result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
@@ -1666,6 +1680,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
+        public void onUidProcAdjChanged(int uid) throws RemoteException {
+        }
+
+        @Override
         public void onOomAdjMessage(String msg) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
@@ -1958,22 +1976,42 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private static byte[] argToBytes(String arg) {
-        if (arg.equals("!")) {
-            return null;
-        } else {
-            return HexDump.hexStringToByteArray(arg);
-        }
-    }
-
     int runUnlockUser(PrintWriter pw) throws RemoteException {
         int userId = Integer.parseInt(getNextArgRequired());
-        byte[] token = argToBytes(getNextArgRequired());
-        byte[] secret = argToBytes(getNextArgRequired());
-        boolean success = mInterface.unlockUser(userId, token, secret, null);
+
+        /*
+         * Originally this command required two more parameters: the hardware
+         * authentication token and secret needed to unlock the user.  However,
+         * unlockUser() no longer takes a token parameter at all, and there
+         * isn't really any way for callers of this shell command to get the
+         * secret if one is needed (i.e., when the user has an LSKF), given that
+         * the secret must be a cryptographic key derived from the user's
+         * synthetic password.  I.e. the secret is *not* the LSKF here, but
+         * rather an intermediate value several steps down the chain.
+         *
+         * As such, the only supported use for this command is unlocking a user
+         * who doesn't have an LSKF, with empty or unspecified token and secret.
+         *
+         * To preserve previous behavior, an exclamation mark ("!") is also
+         * accepted for these values; it means the same as an empty string.
+         */
+        String token = getNextArg();
+        if (!TextUtils.isEmpty(token) && !"!".equals(token)) {
+            getErrPrintWriter().println("Error: token parameter not supported");
+            return -1;
+        }
+        String secret = getNextArg();
+        if (!TextUtils.isEmpty(secret) && !"!".equals(secret)) {
+            getErrPrintWriter().println("Error: secret parameter not supported");
+            return -1;
+        }
+
+        boolean success = mInterface.unlockUser(userId, null, null, null);
         if (success) {
             pw.println("Success: user unlocked");
         } else {
+            // TODO(b/218389026): we can reach here even if the user's storage
+            // was successfully unlocked.
             getErrPrintWriter().println("Error: could not unlock user");
         }
         return 0;
@@ -3237,12 +3275,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
         if (arg == null) {
-            batteryTracker.mDebugUidPercentages.clear();
+            batteryTracker.clearDebugUidPercentage();
             return 0;
         }
         String[] pairs = arg.split(",");
         int[] uids = new int[pairs.length];
-        double[] values = new double[pairs.length];
+        double[][] values = new double[pairs.length][];
         try {
             for (int i = 0; i < pairs.length; i++) {
                 String[] pair = pairs[i].split("=");
@@ -3251,15 +3289,33 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return -1;
                 }
                 uids[i] = Integer.parseInt(pair[0]);
-                values[i] = Double.parseDouble(pair[1]);
+                final String[] vals = pair[1].split(":");
+                if (vals.length != BATTERY_USAGE_COUNT) {
+                    getErrPrintWriter().println("Malformed input");
+                    return -1;
+                }
+                values[i] = new double[vals.length];
+                for (int j = 0; j < vals.length; j++) {
+                    values[i][j] = Double.parseDouble(vals[j]);
+                }
             }
         } catch (NumberFormatException e) {
             getErrPrintWriter().println("Malformed input");
             return -1;
         }
-        batteryTracker.mDebugUidPercentages.clear();
-        for (int i = 0; i < pairs.length; i++) {
-            batteryTracker.mDebugUidPercentages.put(uids[i], values[i]);
+        batteryTracker.setDebugUidPercentage(uids, values);
+        return 0;
+    }
+
+    private int runListBgExemptionsConfig(PrintWriter pw) throws RemoteException {
+        final ArraySet<String> sysConfigs = mInternal.mAppRestrictionController
+                .mBgRestrictionExemptioFromSysConfig;
+        if (sysConfigs != null) {
+            for (int i = 0, size = sysConfigs.size(); i < size; i++) {
+                pw.print(sysConfigs.valueAt(i));
+                pw.print(' ');
+            }
+            pw.println();
         }
         return 0;
     }
@@ -3284,6 +3340,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         dumpHelp(pw, mDumping);
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     static void dumpHelp(PrintWriter pw, boolean dumping) {
         if (dumping) {
             pw.println("Activity manager dump options:");
@@ -3321,7 +3378,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  --checkin: output checkin format, resetting data.");
             pw.println("  --C: output checkin format, not resetting data.");
             pw.println("  --proto: output dump in protocol buffer format.");
-            pw.println("  --autofill: dump just the autofill-related state of an activity");
+            pw.printf("  %s: dump just the DUMPABLE-related state of an activity. Use the %s "
+                    + "option to list the supported DUMPABLEs\n", Activity.DUMP_ARG_DUMP_DUMPABLE,
+                    Activity.DUMP_ARG_LIST_DUMPABLES);
+            pw.printf("  %s: show the available dumpables in an activity\n",
+                    Activity.DUMP_ARG_LIST_DUMPABLES);
         } else {
             pw.println("Activity manager (activity) commands:");
             pw.println("  help");
@@ -3494,8 +3555,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Start USER_ID in background if it is currently stopped;");
             pw.println("      use switch-user if you want to start the user in foreground.");
             pw.println("      -w: wait for start-user to complete and the user to be unlocked.");
-            pw.println("  unlock-user <USER_ID> [TOKEN_HEX]");
-            pw.println("      Attempt to unlock the given user using the given authorization token.");
+            pw.println("  unlock-user <USER_ID>");
+            pw.println("      Unlock the given user.  This will only work if the user doesn't");
+            pw.println("      have an LSKF (PIN/pattern/password).");
             pw.println("  stop-user [-w] [-f] <USER_ID>");
             pw.println("      Stop execution of USER_ID, not allowing it to run any");
             pw.println("      code until a later explicit start or switch to it.");

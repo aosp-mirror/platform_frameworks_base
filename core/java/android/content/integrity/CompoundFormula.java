@@ -137,6 +137,11 @@ public final class CompoundFormula extends IntegrityFormula implements Parcelabl
     }
 
     @Override
+    public boolean isAppCertificateLineageFormula() {
+        return getFormulas().stream().anyMatch(formula -> formula.isAppCertificateLineageFormula());
+    }
+
+    @Override
     public boolean isInstallerFormula() {
         return getFormulas().stream().anyMatch(formula -> formula.isInstallerFormula());
     }

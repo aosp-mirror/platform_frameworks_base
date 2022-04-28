@@ -25,13 +25,11 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.rules.WMFlickerServiceRuleForTestSpec
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -80,9 +78,6 @@ import org.junit.runners.Parameterized
 class ChangeAppRotationTest(
     testSpec: FlickerTestParameter
 ) : RotationTransition(testSpec) {
-    @get:Rule
-    val flickerRule = WMFlickerServiceRuleForTestSpec(testSpec)
-
     override val testApp = SimpleAppHelper(instrumentation)
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -94,29 +89,11 @@ class ChangeAppRotationTest(
             }
         }
 
-    @FlakyTest
-    @Test
-    fun runPresubmitAssertion() {
-        flickerRule.checkPresubmitAssertions()
-    }
-
-    @FlakyTest
-    @Test
-    fun runPostsubmitAssertion() {
-        flickerRule.checkPostsubmitAssertions()
-    }
-
-    @FlakyTest
-    @Test
-    fun runFlakyAssertion() {
-        flickerRule.checkFlakyAssertions()
-    }
-
     /**
      * Windows maybe recreated when rotated. Checks that the focus does not change or if it does,
      * focus returns to [testApp]
      */
-    @FlakyTest(bugId = 190185577)
+    @Presubmit
     @Test
     fun focusChanges() {
         testSpec.assertEventLog {
@@ -128,9 +105,7 @@ class ChangeAppRotationTest(
      * Checks that the [FlickerComponentName.ROTATION] layer appears during the transition,
      * doesn't flicker, and disappears before the transition is complete
      */
-    @Presubmit
-    @Test
-    fun rotationLayerAppearsAndVanishes() {
+    fun rotationLayerAppearsAndVanishesAssertion() {
         testSpec.assertLayers {
             this.isVisible(testApp.component)
                 .then()
@@ -139,6 +114,16 @@ class ChangeAppRotationTest(
                 .isVisible(testApp.component)
                 .isInvisible(FlickerComponentName.ROTATION)
         }
+    }
+
+    /**
+     * Checks that the [FlickerComponentName.ROTATION] layer appears during the transition,
+     * doesn't flicker, and disappears before the transition is complete
+     */
+    @Presubmit
+    @Test
+    fun rotationLayerAppearsAndVanishes() {
+        rotationLayerAppearsAndVanishesAssertion()
     }
 
     /**
@@ -191,7 +176,7 @@ class ChangeAppRotationTest(
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigRotationTests(repetitions = 5)
+                .getConfigRotationTests(repetitions = 3)
         }
     }
 }

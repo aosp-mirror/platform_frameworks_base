@@ -247,7 +247,7 @@
     <item msgid="5023908510820531131">"След <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="1968128556747588800">"Изключено"</item>
+    <item msgid="1968128556747588800">"Изкл."</item>
     <item msgid="3033215374382962216">"Области за преизчертаване: Показв."</item>
     <item msgid="3474333938380896988">"Показване на областите за деутеранопия"</item>
   </string-array>
@@ -266,5 +266,7 @@
     <item msgid="3825132913289380004">"RNDIS (Ethernet през USB)"</item>
     <item msgid="8828567335701536560">"Аудиоизточник"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
+  </string-array>
+  <string-array name="avatar_image_descriptions">
   </string-array>
 </resources>

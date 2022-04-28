@@ -32,20 +32,25 @@ import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.window.ITaskFpsCallback;
 import android.window.TaskFpsCallback;
 import android.window.WindowContext;
 import android.window.WindowProvider;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -97,6 +102,10 @@ public final class WindowManagerImpl implements WindowManager {
      */
     @Nullable
     private final IBinder mWindowContextToken;
+
+    @GuardedBy("mOnFpsCallbackListenerProxies")
+    private final ArrayList<OnFpsCallbackListenerProxy> mOnFpsCallbackListenerProxies =
+            new ArrayList<>();
 
     public WindowManagerImpl(Context context) {
         this(context, null /* parentWindow */, null /* clientToken */);
@@ -423,20 +432,66 @@ public final class WindowManagerImpl implements WindowManager {
     }
 
     @Override
-    public void registerTaskFpsCallback(@IntRange(from = 0) int taskId, TaskFpsCallback callback) {
+    public void registerTaskFpsCallback(@IntRange(from = 0) int taskId, @NonNull Executor executor,
+            TaskFpsCallback callback) {
+        final OnFpsCallbackListenerProxy onFpsCallbackListenerProxy =
+                new OnFpsCallbackListenerProxy(executor, callback);
         try {
             WindowManagerGlobal.getWindowManagerService().registerTaskFpsCallback(
-                    taskId, callback.getListener());
+                    taskId, onFpsCallbackListenerProxy);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        synchronized (mOnFpsCallbackListenerProxies) {
+            mOnFpsCallbackListenerProxies.add(onFpsCallbackListenerProxy);
         }
     }
 
     @Override
     public void unregisterTaskFpsCallback(TaskFpsCallback callback) {
-        try {
-            WindowManagerGlobal.getWindowManagerService().unregisterTaskFpsCallback(
-                    callback.getListener());
-        } catch (RemoteException e) {
+        synchronized (mOnFpsCallbackListenerProxies) {
+            final Iterator<OnFpsCallbackListenerProxy> iterator =
+                    mOnFpsCallbackListenerProxies.iterator();
+            while (iterator.hasNext()) {
+                final OnFpsCallbackListenerProxy proxy = iterator.next();
+                if (proxy.mCallback == callback) {
+                    try {
+                        WindowManagerGlobal.getWindowManagerService()
+                                .unregisterTaskFpsCallback(proxy);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                    iterator.remove();
+                }
+            }
         }
+    }
+
+    private static class OnFpsCallbackListenerProxy
+            extends ITaskFpsCallback.Stub {
+        private final Executor mExecutor;
+        private final TaskFpsCallback mCallback;
+
+        private OnFpsCallbackListenerProxy(Executor executor, TaskFpsCallback callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onFpsReported(float fps) {
+            mExecutor.execute(() -> {
+                mCallback.onFpsReported(fps);
+            });
+        }
+    }
+
+    @Override
+    public Bitmap snapshotTaskForRecents(int taskId) {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().snapshotTaskForRecents(taskId);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        return null;
     }
 }

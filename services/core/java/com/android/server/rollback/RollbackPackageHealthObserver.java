@@ -16,16 +16,11 @@
 
 package com.android.server.rollback;
 
-import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN;
-
 import android.annotation.AnyThread;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -240,64 +235,6 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
         return null;
     }
 
-    @WorkerThread
-    private BroadcastReceiver listenForStagedSessionReady(RollbackManager rollbackManager,
-            int rollbackId, @Nullable VersionedPackage logPackage) {
-        assertInWorkerThread();
-        BroadcastReceiver sessionUpdatedReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                handleStagedSessionChange(rollbackManager,
-                        rollbackId, this /* BroadcastReceiver */, logPackage);
-            }
-        };
-        IntentFilter sessionUpdatedFilter =
-                new IntentFilter(PackageInstaller.ACTION_SESSION_UPDATED);
-        mContext.registerReceiver(sessionUpdatedReceiver, sessionUpdatedFilter, null, mHandler);
-        return sessionUpdatedReceiver;
-    }
-
-    @WorkerThread
-    private void handleStagedSessionChange(RollbackManager rollbackManager, int rollbackId,
-            BroadcastReceiver listener, @Nullable VersionedPackage logPackage) {
-        assertInWorkerThread();
-        PackageInstaller packageInstaller =
-                mContext.getPackageManager().getPackageInstaller();
-        List<RollbackInfo> recentRollbacks =
-                rollbackManager.getRecentlyCommittedRollbacks();
-        for (int i = 0; i < recentRollbacks.size(); i++) {
-            RollbackInfo recentRollback = recentRollbacks.get(i);
-            int sessionId = recentRollback.getCommittedSessionId();
-            if ((rollbackId == recentRollback.getRollbackId())
-                    && (sessionId != PackageInstaller.SessionInfo.INVALID_ID)) {
-                PackageInstaller.SessionInfo sessionInfo =
-                        packageInstaller.getSessionInfo(sessionId);
-                if (sessionInfo.isStagedSessionReady() && markStagedSessionHandled(rollbackId)) {
-                    mContext.unregisterReceiver(listener);
-                    saveStagedRollbackId(rollbackId, logPackage);
-                    WatchdogRollbackLogger.logEvent(logPackage,
-                            FrameworkStatsLog
-                            .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED,
-                            WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN,
-                            "");
-                } else if (sessionInfo.isStagedSessionFailed()
-                        && markStagedSessionHandled(rollbackId)) {
-                    WatchdogRollbackLogger.logEvent(logPackage,
-                            FrameworkStatsLog
-                                    .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
-                            WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN,
-                            "");
-                    mContext.unregisterReceiver(listener);
-                }
-            }
-        }
-
-        // Wait for all pending staged sessions to get handled before rebooting.
-        if (isPendingStagedSessionsEmpty()) {
-            mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
-        }
-    }
-
     /**
      * Returns {@code true} if staged session associated with {@code rollbackId} was marked
      * as handled, {@code false} if already handled.
@@ -447,12 +384,12 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
             if (status == RollbackManager.STATUS_SUCCESS) {
                 if (rollback.isStaged()) {
                     int rollbackId = rollback.getRollbackId();
-                    mPendingStagedRollbackIds.add(rollbackId);
-                    BroadcastReceiver listener =
-                            listenForStagedSessionReady(rollbackManager, rollbackId,
-                                    logPackage);
-                    handleStagedSessionChange(rollbackManager, rollbackId, listener,
-                            logPackage);
+                    saveStagedRollbackId(rollbackId, logPackage);
+                    WatchdogRollbackLogger.logEvent(logPackage,
+                            FrameworkStatsLog
+                            .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED,
+                            reasonToLog, failedPackageToLog);
+
                 } else {
                     WatchdogRollbackLogger.logEvent(logPackage,
                             FrameworkStatsLog
@@ -460,13 +397,17 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
                             reasonToLog, failedPackageToLog);
                 }
             } else {
-                if (rollback.isStaged()) {
-                    markStagedSessionHandled(rollback.getRollbackId());
-                }
                 WatchdogRollbackLogger.logEvent(logPackage,
                         FrameworkStatsLog
                                 .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
                         reasonToLog, failedPackageToLog);
+            }
+            if (rollback.isStaged()) {
+                markStagedSessionHandled(rollback.getRollbackId());
+                // Wait for all pending staged sessions to get handled before rebooting.
+                if (isPendingStagedSessionsEmpty()) {
+                    mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
+                }
             }
         };
 

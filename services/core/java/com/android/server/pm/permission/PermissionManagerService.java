@@ -562,12 +562,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public void revokeOwnPermissionsOnKill(@NonNull String packageName,
-            @NonNull List<String> permissions) {
-        mPermissionManagerServiceImpl.revokeOwnPermissionsOnKill(packageName, permissions);
-    }
-
-    @Override
     public boolean shouldShowRequestPermissionRationale(String packageName, String permissionName,
             int userId) {
         return mPermissionManagerServiceImpl.shouldShowRequestPermissionRationale(packageName,
@@ -606,6 +600,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             int granted = PermissionManagerService.this.checkUidPermission(uid,
                     POST_NOTIFICATIONS);
             AndroidPackage pkg = mPackageManagerInt.getPackage(uid);
+            if (pkg == null) {
+                Slog.e(LOG_TAG, "No package for uid " + uid);
+                return granted;
+            }
             if (granted != PackageManager.PERMISSION_GRANTED
                     && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M) {
                 int flags = PermissionManagerService.this.getPermissionFlags(pkg.getPackageName(),

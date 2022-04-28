@@ -22,6 +22,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -38,6 +40,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /** @hide **/
 public class ParsingUtils {
@@ -47,6 +50,7 @@ public class ParsingUtils {
     public static final String ANDROID_RES_NAMESPACE = "http://schemas.android.com/apk/res/android";
 
     public static final int DEFAULT_MIN_SDK_VERSION = 1;
+    public static final int DEFAULT_MAX_SDK_VERSION = Integer.MAX_VALUE;
     public static final int DEFAULT_TARGET_SDK_VERSION = 0;
 
     public static final int NOT_SET = -1;
@@ -167,5 +171,51 @@ public class ParsingUtils {
 
             return list;
         }
+    }
+
+    /**
+     * Parse the {@link android.R.attr#knownActivityEmbeddingCerts} attribute, if available.
+     */
+    @NonNull
+    public static ParseResult<Set<String>> parseKnownActivityEmbeddingCerts(@NonNull TypedArray sa,
+            @NonNull Resources res, int resourceId, @NonNull ParseInput input) {
+        if (!sa.hasValue(resourceId)) {
+            return input.success(null);
+        }
+
+        final int knownActivityEmbeddingCertsResource = sa.getResourceId(resourceId, 0);
+        if (knownActivityEmbeddingCertsResource != 0) {
+            // The knownCerts attribute supports both a string array resource as well as a
+            // string resource for the case where the permission should only be granted to a
+            // single known signer.
+            Set<String> knownEmbeddingCertificates = null;
+            final String resourceType = res.getResourceTypeName(
+                    knownActivityEmbeddingCertsResource);
+            if (resourceType.equals("array")) {
+                final String[] knownCerts = res.getStringArray(knownActivityEmbeddingCertsResource);
+                if (knownCerts != null) {
+                    knownEmbeddingCertificates = Set.of(knownCerts);
+                }
+            } else {
+                final String knownCert = res.getString(knownActivityEmbeddingCertsResource);
+                if (knownCert != null) {
+                    knownEmbeddingCertificates = Set.of(knownCert);
+                }
+            }
+            if (knownEmbeddingCertificates == null || knownEmbeddingCertificates.isEmpty()) {
+                return input.error("Defined a knownActivityEmbeddingCerts attribute but the "
+                        + "provided resource is null");
+            }
+            return input.success(knownEmbeddingCertificates);
+        }
+
+        // If the knownCerts resource ID is null - the app specified a string value for the
+        // attribute representing a single trusted signer.
+        final String knownCert = sa.getString(resourceId);
+        if (knownCert == null || knownCert.isEmpty()) {
+            return input.error("Defined a knownActivityEmbeddingCerts attribute but the provided "
+                    + "string is empty");
+        }
+        return input.success(Set.of(knownCert));
     }
 }

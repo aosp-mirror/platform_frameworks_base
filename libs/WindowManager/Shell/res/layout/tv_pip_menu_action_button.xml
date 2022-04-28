@@ -20,8 +20,7 @@
         android:id="@+id/button"
         android:layout_width="@dimen/pip_menu_button_size"
         android:layout_height="@dimen/pip_menu_button_size"
-        android:layout_marginStart="@dimen/pip_menu_button_margin"
-        android:layout_marginEnd="@dimen/pip_menu_button_margin"
+        android:layout_margin="@dimen/pip_menu_button_margin"
         android:background="@drawable/tv_pip_button_bg"
         android:focusable="true">
 

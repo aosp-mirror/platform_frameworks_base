@@ -16,15 +16,15 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
-import androidx.test.filters.RequiresDevice
+import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -54,7 +54,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
+open class OpenAppColdTest(testSpec: FlickerTestParameter)
+    : OpenAppFromLauncherTransition(testSpec) {
     /**
      * Defines the transition used to run the test
      */
@@ -104,11 +105,6 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun launcherWindowBecomesInvisible() = super.launcherWindowBecomesInvisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
     override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
     /** {@inheritDoc} */
@@ -117,7 +113,7 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 213852103)
+    @Presubmit
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 

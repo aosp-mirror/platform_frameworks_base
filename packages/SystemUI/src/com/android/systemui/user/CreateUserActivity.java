@@ -44,7 +44,9 @@ public class CreateUserActivity extends Activity {
      * Creates an intent to start this activity.
      */
     public static Intent createIntentForStart(Context context) {
-        return new Intent(context, CreateUserActivity.class);
+        Intent intent = new Intent(context, CreateUserActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
     }
 
     private static final String TAG = "CreateUserActivity";
@@ -108,7 +110,7 @@ public class CreateUserActivity extends Activity {
                 },
                 null,
                 defaultUserName,
-                getString(R.string.user_add_user),
+                getString(com.android.settingslib.R.string.user_add_user),
                 this::addUserNow,
                 this::finish
         );
@@ -132,7 +134,7 @@ public class CreateUserActivity extends Activity {
         mSetupUserDialog.dismiss();
 
         userName = (userName == null || userName.trim().isEmpty())
-                ? getString(R.string.user_new_user_name)
+                ? getString(com.android.settingslib.R.string.user_new_user_name)
                 : userName;
 
         mUserCreator.createUser(userName, userIcon,

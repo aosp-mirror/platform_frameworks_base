@@ -64,9 +64,11 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -1148,6 +1150,8 @@ class MediaRouter2ServiceImpl {
             if (DEBUG) {
                 Slog.d(TAG, userRecord + ": Disposed");
             }
+            userRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::stop, userRecord.mHandler));
             mUserRecords.remove(userRecord.mUserId);
             // Note: User already stopped (by switchUser) so no need to send stop message here.
         }
@@ -1328,6 +1332,7 @@ class MediaRouter2ServiceImpl {
         private void start() {
             if (!mRunning) {
                 mRunning = true;
+                mSystemProvider.start();
                 mWatcher.start();
             }
         }
@@ -1336,6 +1341,7 @@ class MediaRouter2ServiceImpl {
             if (mRunning) {
                 mRunning = false;
                 mWatcher.stop(); // also stops all providers
+                mSystemProvider.stop();
             }
         }
 
@@ -2200,9 +2206,21 @@ class MediaRouter2ServiceImpl {
                 }
             }
 
+            // Build a composite RouteDiscoveryPreference that matches all of the routes
+            // that match one or more of the individual discovery preferences. It may also
+            // match additional routes. The composite RouteDiscoveryPreference can be used
+            // to query route providers once to obtain all of the routes of interest, which
+            // can be subsequently filtered for the individual discovery preferences.
+            Set<String> preferredFeatures = new HashSet<>();
+            boolean activeScan = false;
+            for (RouteDiscoveryPreference preference : discoveryPreferences) {
+                preferredFeatures.addAll(preference.getPreferredFeatures());
+                activeScan |= preference.shouldPerformActiveScan();
+            }
+            RouteDiscoveryPreference newPreference = new RouteDiscoveryPreference.Builder(
+                    List.copyOf(preferredFeatures), activeScan).build();
+
             synchronized (service.mLock) {
-                RouteDiscoveryPreference newPreference =
-                        new RouteDiscoveryPreference.Builder(discoveryPreferences).build();
                 if (newPreference.equals(mUserRecord.mCompositeDiscoveryPreference)) {
                     return;
                 }

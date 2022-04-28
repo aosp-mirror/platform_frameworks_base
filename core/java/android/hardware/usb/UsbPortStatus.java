@@ -44,8 +44,8 @@ public final class UsbPortStatus implements Parcelable {
     private final @ContaminantProtectionStatus int mContaminantProtectionStatus;
     private final @ContaminantDetectionStatus int mContaminantDetectionStatus;
     private final boolean mPowerTransferLimited;
-    private final @UsbDataStatus int[] mUsbDataStatus;
-    private final @PowerBrickStatus int mPowerBrickStatus;
+    private final @UsbDataStatus int mUsbDataStatus;
+    private final @PowerBrickConnectionStatus int mPowerBrickConnectionStatus;
 
     /**
      * Power role: This USB port does not have a power role.
@@ -198,38 +198,38 @@ public final class UsbPortStatus implements Parcelable {
     /**
      * USB data status is not known.
      */
-    public static final int USB_DATA_STATUS_UNKNOWN = 0;
+    public static final int DATA_STATUS_UNKNOWN = 0;
 
     /**
      * USB data is enabled.
      */
-    public static final int USB_DATA_STATUS_ENABLED = 1;
+    public static final int DATA_STATUS_ENABLED = 1 << 0;
 
     /**
      * USB data is disabled as the port is too hot.
      */
-    public static final int USB_DATA_STATUS_DISABLED_OVERHEAT = 2;
+    public static final int DATA_STATUS_DISABLED_OVERHEAT = 1 << 1;
 
     /**
      * USB data is disabled due to contaminated port.
      */
-    public static final int USB_DATA_STATUS_DISABLED_CONTAMINANT = 3;
+    public static final int DATA_STATUS_DISABLED_CONTAMINANT = 1 << 2;
 
     /**
      * USB data is disabled due to docking event.
      */
-    public static final int USB_DATA_STATUS_DISABLED_DOCK = 4;
+    public static final int DATA_STATUS_DISABLED_DOCK = 1 << 3;
 
     /**
      * USB data is disabled by
      * {@link UsbPort#enableUsbData UsbPort.enableUsbData}.
      */
-    public static final int USB_DATA_STATUS_DISABLED_FORCE = 5;
+    public static final int DATA_STATUS_DISABLED_FORCE = 1 << 4;
 
     /**
      * USB data is disabled for debug.
      */
-    public static final int USB_DATA_STATUS_DISABLED_DEBUG = 6;
+    public static final int DATA_STATUS_DISABLED_DEBUG = 1 << 5;
 
     /**
      * Unknown whether a power brick is connected.
@@ -276,14 +276,14 @@ public final class UsbPortStatus implements Parcelable {
     @interface UsbPortMode{}
 
     /** @hide */
-    @IntDef(prefix = { "USB_DATA_STATUS_" }, value = {
-            USB_DATA_STATUS_UNKNOWN,
-            USB_DATA_STATUS_ENABLED,
-            USB_DATA_STATUS_DISABLED_OVERHEAT,
-            USB_DATA_STATUS_DISABLED_CONTAMINANT,
-            USB_DATA_STATUS_DISABLED_DOCK,
-            USB_DATA_STATUS_DISABLED_FORCE,
-            USB_DATA_STATUS_DISABLED_DEBUG
+    @IntDef(prefix = { "DATA_STATUS_" }, flag = true, value = {
+            DATA_STATUS_UNKNOWN,
+            DATA_STATUS_ENABLED,
+            DATA_STATUS_DISABLED_OVERHEAT,
+            DATA_STATUS_DISABLED_CONTAMINANT,
+            DATA_STATUS_DISABLED_DOCK,
+            DATA_STATUS_DISABLED_FORCE,
+            DATA_STATUS_DISABLED_DEBUG
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface UsbDataStatus{}
@@ -295,13 +295,14 @@ public final class UsbPortStatus implements Parcelable {
             POWER_BRICK_STATUS_CONNECTED,
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface PowerBrickStatus{}
+    @interface PowerBrickConnectionStatus{}
 
     /** @hide */
     public UsbPortStatus(int currentMode, int currentPowerRole, int currentDataRole,
             int supportedRoleCombinations, int contaminantProtectionStatus,
-            int contaminantDetectionStatus, @UsbDataStatus int[] usbDataStatus,
-            boolean powerTransferLimited, @PowerBrickStatus int powerBrickStatus) {
+            int contaminantDetectionStatus, @UsbDataStatus int usbDataStatus,
+            boolean powerTransferLimited,
+            @PowerBrickConnectionStatus int powerBrickConnectionStatus) {
         mCurrentMode = currentMode;
         mCurrentPowerRole = currentPowerRole;
         mCurrentDataRole = currentDataRole;
@@ -310,7 +311,7 @@ public final class UsbPortStatus implements Parcelable {
         mContaminantDetectionStatus = contaminantDetectionStatus;
         mUsbDataStatus = usbDataStatus;
         mPowerTransferLimited = powerTransferLimited;
-        mPowerBrickStatus = powerBrickStatus;
+        mPowerBrickConnectionStatus = powerBrickConnectionStatus;
     }
 
     /** @hide */
@@ -323,8 +324,8 @@ public final class UsbPortStatus implements Parcelable {
         mSupportedRoleCombinations = supportedRoleCombinations;
         mContaminantProtectionStatus = contaminantProtectionStatus;
         mContaminantDetectionStatus = contaminantDetectionStatus;
-        mUsbDataStatus = new int[]{USB_DATA_STATUS_UNKNOWN};
-        mPowerBrickStatus = POWER_BRICK_STATUS_UNKNOWN;
+        mUsbDataStatus = DATA_STATUS_UNKNOWN;
+        mPowerBrickConnectionStatus = POWER_BRICK_STATUS_UNKNOWN;
         mPowerTransferLimited = false;
     }
 
@@ -411,13 +412,13 @@ public final class UsbPortStatus implements Parcelable {
     /**
      * Returns UsbData status.
      *
-     * @return Current USB data status of the port: {@link #USB_DATA_STATUS_UNKNOWN}
-     *         or {@link #USB_DATA_STATUS_ENABLED} or {@link #USB_DATA_STATUS_DIASBLED_OVERHEAT}
-     *         or {@link #USB_DATA_STATUS_DISABLED_CONTAMINANT}
-     *         or {@link #USB_DATA_STATUS_DISABLED_DOCK} or {@link #USB_DATA_STATUS_DISABLED_FORCE}
-     *         or {@link #USB_DATA_STATUS_DISABLED_DEBUG}
+     * @return Current USB data status of the port with one or more of the following values
+     *         {@link #DATA_STATUS_UNKNOWN}, {@link #DATA_STATUS_ENABLED},
+     *         {@link #DATA_STATUS_DISABLED_OVERHEAT}, {@link #DATA_STATUS_DISABLED_CONTAMINANT},
+     *         {@link #DATA_STATUS_DISABLED_DOCK}, {@link #DATA_STATUS_DISABLED_FORCE},
+     *         {@link #DATA_STATUS_DISABLED_DEBUG}
      */
-    public @UsbDataStatus @Nullable int[] getUsbDataStatus() {
+    public @UsbDataStatus int getUsbDataStatus() {
         return mUsbDataStatus;
     }
 
@@ -432,14 +433,14 @@ public final class UsbPortStatus implements Parcelable {
     }
 
     /**
-     * Let's the caller know if a power brick is connected to the USB port.
+     * Returns the connection status of the power brick.
      *
      * @return {@link #POWER_BRICK_STATUS_UNKNOWN}
      *         or {@link #POWER_BRICK_STATUS_CONNECTED}
      *         or {@link #POWER_BRICK_STATUS_DISCONNECTED}
      */
-    public @PowerBrickStatus int getPowerBrickStatus() {
-        return mPowerBrickStatus;
+    public @PowerBrickConnectionStatus int getPowerBrickConnectionStatus() {
+        return mPowerBrickConnectionStatus;
     }
 
     @NonNull
@@ -459,8 +460,9 @@ public final class UsbPortStatus implements Parcelable {
                         + UsbPort.usbDataStatusToString(getUsbDataStatus())
                 + ", isPowerTransferLimited="
                         + isPowerTransferLimited()
-                +", powerBrickStatus="
-                        + UsbPort.powerBrickStatusToString(getPowerBrickStatus())
+                +", powerBrickConnectionStatus="
+                        + UsbPort
+                            .powerBrickConnectionStatusToString(getPowerBrickConnectionStatus())
                 + "}";
     }
 
@@ -477,10 +479,9 @@ public final class UsbPortStatus implements Parcelable {
         dest.writeInt(mSupportedRoleCombinations);
         dest.writeInt(mContaminantProtectionStatus);
         dest.writeInt(mContaminantDetectionStatus);
-        dest.writeInt(mUsbDataStatus.length);
-        dest.writeIntArray(mUsbDataStatus);
+        dest.writeInt(mUsbDataStatus);
         dest.writeBoolean(mPowerTransferLimited);
-        dest.writeInt(mPowerBrickStatus);
+        dest.writeInt(mPowerBrickConnectionStatus);
     }
 
     public static final @NonNull Parcelable.Creator<UsbPortStatus> CREATOR =
@@ -493,19 +494,140 @@ public final class UsbPortStatus implements Parcelable {
             int supportedRoleCombinations = in.readInt();
             int contaminantProtectionStatus = in.readInt();
             int contaminantDetectionStatus = in.readInt();
-            int[] usbDataStatus = new int[in.readInt()];
-            in.readIntArray(usbDataStatus);
+            int usbDataStatus = in.readInt();
             boolean powerTransferLimited = in.readBoolean();
-            int powerBrickStatus = in.readInt();
+            int powerBrickConnectionStatus = in.readInt();
             return new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
                     supportedRoleCombinations, contaminantProtectionStatus,
                     contaminantDetectionStatus, usbDataStatus, powerTransferLimited,
-                    powerBrickStatus);
+                    powerBrickConnectionStatus);
         }
 
         @Override
         public UsbPortStatus[] newArray(int size) {
             return new UsbPortStatus[size];
+        }
+    };
+
+    /**
+     * Builder is used to create {@link UsbPortStatus} objects.
+     *
+     * @hide
+     */
+    public static final class Builder {
+        private @UsbPortMode int mCurrentMode;
+        private @UsbPowerRole int mCurrentPowerRole;
+        private @UsbDataRole int mCurrentDataRole;
+        private int mSupportedRoleCombinations;
+        private @ContaminantProtectionStatus int mContaminantProtectionStatus;
+        private @ContaminantDetectionStatus int mContaminantDetectionStatus;
+        private boolean mPowerTransferLimited;
+        private @UsbDataStatus int mUsbDataStatus;
+        private @PowerBrickConnectionStatus int mPowerBrickConnectionStatus;
+
+        public Builder() {
+            mCurrentMode = MODE_NONE;
+            mCurrentPowerRole = POWER_ROLE_NONE;
+            mCurrentDataRole = DATA_ROLE_NONE;
+            mContaminantProtectionStatus = CONTAMINANT_PROTECTION_NONE;
+            mContaminantDetectionStatus = CONTAMINANT_DETECTION_NOT_SUPPORTED;
+            mUsbDataStatus = DATA_STATUS_UNKNOWN;
+            mPowerBrickConnectionStatus = POWER_BRICK_STATUS_UNKNOWN;
+        }
+
+        /**
+         * Sets the current mode of {@link UsbPortStatus}
+         *
+         * @return Instance of {@link Builder}
+         */
+        @NonNull
+        public Builder setCurrentMode(@UsbPortMode int currentMode) {
+            mCurrentMode = currentMode;
+            return this;
+        }
+
+        /**
+         * Sets the current power role and data role of {@link UsbPortStatus}
+         *
+         * @return Instance of {@link Builder}
+         */
+        @NonNull
+        public Builder setCurrentRoles(@UsbPowerRole int currentPowerRole,
+                @UsbDataRole int currentDataRole) {
+            mCurrentPowerRole = currentPowerRole;
+            mCurrentDataRole = currentDataRole;
+            return this;
+        }
+
+        /**
+         * Sets supported role combinations of {@link UsbPortStatus}
+         *
+         * @return Instance of {@link Builder}
+         */
+        @NonNull
+        public Builder setSupportedRoleCombinations(int supportedRoleCombinations) {
+            mSupportedRoleCombinations = supportedRoleCombinations;
+            return this;
+        }
+
+        /**
+         * Sets current contaminant status of {@link UsbPortStatus}
+         *
+         * @return Instance of {@link Builder}
+         */
+        @NonNull
+        public Builder setContaminantStatus(
+                @ContaminantProtectionStatus int contaminantProtectionStatus,
+                @ContaminantDetectionStatus int contaminantDetectionStatus) {
+            mContaminantProtectionStatus = contaminantProtectionStatus;
+            mContaminantDetectionStatus = contaminantDetectionStatus;
+            return this;
+        }
+
+        /**
+         * Sets power limit power transfer of {@link UsbPortStatus}
+         *
+         * @return Instance of {@link Builder}
+         */
+        @NonNull
+        public Builder setPowerTransferLimited(boolean powerTransferLimited) {
+            mPowerTransferLimited = powerTransferLimited;
+            return this;
+        }
+
+        /**
+         * Sets the USB data status of {@link UsbPortStatus}
+         *
+         * @return Instance of {@link Builder}
+         */
+        @NonNull
+        public Builder setUsbDataStatus(@UsbDataStatus int usbDataStatus) {
+            mUsbDataStatus = usbDataStatus;
+            return this;
+        }
+
+        /**
+         * Sets the power brick connection status of {@link UsbPortStatus}
+         *
+         * @return Instance of {@link Builder}
+         */
+        @NonNull
+        public Builder setPowerBrickConnectionStatus(
+                @PowerBrickConnectionStatus int powerBrickConnectionStatus) {
+            mPowerBrickConnectionStatus = powerBrickConnectionStatus;
+            return this;
+        }
+
+        /**
+         * Creates the {@link UsbPortStatus} object.
+         */
+        @NonNull
+        public UsbPortStatus build() {
+            UsbPortStatus status = new UsbPortStatus(mCurrentMode, mCurrentPowerRole,
+                    mCurrentDataRole, mSupportedRoleCombinations, mContaminantProtectionStatus,
+                    mContaminantDetectionStatus, mUsbDataStatus, mPowerTransferLimited,
+                    mPowerBrickConnectionStatus);
+            return status;
         }
     };
 }

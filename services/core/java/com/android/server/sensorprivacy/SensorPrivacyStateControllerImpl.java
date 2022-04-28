@@ -16,7 +16,6 @@
 
 package com.android.server.sensorprivacy;
 
-import android.hardware.SensorPrivacyManager;
 import android.os.Handler;
 
 import com.android.internal.util.dump.DualDumpOutputStream;
@@ -49,10 +48,6 @@ class SensorPrivacyStateControllerImpl extends SensorPrivacyStateController {
 
     @Override
     SensorState getStateLocked(int toggleType, int userId, int sensor) {
-        if (toggleType == SensorPrivacyManager.ToggleTypes.HARDWARE) {
-            // Device doesn't support hardware state
-            return getDefaultSensorState();
-        }
         SensorState sensorState = mPersistedState.getState(toggleType, userId, sensor);
         if (sensorState != null) {
             return new SensorState(sensorState);
@@ -67,12 +62,6 @@ class SensorPrivacyStateControllerImpl extends SensorPrivacyStateController {
     @Override
     void setStateLocked(int toggleType, int userId, int sensor, boolean enabled,
             Handler callbackHandler, SetStateResultCallback callback) {
-        if (toggleType != SensorPrivacyManager.ToggleTypes.SOFTWARE) {
-            // Implementation only supports software switch
-            callbackHandler.sendMessage(PooledLambda.obtainMessage(
-                    SetStateResultCallback::callback, callback, false));
-            return;
-        }
         // Changing the SensorState's mEnabled updates the timestamp of its last change.
         // A nonexistent state -> unmuted should not set the timestamp.
         SensorState lastState = mPersistedState.getState(toggleType, userId, sensor);

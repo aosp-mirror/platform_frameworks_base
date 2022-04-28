@@ -51,6 +51,10 @@ class UserBroadcastEvents {
     }
 
     void onUidRemoved(int uid) {
+        clear(uid);
+    }
+
+    void clear(int uid) {
         for (int i = mBroadcastEvents.size() - 1; i >= 0; --i) {
             final LongSparseArray<BroadcastEvent> broadcastEvents = mBroadcastEvents.valueAt(i);
             for (int j = broadcastEvents.size() - 1; j >= 0; --j) {

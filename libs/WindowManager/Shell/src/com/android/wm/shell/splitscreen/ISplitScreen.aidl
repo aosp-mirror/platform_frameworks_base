@@ -42,11 +42,6 @@ interface ISplitScreen {
     oneway void unregisterSplitScreenListener(in ISplitScreenListener listener) = 2;
 
     /**
-     * Hides the side-stage if it is currently visible.
-     */
-    oneway void setSideStageVisibility(boolean visible) = 3;
-
-    /**
      * Removes a task from the side stage.
      */
     oneway void removeFromSideStage(int taskId) = 4;
@@ -97,9 +92,8 @@ interface ISplitScreen {
      * Start a pair of intent and task using legacy transition system.
      */
     oneway void startIntentAndTaskWithLegacyTransition(in PendingIntent pendingIntent,
-            in Intent fillInIntent, int taskId, boolean intentFirst, in Bundle mainOptions,
-            in Bundle sideOptions, int sidePosition, float splitRatio,
-            in RemoteAnimationAdapter adapter) = 12;
+            in Intent fillInIntent, int taskId, in Bundle mainOptions,in Bundle sideOptions,
+            int sidePosition, float splitRatio, in RemoteAnimationAdapter adapter) = 12;
 
     /**
      * Blocking call that notifies and gets additional split-screen targets when entering

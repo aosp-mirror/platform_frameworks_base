@@ -17,7 +17,7 @@
 package android.app.smartspace;
 
 import android.annotation.Nullable;
-import android.app.smartspace.uitemplatedata.SmartspaceText;
+import android.app.smartspace.uitemplatedata.Text;
 import android.text.TextUtils;
 
 /**
@@ -30,13 +30,13 @@ public final class SmartspaceUtils {
     private SmartspaceUtils() {
     }
 
-    /** Returns true if the passed in {@link SmartspaceText} is null or its content is empty. */
-    public static boolean isEmpty(@Nullable SmartspaceText text) {
+    /** Returns true if the passed in {@link Text} is null or its content is empty. */
+    public static boolean isEmpty(@Nullable Text text) {
         return text == null || TextUtils.isEmpty(text.getText());
     }
 
-    /** Returns true if the passed-in {@link SmartspaceText}s are equal. */
-    public static boolean isEqual(@Nullable SmartspaceText text1, @Nullable SmartspaceText text2) {
+    /** Returns true if the passed-in {@link Text}s are equal. */
+    public static boolean isEqual(@Nullable Text text1, @Nullable Text text2) {
         if (text1 == null && text2 == null) return true;
         if (text1 == null || text2 == null) return false;
         return text1.equals(text2);

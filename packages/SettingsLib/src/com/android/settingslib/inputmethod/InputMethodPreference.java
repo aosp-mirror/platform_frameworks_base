@@ -32,7 +32,6 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -156,14 +155,10 @@ public class InputMethodPreference extends PrimarySwitchPreference
         final int iconSize = getContext().getResources().getDimensionPixelSize(
                 R.dimen.secondary_app_icon_size);
         if (icon != null && iconSize > 0) {
-            if (isTv()) {
-                ViewGroup.LayoutParams params = icon.getLayoutParams();
-                params.height = iconSize;
-                params.width = iconSize;
-                icon.setLayoutParams(params);
-            } else {
-                icon.setLayoutParams(new LinearLayout.LayoutParams(iconSize, iconSize));
-            }
+            ViewGroup.LayoutParams params = icon.getLayoutParams();
+            params.height = iconSize;
+            params.width = iconSize;
+            icon.setLayoutParams(params);
         }
     }
 
@@ -226,8 +221,8 @@ public class InputMethodPreference extends PrimarySwitchPreference
             setSwitchEnabled(false);
         } else if (!mIsAllowedByOrganization) {
             EnforcedAdmin admin =
-                    RestrictedLockUtilsInternal.checkIfInputMethodDisallowed(getContext(),
-                            mImi.getPackageName(), UserHandle.myUserId());
+                    RestrictedLockUtilsInternal.checkIfInputMethodDisallowed(
+                            getContext(), mImi.getPackageName(), mUserId);
             setDisabledByAdmin(admin);
         } else {
             setEnabled(true);

@@ -78,6 +78,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private RowContentBindStage mBindStage;
     @Mock PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+    @Mock StatusBarStateController mStatusBarStateController;
     @Captor private ArgumentCaptor<NotificationEntryListener> mListenerCaptor;
     private NotificationEntryListener mNotificationEntryListener;
     private final HashMap<String, NotificationEntry> mPendingEntries = new HashMap<>();
@@ -94,7 +95,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
                 .thenReturn(mPendingEntries.values());
 
         mGroupManager = new NotificationGroupManagerLegacy(
-                mock(StatusBarStateController.class),
+                mStatusBarStateController,
                 () -> mPeopleNotificationIdentifier,
                 Optional.of(mock(Bubbles.class)),
                 mock(DumpManager.class));
@@ -103,7 +104,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         when(mBindStage.getStageParams(any())).thenReturn(new RowContentBindParams());
 
-        mGroupAlertTransferHelper = new NotificationGroupAlertTransferHelper(mBindStage);
+        mGroupAlertTransferHelper = new NotificationGroupAlertTransferHelper(
+                mBindStage, mStatusBarStateController, mGroupManager);
         mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
 
         mGroupAlertTransferHelper.bind(mNotificationEntryManager, mGroupManager);

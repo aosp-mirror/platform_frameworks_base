@@ -19,6 +19,7 @@ package com.android.server.media.metrics;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaMetrics;
+import android.media.metrics.BundleSession;
 import android.media.metrics.IMediaMetricsManager;
 import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
@@ -26,6 +27,7 @@ import android.media.metrics.PlaybackMetrics;
 import android.media.metrics.PlaybackStateEvent;
 import android.media.metrics.TrackChangeEvent;
 import android.os.Binder;
+import android.os.PersistableBundle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.util.Base64;
@@ -180,6 +182,42 @@ public final class MediaMetricsManagerService extends SystemService {
             StatsLog.write(statsEvent);
         }
 
+        public void reportBundleMetrics(String sessionId, PersistableBundle metrics, int userId) {
+            int level = loggingLevel();
+            if (level == LOGGING_LEVEL_BLOCKED) {
+                return;
+            }
+
+            int atomid = metrics.getInt(BundleSession.KEY_STATSD_ATOM);
+            switch (atomid) {
+                default:
+                    return;
+                // to be extended as we define statsd atoms
+                case 322: // MediaPlaybackStateEvent
+                    // pattern for the keys:
+                    // <statsd event> - <fieldname>
+                    // match types to what stats will want
+                    String _sessionId = metrics.getString("playbackstateevent-sessionid");
+                    int _state = metrics.getInt("playbackstateevent-state", -1);
+                    long _lifetime = metrics.getLong("playbackstateevent-lifetime", -1);
+                    if (_sessionId == null || _state < 0 || _lifetime < 0) {
+                        Slog.d(TAG, "dropping incomplete data for atom 322: _sessionId: "
+                                        + _sessionId + " _state: " + _state
+                                        + " _lifetime: " + _lifetime);
+                        return;
+                    }
+                    StatsEvent statsEvent = StatsEvent.newBuilder()
+                            .setAtomId(322)
+                            .writeString(_sessionId)
+                            .writeInt(_state)
+                            .writeLong(_lifetime)
+                            .usePooledBuffer()
+                            .build();
+                    StatsLog.write(statsEvent);
+                    return;
+            }
+        }
+
         @Override
         public void reportPlaybackStateEvent(
                 String sessionId, PlaybackStateEvent event, int userId) {
@@ -212,12 +250,34 @@ public final class MediaMetricsManagerService extends SystemService {
         }
 
         @Override
+        public void releaseSessionId(String sessionId, int userId) {
+            // De-authorize this session-id in the native mediametrics service.
+            // TODO: plumbing to the native mediametrics service
+            Slog.v(TAG, "Releasing sessionId " + sessionId + " for userId " + userId + " [NOP]");
+        }
+
+        @Override
         public String getPlaybackSessionId(int userId) {
             return getSessionIdInternal(userId);
         }
 
         @Override
         public String getRecordingSessionId(int userId) {
+            return getSessionIdInternal(userId);
+        }
+
+        @Override
+        public String getTranscodingSessionId(int userId) {
+            return getSessionIdInternal(userId);
+        }
+
+        @Override
+        public String getEditingSessionId(int userId) {
+            return getSessionIdInternal(userId);
+        }
+
+        @Override
+        public String getBundleSessionId(int userId) {
             return getSessionIdInternal(userId);
         }
 

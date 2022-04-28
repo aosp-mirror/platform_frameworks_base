@@ -104,7 +104,6 @@ static void doRun(const TestScene::Info& info, const TestScene::Options& opts, i
         // If we're reporting GPU memory usage we need to first start with a clean slate
         RenderProxy::purgeCaches();
     }
-    Properties::forceDrawFrame = true;
     TestContext testContext;
     testContext.setRenderOffscreen(opts.renderOffscreen);
 
@@ -144,6 +143,7 @@ static void doRun(const TestScene::Info& info, const TestScene::Options& opts, i
             .setVsync(vsync, vsync, UiFrameInfoBuilder::INVALID_VSYNC_ID,
                       UiFrameInfoBuilder::UNKNOWN_DEADLINE,
                       UiFrameInfoBuilder::UNKNOWN_FRAME_INTERVAL);
+        proxy->forceDrawNextFrame();
         proxy->syncAndDrawFrame();
     }
 
@@ -163,6 +163,7 @@ static void doRun(const TestScene::Info& info, const TestScene::Options& opts, i
                           UiFrameInfoBuilder::UNKNOWN_DEADLINE,
                           UiFrameInfoBuilder::UNKNOWN_FRAME_INTERVAL);
             scene->doFrame(i);
+            proxy->forceDrawNextFrame();
             proxy->syncAndDrawFrame();
         }
         if (opts.reportFrametimeWeight) {

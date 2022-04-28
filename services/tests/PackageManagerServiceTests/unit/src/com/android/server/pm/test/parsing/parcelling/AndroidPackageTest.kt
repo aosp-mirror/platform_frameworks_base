@@ -143,6 +143,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::getLogo,
         AndroidPackage::getLocaleConfigRes,
         AndroidPackage::getManageSpaceActivityName,
+        AndroidPackage::getMaxSdkVersion,
         AndroidPackage::getMemtagMode,
         AndroidPackage::getMinSdkVersion,
         AndroidPackage::getNativeHeapZeroInitialized,
@@ -238,6 +239,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isVendor,
         AndroidPackage::isVisibleToInstantApps,
         AndroidPackage::isVmSafeMode,
+        AndroidPackage::isLeavingSharedUid,
         AndroidPackage::isResetEnabledSettingsOnAppDataCleared,
         AndroidPackage::getMaxAspectRatio,
         AndroidPackage::getMinAspectRatio,
@@ -504,9 +506,10 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                 )
             }
         ),
+        getter(AndroidPackage::getKnownActivityEmbeddingCerts, setOf("TESTEMBEDDINGCERT")),
         getSetByValue(
-            AndroidPackage::shouldInheritKeyStoreKeys,
-            ParsingPackage::setInheritKeyStoreKeys,
+            AndroidPackage::isOnBackInvokedCallbackEnabled,
+            ParsingPackage::setOnBackInvokedCallbackEnabled,
             true
         )
     )

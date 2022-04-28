@@ -358,7 +358,7 @@ bool CollectProguardRules(IAaptContext* context_, xml::XmlResource* res, KeepSet
     return false;
   }
 
-  switch (res->file.name.type) {
+  switch (res->file.name.type.type) {
     case ResourceType::kLayout: {
       LayoutVisitor visitor(res->file, keep_set);
       res->root->Accept(&visitor);
@@ -465,7 +465,7 @@ bool CollectLocations(const UsageLocation& location, const KeepSet& keep_set,
   locations->insert(location);
 
   // TODO: allow for more reference types if we can determine its safe.
-  if (location.name.type != ResourceType::kLayout) {
+  if (location.name.type.type != ResourceType::kLayout) {
     return false;
   }
 

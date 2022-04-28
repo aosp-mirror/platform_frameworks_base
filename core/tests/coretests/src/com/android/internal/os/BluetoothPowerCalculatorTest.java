@@ -24,6 +24,7 @@ import android.bluetooth.UidTraffic;
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStatsQuery;
+import android.os.Parcel;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
 import android.os.WorkSource;
@@ -36,6 +37,8 @@ import com.google.common.collect.ImmutableList;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -90,11 +93,13 @@ public class BluetoothPowerCalculatorTest {
         uid.setProcessStateForTest(
                 BatteryStats.Uid.PROCESS_STATE_FOREGROUND, 1000);
 
-        BluetoothActivityEnergyInfo info1 = new BluetoothActivityEnergyInfo(2000,
-                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE, 1000, 2000, 3000, 4000);
-        info1.setUidTraffic(ImmutableList.of(
-                new UidTraffic(Process.BLUETOOTH_UID, 1000, 2000),
-                new UidTraffic(APP_UID, 3000, 4000)));
+
+        List<UidTraffic> trafficList1 = ImmutableList.of(
+                createUidTraffic(Process.BLUETOOTH_UID, 1000, 2000),
+                createUidTraffic(APP_UID, 3000, 4000));
+        BluetoothActivityEnergyInfo info1 = createBtEnergyInfo(2000,
+                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE, 1000, 2000, 3000, 4000,
+                trafficList1);
 
         batteryStats.updateBluetoothStateLocked(info1,
                 0/*1_000_000*/, 2000, 2000);
@@ -102,11 +107,14 @@ public class BluetoothPowerCalculatorTest {
         uid.setProcessStateForTest(
                 BatteryStats.Uid.PROCESS_STATE_BACKGROUND, 3000);
 
-        BluetoothActivityEnergyInfo info2 = new BluetoothActivityEnergyInfo(4000,
-                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE, 5000, 6000, 7000, 8000);
-        info2.setUidTraffic(ImmutableList.of(
-                new UidTraffic(Process.BLUETOOTH_UID, 5000, 6000),
-                new UidTraffic(APP_UID, 7000, 8000)));
+
+        List<UidTraffic> trafficList2 = ImmutableList.of(
+                createUidTraffic(Process.BLUETOOTH_UID, 5000, 6000),
+                createUidTraffic(APP_UID, 7000, 8000));
+        BluetoothActivityEnergyInfo info2 = createBtEnergyInfo(4000,
+                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE, 5000, 6000, 7000, 8000,
+                trafficList2);
+
 
         batteryStats.updateBluetoothStateLocked(info2,
                 0 /*5_000_000 */, 4000, 4000);
@@ -137,10 +145,14 @@ public class BluetoothPowerCalculatorTest {
         final BatteryConsumer.Key fgs = uidConsumer.getKey(
                 BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+        final BatteryConsumer.Key cached = uidConsumer.getKey(
+                BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                BatteryConsumer.PROCESS_STATE_CACHED);
 
         assertThat(uidConsumer.getConsumedPower(foreground)).isWithin(PRECISION).of(0.081);
         assertThat(uidConsumer.getConsumedPower(background)).isWithin(PRECISION).of(0.0416666);
         assertThat(uidConsumer.getConsumedPower(fgs)).isWithin(PRECISION).of(0);
+        assertThat(uidConsumer.getConsumedPower(cached)).isWithin(PRECISION).of(0);
     }
 
     @Test
@@ -202,11 +214,14 @@ public class BluetoothPowerCalculatorTest {
         uid.setProcessStateForTest(
                 BatteryStats.Uid.PROCESS_STATE_FOREGROUND, 1000);
 
-        BluetoothActivityEnergyInfo info1 = new BluetoothActivityEnergyInfo(2000,
-                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE, 1000, 2000, 3000, 4000);
-        info1.setUidTraffic(ImmutableList.of(
-                new UidTraffic(Process.BLUETOOTH_UID, 1000, 2000),
-                new UidTraffic(APP_UID, 3000, 4000)));
+
+        List<UidTraffic> trafficList1 = ImmutableList.of(
+                createUidTraffic(Process.BLUETOOTH_UID, 1000, 2000),
+                createUidTraffic(APP_UID, 3000, 4000));
+        BluetoothActivityEnergyInfo info1 = createBtEnergyInfo(2000,
+                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE, 1000, 2000, 3000, 4000,
+                trafficList1);
+
 
         batteryStats.updateBluetoothStateLocked(info1,
                 1_000_000, 2000, 2000);
@@ -214,11 +229,13 @@ public class BluetoothPowerCalculatorTest {
         uid.setProcessStateForTest(
                 BatteryStats.Uid.PROCESS_STATE_BACKGROUND, 3000);
 
-        BluetoothActivityEnergyInfo info2 = new BluetoothActivityEnergyInfo(4000,
-                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE, 5000, 6000, 7000, 8000);
-        info2.setUidTraffic(ImmutableList.of(
-                new UidTraffic(Process.BLUETOOTH_UID, 5000, 6000),
-                new UidTraffic(APP_UID, 7000, 8000)));
+        List<UidTraffic> trafficList2 = ImmutableList.of(
+                createUidTraffic(Process.BLUETOOTH_UID, 5000, 6000),
+                createUidTraffic(APP_UID, 7000, 8000));
+        BluetoothActivityEnergyInfo info2 = createBtEnergyInfo(4000,
+                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE, 5000, 6000, 7000, 8000,
+                trafficList2);
+
 
         batteryStats.updateBluetoothStateLocked(info2,
                 5_000_000, 4000, 4000);
@@ -248,10 +265,14 @@ public class BluetoothPowerCalculatorTest {
         final BatteryConsumer.Key fgs = uidConsumer.getKey(
                 BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+        final BatteryConsumer.Key cached = uidConsumer.getKey(
+                BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                BatteryConsumer.PROCESS_STATE_CACHED);
 
         assertThat(uidConsumer.getConsumedPower(foreground)).isWithin(PRECISION).of(0.4965352);
         assertThat(uidConsumer.getConsumedPower(background)).isWithin(PRECISION).of(0.3255208);
         assertThat(uidConsumer.getConsumedPower(fgs)).isWithin(PRECISION).of(0);
+        assertThat(uidConsumer.getConsumedPower(cached)).isWithin(PRECISION).of(0);
     }
 
 
@@ -280,12 +301,15 @@ public class BluetoothPowerCalculatorTest {
     }
 
     private void setupBluetoothEnergyInfo(long reportedEnergyUc, long consumedEnergyUc) {
-        final BluetoothActivityEnergyInfo info = new BluetoothActivityEnergyInfo(1000,
+        List<UidTraffic> trafficList = ImmutableList.of(
+                createUidTraffic(Process.BLUETOOTH_UID, 1000, 2000),
+                createUidTraffic(APP_UID, 3000, 4000));
+
+
+        final BluetoothActivityEnergyInfo info = createBtEnergyInfo(1000,
                 BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE, 7000, 5000, 0,
-                reportedEnergyUc);
-        info.setUidTraffic(ImmutableList.of(
-                new UidTraffic(Process.BLUETOOTH_UID, 1000, 2000),
-                new UidTraffic(APP_UID, 3000, 4000)));
+                reportedEnergyUc, trafficList);
+
         mStatsRule.getBatteryStats().updateBluetoothStateLocked(info,
                 consumedEnergyUc, 1000, 1000);
     }
@@ -303,5 +327,35 @@ public class BluetoothPowerCalculatorTest {
         long usageDurationMillis = batteryConsumer.getUsageDurationMillis(
                 BatteryConsumer.POWER_COMPONENT_BLUETOOTH);
         assertThat(usageDurationMillis).isEqualTo(durationMs);
+    }
+
+    private UidTraffic createUidTraffic(int uid, long traffic1, long traffic2) {
+        final Parcel uidTrafficParcel = Parcel.obtain();
+        uidTrafficParcel.writeInt(uid);
+        uidTrafficParcel.writeLong(traffic1);
+        uidTrafficParcel.writeLong(traffic2);
+        uidTrafficParcel.setDataPosition(0);
+
+        UidTraffic traffic = UidTraffic.CREATOR.createFromParcel(uidTrafficParcel);
+        uidTrafficParcel.recycle();
+        return traffic;
+    }
+
+    private BluetoothActivityEnergyInfo createBtEnergyInfo(long timestamp, int stackState,
+            long txTime, long rxTime, long idleTime, long energyUsed, List<UidTraffic> traffic) {
+        final Parcel btActivityEnergyInfoParcel = Parcel.obtain();
+        btActivityEnergyInfoParcel.writeLong(timestamp);
+        btActivityEnergyInfoParcel.writeInt(stackState);
+        btActivityEnergyInfoParcel.writeLong(txTime);
+        btActivityEnergyInfoParcel.writeLong(rxTime);
+        btActivityEnergyInfoParcel.writeLong(idleTime);
+        btActivityEnergyInfoParcel.writeLong(energyUsed);
+        btActivityEnergyInfoParcel.writeTypedList(traffic);
+        btActivityEnergyInfoParcel.setDataPosition(0);
+
+        BluetoothActivityEnergyInfo info = BluetoothActivityEnergyInfo.CREATOR
+                .createFromParcel(btActivityEnergyInfoParcel);
+        btActivityEnergyInfoParcel.recycle();
+        return info;
     }
 }

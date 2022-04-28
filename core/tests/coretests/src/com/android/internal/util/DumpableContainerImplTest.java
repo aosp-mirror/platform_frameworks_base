@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class DumpableContainerImplTest {
 
@@ -41,7 +42,7 @@ public final class DumpableContainerImplTest {
 
     @Test
     public void testAddDumpable_dumpableWithoutName() {
-        Dumpable noNamer = new Dumpable() {
+        Dumpable namelessDumpable = new Dumpable() {
 
             @Override
             public String getDumpableName() {
@@ -54,7 +55,7 @@ public final class DumpableContainerImplTest {
             }
 
         };
-        assertThrows(NullPointerException.class, () -> mImpl.addDumpable(noNamer));
+        assertThrows(NullPointerException.class, () -> mImpl.addDumpable(namelessDumpable));
     }
 
     @Test
@@ -178,9 +179,74 @@ public final class DumpableContainerImplTest {
                         + "......6 Args: 4,8,15,16,23,42,\n");
     }
 
+    @Test
+    public void testRemoveDumpable_null() {
+        assertThrows(NullPointerException.class, () -> mImpl.removeDumpable(null));
+    }
+
+    @Test
+    public void testARemoveDumpable_dumpableWithoutName() {
+        // Need a non-null name initially otherwise it won't be added
+        AtomicReference<String> name = new AtomicReference<>("A Dumpable Has No Name");
+        Dumpable dumpable = new Dumpable() {
+
+            @Override
+            public String getDumpableName() {
+                return name.get();
+            }
+
+            @Override
+            public void dump(PrintWriter writer, String[] args) {
+                throw new UnsupportedOperationException("D'OH!");
+            }
+
+        };
+        assertWithMessage("addDumpable(with name)").that(mImpl.addDumpable(dumpable)).isTrue();
+
+        name.set(null);
+        assertWithMessage("removeDumpable(nameless)").that(mImpl.removeDumpable(dumpable))
+                .isFalse();
+    }
+
+    @Test
+    public void testRemoveDumpable_empty() {
+        CustomDumpable dumpable = new CustomDumpable("The name is Bond", "James Bond!");
+
+        assertWithMessage("removeDumpable()").that(mImpl.removeDumpable(dumpable)).isFalse();
+    }
+
+    @Test
+    public void testRemoveDumpable_sameNameButDifferentDumpable() {
+        CustomDumpable real = new CustomDumpable("Slim Shade", "Please stand up!");
+        CustomDumpable fake = new CustomDumpable("Slim Shade", "Please stand up!");
+
+        mImpl.addDumpable(real);
+
+        assertWithMessage("removeDumpable(fake)").that(mImpl.removeDumpable(fake)).isFalse();
+        assertWithMessage("removeDumpable(real)").that(mImpl.removeDumpable(real)).isTrue();
+    }
+
+    @Test
+    public void testRemoveDumpable_existing() {
+        CustomDumpable dumpable = new CustomDumpable("Homer", "D'ohmp!");
+
+        mImpl.addDumpable(dumpable);
+        mImpl.listDumpables("...", mWriter);
+        assertWithMessage("listDumpables()").that(getOutput()).isEqualTo("...1 dumpables: Homer\n");
+
+        assertWithMessage("removeDumpable()").that(mImpl.removeDumpable(dumpable)).isTrue();
+        resetOutput();
+        mImpl.listDumpables("...", mWriter);
+        assertWithMessage("listDumpables(...)").that(getOutput()).isEqualTo("...No dumpables\n");
+    }
+
     private String getOutput() {
         mSw.flush();
         return mSw.toString();
+    }
+
+    private void resetOutput() {
+        mSw.getBuffer().setLength(0);
     }
 
     private static final class CustomDumpable implements Dumpable {

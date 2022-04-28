@@ -25,6 +25,7 @@ import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.telephony.ServiceState.FrequencyRange;
 import android.util.Range;
 
 import java.lang.annotation.Retention;
@@ -94,8 +95,10 @@ public final class ModemActivityInfo implements Parcelable {
     private long mTimestamp;
     private int mSleepTimeMs;
     private int mIdleTimeMs;
-    private int[] mTxTimeMs;
-    private int mRxTimeMs;
+    private int[] mTotalTxTimeMs;
+    private int mTotalRxTimeMs;
+    private int mSizeOfSpecificInfo;
+    private ActivityStatsTechSpecificInfo[] mActivityStatsTechSpecificInfo;
 
     /**
      * @hide
@@ -110,8 +113,17 @@ public final class ModemActivityInfo implements Parcelable {
         mTimestamp = timestamp;
         mSleepTimeMs = sleepTimeMs;
         mIdleTimeMs = idleTimeMs;
-        mTxTimeMs = txTimeMs;
-        mRxTimeMs = rxTimeMs;
+        mTotalTxTimeMs = txTimeMs;
+        mTotalRxTimeMs = rxTimeMs;
+
+        mActivityStatsTechSpecificInfo = new ActivityStatsTechSpecificInfo[1];
+        mSizeOfSpecificInfo = mActivityStatsTechSpecificInfo.length;
+        mActivityStatsTechSpecificInfo[0] =
+                new ActivityStatsTechSpecificInfo(
+                        AccessNetworkConstants.AccessNetworkType.UNKNOWN,
+                        ServiceState.FREQUENCY_RANGE_UNKNOWN,
+                        txTimeMs,
+                        rxTimeMs);
     }
 
     /**
@@ -124,14 +136,49 @@ public final class ModemActivityInfo implements Parcelable {
         this(timestamp, (int) sleepTimeMs, (int) idleTimeMs, txTimeMs, (int) rxTimeMs);
     }
 
+    /** @hide */
+    public ModemActivityInfo(long timestamp, int sleepTimeMs, int idleTimeMs,
+                        @NonNull ActivityStatsTechSpecificInfo[] activityStatsTechSpecificInfo) {
+        mTimestamp = timestamp;
+        mSleepTimeMs = sleepTimeMs;
+        mIdleTimeMs = idleTimeMs;
+        mActivityStatsTechSpecificInfo = activityStatsTechSpecificInfo;
+        mSizeOfSpecificInfo = mActivityStatsTechSpecificInfo.length;
+        mTotalTxTimeMs = new int[ModemActivityInfo.TX_POWER_LEVELS];
+        for (int i = 0; i < getNumTxPowerLevels(); i++) {
+            for (int j = 0; j < getSpecificInfoLength(); j++) {
+                mTotalTxTimeMs[i] = mTotalTxTimeMs[i]
+                            + (int) mActivityStatsTechSpecificInfo[j].getTransmitTimeMillis(i);
+            }
+        }
+        mTotalRxTimeMs = 0;
+        for (int i = 0; i < getSpecificInfoLength(); i++) {
+            mTotalRxTimeMs =
+                    mTotalRxTimeMs + (int) mActivityStatsTechSpecificInfo[i].getReceiveTimeMillis();
+        }
+    }
+
+    /**
+     * Provided for convenience in manipulation since the API exposes long values but internal
+     * representations are ints.
+     * @hide
+     */
+    public ModemActivityInfo(long timestamp, long sleepTimeMs, long idleTimeMs,
+                        @NonNull ActivityStatsTechSpecificInfo[] activityStatsTechSpecificInfo) {
+        this(timestamp, (int) sleepTimeMs, (int) idleTimeMs, activityStatsTechSpecificInfo);
+    }
+
     @Override
     public String toString() {
         return "ModemActivityInfo{"
-            + " mTimestamp=" + mTimestamp
-            + " mSleepTimeMs=" + mSleepTimeMs
-            + " mIdleTimeMs=" + mIdleTimeMs
-            + " mTxTimeMs[]=" + Arrays.toString(mTxTimeMs)
-            + " mRxTimeMs=" + mRxTimeMs
+            + " mTimestamp="
+            + mTimestamp
+            + " mSleepTimeMs="
+            + mSleepTimeMs
+            + " mIdleTimeMs="
+            + mIdleTimeMs
+            + " mActivityStatsTechSpecificInfo="
+            + Arrays.toString(mActivityStatsTechSpecificInfo)
             + "}";
     }
 
@@ -145,11 +192,17 @@ public final class ModemActivityInfo implements Parcelable {
             long timestamp = in.readLong();
             int sleepTimeMs = in.readInt();
             int idleTimeMs = in.readInt();
-            int[] txTimeMs = new int[TX_POWER_LEVELS];
-            in.readIntArray(txTimeMs);
-            int rxTimeMs = in.readInt();
-            return new ModemActivityInfo(timestamp, sleepTimeMs, idleTimeMs,
-                                txTimeMs, rxTimeMs);
+            Parcelable[] tempSpecifiers =
+                    in.createTypedArray(ActivityStatsTechSpecificInfo.CREATOR);
+            ActivityStatsTechSpecificInfo[] activityStatsTechSpecificInfo;
+            activityStatsTechSpecificInfo =
+                    new ActivityStatsTechSpecificInfo[tempSpecifiers.length];
+            for (int i = 0; i < tempSpecifiers.length; i++) {
+                activityStatsTechSpecificInfo[i] =
+                                (ActivityStatsTechSpecificInfo) tempSpecifiers[i];
+                    }
+            return new ModemActivityInfo(
+                    timestamp, sleepTimeMs, idleTimeMs, activityStatsTechSpecificInfo);
         }
 
         public ModemActivityInfo[] newArray(int size) {
@@ -165,15 +218,14 @@ public final class ModemActivityInfo implements Parcelable {
         dest.writeLong(mTimestamp);
         dest.writeInt(mSleepTimeMs);
         dest.writeInt(mIdleTimeMs);
-        dest.writeIntArray(mTxTimeMs);
-        dest.writeInt(mRxTimeMs);
+        dest.writeTypedArray(mActivityStatsTechSpecificInfo, flags);
     }
 
     /**
      * Gets the timestamp at which this modem activity info was recorded.
      *
-     * @return The timestamp, as returned by {@link SystemClock#elapsedRealtime()}, when this
-     * {@link ModemActivityInfo} was recorded.
+     * @return The timestamp, as returned by {@link SystemClock#elapsedRealtime()}, when this {@link
+     *     ModemActivityInfo} was recorded.
      */
     public @ElapsedRealtimeLong long getTimestampMillis() {
         return mTimestamp;
@@ -188,14 +240,41 @@ public final class ModemActivityInfo implements Parcelable {
      * Gets the amount of time the modem spent transmitting at a certain power level.
      *
      * @param powerLevel The power level to query.
-     * @return The amount of time, in milliseconds, that the modem spent transmitting at the
-     * given power level.
+     * @return The amount of time, in milliseconds, that the modem spent transmitting at the given
+     *     power level.
      */
     public @DurationMillisLong long getTransmitDurationMillisAtPowerLevel(
             @TxPowerLevel int powerLevel) {
-        return mTxTimeMs[powerLevel];
+        long txTimeMsAtPowerLevel = 0;
+        for (int i = 0; i < getSpecificInfoLength(); i++) {
+            txTimeMsAtPowerLevel +=
+                    mActivityStatsTechSpecificInfo[i].getTransmitTimeMillis(powerLevel);
+        }
+        return txTimeMsAtPowerLevel;
     }
 
+    /** @hide */
+    public @DurationMillisLong long getTransmitDurationMillisAtPowerLevel(
+            @TxPowerLevel int powerLevel, int rat) {
+        for (int i = 0; i < getSpecificInfoLength(); i++) {
+            if (mActivityStatsTechSpecificInfo[i].getRat() == rat) {
+                return mActivityStatsTechSpecificInfo[i].getTransmitTimeMillis(powerLevel);
+            }
+        }
+        return 0;
+    }
+
+    /** @hide */
+    public @DurationMillisLong long getTransmitDurationMillisAtPowerLevel(
+            @TxPowerLevel int powerLevel, int rat, @FrequencyRange int freq) {
+        for (int i = 0; i < getSpecificInfoLength(); i++) {
+            if (mActivityStatsTechSpecificInfo[i].getRat() == rat
+                    && mActivityStatsTechSpecificInfo[i].getFrequencyRange() == freq) {
+                return mActivityStatsTechSpecificInfo[i].getTransmitTimeMillis(powerLevel);
+            }
+        }
+        return 0;
+    }
     /**
      * Gets the range of transmit powers corresponding to a certain power level.
      *
@@ -208,17 +287,64 @@ public final class ModemActivityInfo implements Parcelable {
     }
 
     /** @hide */
-    public void setTransmitTimeMillis(int[] txTimeMs) {
-        mTxTimeMs = Arrays.copyOf(txTimeMs, TX_POWER_LEVELS);
+    public int getSpecificInfoRat(int index) {
+        return mActivityStatsTechSpecificInfo[index].getRat();
     }
 
+    /** @hide */
+    public int getSpecificInfoFrequencyRange(int index) {
+        return mActivityStatsTechSpecificInfo[index].getFrequencyRange();
+    }
+    /** @hide */
+    public void setTransmitTimeMillis(int[] txTimeMs) {
+        mTotalTxTimeMs = Arrays.copyOf(txTimeMs, TX_POWER_LEVELS);
+    }
+    /** @hide */
+    public void setTransmitTimeMillis(int rat, int[] txTimeMs) {
+        for (int i = 0; i < getSpecificInfoLength(); i++) {
+            if (mActivityStatsTechSpecificInfo[i].getRat() == rat) {
+                mActivityStatsTechSpecificInfo[i].setTransmitTimeMillis(txTimeMs);
+            }
+        }
+    }
+    /** @hide */
+    public void setTransmitTimeMillis(int rat, int freq, int[] txTimeMs) {
+        for (int i = 0; i < getSpecificInfoLength(); i++) {
+            if (mActivityStatsTechSpecificInfo[i].getRat() == rat
+                    && mActivityStatsTechSpecificInfo[i].getFrequencyRange() == freq) {
+                mActivityStatsTechSpecificInfo[i].setTransmitTimeMillis(txTimeMs);
+            }
+        }
+    }
     /**
      * @return The raw array of transmit power durations
      * @hide
      */
     @NonNull
     public int[] getTransmitTimeMillis() {
-        return mTxTimeMs;
+        return mTotalTxTimeMs;
+    }
+
+    /** @hide */
+    public int[] getTransmitTimeMillis(@AccessNetworkConstants.RadioAccessNetworkType int rat) {
+        for (int i = 0; i < mActivityStatsTechSpecificInfo.length; i++) {
+            if (mActivityStatsTechSpecificInfo[i].getRat() == rat) {
+                return mActivityStatsTechSpecificInfo[i].getTransmitTimeMillis();
+            }
+        }
+        return new int[5];
+    }
+
+    /** @hide */
+    public int[] getTransmitTimeMillis(
+            @AccessNetworkConstants.RadioAccessNetworkType int rat, @FrequencyRange int freq) {
+        for (int i = 0; i < mActivityStatsTechSpecificInfo.length; i++) {
+            if (mActivityStatsTechSpecificInfo[i].getRat() == rat
+                    && mActivityStatsTechSpecificInfo[i].getFrequencyRange() == freq) {
+                return mActivityStatsTechSpecificInfo[i].getTransmitTimeMillis();
+            }
+        }
+        return new int[5];
     }
 
     /**
@@ -238,6 +364,7 @@ public final class ModemActivityInfo implements Parcelable {
     /**
      * Provided for convenience, since the API surface needs to return longs but internal
      * representations are ints.
+     *
      * @hide
      */
     public void setSleepTimeMillis(long sleepTimeMillis) {
@@ -256,15 +383,64 @@ public final class ModemActivityInfo implements Parcelable {
      * activity.
      */
     public @NonNull ModemActivityInfo getDelta(@NonNull ModemActivityInfo other) {
-        int[] txTimeMs = new int[ModemActivityInfo.TX_POWER_LEVELS];
-        for (int i = 0; i < ModemActivityInfo.TX_POWER_LEVELS; i++) {
-            txTimeMs[i] = other.mTxTimeMs[i] - mTxTimeMs[i];
+        ActivityStatsTechSpecificInfo[] mDeltaSpecificInfo;
+        mDeltaSpecificInfo = new ActivityStatsTechSpecificInfo[other.getSpecificInfoLength()];
+
+        boolean matched;
+        for (int i = 0; i < other.getSpecificInfoLength(); i++) {
+            matched = false;
+            for (int j = 0; j < getSpecificInfoLength(); j++) {
+                int rat = mActivityStatsTechSpecificInfo[j].getRat();
+                if (rat == other.mActivityStatsTechSpecificInfo[i].getRat() && !matched) {
+                    if (mActivityStatsTechSpecificInfo[j].getRat()
+                            == AccessNetworkConstants.AccessNetworkType.NGRAN) {
+                        if (other.mActivityStatsTechSpecificInfo[i].getFrequencyRange()
+                                == mActivityStatsTechSpecificInfo[j].getFrequencyRange()) {
+                            int freq = mActivityStatsTechSpecificInfo[j].getFrequencyRange();
+                            int[] txTimeMs = new int[ModemActivityInfo.TX_POWER_LEVELS];
+                            for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
+                                txTimeMs[lvl] =
+                                        (int) (other.getTransmitDurationMillisAtPowerLevel(
+                                                            lvl, rat, freq)
+                                                        - getTransmitDurationMillisAtPowerLevel(
+                                                            lvl, rat, freq));
+                            }
+                            matched = true;
+                            mDeltaSpecificInfo[i] =
+                                    new ActivityStatsTechSpecificInfo(
+                                            rat,
+                                            freq,
+                                            txTimeMs,
+                                            (int) (other.getReceiveTimeMillis(rat, freq)
+                                                        - getReceiveTimeMillis(rat, freq)));
+                        }
+                    } else {
+                        int[] txTimeMs = new int[ModemActivityInfo.TX_POWER_LEVELS];
+                        for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
+                            txTimeMs[lvl] =
+                                    (int) (other.getTransmitDurationMillisAtPowerLevel(lvl, rat)
+                                                - getTransmitDurationMillisAtPowerLevel(lvl, rat));
+                        }
+                        matched = true;
+                        mDeltaSpecificInfo[i] =
+                                new ActivityStatsTechSpecificInfo(
+                                        rat,
+                                        ServiceState.FREQUENCY_RANGE_UNKNOWN,
+                                        txTimeMs,
+                                        (int) (other.getReceiveTimeMillis(rat)
+                                                     - getReceiveTimeMillis(rat)));
+                    }
+                }
+            }
+            if (!matched) {
+                mDeltaSpecificInfo[i] = other.mActivityStatsTechSpecificInfo[i];
+            }
         }
-        return new ModemActivityInfo(other.getTimestampMillis(),
+        return new ModemActivityInfo(
+                other.getTimestampMillis(),
                 other.getSleepTimeMillis() - getSleepTimeMillis(),
                 other.getIdleTimeMillis() - getIdleTimeMillis(),
-                txTimeMs,
-                other.getReceiveTimeMillis() - getReceiveTimeMillis());
+                mDeltaSpecificInfo);
     }
 
     /**
@@ -285,6 +461,7 @@ public final class ModemActivityInfo implements Parcelable {
     /**
      * Provided for convenience, since the API surface needs to return longs but internal
      * representations are ints.
+     *
      * @hide
      */
     public void setIdleTimeMillis(long idleTimeMillis) {
@@ -297,21 +474,66 @@ public final class ModemActivityInfo implements Parcelable {
      * @return Time in milliseconds.
      */
     public @DurationMillisLong long getReceiveTimeMillis() {
-        return mRxTimeMs;
+        return mTotalRxTimeMs;
+    }
+
+    /** @hide */
+    public @DurationMillisLong long getReceiveTimeMillis(int rat) {
+        for (int i = 0; i < mActivityStatsTechSpecificInfo.length; i++) {
+            if (mActivityStatsTechSpecificInfo[i].getRat() == rat) {
+                return mActivityStatsTechSpecificInfo[i].getReceiveTimeMillis();
+            }
+        }
+        return 0;
+    }
+    /** @hide */
+    public @DurationMillisLong long getReceiveTimeMillis(int rat, int freq) {
+        for (int i = 0; i < mActivityStatsTechSpecificInfo.length; i++) {
+            if (mActivityStatsTechSpecificInfo[i].getRat() == rat
+                    && mActivityStatsTechSpecificInfo[i].getFrequencyRange() == freq) {
+                return mActivityStatsTechSpecificInfo[i].getReceiveTimeMillis();
+            }
+        }
+        return 0;
     }
 
     /** @hide */
     public void setReceiveTimeMillis(int rxTimeMillis) {
-        mRxTimeMs = rxTimeMillis;
+        mTotalRxTimeMs = rxTimeMillis;
     }
 
     /**
      * Provided for convenience, since the API surface needs to return longs but internal
      * representations are ints.
+     *
      * @hide
      */
     public void setReceiveTimeMillis(long receiveTimeMillis) {
-        mRxTimeMs = (int) receiveTimeMillis;
+        mTotalRxTimeMs = (int) receiveTimeMillis;
+    }
+
+    /** @hide */
+    public void setReceiveTimeMillis(int rat, long receiveTimeMillis) {
+        for (int i = 0; i < mActivityStatsTechSpecificInfo.length; i++) {
+            if (mActivityStatsTechSpecificInfo[i].getRat() == rat) {
+                mActivityStatsTechSpecificInfo[i].setReceiveTimeMillis(receiveTimeMillis);
+            }
+        }
+    }
+
+    /** @hide */
+    public void setReceiveTimeMillis(int rat, int freq, long receiveTimeMillis) {
+        for (int i = 0; i < mActivityStatsTechSpecificInfo.length; i++) {
+            if (mActivityStatsTechSpecificInfo[i].getRat() == rat
+                    && mActivityStatsTechSpecificInfo[i].getFrequencyRange() == freq) {
+                mActivityStatsTechSpecificInfo[i].setReceiveTimeMillis(receiveTimeMillis);
+            }
+        }
+    }
+
+    /** @hide */
+    public int getSpecificInfoLength() {
+        return mSizeOfSpecificInfo;
     }
 
     /**
@@ -323,22 +545,41 @@ public final class ModemActivityInfo implements Parcelable {
      */
     @TestApi
     public boolean isValid() {
-        boolean isTxPowerValid = Arrays.stream(mTxTimeMs).allMatch((i) -> i >= 0);
-
-        return isTxPowerValid && ((getIdleTimeMillis() >= 0) && (getSleepTimeMillis() >= 0)
-                && (getReceiveTimeMillis() >= 0) && !isEmpty());
+        if (mActivityStatsTechSpecificInfo == null) {
+            return false;
+        } else {
+            boolean isTxPowerValid = true;
+            boolean isRxPowerValid = true;
+            for (int i = 0; i < getSpecificInfoLength(); i++) {
+                if (!mActivityStatsTechSpecificInfo[i].isTxPowerValid()) {
+                    isTxPowerValid = false;
+                }
+                if (!mActivityStatsTechSpecificInfo[i].isRxPowerValid()) {
+                    isRxPowerValid = false;
+                }
+            }
+            return isTxPowerValid
+                    && isRxPowerValid
+                    && ((getIdleTimeMillis() >= 0) && (getSleepTimeMillis() >= 0) && !isEmpty());
+        }
     }
 
     /** @hide */
     @TestApi
     public boolean isEmpty() {
-        boolean isTxPowerEmpty = mTxTimeMs == null || mTxTimeMs.length == 0
-                || Arrays.stream(mTxTimeMs).allMatch((i) -> i == 0);
-
-        return isTxPowerEmpty && ((getIdleTimeMillis() == 0) && (getSleepTimeMillis() == 0)
-                && (getReceiveTimeMillis() == 0));
+        boolean isTxPowerEmpty = false;
+        boolean isRxPowerEmpty = false;
+        for (int i = 0; i < getSpecificInfoLength(); i++) {
+            if (mActivityStatsTechSpecificInfo[i].isTxPowerEmpty()) {
+                isTxPowerEmpty = true;
+            }
+            if (mActivityStatsTechSpecificInfo[i].isRxPowerEmpty()) {
+                isRxPowerEmpty = true;
+            }
+        }
+        return isTxPowerEmpty
+                && ((getIdleTimeMillis() == 0) && (getSleepTimeMillis() == 0) && isRxPowerEmpty);
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -348,14 +589,15 @@ public final class ModemActivityInfo implements Parcelable {
         return mTimestamp == that.mTimestamp
                 && mSleepTimeMs == that.mSleepTimeMs
                 && mIdleTimeMs == that.mIdleTimeMs
-                && mRxTimeMs == that.mRxTimeMs
-                && Arrays.equals(mTxTimeMs, that.mTxTimeMs);
+                && mSizeOfSpecificInfo == that.mSizeOfSpecificInfo
+                && Arrays.equals(
+                        mActivityStatsTechSpecificInfo, that.mActivityStatsTechSpecificInfo);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(mTimestamp, mSleepTimeMs, mIdleTimeMs, mRxTimeMs);
-        result = 31 * result + Arrays.hashCode(mTxTimeMs);
+        int result = Objects.hash(mTimestamp, mSleepTimeMs, mIdleTimeMs, mTotalRxTimeMs);
+        result = 31 * result + Arrays.hashCode(mTotalTxTimeMs);
         return result;
     }
 }

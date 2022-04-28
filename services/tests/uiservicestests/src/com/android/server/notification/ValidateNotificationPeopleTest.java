@@ -274,7 +274,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
         new ValidateNotificationPeople().searchContactsAndLookupNumbers(mockContext, lookupUri);
         verify(mockContentResolver, never()).query(
                 eq(ContactsContract.CommonDataKinds.Phone.CONTENT_URI),
-                eq(new String[] { ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER }),
+                eq(ValidateNotificationPeople.PHONE_LOOKUP_PROJECTION),
                 contains(ContactsContract.Contacts.LOOKUP_KEY),
                 any(),  // selection args
                 isNull());  // sort order
@@ -308,7 +308,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
         // in the case of a phone lookup, return null cursor; that's not an error case
         // and we're not checking the actual storing of the phone data here.
         when(mockContentResolver.query(eq(ContactsContract.CommonDataKinds.Phone.CONTENT_URI),
-                eq(new String[] { ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER }),
+                eq(ValidateNotificationPeople.PHONE_LOOKUP_PROJECTION),
                 contains(ContactsContract.Contacts.LOOKUP_KEY),
                 any(), isNull())).thenReturn(null);
 
@@ -317,7 +317,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
         new ValidateNotificationPeople().searchContactsAndLookupNumbers(mockContext, lookupUri);
         verify(mockContentResolver, times(1)).query(
                 eq(ContactsContract.CommonDataKinds.Phone.CONTENT_URI),
-                eq(new String[] { ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER }),
+                eq(ValidateNotificationPeople.PHONE_LOOKUP_PROJECTION),
                 contains(ContactsContract.Contacts.LOOKUP_KEY),
                 eq(new String[] { "testlookupkey" }),  // selection args
                 isNull());  // sort order

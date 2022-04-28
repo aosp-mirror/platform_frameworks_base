@@ -48,8 +48,8 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * The header group on Keyguard.
@@ -60,7 +60,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private static final int LAYOUT_CUTOUT = 1;
     private static final int LAYOUT_NO_CUTOUT = 2;
 
-    private final Rect mEmptyRect = new Rect(0, 0, 0, 0);
+    private final ArrayList<Rect> mEmptyTintRect = new ArrayList<>();
 
     private boolean mShowPercentAvailable;
     private boolean mBatteryCharging;
@@ -173,7 +173,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     private void updateKeyguardStatusBarHeight() {
-        MarginLayoutParams lp =  (MarginLayoutParams) getLayoutParams();
+        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
         lp.height = getStatusBarHeaderHeightKeyguard(mContext);
         setLayoutParams(lp);
     }
@@ -233,9 +233,6 @@ public class KeyguardStatusBarView extends RelativeLayout {
         LinearLayout.LayoutParams lp =
                 (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
 
-        int marginStart = getResources().getDimensionPixelSize(
-                R.dimen.system_icons_super_container_margin_start);
-
         // Use status_bar_padding_end to replace original
         // system_icons_super_container_avatarless_margin_end to prevent different end alignment
         // between PhoneStatusBarView and KeyguardStatusBarView
@@ -248,8 +245,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         // 1. status bar layout: mPadding(consider round_corner + privacy dot)
         // 2. icon container: R.dimen.status_bar_padding_end
 
-        if (marginEnd != lp.getMarginEnd() || marginStart != lp.getMarginStart()) {
-            lp.setMarginStart(marginStart);
+        if (marginEnd != lp.getMarginEnd()) {
             lp.setMarginEnd(marginEnd);
             mSystemIconsContainer.setLayoutParams(lp);
         }
@@ -476,14 +472,14 @@ public class KeyguardStatusBarView extends RelativeLayout {
             iconManager.setTint(iconColor);
         }
 
-        applyDarkness(R.id.battery, mEmptyRect, intensity, iconColor);
-        applyDarkness(R.id.clock, mEmptyRect, intensity, iconColor);
+        applyDarkness(R.id.battery, mEmptyTintRect, intensity, iconColor);
+        applyDarkness(R.id.clock, mEmptyTintRect, intensity, iconColor);
     }
 
-    private void applyDarkness(int id, Rect tintArea, float intensity, int color) {
+    private void applyDarkness(int id, ArrayList<Rect> tintAreas, float intensity, int color) {
         View v = findViewById(id);
         if (v instanceof DarkReceiver) {
-            ((DarkReceiver) v).onDarkChanged(tintArea, intensity, color);
+            ((DarkReceiver) v).onDarkChanged(tintAreas, intensity, color);
         }
     }
 
@@ -499,36 +495,14 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     /** Should only be called from {@link KeyguardStatusBarViewController}. */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusBarView:");
         pw.println("  mBatteryCharging: " + mBatteryCharging);
         pw.println("  mLayoutState: " + mLayoutState);
         pw.println("  mKeyguardUserSwitcherEnabled: " + mKeyguardUserSwitcherEnabled);
         if (mBatteryView != null) {
-            mBatteryView.dump(fd, pw, args);
+            mBatteryView.dump(pw, args);
         }
-    }
-
-    void onSystemChromeAnimationStart(boolean isAnimatingOut) {
-        if (isAnimatingOut) {
-            mSystemIconsContainer.setVisibility(View.VISIBLE);
-            mSystemIconsContainer.setAlpha(0f);
-        }
-    }
-
-    void onSystemChromeAnimationEnd(boolean isAnimatingIn) {
-        // Make sure the system icons are out of the way
-        if (isAnimatingIn) {
-            mSystemIconsContainer.setVisibility(View.INVISIBLE);
-            mSystemIconsContainer.setAlpha(0f);
-        } else {
-            mSystemIconsContainer.setAlpha(1f);
-            mSystemIconsContainer.setVisibility(View.VISIBLE);
-        }
-    }
-
-    void onSystemChromeAnimationUpdate(float animatedValue) {
-        mSystemIconsContainer.setAlpha(animatedValue);
     }
 
     @Override

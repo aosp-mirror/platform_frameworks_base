@@ -74,7 +74,7 @@ public interface RecognitionListener {
      * <p>
      *     Called with the results for the full speech since {@link #onReadyForSpeech(Bundle)}.
      *     To get recognition results in segments rather than for the full session see
-     *     {@link RecognizerIntent#EXTRA_SEGMENT_SESSION}.
+     *     {@link RecognizerIntent#EXTRA_SEGMENTED_SESSION}.
      * </p>
      *
      * @param results the recognition results. To retrieve the results in {@code
@@ -100,7 +100,7 @@ public interface RecognitionListener {
 
     /**
      * Called for each ready segment of a recognition request. To request segmented speech results
-     * use {@link RecognizerIntent#EXTRA_SEGMENT_SESSION}. The callback might be called
+     * use {@link RecognizerIntent#EXTRA_SEGMENTED_SESSION}. The callback might be called
      * any number of times between {@link #onReadyForSpeech(Bundle)} and
      * {@link #onEndOfSegmentedSession()}.
      *
@@ -112,7 +112,7 @@ public interface RecognitionListener {
 
     /**
      * Called at the end of a segmented recognition request. To request segmented speech results
-     * use {@link RecognizerIntent#EXTRA_SEGMENT_SESSION}.
+     * use {@link RecognizerIntent#EXTRA_SEGMENTED_SESSION}.
      */
     default void onEndOfSegmentedSession() {}
 

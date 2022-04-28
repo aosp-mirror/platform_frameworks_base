@@ -116,7 +116,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
     public void testGetSnapshotMode() {
         final WindowState disabledWindow = createWindow(null,
                 FIRST_APPLICATION_WINDOW, mDisplayContent, "disabledWindow");
-        disabledWindow.mActivityRecord.setDisablePreviewScreenshots(true);
+        disabledWindow.mActivityRecord.setRecentsScreenshotEnabled(false);
         assertEquals(SNAPSHOT_MODE_APP_THEME,
                 mWm.mTaskSnapshotController.getSnapshotMode(disabledWindow.getTask()));
 

@@ -54,7 +54,7 @@ class FlagManager constructor(
      * An action called on restart which takes as an argument whether the listeners requested
      * that the restart be suppressed
      */
-    var restartAction: Consumer<Boolean>? = null
+    var onSettingsChangedAction: Consumer<Boolean>? = null
     var clearCacheAction: Consumer<Int>? = null
     private val listeners: MutableSet<PerFlagListener> = mutableSetOf()
     private val settingsObserver: ContentObserver = SettingsObserver()
@@ -64,7 +64,7 @@ class FlagManager constructor(
         intent.setPackage(RECEIVING_PACKAGE)
 
         return CallbackToFutureAdapter.getFuture {
-            completer: CallbackToFutureAdapter.Completer<Any?> ->
+            completer: CallbackToFutureAdapter.Completer<Collection<Flag<*>>> ->
                 context.sendOrderedBroadcast(intent, null,
                     object : BroadcastReceiver() {
                         override fun onReceive(context: Context, intent: Intent) {
@@ -79,7 +79,7 @@ class FlagManager constructor(
                         }
                     }, null, Activity.RESULT_OK, "extra data", null)
             "QueryingFlags"
-        } as ListenableFuture<Collection<Flag<*>>>
+        }
     }
 
     /**
@@ -154,11 +154,11 @@ class FlagManager constructor(
             val idStr = parts[parts.size - 1]
             val id = try { idStr.toInt() } catch (e: NumberFormatException) { return }
             clearCacheAction?.accept(id)
-            dispatchListenersAndMaybeRestart(id)
+            dispatchListenersAndMaybeRestart(id, onSettingsChangedAction)
         }
     }
 
-    fun dispatchListenersAndMaybeRestart(id: Int) {
+    fun dispatchListenersAndMaybeRestart(id: Int, restartAction: Consumer<Boolean>?) {
         val filteredListeners: List<FlagListenable.Listener> = synchronized(listeners) {
             listeners.mapNotNull { if (it.id == id) it.listener else null }
         }

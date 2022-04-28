@@ -85,6 +85,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
+import com.android.server.pm.KnownPackages;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.vr.VrManagerInternal;
@@ -627,7 +628,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             return true;
         }
         final String[] installerNames = pm.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
+                KnownPackages.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
         return installerNames.length > 0 && callingPkg.getPackageName().equals(installerNames[0]);
     }
 
@@ -747,9 +748,24 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // be used the next time the activity enters PiP.
                     final Task rootTask = r.getRootTask();
                     rootTask.setPictureInPictureAspectRatio(
-                            r.pictureInPictureArgs.getAspectRatio());
-                    rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
+                            r.pictureInPictureArgs.getAspectRatioFloat(),
+                            r.pictureInPictureArgs.getExpandedAspectRatioFloat());
+                    rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions(),
+                            r.pictureInPictureArgs.getCloseAction());
                 }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void setShouldDockBigOverlays(IBinder token, boolean shouldDockBigOverlays) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                r.setShouldDockBigOverlays(shouldDockBigOverlays);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -808,15 +824,25 @@ class ActivityClientController extends IActivityClientController.Stub {
                     + ": Current activity does not support picture-in-picture.");
         }
 
+        final float minAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
+        final float maxAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
+
         if (params.hasSetAspectRatio()
                 && !mService.mWindowManager.isValidPictureInPictureAspectRatio(
-                r.mDisplayContent, params.getAspectRatio())) {
-            final float minAspectRatio = mContext.getResources().getFloat(
-                    com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
-            final float maxAspectRatio = mContext.getResources().getFloat(
-                    com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
+                r.mDisplayContent, params.getAspectRatioFloat())) {
             throw new IllegalArgumentException(String.format(caller
                             + ": Aspect ratio is too extreme (must be between %f and %f).",
+                    minAspectRatio, maxAspectRatio));
+        }
+
+        if (mService.mSupportsExpandedPictureInPicture && params.hasSetExpandedAspectRatio()
+                && !mService.mWindowManager.isValidExpandedPictureInPictureAspectRatio(
+                r.mDisplayContent, params.getExpandedAspectRatioFloat())) {
+            throw new IllegalArgumentException(String.format(caller
+                            + ": Expanded aspect ratio is not extreme enough (must not be between"
+                            + " %f and %f).",
                     minAspectRatio, maxAspectRatio));
         }
 
@@ -1088,7 +1114,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
             if (r != null && r.isState(RESUMED, PAUSING)) {
                 r.mDisplayContent.mAppTransition.overridePendingAppTransition(
-                        packageName, enterAnim, exitAnim, null, null,
+                        packageName, enterAnim, exitAnim, backgroundColor, null, null,
                         r.mOverrideTaskTransition);
                 r.mTransitionController.setOverrideAnimation(
                         TransitionInfo.AnimationOptions.makeCustomAnimOptions(packageName,
@@ -1135,13 +1161,13 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
-    public void setDisablePreviewScreenshots(IBinder token, boolean disable) {
+    public void setRecentsScreenshotEnabled(IBinder token, boolean enabled) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r != null) {
-                    r.setDisablePreviewScreenshots(disable);
+                    r.setRecentsScreenshotEnabled(enabled);
                 }
             }
         } finally {
@@ -1164,10 +1190,29 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
+    /**
+     * Removes the outdated home task snapshot.
+     *
+     * @param token The token of the home task, or null if you have the
+     *              {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}
+     *              permission and want us to find the home task token for you.
+     */
     @Override
     public void invalidateHomeTaskSnapshot(IBinder token) {
+        if (token == null) {
+            ActivityTaskManagerService.enforceTaskPermission("invalidateHomeTaskSnapshot");
+        }
+
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+            final ActivityRecord r;
+            if (token == null) {
+                final Task rootTask =
+                        mService.mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask();
+                r = rootTask != null ? rootTask.topRunningActivity() : null;
+            } else {
+                r = ActivityRecord.isInRootTaskLocked(token);
+            }
+
             if (r != null && r.isActivityTypeHome()) {
                 mService.mWindowManager.mTaskSnapshotController.removeSnapshotCache(
                         r.getTask().mTaskId);

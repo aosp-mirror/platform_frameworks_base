@@ -74,7 +74,12 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
-        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,custom(com.android.permissioncontroller/.permission.service.SafetyCenterQsTileService)
+    </string>
+
+    <!-- The component name of the Safety Quick Settings Tile -->
+    <string name="safety_quick_settings_tile" translatable="false">
+        custom(com.android.permissioncontroller/.permission.service.SafetyCenterQsTileService)
     </string>
 
     <!-- The minimum number of tiles to display in QuickSettings -->
@@ -283,51 +288,11 @@
     <!-- Enable the default volume level warning dialog -->
     <bool name="enable_safety_warning">true</bool>
 
-    <!-- Whether to show operator name in the status bar -->
-    <bool name="config_showOperatorNameInStatusBar">false</bool>
-
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
 
     <!-- SystemUIFactory component -->
     <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
-
-    <!-- SystemUI Services: The classes of base stuff to start by default for all
-         configurations. -->
-    <string-array name="config_systemUIServiceComponents" translatable="false">
-        <item>com.android.systemui.util.NotificationChannels</item>
-        <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
-        <item>com.android.keyguard.KeyguardBiometricLockoutLogger</item>
-        <item>com.android.systemui.recents.Recents</item>
-        <item>com.android.systemui.volume.VolumeUI</item>
-        <item>com.android.systemui.statusbar.phone.StatusBar</item>
-        <item>com.android.systemui.usb.StorageNotification</item>
-        <item>com.android.systemui.power.PowerUI</item>
-        <item>com.android.systemui.media.RingtonePlayer</item>
-        <item>com.android.systemui.keyboard.KeyboardUI</item>
-        <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>
-        <item>@string/config_systemUIVendorServiceComponent</item>
-        <item>com.android.systemui.util.leak.GarbageMonitor$Service</item>
-        <item>com.android.systemui.LatencyTester</item>
-        <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
-        <item>com.android.systemui.ScreenDecorations</item>
-        <item>com.android.systemui.biometrics.AuthController</item>
-        <item>com.android.systemui.log.SessionTracker</item>
-        <item>com.android.systemui.SliceBroadcastRelayHandler</item>
-        <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
-        <item>com.android.systemui.theme.ThemeOverlayController</item>
-        <item>com.android.systemui.accessibility.WindowMagnification</item>
-        <item>com.android.systemui.accessibility.SystemActions</item>
-        <item>com.android.systemui.toast.ToastUI</item>
-        <item>com.android.systemui.wmshell.WMShell</item>
-        <item>com.android.systemui.clipboardoverlay.ClipboardListener</item>
-    </string-array>
-
-    <!-- SystemUI Services: The classes of the additional stuff to start. Services here are
-                            specified as an overlay to provide configuration-specific services that
-                            supplement those listed in config_systemUIServiceComponents. -->
-    <string-array name="config_additionalSystemUIServiceComponents" translatable="false">
-    </string-array>
 
     <!-- QS tile shape store width. negative implies fill configuration instead of stroke-->
     <dimen name="config_qsTileStrokeWidthActive">-1dp</dimen>
@@ -478,6 +443,10 @@
          This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_screenshotEditor" translatable="false"></string>
 
+    <!-- Remote copy default activity.  Must handle REMOTE_COPY_ACTION intents.
+     This name is in the ComponentName flattened format (package/class)  -->
+    <string name="config_remoteCopyPackage" translatable="false"></string>
+
     <!-- On debuggable builds, alert the user if SystemUI PSS goes over this number (in kb) -->
     <integer name="watch_heap_limit">256000</integer>
 
@@ -519,6 +488,9 @@
      space -->
     <bool name="config_showBatteryEstimateQSBH">false</bool>
 
+    <!-- Whether to show a severe low battery dialog. -->
+    <bool name="config_severe_battery_dialog">false</bool>
+
     <!-- A path similar to frameworks/base/core/res/res/values/config.xml
       config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display
       cutout. If present as well as config_enableDisplayCutoutProtection is set to true, then
@@ -539,9 +511,6 @@
 
     <!--  Flag to turn on the rendering of the above path or not  -->
     <bool name="config_enableDisplayCutoutProtection">false</bool>
-
-    <!-- Respect drawable/rounded.xml intrinsic size for multiple radius corner path customization -->
-    <bool name="config_roundedCornerMultipleRadius">false</bool>
 
     <!-- Controls can query 2 preferred applications for limited number of suggested controls.
          This config value should contain a list of package names of thoses preferred applications.
@@ -584,6 +553,9 @@
 
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">false</bool>
+
+    <!-- Whether we use large screen shade header which takes only one row compared to QS header -->
+    <bool name="config_use_large_screen_shade_header">false</bool>
 
     <!-- Whether notification header should never show section headers. -->
     <bool name="config_notification_never_show_section_headers">false</bool>
@@ -645,10 +617,6 @@
     <!-- Component name of communal source service -->
     <string name="config_communalSourceComponent" translatable="false">@null</string>
 
-    <!-- Whether idle mode should be enabled. When enabled, the lock screen will timeout to an idle
-         screen on inactivity. -->
-    <bool name="config_enableIdleMode">false</bool>
-
     <!-- This value is used when calculating whether the device is in ambient light mode. It is
         light mode when the light sensor sample value exceeds above this value. -->
     <integer name="config_ambientLightModeThreshold">5</integer>
@@ -688,17 +656,6 @@
     <!-- Flag to activate notification to contents feature -->
     <bool name="config_notificationToContents">true</bool>
 
-    <!-- Respect drawable/rounded_secondary.xml intrinsic size for multiple radius corner path
-         customization for secondary display-->
-    <bool name="config_roundedCornerMultipleRadiusSecondary">false</bool>
-
-    <!-- Whether the rounded corners are multiple radius for each display in a multi-display device.
-         {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
-    <array name="config_roundedCornerMultipleRadiusArray">
-        <item>@bool/config_roundedCornerMultipleRadius</item>
-        <item>@bool/config_roundedCornerMultipleRadiusSecondary</item>
-    </array>
-
     <!-- The rounded corner drawable for each display in a multi-display device.
          {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
     <array name="config_roundedCornerDrawableArray">
@@ -731,4 +688,33 @@
 
     <!-- How often in milliseconds to jitter the dream overlay in order to avoid burn-in. -->
     <integer name="config_dreamOverlayBurnInProtectionUpdateIntervalMillis">500</integer>
+
+    <!-- How long in milliseconds before full burn-in protection is achieved. -->
+    <integer name="config_dreamOverlayMillisUntilFullJitter">240000</integer>
+
+    <integer name="complicationFadeOutMs">500</integer>
+
+    <integer name="complicationFadeInMs">500</integer>
+
+    <integer name="complicationRestoreMs">1000</integer>
+
+    <!-- Icons that don't show in a collapsed non-keyguard statusbar -->
+    <string-array name="config_collapsed_statusbar_icon_blocklist" translatable="false">
+        <item>@*android:string/status_bar_volume</item>
+        <item>@*android:string/status_bar_alarm_clock</item>
+        <item>@*android:string/status_bar_call_strength</item>
+    </string-array>
+
+    <!-- Icons that don't show in a collapsed statusbar on keyguard -->
+    <string-array name="config_keyguard_statusbar_icon_blocklist" translatable="false">
+        <item>@*android:string/status_bar_volume</item>
+        <item>@*android:string/status_bar_alarm_clock</item>
+        <item>@*android:string/status_bar_call_strength</item>
+    </string-array>
+
+    <!-- Packages of SystemUI -->
+    <string-array name="system_ui_packages" translatable="false">
+        <item>com.android.keyguard</item>
+        <item>com.android.systemui</item>
+    </string-array>
 </resources>

@@ -263,6 +263,25 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public String getVoiceInteractorPackageName(IBinder callingVoiceInteractor) {
+            VoiceInteractionManagerServiceImpl impl =
+                    VoiceInteractionManagerService.this.mServiceStub.mImpl;
+            if (impl == null) {
+                return null;
+            }
+            VoiceInteractionSessionConnection session =
+                    impl.mActiveSession;
+            if (session == null) {
+                return null;
+            }
+            IVoiceInteractor voiceInteractor = session.mInteractor;
+            if (voiceInteractor == null || voiceInteractor.asBinder() != callingVoiceInteractor) {
+                return null;
+            }
+            return session.mSessionComponentName.getPackageName();
+        }
+
+        @Override
         public HotwordDetectionServiceIdentity getHotwordDetectionServiceIdentity() {
             // IMPORTANT: This is called when performing permission checks; do not lock!
 
@@ -1802,6 +1821,32 @@ public class VoiceInteractionManagerService extends SystemService {
                     }
                 }
                 mVoiceInteractionSessionListeners.finishBroadcast();
+            }
+        }
+
+        public void setSessionWindowVisible(IBinder token, boolean visible) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "setSessionWindowVisible called without running voice interaction "
+                            + "service");
+                    return;
+                }
+                if (mImpl.mActiveSession == null || token != mImpl.mActiveSession.mToken) {
+                    Slog.w(TAG, "setSessionWindowVisible does not match active session");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mVoiceInteractionSessionListeners.broadcast(listener -> {
+                        try {
+                            listener.onVoiceSessionWindowVisibilityChanged(visible);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Error delivering window visibility event to listener.", e);
+                        }
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
             }
         }
 

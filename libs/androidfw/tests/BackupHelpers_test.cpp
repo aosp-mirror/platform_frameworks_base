@@ -50,7 +50,7 @@ TEST_F(BackupHelpersTest, WriteTarFileWithSizeLessThan2GB) {
 TEST_F(BackupHelpersTest, WriteTarFileWithSizeGreaterThan2GB) {
   TemporaryFile tf;
   // Allocate a 2 GB file.
-  off64_t fileSize = 2ll * 1024ll * 1024ll * 1024ll + 512ll;
+  off64_t fileSize = 2LL * 1024LL * 1024LL * 1024LL + 512LL;
   ASSERT_EQ(0, posix_fallocate64(tf.fd, 0, fileSize));
   off64_t tarSize = 0;
   int err = write_tarfile(/* packageName */ String8("test-pkg"), /* domain */ String8(""), /* rootpath */ String8(""), /* filePath */ String8(tf.path), /* outSize */ &tarSize, /* writer */ NULL);

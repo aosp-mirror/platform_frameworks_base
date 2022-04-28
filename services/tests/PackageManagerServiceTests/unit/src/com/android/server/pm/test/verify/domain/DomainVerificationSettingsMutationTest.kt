@@ -29,7 +29,6 @@ import android.util.ArraySet
 import android.util.SparseArray
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
-import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageStates
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy
@@ -245,10 +244,14 @@ class DomainVerificationSettingsMutationTest {
         mockThrowOnUnmocked {
             whenever(callingUid) { TEST_UID }
             whenever(callingUserId) { TEST_USER_ID }
-            mockPackageStates {
-                when (it) {
-                    TEST_PKG -> mockPkgState()
-                    else -> null
+            whenever(snapshot()) {
+                mockThrowOnUnmocked {
+                    whenever(getPackageStateInternal(anyString())) {
+                        when (getArgument<String>(0)) {
+                            TEST_PKG -> mockPkgState()
+                            else -> null
+                        }
+                    }
                 }
             }
             whenever(schedule(anyInt(), any()))

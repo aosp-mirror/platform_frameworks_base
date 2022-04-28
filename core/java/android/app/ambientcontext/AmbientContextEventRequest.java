@@ -23,6 +23,9 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
 
+import com.android.internal.util.AnnotationValidations;
+import com.android.internal.util.Preconditions;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,15 +39,17 @@ public final class AmbientContextEventRequest implements Parcelable {
     @NonNull private final Set<Integer> mEventTypes;
     @NonNull private final PersistableBundle mOptions;
 
-    AmbientContextEventRequest(
+    private AmbientContextEventRequest(
             @NonNull Set<Integer> eventTypes,
             @NonNull PersistableBundle options) {
         this.mEventTypes = eventTypes;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mEventTypes);
+        AnnotationValidations.validate(NonNull.class, null, mEventTypes);
+        Preconditions.checkArgument(!eventTypes.isEmpty(), "eventTypes cannot be empty");
+        for (int eventType : eventTypes) {
+            AnnotationValidations.validate(AmbientContextEvent.EventCode.class, null, eventType);
+        }
         this.mOptions = options;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mOptions);
+        AnnotationValidations.validate(NonNull.class, null, mOptions);
     }
 
     /**
@@ -80,16 +85,20 @@ public final class AmbientContextEventRequest implements Parcelable {
 
     /** @hide */
     @SuppressWarnings({"unchecked", "RedundantCast"})
-    AmbientContextEventRequest(@NonNull Parcel in) {
+    private AmbientContextEventRequest(@NonNull Parcel in) {
         Set<Integer> eventTypes = (Set<Integer>) in.readArraySet(Integer.class.getClassLoader());
         PersistableBundle options = (PersistableBundle) in.readTypedObject(
                 PersistableBundle.CREATOR);
 
         this.mEventTypes = eventTypes;
-        com.android.internal.util.AnnotationValidations.validate(
+        AnnotationValidations.validate(
                 NonNull.class, null, mEventTypes);
+        Preconditions.checkArgument(!eventTypes.isEmpty(), "eventTypes cannot be empty");
+        for (int eventType : eventTypes) {
+            AnnotationValidations.validate(AmbientContextEvent.EventCode.class, null, eventType);
+        }
         this.mOptions = options;
-        com.android.internal.util.AnnotationValidations.validate(
+        AnnotationValidations.validate(
                 NonNull.class, null, mOptions);
     }
 

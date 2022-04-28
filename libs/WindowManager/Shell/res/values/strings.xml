@@ -172,19 +172,16 @@
     <string name="camera_compat_dismiss_button_description">No camera issues? Tap to dismiss.</string>
 
     <!-- The title of the letterbox education dialog. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_education_dialog_title">Get the most out of <xliff:g id="app_name" example="YouTube">%s</xliff:g></string>
+    <string name="letterbox_education_dialog_title">Some apps work best in portrait</string>
 
-    <!-- Description of the rotate screen into portrait action. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_education_screen_rotation_portrait_text">Rotate your screen to portrait</string>
+    <!-- The subtext of the letterbox education dialog. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_dialog_subtext">Try one of these options to make the most of your space</string>
 
-    <!-- Description of the rotate screen into landscape action. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_education_screen_rotation_landscape_text">Rotate your screen to landscape</string>
-
-    <!-- Description of the put app in split-screen action. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_education_split_screen_text">Drag in another app to use split screen</string>
+    <!-- Description of the rotate screen action. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_screen_rotation_text">Rotate your device to go full screen</string>
 
     <!-- Description of the reposition app action. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_education_reposition_text">Double tap to reposition</string>
+    <string name="letterbox_education_reposition_text">Double-tap next to an app to reposition it</string>
 
     <!-- Button text for dismissing the letterbox education dialog. [CHAR LIMIT=20] -->
     <string name="letterbox_education_got_it">Got it</string>

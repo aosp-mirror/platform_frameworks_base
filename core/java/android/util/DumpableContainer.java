@@ -18,8 +18,7 @@ package android.util;
 import android.annotation.NonNull;
 
 /**
- * Objects that contains a list of {@link Dumpable}, which will be dumped when the object itself
- * is dumped.
+ * Represents a container that manages {@link Dumpable dumpables}.
  */
 public interface DumpableContainer {
 
@@ -37,4 +36,15 @@ public interface DumpableContainer {
      * @return {@code true} if the dumpable was added, {@code false} if the call was ignored.
      */
     boolean addDumpable(@NonNull Dumpable dumpable);
+
+    /**
+     * Removes the given {@link Dumpable dumpable} from the container.
+     *
+     * @param dumpable dumpable to be removed.
+     *
+     * @return {@code true} if the dumpable was removed, {@code false} if it was not previously
+     * {@link #addDumpable(Dumpable) added} with the same identify (object reference) and
+     * {@link Dumpable#getDumpableName() name}.
+     */
+    boolean removeDumpable(@NonNull Dumpable dumpable);
 }

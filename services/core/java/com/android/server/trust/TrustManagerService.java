@@ -16,6 +16,9 @@
 
 package com.android.server.trust;
 
+import static android.service.trust.GrantTrustResult.STATUS_UNLOCKED_BY_GRANT;
+import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -59,6 +62,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Authorization;
+import android.service.trust.GrantTrustResult;
 import android.service.trust.TrustAgentService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -69,14 +73,18 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
+import android.view.Display;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -124,13 +132,17 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_DISPATCH_UNLOCK_LOCKOUT = 13;
     private static final int MSG_REFRESH_DEVICE_LOCKED_FOR_USER = 14;
     private static final int MSG_SCHEDULE_TRUST_TIMEOUT = 15;
-    public static final int MSG_USER_REQUESTED_UNLOCK = 16;
+    private static final int MSG_USER_REQUESTED_UNLOCK = 16;
+    private static final int MSG_REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH = 17;
+    private static final int MSG_USER_MAY_REQUEST_UNLOCK = 18;
 
     private static final String REFRESH_DEVICE_LOCKED_EXCEPT_USER = "except";
 
     private static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
     private static final String TRUST_TIMEOUT_ALARM_TAG = "TrustManagerService.trustTimeoutForUser";
     private static final long TRUST_TIMEOUT_IN_MILLIS = 4 * 60 * 60 * 1000;
+    private static final long TRUSTABLE_IDLE_TIMEOUT_IN_MILLIS = 8 * 60 * 60 * 1000;
+    private static final long TRUSTABLE_TIMEOUT_IN_MILLIS = 24 * 60 * 60 * 1000;
 
     private static final String PRIV_NAMESPACE = "http://schemas.android.com/apk/prv/res/android";
 
@@ -143,6 +155,7 @@ public class TrustManagerService extends SystemService {
     private final LockPatternUtils mLockPatternUtils;
     private final UserManager mUserManager;
     private final ActivityManager mActivityManager;
+    private VirtualDeviceManagerInternal mVirtualDeviceManager;
 
     @GuardedBy("mUserIsTrusted")
     private final SparseBooleanArray mUserIsTrusted = new SparseBooleanArray();
@@ -199,9 +212,18 @@ public class TrustManagerService extends SystemService {
     @GuardedBy("mUsersUnlockedByBiometric")
     private final SparseBooleanArray mUsersUnlockedByBiometric = new SparseBooleanArray();
 
-    private final ArrayMap<Integer, TrustTimeoutAlarmListener> mTrustTimeoutAlarmListenerForUser =
+    private enum TimeoutType {
+        TRUSTED,
+        TRUSTABLE
+    }
+    private final ArrayMap<Integer, TrustedTimeoutAlarmListener> mTrustTimeoutAlarmListenerForUser =
             new ArrayMap<>();
+    private final SparseArray<TrustableTimeoutAlarmListener> mTrustableTimeoutAlarmListenerForUser =
+            new SparseArray<>();
+    private final SparseArray<TrustableTimeoutAlarmListener>
+            mIdleTrustableTimeoutAlarmListenerForUser = new SparseArray<>();
     private AlarmManager mAlarmManager;
+    private final Object mAlarmLock = new Object();
     private final SettingsObserver mSettingsObserver;
 
     private final StrongAuthTracker mStrongAuthTracker;
@@ -254,7 +276,7 @@ public class TrustManagerService extends SystemService {
 
         private final boolean mIsAutomotive;
         private final ContentResolver mContentResolver;
-        private boolean mTrustAgentsExtendUnlock;
+        private boolean mTrustAgentsNonrenewableTrust;
         private boolean mLockWhenTrustLost;
 
         /**
@@ -291,11 +313,11 @@ public class TrustManagerService extends SystemService {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (TRUST_AGENTS_EXTEND_UNLOCK.equals(uri)) {
-                // Smart lock should only extend unlock. The only exception is for automotive,
-                // where it can actively unlock the head unit.
+                // Smart lock should only grant non-renewable trust. The only exception is for
+                // automotive, where it can actively unlock the head unit.
                 int defaultValue = mIsAutomotive ? 0 : 1;
 
-                mTrustAgentsExtendUnlock =
+                mTrustAgentsNonrenewableTrust =
                         Settings.Secure.getIntForUser(
                                 mContentResolver,
                                 Settings.Secure.TRUST_AGENTS_EXTEND_UNLOCK,
@@ -311,8 +333,8 @@ public class TrustManagerService extends SystemService {
             }
         }
 
-        boolean getTrustAgentsExtendUnlock() {
-            return mTrustAgentsExtendUnlock;
+        boolean getTrustAgentsNonrenewableTrust() {
+            return mTrustAgentsNonrenewableTrust;
         }
 
         boolean getLockWhenTrustLost() {
@@ -335,36 +357,53 @@ public class TrustManagerService extends SystemService {
 
             // If active unlocking is not allowed, cancel any pending trust timeouts because the
             // screen is already locked.
-            TrustTimeoutAlarmListener alarm = mTrustTimeoutAlarmListenerForUser.get(userId);
-            if (alarm != null && mSettingsObserver.getTrustAgentsExtendUnlock()) {
+            TrustedTimeoutAlarmListener alarm = mTrustTimeoutAlarmListenerForUser.get(userId);
+            if (alarm != null && mSettingsObserver.getTrustAgentsNonrenewableTrust()) {
                 mAlarmManager.cancel(alarm);
                 alarm.setQueued(false /* isQueued */);
             }
         }
     }
 
-    private void scheduleTrustTimeout(int userId, boolean override) {
+    private void scheduleTrustTimeout(boolean override, boolean isTrustableTimeout) {
         int shouldOverride = override ? 1 : 0;
-        if (override) {
-            shouldOverride = 1;
-        }
-        mHandler.obtainMessage(MSG_SCHEDULE_TRUST_TIMEOUT, userId, shouldOverride).sendToTarget();
+        int trustableTimeout = isTrustableTimeout ? 1 : 0;
+        mHandler.obtainMessage(MSG_SCHEDULE_TRUST_TIMEOUT, shouldOverride,
+                trustableTimeout).sendToTarget();
     }
 
-    private void handleScheduleTrustTimeout(int userId, int shouldOverride) {
+    private void handleScheduleTrustTimeout(boolean shouldOverride, TimeoutType timeoutType) {
+        int userId = mCurrentUser;
+        if (timeoutType == TimeoutType.TRUSTABLE) {
+            // don't override the hard timeout unless biometric or knowledge factor authentication
+            // occurs which isn't where this is called from. Override the idle timeout what the
+            // calling function has determined.
+            handleScheduleTrustableTimeouts(userId, shouldOverride,
+                    false /* overrideHardTimeout */);
+        } else {
+            handleScheduleTrustedTimeout(userId, shouldOverride);
+        }
+    }
+
+    /* Override both the idle and hard trustable timeouts */
+    private void refreshTrustableTimers(int userId) {
+        handleScheduleTrustableTimeouts(userId, true /* overrideIdleTimeout */,
+                true /* overrideHardTimeout */);
+    }
+
+    private void handleScheduleTrustedTimeout(int userId, boolean shouldOverride) {
         long when = SystemClock.elapsedRealtime() + TRUST_TIMEOUT_IN_MILLIS;
-        userId = mCurrentUser;
-        TrustTimeoutAlarmListener alarm = mTrustTimeoutAlarmListenerForUser.get(userId);
+        TrustedTimeoutAlarmListener alarm = mTrustTimeoutAlarmListenerForUser.get(userId);
 
         // Cancel existing trust timeouts for this user if needed.
         if (alarm != null) {
-            if (shouldOverride == 0 && alarm.isQueued()) {
+            if (!shouldOverride && alarm.isQueued()) {
                 if (DEBUG) Slog.d(TAG, "Found existing trust timeout alarm. Skipping.");
                 return;
             }
             mAlarmManager.cancel(alarm);
         } else {
-            alarm = new TrustTimeoutAlarmListener(userId);
+            alarm = new TrustedTimeoutAlarmListener(userId);
             mTrustTimeoutAlarmListenerForUser.put(userId, alarm);
         }
 
@@ -373,6 +412,59 @@ public class TrustManagerService extends SystemService {
         mAlarmManager.setExact(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP, when, TRUST_TIMEOUT_ALARM_TAG, alarm,
                 mHandler);
+    }
+
+    private void handleScheduleTrustableTimeouts(int userId, boolean overrideIdleTimeout,
+            boolean overrideHardTimeout) {
+        setUpIdleTimeout(userId, overrideIdleTimeout);
+        setUpHardTimeout(userId, overrideHardTimeout);
+    }
+
+    private void setUpIdleTimeout(int userId, boolean overrideIdleTimeout) {
+        long when = SystemClock.elapsedRealtime() + TRUSTABLE_IDLE_TIMEOUT_IN_MILLIS;
+        TrustableTimeoutAlarmListener alarm = mIdleTrustableTimeoutAlarmListenerForUser.get(userId);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.SCHEDULE_EXACT_ALARM, null);
+
+        // Cancel existing trustable timeouts for this user if needed.
+        if (alarm != null) {
+            if (!overrideIdleTimeout && alarm.isQueued()) {
+                if (DEBUG) Slog.d(TAG, "Found existing trustable timeout alarm. Skipping.");
+                return;
+            }
+            mAlarmManager.cancel(alarm);
+        } else {
+            alarm = new TrustableTimeoutAlarmListener(userId);
+            mIdleTrustableTimeoutAlarmListenerForUser.put(userId, alarm);
+        }
+
+        if (DEBUG) Slog.d(TAG, "\tSetting up trustable idle timeout alarm");
+        alarm.setQueued(true /* isQueued */);
+        mAlarmManager.setExact(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP, when, TRUST_TIMEOUT_ALARM_TAG, alarm,
+                mHandler);
+    }
+
+    private void setUpHardTimeout(int userId, boolean overrideHardTimeout) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.SCHEDULE_EXACT_ALARM, null);
+        TrustableTimeoutAlarmListener alarm = mTrustableTimeoutAlarmListenerForUser.get(userId);
+
+        // if the alarm doesn't exist, or hasn't been queued, or needs to be overridden we need to
+        // set it
+        if (alarm == null || !alarm.isQueued() || overrideHardTimeout) {
+            // schedule hard limit on renewable trust use
+            long when = SystemClock.elapsedRealtime() + TRUSTABLE_TIMEOUT_IN_MILLIS;
+            if (alarm == null) {
+                alarm = new TrustableTimeoutAlarmListener(userId);
+                mTrustableTimeoutAlarmListenerForUser.put(userId, alarm);
+            } else if (overrideHardTimeout) {
+                mAlarmManager.cancel(alarm);
+            }
+            if (DEBUG) Slog.d(TAG, "\tSetting up trustable hard timeout alarm");
+            alarm.setQueued(true /* isQueued */);
+            mAlarmManager.setExact(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP, when, TRUST_TIMEOUT_ALARM_TAG, alarm,
+                    mHandler);
+        }
     }
 
    // Agent management
@@ -407,19 +499,34 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    public void updateTrust(int userId, int flags) {
-        updateTrust(userId, flags, false /* isFromUnlock */);
+    /** Triggers a trust update. */
+    public void updateTrust(
+            int userId,
+            int flags) {
+        updateTrust(userId, flags, null);
     }
 
-    private void updateTrust(int userId, int flags, boolean isFromUnlock) {
+    /** Triggers a trust update. */
+    public void updateTrust(
+            int userId,
+            int flags,
+            @Nullable AndroidFuture<GrantTrustResult> resultCallback) {
+        updateTrust(userId, flags, false /* isFromUnlock */, resultCallback);
+    }
+
+    private void updateTrust(
+            int userId,
+            int flags,
+            boolean isFromUnlock,
+            @Nullable AndroidFuture<GrantTrustResult> resultCallback) {
         if (ENABLE_ACTIVE_UNLOCK_FLAG) {
-            updateTrustWithRenewableUnlock(userId, flags, isFromUnlock);
+            updateTrustWithRenewableUnlock(userId, flags, isFromUnlock, resultCallback);
         } else {
-            updateTrustWithExtendUnlock(userId, flags, isFromUnlock);
+            updateTrustWithNonrenewableTrust(userId, flags, isFromUnlock);
         }
     }
 
-    private void updateTrustWithExtendUnlock(int userId, int flags, boolean isFromUnlock) {
+    private void updateTrustWithNonrenewableTrust(int userId, int flags, boolean isFromUnlock) {
         boolean managed = aggregateIsTrustManaged(userId);
         dispatchOnTrustManagedChanged(managed, userId);
         if (mStrongAuthTracker.isTrustAllowedForUser(userId)
@@ -437,8 +544,8 @@ public class TrustManagerService extends SystemService {
 
         boolean changed;
         synchronized (mUserIsTrusted) {
-            if (mSettingsObserver.getTrustAgentsExtendUnlock()) {
-                // In extend unlock trust agents can only set the device to trusted if it already
+            if (mSettingsObserver.getTrustAgentsNonrenewableTrust()) {
+                // For non-renewable trust agents can only set the device to trusted if it already
                 // trusted or the device is unlocked. Attempting to set the device as trusted
                 // when the device is locked will be ignored.
                 changed = mUserIsTrusted.get(userId) != trusted;
@@ -460,12 +567,16 @@ public class TrustManagerService extends SystemService {
             if (!trusted) {
                 maybeLockScreen(userId);
             } else {
-                scheduleTrustTimeout(userId, false /* override */);
+                scheduleTrustTimeout(false /* override */, false /* isTrustableTimeout*/);
             }
         }
     }
 
-    private void updateTrustWithRenewableUnlock(int userId, int flags, boolean isFromUnlock) {
+    private void updateTrustWithRenewableUnlock(
+            int userId,
+            int flags,
+            boolean isFromUnlock,
+            @Nullable AndroidFuture<GrantTrustResult> resultCallback) {
         boolean managed = aggregateIsTrustManaged(userId);
         dispatchOnTrustManagedChanged(managed, userId);
         if (mStrongAuthTracker.isTrustAllowedForUser(userId)
@@ -518,11 +629,24 @@ public class TrustManagerService extends SystemService {
             if (!isNowTrusted) {
                 maybeLockScreen(userId);
             } else {
-                scheduleTrustTimeout(userId, false /* override */);
+                boolean isTrustableTimeout =
+                        (flags & FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0;
+                // Every time we grant renewable trust we should override the idle trustable
+                // timeout. If this is for non-renewable trust, then we shouldn't override.
+                scheduleTrustTimeout(isTrustableTimeout /* override */,
+                        isTrustableTimeout /* isTrustableTimeout */);
+            }
+        }
+
+        boolean wasLocked = !alreadyUnlocked;
+        boolean shouldSendCallback = wasLocked && pendingTrustState == TrustState.TRUSTED;
+        if (shouldSendCallback) {
+            if (resultCallback != null) {
+                if (DEBUG) Slog.d(TAG, "calling back with UNLOCKED_BY_GRANT");
+                resultCallback.complete(new GrantTrustResult(STATUS_UNLOCKED_BY_GRANT));
             }
         }
     }
-
 
     private void updateTrustUsuallyManaged(int userId, boolean managed) {
         synchronized (mTrustUsuallyManagedForUser) {
@@ -622,7 +746,7 @@ public class TrustManagerService extends SystemService {
                     (disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0;
 
             List<ComponentName> enabledAgents = lockPatternUtils.getEnabledTrustAgents(userInfo.id);
-            if (enabledAgents == null) {
+            if (enabledAgents.isEmpty()) {
                 if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
                         + ": no agents enabled by user");
                 continue;
@@ -987,9 +1111,7 @@ public class TrustManagerService extends SystemService {
         }
 
         List<ComponentName> previouslyEnabledAgents = utils.getEnabledTrustAgents(userId);
-        if (previouslyEnabledAgents != null) {
-            discoveredAgents.addAll(previouslyEnabledAgents);
-        }
+        discoveredAgents.addAll(previouslyEnabledAgents);
         utils.setEnabledTrustAgents(discoveredAgents, userId);
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                 Settings.Secure.TRUST_AGENTS_INITIALIZED, 1, userId);
@@ -1098,8 +1220,9 @@ public class TrustManagerService extends SystemService {
     private void dispatchUnlockAttempt(boolean successful, int userId) {
         if (successful) {
             mStrongAuthTracker.allowTrustFromUnlock(userId);
-            // Allow the presence of trust on a successful unlock attempt to extend unlock.
-            updateTrust(userId, 0 /* flags */, true);
+            // Allow the presence of trust on a successful unlock attempt to extend unlock
+            updateTrust(userId, 0 /* flags */, true, null);
+            mHandler.obtainMessage(MSG_REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH, userId).sendToTarget();
         }
 
         for (int i = 0; i < mActiveAgents.size(); i++) {
@@ -1110,11 +1233,27 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    private void dispatchUserRequestedUnlock(int userId) {
+    private void dispatchUserRequestedUnlock(int userId, boolean dismissKeyguard) {
+        if (DEBUG) {
+            Slog.d(TAG, "dispatchUserRequestedUnlock(user=" + userId + ", dismissKeyguard="
+                    + dismissKeyguard + ")");
+        }
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (info.userId == userId) {
-                info.agent.onUserRequestedUnlock();
+                info.agent.onUserRequestedUnlock(dismissKeyguard);
+            }
+        }
+    }
+
+    private void dispatchUserMayRequestUnlock(int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, "dispatchUserMayRequestUnlock(user=" + userId + ")");
+        }
+        for (int i = 0; i < mActiveAgents.size(); i++) {
+            AgentInfo info = mActiveAgents.valueAt(i);
+            if (info.userId == userId) {
+                info.agent.onUserMayRequestUnlock();
             }
         }
     }
@@ -1249,9 +1388,17 @@ public class TrustManagerService extends SystemService {
         }
 
         @Override
-        public void reportUserRequestedUnlock(int userId) throws RemoteException {
+        public void reportUserRequestedUnlock(int userId, boolean dismissKeyguard)
+                throws RemoteException {
             enforceReportPermission();
-            mHandler.obtainMessage(MSG_USER_REQUESTED_UNLOCK, userId).sendToTarget();
+            mHandler.obtainMessage(MSG_USER_REQUESTED_UNLOCK, userId, dismissKeyguard ? 1 : 0)
+                    .sendToTarget();
+        }
+
+        @Override
+        public void reportUserMayRequestUnlock(int userId) throws RemoteException {
+            enforceReportPermission();
+            mHandler.obtainMessage(MSG_USER_MAY_REQUEST_UNLOCK, userId).sendToTarget();
         }
 
         @Override
@@ -1293,9 +1440,57 @@ public class TrustManagerService extends SystemService {
             mHandler.obtainMessage(MSG_UNREGISTER_LISTENER, trustListener).sendToTarget();
         }
 
+        /**
+         * @param uid: uid of the calling app (obtained via getCallingUid())
+         * @param displayId: the id of a Display
+         * @return Returns true if both of the following conditions hold -
+         * 1) the uid belongs to an app instead of a system core component; and
+         * 2) either the uid is running on a virtual device or the displayId
+         *    is owned by a virtual device
+         */
+        private boolean isAppOrDisplayOnAnyVirtualDevice(int uid, int displayId) {
+            if (UserHandle.isCore(uid)) {
+                return false;
+            }
+
+            if (mVirtualDeviceManager == null) {
+                mVirtualDeviceManager = LocalServices.getService(
+                        VirtualDeviceManagerInternal.class);
+                if (mVirtualDeviceManager == null) {
+                    // VirtualDeviceManager service may not have been published
+                    return false;
+                }
+            }
+
+            switch (displayId) {
+                case Display.INVALID_DISPLAY:
+                    // There is no Display object associated with the Context of the calling app.
+                    if (mVirtualDeviceManager.isAppRunningOnAnyVirtualDevice(uid)) {
+                        return true;
+                    }
+                    break;
+                case Display.DEFAULT_DISPLAY:
+                    // The DEFAULT_DISPLAY is by definition not virtual.
+                    break;
+                default:
+                    // Other display IDs can belong to logical displays created for other purposes.
+                    if (mVirtualDeviceManager.isDisplayOwnedByAnyVirtualDevice(displayId)) {
+                        return true;
+                    }
+                    break;
+            }
+            return false;
+        }
+
         @Override
-        public boolean isDeviceLocked(int userId) throws RemoteException {
-            userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
+        public boolean isDeviceLocked(int userId, int displayId) throws RemoteException {
+            int uid = getCallingUid();
+            if (isAppOrDisplayOnAnyVirtualDevice(uid, displayId)) {
+                // Virtual displays are considered insecure because they may be used for streaming
+                // to other devices.
+                return false;
+            }
+            userId = ActivityManager.handleIncomingUser(getCallingPid(), uid, userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceLocked", null);
 
             final long token = Binder.clearCallingIdentity();
@@ -1310,8 +1505,15 @@ public class TrustManagerService extends SystemService {
         }
 
         @Override
-        public boolean isDeviceSecure(int userId) throws RemoteException {
-            userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
+        public boolean isDeviceSecure(int userId, int displayId) throws RemoteException {
+            int uid = getCallingUid();
+            if (isAppOrDisplayOnAnyVirtualDevice(uid, displayId)) {
+                // Virtual displays are considered insecure because they may be used for streaming
+                // to other devices.
+                return false;
+            }
+
+            userId = ActivityManager.handleIncomingUser(getCallingPid(), uid, userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceSecure", null);
 
             final long token = Binder.clearCallingIdentity();
@@ -1461,11 +1663,12 @@ public class TrustManagerService extends SystemService {
             synchronized(mUsersUnlockedByBiometric) {
                 mUsersUnlockedByBiometric.put(userId, true);
             }
-            // In extend unlock mode we need to refresh trust state here, which will call
+            // In non-renewable trust mode we need to refresh trust state here, which will call
             // refreshDeviceLockedForUser()
-            int updateTrustOnUnlock = mSettingsObserver.getTrustAgentsExtendUnlock() ? 1 : 0;
+            int updateTrustOnUnlock = mSettingsObserver.getTrustAgentsNonrenewableTrust() ? 1 : 0;
             mHandler.obtainMessage(MSG_REFRESH_DEVICE_LOCKED_FOR_USER, userId,
                     updateTrustOnUnlock).sendToTarget();
+            mHandler.obtainMessage(MSG_REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH, userId).sendToTarget();
         }
 
         @Override
@@ -1535,7 +1738,10 @@ public class TrustManagerService extends SystemService {
                     dispatchUnlockAttempt(msg.arg1 != 0, msg.arg2);
                     break;
                 case MSG_USER_REQUESTED_UNLOCK:
-                    dispatchUserRequestedUnlock(msg.arg1);
+                    dispatchUserRequestedUnlock(msg.arg1, msg.arg2 != 0);
+                    break;
+                case MSG_USER_MAY_REQUEST_UNLOCK:
+                    dispatchUserMayRequestUnlock(msg.arg1);
                     break;
                 case MSG_DISPATCH_UNLOCK_LOCKOUT:
                     dispatchUnlockLockout(msg.arg1, msg.arg2);
@@ -1577,14 +1783,20 @@ public class TrustManagerService extends SystemService {
                     break;
                 case MSG_REFRESH_DEVICE_LOCKED_FOR_USER:
                     if (msg.arg2 == 1) {
-                        updateTrust(msg.arg1, 0 /* flags */, true /* isFromUnlock */);
+                        updateTrust(msg.arg1, 0 /* flags */, true /* isFromUnlock */, null);
                     }
                     final int unlockedUser = msg.getData().getInt(
                             REFRESH_DEVICE_LOCKED_EXCEPT_USER, UserHandle.USER_NULL);
                     refreshDeviceLockedForUser(msg.arg1, unlockedUser);
                     break;
                 case MSG_SCHEDULE_TRUST_TIMEOUT:
-                    handleScheduleTrustTimeout(msg.arg1, msg.arg2);
+                    boolean shouldOverride = msg.arg1 == 1 ? true : false;
+                    TimeoutType timeoutType =
+                            msg.arg2 == 1 ? TimeoutType.TRUSTABLE : TimeoutType.TRUSTED;
+                    handleScheduleTrustTimeout(shouldOverride, timeoutType);
+                    break;
+                case MSG_REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH:
+                    refreshTrustableTimers(msg.arg1);
                     break;
             }
         }
@@ -1700,10 +1912,11 @@ public class TrustManagerService extends SystemService {
             // Cancel pending alarms if we require some auth anyway.
             if (!isTrustAllowedForUser(userId)) {
                 TrustTimeoutAlarmListener alarm = mTrustTimeoutAlarmListenerForUser.get(userId);
-                if (alarm != null && alarm.isQueued()) {
-                    alarm.setQueued(false /* isQueued */);
-                    mAlarmManager.cancel(alarm);
-                }
+                cancelPendingAlarm(alarm);
+                alarm = mTrustableTimeoutAlarmListenerForUser.get(userId);
+                cancelPendingAlarm(alarm);
+                alarm = mIdleTrustableTimeoutAlarmListenerForUser.get(userId);
+                cancelPendingAlarm(alarm);
             }
 
             refreshAgentList(userId);
@@ -1711,6 +1924,13 @@ public class TrustManagerService extends SystemService {
             // The list of active trust agents may not have changed, if there was a previous call
             // to allowTrustFromUnlock, so we update the trust here too.
             updateTrust(userId, 0 /* flags */);
+        }
+
+        private void cancelPendingAlarm(@Nullable TrustTimeoutAlarmListener alarm) {
+            if (alarm != null && alarm.isQueued()) {
+                alarm.setQueued(false /* isQueued */);
+                mAlarmManager.cancel(alarm);
+            }
         }
 
         boolean canAgentsRunForUser(int userId) {
@@ -1745,9 +1965,9 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    private class TrustTimeoutAlarmListener implements OnAlarmListener {
-        private final int mUserId;
-        private boolean mIsQueued = false;
+    private abstract class TrustTimeoutAlarmListener implements OnAlarmListener {
+        protected final int mUserId;
+        protected boolean mIsQueued = false;
 
         TrustTimeoutAlarmListener(int userId) {
             mUserId = userId;
@@ -1756,8 +1976,7 @@ public class TrustManagerService extends SystemService {
         @Override
         public void onAlarm() {
             mIsQueued = false;
-            int strongAuthState = mStrongAuthTracker.getStrongAuthForUser(mUserId);
-
+            handleAlarm();
             // Only fire if trust can unlock.
             if (mStrongAuthTracker.isTrustAllowedForUser(mUserId)) {
                 if (DEBUG) Slog.d(TAG, "Revoking all trust because of trust timeout");
@@ -1767,12 +1986,98 @@ public class TrustManagerService extends SystemService {
             maybeLockScreen(mUserId);
         }
 
-        public void setQueued(boolean isQueued) {
-            mIsQueued = isQueued;
-        }
+        protected abstract void handleAlarm();
 
         public boolean isQueued() {
             return mIsQueued;
+        }
+
+        public void setQueued(boolean isQueued) {
+            mIsQueued = isQueued;
+        }
+    }
+
+    private class TrustedTimeoutAlarmListener extends TrustTimeoutAlarmListener {
+
+        TrustedTimeoutAlarmListener(int userId) {
+            super(userId);
+        }
+
+        @Override
+        public void handleAlarm() {
+            TrustableTimeoutAlarmListener otherAlarm;
+            boolean otherAlarmPresent;
+            if (ENABLE_ACTIVE_UNLOCK_FLAG) {
+                otherAlarm = mTrustableTimeoutAlarmListenerForUser.get(mUserId);
+                otherAlarmPresent = (otherAlarm != null) && otherAlarm.isQueued();
+                if (otherAlarmPresent) {
+                    synchronized (mAlarmLock) {
+                        disableNonrenewableTrustWhileRenewableTrustIsPresent();
+                    }
+                    return;
+                }
+            }
+        }
+
+        private void disableNonrenewableTrustWhileRenewableTrustIsPresent() {
+            synchronized (mUserTrustState) {
+                if (mUserTrustState.get(mUserId) == TrustState.TRUSTED) {
+                    // if we're trusted and we have a trustable alarm, we need to
+                    // downgrade to trustable
+                    mUserTrustState.put(mUserId, TrustState.TRUSTABLE);
+                    updateTrust(mUserId, 0 /* flags */);
+                }
+            }
+        }
+    }
+
+    private class TrustableTimeoutAlarmListener extends TrustTimeoutAlarmListener {
+
+        TrustableTimeoutAlarmListener(int userId) {
+            super(userId);
+        }
+
+        @Override
+        public void handleAlarm() {
+            TrustedTimeoutAlarmListener otherAlarm;
+            boolean otherAlarmPresent;
+            if (ENABLE_ACTIVE_UNLOCK_FLAG) {
+                cancelBothTrustableAlarms();
+                otherAlarm = mTrustTimeoutAlarmListenerForUser.get(mUserId);
+                otherAlarmPresent = (otherAlarm != null) && otherAlarm.isQueued();
+                if (otherAlarmPresent) {
+                    synchronized (mAlarmLock) {
+                        disableRenewableTrustWhileNonrenewableTrustIsPresent();
+                    }
+                    return;
+                }
+            }
+        }
+
+        private void cancelBothTrustableAlarms() {
+            TrustableTimeoutAlarmListener idleTimeout =
+                    mIdleTrustableTimeoutAlarmListenerForUser.get(
+                            mUserId);
+            TrustableTimeoutAlarmListener trustableTimeout =
+                    mTrustableTimeoutAlarmListenerForUser.get(
+                            mUserId);
+            if (idleTimeout != null && idleTimeout.isQueued()) {
+                idleTimeout.setQueued(false);
+                mAlarmManager.cancel(idleTimeout);
+            }
+            if (trustableTimeout != null && trustableTimeout.isQueued()) {
+                trustableTimeout.setQueued(false);
+                mAlarmManager.cancel(trustableTimeout);
+            }
+        }
+
+        private void disableRenewableTrustWhileNonrenewableTrustIsPresent() {
+            // if non-renewable trust is running, we need to temporarily prevent
+            // renewable trust from being used
+            for (AgentInfo agentInfo : mActiveAgents) {
+                agentInfo.agent.setUntrustable();
+            }
+            updateTrust(mUserId, 0 /* flags */);
         }
     }
 }

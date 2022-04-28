@@ -449,7 +449,7 @@ interface IActivityManager {
 
     void requestInteractiveBugReport();
     void requestFullBugReport();
-    void requestRemoteBugReport();
+    void requestRemoteBugReport(long nonce);
     boolean launchBugReportHandlerApp();
     List<String> getBugreportWhitelistedPackages();
 
@@ -510,7 +510,6 @@ interface IActivityManager {
     void noteAlarmFinish(in IIntentSender sender, in WorkSource workSource, int sourceUid, in String tag);
     @UnsupportedAppUsage
     int getPackageProcessState(in String packageName, in String callingPackage);
-    void updateDeviceOwner(in String packageName);
 
     // Start of N transactions
     // Start Binder transaction tracking for all applications.

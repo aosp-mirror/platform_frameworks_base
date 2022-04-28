@@ -17,13 +17,19 @@
 package com.android.server.translation;
 
 import static android.view.translation.TranslationManager.EXTRA_CAPABILITIES;
+import static android.view.translation.UiTranslationManager.EXTRA_PACKAGE_NAME;
 import static android.view.translation.UiTranslationManager.EXTRA_SOURCE_LOCALE;
 import static android.view.translation.UiTranslationManager.EXTRA_STATE;
 import static android.view.translation.UiTranslationManager.EXTRA_TARGET_LOCALE;
 import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_FINISHED;
+import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_PAUSED;
+import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_RESUMED;
+import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_STARTED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -35,7 +41,9 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.service.translation.TranslationServiceInfo;
+import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InputMethodInfo;
@@ -43,6 +51,7 @@ import android.view.translation.ITranslationServiceCallback;
 import android.view.translation.TranslationCapability;
 import android.view.translation.TranslationContext;
 import android.view.translation.TranslationSpec;
+import android.view.translation.UiTranslationController;
 import android.view.translation.UiTranslationManager.UiTranslationState;
 import android.view.translation.UiTranslationSpec;
 
@@ -62,9 +71,12 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 final class TranslationManagerServiceImpl extends
-        AbstractPerUserSystemService<TranslationManagerServiceImpl, TranslationManagerService> {
+        AbstractPerUserSystemService<TranslationManagerServiceImpl, TranslationManagerService>
+        implements IBinder.DeathRecipient {
 
     private static final String TAG = "TranslationManagerServiceImpl";
+    @SuppressLint("IsLoggableTagLength")
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     @GuardedBy("mLock")
     @Nullable
@@ -80,13 +92,19 @@ final class TranslationManagerServiceImpl extends
     @GuardedBy("mLock")
     private WeakReference<ActivityTokens> mLastActivityTokens;
 
-    private ActivityTaskManagerInternal mActivityTaskManagerInternal;
+    private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
 
     private final TranslationServiceRemoteCallback mRemoteServiceCallback =
             new TranslationServiceRemoteCallback();
     private final RemoteCallbackList<IRemoteCallback> mTranslationCapabilityCallbacks =
             new RemoteCallbackList<>();
-    private final ArraySet<IBinder> mWaitingFinishedCallbackActivities = new ArraySet();
+    private final ArraySet<IBinder> mWaitingFinishedCallbackActivities = new ArraySet<>();
+
+    /**
+     * Key is translated activity token, value is the specification and state for the translation.
+     */
+    @GuardedBy("mLock")
+    private final ArrayMap<IBinder, ActiveTranslation> mActiveTranslations = new ArrayMap<>();
 
     protected TranslationManagerServiceImpl(
             @NonNull TranslationManagerService master,
@@ -173,36 +191,38 @@ final class TranslationManagerServiceImpl extends
         }
     }
 
-    private int getActivityUidByComponentName(Context context, ComponentName componentName,
-            int userId) {
-        int translationActivityUid = -1;
+    private int getAppUidByComponentName(Context context, ComponentName componentName, int userId) {
+        int translatedAppUid = -1;
         try {
             if (componentName != null) {
-                translationActivityUid = context.getPackageManager().getApplicationInfoAsUser(
+                translatedAppUid = context.getPackageManager().getApplicationInfoAsUser(
                         componentName.getPackageName(), 0, userId).uid;
             }
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.d(TAG, "Cannot find packageManager for" +  componentName);
+            Slog.d(TAG, "Cannot find packageManager for" + componentName);
         }
-        return translationActivityUid;
+        return translatedAppUid;
     }
 
     @GuardedBy("mLock")
     public void onTranslationFinishedLocked(boolean activityDestroyed, IBinder token,
             ComponentName componentName) {
-        int translationActivityUid =
-                getActivityUidByComponentName(getContext(), componentName, getUserId());
+        final int translatedAppUid =
+                getAppUidByComponentName(getContext(), componentName, getUserId());
+        final String packageName = componentName.getPackageName();
         if (activityDestroyed) {
             // In the Activity destroy case, we only calls onTranslationFinished() in
             // non-finisTranslation() state. If there is a finisTranslation() calls by apps, we
             // should remove the waiting callback to avoid callback twice.
-            invokeCallbacks(STATE_UI_TRANSLATION_FINISHED, /* sourceSpec= */
-                    null, /* targetSpec= */null, translationActivityUid);
+            invokeCallbacks(STATE_UI_TRANSLATION_FINISHED,
+                    /* sourceSpec= */ null, /* targetSpec= */ null,
+                    packageName, translatedAppUid);
             mWaitingFinishedCallbackActivities.remove(token);
         } else {
             if (mWaitingFinishedCallbackActivities.contains(token)) {
-                invokeCallbacks(STATE_UI_TRANSLATION_FINISHED, /* sourceSpec= */
-                        null, /* targetSpec= */null, translationActivityUid);
+                invokeCallbacks(STATE_UI_TRANSLATION_FINISHED,
+                        /* sourceSpec= */ null, /* targetSpec= */ null,
+                        packageName, translatedAppUid);
                 mWaitingFinishedCallbackActivities.remove(token);
             }
         }
@@ -212,34 +232,188 @@ final class TranslationManagerServiceImpl extends
     public void updateUiTranslationStateLocked(@UiTranslationState int state,
             TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
             IBinder token, int taskId, UiTranslationSpec uiTranslationSpec) {
-        // Get top activity for a given task id
-        final ActivityTokens taskTopActivityTokens =
-                mActivityTaskManagerInternal.getTopActivityForTask(taskId);
-        if (taskTopActivityTokens == null
-                || taskTopActivityTokens.getShareableActivityToken() != token) {
-            Slog.w(TAG, "Unknown activity or it was finished to query for update translation "
-                    + "state for token=" + token + " taskId=" + taskId + " for state= " + state);
+        // If the app starts a new Activity in the same task then the finish or pause API
+        // is called, the operation doesn't work if we only check task top Activity. The top
+        // Activity is the new Activity, the original Activity is paused in the same task.
+        // To make sure the operation still work, we use the token to find the target Activity in
+        // this task, not the top Activity only.
+        ActivityTokens candidateActivityTokens =
+                mActivityTaskManagerInternal.getAttachedNonFinishingActivityForTask(taskId, token);
+        if (candidateActivityTokens == null) {
+            Slog.w(TAG, "Unknown activity or it was finished to query for update "
+                    + "translation state for token=" + token + " taskId=" + taskId + " for "
+                    + "state= " + state);
             return;
         }
+        mLastActivityTokens = new WeakReference<>(candidateActivityTokens);
         if (state == STATE_UI_TRANSLATION_FINISHED) {
             mWaitingFinishedCallbackActivities.add(token);
         }
-        int translationActivityUid = -1;
+        IBinder activityToken = candidateActivityTokens.getActivityToken();
         try {
-            IBinder activityToken = taskTopActivityTokens.getActivityToken();
-            taskTopActivityTokens.getApplicationThread().updateUiTranslationState(
+            candidateActivityTokens.getApplicationThread().updateUiTranslationState(
                     activityToken, state, sourceSpec, targetSpec,
                     viewIds, uiTranslationSpec);
-            mLastActivityTokens = new WeakReference<>(taskTopActivityTokens);
-            ComponentName componentName =
-                    mActivityTaskManagerInternal.getActivityName(activityToken);
-            translationActivityUid =
-                    getActivityUidByComponentName(getContext(), componentName, getUserId());
         } catch (RemoteException e) {
             Slog.w(TAG, "Update UiTranslationState fail: " + e);
         }
-        if (state != STATE_UI_TRANSLATION_FINISHED) {
-            invokeCallbacks(state, sourceSpec, targetSpec, translationActivityUid);
+
+        ComponentName componentName = mActivityTaskManagerInternal.getActivityName(activityToken);
+        int translatedAppUid =
+                getAppUidByComponentName(getContext(), componentName, getUserId());
+        String packageName = componentName.getPackageName();
+
+        invokeCallbacksIfNecessaryLocked(state, sourceSpec, targetSpec, packageName, activityToken,
+                translatedAppUid);
+        updateActiveTranslationsLocked(state, sourceSpec, targetSpec, packageName, activityToken,
+                translatedAppUid);
+    }
+
+    @GuardedBy("mLock")
+    private void updateActiveTranslationsLocked(int state, TranslationSpec sourceSpec,
+            TranslationSpec targetSpec, String packageName, IBinder activityToken,
+            int translatedAppUid) {
+        // We keep track of active translations and their state so that we can:
+        // 1. Trigger callbacks that are registered after translation has started.
+        //    See registerUiTranslationStateCallbackLocked().
+        // 2. NOT trigger callbacks when the state didn't change.
+        //    See invokeCallbacksIfNecessaryLocked().
+        ActiveTranslation activeTranslation = mActiveTranslations.get(activityToken);
+        switch (state) {
+            case STATE_UI_TRANSLATION_STARTED: {
+                if (activeTranslation == null) {
+                    try {
+                        activityToken.linkToDeath(this, /* flags= */ 0);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to call linkToDeath for translated app with uid="
+                                + translatedAppUid + "; activity is already dead", e);
+
+                        // Apps with registered callbacks were just notified that translation
+                        // started. We should let them know translation is finished too.
+                        invokeCallbacks(STATE_UI_TRANSLATION_FINISHED, sourceSpec, targetSpec,
+                                packageName, translatedAppUid);
+                        return;
+                    }
+                    mActiveTranslations.put(activityToken,
+                            new ActiveTranslation(sourceSpec, targetSpec, translatedAppUid,
+                                    packageName));
+                }
+                break;
+            }
+
+            case STATE_UI_TRANSLATION_PAUSED: {
+                if (activeTranslation != null) {
+                    activeTranslation.isPaused = true;
+                }
+                break;
+            }
+
+            case STATE_UI_TRANSLATION_RESUMED: {
+                if (activeTranslation != null) {
+                    activeTranslation.isPaused = false;
+                }
+                break;
+            }
+
+            case STATE_UI_TRANSLATION_FINISHED: {
+                if (activeTranslation != null) {
+                    mActiveTranslations.remove(activityToken);
+                }
+                break;
+            }
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG,
+                    "Updating to translation state=" + state + " for app with uid="
+                            + translatedAppUid + " packageName=" + packageName);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void invokeCallbacksIfNecessaryLocked(int state, TranslationSpec sourceSpec,
+            TranslationSpec targetSpec, String packageName, IBinder activityToken,
+            int translatedAppUid) {
+        boolean shouldInvokeCallbacks = true;
+        int stateForCallbackInvocation = state;
+
+        ActiveTranslation activeTranslation = mActiveTranslations.get(activityToken);
+        if (activeTranslation == null) {
+            if (state != STATE_UI_TRANSLATION_STARTED) {
+                shouldInvokeCallbacks = false;
+                Slog.w(TAG,
+                        "Updating to translation state=" + state + " for app with uid="
+                                + translatedAppUid + " packageName=" + packageName
+                                + " but no active translation was found for it");
+            }
+        } else {
+            switch (state) {
+                case STATE_UI_TRANSLATION_STARTED: {
+                    boolean specsAreIdentical = activeTranslation.sourceSpec.getLocale().equals(
+                            sourceSpec.getLocale())
+                            && activeTranslation.targetSpec.getLocale().equals(
+                            targetSpec.getLocale());
+                    if (specsAreIdentical) {
+                        if (activeTranslation.isPaused) {
+                            // Ideally UiTranslationManager.resumeTranslation() should be first
+                            // used to resume translation, but for the purposes of invoking the
+                            // callback, we want to call onResumed() instead of onStarted(). This
+                            // way there can only be one call to onStarted() for the lifetime of
+                            // a translated activity and this will simplify the number of states
+                            // apps have to handle.
+                            stateForCallbackInvocation = STATE_UI_TRANSLATION_RESUMED;
+                        } else {
+                            // Don't invoke callbacks if the state or specs didn't change. For a
+                            // given activity, startTranslation() will be called every time there
+                            // are new views to be translated, but we don't need to repeatedly
+                            // notify apps about it.
+                            shouldInvokeCallbacks = false;
+                        }
+                    }
+                    break;
+                }
+
+                case STATE_UI_TRANSLATION_PAUSED: {
+                    if (activeTranslation.isPaused) {
+                        // Don't invoke callbacks if the state didn't change.
+                        shouldInvokeCallbacks = false;
+                    }
+                    break;
+                }
+
+                case STATE_UI_TRANSLATION_RESUMED: {
+                    if (!activeTranslation.isPaused) {
+                        // Don't invoke callbacks if the state didn't change. Either
+                        // resumeTranslation() was called consecutive times, or right after
+                        // startTranslation(). The latter case shouldn't happen normally, so we
+                        // don't want apps to have to handle that particular transition.
+                        shouldInvokeCallbacks = false;
+                    }
+                    break;
+                }
+
+                case STATE_UI_TRANSLATION_FINISHED: {
+                    // Note: Here finishTranslation() was called but we don't want to invoke
+                    // onFinished() on the callbacks. They will be invoked when
+                    // UiTranslationManager.onTranslationFinished() is called (see
+                    // onTranslationFinishedLocked()).
+                    shouldInvokeCallbacks = false;
+                    break;
+                }
+            }
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG,
+                    (shouldInvokeCallbacks ? "" : "NOT ")
+                            + "Invoking callbacks for translation state="
+                            + stateForCallbackInvocation + " for app with uid=" + translatedAppUid
+                            + " packageName=" + packageName);
+        }
+
+        if (shouldInvokeCallbacks) {
+            invokeCallbacks(stateForCallbackInvocation, sourceSpec, targetSpec, packageName,
+                    translatedAppUid);
         }
     }
 
@@ -253,7 +427,10 @@ final class TranslationManagerServiceImpl extends
             try (TransferPipe tp = new TransferPipe()) {
                 activityTokens.getApplicationThread().dumpActivity(tp.getWriteFd(),
                         activityTokens.getActivityToken(), prefix,
-                        new String[]{"--translation"});
+                        new String[]{
+                                Activity.DUMP_ARG_DUMP_DUMPABLE,
+                                UiTranslationController.DUMPABLE_NAME
+                        });
                 tp.go(fd);
             } catch (IOException e) {
                 pw.println(prefix + "Failure while dumping the activity: " + e);
@@ -261,62 +438,120 @@ final class TranslationManagerServiceImpl extends
                 pw.println(prefix + "Got a RemoteException while dumping the activity");
             }
         } else {
-            pw.print(prefix); pw.println("No requested UiTranslation Activity.");
+            pw.print(prefix);
+            pw.println("No requested UiTranslation Activity.");
         }
         final int waitingFinishCallbackSize = mWaitingFinishedCallbackActivities.size();
         if (waitingFinishCallbackSize > 0) {
-            pw.print(prefix); pw.print("number waiting finish callback activities: ");
+            pw.print(prefix);
+            pw.print("number waiting finish callback activities: ");
             pw.println(waitingFinishCallbackSize);
             for (IBinder activityToken : mWaitingFinishedCallbackActivities) {
-                pw.print(prefix); pw.print("activityToken: "); pw.println(activityToken);
+                pw.print(prefix);
+                pw.print("activityToken: ");
+                pw.println(activityToken);
             }
         }
     }
 
     private void invokeCallbacks(
-            int state, TranslationSpec sourceSpec, TranslationSpec targetSpec,
-            int translationActivityUid) {
-        Bundle res = new Bundle();
-        res.putInt(EXTRA_STATE, state);
-        // TODO(177500482): Store the locale pair so it can be sent for RESUME events.
-        if (sourceSpec != null) {
-            res.putSerializable(EXTRA_SOURCE_LOCALE, sourceSpec.getLocale());
-            res.putSerializable(EXTRA_TARGET_LOCALE, targetSpec.getLocale());
+            int state, TranslationSpec sourceSpec, TranslationSpec targetSpec, String packageName,
+            int translatedAppUid) {
+        Bundle result = createResultForCallback(state, sourceSpec, targetSpec, packageName);
+        if (mCallbacks.getRegisteredCallbackCount() == 0) {
+            return;
         }
-        // TODO(177500482): Only support the *current* Input Method.
-        List<InputMethodInfo> enabledInputMethods =
-                LocalServices.getService(InputMethodManagerInternal.class)
-                        .getEnabledInputMethodListAsUser(mUserId);
+        List<InputMethodInfo> enabledInputMethods = getEnabledInputMethods();
         mCallbacks.broadcast((callback, uid) -> {
-            if ((int) uid == translationActivityUid) {
-                try {
-                    callback.sendResult(res);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed to invoke UiTranslationStateCallback: " + e);
-                }
-            }
-            // Code here is non-optimal since it's temporary..
-            boolean isIme = false;
-            for (InputMethodInfo inputMethod : enabledInputMethods) {
-                if ((int) uid == inputMethod.getServiceInfo().applicationInfo.uid) {
-                    isIme = true;
-                }
-            }
-            // TODO(177500482): Invoke it for the application being translated too.
-            if (!isIme) {
-                return;
-            }
-            try {
-                callback.sendResult(res);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to invoke UiTranslationStateCallback: " + e);
-            }
+            invokeCallback((int) uid, translatedAppUid, callback, result, enabledInputMethods);
         });
     }
 
-    public void registerUiTranslationStateCallback(IRemoteCallback callback, int sourceUid) {
+    private List<InputMethodInfo> getEnabledInputMethods() {
+        return LocalServices.getService(InputMethodManagerInternal.class)
+                .getEnabledInputMethodListAsUser(mUserId);
+    }
+
+    private Bundle createResultForCallback(
+            int state, TranslationSpec sourceSpec, TranslationSpec targetSpec, String packageName) {
+        Bundle result = new Bundle();
+        result.putInt(EXTRA_STATE, state);
+        // TODO(177500482): Store the locale pair so it can be sent for RESUME events.
+        if (sourceSpec != null) {
+            result.putSerializable(EXTRA_SOURCE_LOCALE, sourceSpec.getLocale());
+            result.putSerializable(EXTRA_TARGET_LOCALE, targetSpec.getLocale());
+        }
+        result.putString(EXTRA_PACKAGE_NAME, packageName);
+        return result;
+    }
+
+    private void invokeCallback(
+            int callbackSourceUid, int translatedAppUid, IRemoteCallback callback,
+            Bundle result, List<InputMethodInfo> enabledInputMethods) {
+        if (callbackSourceUid == translatedAppUid) {
+            // Invoke callback for the application being translated.
+            try {
+                callback.sendResult(result);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to invoke UiTranslationStateCallback: " + e);
+            }
+            return;
+        }
+
+        // TODO(177500482): Only support the *current* Input Method.
+        // Code here is non-optimal since it's temporary..
+        boolean isIme = false;
+        for (InputMethodInfo inputMethod : enabledInputMethods) {
+            if (callbackSourceUid == inputMethod.getServiceInfo().applicationInfo.uid) {
+                isIme = true;
+                break;
+            }
+        }
+
+        if (!isIme) {
+            return;
+        }
+        try {
+            callback.sendResult(result);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to invoke UiTranslationStateCallback: " + e);
+        }
+    }
+
+    @GuardedBy("mLock")
+    public void registerUiTranslationStateCallbackLocked(IRemoteCallback callback, int sourceUid) {
         mCallbacks.register(callback, sourceUid);
-        // TODO(177500482): trigger the callback here if we're already translating the UI.
+
+        if (mActiveTranslations.size() == 0) {
+            return;
+        }
+
+        // Trigger the callback for already active translations.
+        List<InputMethodInfo> enabledInputMethods = getEnabledInputMethods();
+        for (int i = 0; i < mActiveTranslations.size(); i++) {
+            ActiveTranslation activeTranslation = mActiveTranslations.valueAt(i);
+            int translatedAppUid = activeTranslation.translatedAppUid;
+            String packageName = activeTranslation.packageName;
+            if (DEBUG) {
+                Slog.d(TAG, "Triggering callback for sourceUid=" + sourceUid
+                        + " for translated app with uid=" + translatedAppUid
+                        + "packageName=" + packageName + " isPaused=" + activeTranslation.isPaused);
+            }
+
+            Bundle startedResult = createResultForCallback(STATE_UI_TRANSLATION_STARTED,
+                    activeTranslation.sourceSpec, activeTranslation.targetSpec,
+                    packageName);
+            invokeCallback(sourceUid, translatedAppUid, callback, startedResult,
+                    enabledInputMethods);
+            if (activeTranslation.isPaused) {
+                // Also send event so callback owners know that translation was started then paused.
+                Bundle pausedResult = createResultForCallback(STATE_UI_TRANSLATION_PAUSED,
+                        activeTranslation.sourceSpec, activeTranslation.targetSpec,
+                        packageName);
+                invokeCallback(sourceUid, translatedAppUid, callback, pausedResult,
+                        enabledInputMethods);
+            }
+        }
     }
 
     public void unregisterUiTranslationStateCallback(IRemoteCallback callback) {
@@ -359,6 +594,41 @@ final class TranslationManagerServiceImpl extends
                 return;
             }
             notifyClientsTranslationCapability(capability);
+        }
+    }
+
+    private static final class ActiveTranslation {
+        public final TranslationSpec sourceSpec;
+        public final TranslationSpec targetSpec;
+        public final String packageName;
+        public final int translatedAppUid;
+        public boolean isPaused = false;
+
+        private ActiveTranslation(TranslationSpec sourceSpec, TranslationSpec targetSpec,
+                int translatedAppUid, String packageName) {
+            this.sourceSpec = sourceSpec;
+            this.targetSpec = targetSpec;
+            this.translatedAppUid = translatedAppUid;
+            this.packageName = packageName;
+        }
+    }
+
+    @Override
+    public void binderDied() {
+        // Don't need to implement this with binderDied(IBinder) implemented.
+    }
+
+    @Override
+    public void binderDied(IBinder who) {
+        synchronized (mLock) {
+            mWaitingFinishedCallbackActivities.remove(who);
+            ActiveTranslation activeTranslation = mActiveTranslations.remove(who);
+            if (activeTranslation != null) {
+                // Let apps with registered callbacks know about the activity's death.
+                invokeCallbacks(STATE_UI_TRANSLATION_FINISHED, activeTranslation.sourceSpec,
+                        activeTranslation.targetSpec, activeTranslation.packageName,
+                        activeTranslation.translatedAppUid);
+            }
         }
     }
 }

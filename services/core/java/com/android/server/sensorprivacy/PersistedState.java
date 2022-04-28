@@ -295,6 +295,11 @@ class PersistedState {
                 TypeUserSensor userSensor = states.keyAt(i);
                 SensorState sensorState = states.valueAt(i);
 
+                // Do not persist hardware toggle states. Will be restored on reboot
+                if (userSensor.mType != SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE) {
+                    continue;
+                }
+
                 serializer.startTag(null, XML_TAG_SENSOR_STATE);
                 serializer.attributeInt(null, XML_ATTRIBUTE_TOGGLE_TYPE,
                         userSensor.mType);
@@ -473,7 +478,7 @@ class PersistedState {
                 for (int j = 0; j < numSensors; j++) {
                     int sensor = userIndividualEnabled.keyAt(j);
                     SensorState sensorState = userIndividualEnabled.valueAt(j);
-                    result.addState(SensorPrivacyManager.ToggleTypes.SOFTWARE,
+                    result.addState(SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE,
                             userId, sensor, sensorState.getState(), sensorState.getLastChange());
                 }
             }

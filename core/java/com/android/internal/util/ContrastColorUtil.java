@@ -627,7 +627,7 @@ public class ContrastColorUtil {
     }
 
     /**
-     * Framework copy of functions needed from android.support.v4.graphics.ColorUtils.
+     * Framework copy of functions needed from androidx.core.graphics.ColorUtils.
      */
     private static class ColorUtilsFromCompat {
         private static final double XYZ_WHITE_REFERENCE_X = 95.047;

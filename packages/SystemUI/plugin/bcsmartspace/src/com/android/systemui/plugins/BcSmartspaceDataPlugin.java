@@ -20,7 +20,7 @@ import android.app.PendingIntent;
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
 import android.app.smartspace.SmartspaceTargetEvent;
-import android.app.smartspace.uitemplatedata.SmartspaceTapAction;
+import android.app.smartspace.uitemplatedata.TapAction;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -94,6 +94,12 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void setPrimaryTextColor(int color);
 
         /**
+         * When the view is displayed on Dream, set the flag to true, immediately after the view is
+         * created.
+         */
+        void setIsDreaming(boolean isDreaming);
+
+        /**
          * Range [0.0 - 1.0] when transitioning from Lockscreen to/from AOD
          */
         void setDozeAmount(float amount);
@@ -144,7 +150,7 @@ public interface BcSmartspaceDataPlugin extends Plugin {
             }
         }
 
-        default void startFromAction(SmartspaceTapAction action, View v, boolean showOnLockscreen) {
+        default void startFromAction(TapAction action, View v, boolean showOnLockscreen) {
             try {
                 if (action.getIntent() != null) {
                     startIntent(v, action.getIntent(), showOnLockscreen);

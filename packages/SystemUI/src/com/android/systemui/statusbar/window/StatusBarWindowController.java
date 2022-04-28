@@ -68,6 +68,7 @@ public class StatusBarWindowController {
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
     private int mBarHeight = -1;
     private final State mCurrentState = new State();
+    private boolean mIsAttached;
 
     private final ViewGroup mStatusBarWindowView;
     // The container in which we should run launch animations started from the status bar and
@@ -136,6 +137,8 @@ public class StatusBarWindowController {
 
         mContentInsetsProvider.addCallback(this::calculateStatusBarLocationsForAllRotations);
         calculateStatusBarLocationsForAllRotations();
+        mIsAttached = true;
+        apply(mCurrentState);
     }
 
     /** Adds the given view to the status bar window view. */
@@ -274,9 +277,17 @@ public class StatusBarWindowController {
     private void applyHeight(State state) {
         mLpChanged.height =
                 state.mIsLaunchAnimationRunning ? ViewGroup.LayoutParams.MATCH_PARENT : mBarHeight;
+        for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+            mLpChanged.paramsForRotation[rot].height =
+                    state.mIsLaunchAnimationRunning ? ViewGroup.LayoutParams.MATCH_PARENT :
+                    SystemBarUtils.getStatusBarHeightForRotation(mContext, rot);
+        }
     }
 
     private void apply(State state) {
+        if (!mIsAttached) {
+            return;
+        }
         applyForceStatusBarVisibleFlag(state);
         applyHeight(state);
         if (mLp != null && mLp.copyFrom(mLpChanged) != 0) {

@@ -46,4 +46,5 @@ class HeadsUpViewBinderLogger @Inject constructor(@NotificationHeadsUpLog val bu
         })
     }
 }
-const val TAG = "HeadsUpViewBinder"
+
+private const val TAG = "HeadsUpViewBinder"

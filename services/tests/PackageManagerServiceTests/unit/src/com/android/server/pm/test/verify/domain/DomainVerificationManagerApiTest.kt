@@ -19,9 +19,6 @@ package com.android.server.pm.test.verify.domain
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
-import com.android.server.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainOwner
 import android.content.pm.verify.domain.DomainVerificationInfo
 import android.content.pm.verify.domain.DomainVerificationManager
@@ -34,7 +31,9 @@ import android.util.ArraySet
 import android.util.SparseArray
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
-import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageStates
+import com.android.server.pm.pkg.PackageUserStateInternal
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.verify.domain.DomainVerificationManagerStub
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.testutils.mockThrowOnUnmocked
@@ -502,8 +501,12 @@ class DomainVerificationManagerApiTest {
                 whenever(callingUid) { Process.ROOT_UID }
                 whenever(callingUserId) { 0 }
 
-                mockPackageStates {
-                    pkgStateFunction(it)
+                whenever(snapshot()) {
+                    mockThrowOnUnmocked {
+                        whenever(getPackageStateInternal(anyString())) {
+                            pkgStateFunction(getArgument(0))
+                        }
+                    }
                 }
             })
         }

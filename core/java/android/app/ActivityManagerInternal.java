@@ -239,6 +239,12 @@ public abstract class ActivityManagerInternal {
     public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
 
     /**
+     * Inform ActivityManagerService about the latest {@code blockedReasons} for an uid, which
+     * can be used to understand whether the {@code uid} is allowed to access network or not.
+     */
+    public abstract void onUidBlockedReasonsChanged(int uid, int blockedReasons);
+
+    /**
      * @return true if runtime was restarted, false if it's normal boot
      */
     public abstract boolean isRuntimeRestarted();
@@ -625,13 +631,14 @@ public abstract class ActivityManagerInternal {
      * @param uid uid
      * @param pid pid of the ProcessRecord that is pending top.
      */
-    public abstract void addPendingTopUid(int uid, int pid);
+    public abstract void addPendingTopUid(int uid, int pid, @Nullable IApplicationThread thread);
 
     /**
      * Delete uid from the ActivityManagerService PendingStartActivityUids list.
      * @param uid uid
+     * @param nowElapsed starting time of updateOomAdj
      */
-    public abstract void deletePendingTopUid(int uid);
+    public abstract void deletePendingTopUid(int uid, long nowElapsed);
 
     /**
      * Is the uid in ActivityManagerService PendingStartActivityUids list?
@@ -682,6 +689,11 @@ public abstract class ActivityManagerInternal {
      * Return the temp allowlist type when server push messaging is over the quota.
      */
     public abstract @TempAllowListType int getPushMessagingOverQuotaBehavior();
+
+    /**
+     * Return the startForeground() grace period after calling startForegroundService().
+     */
+    public abstract int getServiceStartForegroundTimeout();
 
     /**
      * Returns the capability of the given uid
@@ -779,6 +791,17 @@ public abstract class ActivityManagerInternal {
          * @param started {@code true} if the process transits from non-FGS state to FGS state.
          */
         void onForegroundServiceStateChanged(String packageName, int uid, int pid, boolean started);
+
+        /**
+         * Call when the notification of the foreground service is updated.
+         *
+         * @param packageName The package name of the process.
+         * @param uid The UID of the process.
+         * @param foregroundId The current foreground service notification ID.
+         * @param canceling The given notification is being canceled.
+         */
+        void onForegroundServiceNotificationUpdated(String packageName, int uid, int foregroundId,
+                boolean canceling);
     }
 
     /**
@@ -816,4 +839,25 @@ public abstract class ActivityManagerInternal {
      * Register the bind service event listener callback.
      */
     public abstract void addBindServiceEventListener(@NonNull BindServiceEventListener listener);
+
+    /**
+     * Restart android.
+     */
+    public abstract void restart();
+
+    /**
+     * Returns some summary statistics of the current PendingIntent queue - sizes and counts.
+     */
+    public abstract List<PendingIntentStats> getPendingIntentStats();
+
+    /**
+     * Register the UidObserver for NetworkPolicyManager service.
+     *
+     * This is equivalent to calling
+     * {@link IActivityManager#registerUidObserver(IUidObserver, int, int, String)} but having a
+     * separate method for NetworkPolicyManager service so that it's UidObserver can be called
+     * separately outside the usual UidObserver flow.
+     */
+    public abstract void registerNetworkPolicyUidObserver(@NonNull IUidObserver observer,
+            int which, int cutpoint, @NonNull String callingPackage);
 }

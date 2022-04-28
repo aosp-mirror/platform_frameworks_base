@@ -75,6 +75,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.permission.PermissionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.UiccCardInfo;
 import android.telephony.gba.GbaService;
 import android.telephony.ims.ImsService;
 import android.telephony.ims.ProvisioningManager;
@@ -119,6 +120,9 @@ public abstract class PackageManager {
 
     /** {@hide} */
     public static final boolean APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE = true;
+
+    /** {@hide} */
+    public static final boolean ENABLE_SHARED_UID_MIGRATION = true;
 
     /**
      * This exception is thrown when a given package, application, or component
@@ -2201,6 +2205,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_BAD_PERMISSION_GROUP = -127;
 
+    /**
+     * Installation failed return code: an error occurred during the activation phase of this
+     * session.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ACTIVATION_FAILED = -128;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
@@ -3185,6 +3197,13 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_SENSOR_HINGE_ANGLE = "android.hardware.sensor.hinge_angle";
 
+     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a heading sensor.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_HEADING = "android.hardware.sensor.heading";
+
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports exposing head tracker sensors from peripheral
@@ -3263,6 +3282,20 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_EUICC = "android.hardware.telephony.euicc";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports multiple enabled profiles on eUICCs.
+     *
+     * <p>Devices declaring this feature must have an implementation of the
+     *  {@link UiccCardInfo#getPorts},
+     *  {@link UiccCardInfo#isMultipleEnabledProfilesSupported} and
+     *  {@link android.telephony.euicc.EuiccManager#switchToSubscription (with portIndex)}.
+     *
+     * This feature should only be defined if {@link #FEATURE_TELEPHONY_EUICC} have been defined.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_EUICC_MEP = "android.hardware.telephony.euicc.mep";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
@@ -3775,6 +3808,16 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports expanded picture-in-picture multi-window mode.
+     *
+     * @see android.app.PictureInPictureParams.Builder#setExpandedAspectRatio
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_EXPANDED_PICTURE_IN_PICTURE
+            = "android.software.expanded_picture_in_picture";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports running activities on secondary displays.
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -4044,6 +4087,28 @@ public abstract class PackageManager {
             "android.software.incremental_delivery";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * has the requisite kernel support for the EROFS filesystem present in 4.19 kernels as a
+     * staging driver, which lacks 0padding and big pcluster support.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_EROFS_LEGACY = "android.software.erofs_legacy";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * has the requisite kernel support for the EROFS filesystem present in 5.10 kernels, which
+     * has 0padding, big pcluster, and chunked index support.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_EROFS = "android.software.erofs";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device has tuner hardware to support tuner operations.
      *
@@ -4123,6 +4188,8 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
      * supports window magnification.
+     *
+     * @see android.accessibilityservice.MagnificationConfig#MAGNIFICATION_MODE_WINDOW
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WINDOW_MAGNIFICATION =
@@ -4219,8 +4286,9 @@ public abstract class PackageManager {
      * for more details.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String EXTRA_VERIFICATION_ROOT_HASH =
-            "android.content.pm.extra.EXTRA_VERIFICATION_ROOT_HASH";
+            "android.content.pm.extra.VERIFICATION_ROOT_HASH";
 
     /**
      * Extra field name for the ID of a intent filter pending verification.
@@ -4318,6 +4386,21 @@ public abstract class PackageManager {
     @SystemApi
     public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS
             = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
+
+    /**
+     * Indicates that the package requesting permissions has legacy access for some permissions,
+     * or had it, but it was recently revoked. These request dialogs may show different text,
+     * indicating that the app is requesting continued access to a permission. Will be cleared
+     * from any permission request intent, if set by a non-system server app.
+     * <p>
+     * <strong>Type:</strong> String[]
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES
+            = "android.content.pm.extra.REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES";
 
     /**
      * String extra for {@link PackageInstallObserver} in the 'extras' Bundle in case of
@@ -4911,8 +4994,8 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageInfo(String, PackageInfoFlags)} instead.
      */
     @Deprecated
@@ -4948,8 +5031,8 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageInfo(VersionedPackage, PackageInfoFlags)} instead.
      */
     @Deprecated
@@ -4981,8 +5064,8 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageInfoAsUser(String, PackageInfoFlags, int)} instead.
      * @hide
      */
@@ -5107,8 +5190,8 @@ public abstract class PackageManager {
      *            desired package.
      * @return Returns an int array of the assigned GIDs, or null if there are
      *         none.
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      */
     public abstract int[] getPackageGids(@NonNull String packageName)
             throws NameNotFoundException;
@@ -5124,8 +5207,8 @@ public abstract class PackageManager {
      *            desired package.
      * @return Returns an int array of the assigned gids, or null if there are
      *         none.
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageGids(String, PackageInfoFlags)} instead.
      */
     @Deprecated
@@ -5151,8 +5234,8 @@ public abstract class PackageManager {
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
      * @return Returns an integer UID who owns the given package name.
-     * @throws NameNotFoundException if a package with the given name can not be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageUid(String, PackageInfoFlags)} instead.
      */
     @Deprecated
@@ -5178,8 +5261,8 @@ public abstract class PackageManager {
      *            desired package.
      * @param userId The user handle identifier to look up the package under.
      * @return Returns an integer UID who owns the given package name.
-     * @throws NameNotFoundException if a package with the given name can not be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
@@ -5197,8 +5280,8 @@ public abstract class PackageManager {
      *            desired package.
      * @param userId The user handle identifier to look up the package under.
      * @return Returns an integer UID who owns the given package name.
-     * @throws NameNotFoundException if a package with the given name can not be
-     *             found on the system.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @deprecated Use {@link #getPackageUidAsUser(String, PackageInfoFlags, int)} instead.
      * @hide
      */
@@ -5725,16 +5808,16 @@ public abstract class PackageManager {
     }
 
     /**
-     * Returns the package name of the component implementing supplemental process service.
+     * Returns the package name of the component implementing sdk sandbox service.
      *
-     * @return the package name of the component implementing supplemental process service
+     * @return the package name of the component implementing sdk sandbox service
      *
      * @hide
      */
     @NonNull
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public String getSupplementalProcessPackageName() {
+    public String getSdkSandboxPackageName() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -7988,6 +8071,7 @@ public abstract class PackageManager {
             return PackageParser.generatePackageInfo(pkg, null, (int) flagsBits, 0, 0, null,
                     FrameworkPackageUserState.DEFAULT);
         } catch (PackageParser.PackageParserException e) {
+            Log.w(TAG, "Failure to parse package archive", e);
             return null;
         }
     }
@@ -10221,17 +10305,40 @@ public abstract class PackageManager {
     }
 
     /**
-     * Grants implicit visibility of the package that provides an authority to a querying UID.
+     * Makes a package that provides an authority {@code visibleAuthority} become visible to the
+     * application {@code recipientUid}.
      *
      * @throws SecurityException when called by a package other than the contacts provider
      * @hide
      */
-    public void grantImplicitAccess(int queryingUid, String visibleAuthority) {
+    public void makeProviderVisible(int recipientUid, String visibleAuthority) {
         try {
-            ActivityThread.getPackageManager().grantImplicitAccess(queryingUid, visibleAuthority);
+            ActivityThread.getPackageManager().makeProviderVisible(recipientUid, visibleAuthority);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Makes the package associated with the uid {@code visibleUid} become visible to the
+     * recipient application. The recipient application can receive the details about the
+     * visible package if successful.
+     * <p>
+     * Read <a href="/training/basics/intents/package-visibility">package visibility</a> for more
+     * information.
+     *
+     * @param recipientUid The uid of the application that is being given access to {@code
+     *                     visibleUid}
+     * @param visibleUid The uid of the application that is becoming accessible to {@code
+     *                   recipientAppId}
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE)
+    @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void makeUidVisible(int recipientUid, int visibleUid) {
+        throw new UnsupportedOperationException(
+                "makeUidVisible not implemented in subclass");
     }
 
     // Some of the flags don't affect the query result, but let's be conservative and cache

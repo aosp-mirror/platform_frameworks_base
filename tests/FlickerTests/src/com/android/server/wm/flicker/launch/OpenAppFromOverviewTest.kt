@@ -16,22 +16,21 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Presubmit
-import android.view.Display
 import androidx.test.filters.FlakyTest
-import androidx.test.filters.RequiresDevice
+import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresDevice
+import android.view.Display
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.helpers.reopenAppFromOverview
-import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.helpers.reopenAppFromOverview
+import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
-import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,7 +61,9 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
+open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
+    : OpenAppFromLauncherTransition(testSpec) {
+
     /**
      * Defines the transition used to run the test
      */
@@ -116,11 +117,6 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun launcherWindowBecomesInvisible() = super.launcherWindowBecomesInvisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
     override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
     /** {@inheritDoc} */
@@ -131,16 +127,46 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
     /** {@inheritDoc} */
     @Presubmit
     @Test
+    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 229735718)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
     override fun appWindowReplacesLauncherAsTopWindow() {
-        assumeFalse(isShellTransitionsEnabled)
+        Assume.assumeFalse(isShellTransitionsEnabled)
         super.appWindowReplacesLauncherAsTopWindow()
     }
 
-    @FlakyTest(bugId = 216266712)
+    @FlakyTest(bugId = 229738092)
     @Test
-    fun appWindowReplacesLauncherAsTopWindow_shellTransit() {
-        assumeTrue(isShellTransitionsEnabled)
+    fun appWindowReplacesLauncherAsTopWindow_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
         super.appWindowReplacesLauncherAsTopWindow()
+    }
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesTopWindow() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        super.appWindowBecomesTopWindow()
+    }
+
+    @FlakyTest(bugId = 229738092)
+    @Test
+    fun appWindowBecomesTopWindow_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        super.appWindowBecomesTopWindow()
     }
 
     companion object {
@@ -154,7 +180,7 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 5)
+                .getConfigNonRotationTests(repetitions = 3)
         }
     }
 }

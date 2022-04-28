@@ -150,6 +150,6 @@ public class UserDetailItemView extends LinearLayout {
     }
 
     protected int getFontSizeDimen() {
-        return R.dimen.qs_detail_item_secondary_text_size;
+        return R.dimen.qs_tile_text_size;
     }
 }

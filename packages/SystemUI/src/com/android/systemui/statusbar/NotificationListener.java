@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.statusbar.RemoteInputController.processForRemoteInput;
-import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -30,10 +29,13 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
+import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.time.SystemClock;
 
 import java.util.ArrayList;
@@ -42,14 +44,17 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executor;
 
+import javax.inject.Inject;
+
 /**
  * This class handles listening to notification updates and passing them along to
  * NotificationPresenter to be displayed to the user.
  */
+@SysUISingleton
 @SuppressLint("OverrideAbstract")
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
-    private static final boolean DEBUG = StatusBar.DEBUG;
+    private static final boolean DEBUG = CentralSurfaces.DEBUG;
     private static final long MAX_RANKING_DELAY_MILLIS = 500L;
 
     private final Context mContext;
@@ -64,13 +69,16 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     private long mSkippingRankingUpdatesSince = -1;
 
     /**
-     * Injected constructor. See {@link StatusBarModule}.
+     * Injected constructor. See {@link CentralSurfacesModule}.
      */
+    @Inject
     public NotificationListener(
             Context context,
             NotificationManager notificationManager,
             SystemClock systemClock,
-            @Main Executor mainExecutor) {
+            @Main Executor mainExecutor,
+            PluginManager pluginManager) {
+        super(pluginManager);
         mContext = context;
         mNotificationManager = notificationManager;
         mSystemClock = systemClock;
@@ -155,7 +163,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap) {
-        onNotificationRemoved(sbn, rankingMap, UNDEFINED_DISMISS_REASON);
+        onNotificationRemoved(sbn, rankingMap, NotifCollection.REASON_UNKNOWN);
     }
 
     @Override

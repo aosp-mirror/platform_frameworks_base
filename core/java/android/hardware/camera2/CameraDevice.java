@@ -883,6 +883,27 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
+     *<p> For devices where {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES}
+     * includes {@link CameraMetadata#CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION},
+     * the following stream combinations are guaranteed,
+     * for CaptureRequests where {@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE} is set to
+     * {@link CameraMetadata#CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION} <p>
+     * <table>
+     * <tr><th colspan="7">Preview stabilization guaranteed stream configurations</th></tr>
+     * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
+     * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code RECORD}</td><td colspan="4" id="rb"></td> <td>Stabilized preview, GPU video processing, or no-preview stabilized video recording.</td> </tr>
+     * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG / YUV}</td><td id="rb">{@code MAXIMUM }</td><td>Standard still imaging with stabilized preview.</td> </tr>
+     * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV / YUV}</td><td id="rb">{@code RECORD }</td><td>High-resolution recording with stabilized preview and recording stream.</td> </tr>
+     * </table><br>
+     * <p>
+     * For the maximum size column, PREVIEW refers to the best size match to the device's screen
+     * resolution, or to 1080p (1920x1080), whichever is smaller. RECORD refers to the camera
+     * device's maximum supported recording resolution, as determined by
+     * {@link android.media.CamcorderProfile}. MAXIMUM refers to the camera device's maximum output
+     * resolution for that format or target from {@link StreamConfigurationMap#getOutputSizes(int)}.
+     * </p>
+     *
      * <p>Since the capabilities of camera devices vary greatly, a given camera device may support
      * target combinations with sizes outside of these guarantees, but this can only be tested for
      * by calling {@link #isSessionConfigurationSupported} or attempting to create a session with
@@ -969,7 +990,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>Reprocessing with 10-bit output targets on 10-bit capable
      * {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT} devices is
      * not supported. Trying to initialize a repreocessable capture session with one ore more
-     * output configurations set {@link OutputConfiguration#setDynamicRangeProfile(int)} to use
+     * output configurations set {@link OutputConfiguration#setDynamicRangeProfile} to use
      * a 10-bit dynamic range profile {@link android.hardware.camera2.params.DynamicRangeProfiles}
      * will trigger {@link IllegalArgumentException}.</p>
      *
@@ -1158,7 +1179,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see #createCaptureSessionByOutputConfigurations
      * @see #createReprocessableCaptureSession
      * @see #createConstrainedHighSpeedCaptureSession
-     * @see OutputConfiguration#setDynamicRangeProfile(int)
+     * @see OutputConfiguration#setDynamicRangeProfile
      * @see android.hardware.camera2.params.DynamicRangeProfiles
      */
     public void createCaptureSession(

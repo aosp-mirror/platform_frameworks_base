@@ -56,7 +56,7 @@ public class BiometricFrameworkStatsLogger {
                 -1 /* sensorId */,
                 operationContext.id,
                 sessionType(operationContext.reason),
-                operationContext.isAoD);
+                operationContext.isAod);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_AUTHENTICATED}. */
@@ -77,7 +77,7 @@ public class BiometricFrameworkStatsLogger {
                 ambientLightLux,
                 operationContext.id,
                 sessionType(operationContext.reason),
-                operationContext.isAoD);
+                operationContext.isAod);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_ENROLLED}. */
@@ -109,7 +109,7 @@ public class BiometricFrameworkStatsLogger {
                 -1 /* sensorId */,
                 operationContext.id,
                 sessionType(operationContext.reason),
-                operationContext.isAoD);
+                operationContext.isAod);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED}. */

@@ -24,6 +24,9 @@ import android.view.inputmethod.InputMethodManager;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Initiates handwriting mode once it detects stylus movement in handwritable areas.
@@ -52,12 +55,13 @@ public class HandwritingInitiator {
      */
     private final int mTouchSlop;
     /**
-     * The timeout used to distinguish tap from handwriting. If the stylus doesn't move before this
-     * timeout, it's not considered as handwriting.
+     * The timeout used to distinguish tap or long click from handwriting. If the stylus doesn't
+     * move before this timeout, it's not considered as handwriting.
      */
-    private final long mTapTimeoutInMillis;
+    private final long mHandwritingTimeoutInMillis;
 
     private State mState = new State();
+    private final HandwritingAreaTracker mHandwritingAreasTracker = new HandwritingAreaTracker();
 
     /**
      * Helper method to reset the internal state of this class.
@@ -83,10 +87,10 @@ public class HandwritingInitiator {
     private final InputMethodManager mImm;
 
     @VisibleForTesting
-    public HandwritingInitiator(ViewConfiguration viewConfiguration,
-            InputMethodManager inputMethodManager) {
+    public HandwritingInitiator(@NonNull ViewConfiguration viewConfiguration,
+            @NonNull InputMethodManager inputMethodManager) {
         mTouchSlop = viewConfiguration.getScaledTouchSlop();
-        mTapTimeoutInMillis = ViewConfiguration.getTapTimeout();
+        mHandwritingTimeoutInMillis = ViewConfiguration.getLongPressTimeout();
         mImm = inputMethodManager;
     }
 
@@ -98,7 +102,7 @@ public class HandwritingInitiator {
      * @param motionEvent the stylus MotionEvent.
      */
     @VisibleForTesting
-    public void onTouchEvent(MotionEvent motionEvent) {
+    public void onTouchEvent(@NonNull MotionEvent motionEvent) {
         final int maskedAction = motionEvent.getActionMasked();
         switch (maskedAction) {
             case MotionEvent.ACTION_DOWN:
@@ -141,7 +145,7 @@ public class HandwritingInitiator {
 
                 final long timeElapsed =
                         motionEvent.getEventTime() - mState.mStylusDownTimeInMillis;
-                if (timeElapsed > mTapTimeoutInMillis) {
+                if (timeElapsed > mHandwritingTimeoutInMillis) {
                     reset();
                     return;
                 }
@@ -151,11 +155,20 @@ public class HandwritingInitiator {
                 final float y = motionEvent.getY(pointerIndex);
                 if (largerThanTouchSlop(x, y, mState.mStylusDownX, mState.mStylusDownY)) {
                     mState.mExceedTouchSlop = true;
-                    tryStartHandwriting();
+                    View candidateView =
+                            findBestCandidateView(mState.mStylusDownX, mState.mStylusDownY);
+                    if (candidateView != null) {
+                        if (candidateView == getConnectedView()) {
+                            startHandwriting(candidateView);
+                        } else {
+                            candidateView.requestFocus();
+                        }
+                    }
                 }
         }
     }
 
+    @Nullable
     private View getConnectedView() {
         if (mConnectedView == null) return null;
         return mConnectedView.get();
@@ -178,13 +191,16 @@ public class HandwritingInitiator {
             clearConnectedView();
             return;
         }
+
         final View connectedView = getConnectedView();
         if (connectedView == view) {
             ++mConnectionCount;
         } else {
             mConnectedView = new WeakReference<>(view);
             mConnectionCount = 1;
-            tryStartHandwriting();
+            if (mState.mShouldInitHandwriting) {
+                tryStartHandwriting();
+            }
         }
     }
 
@@ -233,26 +249,91 @@ public class HandwritingInitiator {
             return;
         }
 
-        final ViewParent viewParent = connectedView.getParent();
-        // Do a final check before startHandwriting.
-        if (viewParent != null && connectedView.isAttachedToWindow()) {
-            final Rect editorBounds =
-                    new Rect(0, 0, connectedView.getWidth(), connectedView.getHeight());
-            if (viewParent.getChildVisibleRect(connectedView, editorBounds, null)) {
-                final int roundedInitX = Math.round(mState.mStylusDownX);
-                final int roundedInitY = Math.round(mState.mStylusDownY);
-                if (editorBounds.contains(roundedInitX, roundedInitY)) {
-                    startHandwriting(connectedView);
-                }
-            }
+        final Rect handwritingArea = getViewHandwritingArea(connectedView);
+        if (contains(handwritingArea, mState.mStylusDownX, mState.mStylusDownY)) {
+            startHandwriting(connectedView);
+        } else {
+            reset();
         }
-        reset();
     }
 
     /** For test only. */
     @VisibleForTesting
-    public void startHandwriting(View view) {
+    public void startHandwriting(@NonNull View view) {
         mImm.startStylusHandwriting(view);
+        reset();
+    }
+
+    /**
+     * Notify that the handwriting area for the given view might be updated.
+     * @param view the view whose handwriting area might be updated.
+     */
+    public void updateHandwritingAreasForView(@NonNull View view) {
+        mHandwritingAreasTracker.updateHandwritingAreaForView(view);
+    }
+
+    /**
+     * Given the location of the stylus event, return the best candidate view to initialize
+     * handwriting mode.
+     *
+     * @param x the x coordinates of the stylus event, in the coordinates of the window.
+     * @param y the y coordinates of the stylus event, in the coordinates of the window.
+     */
+    @Nullable
+    private View findBestCandidateView(float x, float y) {
+        // If the connectedView is not null and do not set any handwriting area, it will check
+        // whether the connectedView's boundary contains the initial stylus position. If true,
+        // directly return the connectedView.
+        final View connectedView = getConnectedView();
+        if (connectedView != null && connectedView.isAutoHandwritingEnabled()) {
+            final Rect handwritingArea = getViewHandwritingArea(connectedView);
+            if (contains(handwritingArea, x, y)) {
+                return connectedView;
+            }
+        }
+
+        // Check the registered handwriting areas.
+        final List<HandwritableViewInfo> handwritableViewInfos =
+                mHandwritingAreasTracker.computeViewInfos();
+        for (HandwritableViewInfo viewInfo : handwritableViewInfos) {
+            final View view = viewInfo.getView();
+            if (!view.isAutoHandwritingEnabled()) continue;
+            if (contains(viewInfo.getHandwritingArea(), x, y)) {
+                return viewInfo.getView();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return the handwriting area of the given view, represented in the window's coordinate.
+     * If the view didn't set any handwriting area, it will return the view's boundary.
+     * It will return null if the view or its handwriting area is not visible.
+     */
+    @Nullable
+    private static Rect getViewHandwritingArea(@NonNull View view) {
+        final ViewParent viewParent = view.getParent();
+        if (viewParent != null && view.isAttachedToWindow() && view.isAggregatedVisible()) {
+            final Rect localHandwritingArea = view.getHandwritingArea();
+            final Rect globalHandwritingArea = new Rect();
+            if (localHandwritingArea != null) {
+                globalHandwritingArea.set(localHandwritingArea);
+            } else {
+                globalHandwritingArea.set(0, 0, view.getWidth(), view.getHeight());
+            }
+            if (viewParent.getChildVisibleRect(view, globalHandwritingArea, null)) {
+                return globalHandwritingArea;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return true if the (x, y) is inside by the given {@link Rect}.
+     */
+    private boolean contains(@Nullable Rect rect, float x, float y) {
+        if (rect == null) return false;
+        return x >= rect.left && x < rect.right && y >= rect.top && y < rect.bottom;
     }
 
     private boolean largerThanTouchSlop(float x1, float y1, float x2, float y2) {
@@ -290,5 +371,136 @@ public class HandwritingInitiator {
         /** The initial location where the stylus pointer goes down. */
         private float mStylusDownX = Float.NaN;
         private float mStylusDownY = Float.NaN;
+    }
+
+    /** The helper method to check if the given view is still active for handwriting. */
+    private static boolean isViewActive(@Nullable View view) {
+        return view != null && view.isAttachedToWindow() && view.isAggregatedVisible()
+                && view.isAutoHandwritingEnabled();
+    }
+
+    /**
+     * A class used to track the handwriting areas set by the Views.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static class HandwritingAreaTracker {
+        private final List<HandwritableViewInfo> mHandwritableViewInfos;
+
+        public HandwritingAreaTracker() {
+            mHandwritableViewInfos = new ArrayList<>();
+        }
+
+        /**
+         * Notify this tracker that the handwriting area of the given view has been updated.
+         * This method does three things:
+         * a) iterate over the all the tracked ViewInfos and remove those already invalid ones.
+         * b) mark the given view's ViewInfo to be dirty. So that next time when
+         * {@link #computeViewInfos} is called, this view's handwriting area will be recomputed.
+         * c) If no the given view is not in the tracked ViewInfo list, a new ViewInfo object will
+         * be created and added to the list.
+         *
+         * @param view the view whose handwriting area is updated.
+         */
+        public void updateHandwritingAreaForView(@NonNull View view) {
+            Iterator<HandwritableViewInfo> iterator = mHandwritableViewInfos.iterator();
+            boolean found = false;
+            while (iterator.hasNext()) {
+                final HandwritableViewInfo handwritableViewInfo = iterator.next();
+                final View curView = handwritableViewInfo.getView();
+                if (!isViewActive(curView)) {
+                    iterator.remove();
+                }
+                if (curView == view) {
+                    found = true;
+                    handwritableViewInfo.mIsDirty = true;
+                }
+            }
+            if (!found && isViewActive(view)) {
+                // The given view is not tracked. Create a new HandwritableViewInfo for it and add
+                // to the list.
+                mHandwritableViewInfos.add(new HandwritableViewInfo(view));
+            }
+        }
+
+        /**
+         * Update the handwriting areas and return a list of ViewInfos containing the view
+         * reference and its handwriting area.
+         */
+        @NonNull
+        public List<HandwritableViewInfo> computeViewInfos() {
+            mHandwritableViewInfos.removeIf(viewInfo -> !viewInfo.update());
+            return mHandwritableViewInfos;
+        }
+    }
+
+    /**
+     * A class that reference to a View and its handwriting area(in the ViewRoot's coordinate.)
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static class HandwritableViewInfo {
+        final WeakReference<View> mViewRef;
+        Rect mHandwritingArea = null;
+        @VisibleForTesting
+        public boolean mIsDirty = true;
+
+        @VisibleForTesting
+        public HandwritableViewInfo(@NonNull View view) {
+            mViewRef = new WeakReference<>(view);
+        }
+
+        /** Return the tracked view. */
+        @Nullable
+        public View getView() {
+            return mViewRef.get();
+        }
+
+        /**
+         * Return the tracked handwriting area, represented in the ViewRoot's coordinates.
+         * Notice, the caller should not modify the returned Rect.
+         */
+        @Nullable
+        public Rect getHandwritingArea() {
+            return mHandwritingArea;
+        }
+
+        /**
+         * Update the handwriting area in this ViewInfo.
+         *
+         * @return true if this ViewInfo is still valid. Or false if this ViewInfo has become
+         * invalid due to either view is no longer visible, or the handwriting area set by the
+         * view is removed. {@link HandwritingAreaTracker} no longer need to keep track of this
+         * HandwritableViewInfo this method returns false.
+         */
+        public boolean update() {
+            final View view = getView();
+            if (!isViewActive(view)) {
+                return false;
+            }
+
+            if (!mIsDirty) {
+                return true;
+            }
+            final Rect handwritingArea = view.getHandwritingArea();
+            if (handwritingArea == null) {
+                return false;
+            }
+
+            ViewParent parent = view.getParent();
+            if (parent != null) {
+                if (mHandwritingArea == null) {
+                    mHandwritingArea = new Rect();
+                }
+                mHandwritingArea.set(handwritingArea);
+                if (!parent.getChildVisibleRect(view, mHandwritingArea, null /* offset */)) {
+                    mHandwritingArea = null;
+                }
+            }
+            mIsDirty = false;
+            return true;
+        }
     }
 }

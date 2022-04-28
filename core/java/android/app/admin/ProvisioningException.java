@@ -15,8 +15,10 @@
  */
 
 package android.app.admin;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
 import android.util.AndroidException;
@@ -44,7 +46,7 @@ public class ProvisioningException extends AndroidException {
     /**
      * Service-specific error code for {@link DevicePolicyManager#provisionFullyManagedDevice} and
      * {@link DevicePolicyManager#createAndProvisionManagedProfile}:
-     * Indicates the call to {@link DevicePolicyManager#checkProvisioningPreCondition} returned an
+     * Indicates the call to {@link DevicePolicyManager#checkProvisioningPrecondition} returned an
      * error code.
      */
     public static final int ERROR_PRE_CONDITION_FAILED = 1;
@@ -106,12 +108,35 @@ public class ProvisioningException extends AndroidException {
 
     private final @ProvisioningError int mProvisioningError;
 
+    /**
+     * Constructs a {@link ProvisioningException}.
+     *
+     * @param cause the cause
+     * @param provisioningError the error code
+     */
     public ProvisioningException(@NonNull Exception cause,
             @ProvisioningError int provisioningError) {
-        super(cause);
+        this(cause, provisioningError, /* errorMessage= */ null);
+    }
+
+    /**
+     * Constructs a {@link ProvisioningException}.
+     *
+     * @param cause the cause
+     * @param provisioningError the error code
+     * @param errorMessage a {@code String} error message that give a more specific
+     *                     description of the exception; can be {@code null}
+     */
+    public ProvisioningException(@NonNull Exception cause,
+            @ProvisioningError int provisioningError,
+            @Nullable String errorMessage) {
+        super(errorMessage, cause);
         mProvisioningError = provisioningError;
     }
 
+    /**
+     * Returns the provisioning error specified at construction time.
+     */
     public @ProvisioningError int getProvisioningError() {
         return mProvisioningError;
     }

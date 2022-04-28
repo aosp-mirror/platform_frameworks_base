@@ -49,6 +49,7 @@ public class RuleEvaluatorTest {
             new AppInstallMetadata.Builder()
                     .setPackageName(PACKAGE_NAME_1)
                     .setAppCertificates(Collections.singletonList(APP_CERTIFICATE))
+                    .setAppCertificateLineage(Collections.singletonList(APP_CERTIFICATE))
                     .setVersionCode(2)
                     .build();
 

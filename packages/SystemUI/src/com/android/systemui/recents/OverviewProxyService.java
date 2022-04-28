@@ -101,12 +101,11 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.wm.shell.back.BackAnimation;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -115,7 +114,6 @@ import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.transition.ShellTransitions;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -147,8 +145,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
     private final Context mContext;
     private final Optional<Pip> mPipOptional;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
-    private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private SysUiState mSysUiState;
     private final Handler mHandler;
@@ -188,7 +185,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         @Override
         public void startScreenPinning(int taskId) {
             verifyCallerAndClearCallingIdentityPostMain("startScreenPinning", () ->
-                    mStatusBarOptionalLazy.get().ifPresent(
+                    mCentralSurfacesOptionalLazy.get().ifPresent(
                             statusBar -> statusBar.showScreenPinningRequest(taskId,
                                     false /* allowCancel */)));
         }
@@ -209,9 +206,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
         public void onStatusBarMotionEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentity("onStatusBarMotionEvent", () -> {
                 // TODO move this logic to message queue
-                mStatusBarOptionalLazy.get().ifPresent(statusBar -> {
+                mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
                     if (event.getActionMasked() == ACTION_DOWN) {
-                        statusBar.getPanelController().startExpandLatencyTracking();
+                        centralSurfaces.getPanelController().startExpandLatencyTracking();
                     }
                     mHandler.post(() -> {
                         int action = event.getActionMasked();
@@ -219,7 +216,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                             mInputFocusTransferStarted = true;
                             mInputFocusTransferStartY = event.getY();
                             mInputFocusTransferStartMillis = event.getEventTime();
-                            statusBar.onInputFocusTransfer(
+                            centralSurfaces.onInputFocusTransfer(
                                     mInputFocusTransferStarted, false /* cancel */,
                                     0 /* velocity */);
                         }
@@ -227,7 +224,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                             mInputFocusTransferStarted = false;
                             float velocity = (event.getY() - mInputFocusTransferStartY)
                                     / (event.getEventTime() - mInputFocusTransferStartMillis);
-                            statusBar.onInputFocusTransfer(mInputFocusTransferStarted,
+                            centralSurfaces.onInputFocusTransfer(mInputFocusTransferStarted,
                                     action == ACTION_CANCEL,
                                     velocity);
                         }
@@ -298,14 +295,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public Rect getNonMinimizedSplitScreenSecondaryBounds() {
-            return verifyCallerAndClearCallingIdentity(
-                    "getNonMinimizedSplitScreenSecondaryBounds",
-                    () -> mLegacySplitScreenOptional.map(splitScreen ->
-                            splitScreen
-                                    .getDividerView()
-                                    .getNonMinimizedSplitScreenSecondaryBounds())
-                            .orElse(null)
-            );
+            // Deprecated
+            return null;
         }
 
         @Override
@@ -362,8 +353,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void setSplitScreenMinimized(boolean minimized) {
-            mLegacySplitScreenOptional.ifPresent(
-                    splitScreen -> splitScreen.setMinimized(minimized));
+            // Deprecated
         }
 
         @Override
@@ -410,7 +400,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         @Override
         public void toggleNotificationPanel() {
             verifyCallerAndClearCallingIdentityPostMain("toggleNotificationPanel", () ->
-                    mStatusBarOptionalLazy.get().ifPresent(StatusBar::togglePanel));
+                    mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::togglePanel));
         }
 
 
@@ -516,6 +506,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     backAnimation.createExternalInterface().asBinder()));
 
             try {
+                Log.d(TAG_OPS, "OverviewProxyService connected, initializing overview proxy");
                 mOverviewProxy.onInitialize(params);
             } catch (RemoteException e) {
                 mCurrentBoundedUserId = -1;
@@ -564,11 +555,10 @@ public class OverviewProxyService extends CurrentUserTracker implements
     @Inject
     public OverviewProxyService(Context context, CommandQueue commandQueue,
             Lazy<NavigationBarController> navBarControllerLazy,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
             Optional<Pip> pipOptional,
-            Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<RecentTasks> recentTasks,
@@ -583,7 +573,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         super(broadcastDispatcher);
         mContext = context;
         mPipOptional = pipOptional;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
         mStatusBarWinController = statusBarWinController;
@@ -634,9 +624,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mCommandQueue = commandQueue;
 
         mSplitScreenOptional = splitScreenOptional;
-        legacySplitScreenOptional.ifPresent(splitScreen ->
-                splitScreen.registerBoundsChangeListener(mSplitScreenBoundsChangeListener));
-        mLegacySplitScreenOptional = legacySplitScreenOptional;
 
         // Listen for user setup
         startTracking();
@@ -678,7 +665,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         final NavigationBarView navBarView =
                 mNavBarControllerLazy.get().getNavigationBarView(mContext.getDisplayId());
         final NotificationPanelViewController panelController =
-                mStatusBarOptionalLazy.get().get().getPanelController();
+                mCentralSurfacesOptionalLazy.get().get().getPanelController();
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Updating sysui state flags: navBarFragment=" + navBarFragment
                     + " navBarView=" + navBarView + " panelController=" + panelController);
@@ -688,7 +675,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             navBarFragment.updateSystemUiStateFlags();
         }
         if (navBarView != null) {
-            navBarView.updateDisabledSystemUiStateFlags();
+            navBarView.updateDisabledSystemUiStateFlags(mSysUiState);
         }
         if (panelController != null) {
             panelController.updateSystemUiStateFlags();
@@ -744,17 +731,13 @@ public class OverviewProxyService extends CurrentUserTracker implements
     public void cleanupAfterDeath() {
         if (mInputFocusTransferStarted) {
             mHandler.post(() -> {
-                mStatusBarOptionalLazy.get().ifPresent(statusBar -> {
+                mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
                     mInputFocusTransferStarted = false;
-                    statusBar.onInputFocusTransfer(false, true /* cancel */, 0 /* velocity */);
+                    centralSurfaces.onInputFocusTransfer(false, true /* cancel */, 0 /* velocity */);
                 });
             });
         }
         startConnectionToCurrentUser();
-
-        // Clean up the minimized state if launcher dies
-        mLegacySplitScreenOptional.ifPresent(
-                splitScreen -> splitScreen.setMinimized(false));
     }
 
     public void startConnectionToCurrentUser() {
@@ -1031,7 +1014,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG_OPS + " state:");
         pw.print("  isConnected="); pw.println(mOverviewProxy != null);
         pw.print("  mIsEnabled="); pw.println(isEnabled());
@@ -1048,7 +1031,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         pw.print("  mNavBarButtonAlpha="); pw.println(mNavBarButtonAlpha);
         pw.print("  mActiveNavBarRegion="); pw.println(mActiveNavBarRegion);
         pw.print("  mNavBarMode="); pw.println(mNavBarMode);
-        mSysUiState.dump(fd, pw, args);
+        mSysUiState.dump(pw, args);
     }
 
     public interface OverviewProxyListener {

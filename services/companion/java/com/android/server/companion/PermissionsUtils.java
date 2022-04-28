@@ -36,6 +36,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
@@ -188,6 +189,19 @@ final class PermissionsUtils {
         if (!checkCallerCanInteractWithUserId(context, userId)) return false;
 
         return checkCallerCanManageCompanionDevice(context);
+    }
+
+    static @Nullable AssociationInfo sanitizeWithCallerChecks(@NonNull Context context,
+            @Nullable AssociationInfo association) {
+        if (association == null) return null;
+
+        final int userId = association.getUserId();
+        final String packageName = association.getPackageName();
+        if (!checkCallerCanManageAssociationsForPackage(context, userId, packageName)) {
+            return null;
+        }
+
+        return association;
     }
 
     private static boolean checkPackage(@UserIdInt int uid, @NonNull String packageName) {
