@@ -133,6 +133,25 @@ class WindowMagnificationConnectionWrapper {
         return true;
     }
 
+    boolean moveWindowMagnifierToPosition(int displayId, float positionX, float positionY,
+            @Nullable MagnificationAnimationCallback callback) {
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".moveWindowMagnifierToPosition",
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION, "displayId=" + displayId
+                            + ";positionX=" + positionX + ";positionY=" + positionY);
+        }
+        try {
+            mConnection.moveWindowMagnifierToPosition(displayId, positionX, positionY,
+                    transformToRemoteCallback(callback, mTrace));
+        } catch (RemoteException e) {
+            if (DBG) {
+                Slog.e(TAG, "Error calling moveWindowMagnifierToPosition()", e);
+            }
+            return false;
+        }
+        return true;
+    }
+
     boolean showMagnificationButton(int displayId, int magnificationMode) {
         if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
             mTrace.logTrace(TAG + ".showMagnificationButton",

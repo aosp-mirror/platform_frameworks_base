@@ -17,6 +17,8 @@
 
 package android.hardware.usb;
 
+import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
+
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
@@ -36,8 +38,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.hardware.usb.gadget.V1_0.GadgetFunction;
 import android.hardware.usb.gadget.V1_2.UsbSpeed;
-import android.hardware.usb.IUsbOperationInternal;
-import android.hardware.usb.UsbPort;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -1189,9 +1189,8 @@ public class UsbManager {
     /**
      * Enable/Disable the USB data signaling.
      * <p>
-     * Enables/Disables USB data path of the first port..
+     * Enables/Disables USB data path of all USB ports.
      * It will force to stop or restore USB data signaling.
-     * Call UsbPort API if the device has more than one UsbPort.
      * </p>
      *
      * @param enable enable or disable USB data signaling
@@ -1202,11 +1201,30 @@ public class UsbManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_USB)
     public boolean enableUsbDataSignal(boolean enable) {
-        List<UsbPort> usbPorts = getPorts();
-        if (usbPorts.size() == 1) {
-            return usbPorts.get(0).enableUsbData(enable) == UsbPort.ENABLE_USB_DATA_SUCCESS;
+        return setUsbDataSignal(getPorts(), !enable, /* revertOnFailure= */ true);
+    }
+
+    private boolean setUsbDataSignal(List<UsbPort> usbPorts, boolean disable,
+            boolean revertOnFailure) {
+        List<UsbPort> changedPorts = new ArrayList<>();
+        for (int i = 0; i < usbPorts.size(); i++) {
+            UsbPort port = usbPorts.get(i);
+            if (isPortDisabled(port) != disable) {
+                changedPorts.add(port);
+                if (port.enableUsbData(!disable) != UsbPort.ENABLE_USB_DATA_SUCCESS
+                        && revertOnFailure) {
+                    Log.e(TAG, "Failed to set usb data signal for portID(" + port.getId() + ")");
+                    setUsbDataSignal(changedPorts, !disable, /* revertOnFailure= */ false);
+                    return false;
+                }
+            }
         }
-        return false;
+        return true;
+    }
+
+    private boolean isPortDisabled(UsbPort usbPort) {
+        return (getPortStatus(usbPort).getUsbDataStatus() & DATA_STATUS_DISABLED_FORCE)
+                == DATA_STATUS_DISABLED_FORCE;
     }
 
     /**
@@ -1342,11 +1360,11 @@ public class UsbManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_USB)
-    boolean resetUsbPort(@NonNull UsbPort port, int operationId,
+    void resetUsbPort(@NonNull UsbPort port, int operationId,
             IUsbOperationInternal callback) {
         Objects.requireNonNull(port, "resetUsbPort: port must not be null. opId:" + operationId);
         try {
-            return mService.resetUsbPort(port.getId(), operationId, callback);
+            mService.resetUsbPort(port.getId(), operationId, callback);
         } catch (RemoteException e) {
             Log.e(TAG, "resetUsbPort: failed. ", e);
             try {

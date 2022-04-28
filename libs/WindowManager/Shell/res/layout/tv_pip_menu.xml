@@ -16,26 +16,41 @@
 -->
 <!-- Layout for TvPipMenuView -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:id="@+id/tv_pip_menu"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+            android:id="@+id/tv_pip_menu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center|top">
+
+    <View
+        android:id="@+id/tv_pip"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/pip_menu_outer_space"
+        android:layout_marginStart="@dimen/pip_menu_outer_space"
+        android:layout_marginEnd="@dimen/pip_menu_outer_space"/>
 
     <ScrollView
         android:id="@+id/tv_pip_menu_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
+        android:layout_alignTop="@+id/tv_pip"
+        android:layout_alignStart="@+id/tv_pip"
+        android:layout_alignEnd="@+id/tv_pip"
+        android:layout_alignBottom="@+id/tv_pip"
         android:scrollbars="none"
-        android:layout_margin="@dimen/pip_menu_outer_space"
         android:visibility="gone"/>
 
     <HorizontalScrollView
         android:id="@+id/tv_pip_menu_horizontal_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignTop="@+id/tv_pip"
+        android:layout_alignStart="@+id/tv_pip"
+        android:layout_alignEnd="@+id/tv_pip"
+        android:layout_alignBottom="@+id/tv_pip"
         android:gravity="center_vertical"
-        android:scrollbars="none"
-        android:layout_margin="@dimen/pip_menu_outer_space">
+        android:scrollbars="none">
 
         <LinearLayout
             android:id="@+id/tv_pip_menu_action_buttons"
@@ -89,10 +104,44 @@
     </HorizontalScrollView>
 
     <View
+        android:id="@+id/tv_pip_border"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/pip_menu_outer_space_frame"
+        android:layout_marginStart="@dimen/pip_menu_outer_space_frame"
+        android:layout_marginEnd="@dimen/pip_menu_outer_space_frame"
+        android:background="@drawable/tv_pip_menu_border"/>
+
+    <FrameLayout
+        android:id="@+id/tv_pip_menu_edu_text_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tv_pip"
+        android:layout_alignBottom="@+id/tv_pip_menu_frame"
+        android:layout_alignStart="@+id/tv_pip"
+        android:layout_alignEnd="@+id/tv_pip"
+        android:background="@color/tv_pip_menu_background"
+        android:clipChildren="true">
+
+        <TextView
+            android:id="@+id/tv_pip_menu_edu_text"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/pip_menu_edu_text_view_height"
+            android:layout_gravity="bottom|center"
+            android:gravity="center"
+            android:paddingBottom="@dimen/pip_menu_border_width"
+            android:text="@string/pip_edu_text"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="1"
+            android:scrollHorizontally="true"
+            android:textAppearance="@style/TvPipEduText"/>
+    </FrameLayout>
+
+    <View
         android:id="@+id/tv_pip_menu_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0"
         android:layout_margin="@dimen/pip_menu_outer_space_frame"
         android:background="@drawable/tv_pip_menu_border"/>
 

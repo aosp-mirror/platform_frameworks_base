@@ -76,13 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"کیمرے کے مسائل؟\nدوبارہ فٹ کرنے کیلئے تھپتھپائیں"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"یہ حل نہیں ہوا؟\nلوٹانے کیلئے تھپتھپائیں"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"کوئی کیمرے کا مسئلہ نہیں ہے؟ برخاست کرنے کیلئے تھپتھپائیں۔"</string>
-    <!-- no translation found for letterbox_education_dialog_title (6688664582871779215) -->
-    <skip />
-    <!-- no translation found for letterbox_education_dialog_subtext (4853542518367719562) -->
-    <skip />
-    <!-- no translation found for letterbox_education_screen_rotation_text (5085786687366339027) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (1068293354123934727) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"کچھ ایپس پورٹریٹ میں بہترین کام کرتی ہیں"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"اپنی اسپیس کا زیادہ سے زیادہ فائدہ اٹھانے کے لیے ان اختیارات میں سے ایک کو آزمائیں"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"پوری اسکرین پر جانے کیلئے اپنا آلہ گھمائیں"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"کسی ایپ کی پوزیشن تبدیل کرنے کے لیے اس کے آگے دو بار تھپتھپائیں"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"سمجھ آ گئی"</string>
 </resources>

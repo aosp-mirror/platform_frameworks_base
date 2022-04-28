@@ -24,6 +24,7 @@ import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD;
 import static com.android.server.pm.PackageManagerService.DEFERRED_NO_KILL_INSTALL_OBSERVER;
 import static com.android.server.pm.PackageManagerService.DEFERRED_NO_KILL_POST_DELETE;
+import static com.android.server.pm.PackageManagerService.DEFERRED_PENDING_KILL_INSTALL_OBSERVER;
 import static com.android.server.pm.PackageManagerService.DOMAIN_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.ENABLE_ROLLBACK_STATUS;
 import static com.android.server.pm.PackageManagerService.ENABLE_ROLLBACK_TIMEOUT;
@@ -74,7 +75,7 @@ final class PackageHandler extends Handler {
         try {
             doHandleMessage(msg);
         } finally {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
         }
     }
 
@@ -126,26 +127,22 @@ final class PackageHandler extends Handler {
                     }
                 }
             } break;
-            case DEFERRED_NO_KILL_INSTALL_OBSERVER: {
-                String packageName = (String) msg.obj;
+            case DEFERRED_NO_KILL_INSTALL_OBSERVER:
+            case DEFERRED_PENDING_KILL_INSTALL_OBSERVER: {
+                final String packageName = (String) msg.obj;
                 if (packageName != null) {
-                    mPm.notifyInstallObserver(packageName);
+                    final boolean killApp = msg.what == DEFERRED_PENDING_KILL_INSTALL_OBSERVER;
+                    mPm.notifyInstallObserver(packageName, killApp);
                 }
             } break;
             case WRITE_SETTINGS: {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                 mPm.writeSettings();
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             } break;
             case WRITE_PACKAGE_RESTRICTIONS: {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                 mPm.writePendingRestrictions();
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             } break;
             case WRITE_PACKAGE_LIST: {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                 mPm.writePackageList(msg.arg1);
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             } break;
             case CHECK_PENDING_VERIFICATION: {
                 final int verificationId = msg.arg1;
@@ -313,6 +310,8 @@ final class PackageHandler extends Handler {
             }
             case INSTANT_APP_RESOLUTION_PHASE_TWO: {
                 InstantAppResolver.doInstantAppResolutionPhaseTwo(mPm.mContext,
+                        mPm.snapshotComputer(),
+                        mPm.mUserManager,
                         mPm.mInstantAppResolverConnection,
                         (InstantAppRequest) msg.obj,
                         mPm.mInstantAppInstallerActivity,
@@ -380,6 +379,7 @@ final class PackageHandler extends Handler {
             case PRUNE_UNUSED_STATIC_SHARED_LIBRARIES: {
                 try {
                     mPm.mInjector.getSharedLibrariesImpl().pruneUnusedStaticSharedLibraries(
+                            mPm.snapshotComputer(),
                             Long.MAX_VALUE,
                             Settings.Global.getLong(mPm.mContext.getContentResolver(),
                                     Settings.Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,

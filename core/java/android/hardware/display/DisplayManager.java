@@ -957,7 +957,7 @@ public final class DisplayManager {
     public VirtualDisplay createVirtualDisplay(@Nullable IVirtualDevice virtualDevice,
             @NonNull VirtualDisplayConfig virtualDisplayConfig,
             @Nullable VirtualDisplay.Callback callback,
-            @NonNull Executor executor) {
+            @Nullable Executor executor) {
         return mGlobal.createVirtualDisplay(mContext, null /* projection */, virtualDevice,
                 virtualDisplayConfig, callback, executor, null);
     }

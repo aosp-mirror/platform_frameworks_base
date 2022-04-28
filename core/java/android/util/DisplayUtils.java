@@ -21,7 +21,7 @@ import android.content.res.Resources;
 import com.android.internal.R;
 
 /**
- * Utils for loading resources for multi-display.
+ * Utils for loading display related resources and calculations.
  *
  * @hide
  */
@@ -50,5 +50,18 @@ public class DisplayUtils {
             }
         }
         return index;
+    }
+
+    /**
+     * Get the display size ratio based on the stable display size.
+     */
+    public static float getPhysicalPixelDisplaySizeRatio(
+            int stableWidth, int stableHeight, int currentWidth, int currentHeight) {
+        if (stableWidth == currentWidth && stableHeight == currentHeight) {
+            return 1f;
+        }
+        final float widthRatio = (float) currentWidth / stableWidth;
+        final float heightRatio = (float) currentHeight / stableHeight;
+        return Math.min(widthRatio, heightRatio);
     }
 }

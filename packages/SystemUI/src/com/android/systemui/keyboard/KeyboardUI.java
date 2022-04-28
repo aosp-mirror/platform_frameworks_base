@@ -54,7 +54,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
@@ -141,7 +140,7 @@ public class KeyboardUI extends CoreStartable implements InputManager.OnTabletMo
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyboardUI:");
         pw.println("  mEnabled=" + mEnabled);
         pw.println("  mBootCompleted=" + mEnabled);

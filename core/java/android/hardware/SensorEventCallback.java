@@ -16,8 +16,6 @@
 
 package android.hardware;
 
-import android.annotation.NonNull;
-
 /**
  * Used for receiving sensor additional information frames.
  */
@@ -54,21 +52,4 @@ public abstract class SensorEventCallback implements SensorEventListener2 {
      * reported from sensor hardware.
      */
     public void onSensorAdditionalInfo(SensorAdditionalInfo info) {}
-
-    /**
-     * Called when the next {@link android.hardware.SensorEvent SensorEvent} to be delivered via the
-     * {@link #onSensorChanged(SensorEvent) onSensorChanged} method represents the first event after
-     * a discontinuity.
-     *
-     * The exact meaning of discontinuity depends on the sensor type. For {@link
-     * android.hardware.Sensor#TYPE_HEAD_TRACKER Sensor.TYPE_HEAD_TRACKER}, this means that the
-     * reference frame has suddenly and significantly changed.
-     *
-     * Note that this concept is either not relevant to or not supported by most sensor types,
-     * {@link android.hardware.Sensor#TYPE_HEAD_TRACKER Sensor.TYPE_HEAD_TRACKER} being the notable
-     * exception.
-     *
-     * @param sensor The {@link android.hardware.Sensor Sensor} which experienced the discontinuity.
-     */
-    public void onSensorDiscontinuity(@NonNull Sensor sensor) {}
 }

@@ -46,6 +46,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
     private val sectionsFeatureManager: NotificationSectionsFeatureManager = mock()
     private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider = mock()
     private val viewBarn: NotifViewBarn = mock()
+    private val logger: NodeSpecBuilderLogger = mock()
 
     private var rootController: NodeController = buildFakeController("rootController")
     private var headerController0: NodeController = buildFakeController("header0")
@@ -75,7 +76,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
         }
 
         specBuilder = NodeSpecBuilder(mediaContainerController, sectionsFeatureManager,
-                sectionHeaderVisibilityProvider, viewBarn)
+                sectionHeaderVisibilityProvider, viewBarn, logger)
     }
 
     @Test

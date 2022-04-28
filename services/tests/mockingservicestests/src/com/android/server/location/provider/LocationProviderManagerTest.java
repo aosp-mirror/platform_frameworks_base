@@ -213,7 +213,7 @@ public class LocationProviderManagerTest {
     public void testProperties() {
         assertThat(mManager.getName()).isEqualTo(NAME);
         assertThat(mManager.getProperties()).isEqualTo(PROPERTIES);
-        assertThat(mManager.getIdentity()).isEqualTo(IDENTITY);
+        assertThat(mManager.getProviderIdentity()).isEqualTo(IDENTITY);
         assertThat(mManager.hasProvider()).isTrue();
 
         ProviderProperties newProperties = new ProviderProperties.Builder()
@@ -230,7 +230,7 @@ public class LocationProviderManagerTest {
         CallerIdentity newIdentity = CallerIdentity.forTest(OTHER_USER, 1, "otherpackage",
                 "otherattribution");
         mProvider.setIdentity(newIdentity);
-        assertThat(mManager.getIdentity()).isEqualTo(newIdentity);
+        assertThat(mManager.getProviderIdentity()).isEqualTo(newIdentity);
 
         mManager.setRealProvider(null);
         assertThat(mManager.hasProvider()).isFalse();
@@ -333,6 +333,10 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testGetLastLocation_Bypass() {
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
         assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
                 PERMISSION_FINE)).isNull();
         assertThat(mManager.getLastLocation(
@@ -381,6 +385,14 @@ public class LocationProviderManagerTest {
                 new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
                 IDENTITY, PERMISSION_FINE)).isEqualTo(
                 loc);
+
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().build());
+        mProvider.setProviderAllowed(false);
+
+        assertThat(mManager.getLastLocation(
+                new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
+                IDENTITY, PERMISSION_FINE)).isNull();
     }
 
     @Test
@@ -1095,6 +1107,10 @@ public class LocationProviderManagerTest {
         doReturn(true).when(mPackageManager).hasSystemFeature(FEATURE_AUTOMOTIVE);
         doReturn(true).when(mResources).getBoolean(R.bool.config_defaultAdasGnssLocationEnabled);
 
+        mInjector.getSettingsHelper().setAdasSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
         createManager(GPS_PROVIDER);
 
         ILocationListener listener1 = createMockLocationListener();
@@ -1124,6 +1140,10 @@ public class LocationProviderManagerTest {
         doReturn(true).when(mPackageManager).hasSystemFeature(FEATURE_AUTOMOTIVE);
         doReturn(true).when(mResources).getBoolean(R.bool.config_defaultAdasGnssLocationEnabled);
 
+        mInjector.getSettingsHelper().setAdasSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
         createManager(GPS_PROVIDER);
 
         ILocationListener listener1 = createMockLocationListener();
@@ -1148,11 +1168,16 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testProviderRequest_AdasGnssBypass_ProviderDisabled_AdasDisabled() {
+        doReturn(true).when(mPackageManager).hasSystemFeature(FEATURE_AUTOMOTIVE);
+        doReturn(true).when(mResources).getBoolean(R.bool.config_defaultAdasGnssLocationEnabled);
+
         mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
                 new PackageTagsList.Builder().add(
                         IDENTITY.getPackageName()).build());
-        doReturn(true).when(mPackageManager).hasSystemFeature(FEATURE_AUTOMOTIVE);
-        doReturn(true).when(mResources).getBoolean(R.bool.config_defaultAdasGnssLocationEnabled);
+
+        mInjector.getSettingsHelper().setAdasSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
 
         createManager(GPS_PROVIDER);
 

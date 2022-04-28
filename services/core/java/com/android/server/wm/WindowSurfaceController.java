@@ -33,6 +33,7 @@ import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 
 import android.os.Debug;
 import android.os.Trace;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
@@ -124,6 +125,10 @@ class WindowSurfaceController {
         setShown(false);
         try {
             transaction.hide(mSurfaceControl);
+            if (mAnimator.mIsWallpaper) {
+                EventLog.writeEvent(EventLogTags.WM_WALLPAPER_SURFACE,
+                        mAnimator.mWin.getDisplayId(), 0 /* request hidden */);
+            }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception hiding surface in " + this);
         }
@@ -212,6 +217,11 @@ class WindowSurfaceController {
         mService.openSurfaceTransaction();
         try {
             getGlobalTransaction().setSecure(mSurfaceControl, isSecure);
+
+            final DisplayContent dc = mAnimator.mWin.mDisplayContent;
+            if (dc != null) {
+                dc.refreshImeSecureFlag(getGlobalTransaction());
+            }
         } finally {
             mService.closeSurfaceTransaction("setSecure");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setSecureLocked");
@@ -249,6 +259,10 @@ class WindowSurfaceController {
 
         setShown(true);
         t.show(mSurfaceControl);
+        if (mAnimator.mIsWallpaper) {
+            EventLog.writeEvent(EventLogTags.WM_WALLPAPER_SURFACE,
+                    mAnimator.mWin.getDisplayId(), 1 /* request shown */);
+        }
         return true;
     }
 

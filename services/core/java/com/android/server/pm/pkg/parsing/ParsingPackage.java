@@ -287,8 +287,8 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setInstallLocation(int installLocation);
 
-    /** @see R#styleable.AndroidManifest_inheritKeyStoreKeys */
-    ParsingPackage setInheritKeyStoreKeys(boolean inheritKeyStoreKeys);
+    /** @see R#styleable.AndroidManifest_sharedUserMaxSdkVersion */
+    ParsingPackage setLeavingSharedUid(boolean leavingSharedUid);
 
     ParsingPackage setLabelRes(int labelRes);
 
@@ -301,6 +301,8 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage setMinExtensionVersions(@Nullable SparseIntArray minExtensionVersions);
 
     ParsingPackage setMinSdkVersion(int minSdkVersion);
+
+    ParsingPackage setMaxSdkVersion(int maxSdkVersion);
 
     ParsingPackage setNetworkSecurityConfigRes(int networkSecurityConfigRes);
 

@@ -773,6 +773,20 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public void finishedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason);
 
     /**
+     * Called when a particular PowerGroup has changed wakefulness.
+     *
+     * @param groupId The id of the PowerGroup.
+     * @param wakefulness One of PowerManagerInternal.WAKEFULNESS_* indicating the wake state for
+     * the group
+     * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the reason this
+     * group is going to sleep.
+     * @param globalWakefulness The global wakefulness, which may or may not match that of this
+     * group. One of PowerManagerInternal.WAKEFULNESS_*
+     */
+    void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
+            @PowerManager.GoToSleepReason int pmSleepReason, int globalWakefulness);
+
+    /**
      * Called when the display is about to turn on to show content.
      * When waking up, this method will be called once after the call to wakingUp().
      * When dozing, the method will be called sometime after the call to goingToSleep() and

@@ -17,13 +17,13 @@
 package android.companion.virtual;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
@@ -48,8 +48,12 @@ import android.os.ResultReceiver;
 import android.util.ArrayMap;
 import android.view.Surface;
 
-import java.util.Objects;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * System level service for managing virtual devices.
@@ -70,6 +74,35 @@ public final class VirtualDeviceManager {
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            prefix = "LAUNCH_",
+            value = {
+                    LAUNCH_SUCCESS,
+                    LAUNCH_FAILURE_PENDING_INTENT_CANCELED,
+                    LAUNCH_FAILURE_NO_ACTIVITY})
+    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    public @interface PendingIntentLaunchStatus {}
+
+    /**
+     * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch was
+     * successful.
+     */
+    public static final int LAUNCH_SUCCESS = 0;
+
+    /**
+     * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch failed
+     * because the pending intent was canceled.
+     */
+    public static final int LAUNCH_FAILURE_PENDING_INTENT_CANCELED = 1;
+
+    /**
+     * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch failed
+     * because no activity starts were detected as a result of calling the pending intent.
+     */
+    public static final int LAUNCH_FAILURE_NO_ACTIVITY = 2;
 
     private final IVirtualDeviceManager mService;
     private final Context mContext;
@@ -148,6 +181,8 @@ public final class VirtualDeviceManager {
                         }
                     }
                 };
+        @Nullable
+        private VirtualAudioDevice mVirtualAudioDevice;
 
         private VirtualDevice(
                 IVirtualDeviceManager service,
@@ -172,16 +207,20 @@ public final class VirtualDeviceManager {
          *   intent, the activity will be started on the virtual display using
          *   {@link android.app.ActivityOptions#setLaunchDisplayId}. If the intent is a service or
          *   broadcast intent, an attempt will be made to catch activities started as a result of
-         *   sending the pending intent and move them to the given display.
+         *   sending the pending intent and move them to the given display. When it completes,
+         *   {@code listener} will be called with the status of whether the launch attempt is
+         *   successful or not.
          * @param executor The executor to run {@code launchCallback} on.
-         * @param launchCallback Callback that is called when the pending intent launching is
-         *   complete.
+         * @param listener Listener that is called when the pending intent launching is complete.
+         *   The argument is {@link #LAUNCH_SUCCESS} if the launch successfully started an activity
+         *   on the virtual display, or one of the {@code LAUNCH_FAILED} status explaining why it
+         *   failed.
          */
         public void launchPendingIntent(
                 int displayId,
                 @NonNull PendingIntent pendingIntent,
                 @NonNull Executor executor,
-                @NonNull LaunchCallback launchCallback) {
+                @NonNull IntConsumer listener) {
             try {
                 mVirtualDevice.launchPendingIntent(
                         displayId,
@@ -190,13 +229,7 @@ public final class VirtualDeviceManager {
                             @Override
                             protected void onReceiveResult(int resultCode, Bundle resultData) {
                                 super.onReceiveResult(resultCode, resultData);
-                                executor.execute(() -> {
-                                    if (resultCode == Activity.RESULT_OK) {
-                                        launchCallback.onLaunchSuccess();
-                                    } else {
-                                        launchCallback.onLaunchFailed();
-                                    }
-                                });
+                                executor.execute(() -> listener.accept(resultCode));
                             }
                         });
             } catch (RemoteException e) {
@@ -221,7 +254,8 @@ public final class VirtualDeviceManager {
          * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
          * VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY}.
          * @param executor The executor on which {@code callback} will be invoked. This is ignored
-         * if {@code callback} is {@code null}.
+         * if {@code callback} is {@code null}. If {@code callback} is specified, this executor must
+         * not be null.
          * @param callback Callback to call when the state of the {@link VirtualDisplay} changes
          * @return The newly created virtual display, or {@code null} if the application could
          * not create the virtual display.
@@ -235,7 +269,7 @@ public final class VirtualDeviceManager {
                 @IntRange(from = 1) int densityDpi,
                 @Nullable Surface surface,
                 @VirtualDisplayFlag int flags,
-                @NonNull @CallbackExecutor Executor executor,
+                @Nullable @CallbackExecutor Executor executor,
                 @Nullable VirtualDisplay.Callback callback) {
             // TODO(b/205343547): Handle display groups properly instead of creating a new display
             //  group for every new virtual display created using this API.
@@ -251,12 +285,12 @@ public final class VirtualDeviceManager {
                             .setFlags(getVirtualDisplayFlags(flags))
                             .build(),
                     callback,
-                    Objects.requireNonNull(executor));
+                    executor);
         }
 
         /**
-         * Closes the virtual device, stopping and tearing down any virtual displays,
-         * audio policies, and event injection that's currently in progress.
+         * Closes the virtual device, stopping and tearing down any virtual displays, associated
+         * virtual audio device, and event injection that's currently in progress.
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void close() {
@@ -265,6 +299,10 @@ public final class VirtualDeviceManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+            if (mVirtualAudioDevice != null) {
+                mVirtualAudioDevice.close();
+                mVirtualAudioDevice = null;
+            }
         }
 
         /**
@@ -272,8 +310,8 @@ public final class VirtualDeviceManager {
          *
          * @param display the display that the events inputted through this device should target
          * @param inputDeviceName the name to call this input device
-         * @param vendorId the vendor id, as defined by uinput's uinput_setup struct (PCI vendor id)
-         * @param productId the product id, as defined by uinput's uinput_setup struct
+         * @param vendorId the PCI vendor id
+         * @param productId the product id, as defined by the vendor
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
@@ -298,8 +336,8 @@ public final class VirtualDeviceManager {
          *
          * @param display the display that the events inputted through this device should target
          * @param inputDeviceName the name to call this input device
-         * @param vendorId the vendor id, as defined by uinput's uinput_setup struct (PCI vendor id)
-         * @param productId the product id, as defined by uinput's uinput_setup struct
+         * @param vendorId the PCI vendor id
+         * @param productId the product id, as defined by the vendor
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
@@ -324,8 +362,8 @@ public final class VirtualDeviceManager {
          *
          * @param display the display that the events inputted through this device should target
          * @param inputDeviceName the name to call this input device
-         * @param vendorId the vendor id, as defined by uinput's uinput_setup struct (PCI vendor id)
-         * @param productId the product id, as defined by uinput's uinput_setup struct
+         * @param vendorId the PCI vendor id
+         * @param productId the product id, as defined by the vendor
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
@@ -351,8 +389,10 @@ public final class VirtualDeviceManager {
          * Creates a VirtualAudioDevice, capable of recording audio emanating from this device,
          * or injecting audio from another device.
          *
-         * <p>Note: This object does not support capturing privileged playback, such as voice call
-         * audio.
+         * <p>Note: One {@link VirtualDevice} can only create one {@link VirtualAudioDevice}, so
+         * calling this method multiple times will return the same instance. When
+         * {@link VirtualDevice#close()} is called, the associated {@link VirtualAudioDevice} will
+         * also be closed automatically.
          *
          * @param display The target virtual display to capture from and inject into.
          * @param executor The {@link Executor} object for the thread on which to execute
@@ -368,7 +408,11 @@ public final class VirtualDeviceManager {
                 @NonNull VirtualDisplay display,
                 @Nullable Executor executor,
                 @Nullable AudioConfigurationChangeCallback callback) {
-            return new VirtualAudioDevice(mContext, mVirtualDevice, display, executor, callback);
+            if (mVirtualAudioDevice == null) {
+                mVirtualAudioDevice = new VirtualAudioDevice(
+                        mContext, mVirtualDevice, display, executor, callback);
+            }
+            return mVirtualAudioDevice;
         }
 
         /**
@@ -413,23 +457,12 @@ public final class VirtualDeviceManager {
          * Adds an activity listener to listen for events such as top activity change or virtual
          * display task stack became empty.
          *
+         * @param executor The executor where the listener is executed on.
          * @param listener The listener to add.
-         * @see #removeActivityListener(ActivityListener)
-         */
-        public void addActivityListener(@NonNull ActivityListener listener) {
-            addActivityListener(listener, mContext.getMainExecutor());
-        }
-
-        /**
-         * Adds an activity listener to listen for events such as top activity change or virtual
-         * display task stack became empty.
-         *
-         * @param listener The listener to add.
-         * @param executor The executor where the callback is executed on.
          * @see #removeActivityListener(ActivityListener)
          */
         public void addActivityListener(
-                @NonNull ActivityListener listener, @NonNull Executor executor) {
+                @CallbackExecutor @NonNull Executor executor, @NonNull ActivityListener listener) {
             mActivityListeners.put(listener, new ActivityListenerDelegate(listener, executor));
         }
 
@@ -438,26 +471,11 @@ public final class VirtualDeviceManager {
          * {@link #addActivityListener}.
          *
          * @param listener The listener to remove.
-         * @see #addActivityListener(ActivityListener, Executor)
+         * @see #addActivityListener(Executor, ActivityListener)
          */
         public void removeActivityListener(@NonNull ActivityListener listener) {
             mActivityListeners.remove(listener);
         }
-    }
-
-    /**
-     * Callback for launching pending intents on the virtual device.
-     */
-    public interface LaunchCallback {
-        /**
-         * Called when the pending intent launched successfully.
-         */
-        void onLaunchSuccess();
-
-        /**
-         * Called when the pending intent failed to launch.
-         */
-        void onLaunchFailed();
     }
 
     /**
@@ -467,6 +485,10 @@ public final class VirtualDeviceManager {
 
         /**
          * Called when the top activity is changed.
+         *
+         * <p>Note: When there are no activities running on the virtual display, the
+         * {@link #onDisplayEmpty(int)} will be called. If the value topActivity is cached, it
+         * should be cleared when {@link #onDisplayEmpty(int)} is called.
          *
          * @param displayId The display ID on which the activity change happened.
          * @param topActivity The component name of the top activity.

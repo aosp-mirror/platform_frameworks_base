@@ -46,7 +46,7 @@ public class ProvisioningException extends AndroidException {
     /**
      * Service-specific error code for {@link DevicePolicyManager#provisionFullyManagedDevice} and
      * {@link DevicePolicyManager#createAndProvisionManagedProfile}:
-     * Indicates the call to {@link DevicePolicyManager#checkProvisioningPreCondition} returned an
+     * Indicates the call to {@link DevicePolicyManager#checkProvisioningPrecondition} returned an
      * error code.
      */
     public static final int ERROR_PRE_CONDITION_FAILED = 1;

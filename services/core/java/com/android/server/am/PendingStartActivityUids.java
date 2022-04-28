@@ -46,15 +46,24 @@ final class PendingStartActivityUids {
         mContext = context;
     }
 
-    synchronized void add(int uid, int pid) {
+    /** Returns {@code true} if the uid is put to the pending array. Otherwise it existed. */
+    synchronized boolean add(int uid, int pid) {
         if (mPendingUids.get(uid) == null) {
             mPendingUids.put(uid, new Pair<>(pid, SystemClock.elapsedRealtime()));
+            return true;
         }
+        return false;
     }
 
-    synchronized void delete(int uid) {
+    synchronized void delete(int uid, long nowElapsed) {
         final Pair<Integer, Long> pendingPid = mPendingUids.get(uid);
         if (pendingPid != null) {
+            if (nowElapsed < pendingPid.second) {
+                Slog.i(TAG,
+                        "updateOomAdj start time is before than pendingPid added,"
+                        + " don't delete it");
+                return;
+            }
             final long delay = SystemClock.elapsedRealtime() - pendingPid.second;
             if (delay >= 1000 /*ms*/) {
                 Slog.i(TAG,

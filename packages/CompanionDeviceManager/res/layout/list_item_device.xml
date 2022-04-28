@@ -25,16 +25,18 @@
     <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
 
     <ImageView
-            android:id="@android:id/icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginRight="12dp"/>
+        android:id="@android:id/icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="12dp"
+        android:tint="@android:color/system_accent1_600"/>
 
     <TextView
-            android:id="@android:id/text1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
+        android:id="@android:id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
 
 </LinearLayout>

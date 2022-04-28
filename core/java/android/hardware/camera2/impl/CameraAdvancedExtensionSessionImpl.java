@@ -86,6 +86,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     // maps camera extension output ids to camera registered image readers
     private final HashMap<Integer, ImageReader> mReaderMap = new HashMap<>();
     private final RequestProcessor mRequestProcessor = new RequestProcessor();
+    private final int mSessionId;
 
     private Surface mClientRepeatingRequestSurface;
     private Surface mClientCaptureSurface;
@@ -175,7 +176,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
         CameraAdvancedExtensionSessionImpl ret = new CameraAdvancedExtensionSessionImpl(clientId,
                 extender, cameraDevice, repeatingRequestSurface, burstCaptureSurface,
-                config.getStateCallback(), config.getExecutor());
+                config.getStateCallback(), config.getExecutor(), sessionId);
         ret.initialize();
 
         return ret;
@@ -184,7 +185,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     private CameraAdvancedExtensionSessionImpl(long extensionClientId,
             @NonNull IAdvancedExtenderImpl extender, @NonNull CameraDevice cameraDevice,
             @Nullable Surface repeatingRequestSurface, @Nullable Surface burstCaptureSurface,
-            @NonNull CameraExtensionSession.StateCallback callback, @NonNull Executor executor) {
+            @NonNull CameraExtensionSession.StateCallback callback, @NonNull Executor executor,
+            int sessionId) {
         mExtensionClientId = extensionClientId;
         mAdvancedExtender = extender;
         mCameraDevice = cameraDevice;
@@ -197,6 +199,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         mHandler = new Handler(mHandlerThread.getLooper());
         mInitialized = false;
         mInitializeHandler = new InitializeSessionHandler();
+        mSessionId = sessionId;
     }
 
     /**
@@ -367,6 +370,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             }
 
             try {
+                mSessionProcessor.setParameters(request);
+
                 seqId = mSessionProcessor.startRepeating(new RequestCallbackHandler(request,
                         executor, listener));
             } catch (RemoteException e) {
@@ -388,34 +393,32 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 throw new IllegalStateException("Uninitialized component");
             }
 
-            if (mClientCaptureSurface == null) {
-                throw new IllegalArgumentException("No output surface registered for single"
-                        + " requests!");
+            if (request.getTargets().size() != 1) {
+                throw new IllegalArgumentException("Single capture to both preview & still"  +
+                        " capture outputs target is not supported!");
             }
 
-            if (!request.containsTarget(mClientCaptureSurface) ||
-                    (request.getTargets().size() != 1)) {
+            if ((mClientCaptureSurface != null)  && request.containsTarget(mClientCaptureSurface)) {
+                try {
+                    mSessionProcessor.setParameters(request);
+
+                    seqId = mSessionProcessor.startCapture(new RequestCallbackHandler(request,
+                            executor, listener));
+                } catch (RemoteException e) {
+                    throw new CameraAccessException(CameraAccessException.CAMERA_ERROR, "Failed " +
+                            " to submit capture request, extension service failed to respond!");
+                }
+            } else if ((mClientRepeatingRequestSurface != null) &&
+                    request.containsTarget(mClientRepeatingRequestSurface)) {
+                try {
+                    seqId = mSessionProcessor.startTrigger(request,
+                            new RequestCallbackHandler(request, executor, listener));
+                } catch (RemoteException e) {
+                    throw new CameraAccessException(CameraAccessException.CAMERA_ERROR, "Failed " +
+                            " to submit trigger request, extension service failed to respond!");
+                }
+            } else {
                 throw new IllegalArgumentException("Invalid single capture output target!");
-            }
-
-            try {
-                // This will override the extension capture stage jpeg parameters with the user set
-                // jpeg quality and rotation. This will guarantee that client configured jpeg
-                // parameters always have highest priority.
-                Integer jpegRotation = request.get(CaptureRequest.JPEG_ORIENTATION);
-                if (jpegRotation == null) {
-                    jpegRotation = CameraExtensionUtils.JPEG_DEFAULT_ROTATION;
-                }
-                Byte jpegQuality = request.get(CaptureRequest.JPEG_QUALITY);
-                if (jpegQuality == null) {
-                    jpegQuality = CameraExtensionUtils.JPEG_DEFAULT_QUALITY;
-                }
-
-                seqId = mSessionProcessor.startCapture(new RequestCallbackHandler(request,
-                        executor, listener), jpegRotation, jpegQuality);
-            } catch (RemoteException e) {
-                throw new CameraAccessException(CameraAccessException.CAMERA_ERROR,
-                        "Failed to submit capture request, extension service failed to respond!");
             }
         }
 
@@ -657,6 +660,28 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 mClientExecutor.execute(
                         () -> mClientCallbacks.onCaptureSequenceAborted(
                                 CameraAdvancedExtensionSessionImpl.this, captureSequenceId));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public void onCaptureCompleted(long timestamp, int requestId, CameraMetadataNative result) {
+            if (result == null) {
+                Log.e(TAG,"Invalid capture result!");
+                return;
+            }
+
+            result.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
+            TotalCaptureResult totalResult = new TotalCaptureResult(mCameraDevice.getId(), result,
+                    mClientRequest, requestId, timestamp, new ArrayList<>(), mSessionId,
+                    new PhysicalCaptureResultInfo[0]);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mClientCallbacks.onCaptureResultAvailable(
+                                CameraAdvancedExtensionSessionImpl.this, mClientRequest,
+                                totalResult));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

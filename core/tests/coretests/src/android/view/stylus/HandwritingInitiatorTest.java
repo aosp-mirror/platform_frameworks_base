@@ -60,7 +60,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class HandwritingInitiatorTest {
     private static final int TOUCH_SLOP = 8;
-    private static final long TAP_TIMEOUT = ViewConfiguration.getTapTimeout();
+    private static final long TIMEOUT = ViewConfiguration.getLongPressTimeout();
     private static final Rect sHwArea = new Rect(100, 200, 500, 500);
 
     private HandwritingInitiator mHandwritingInitiator;
@@ -177,7 +177,7 @@ public class HandwritingInitiatorTest {
     }
 
     @Test
-    public void onTouchEvent_notStartHandwriting_when_stylusMove_afterTapTimeOut() {
+    public void onTouchEvent_notStartHandwriting_when_stylusMove_afterTimeOut() {
         mHandwritingInitiator.onInputConnectionCreated(mTestView);
         final int x1 = 10;
         final int y1 = 10;
@@ -187,7 +187,7 @@ public class HandwritingInitiatorTest {
 
         final int x2 = x1 + TOUCH_SLOP * 2;
         final int y2 = y1;
-        final long time2 = time1 + TAP_TIMEOUT + 10L;
+        final long time2 = time1 + TIMEOUT + 10L;
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, time2);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 

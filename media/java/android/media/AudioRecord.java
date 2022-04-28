@@ -187,22 +187,14 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      */
     @SuppressWarnings("unused")
     @UnsupportedAppUsage
-    private long mNativeRecorderInJavaObj;
+    private long mNativeAudioRecordHandle;
 
     /**
      * Accessed by native methods: provides access to the callback data.
      */
     @SuppressWarnings("unused")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private long mNativeCallbackCookie;
-
-    /**
-     * Accessed by native methods: provides access to the JNIDeviceCallback instance.
-     */
-    @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private long mNativeDeviceCallback;
-
+    private long mNativeJNIDataHandle;
 
     //---------------------------------------------------------
     // Member variables
@@ -492,9 +484,8 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * value here as no error checking is or can be done.
      */
     /*package*/ AudioRecord(long nativeRecordInJavaObj) {
-        mNativeRecorderInJavaObj = 0;
-        mNativeCallbackCookie = 0;
-        mNativeDeviceCallback = 0;
+        mNativeAudioRecordHandle = 0;
+        mNativeJNIDataHandle = 0;
 
         // other initialization...
         if (nativeRecordInJavaObj != 0) {
@@ -2131,7 +2122,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * @hide
      */
     public int getPortId() {
-        if (mNativeRecorderInJavaObj == 0) {
+        if (mNativeAudioRecordHandle == 0) {
             return 0;
         }
         try {

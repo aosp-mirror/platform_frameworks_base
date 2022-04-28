@@ -18,8 +18,11 @@ package com.android.server.location.settings;
 
 import static android.content.pm.PackageManager.FEATURE_AUTOMOTIVE;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Environment;
+import android.os.RemoteException;
+import android.util.IndentingPrintWriter;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -29,6 +32,7 @@ import com.android.server.FgThread;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
@@ -102,6 +106,33 @@ public class LocationSettings {
     public final void updateUserSettings(int userId,
             Function<LocationUserSettings, LocationUserSettings> updater) {
         getUserSettingsStore(userId).update(updater);
+    }
+
+    /** Dumps info for debugging. */
+    public final void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
+        int[] userIds;
+        try {
+            userIds = ActivityManager.getService().getRunningUserIds();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        if (mContext.getPackageManager().hasSystemFeature(FEATURE_AUTOMOTIVE)) {
+            ipw.print("ADAS Location Setting: ");
+            ipw.increaseIndent();
+            if (userIds.length > 1) {
+                ipw.println();
+                for (int userId : userIds) {
+                    ipw.print("[u");
+                    ipw.print(userId);
+                    ipw.print("] ");
+                    ipw.println(getUserSettings(userId).isAdasGnssLocationEnabled());
+                }
+            } else {
+                ipw.println(getUserSettings(userIds[0]).isAdasGnssLocationEnabled());
+            }
+            ipw.decreaseIndent();
+        }
     }
 
     @VisibleForTesting

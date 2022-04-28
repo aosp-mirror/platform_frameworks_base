@@ -204,6 +204,9 @@ public class TileLifecycleManager extends BroadcastReceiver implements
                                 | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
                                 | Context.BIND_WAIVE_PRIORITY,
                         mUser);
+                if (!mIsBound) {
+                    mContext.unbindService(this);
+                }
             } catch (SecurityException e) {
                 Log.e(TAG, "Failed to bind to service", e);
                 mIsBound = false;

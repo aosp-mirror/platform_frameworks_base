@@ -22,10 +22,6 @@
     android:scrollbarAlwaysDrawVerticalTrack="true"
     android:scrollIndicators="top|bottom"
     android:fillViewport="true"
-    android:paddingTop="@dimen/dialog_button_bar_top_padding"
-    android:paddingStart="@dimen/dialog_side_padding"
-    android:paddingEnd="@dimen/dialog_side_padding"
-    android:paddingBottom="@dimen/dialog_bottom_padding"
     style="?android:attr/buttonBarStyle">
     <com.android.internal.widget.ButtonBarLayout
         android:layout_width="match_parent"

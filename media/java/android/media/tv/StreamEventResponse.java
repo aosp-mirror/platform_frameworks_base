@@ -43,7 +43,7 @@ public final class StreamEventResponse extends BroadcastInfoResponse implements 
             };
 
     private final int mEventId;
-    private final long mNpt;
+    private final long mNptMillis;
     private final byte[] mData;
 
     static StreamEventResponse createFromParcelBody(Parcel in) {
@@ -51,20 +51,24 @@ public final class StreamEventResponse extends BroadcastInfoResponse implements 
     }
 
     public StreamEventResponse(int requestId, int sequence, @ResponseResult int responseResult,
-            int eventId, long npt, @Nullable byte[] data) {
+            int eventId, long nptMillis, @Nullable byte[] data) {
         super(RESPONSE_TYPE, requestId, sequence, responseResult);
         mEventId = eventId;
-        mNpt = npt;
+        mNptMillis = nptMillis;
         mData = data;
     }
 
     private StreamEventResponse(@NonNull Parcel source) {
         super(RESPONSE_TYPE, source);
         mEventId = source.readInt();
-        mNpt = source.readLong();
+        mNptMillis = source.readLong();
         int dataLength = source.readInt();
-        mData = new byte[dataLength];
-        source.readByteArray(mData);
+        if (dataLength > 0) {
+            mData = new byte[dataLength];
+            source.readByteArray(mData);
+        } else {
+            mData = null;
+        }
     }
 
     /**
@@ -76,9 +80,10 @@ public final class StreamEventResponse extends BroadcastInfoResponse implements 
 
     /**
      * Returns the NPT(Normal Play Time) value when the event occurred or will occur.
+     * <p>The time unit of NPT is millisecond.
      */
-    public long getNpt() {
-        return mNpt;
+    public long getNptMillis() {
+        return mNptMillis;
     }
 
     /**
@@ -98,8 +103,12 @@ public final class StreamEventResponse extends BroadcastInfoResponse implements 
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(mEventId);
-        dest.writeLong(mNpt);
-        dest.writeInt(mData.length);
-        dest.writeByteArray(mData);
+        dest.writeLong(mNptMillis);
+        if (mData != null && mData.length > 0) {
+            dest.writeInt(mData.length);
+            dest.writeByteArray(mData);
+        } else {
+            dest.writeInt(0);
+        }
     }
 }

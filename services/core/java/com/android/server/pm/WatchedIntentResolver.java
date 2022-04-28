@@ -18,8 +18,10 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.IntentFilter;
 
 import com.android.server.IntentResolver;
+import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableImpl;
@@ -99,8 +101,8 @@ public abstract class WatchedIntentResolver<F extends WatchedIntentFilter,
     }
 
     @Override
-    public void addFilter(F f) {
-        super.addFilter(f);
+    public void addFilter(@Nullable PackageDataSnapshot snapshot, F f) {
+        super.addFilter(snapshot, f);
         f.registerObserver(mWatcher);
         onChanged();
     }

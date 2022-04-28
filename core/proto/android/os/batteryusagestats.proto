@@ -76,6 +76,7 @@ message BatteryUsageStatsAtomsProto {
                 FOREGROUND = 1;
                 BACKGROUND = 2;
                 FOREGROUND_SERVICE = 3;
+                CACHED = 4;
             }
 
             optional ProcessState process_state = 2;

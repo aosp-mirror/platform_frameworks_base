@@ -16,6 +16,8 @@
 
 package com.android.server.companion.virtual;
 
+import static android.content.pm.ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -26,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -36,13 +39,19 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
 import android.Manifest;
+import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
-import android.companion.virtual.audio.IAudioSessionCallback;
+import android.companion.virtual.audio.IAudioConfigChangedCallback;
+import android.companion.virtual.audio.IAudioRoutingCallback;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Point;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManagerInternal;
@@ -58,16 +67,19 @@ import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.IThermalService;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.platform.test.annotations.Presubmit;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.ArraySet;
 import android.view.DisplayInfo;
 import android.view.KeyEvent;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.internal.app.BlockedAppStreamingActivity;
 import com.android.server.LocalServices;
 
 import org.junit.Before;
@@ -78,11 +90,22 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.function.Consumer;
+
 @Presubmit
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class VirtualDeviceManagerServiceTest {
 
+    private static final String NONBLOCKED_APP_PACKAGE_NAME = "com.someapp";
+    private static final String PERMISSION_CONTROLLER_PACKAGE_NAME =
+            "com.android.permissioncontroller";
+    private static final String SETTINGS_PACKAGE_NAME = "com.android.settings";
+    private static final String VENDING_PACKAGE_NAME = "com.android.vending";
+    private static final String GOOGLE_DIALER_PACKAGE_NAME = "com.google.android.dialer";
+    private static final String GOOGLE_MAPS_PACKAGE_NAME = "com.google.android.apps.maps";
     private static final String DEVICE_NAME = "device name";
     private static final int DISPLAY_ID = 2;
     private static final int PRODUCT_ID = 10;
@@ -92,10 +115,12 @@ public class VirtualDeviceManagerServiceTest {
     private static final int HEIGHT = 1800;
     private static final int WIDTH = 900;
     private static final Binder BINDER = new Binder("binder");
+    private static final int FLAG_CANNOT_DISPLAY_ON_REMOTE_DEVICES = 0x00000;
 
     private Context mContext;
     private VirtualDeviceImpl mDeviceImpl;
     private InputController mInputController;
+    private AssociationInfo mAssociationInfo;
     @Mock
     private InputController.NativeWrapper mNativeWrapperMock;
     @Mock
@@ -109,12 +134,40 @@ public class VirtualDeviceManagerServiceTest {
     @Mock
     private IVirtualDeviceActivityListener mActivityListener;
     @Mock
+    private Consumer<ArraySet<Integer>> mRunningAppsChangedCallback;
+    @Mock
     IPowerManager mIPowerManagerMock;
     @Mock
     IThermalService mIThermalServiceMock;
     private PowerManager mPowerManager;
     @Mock
-    private IAudioSessionCallback mCallback;
+    private IAudioRoutingCallback mRoutingCallback;
+    @Mock
+    private IAudioConfigChangedCallback mConfigChangedCallback;
+    @Mock
+    private ApplicationInfo mApplicationInfoMock;
+
+    private ArraySet<ComponentName> getBlockedActivities() {
+        ArraySet<ComponentName> blockedActivities = new ArraySet<>();
+        blockedActivities.add(new ComponentName(SETTINGS_PACKAGE_NAME, SETTINGS_PACKAGE_NAME));
+        blockedActivities.add(new ComponentName(VENDING_PACKAGE_NAME, VENDING_PACKAGE_NAME));
+        blockedActivities.add(
+                new ComponentName(GOOGLE_DIALER_PACKAGE_NAME, GOOGLE_DIALER_PACKAGE_NAME));
+        blockedActivities.add(
+                new ComponentName(GOOGLE_MAPS_PACKAGE_NAME, GOOGLE_MAPS_PACKAGE_NAME));
+        return blockedActivities;
+    }
+
+    private ArrayList<ActivityInfo> getActivityInfoList(
+            String packageName, String name, boolean displayOnRemoveDevices) {
+        ActivityInfo activityInfo = new ActivityInfo();
+        activityInfo.packageName = packageName;
+        activityInfo.name = name;
+        activityInfo.flags = displayOnRemoveDevices
+                ? FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES : FLAG_CANNOT_DISPLAY_ON_REMOTE_DEVICES;
+        activityInfo.applicationInfo = mApplicationInfoMock;
+        return new ArrayList<>(Arrays.asList(activityInfo));
+    }
 
     @Before
     public void setUp() {
@@ -136,6 +189,7 @@ public class VirtualDeviceManagerServiceTest {
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
         mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
+        doReturn(mContext).when(mContext).createContextAsUser(eq(Process.myUserHandle()), anyInt());
         doNothing().when(mContext).enforceCallingOrSelfPermission(
                 eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
         when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(
@@ -146,13 +200,18 @@ public class VirtualDeviceManagerServiceTest {
         when(mContext.getSystemService(Context.POWER_SERVICE)).thenReturn(mPowerManager);
 
         mInputController = new InputController(new Object(), mNativeWrapperMock);
-        AssociationInfo associationInfo = new AssociationInfo(1, 0, null,
+        mAssociationInfo = new AssociationInfo(1, 0, null,
                 MacAddress.BROADCAST_ADDRESS, "", null, true, false, 0, 0);
+
+        VirtualDeviceParams params = new VirtualDeviceParams
+                .Builder()
+                .setBlockedActivities(getBlockedActivities())
+                .build();
         mDeviceImpl = new VirtualDeviceImpl(mContext,
-                associationInfo, new Binder(), /* uid */ 0, mInputController,
+                mAssociationInfo, new Binder(), /* uid */ 0, mInputController,
                 (int associationId) -> {
-                }, mPendingTrampolineCallback, mActivityListener,
-                new VirtualDeviceParams.Builder().build());
+                }, mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback,
+                params);
     }
 
     @Test
@@ -256,7 +315,8 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void onAudioSessionStarting_noDisplay_failsSecurityException() {
         assertThrows(SecurityException.class,
-                () -> mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback));
+                () -> mDeviceImpl.onAudioSessionStarting(
+                        DISPLAY_ID, mRoutingCallback, mConfigChangedCallback));
     }
 
     @Test
@@ -298,7 +358,8 @@ public class VirtualDeviceManagerServiceTest {
         doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
                 eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
         assertThrows(SecurityException.class,
-                () -> mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback));
+                () -> mDeviceImpl.onAudioSessionStarting(
+                        DISPLAY_ID, mRoutingCallback, mConfigChangedCallback));
     }
 
     @Test
@@ -345,7 +406,7 @@ public class VirtualDeviceManagerServiceTest {
     public void onAudioSessionStarting_hasVirtualAudioController() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
 
-        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback);
+        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mRoutingCallback, mConfigChangedCallback);
 
         assertThat(mDeviceImpl.getVirtualAudioControllerForTesting()).isNotNull();
     }
@@ -353,9 +414,19 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void onAudioSessionEnded_noVirtualAudioController() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
-        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback);
+        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mRoutingCallback, mConfigChangedCallback);
 
         mDeviceImpl.onAudioSessionEnded();
+
+        assertThat(mDeviceImpl.getVirtualAudioControllerForTesting()).isNull();
+    }
+
+    @Test
+    public void close_cleanVirtualAudioController() {
+        mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
+        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mRoutingCallback, mConfigChangedCallback);
+
+        mDeviceImpl.close();
 
         assertThat(mDeviceImpl.getVirtualAudioControllerForTesting()).isNull();
     }
@@ -572,5 +643,113 @@ public class VirtualDeviceManagerServiceTest {
         verify(mInputManagerInternalMock, never()).setPointerIconVisible(eq(true), anyInt());
         mDeviceImpl.setShowPointerIcon(true);
         verify(mInputManagerInternalMock, times(3)).setPointerIconVisible(eq(true), anyInt());
+    }
+
+    @Test
+    public void openNonBlockedAppOnVirtualDisplay_doesNotStartBlockedAlertActivity() {
+        mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                DISPLAY_ID);
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
+                NONBLOCKED_APP_PACKAGE_NAME,
+                NONBLOCKED_APP_PACKAGE_NAME, /* displayOnRemoveDevices */ true);
+        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
+                activityInfos.get(0), mAssociationInfo.getDisplayName());
+        gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
+
+        verify(mContext, never()).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    @Test
+    public void openPermissionControllerOnVirtualDisplay_startBlockedAlertActivity() {
+        mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                DISPLAY_ID);
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
+                PERMISSION_CONTROLLER_PACKAGE_NAME,
+                PERMISSION_CONTROLLER_PACKAGE_NAME, /* displayOnRemoveDevices */  false);
+        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
+                activityInfos.get(0), mAssociationInfo.getDisplayName());
+        gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
+
+        verify(mContext).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    @Test
+    public void openSettingsOnVirtualDisplay_startBlockedAlertActivity() {
+        mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                DISPLAY_ID);
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
+                SETTINGS_PACKAGE_NAME,
+                SETTINGS_PACKAGE_NAME, /* displayOnRemoveDevices */  true);
+        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
+                activityInfos.get(0), mAssociationInfo.getDisplayName());
+        gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
+
+        verify(mContext).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    @Test
+    public void openVendingOnVirtualDisplay_startBlockedAlertActivity() {
+        mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                DISPLAY_ID);
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
+                VENDING_PACKAGE_NAME,
+                VENDING_PACKAGE_NAME, /* displayOnRemoveDevices */  true);
+        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
+                activityInfos.get(0), mAssociationInfo.getDisplayName());
+        gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
+
+        verify(mContext).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    @Test
+    public void openGoogleDialerOnVirtualDisplay_startBlockedAlertActivity() {
+        mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                DISPLAY_ID);
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
+                GOOGLE_DIALER_PACKAGE_NAME,
+                GOOGLE_DIALER_PACKAGE_NAME, /* displayOnRemoveDevices */  true);
+        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
+                activityInfos.get(0), mAssociationInfo.getDisplayName());
+        gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
+
+        verify(mContext).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
+    }
+
+    @Test
+    public void openGoogleMapsOnVirtualDisplay_startBlockedAlertActivity() {
+        mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
+        GenericWindowPolicyController gwpc = mDeviceImpl.getWindowPolicyControllersForTesting().get(
+                DISPLAY_ID);
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        ArrayList<ActivityInfo> activityInfos = getActivityInfoList(
+                GOOGLE_MAPS_PACKAGE_NAME,
+                GOOGLE_MAPS_PACKAGE_NAME, /* displayOnRemoveDevices */  true);
+        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
+                activityInfos.get(0), mAssociationInfo.getDisplayName());
+        gwpc.canContainActivities(activityInfos, WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
+
+        verify(mContext).startActivityAsUser(argThat(intent ->
+                intent.filterEquals(blockedAppIntent)), any(), any());
     }
 }

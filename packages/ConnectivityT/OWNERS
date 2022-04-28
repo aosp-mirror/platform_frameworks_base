@@ -1,2 +1,0 @@
-file:platform/packages/modules/Connectivity:master:/OWNERS_core_networking
-per-file **IpSec* = file:/services/core/java/com/android/server/vcn/OWNERS

@@ -18,6 +18,7 @@ package com.android.wm.shell.compatui.letterboxedu;
 
 import static com.android.internal.R.styleable.WindowAnimation_windowEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_windowExitAnimation;
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -39,11 +40,12 @@ import com.android.internal.policy.TransitionAnimation;
 /**
  * Controls the enter/exit animations of the letterbox education.
  */
-// TODO(b/215316431): Add tests
 class LetterboxEduAnimationController {
     private static final String TAG = "LetterboxEduAnimation";
 
-    private static final int ENTER_ANIM_START_DELAY_MILLIS = 500;
+    // If shell transitions are enabled, startEnterAnimation will be called after all transitions
+    // have finished, and therefore the start delay should be shorter.
+    private static final int ENTER_ANIM_START_DELAY_MILLIS = ENABLE_SHELL_TRANSITIONS ? 300 : 500;
 
     private final TransitionAnimation mTransitionAnimation;
     private final String mPackageName;
@@ -99,14 +101,9 @@ class LetterboxEduAnimationController {
     /**
      * Starts both the background dim fade-out animation and the dialog exit animation.
      */
-    void startExitAnimation(@Nullable LetterboxEduDialogLayout layout, Runnable endCallback) {
+    void startExitAnimation(@NonNull LetterboxEduDialogLayout layout, Runnable endCallback) {
         // Cancel any previous animation if it's still running.
         cancelAnimation();
-
-        if (layout == null) {
-            endCallback.run();
-            return;
-        }
 
         final View dialogContainer = layout.getDialogContainer();
         mDialogAnimation = loadAnimation(WindowAnimation_windowExitAnimation);

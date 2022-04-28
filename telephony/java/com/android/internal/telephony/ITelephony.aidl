@@ -270,13 +270,13 @@ interface ITelephony {
      * Allow mobile data connections.
      */
     @UnsupportedAppUsage
-    boolean enableDataConnectivity();
+    boolean enableDataConnectivity(String callingPackage);
 
     /**
      * Disallow mobile data connections.
      */
     @UnsupportedAppUsage
-    boolean disableDataConnectivity();
+    boolean disableDataConnectivity(String callingPackage);
 
     /**
      * Report whether data connectivity is possible.
@@ -959,8 +959,9 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @param reason the reason the data enable change is taking place
      * @param enable true to turn on, else false
+     * @param callingPackage the package that changed the data enabled state
      */
-     void setDataEnabledForReason(int subId, int reason, boolean enable);
+     void setDataEnabledForReason(int subId, int reason, boolean enable, String callingPackage);
 
     /**
      * Return whether data is enabled for certain reason
@@ -976,14 +977,6 @@ interface ITelephony {
      * @return {@code true} if manual network selection is allowed, otherwise return {@code false}.
      */
      boolean isManualNetworkSelectionAllowed(int subId);
-
-    /**
-     * Get P-CSCF address from PCO after data connection is established or modified.
-     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
-     * @param callingPackage The package making the call.
-     * @param callingFeatureId The feature in the package.
-     */
-    String[] getPcscfAddress(String apnType, String callingPackage, String callingFeatureId);
 
     /**
      * Set IMS registration state
@@ -1335,7 +1328,7 @@ interface ITelephony {
      */
     PhoneAccountHandle getPhoneAccountHandleForSubscriptionId(int subscriptionId);
 
-    void factoryReset(int subId);
+    void factoryReset(int subId, String callingPackage);
 
     /**
      * Returns users's current locale based on the SIM.
@@ -2150,7 +2143,7 @@ interface ITelephony {
 
     List<RadioAccessSpecifier> getSystemSelectionChannels(int subId);
 
-    boolean isMvnoMatched(int subId, int mvnoType, String mvnoMatchData);
+    boolean isMvnoMatched(int slotIndex, int mvnoType, String mvnoMatchData);
 
     /**
      * Enqueue a pending sms Consumer, which will answer with the user specified selection for an
@@ -2549,4 +2542,15 @@ interface ITelephony {
      * PhoneAccount#CAPABILITY_VOICE_CALLING_AVAILABLE.
      */
     void setVoiceServiceStateOverride(int subId, boolean hasService, String callingPackage);
+
+    /**
+     * Returns the package name that provides the {@link CarrierService} implementation for the
+     * specified {@code logicalSlotIndex}, or {@code null} if no package with carrier privileges
+     * declares one.
+     *
+     * @param logicalSlotIndex The slot index to fetch the {@link CarrierService} package for
+     * @return The system-selected package that provides the {@link CarrierService} implementation
+     * for the slot, or {@code null} if none is resolved
+     */
+    String getCarrierServicePackageNameForLogicalSlot(int logicalSlotIndex);
 }

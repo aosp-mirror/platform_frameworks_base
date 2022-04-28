@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconMa
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.VariableDateView;
+import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.List;
 
@@ -69,7 +70,6 @@ public class QuickStatusBarHeader extends FrameLayout {
     private View mDateView;
     // DateView next to clock. Visible on QQS
     private VariableDateView mClockDateView;
-    private View mSecurityHeaderView;
     private View mStatusIconsView;
     private View mContainer;
 
@@ -102,7 +102,7 @@ public class QuickStatusBarHeader extends FrameLayout {
     private int mTopViewMeasureHeight;
 
     @NonNull
-    private List<String> mRssiIgnoredSlots;
+    private List<String> mRssiIgnoredSlots = List.of();
     private boolean mIsSingleCarrier;
 
     private boolean mHasCenterCutout;
@@ -136,7 +136,6 @@ public class QuickStatusBarHeader extends FrameLayout {
         mPrivacyChip = findViewById(R.id.privacy_chip);
         mDateView = findViewById(R.id.date);
         mClockDateView = findViewById(R.id.date_clock);
-        mSecurityHeaderView = findViewById(R.id.header_text_container);
         mClockIconsSeparator = findViewById(R.id.separator);
         mRightLayout = findViewById(R.id.rightLayout);
         mDateContainer = findViewById(R.id.date_container);
@@ -151,8 +150,6 @@ public class QuickStatusBarHeader extends FrameLayout {
         updateResources();
         Configuration config = mContext.getResources().getConfiguration();
         setDatePrivacyContainersWidth(config.orientation == Configuration.ORIENTATION_LANDSCAPE);
-        setSecurityHeaderContainerVisibility(
-                config.orientation == Configuration.ORIENTATION_LANDSCAPE);
 
         // QS will always show the estimate, and BatteryMeterView handles the case where
         // it's unavailable or charging
@@ -206,8 +203,6 @@ public class QuickStatusBarHeader extends FrameLayout {
         super.onConfigurationChanged(newConfig);
         updateResources();
         setDatePrivacyContainersWidth(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE);
-        setSecurityHeaderContainerVisibility(
-                newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE);
     }
 
     @Override
@@ -228,10 +223,6 @@ public class QuickStatusBarHeader extends FrameLayout {
         mPrivacyContainer.setLayoutParams(lp);
     }
 
-    private void setSecurityHeaderContainerVisibility(boolean landscape) {
-        mSecurityHeaderView.setVisibility(landscape ? VISIBLE : GONE);
-    }
-
     private void updateBatteryMode() {
         if (mConfigShowBatteryEstimate && !mHasCenterCutout) {
             mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
@@ -242,11 +233,10 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     void updateResources() {
         Resources resources = mContext.getResources();
-        // status bar is already displayed out of QS in split shade
-        boolean shouldUseSplitShade =
-                resources.getBoolean(R.bool.config_use_split_notification_shade);
+        boolean largeScreenHeaderActive =
+                LargeScreenUtils.shouldUseLargeScreenShadeHeader(resources);
 
-        boolean gone = shouldUseSplitShade || mUseCombinedQSHeader || mQsDisabled;
+        boolean gone = largeScreenHeaderActive || mUseCombinedQSHeader || mQsDisabled;
         mStatusIconsView.setVisibility(gone ? View.GONE : View.VISIBLE);
         mDatePrivacyView.setVisibility(gone ? View.GONE : View.VISIBLE);
 
@@ -287,7 +277,7 @@ public class QuickStatusBarHeader extends FrameLayout {
         }
 
         MarginLayoutParams qqsLP = (MarginLayoutParams) mHeaderQsPanel.getLayoutParams();
-        qqsLP.topMargin = shouldUseSplitShade || !mUseCombinedQSHeader ? mContext.getResources()
+        qqsLP.topMargin = largeScreenHeaderActive || !mUseCombinedQSHeader ? mContext.getResources()
                 .getDimensionPixelSize(R.dimen.qqs_layout_margin_top) : qsOffsetHeight;
         mHeaderQsPanel.setLayoutParams(qqsLP);
 
@@ -337,7 +327,6 @@ public class QuickStatusBarHeader extends FrameLayout {
             return;
         }
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
-                .addFloat(mSecurityHeaderView, "alpha", 0, 1)
                 // These views appear on expanding down
                 .addFloat(mDateView, "alpha", 0, 0, 1)
                 .addFloat(mClockDateView, "alpha", 1, 0, 0)

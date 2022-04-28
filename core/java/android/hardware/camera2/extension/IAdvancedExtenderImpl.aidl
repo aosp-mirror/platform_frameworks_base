@@ -19,6 +19,7 @@ import android.hardware.camera2.extension.ISessionProcessorImpl;
 import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.Size;
 import android.hardware.camera2.extension.SizeList;
+import android.hardware.camera2.impl.CameraMetadataNative;
 
 /** @hide */
 interface IAdvancedExtenderImpl
@@ -30,4 +31,6 @@ interface IAdvancedExtenderImpl
     @nullable List<SizeList> getSupportedPreviewOutputResolutions(in String cameraId);
     @nullable List<SizeList> getSupportedCaptureOutputResolutions(in String cameraId);
     ISessionProcessorImpl getSessionProcessor();
+    CameraMetadataNative getAvailableCaptureRequestKeys(in String cameraId);
+    CameraMetadataNative getAvailableCaptureResultKeys(in String cameraId);
 }

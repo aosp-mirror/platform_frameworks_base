@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.security.keymaster.KeymasterDefs;
 import android.system.keystore2.ResponseCode;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -36,6 +37,8 @@ import java.util.Map;
  * is likely to succeed.
  */
 public class KeyStoreException extends Exception {
+    private static final String TAG = "KeyStoreException";
+
     /**
      * This error code is for mapping errors that the caller will not know about. If the caller is
      * targeting an API level earlier than the one the error was introduced in, then the error will
@@ -114,6 +117,27 @@ public class KeyStoreException extends Exception {
      * The caller should re-create the crypto object and try again.
      */
     public static final int ERROR_KEY_OPERATION_EXPIRED = 15;
+    /**
+     * There are no keys available for attestation.
+     * This error is returned only on devices that rely solely on remotely-provisioned keys (see
+     * <a href=
+     * "https://android-developers.googleblog.com/2022/03/upgrading-android-attestation-remote.html"
+     * >Remote Key Provisioning</a>).
+     *
+     * <p>On such a device, if the caller requests key generation and includes an attestation
+     * challenge (indicating key attestation is required), the error will be returned in one of
+     * the following cases:
+     * <ul>
+     *     <li>The pool of remotely-provisioned keys has been exhausted.</li>
+     *     <li>The device is not registered with the key provisioning server.</li>
+     * </ul>
+     * </p>
+     *
+     * <p>This error is a transient one if the pool of remotely-provisioned keys has been
+     * exhausted. However, if the device is not registered with the server, or the key
+     * provisioning server refuses key issuance, this is a permanent error.</p>
+     */
+    public static final int ERROR_ATTESTATION_KEYS_UNAVAILABLE = 16;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -132,10 +156,67 @@ public class KeyStoreException extends Exception {
             ERROR_UNIMPLEMENTED,
             ERROR_INCORRECT_USAGE,
             ERROR_KEY_NOT_TEMPORALLY_VALID,
-            ERROR_KEY_OPERATION_EXPIRED
+            ERROR_KEY_OPERATION_EXPIRED,
+            ERROR_ATTESTATION_KEYS_UNAVAILABLE
     })
     public @interface PublicErrorCode {
     }
+
+    /**
+     * Never re-try the operation that led to this error, since it's a permanent error.
+     *
+     * This value is always returned when {@link #isTransientFailure()} is {@code false}.
+     */
+    public static final int RETRY_NEVER = 1;
+    /**
+     * Re-try the operation that led to this error with an exponential back-off delay.
+     * The first delay should be between 5 to 30 seconds, and each subsequent re-try should double
+     * the delay time.
+     *
+     * This value is returned when {@link #isTransientFailure()} is {@code true}.
+     */
+    public static final int RETRY_WITH_EXPONENTIAL_BACKOFF = 2;
+    /**
+     * Re-try the operation that led to this error when the device regains connectivity.
+     * Remote provisioning of keys requires reaching the remote server, and the device is
+     * currently unable to due that due to lack of network connectivity.
+     *
+     * This value is returned when {@link #isTransientFailure()} is {@code true}.
+     */
+    public static final int RETRY_WHEN_CONNECTIVITY_AVAILABLE = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = {"RETRY_"}, value = {
+            RETRY_NEVER,
+            RETRY_WITH_EXPONENTIAL_BACKOFF,
+            RETRY_WHEN_CONNECTIVITY_AVAILABLE,
+    })
+    public @interface RetryPolicy {
+    }
+
+    // RKP-specific error information.
+    /**
+     * Remote provisioning of attestation keys has completed successfully.
+     * @hide */
+    public static final int RKP_SUCCESS = 0;
+    /**
+     * Remotely-provisioned keys are temporarily unavailable. This could be because of RPC
+     * error when talking to the remote provisioner or keys are being currently fetched and will
+     * be available soon.
+     * @hide */
+    public static final int RKP_TEMPORARILY_UNAVAILABLE = 1;
+    /**
+     * Permanent failure: The RKP server has declined issuance of keys to this device. Either
+     * because the device is not registered with the server or the server considers the device
+     * not to be trustworthy.
+     * @hide */
+    public static final int RKP_SERVER_REFUSED_ISSUANCE = 2;
+    /**
+     * The RKP server is unavailable due to lack of connectivity. The caller should re-try
+     * when the device has connectivity again.
+     * @hide */
+    public static final int RKP_FETCHING_PENDING_CONNECTIVITY = 3;
 
     // Constants for encoding information about the error encountered:
     // Whether the error relates to the system state/implementation as a whole, or a specific key.
@@ -148,6 +229,21 @@ public class KeyStoreException extends Exception {
     // The internal error code. NOT to be returned directly to callers or made part of the
     // public API.
     private final int mErrorCode;
+    // The Remote Key Provisioning status. Applicable if and only if {@link #mErrorCode} is equal
+    // to {@link ResponseCode.OUT_OF_KEYS}.
+    private final int mRkpStatus;
+
+    private static int initializeRkpStatusForRegularErrors(int errorCode) {
+        // Check if the system code mistakenly called a constructor of KeyStoreException with
+        // the OUT_OF_KEYS error code but without RKP status.
+        if (errorCode == ResponseCode.OUT_OF_KEYS) {
+            Log.e(TAG, "RKP error code without RKP status");
+            // Set RKP status to RKP_SERVER_REFUSED_ISSUANCE so that the caller never retries.
+            return RKP_SERVER_REFUSED_ISSUANCE;
+        } else {
+            return RKP_SUCCESS;
+        }
+    }
 
     /**
      * @hide
@@ -155,6 +251,7 @@ public class KeyStoreException extends Exception {
     public KeyStoreException(int errorCode, @Nullable String message) {
         super(message);
         mErrorCode = errorCode;
+        mRkpStatus = initializeRkpStatusForRegularErrors(errorCode);
     }
 
     /**
@@ -165,6 +262,19 @@ public class KeyStoreException extends Exception {
         super(message + " (internal Keystore code: " + errorCode + " message: "
                 + keystoreErrorMessage + ")");
         mErrorCode = errorCode;
+        mRkpStatus = initializeRkpStatusForRegularErrors(errorCode);
+    }
+
+    /**
+     * @hide
+     */
+    public KeyStoreException(int errorCode, @Nullable String message, int rkpStatus) {
+        super(message);
+        mErrorCode = errorCode;
+        mRkpStatus = rkpStatus;
+        if (mErrorCode != ResponseCode.OUT_OF_KEYS) {
+            Log.e(TAG, "Providing RKP status for error code " + errorCode + " has no effect.");
+        }
     }
 
     /**
@@ -198,6 +308,17 @@ public class KeyStoreException extends Exception {
      */
     public boolean isTransientFailure() {
         PublicErrorInformation failureInfo = getErrorInformation(mErrorCode);
+        // Special-case handling for RKP failures:
+        if (mRkpStatus != RKP_SUCCESS && mErrorCode == ResponseCode.OUT_OF_KEYS) {
+            switch (mRkpStatus) {
+                case RKP_TEMPORARILY_UNAVAILABLE:
+                case RKP_FETCHING_PENDING_CONNECTIVITY:
+                    return true;
+                case RKP_SERVER_REFUSED_ISSUANCE:
+                default:
+                    return false;
+            }
+        }
         return (failureInfo.indicators & IS_TRANSIENT_ERROR) != 0;
     }
 
@@ -223,6 +344,34 @@ public class KeyStoreException extends Exception {
     public boolean isSystemError() {
         PublicErrorInformation failureInfo = getErrorInformation(mErrorCode);
         return (failureInfo.indicators & IS_SYSTEM_ERROR) != 0;
+    }
+
+    /**
+     * Returns the re-try policy for transient failures. Valid only if
+     * {@link #isTransientFailure()} returns {@code True}.
+     */
+    @RetryPolicy
+    public int getRetryPolicy() {
+        PublicErrorInformation failureInfo = getErrorInformation(mErrorCode);
+        // Special-case handling for RKP failures:
+        if (mRkpStatus != RKP_SUCCESS) {
+            switch (mRkpStatus) {
+                case RKP_TEMPORARILY_UNAVAILABLE:
+                    return RETRY_WITH_EXPONENTIAL_BACKOFF;
+                case RKP_FETCHING_PENDING_CONNECTIVITY:
+                    return RETRY_WHEN_CONNECTIVITY_AVAILABLE;
+                case RKP_SERVER_REFUSED_ISSUANCE:
+                    return RETRY_NEVER;
+                default:
+                    return (failureInfo.indicators & IS_TRANSIENT_ERROR) != 0
+                            ? RETRY_WITH_EXPONENTIAL_BACKOFF : RETRY_NEVER;
+            }
+        }
+        if ((failureInfo.indicators & IS_TRANSIENT_ERROR) != 0) {
+            return RETRY_WITH_EXPONENTIAL_BACKOFF;
+        } else {
+            return RETRY_NEVER;
+        }
     }
 
     @Override
@@ -469,5 +618,7 @@ public class KeyStoreException extends Exception {
                 new PublicErrorInformation(0, ERROR_KEY_CORRUPTED));
         sErrorCodeToFailureInfo.put(ResponseCode.KEY_PERMANENTLY_INVALIDATED,
                 new PublicErrorInformation(0, ERROR_KEY_DOES_NOT_EXIST));
+        sErrorCodeToFailureInfo.put(ResponseCode.OUT_OF_KEYS,
+                new PublicErrorInformation(IS_SYSTEM_ERROR, ERROR_ATTESTATION_KEYS_UNAVAILABLE));
     }
 }

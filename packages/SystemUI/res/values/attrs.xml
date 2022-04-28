@@ -154,10 +154,6 @@
         <attr name="showAirplaneMode" format="boolean" />
     </declare-styleable>
 
-    <declare-styleable name="CaptionsToggleImageButton">
-        <attr name="optedOut" format="boolean" />
-    </declare-styleable>
-
     <declare-styleable name="IlluminationDrawable">
         <attr name="highlight" format="integer" />
         <attr name="cornerRadius" format="dimension" />
@@ -192,12 +188,10 @@
         <attr name="borderColor" format="color" />
     </declare-styleable>
 
-    <declare-styleable name="DualHeightHorizontalLinearLayout">
-        <attr name="singleLineHeight" format="dimension" />
-        <attr name="singleLineVerticalPadding" format="dimension" />
-        <attr name="textViewId" format="reference" />
-    </declare-styleable>
-
     <attr name="overlayButtonTextColor" format="color" />
+
+    <declare-styleable name="DreamOverlayDotImageView">
+        <attr name="dotColor" format="color" />
+    </declare-styleable>
 </resources>
 

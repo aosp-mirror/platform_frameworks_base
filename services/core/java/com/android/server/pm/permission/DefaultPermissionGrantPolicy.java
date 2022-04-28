@@ -21,6 +21,7 @@ import static android.os.Process.FIRST_APPLICATION_UID;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.SearchManager;
@@ -70,6 +71,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
+import com.android.server.pm.KnownPackages;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal.PackagesProvider;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal.SyncAdapterPackagesProvider;
 
@@ -206,6 +208,9 @@ final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
     }
 
     private static final Set<String> NEARBY_DEVICES_PERMISSIONS = new ArraySet<>();
@@ -585,19 +590,19 @@ final class DefaultPermissionGrantPolicy {
         // Installer
         grantSystemFixedPermissionsToSystemPackage(pm,
                 ArrayUtils.firstOrNull(getKnownPackages(
-                        PackageManagerInternal.PACKAGE_INSTALLER, userId)),
+                        KnownPackages.PACKAGE_INSTALLER, userId)),
                 userId, STORAGE_PERMISSIONS, NOTIFICATION_PERMISSIONS);
 
         // Verifier
         final String verifier = ArrayUtils.firstOrNull(getKnownPackages(
-                PackageManagerInternal.PACKAGE_VERIFIER, userId));
+                KnownPackages.PACKAGE_VERIFIER, userId));
         grantSystemFixedPermissionsToSystemPackage(pm, verifier, userId, STORAGE_PERMISSIONS);
         grantPermissionsToSystemPackage(pm, verifier, userId, PHONE_PERMISSIONS, SMS_PERMISSIONS,
                 NOTIFICATION_PERMISSIONS);
 
         // SetupWizard
         final String setupWizardPackage = ArrayUtils.firstOrNull(getKnownPackages(
-                PackageManagerInternal.PACKAGE_SETUP_WIZARD, userId));
+                KnownPackages.PACKAGE_SETUP_WIZARD, userId));
         grantPermissionsToSystemPackage(pm, setupWizardPackage, userId, PHONE_PERMISSIONS,
                 CONTACTS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, CAMERA_PERMISSIONS);
         grantSystemFixedPermissionsToSystemPackage(pm, setupWizardPackage, userId,
@@ -608,6 +613,10 @@ final class DefaultPermissionGrantPolicy {
             grantPermissionsToSystemPackage(
                     pm, setupWizardPackage, userId, NEARBY_DEVICES_PERMISSIONS);
         }
+
+        // SearchSelector
+        grantPermissionsToSystemPackage(pm, getDefaultSearchSelectorPackage(), userId,
+                NOTIFICATION_PERMISSIONS);
 
         // Camera
         grantPermissionsToSystemPackage(pm,
@@ -758,7 +767,7 @@ final class DefaultPermissionGrantPolicy {
 
         // Browser
         String browserPackage = ArrayUtils.firstOrNull(getKnownPackages(
-                PackageManagerInternal.PACKAGE_BROWSER, userId));
+                KnownPackages.PACKAGE_BROWSER, userId));
         if (browserPackage == null) {
             browserPackage = getDefaultSystemHandlerActivityPackageForCategory(pm,
                     Intent.CATEGORY_APP_BROWSER, userId);
@@ -890,18 +899,9 @@ final class DefaultPermissionGrantPolicy {
 
         // TextClassifier Service
         for (String textClassifierPackage :
-                getKnownPackages(PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER, userId)) {
+                getKnownPackages(KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER, userId)) {
             grantPermissionsToSystemPackage(pm, textClassifierPackage, userId,
                     COARSE_BACKGROUND_LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
-        }
-
-        // Content capture
-        String contentCapturePackageName =
-                mContext.getPackageManager().getContentCaptureServicePackageName();
-        if (!TextUtils.isEmpty(contentCapturePackageName)) {
-            grantPermissionsToSystemPackage(pm, contentCapturePackageName, userId,
-                    PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
-                    CONTACTS_PERMISSIONS, STORAGE_PERMISSIONS);
         }
 
         // Attention Service
@@ -935,6 +935,10 @@ final class DefaultPermissionGrantPolicy {
             String category, int userId) {
         return getDefaultSystemHandlerActivityPackage(pm,
                 new Intent(Intent.ACTION_MAIN).addCategory(category), userId);
+    }
+
+    private String getDefaultSearchSelectorPackage() {
+        return mContext.getString(R.string.config_defaultSearchSelectorPackageName);
     }
 
     @SafeVarargs
@@ -1022,6 +1026,8 @@ final class DefaultPermissionGrantPolicy {
         for (String packageName : packageNames) {
             grantPermissionsToSystemPackage(NO_PM_CACHE, packageName, userId,
                     PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, SMS_PERMISSIONS);
+            grantPermissionsToPackage(NO_PM_CACHE, packageName, userId, false, false,
+                    NOTIFICATION_PERMISSIONS);
         }
     }
 
@@ -1086,6 +1092,14 @@ final class DefaultPermissionGrantPolicy {
                         userId);
             }
         }
+    }
+
+    public void grantDefaultPermissionsToCarrierServiceApp(@NonNull String packageName,
+            @UserIdInt int userId) {
+        Log.i(TAG, "Grant permissions to Carrier Service app " + packageName + " for user:"
+                + userId);
+        grantPermissionsToPackage(NO_PM_CACHE, packageName, userId, /* ignoreSystemPackage */ false,
+               /* whitelistRestricted */ true, NOTIFICATION_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackage(PackageManagerWrapper pm,
