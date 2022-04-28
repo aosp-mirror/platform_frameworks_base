@@ -1224,16 +1224,8 @@ public class DisplayRotation {
                 || orientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT) {
             // Otherwise, use sensor only if requested by the application or enabled
             // by default for USER or UNSPECIFIED modes.  Does not apply to NOSENSOR.
-            if (mAllowAllRotations == ALLOW_ALL_ROTATIONS_UNDEFINED) {
-                // Can't read this during init() because the context doesn't have display metrics at
-                // that time so we cannot determine tablet vs. phone then.
-                mAllowAllRotations = mContext.getResources().getBoolean(
-                        R.bool.config_allowAllRotations)
-                                ? ALLOW_ALL_ROTATIONS_ENABLED
-                                : ALLOW_ALL_ROTATIONS_DISABLED;
-            }
             if (sensorRotation != Surface.ROTATION_180
-                    || mAllowAllRotations == ALLOW_ALL_ROTATIONS_ENABLED
+                    || getAllowAllRotations() == ALLOW_ALL_ROTATIONS_ENABLED
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_USER) {
                 preferredRotation = sensorRotation;
@@ -1322,6 +1314,19 @@ public class DisplayRotation {
         }
     }
 
+    private int getAllowAllRotations() {
+        if (mAllowAllRotations == ALLOW_ALL_ROTATIONS_UNDEFINED) {
+            // Can't read this during init() because the context doesn't have display metrics at
+            // that time so we cannot determine tablet vs. phone then.
+            mAllowAllRotations = mContext.getResources().getBoolean(
+                    R.bool.config_allowAllRotations)
+                    ? ALLOW_ALL_ROTATIONS_ENABLED
+                    : ALLOW_ALL_ROTATIONS_DISABLED;
+        }
+
+        return mAllowAllRotations;
+    }
+
     private boolean isLandscapeOrSeascape(int rotation) {
         return rotation == mLandscapeRotation || rotation == mSeascapeRotation;
     }
@@ -1349,6 +1354,11 @@ public class DisplayRotation {
 
             case ActivityInfo.SCREEN_ORIENTATION_USER:
             case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
+                // When all rotations enabled it works with any of the 4 rotations
+                if (getAllowAllRotations() == ALLOW_ALL_ROTATIONS_ENABLED) {
+                    return preferredRotation >= 0;
+                }
+
                 // Works with any rotation except upside down.
                 return (preferredRotation >= 0) && (preferredRotation != Surface.ROTATION_180);
         }
