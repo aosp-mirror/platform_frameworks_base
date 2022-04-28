@@ -661,9 +661,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /**
      * The activity is opaque and fills the entire space of this task.
-     * @see WindowContainer#fillsParent()
+     * @see #occludesParent()
      */
     private boolean mOccludesParent;
+
+    /**
+     * Unlike {@link #mOccludesParent} which can be changed at runtime. This is a static attribute
+     * from the style of activity. Because we don't want {@link WindowContainer#getOrientation()}
+     * to be affected by the temporal state of {@link ActivityClientController#convertToTranslucent}
+     * when running ANIM_SCENE_TRANSITION.
+     * @see WindowContainer#fillsParent()
+     */
+    private final boolean mFillsParent;
 
     // The input dispatching timeout for this application token in milliseconds.
     long mInputDispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
@@ -1956,8 +1965,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // This style is propagated to the main window attributes with
                     // FLAG_SHOW_WALLPAPER from PhoneWindow#generateLayout.
                     || ent.array.getBoolean(R.styleable.Window_windowShowWallpaper, false);
+            mFillsParent = mOccludesParent;
             noDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
         } else {
+            mFillsParent = mOccludesParent = true;
             noDisplay = false;
         }
 
@@ -2852,7 +2863,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean fillsParent() {
-        return occludesParent(true /* includingFinishing */);
+        return mFillsParent;
     }
 
     /** Returns true if this activity is not finishing, is opaque and fills the entire space of
