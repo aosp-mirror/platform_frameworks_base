@@ -37,6 +37,7 @@ import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 
@@ -57,6 +58,9 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     private SurfaceControlViewHost mViewHost;
     private SurfaceControl mLeash;
     private DividerView mDividerView;
+
+    // Used to "pass" a transaction to WWM.remove so that view removal can be synchronized.
+    private SurfaceControl.Transaction mSyncTransaction = null;
 
     public interface ParentContainerCallbacks {
         void attachToParentSurface(SurfaceControl.Builder b);
@@ -130,25 +134,45 @@ public final class SplitWindowManager extends WindowlessWindowManager {
      * Releases the surface control of the current {@link DividerView} and tear down the view
      * hierarchy.
      */
-    void release() {
+    void release(@Nullable SurfaceControl.Transaction t) {
         if (mDividerView != null) {
             mDividerView = null;
         }
 
         if (mViewHost != null){
+            mSyncTransaction = t;
             mViewHost.release();
+            mSyncTransaction = null;
             mViewHost = null;
         }
 
         if (mLeash != null) {
-            new SurfaceControl.Transaction().remove(mLeash).apply();
+            if (t == null) {
+                new SurfaceControl.Transaction().remove(mLeash).apply();
+            } else {
+                t.remove(mLeash);
+            }
             mLeash = null;
+        }
+    }
+
+    @Override
+    protected void removeSurface(SurfaceControl sc) {
+        // This gets called via SurfaceControlViewHost.release()
+        if (mSyncTransaction != null) {
+            mSyncTransaction.remove(sc);
+        } else {
+            super.removeSurface(sc);
         }
     }
 
     void setInteractive(boolean interactive) {
         if (mDividerView == null) return;
         mDividerView.setInteractive(interactive);
+    }
+
+    View getDividerView() {
+        return mDividerView;
     }
 
     /**

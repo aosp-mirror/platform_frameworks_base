@@ -28,6 +28,9 @@ interface FeatureFlags : FlagListenable {
     /** Returns a boolean value for the given flag.  */
     fun isEnabled(flag: ResourceBooleanFlag): Boolean
 
+    /** Returns a boolean value for the given flag.  */
+    fun isEnabled(flag: SysPropBooleanFlag): Boolean
+
     /** Returns a string value for the given flag.  */
     fun getString(flag: StringFlag): String
 

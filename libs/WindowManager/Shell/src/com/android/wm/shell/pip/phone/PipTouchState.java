@@ -17,15 +17,15 @@
 package com.android.wm.shell.pip.phone;
 
 import android.graphics.PointF;
-import android.os.Handler;
-import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
 
@@ -104,7 +104,8 @@ public class PipTouchState {
 
                 mActivePointerId = ev.getPointerId(0);
                 if (DEBUG) {
-                    Log.e(TAG, "Setting active pointer id on DOWN: " + mActivePointerId);
+                    ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                            "%s: Setting active pointer id on DOWN: %d", TAG, mActivePointerId);
                 }
                 mLastTouch.set(ev.getRawX(), ev.getRawY());
                 mDownTouch.set(mLastTouch);
@@ -131,7 +132,8 @@ public class PipTouchState {
                 addMovementToVelocityTracker(ev);
                 int pointerIndex = ev.findPointerIndex(mActivePointerId);
                 if (pointerIndex == -1) {
-                    Log.e(TAG, "Invalid active pointer id on MOVE: " + mActivePointerId);
+                    ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                            "%s: Invalid active pointer id on MOVE: %d", TAG, mActivePointerId);
                     break;
                 }
 
@@ -168,8 +170,9 @@ public class PipTouchState {
                     final int newPointerIndex = (pointerIndex == 0) ? 1 : 0;
                     mActivePointerId = ev.getPointerId(newPointerIndex);
                     if (DEBUG) {
-                        Log.e(TAG,
-                                "Relinquish active pointer id on POINTER_UP: " + mActivePointerId);
+                        ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "%s: Relinquish active pointer id on POINTER_UP: %d",
+                                TAG, mActivePointerId);
                     }
                     mLastTouch.set(ev.getRawX(newPointerIndex), ev.getRawY(newPointerIndex));
                 }
@@ -189,7 +192,8 @@ public class PipTouchState {
 
                 int pointerIndex = ev.findPointerIndex(mActivePointerId);
                 if (pointerIndex == -1) {
-                    Log.e(TAG, "Invalid active pointer id on UP: " + mActivePointerId);
+                    ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                            "%s: Invalid active pointer id on UP: %d", TAG, mActivePointerId);
                     break;
                 }
 

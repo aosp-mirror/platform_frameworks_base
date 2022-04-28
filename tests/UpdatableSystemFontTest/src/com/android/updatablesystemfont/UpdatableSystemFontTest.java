@@ -84,7 +84,7 @@ public class UpdatableSystemFontTest {
 
     private static final String NOTO_COLOR_EMOJI_POSTSCRIPT_NAME = "NotoColorEmoji";
     private static final String NOTO_COLOR_EMOJI_TTF =
-            "/data/local/tmp/NotoColorEmoji.ttf";
+            "/data/local/tmp/UpdatableSystemFontTest_NotoColorEmoji.ttf";
     private static final String NOTO_COLOR_EMOJI_SIG =
             "/data/local/tmp/UpdatableSystemFontTest_NotoColorEmoji.sig";
     // A font with revision == 0.
@@ -105,13 +105,13 @@ public class UpdatableSystemFontTest {
 
     private static final String NOTO_SERIF_REGULAR_POSTSCRIPT_NAME = "NotoSerif";
     private static final String NOTO_SERIF_REGULAR_TTF =
-            "/data/local/tmp/NotoSerif-Regular.ttf";
+            "/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Regular.ttf";
     private static final String NOTO_SERIF_REGULAR_SIG =
             "/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Regular.sig";
 
     private static final String NOTO_SERIF_BOLD_POSTSCRIPT_NAME = "NotoSerif-Bold";
     private static final String NOTO_SERIF_BOLD_TTF =
-            "/data/local/tmp/NotoSerif-Bold.ttf";
+            "/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Bold.ttf";
     private static final String NOTO_SERIF_BOLD_SIG =
             "/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Bold.sig";
 

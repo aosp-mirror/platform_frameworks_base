@@ -40,7 +40,9 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
+import com.android.wm.shell.transition.Transitions;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -48,6 +50,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import dagger.Lazy;
 
 /**
  * Controller to show/update compat UI components on Tasks based on whether the foreground
@@ -101,32 +105,35 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final DisplayImeController mImeController;
     private final SyncTransactionQueue mSyncQueue;
     private final ShellExecutor mMainExecutor;
+    private final Lazy<Transitions> mTransitionsLazy;
     private final CompatUIImpl mImpl = new CompatUIImpl();
 
     private CompatUICallback mCallback;
 
-    // Only show once automatically in the process life.
-    private boolean mHasShownSizeCompatHint;
-    private boolean mHasShownCameraCompatHint;
+    // Only show each hint once automatically in the process life.
+    private final CompatUIHintsState mCompatUIHintsState;
 
-    // Indicates if the keyguard is currently occluded, in which case compat UIs shouldn't
+    // Indicates if the keyguard is currently showing, in which case compat UIs shouldn't
     // be shown.
-    private boolean mKeyguardOccluded;
+    private boolean mKeyguardShowing;
 
     public CompatUIController(Context context,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
             DisplayImeController imeController,
             SyncTransactionQueue syncQueue,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor,
+            Lazy<Transitions> transitionsLazy) {
         mContext = context;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
         mImeController = imeController;
         mSyncQueue = syncQueue;
         mMainExecutor = mainExecutor;
+        mTransitionsLazy = transitionsLazy;
         mDisplayController.addDisplayWindowListener(this);
         mImeController.addPositionProcessor(this);
+        mCompatUIHintsState = new CompatUIHintsState();
     }
 
     /** Returns implementation of {@link CompatUI}. */
@@ -217,14 +224,14 @@ public class CompatUIController implements OnDisplaysChangedListener,
     }
 
     @VisibleForTesting
-    void onKeyguardOccludedChanged(boolean occluded) {
-        mKeyguardOccluded = occluded;
-        // Hide the compat UIs when keyguard is occluded.
+    void onKeyguardShowingChanged(boolean showing) {
+        mKeyguardShowing = showing;
+        // Hide the compat UIs when keyguard is showing.
         forAllLayouts(layout -> layout.updateVisibility(showOnDisplay(layout.getDisplayId())));
     }
 
     private boolean showOnDisplay(int displayId) {
-        return !mKeyguardOccluded && !isImeShowingOnDisplay(displayId);
+        return !mKeyguardShowing && !isImeShowingOnDisplay(displayId);
     }
 
     private boolean isImeShowingOnDisplay(int displayId) {
@@ -259,19 +266,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
     @VisibleForTesting
     CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener) {
-        final CompatUIWindowManager compatUIWindowManager = new CompatUIWindowManager(context,
+        return new CompatUIWindowManager(context,
                 taskInfo, mSyncQueue, mCallback, taskListener,
-                mDisplayController.getDisplayLayout(taskInfo.displayId), mHasShownSizeCompatHint,
-                mHasShownCameraCompatHint);
-        // TODO(b/218304113): updates values only if hints are actually shown to the user.
-        // Only show hints for the first time.
-        if (taskInfo.topActivityInSizeCompat) {
-            mHasShownSizeCompatHint = true;
-        }
-        if (taskInfo.hasCameraCompatControl()) {
-            mHasShownCameraCompatHint = true;
-        }
-        return compatUIWindowManager;
+                mDisplayController.getDisplayLayout(taskInfo.displayId), mCompatUIHintsState);
     }
 
     private void createOrUpdateLetterboxEduLayout(TaskInfo taskInfo,
@@ -292,9 +289,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         if (context == null) {
             return;
         }
-        LetterboxEduWindowManager newLayout = new LetterboxEduWindowManager(context, taskInfo,
-                mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
-                this::onLetterboxEduDismissed);
+        LetterboxEduWindowManager newLayout = createLetterboxEduWindowManager(context, taskInfo,
+                taskListener);
         if (newLayout.createLayout(showOnDisplay(taskInfo.displayId))) {
             // The new layout is eligible to be shown, make it the active layout.
             if (mActiveLetterboxEduLayout != null) {
@@ -305,6 +301,15 @@ public class CompatUIController implements OnDisplaysChangedListener,
             }
             mActiveLetterboxEduLayout = newLayout;
         }
+    }
+
+    @VisibleForTesting
+    LetterboxEduWindowManager createLetterboxEduWindowManager(Context context, TaskInfo taskInfo,
+            ShellTaskOrganizer.TaskListener taskListener) {
+        return new LetterboxEduWindowManager(context, taskInfo,
+                mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
+                mTransitionsLazy.get(),
+                this::onLetterboxEduDismissed);
     }
 
     private void onLetterboxEduDismissed() {
@@ -374,9 +379,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
     @ExternalThread
     private class CompatUIImpl implements CompatUI {
         @Override
-        public void onKeyguardOccludedChanged(boolean occluded) {
+        public void onKeyguardShowingChanged(boolean showing) {
             mMainExecutor.execute(() -> {
-                CompatUIController.this.onKeyguardOccludedChanged(occluded);
+                CompatUIController.this.onKeyguardShowingChanged(showing);
             });
         }
     }

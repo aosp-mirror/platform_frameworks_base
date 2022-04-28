@@ -64,7 +64,7 @@ message CameraStreamProto {
     repeated int64 histogram_counts = 13;
 
     // The dynamic range profile of the stream
-    optional int32 dynamic_range_profile = 14;
+    optional int64 dynamic_range_profile = 14;
     // The stream use case
-    optional int32 stream_use_case = 15;
+    optional int64 stream_use_case = 15;
 }

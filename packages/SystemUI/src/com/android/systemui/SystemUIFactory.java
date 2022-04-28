@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -28,6 +29,7 @@ import com.android.systemui.dagger.DaggerGlobalRootComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
+import com.android.wm.shell.dagger.WMShellConcurrencyModule;
 import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.wm.shell.transition.ShellTransitions;
@@ -96,8 +98,9 @@ public class SystemUIFactory {
                 && android.os.Process.myUserHandle().isSystem()
                 && ActivityThread.currentProcessName().equals(ActivityThread.currentPackageName());
         mRootComponent = buildGlobalRootComponent(context);
+
         // Stand up WMComponent
-        mWMComponent = mRootComponent.getWMComponentBuilder().build();
+        setupWmComponent(context);
         if (mInitializeComponents) {
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
@@ -124,8 +127,8 @@ public class SystemUIFactory {
                     .setDisplayAreaHelper(mWMComponent.getDisplayAreaHelper())
                     .setTaskSurfaceHelper(mWMComponent.getTaskSurfaceHelper())
                     .setRecentTasks(mWMComponent.getRecentTasks())
-                    .setCompatUI(Optional.of(mWMComponent.getCompatUI()))
-                    .setDragAndDrop(Optional.of(mWMComponent.getDragAndDrop()))
+                    .setCompatUI(mWMComponent.getCompatUI())
+                    .setDragAndDrop(mWMComponent.getDragAndDrop())
                     .setBackAnimation(mWMComponent.getBackAnimation());
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
@@ -158,6 +161,36 @@ public class SystemUIFactory {
         // really need to ensure the Dependency gets initialized early on.
         Dependency dependency = mSysUIComponent.createDependency();
         dependency.start();
+    }
+
+    /**
+     * Sets up {@link #mWMComponent}. On devices where the Shell runs on its own main thread,
+     * this will pre-create the thread to ensure that the components are constructed on the
+     * same thread, to reduce the likelihood of side effects from running the constructors on
+     * a different thread than the rest of the class logic.
+     */
+    private void setupWmComponent(Context context) {
+        WMComponent.Builder wmBuilder = mRootComponent.getWMComponentBuilder();
+        if (!mInitializeComponents || !WMShellConcurrencyModule.enableShellMainThread(context)) {
+            // If running under tests or shell thread is not enabled, we don't need anything special
+            mWMComponent = wmBuilder.build();
+            return;
+        }
+
+        // If the shell main thread is enabled, initialize the component on that thread
+        HandlerThread shellThread = WMShellConcurrencyModule.createShellMainThread();
+        shellThread.start();
+
+        // Use an async handler since we don't care about synchronization
+        Handler shellHandler = Handler.createAsync(shellThread.getLooper());
+        boolean built = shellHandler.runWithScissors(() -> {
+            wmBuilder.setShellMainThread(shellThread);
+            mWMComponent = wmBuilder.build();
+        }, 5000);
+        if (!built) {
+            Log.w(TAG, "Failed to initialize WMComponent");
+            throw new RuntimeException();
+        }
     }
 
     /**

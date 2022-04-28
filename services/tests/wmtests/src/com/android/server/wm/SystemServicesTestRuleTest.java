@@ -16,59 +16,64 @@
 
 package com.android.server.wm;
 
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.Presubmit;
 
-import org.junit.Rule;
+import com.android.internal.util.GcUtils;
+
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runners.model.Statement;
 
-import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.function.Predicate;
 
 @Presubmit
 public class SystemServicesTestRuleTest {
-    @Rule
-    public ExpectedException mExpectedException = ExpectedException.none();
 
     @Test
-    public void testRule_rethrows_unchecked_exceptions() throws Throwable {
-        final SystemServicesTestRule mWmsRule = new SystemServicesTestRule();
-        Statement statement = new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                throw new RuntimeException("A failing test!");
-            }
-        };
-        mExpectedException.expect(RuntimeException.class);
-        mWmsRule.apply(statement, null /* Description*/).evaluate();
-    }
-
-    @Test
-    public void testRule_rethrows_checked_exceptions() throws Throwable {
-        final SystemServicesTestRule mWmsRule = new SystemServicesTestRule();
-        Statement statement = new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                throw new IOException("A failing test!");
-            }
-        };
-        mExpectedException.expect(IOException.class);
-        mWmsRule.apply(statement, null /* Description*/).evaluate();
+    public void testRule_rethrows_throwable() {
+        assertThrows(Throwable.class, () -> applyRule(rule -> false));
     }
 
     @Test
     public void testRule_ranSuccessfully() throws Throwable {
-        final boolean[] testRan = {false};
-        final SystemServicesTestRule mWmsRule = new SystemServicesTestRule();
-        Statement statement = new Statement() {
+        final int iterations = 5;
+        final ArrayList<WeakReference<WindowManagerService>> wmsRefs = new ArrayList<>();
+        for (int i = 0; i < iterations; i++) {
+            applyRule(rule -> {
+                final WindowManagerService wms = rule.getWindowManagerService();
+                assertNotNull(wms);
+                wmsRefs.add(new WeakReference<>(wms));
+                return true;
+            });
+        }
+        assertEquals(iterations, wmsRefs.size());
+
+        GcUtils.runGcAndFinalizersSync();
+        // Only ensure that at least one instance is released because some references may be kept
+        // temporally by the message of other thread or single static reference.
+        for (int i = wmsRefs.size() - 1; i >= 0; i--) {
+            if (wmsRefs.get(i).get() == null) {
+                return;
+            }
+        }
+        fail("WMS instance is leaked");
+    }
+
+    private static void applyRule(Predicate<SystemServicesTestRule> action) throws Throwable {
+        final SystemServicesTestRule wmsRule = new SystemServicesTestRule();
+        wmsRule.apply(new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                testRan[0] = true;
+                if (!action.test(wmsRule)) {
+                    throw new Throwable("A failing test!");
+                }
             }
-        };
-        mWmsRule.apply(statement, null /* Description*/).evaluate();
-        assertTrue(testRan[0]);
+        }, null /* description */).evaluate();
     }
 }

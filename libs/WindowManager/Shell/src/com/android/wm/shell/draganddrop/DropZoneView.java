@@ -28,6 +28,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -65,6 +66,7 @@ public class DropZoneView extends FrameLayout {
     private final float[] mContainerMargin = new float[4];
     private float mCornerRadius;
     private float mBottomInset;
+    private boolean mIgnoreBottomMargin;
     private int mMarginColor; // i.e. color used for negative space like the container insets
 
     private boolean mShowingHighlight;
@@ -109,10 +111,11 @@ public class DropZoneView extends FrameLayout {
         mColorDrawable = new ColorDrawable();
         setBackgroundDrawable(mColorDrawable);
 
+        final int iconSize = context.getResources().getDimensionPixelSize(R.dimen.split_icon_size);
         mSplashScreenView = new ImageView(context);
-        mSplashScreenView.setScaleType(ImageView.ScaleType.CENTER);
-        addView(mSplashScreenView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
+        mSplashScreenView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        addView(mSplashScreenView,
+                new FrameLayout.LayoutParams(iconSize, iconSize, Gravity.CENTER));
         mSplashScreenView.setAlpha(0f);
 
         mMarginView = new MarginView(context);
@@ -136,6 +139,14 @@ public class DropZoneView extends FrameLayout {
         mContainerMargin[1] = top;
         mContainerMargin[2] = right;
         mContainerMargin[3] = bottom;
+        if (mMarginPercent > 0) {
+            mMarginView.invalidate();
+        }
+    }
+
+    /** Ignores the bottom margin provided by the insets. */
+    public void setForceIgnoreBottomMargin(boolean ignoreBottomMargin) {
+        mIgnoreBottomMargin = ignoreBottomMargin;
         if (mMarginPercent > 0) {
             mMarginView.invalidate();
         }
@@ -257,7 +268,8 @@ public class DropZoneView extends FrameLayout {
             mPath.addRoundRect(mContainerMargin[0] * mMarginPercent,
                     mContainerMargin[1] * mMarginPercent,
                     getWidth() - (mContainerMargin[2] * mMarginPercent),
-                    getHeight() - (mContainerMargin[3] * mMarginPercent) - mBottomInset,
+                    getHeight() - (mContainerMargin[3] * mMarginPercent)
+                            - (mIgnoreBottomMargin ? 0 : mBottomInset),
                     mCornerRadius * mMarginPercent,
                     mCornerRadius * mMarginPercent,
                     Path.Direction.CW);

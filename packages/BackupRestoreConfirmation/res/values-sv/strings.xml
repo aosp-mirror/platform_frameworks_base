@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Ange lösenordet för enhetskryptering nedan. Lösenordet kommer även att användas för att kryptera säkerhetskopian."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Ange ett lösenord för kryptering av alla säkerhetskopierade data. Om det här lämnas tomt kommer ditt nuvarande lösenord för säkerhetskopior att användas:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Om du vill kryptera alla säkerhetskopierade data anger du ett lösenord nedan:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Eftersom enheten är krypterad måste du kryptera säkerhetskopierade data. Ange lösenordet nedan:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Om återställda data är krypterade anger du lösenordet nedan:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Säkerhetskopieringen har startat ..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Säkerhetskopieringen har slutförts"</string>

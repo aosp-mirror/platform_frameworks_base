@@ -18,8 +18,8 @@ package com.android.systemui.keyguard;
 
 import android.os.Handler;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Log;
 
 import com.android.internal.policy.IKeyguardDrawnCallback;
@@ -83,6 +83,11 @@ public class KeyguardLifecyclesDispatcher {
             final Object obj = msg.obj;
             switch (msg.what) {
                 case SCREEN_TURNING_ON:
+                    Trace.beginSection("KeyguardLifecyclesDispatcher#SCREEN_TURNING_ON");
+                    final String onDrawWaitingTraceTag =
+                            "Waiting for KeyguardDrawnCallback#onDrawn";
+                    int traceCookie = System.identityHashCode(msg);
+                    Trace.beginAsyncSection(onDrawWaitingTraceTag, traceCookie);
                     // Ensure the drawn callback is only ever called once
                     mScreenLifecycle.dispatchScreenTurningOn(new Runnable() {
                             boolean mInvoked;
@@ -92,6 +97,7 @@ public class KeyguardLifecyclesDispatcher {
                                 if (!mInvoked) {
                                     mInvoked = true;
                                     try {
+                                        Trace.endAsyncSection(onDrawWaitingTraceTag, traceCookie);
                                         ((IKeyguardDrawnCallback) obj).onDrawn();
                                     } catch (RemoteException e) {
                                         Log.w(TAG, "Exception calling onDrawn():", e);
@@ -101,6 +107,7 @@ public class KeyguardLifecyclesDispatcher {
                                 }
                             }
                         });
+                    Trace.endSection();
                     break;
                 case SCREEN_TURNED_ON:
                     mScreenLifecycle.dispatchScreenTurnedOn();

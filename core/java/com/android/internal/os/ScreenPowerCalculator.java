@@ -96,8 +96,10 @@ public class ScreenPowerCalculator extends PowerCalculator {
                                     appPowerAndDuration.durationMs)
                             .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
                                     appPowerAndDuration.powerMah, powerModel);
-                    totalAppPower += appPowerAndDuration.powerMah;
-                    totalAppDuration += appPowerAndDuration.durationMs;
+                    if (!app.isVirtualUid()) {
+                        totalAppPower += appPowerAndDuration.powerMah;
+                        totalAppDuration += appPowerAndDuration.durationMs;
+                    }
                 }
                 break;
             case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
@@ -192,10 +194,13 @@ public class ScreenPowerCalculator extends PowerCalculator {
         long totalActivityTimeMs = 0;
         final SparseLongArray activityTimeArray = new SparseLongArray();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
-            final BatteryStats.Uid uid = uidBatteryConsumerBuilders.valueAt(i).getBatteryStatsUid();
+            final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
+            final BatteryStats.Uid uid = app.getBatteryStatsUid();
             final long timeMs = getProcessForegroundTimeMs(uid, rawRealtimeUs);
             activityTimeArray.put(uid.getUid(), timeMs);
-            totalActivityTimeMs += timeMs;
+            if (!app.isVirtualUid()) {
+                totalActivityTimeMs += timeMs;
+            }
         }
 
         if (totalActivityTimeMs >= MIN_ACTIVE_TIME_FOR_SMEARING) {

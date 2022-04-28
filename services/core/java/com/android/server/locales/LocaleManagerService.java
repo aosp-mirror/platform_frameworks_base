@@ -22,13 +22,16 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ILocaleManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageManager.PackageInfoFlags;
+import android.content.res.Configuration;
 import android.os.Binder;
+import android.os.HandlerThread;
 import android.os.LocaleList;
 import android.os.Process;
 import android.os.RemoteException;
@@ -38,14 +41,13 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.DumpUtils;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
-import java.io.PrintWriter;
 
 /**
  * The implementation of ILocaleManager.aidl.
@@ -58,9 +60,11 @@ public class LocaleManagerService extends SystemService {
     private final LocaleManagerService.LocaleManagerBinderService mBinderService;
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
-    private PackageManagerInternal mPackageManagerInternal;
+    private PackageManager mPackageManager;
 
     private LocaleManagerBackupHelper mBackupHelper;
+
+    private final PackageMonitor mPackageMonitor;
 
     public static final boolean DEBUG = false;
 
@@ -70,23 +74,45 @@ public class LocaleManagerService extends SystemService {
         mBinderService = new LocaleManagerBinderService();
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mPackageManager = mContext.getPackageManager();
+
+        HandlerThread broadcastHandlerThread = new HandlerThread(TAG,
+                Process.THREAD_PRIORITY_BACKGROUND);
+        broadcastHandlerThread.start();
+
+        SystemAppUpdateTracker systemAppUpdateTracker =
+                new SystemAppUpdateTracker(this);
+        broadcastHandlerThread.getThreadHandler().postAtFrontOfQueue(new Runnable() {
+            @Override
+            public void run() {
+                systemAppUpdateTracker.init();
+            }
+        });
+
         mBackupHelper = new LocaleManagerBackupHelper(this,
-                mPackageManagerInternal);
+                mPackageManager, broadcastHandlerThread);
+
+        mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper,
+                systemAppUpdateTracker);
+        mPackageMonitor.register(context, broadcastHandlerThread.getLooper(),
+                UserHandle.ALL,
+                true);
     }
 
     @VisibleForTesting
     LocaleManagerService(Context context, ActivityTaskManagerInternal activityTaskManagerInternal,
             ActivityManagerInternal activityManagerInternal,
-            PackageManagerInternal packageManagerInternal,
-            LocaleManagerBackupHelper localeManagerBackupHelper) {
+            PackageManager packageManager,
+            LocaleManagerBackupHelper localeManagerBackupHelper,
+            PackageMonitor packageMonitor) {
         super(context);
         mContext = context;
         mBinderService = new LocaleManagerBinderService();
         mActivityTaskManagerInternal = activityTaskManagerInternal;
         mActivityManagerInternal = activityManagerInternal;
-        mPackageManagerInternal = packageManagerInternal;
+        mPackageManager = packageManager;
         mBackupHelper = localeManagerBackupHelper;
+        mPackageMonitor = packageMonitor;
     }
 
     @Override
@@ -130,8 +156,9 @@ public class LocaleManagerService extends SystemService {
         }
 
         @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            LocaleManagerService.this.dump(fd, pw, args);
+        @NonNull
+        public LocaleList getSystemLocales() throws RemoteException {
+            return LocaleManagerService.this.getSystemLocales();
         }
 
         @Override
@@ -159,7 +186,7 @@ public class LocaleManagerService extends SystemService {
             userId = mActivityManagerInternal.handleIncomingUser(
                     Binder.getCallingPid(), Binder.getCallingUid(), userId,
                     false /* allowAll */, ActivityManagerInternal.ALLOW_NON_FULL,
-                    "setApplicationLocales", appPackageName);
+                    "setApplicationLocales", /* callerPackage= */ null);
 
             // This function handles two types of set operations:
             // 1.) A normal, non-privileged app setting its own locale.
@@ -237,7 +264,7 @@ public class LocaleManagerService extends SystemService {
      * <p><b>Note:</b> This is can be used by installers to deal with cases such as
      * language-based APK Splits.
      */
-    private void notifyInstallerOfAppWhoseLocaleChanged(String appPackageName, int userId,
+    void notifyInstallerOfAppWhoseLocaleChanged(String appPackageName, int userId,
             LocaleList locales) {
         String installingPackageName = getInstallingPackageName(appPackageName);
         if (installingPackageName != null) {
@@ -262,7 +289,7 @@ public class LocaleManagerService extends SystemService {
         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
     }
 
-    private static Intent createBaseIntent(String intentAction, String appPackageName,
+    static Intent createBaseIntent(String intentAction, String appPackageName,
             LocaleList locales) {
         return new Intent(intentAction)
                 .putExtra(Intent.EXTRA_PACKAGE_NAME, appPackageName)
@@ -328,7 +355,7 @@ public class LocaleManagerService extends SystemService {
         userId = mActivityManagerInternal.handleIncomingUser(
                 Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false /* allowAll */, ActivityManagerInternal.ALLOW_NON_FULL,
-                "getApplicationLocales", appPackageName);
+                "getApplicationLocales", /* callerPackage= */ null);
 
         // This function handles three types of query operations:
         // 1.) A normal, non-privileged app querying its own locale.
@@ -392,12 +419,16 @@ public class LocaleManagerService extends SystemService {
     }
 
     private int getPackageUid(String appPackageName, int userId) {
-        return mPackageManagerInternal
-                .getPackageUid(appPackageName, /* flags */ 0, userId);
+        try {
+            return mPackageManager
+                    .getPackageUidAsUser(appPackageName, PackageInfoFlags.of(0), userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            return Process.INVALID_UID;
+        }
     }
 
     @Nullable
-    private String getInstallingPackageName(String packageName) {
+    String getInstallingPackageName(String packageName) {
         try {
             return mContext.getPackageManager()
                     .getInstallSourceInfo(packageName).getInstallingPackageName();
@@ -408,11 +439,29 @@ public class LocaleManagerService extends SystemService {
     }
 
     /**
-     * Dumps useful info related to service.
+     * Returns the current system locales.
      */
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
-        // TODO(b/201766221): Implement when there is state.
+    @NonNull
+    public LocaleList getSystemLocales() throws RemoteException {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return getSystemLocalesUnchecked();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @NonNull
+    private LocaleList getSystemLocalesUnchecked() throws RemoteException {
+        LocaleList systemLocales = null;
+        Configuration conf = ActivityManager.getService().getConfiguration();
+        if (conf != null) {
+            systemLocales = conf.getLocales();
+        }
+        if (systemLocales == null) {
+            systemLocales = LocaleList.getEmptyLocaleList();
+        }
+        return systemLocales;
     }
 
     private void logMetric(@NonNull AppLocaleChangedAtomRecord atomRecordForMetrics) {

@@ -2448,8 +2448,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_MAX
      * @hide
      */
-    public static final Key<int[]> REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP =
-            new Key<int[]>("android.request.availableDynamicRangeProfilesMap", int[].class);
+    public static final Key<long[]> REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP =
+            new Key<long[]>("android.request.availableDynamicRangeProfilesMap", long[].class);
 
     /**
      * <p>Recommended 10-bit dynamic range profile.</p>
@@ -2464,8 +2464,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    public static final Key<Integer> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE =
-            new Key<Integer>("android.request.recommendedTenBitDynamicRangeProfile", int.class);
+    public static final Key<Long> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE =
+            new Key<Long>("android.request.recommendedTenBitDynamicRangeProfile", long.class);
 
     /**
      * <p>The list of image formats that are supported by this
@@ -3563,8 +3563,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    public static final Key<int[]> SCALER_AVAILABLE_STREAM_USE_CASES =
-            new Key<int[]>("android.scaler.availableStreamUseCases", int[].class);
+    public static final Key<long[]> SCALER_AVAILABLE_STREAM_USE_CASES =
+            new Key<long[]>("android.scaler.availableStreamUseCases", long[].class);
 
     /**
      * <p>An array of mandatory stream combinations with stream use cases.

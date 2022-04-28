@@ -123,7 +123,7 @@ public class ColorSchemeTest extends SysuiTestCase {
                 Style.VIBRANT /* style */);
         int neutralMid = colorScheme.getNeutral1().get(colorScheme.getNeutral1().size() / 2);
         Cam cam = Cam.fromInt(neutralMid);
-        Assert.assertEquals(cam.getChroma(), 8.0, 1.0);
+        Assert.assertTrue(cam.getChroma() <= 8.0);
     }
 
     @Test
@@ -133,7 +133,7 @@ public class ColorSchemeTest extends SysuiTestCase {
                 Style.EXPRESSIVE /* style */);
         int neutralMid = colorScheme.getNeutral1().get(colorScheme.getNeutral1().size() / 2);
         Cam cam = Cam.fromInt(neutralMid);
-        Assert.assertEquals(cam.getChroma(), 12.0, 1.0);
+        Assert.assertTrue(cam.getChroma() <= 8.0);
     }
 
     /**

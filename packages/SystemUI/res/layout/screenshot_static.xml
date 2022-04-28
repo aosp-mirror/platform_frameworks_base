@@ -14,25 +14,25 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<com.android.systemui.screenshot.DraggableConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <ImageView
-        android:id="@+id/screenshot_actions_container_background"
+        android:id="@+id/actions_container_background"
         android:visibility="gone"
         android:layout_height="0dp"
         android:layout_width="0dp"
         android:elevation="1dp"
         android:background="@drawable/action_chip_container_background"
         android:layout_marginStart="@dimen/overlay_action_container_margin_horizontal"
-        app:layout_constraintBottom_toBottomOf="@+id/screenshot_actions_container"
+        app:layout_constraintBottom_toBottomOf="@+id/actions_container"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/screenshot_actions_container"
-        app:layout_constraintEnd_toEndOf="@+id/screenshot_actions_container"/>
+        app:layout_constraintTop_toTopOf="@+id/actions_container"
+        app:layout_constraintEnd_toEndOf="@+id/actions_container"/>
     <HorizontalScrollView
-        android:id="@+id/screenshot_actions_container"
+        android:id="@+id/actions_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/overlay_action_container_margin_horizontal"
@@ -98,6 +98,7 @@
         android:scaleType="fitEnd"
         android:background="@drawable/overlay_preview_background"
         android:adjustViewBounds="true"
+        android:clickable="true"
         app:layout_constraintBottom_toBottomOf="@id/screenshot_preview_border"
         app:layout_constraintStart_toStartOf="@id/screenshot_preview_border"
         app:layout_constraintEnd_toEndOf="@id/screenshot_preview_border"
@@ -130,4 +131,4 @@
         app:layout_constraintStart_toStartOf="@id/screenshot_preview"
         app:layout_constraintTop_toTopOf="@id/screenshot_preview"
         android:elevation="@dimen/overlay_preview_elevation"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.android.systemui.screenshot.DraggableConstraintLayout>

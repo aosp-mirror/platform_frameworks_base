@@ -18,12 +18,14 @@ package com.android.server.locksettings;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
 import android.app.ActivityManager;
 import android.app.admin.PasswordMetrics;
 import android.content.Context;
 import android.os.ShellCommand;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -48,6 +50,8 @@ class LockSettingsShellCommand extends ShellCommand {
     private static final String COMMAND_REMOVE_CACHE = "remove-cache";
     private static final String COMMAND_SET_ROR_PROVIDER_PACKAGE =
             "set-resume-on-reboot-provider-package";
+    private static final String COMMAND_REQUIRE_STRONG_AUTH =
+            "require-strong-auth";
     private static final String COMMAND_HELP = "help";
 
     private int mCurrentUserId;
@@ -96,6 +100,9 @@ class LockSettingsShellCommand extends ShellCommand {
                     return 0;
                 case COMMAND_SET_ROR_PROVIDER_PACKAGE:
                     runSetResumeOnRebootProviderPackage();
+                    return 0;
+                case COMMAND_REQUIRE_STRONG_AUTH:
+                    runRequireStrongAuth();
                     return 0;
                 case COMMAND_HELP:
                     onHelp();
@@ -192,6 +199,10 @@ class LockSettingsShellCommand extends ShellCommand {
             pw.println("    Sets the package name for server based resume on reboot service "
                     + "provider.");
             pw.println("");
+            pw.println("  require-strong-auth [--user USER_ID] <reason>");
+            pw.println("    Requires the strong authentication. The current supported reasons: "
+                    + "STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN.");
+            pw.println("");
         }
     }
 
@@ -285,6 +296,24 @@ class LockSettingsShellCommand extends ShellCommand {
         mContext.enforcePermission(android.Manifest.permission.BIND_RESUME_ON_REBOOT_SERVICE,
                 mCallingPid, mCallingUid, TAG);
         SystemProperties.set(name, packageName);
+        return true;
+    }
+
+    private boolean runRequireStrongAuth() {
+        final String reason = mNew;
+        int strongAuthReason;
+        switch (reason) {
+            case "STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN":
+                strongAuthReason = STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+                mCurrentUserId = UserHandle.USER_ALL;
+                break;
+            default:
+                getErrPrintWriter().println("Unsupported reason: " + reason);
+                return false;
+        }
+        mLockPatternUtils.requireStrongAuth(strongAuthReason, mCurrentUserId);
+        getOutPrintWriter().println("Require strong auth for USER_ID "
+                + mCurrentUserId + " because of " + mNew);
         return true;
     }
 

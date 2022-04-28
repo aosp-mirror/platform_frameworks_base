@@ -17,6 +17,7 @@
 
 package com.android.systemui.unfold
 
+import android.app.ActivityManager
 import android.content.Context
 import android.hardware.SensorManager
 import android.hardware.devicestate.DeviceStateManager
@@ -39,9 +40,11 @@ fun createUnfoldTransitionProgressProvider(
     config: UnfoldTransitionConfig,
     screenStatusProvider: ScreenStatusProvider,
     deviceStateManager: DeviceStateManager,
+    activityManager: ActivityManager,
     sensorManager: SensorManager,
     mainHandler: Handler,
     mainExecutor: Executor,
+    backgroundExecutor: Executor,
     tracingTagPrefix: String
 ): UnfoldTransitionProgressProvider =
     DaggerUnfoldSharedComponent.factory()
@@ -50,9 +53,11 @@ fun createUnfoldTransitionProgressProvider(
             config,
             screenStatusProvider,
             deviceStateManager,
+            activityManager,
             sensorManager,
             mainHandler,
             mainExecutor,
+            backgroundExecutor,
             tracingTagPrefix)
         .unfoldTransitionProvider
         .orElse(null)

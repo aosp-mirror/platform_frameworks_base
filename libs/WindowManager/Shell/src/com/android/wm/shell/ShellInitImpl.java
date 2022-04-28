@@ -29,11 +29,13 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenUnfoldController;
+import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 
 import java.util.Optional;
 
@@ -48,12 +50,14 @@ public class ShellInitImpl {
     private final DisplayInsetsController mDisplayInsetsController;
     private final DragAndDropController mDragAndDropController;
     private final ShellTaskOrganizer mShellTaskOrganizer;
+    private final KidsModeTaskOrganizer mKidsModeTaskOrganizer;
     private final Optional<BubbleController> mBubblesOptional;
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private final Optional<AppPairsController> mAppPairsOptional;
     private final Optional<PipTouchHandler> mPipTouchHandlerOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final Optional<FullscreenUnfoldController> mFullscreenUnfoldController;
+    private final Optional<UnfoldTransitionHandler> mUnfoldTransitionHandler;
     private final Optional<FreeformTaskListener> mFreeformTaskListenerOptional;
     private final ShellExecutor mMainExecutor;
     private final Transitions mTransitions;
@@ -68,12 +72,14 @@ public class ShellInitImpl {
             DisplayInsetsController displayInsetsController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
+            KidsModeTaskOrganizer kidsModeTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Optional<FullscreenUnfoldController> fullscreenUnfoldTransitionController,
+            Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformTaskListener> freeformTaskListenerOptional,
             Optional<RecentTasksController> recentTasks,
             Transitions transitions,
@@ -84,12 +90,14 @@ public class ShellInitImpl {
         mDisplayInsetsController = displayInsetsController;
         mDragAndDropController = dragAndDropController;
         mShellTaskOrganizer = shellTaskOrganizer;
+        mKidsModeTaskOrganizer = kidsModeTaskOrganizer;
         mBubblesOptional = bubblesOptional;
         mSplitScreenOptional = splitScreenOptional;
         mAppPairsOptional = appPairsOptional;
         mFullscreenTaskListener = fullscreenTaskListener;
         mPipTouchHandlerOptional = pipTouchHandlerOptional;
         mFullscreenUnfoldController = fullscreenUnfoldTransitionController;
+        mUnfoldTransitionHandler = unfoldTransitionHandler;
         mFreeformTaskListenerOptional = freeformTaskListenerOptional;
         mRecentTasks = recentTasks;
         mTransitions = transitions;
@@ -122,6 +130,7 @@ public class ShellInitImpl {
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitions.register(mShellTaskOrganizer);
+            mUnfoldTransitionHandler.ifPresent(UnfoldTransitionHandler::init);
         }
 
         // TODO(b/181599115): This should really be the pip controller, but until we can provide the
@@ -136,6 +145,9 @@ public class ShellInitImpl {
 
         mFullscreenUnfoldController.ifPresent(FullscreenUnfoldController::init);
         mRecentTasks.ifPresent(RecentTasksController::init);
+
+        // Initialize kids mode task organizer
+        mKidsModeTaskOrganizer.initialize(mStartingWindow);
     }
 
     @ExternalThread

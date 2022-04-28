@@ -15,16 +15,17 @@
  */
 package com.android.systemui.biometrics
 
+import android.animation.ValueAnimator
 import android.graphics.PointF
 import android.graphics.RectF
 import com.android.systemui.Dumpable
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.util.ViewController
-import java.io.FileDescriptor
 import java.io.PrintWriter
 
 /**
@@ -50,16 +51,16 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     private val view: T
         get() = mView!!
 
-    private val dialogListener = SystemUIDialogManager.Listener { updatePauseAuth() }
+    private var dialogAlphaAnimator: ValueAnimator? = null
+    private val dialogListener = SystemUIDialogManager.Listener { runDialogAlphaAnimator() }
 
-    private val panelExpansionListener =
-        PanelExpansionListener { fraction, expanded, tracking ->
-            // Notification shade can be expanded but not visible (fraction: 0.0), for example
-            // when a heads-up notification (HUN) is showing.
-            notificationShadeVisible = expanded && fraction > 0f
-            view.onExpansionChanged(fraction)
-            updatePauseAuth()
-        }
+    private val panelExpansionListener = PanelExpansionListener { event ->
+        // Notification shade can be expanded but not visible (fraction: 0.0), for example
+        // when a heads-up notification (HUN) is showing.
+        notificationShadeVisible = event.expanded && event.fraction > 0f
+        view.onExpansionChanged(event.fraction)
+        updatePauseAuth()
+    }
 
     /** If the notification shade is visible. */
     var notificationShadeVisible: Boolean = false
@@ -83,6 +84,29 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
      */
     open val paddingY: Int = 0
 
+    open fun updateAlpha() {
+        view.updateAlpha()
+    }
+
+    fun runDialogAlphaAnimator() {
+        val hideAffordance = dialogManager.shouldHideAffordance()
+        dialogAlphaAnimator?.cancel()
+        dialogAlphaAnimator = ValueAnimator.ofFloat(
+                view.calculateAlpha() / 255f,
+                if (hideAffordance) 0f else 1f)
+                .apply {
+            duration = if (hideAffordance) 83L else 200L
+            interpolator = if (hideAffordance) Interpolators.LINEAR else Interpolators.ALPHA_IN
+
+            addUpdateListener { animatedValue ->
+                view.setDialogSuggestedAlpha(animatedValue.animatedValue as Float)
+                updateAlpha()
+                updatePauseAuth()
+            }
+            start()
+        }
+    }
+
     override fun onViewAttached() {
         panelExpansionStateManager.addExpansionListener(panelExpansionListener)
         dialogManager.registerListener(dialogListener)
@@ -102,10 +126,11 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
      */
     private val dumpTag = "$tag ($this)"
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+    override fun dump(pw: PrintWriter, args: Array<String>) {
         pw.println("mNotificationShadeVisible=$notificationShadeVisible")
         pw.println("shouldPauseAuth()=" + shouldPauseAuth())
         pw.println("isPauseAuth=" + view.isPauseAuth)
+        pw.println("dialogSuggestedAlpha=" + view.dialogSuggestedAlpha)
     }
 
     /**

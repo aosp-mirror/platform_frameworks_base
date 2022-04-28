@@ -28,6 +28,7 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
+import android.os.Parcel;
 import android.os.ParcelUuid;
 
 import org.junit.Before;
@@ -60,9 +61,9 @@ public class CachedBluetoothDeviceManagerTest {
     private final static Map<Integer, ParcelUuid> CAP_GROUP2 =
             Map.of(2, BluetoothUuid.CAP);
     private final BluetoothClass DEVICE_CLASS_1 =
-        new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
+            createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
     private final BluetoothClass DEVICE_CLASS_2 =
-        new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
+            createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
     @Mock
     private LocalBluetoothProfileManager mLocalProfileManager;
     @Mock
@@ -91,6 +92,16 @@ public class CachedBluetoothDeviceManagerTest {
     private CachedBluetoothDeviceManager mCachedDeviceManager;
     private HearingAidDeviceManager mHearingAidDeviceManager;
     private Context mContext;
+
+    private BluetoothClass createBtClass(int deviceClass) {
+        Parcel p = Parcel.obtain();
+        p.writeInt(deviceClass);
+        p.setDataPosition(0); // reset position of parcel before passing to constructor
+
+        BluetoothClass bluetoothClass = BluetoothClass.CREATOR.createFromParcel(p);
+        p.recycle();
+        return bluetoothClass;
+    }
 
     @Before
     public void setUp() {

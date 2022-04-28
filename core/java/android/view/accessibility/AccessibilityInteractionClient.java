@@ -46,11 +46,11 @@ import android.view.ViewConfiguration;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1166,7 +1166,7 @@ public final class AccessibilityInteractionClient
                         + connectionIdWaitingForPrefetchResultCopy + ";Result: " + infos,
                         Binder.getCallingUid(),
                         Arrays.asList(Thread.currentThread().getStackTrace()),
-                        new HashSet<String>(Arrays.asList("getStackTrace")),
+                        new HashSet<>(Collections.singletonList("getStackTrace")),
                         FLAGS_ACCESSIBILITY_INTERACTION_CONNECTION_CALLBACK);
             }
         } else if (DEBUG) {
@@ -1348,7 +1348,7 @@ public final class AccessibilityInteractionClient
         }
         // Check for duplicates.
         HashSet<AccessibilityNodeInfo> seen = new HashSet<>();
-        Queue<AccessibilityNodeInfo> fringe = new LinkedList<>();
+        Queue<AccessibilityNodeInfo> fringe = new ArrayDeque<>();
         fringe.add(root);
         while (!fringe.isEmpty()) {
             AccessibilityNodeInfo current = fringe.poll();

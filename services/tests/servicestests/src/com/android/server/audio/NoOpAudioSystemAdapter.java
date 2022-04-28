@@ -17,10 +17,12 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
+import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -121,5 +123,12 @@ public class NoOpAudioSystemAdapter extends AudioSystemAdapter {
     @Override
     public boolean isStreamActive(int stream, int inPastMs) {
         return mIsStreamActive;
+    }
+
+    @Override
+    @NonNull
+    public ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
+            @NonNull AudioAttributes attributes, boolean forVolume) {
+        return new ArrayList<>();
     }
 }

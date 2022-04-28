@@ -203,10 +203,6 @@ public final class ActiveServices {
     // How long we wait for a service to finish executing.
     static final int SERVICE_BACKGROUND_TIMEOUT = SERVICE_TIMEOUT * 10;
 
-    // How long the startForegroundService() grace period is to get around to
-    // calling startForeground() before we ANR + stop it.
-    static final int SERVICE_START_FOREGROUND_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
-
     // Foreground service types that always get immediate notification display,
     // expressed in the same bitmask format that ServiceRecord.foregroundServiceType
     // uses.
@@ -1879,7 +1875,7 @@ public final class ActiveServices {
                             if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
                                 resetFgsRestrictionLocked(r);
                                 setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
-                                        r.appInfo.uid, r.intent.getIntent(), r, r.userId,false);
+                                        r.appInfo.uid, r.intent.getIntent(), r, r.userId, false);
                                 final String temp = "startForegroundDelayMs:" + delayMs;
                                 if (r.mInfoAllowStartForeground != null) {
                                     r.mInfoAllowStartForeground += "; " + temp;
@@ -1892,12 +1888,8 @@ public final class ActiveServices {
                     } else if (r.mStartForegroundCount >= 1) {
                         // The second or later time startForeground() is called after service is
                         // started. Check for app state again.
-                        final long delayMs = SystemClock.elapsedRealtime() -
-                                r.mLastSetFgsRestrictionTime;
-                        if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
-                            setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
-                                    r.appInfo.uid, r.intent.getIntent(), r, r.userId,false);
-                        }
+                        setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
+                                r.appInfo.uid, r.intent.getIntent(), r, r.userId, false);
                     }
                     // If the foreground service is not started from TOP process, do not allow it to
                     // have while-in-use location/camera/microphone access.
@@ -2721,8 +2713,8 @@ public final class ActiveServices {
 
     int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, final IServiceConnection connection, int flags,
-            String instanceName, boolean isSupplementalProcessService, int supplementedAppUid,
-            String callingPackage, final int userId)
+            String instanceName, boolean isSdkSandboxService, int sdkSandboxClientAppUid,
+            String sdkSandboxClientAppPackage, String callingPackage, final int userId)
             throws TransactionTooLargeException {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
                 + " type=" + resolvedType + " conn=" + connection.asBinder()
@@ -2789,6 +2781,11 @@ public final class ActiveServices {
                             + ") set BIND_ALLOW_INSTANT when binding service " + service);
         }
 
+        if ((flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0 && !isCallerSystem) {
+            throw new SecurityException("Non-system caller (pid=" + callingPid
+                    + ") set BIND_ALMOST_PERCEPTIBLE when binding service " + service);
+        }
+
         if ((flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
             mAm.enforceCallingPermission(
                     android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
@@ -2807,8 +2804,9 @@ public final class ActiveServices {
         final boolean allowInstant = (flags & Context.BIND_ALLOW_INSTANT) != 0;
 
         ServiceLookupResult res = retrieveServiceLocked(service, instanceName,
-                isSupplementalProcessService, supplementedAppUid, resolvedType, callingPackage,
-                callingPid, callingUid, userId, true, callerFg, isBindExternal, allowInstant);
+                isSdkSandboxService, sdkSandboxClientAppUid, sdkSandboxClientAppPackage,
+                resolvedType, callingPackage, callingPid, callingUid, userId, true, callerFg,
+                isBindExternal, allowInstant);
         if (res == null) {
             return 0;
         }
@@ -2890,6 +2888,12 @@ public final class ActiveServices {
 
             if ((flags & Context.BIND_NOT_APP_COMPONENT_USAGE) != 0) {
                 s.isNotAppComponentUsage = true;
+            }
+
+            if (s.app != null && s.app.mState != null
+                    && s.app.mState.getCurProcState() <= PROCESS_STATE_TOP
+                    && (flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0) {
+                s.lastTopAlmostPerceptibleBindRequestUptimeMs = SystemClock.uptimeMillis();
             }
 
             if (s.app != null) {
@@ -3228,19 +3232,19 @@ public final class ActiveServices {
             int callingPid, int callingUid, int userId,
             boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
             boolean allowInstant) {
-        return retrieveServiceLocked(service, instanceName, false, 0, resolvedType, callingPackage,
-                callingPid, callingUid, userId, createIfNeeded, callingFromFg, isBindExternal,
-                allowInstant);
+        return retrieveServiceLocked(service, instanceName, false, 0, null, resolvedType,
+                callingPackage, callingPid, callingUid, userId, createIfNeeded, callingFromFg,
+                isBindExternal, allowInstant);
     }
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
-            String instanceName, boolean isSupplementalProcessService, int supplementedAppUid,
-            String resolvedType,
+            String instanceName, boolean isSdkSandboxService, int sdkSandboxClientAppUid,
+            String sdkSandboxClientAppPackage, String resolvedType,
             String callingPackage, int callingPid, int callingUid, int userId,
             boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
             boolean allowInstant) {
-        if (isSupplementalProcessService && instanceName == null) {
-            throw new IllegalArgumentException("No instanceName provided for supplemental process");
+        if (isSdkSandboxService && instanceName == null) {
+            throw new IllegalArgumentException("No instanceName provided for sdk sandbox process");
         }
 
         ServiceRecord r = null;
@@ -3319,13 +3323,13 @@ public final class ActiveServices {
                 }
                 if (instanceName != null
                         && (sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) == 0
-                        && !isSupplementalProcessService) {
+                        && !isSdkSandboxService) {
                     throw new IllegalArgumentException("Can't use instance name '" + instanceName
-                            + "' with non-isolated non-supplemental service '" + sInfo.name + "'");
+                            + "' with non-isolated non-sdk sandbox service '" + sInfo.name + "'");
                 }
-                if (isSupplementalProcessService
+                if (isSdkSandboxService
                         && (sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
-                    throw new IllegalArgumentException("Service cannot be both supplemental and "
+                    throw new IllegalArgumentException("Service cannot be both sdk sandbox and "
                             + "isolated");
                 }
 
@@ -3412,11 +3416,12 @@ public final class ActiveServices {
                     final Intent.FilterComparison filter
                             = new Intent.FilterComparison(service.cloneFilter());
                     final ServiceRestarter res = new ServiceRestarter();
-                    String supplementalProcessName = isSupplementalProcessService ? instanceName
+                    String sdkSandboxProcessName = isSdkSandboxService ? instanceName
                                                                                   : null;
                     r = new ServiceRecord(mAm, className, name, definingPackageName,
                             definingUid, filter, sInfo, callingFromFg, res,
-                            supplementalProcessName, supplementedAppUid);
+                            sdkSandboxProcessName, sdkSandboxClientAppUid,
+                            sdkSandboxClientAppPackage);
                     res.setService(r);
                     smap.mServicesByInstanceName.put(name, r);
                     smap.mServicesByIntent.put(filter, r);
@@ -3799,6 +3804,18 @@ public final class ActiveServices {
     @GuardedBy("mAm")
     void performScheduleRestartLocked(ServiceRecord r, @NonNull String scheduling,
             @NonNull String reason, @UptimeMillisLong long now) {
+
+        // If the service is waiting to become a foreground service, remove the pending
+        // SERVICE_FOREGROUND_TIMEOUT_MSG msg, and set fgWaiting to false, so next time the service
+        // is brought up, scheduleServiceForegroundTransitionTimeoutLocked() can be called again and
+        // a new SERVICE_FOREGROUND_TIMEOUT_MSG is scheduled in SERVICE_START_FOREGROUND_TIMEOUT
+        // again.
+        if (r.fgRequired && r.fgWaiting) {
+            mAm.mHandler.removeMessages(
+                    ActivityManagerService.SERVICE_FOREGROUND_TIMEOUT_MSG, r);
+            r.fgWaiting = false;
+        }
+
         mAm.mHandler.removeCallbacks(r.restarter);
         mAm.mHandler.postAtTime(r.restarter, r.nextRestartTime);
         r.nextRestartTime = now + r.restartDelay;
@@ -4139,7 +4156,8 @@ public final class ActiveServices {
 
         final boolean isolated = (r.serviceInfo.flags&ServiceInfo.FLAG_ISOLATED_PROCESS) != 0;
         final String procName = r.processName;
-        HostingRecord hostingRecord = new HostingRecord("service", r.instanceName);
+        HostingRecord hostingRecord = new HostingRecord("service", r.instanceName,
+                r.definingPackageName, r.definingUid, r.serviceInfo.processName);
         ProcessRecord app;
 
         if (!isolated) {
@@ -4177,11 +4195,12 @@ public final class ActiveServices {
             app = r.isolationHostProc;
             if (WebViewZygote.isMultiprocessEnabled()
                     && r.serviceInfo.packageName.equals(WebViewZygote.getPackageName())) {
-                hostingRecord = HostingRecord.byWebviewZygote(r.instanceName);
+                hostingRecord = HostingRecord.byWebviewZygote(r.instanceName, r.definingPackageName,
+                        r.definingUid, r.serviceInfo.processName);
             }
             if ((r.serviceInfo.flags & ServiceInfo.FLAG_USE_APP_ZYGOTE) != 0) {
                 hostingRecord = HostingRecord.byAppZygote(r.instanceName, r.definingPackageName,
-                        r.definingUid);
+                        r.definingUid, r.serviceInfo.processName);
             }
         }
 
@@ -4190,10 +4209,10 @@ public final class ActiveServices {
         if (app == null && !permissionsReviewRequired && !packageFrozen) {
             // TODO (chriswailes): Change the Zygote policy flags based on if the launch-for-service
             //  was initiated from a notification tap or not.
-            if (r.supplemental) {
-                final int uid = Process.toSupplementalUid(r.supplementedAppUid);
-                app = mAm.startSupplementalProcessLocked(procName, r.appInfo, true, intentFlags,
-                        hostingRecord, ZYGOTE_POLICY_FLAG_EMPTY, uid);
+            if (r.isSdkSandbox) {
+                final int uid = Process.toSdkSandboxUid(r.sdkSandboxClientAppUid);
+                app = mAm.startSdkSandboxProcessLocked(procName, r.appInfo, true, intentFlags,
+                        hostingRecord, ZYGOTE_POLICY_FLAG_EMPTY, uid, r.sdkSandboxClientAppPackage);
                 r.isolationHostProc = app;
             } else {
                 app = mAm.startProcessLocked(procName, r.appInfo, true, intentFlags,
@@ -4219,7 +4238,7 @@ public final class ActiveServices {
                         + " for fg-service launch");
             }
             mAm.tempAllowlistUidLocked(r.appInfo.uid,
-                    SERVICE_START_FOREGROUND_TIMEOUT, REASON_SERVICE_LAUNCH,
+                    mAm.mConstants.mServiceStartForegroundTimeoutMs, REASON_SERVICE_LAUNCH,
                     "fg-service-launch",
                     TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                     r.mRecentCallingUid);
@@ -4780,6 +4799,10 @@ public final class ActiveServices {
             // And do the same for bg activity starts ability.
             if ((c.flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
                 s.updateIsAllowedBgActivityStartsByBinding();
+            }
+            // And for almost perceptible exceptions.
+            if ((c.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0) {
+                psr.updateHasTopStartedAlmostPerceptibleServices();
             }
             if (s.app != null) {
                 updateServiceClientActivitiesLocked(s.app.mServices, c, true);
@@ -5674,7 +5697,7 @@ public final class ActiveServices {
     void serviceForegroundTimeout(ServiceRecord r) {
         ProcessRecord app;
         synchronized (mAm) {
-            if (!r.fgRequired || r.destroying) {
+            if (!r.fgRequired || !r.fgWaiting || r.destroying) {
                 return;
             }
 
@@ -5692,10 +5715,21 @@ public final class ActiveServices {
         }
 
         if (app != null) {
-            mAm.mAnrHelper.appNotResponding(app,
-                    "Context.startForegroundService() did not then call Service.startForeground(): "
-                        + r);
+            final String annotation = "Context.startForegroundService() did not then call "
+                    + "Service.startForeground(): " + r;
+            Message msg = mAm.mHandler.obtainMessage(
+                    ActivityManagerService.SERVICE_FOREGROUND_TIMEOUT_ANR_MSG);
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = app;
+            args.arg2 = annotation;
+            msg.obj = args;
+            mAm.mHandler.sendMessageDelayed(msg,
+                    mAm.mConstants.mServiceStartForegroundAnrDelayMs);
         }
+    }
+
+    void serviceForegroundTimeoutANR(ProcessRecord app, String annotation) {
+        mAm.mAnrHelper.appNotResponding(app, annotation);
     }
 
     public void updateServiceApplicationInfoLocked(ApplicationInfo applicationInfo) {
@@ -5718,7 +5752,7 @@ public final class ActiveServices {
             ComponentName service) {
         mAm.crashApplicationWithTypeWithExtras(
                 app.uid, app.getPid(), app.info.packageName, app.userId,
-                "Context.startForegroundService() did not then call Service.startForeground(): "
+                "Context.startForegroundService() did not then call " + "Service.startForeground(): "
                     + serviceRecord, false /*force*/,
                 ForegroundServiceDidNotStartInTimeException.TYPE_ID,
                 ForegroundServiceDidNotStartInTimeException.createExtrasForService(service));
@@ -5743,7 +5777,7 @@ public final class ActiveServices {
                 ActivityManagerService.SERVICE_FOREGROUND_TIMEOUT_MSG);
         msg.obj = r;
         r.fgWaiting = true;
-        mAm.mHandler.sendMessageDelayed(msg, SERVICE_START_FOREGROUND_TIMEOUT);
+        mAm.mHandler.sendMessageDelayed(msg, mAm.mConstants.mServiceStartForegroundTimeoutMs);
     }
 
     final class ServiceDumper {

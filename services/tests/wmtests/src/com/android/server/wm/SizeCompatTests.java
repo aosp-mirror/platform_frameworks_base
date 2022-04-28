@@ -31,6 +31,7 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
@@ -1528,6 +1529,27 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDisplayIgnoreOrientationRequest_orientationChangedToUnspecified() {
+        // Set up a display in landscape and ignoring orientation request.
+        setUpDisplaySizeWithApp(2800, 1400);
+        final DisplayContent display = mActivity.mDisplayContent;
+        display.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        // Portrait fixed app without max aspect.
+        prepareUnresizable(mActivity, 0, SCREEN_ORIENTATION_PORTRAIT);
+
+        assertTrue(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(mActivity.inSizeCompatMode());
+
+        mActivity.setRequestedOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
+
+        assertTrue(mActivity.inSizeCompatMode());
+        // We should remember the original orientation.
+        assertEquals(mActivity.getResolvedOverrideConfiguration().orientation,
+                Configuration.ORIENTATION_PORTRAIT);
+    }
+
+    @Test
     public void testDisplayIgnoreOrientationRequest_newLaunchedMaxAspectApp() {
         // Set up a display in landscape and ignoring orientation request.
         setUpDisplaySizeWithApp(2800, 1400);
@@ -2126,6 +2148,136 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.areBoundsLetterboxed());
         verifyLogAppCompatState(mActivity,
                 APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE);
+    }
+
+    @Test
+    public void testIsEligibleForLetterboxEducation_educationNotEnabled_returnsFalse() {
+        setUpDisplaySizeWithApp(2500, 1000);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mWmService.mLetterboxConfiguration.setIsEducationEnabled(false);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        assertFalse(mActivity.isEligibleForLetterboxEducation());
+    }
+
+    @Test
+    public void testIsEligibleForLetterboxEducation_notEligibleForFixedOrientation_returnsFalse() {
+        setUpDisplaySizeWithApp(1000, 2500);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mWmService.mLetterboxConfiguration.setIsEducationEnabled(true);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        assertFalse(mActivity.isEligibleForLetterboxEducation());
+    }
+
+    @Test
+    public void testIsEligibleForLetterboxEducation_windowingModeMultiWindow_returnsFalse() {
+        // Support non resizable in multi window
+        mAtm.mDevEnableNonResizableMultiWindow = true;
+        setUpDisplaySizeWithApp(1000, 1200);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mWmService.mLetterboxConfiguration.setIsEducationEnabled(true);
+        final TestSplitOrganizer organizer =
+                new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
+
+        // Non-resizable landscape activity
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        final Rect originalBounds = new Rect(mActivity.getBounds());
+
+        // Move activity to split screen which takes half of the screen.
+        mTask.reparent(organizer.mPrimary, POSITION_TOP,
+                false /*moveParents*/, "test");
+        organizer.mPrimary.setBounds(0, 0, 1000, 600);
+
+        assertFalse(mActivity.isEligibleForLetterboxEducation());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
+    }
+
+    @Test
+    public void testIsEligibleForLetterboxEducation_fixedOrientationLandscape_returnsFalse() {
+        setUpDisplaySizeWithApp(1000, 2500);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mWmService.mLetterboxConfiguration.setIsEducationEnabled(true);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+
+        assertFalse(mActivity.isEligibleForLetterboxEducation());
+        assertTrue(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+    }
+
+    @Test
+    public void testIsEligibleForLetterboxEducation_hasStartingWindow_returnsFalseUntilRemoved() {
+        setUpDisplaySizeWithApp(2500, 1000);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mWmService.mLetterboxConfiguration.setIsEducationEnabled(true);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        mActivity.mStartingData = mock(StartingData.class);
+        mActivity.attachStartingWindow(
+                createWindowState(new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING),
+                        mActivity));
+
+        assertFalse(mActivity.isEligibleForLetterboxEducation());
+
+        // Verify that after removing the starting window isEligibleForLetterboxEducation returns
+        // true and mTask.dispatchTaskInfoChangedIfNeeded is called.
+        spyOn(mTask);
+        mActivity.removeStartingWindow();
+
+        assertTrue(mActivity.isEligibleForLetterboxEducation());
+        verify(mTask).dispatchTaskInfoChangedIfNeeded(true);
+    }
+
+    @Test
+    public void testIsEligibleForLetterboxEducation_hasStartingWindowAndEducationNotEnabled() {
+        setUpDisplaySizeWithApp(2500, 1000);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mWmService.mLetterboxConfiguration.setIsEducationEnabled(false);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        mActivity.mStartingData = mock(StartingData.class);
+        mActivity.attachStartingWindow(
+                createWindowState(new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING),
+                        mActivity));
+
+        assertFalse(mActivity.isEligibleForLetterboxEducation());
+
+        // Verify that after removing the starting window isEligibleForLetterboxEducation still
+        // returns false and mTask.dispatchTaskInfoChangedIfNeeded isn't called.
+        spyOn(mTask);
+        mActivity.removeStartingWindow();
+
+        assertFalse(mActivity.isEligibleForLetterboxEducation());
+        verify(mTask, never()).dispatchTaskInfoChangedIfNeeded(true);
+    }
+
+    @Test
+    public void testIsEligibleForLetterboxEducation_letterboxedForFixedOrientation_returnsTrue() {
+        setUpDisplaySizeWithApp(2500, 1000);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mWmService.mLetterboxConfiguration.setIsEducationEnabled(true);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        assertTrue(mActivity.isEligibleForLetterboxEducation());
+        assertTrue(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+    }
+
+    @Test
+    public void testIsEligibleForLetterboxEducation_sizeCompatAndEligibleForFixedOrientation() {
+        setUpDisplaySizeWithApp(1000, 2500);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mWmService.mLetterboxConfiguration.setIsEducationEnabled(true);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        assertTrue(mActivity.isEligibleForLetterboxEducation());
+        assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertTrue(mActivity.inSizeCompatMode());
     }
 
     /**

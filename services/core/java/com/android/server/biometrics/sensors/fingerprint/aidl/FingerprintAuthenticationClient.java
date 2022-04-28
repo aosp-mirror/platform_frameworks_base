@@ -140,12 +140,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
 
     @Override
     public void onAcquired(@FingerprintAcquired int acquiredInfo, int vendorCode) {
-        // For UDFPS, notify SysUI that the illumination can be turned off.
-        // See AcquiredInfo#GOOD and AcquiredInfo#RETRYING_CAPTURE
-        if (acquiredInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD) {
-            mSensorOverlays.ifUdfps(controller -> controller.onAcquiredGood(getSensorId()));
-        }
-
+        // For UDFPS, notify SysUI with acquiredInfo, so that the illumination can be turned off
+        // for most ACQUIRED messages. See BiometricFingerprintConstants#FingerprintAcquired
+        mSensorOverlays.ifUdfps(controller -> controller.onAcquired(getSensorId(), acquiredInfo));
         super.onAcquired(acquiredInfo, vendorCode);
     }
 

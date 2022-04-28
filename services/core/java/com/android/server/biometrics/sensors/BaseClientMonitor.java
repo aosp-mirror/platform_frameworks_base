@@ -38,7 +38,7 @@ import java.util.NoSuchElementException;
  */
 public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
 
-    private static final String TAG = "Biometrics/ClientMonitor";
+    private static final String TAG = "BaseClientMonitor";
     protected static final boolean DEBUG = true;
 
     // Counter used to distinguish between ClientMonitor instances to help debugging.
@@ -120,8 +120,18 @@ public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
     }
 
     /**
+     * Sets the lifecycle callback before the operation is started via
+     * {@link #start(ClientMonitorCallback)} when the client must wait for a cookie before starting.
+     *
+     * @param callback lifecycle callback (typically same callback used for starting the operation)
+     */
+    public void waitForCookie(@NonNull ClientMonitorCallback callback) {
+        mCallback = callback;
+    }
+
+    /**
      * Starts the ClientMonitor's lifecycle.
-     * @param callback invoked when the operation is complete (succeeds, fails, etc)
+     * @param callback invoked when the operation is complete (succeeds, fails, etc.)
      */
     public void start(@NonNull ClientMonitorCallback callback) {
         mCallback = wrapCallbackForStart(callback);
@@ -246,12 +256,12 @@ public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
     }
 
     /** Unique request id. */
-    public final long getRequestId() {
+    public long getRequestId() {
         return mRequestId;
     }
 
     /** If a unique id has been set via {@link #setRequestId(long)} */
-    public final boolean hasRequestId() {
+    public boolean hasRequestId() {
         return mRequestId > 0;
     }
 

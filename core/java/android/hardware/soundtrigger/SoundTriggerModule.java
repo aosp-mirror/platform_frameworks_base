@@ -37,6 +37,8 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.io.IOException;
+
 /**
  * The SoundTriggerModule provides APIs to control sound models and sound detection
  * on a given sound trigger hardware module.
@@ -137,13 +139,39 @@ public class SoundTriggerModule {
             if (model instanceof SoundTrigger.GenericSoundModel) {
                 SoundModel aidlModel = ConversionUtil.api2aidlGenericSoundModel(
                         (SoundTrigger.GenericSoundModel) model);
-                soundModelHandle[0] = mService.loadModel(aidlModel);
+                try {
+                    soundModelHandle[0] = mService.loadModel(aidlModel);
+                } finally {
+                    // TODO(b/219825762): We should be able to use the entire object in a
+                    //  try-with-resources
+                    //   clause, instead of having to explicitly close internal fields.
+                    if (aidlModel.data != null) {
+                        try {
+                            aidlModel.data.close();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Failed to close file", e);
+                        }
+                    }
+                }
                 return SoundTrigger.STATUS_OK;
             }
             if (model instanceof SoundTrigger.KeyphraseSoundModel) {
                 PhraseSoundModel aidlModel = ConversionUtil.api2aidlPhraseSoundModel(
                         (SoundTrigger.KeyphraseSoundModel) model);
-                soundModelHandle[0] = mService.loadPhraseModel(aidlModel);
+                try {
+                    soundModelHandle[0] = mService.loadPhraseModel(aidlModel);
+                } finally {
+                    // TODO(b/219825762): We should be able to use the entire object in a
+                    //  try-with-resources
+                    //   clause, instead of having to explicitly close internal fields.
+                    if (aidlModel.common.data != null) {
+                        try {
+                            aidlModel.common.data.close();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Failed to close file", e);
+                        }
+                    }
+                }
                 return SoundTrigger.STATUS_OK;
             }
             return SoundTrigger.STATUS_BAD_VALUE;

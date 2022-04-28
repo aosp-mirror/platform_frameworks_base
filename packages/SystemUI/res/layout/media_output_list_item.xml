@@ -62,41 +62,40 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
             android:layout_marginStart="56dp"
+            android:layout_marginEnd="56dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
             android:textSize="16sp"/>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/two_line_layout"
+            android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_gravity="center_vertical|start"
             android:layout_height="48dp"
+            android:layout_marginEnd="56dp"
             android:layout_marginStart="56dp">
             <TextView
                 android:id="@+id/two_line_title"
-                android:gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-                android:textColor="@color/media_dialog_inactive_item_main_content"
+                android:textColor="@color/media_dialog_item_main_content"
                 android:textSize="16sp"/>
             <TextView
                 android:id="@+id/subtitle"
-                android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_alignParentBottom="true"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/media_dialog_inactive_item_main_content"
+                android:textColor="@color/media_dialog_item_main_content"
                 android:textSize="14sp"
                 android:fontFamily="@*android:string/config_bodyFontFamily"
                 android:visibility="gone"/>
-        </RelativeLayout>
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/volume_indeterminate_progress"
@@ -120,14 +119,24 @@
             android:importantForAccessibility="no"
             android:visibility="gone"/>
 
+        <LinearLayout
+            android:id="@+id/end_action_area"
+            android:visibility="gone"
+            android:orientation="vertical"
+            android:layout_width="48dp"
+            android:layout_height="64dp"
+            android:layout_gravity="right|center"
+            android:gravity="center_vertical">
         <CheckBox
             android:id="@+id/check_box"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginEnd="16dp"
-            android:layout_gravity="right|center"
+            android:layout_gravity="right"
             android:button="@drawable/ic_circle_check_box"
             android:visibility="gone"
         />
+
+        </LinearLayout>
     </FrameLayout>
 </LinearLayout>

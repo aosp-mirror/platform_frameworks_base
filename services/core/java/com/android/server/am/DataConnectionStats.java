@@ -73,8 +73,7 @@ public class DataConnectionStats extends BroadcastReceiver {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SIM_STATE_CHANGED);
-        mContext.registerReceiver(this, filter, null /* broadcastPermission */, mListenerHandler,
-                Context.RECEIVER_NOT_EXPORTED);
+        mContext.registerReceiver(this, filter, null /* broadcastPermission */, mListenerHandler);
     }
 
     @Override

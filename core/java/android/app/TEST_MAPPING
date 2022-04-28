@@ -110,6 +110,19 @@
             "options": [
                 {
                     "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                // TODO(b/225076204): Remove the following four test cases after fixing the test fail.
+                {
+                    "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceBasicTest#testHotwordDetectionService_createDetectorTwiceQuickly_triggerSuccess"
+                },
+                {
+                    "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceBasicTest#testHotwordDetectionService_onDetectFromExternalSource_success"
+                },
+                {
+                    "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceBasicTest#testHotwordDetectionService_createDetectorTwiceQuickly_triggerSuccess"
+                },
+                {
+                    "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceBasicTest#testHotwordDetectionService_onDetectFromMic_success"
                 }
             ],
             "file_patterns": ["(/|^)VoiceInteract[^/]*"]

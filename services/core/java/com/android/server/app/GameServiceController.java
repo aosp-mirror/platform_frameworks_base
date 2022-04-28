@@ -19,10 +19,17 @@ package com.android.server.app;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.PatternMatcher;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
+import com.android.server.app.GameServiceConfiguration.GameServiceComponentConfiguration;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -36,8 +43,8 @@ import java.util.concurrent.Executor;
 final class GameServiceController {
     private static final String TAG = "GameServiceController";
 
-
     private final Object mLock = new Object();
+    private final Context mContext;
     private final Executor mBackgroundExecutor;
     private final GameServiceProviderSelector mGameServiceProviderSelector;
     private final GameServiceProviderInstanceFactory mGameServiceProviderInstanceFactory;
@@ -46,18 +53,24 @@ final class GameServiceController {
     @Nullable
     private volatile String mGameServiceProviderOverride;
     @Nullable
+    private BroadcastReceiver mGameServicePackageChangedReceiver;
+    @Nullable
     private volatile SystemService.TargetUser mCurrentForegroundUser;
     @GuardedBy("mLock")
     @Nullable
-    private volatile GameServiceProviderConfiguration mActiveGameServiceProviderConfiguration;
+    private volatile GameServiceComponentConfiguration mActiveGameServiceComponentConfiguration;
     @GuardedBy("mLock")
     @Nullable
     private volatile GameServiceProviderInstance mGameServiceProviderInstance;
+    @GuardedBy("mLock")
+    @Nullable
+    private volatile String mActiveGameServiceProviderPackage;
 
     GameServiceController(
-            @NonNull Executor backgroundExecutor,
+            @NonNull Context context, @NonNull Executor backgroundExecutor,
             @NonNull GameServiceProviderSelector gameServiceProviderSelector,
             @NonNull GameServiceProviderInstanceFactory gameServiceProviderInstanceFactory) {
+        mContext = context;
         mGameServiceProviderInstanceFactory = gameServiceProviderInstanceFactory;
         mBackgroundExecutor = backgroundExecutor;
         mGameServiceProviderSelector = gameServiceProviderSelector;
@@ -139,35 +152,92 @@ final class GameServiceController {
         }
 
         synchronized (mLock) {
-            GameServiceProviderConfiguration selectedGameServiceProviderConfiguration =
+            final GameServiceConfiguration selectedGameServiceConfiguration =
                     mGameServiceProviderSelector.get(mCurrentForegroundUser,
                             mGameServiceProviderOverride);
+            final String gameServicePackage =
+                    selectedGameServiceConfiguration == null ? null :
+                            selectedGameServiceConfiguration.getPackageName();
+            final GameServiceComponentConfiguration gameServiceComponentConfiguration =
+                    selectedGameServiceConfiguration == null ? null
+                            : selectedGameServiceConfiguration
+                                    .getGameServiceComponentConfiguration();
 
-            boolean didActiveGameServiceProviderChanged =
-                    !Objects.equals(selectedGameServiceProviderConfiguration,
-                            mActiveGameServiceProviderConfiguration);
-            if (!didActiveGameServiceProviderChanged) {
+            evaluateGameServiceProviderPackageChangedListenerLocked(gameServicePackage);
+
+            boolean didActiveGameServiceProviderChange =
+                    !Objects.equals(gameServiceComponentConfiguration,
+                            mActiveGameServiceComponentConfiguration);
+            if (!didActiveGameServiceProviderChange) {
                 return;
             }
 
             if (mGameServiceProviderInstance != null) {
                 Slog.i(TAG, "Stopping Game Service provider: "
-                        + mActiveGameServiceProviderConfiguration);
+                        + mActiveGameServiceComponentConfiguration);
                 mGameServiceProviderInstance.stop();
+                mGameServiceProviderInstance = null;
             }
 
-            mActiveGameServiceProviderConfiguration = selectedGameServiceProviderConfiguration;
-
-            if (mActiveGameServiceProviderConfiguration == null) {
+            mActiveGameServiceComponentConfiguration = gameServiceComponentConfiguration;
+            if (mActiveGameServiceComponentConfiguration == null) {
                 return;
             }
 
             Slog.i(TAG,
-                    "Starting Game Service provider: " + mActiveGameServiceProviderConfiguration);
+                    "Starting Game Service provider: " + mActiveGameServiceComponentConfiguration);
             mGameServiceProviderInstance =
                     mGameServiceProviderInstanceFactory.create(
-                            mActiveGameServiceProviderConfiguration);
+                            mActiveGameServiceComponentConfiguration);
             mGameServiceProviderInstance.start();
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void evaluateGameServiceProviderPackageChangedListenerLocked(
+            @Nullable String gameServicePackage) {
+        if (TextUtils.equals(mActiveGameServiceProviderPackage, gameServicePackage)) {
+            return;
+        }
+
+        if (mGameServicePackageChangedReceiver != null) {
+            mContext.unregisterReceiver(mGameServicePackageChangedReceiver);
+            mGameServicePackageChangedReceiver = null;
+        }
+
+        mActiveGameServiceProviderPackage = gameServicePackage;
+
+        if (TextUtils.isEmpty(mActiveGameServiceProviderPackage)) {
+            return;
+        }
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addDataScheme("package");
+        intentFilter.addDataSchemeSpecificPart(gameServicePackage, PatternMatcher.PATTERN_LITERAL);
+        mGameServicePackageChangedReceiver = new PackageChangedBroadcastReceiver(
+                gameServicePackage);
+        mContext.registerReceiver(
+                mGameServicePackageChangedReceiver,
+                intentFilter);
+    }
+
+    private final class PackageChangedBroadcastReceiver extends BroadcastReceiver {
+        private final String mPackageName;
+
+        PackageChangedBroadcastReceiver(String packageName) {
+            mPackageName = packageName;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!TextUtils.equals(intent.getData().getSchemeSpecificPart(), mPackageName)) {
+                return;
+            }
+            mBackgroundExecutor.execute(
+                    GameServiceController.this::evaluateActiveGameServiceProvider);
         }
     }
 }

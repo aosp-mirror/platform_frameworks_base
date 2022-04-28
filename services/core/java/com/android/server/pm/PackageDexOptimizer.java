@@ -319,75 +319,138 @@ public class PackageDexOptimizer {
 
             String profileName = ArtManager.getProfileName(
                     i == 0 ? null : pkg.getSplitNames()[i - 1]);
+            final boolean isUsedByOtherApps = options.isDexoptAsSharedLibrary()
+                    || packageUseInfo.isUsedByOtherApps(path);
+            String compilerFilter = getRealCompilerFilter(pkg, options.getCompilerFilter());
+            // If the app is used by other apps, we must not use the existing profile because it
+            // may contain user data, unless the profile is newly created on install.
+            final boolean useCloudProfile = isProfileGuidedCompilerFilter(compilerFilter)
+                    && isUsedByOtherApps
+                    && options.getCompilationReason() != PackageManagerService.REASON_INSTALL;
 
             String dexMetadataPath = null;
-            if (options.isDexoptInstallWithDexMetadata()) {
+            if (options.isDexoptInstallWithDexMetadata() || useCloudProfile) {
                 File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(new File(path));
                 dexMetadataPath = dexMetadataFile == null
                         ? null : dexMetadataFile.getAbsolutePath();
             }
 
-            final boolean isUsedByOtherApps = options.isDexoptAsSharedLibrary()
-                    || packageUseInfo.isUsedByOtherApps(path);
-            final String compilerFilter = getRealCompilerFilter(pkg,
-                options.getCompilerFilter(), isUsedByOtherApps);
             // If we don't have to check for profiles updates assume
             // PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA which will be a no-op with respect to
             // profiles.
-            final int profileAnalysisResult = options.isCheckForProfileUpdates()
-                    ? analyseProfiles(pkg, sharedGid, profileName, compilerFilter)
-                    : PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
+            int profileAnalysisResult = PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
+            if (options.isCheckForProfileUpdates()) {
+                profileAnalysisResult =
+                        analyseProfiles(pkg, sharedGid, profileName, compilerFilter);
+            }
+            String cloudProfileName = null;
+            try {
+                if (useCloudProfile) {
+                    cloudProfileName = "cloud-" + profileName;
+                    if (prepareCloudProfile(pkg, cloudProfileName, path, dexMetadataPath)) {
+                        profileName = cloudProfileName;
+                    } else {
+                        // Fall back to use the shared filter.
+                        compilerFilter =
+                                PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                                        PackageManagerService.REASON_SHARED);
+                        profileName = null;
+                    }
 
-            // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct
-            // flags.
-            final int dexoptFlags = getDexFlags(pkg, pkgSetting, compilerFilter, options);
+                    // We still run `analyseProfiles` even if `useCloudProfile` is true because it
+                    // merges profiles into the reference profile, which a system API
+                    // `ArtManager.snapshotRuntimeProfile` takes snapshots from. However, we don't
+                    // want the result to affect the decision of whether dexopt is needed.
+                    profileAnalysisResult = PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
+                }
 
-            for (String dexCodeIsa : dexCodeInstructionSets) {
-                int newResult = dexOptPath(pkg, pkgSetting, path, dexCodeIsa, compilerFilter,
-                        profileAnalysisResult, classLoaderContexts[i], dexoptFlags, sharedGid,
-                        packageStats, options.isDowngrade(), profileName, dexMetadataPath,
-                        options.getCompilationReason());
-                // OTAPreopt doesn't have stats so don't report in that case.
-                if (packageStats != null) {
-                    Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
+                // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct
+                // flags.
+                final int dexoptFlags = getDexFlags(pkg, pkgSetting, compilerFilter,
+                        useCloudProfile, options);
+
+                for (String dexCodeIsa : dexCodeInstructionSets) {
+                    int newResult = dexOptPath(pkg, pkgSetting, path, dexCodeIsa, compilerFilter,
+                            profileAnalysisResult, classLoaderContexts[i], dexoptFlags, sharedGid,
+                            packageStats, options.isDowngrade(), profileName, dexMetadataPath,
+                            options.getCompilationReason());
+                    // OTAPreopt doesn't have stats so don't report in that case.
+                    if (packageStats != null) {
+                        Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
+                        try {
+                            long sessionId = sRandom.nextLong();
+                            ArtStatsLogUtils.writeStatsLog(
+                                    mArtStatsLogger,
+                                    sessionId,
+                                    compilerFilter,
+                                    pkg.getUid(),
+                                    packageStats.getCompileTime(path),
+                                    dexMetadataPath,
+                                    options.getCompilationReason(),
+                                    newResult,
+                                    ArtStatsLogUtils.getApkType(path, pkg.getBaseApkPath(),
+                                            pkg.getSplitCodePaths()),
+                                    dexCodeIsa,
+                                    path);
+                        } finally {
+                            Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
+                        }
+                    }
+
+                    // Should stop the operation immediately.
+                    if (newResult == DEX_OPT_CANCELLED) {
+                        // Even for the cancellation, return failed if has failed.
+                        if (result == DEX_OPT_FAILED) {
+                            return result;
+                        }
+                        return newResult;
+                    }
+                    // The end result is:
+                    //  - FAILED if any path failed,
+                    //  - PERFORMED if at least one path needed compilation,
+                    //  - SKIPPED when all paths are up to date
+                    if ((result != DEX_OPT_FAILED) && (newResult != DEX_OPT_SKIPPED)) {
+                        result = newResult;
+                    }
+                }
+            } finally {
+                if (cloudProfileName != null) {
                     try {
-                        long sessionId = sRandom.nextLong();
-                        ArtStatsLogUtils.writeStatsLog(
-                                mArtStatsLogger,
-                                sessionId,
-                                compilerFilter,
-                                pkg.getUid(),
-                                packageStats.getCompileTime(path),
-                                dexMetadataPath,
-                                options.getCompilationReason(),
-                                newResult,
-                                ArtStatsLogUtils.getApkType(path, pkg.getBaseApkPath(),
-                                        pkg.getSplitCodePaths()),
-                                dexCodeIsa,
-                                path);
-                    } finally {
-                        Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
+                        mInstaller.deleteReferenceProfile(pkg.getPackageName(), cloudProfileName);
+                    } catch (InstallerException e) {
+                        Slog.w(TAG, "Failed to cleanup cloud profile", e);
                     }
-                }
-
-                // Should stop the operation immediately.
-                if (newResult == DEX_OPT_CANCELLED) {
-                    // Even for the cancellation, return failed if has failed.
-                    if (result == DEX_OPT_FAILED) {
-                        return result;
-                    }
-                    return newResult;
-                }
-                // The end result is:
-                //  - FAILED if any path failed,
-                //  - PERFORMED if at least one path needed compilation,
-                //  - SKIPPED when all paths are up to date
-                if ((result != DEX_OPT_FAILED) && (newResult != DEX_OPT_SKIPPED)) {
-                    result = newResult;
                 }
             }
         }
         return result;
+    }
+
+    /**
+     * Creates a profile with the name {@code profileName} from the dex metadata file at {@code
+     * dexMetadataPath} for the dex file at {@code path} belonging to the package {@code pkg}.
+     *
+     * @return true on success, or false otherwise.
+     */
+    @GuardedBy("mInstallLock")
+    private boolean prepareCloudProfile(AndroidPackage pkg, String profileName, String path,
+            @Nullable String dexMetadataPath) {
+        if (dexMetadataPath != null) {
+            try {
+                // Make sure we don't keep any existing contents.
+                mInstaller.deleteReferenceProfile(pkg.getPackageName(), profileName);
+
+                final int appId = UserHandle.getAppId(pkg.getUid());
+                mInstaller.prepareAppProfile(pkg.getPackageName(), UserHandle.USER_NULL, appId,
+                        profileName, path, dexMetadataPath);
+                return true;
+            } catch (InstallerException e) {
+                Slog.w(TAG, "Failed to prepare cloud profile", e);
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -405,14 +468,14 @@ public class PackageDexOptimizer {
             String classLoaderContext, int dexoptFlags, int uid,
             CompilerStats.PackageStats packageStats, boolean downgrade, String profileName,
             String dexMetadataPath, int compilationReason) {
-        int dexoptNeeded = getDexoptNeeded(path, isa, compilerFilter, classLoaderContext,
-                profileAnalysisResult, downgrade);
+        String oatDir = getPackageOatDirIfSupported(pkg,
+                pkgSetting.getTransientState().isUpdatedSystemApp());
+
+        int dexoptNeeded = getDexoptNeeded(pkg.getPackageName(), path, isa, compilerFilter,
+                classLoaderContext, profileAnalysisResult, downgrade, dexoptFlags, oatDir);
         if (Math.abs(dexoptNeeded) == DexFile.NO_DEXOPT_NEEDED) {
             return DEX_OPT_SKIPPED;
         }
-
-        String oatDir = getPackageOatDirIfSupported(pkg,
-                pkgSetting.getTransientState().isUpdatedSystemApp());
 
         Log.i(TAG, "Running dexopt (dexoptNeeded=" + dexoptNeeded + ") on: " + path
                 + " pkg=" + pkg.getPackageName() + " isa=" + isa
@@ -456,6 +519,7 @@ public class PackageDexOptimizer {
     /**
      * Perform dexopt (if needed) on a system server code path).
      */
+    @GuardedBy("mInstallLock")
     @DexOptResult
     public int dexoptSystemServerPath(
             String dexPath, PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options) {
@@ -466,12 +530,15 @@ public class PackageDexOptimizer {
         int result = DEX_OPT_SKIPPED;
         for (String isa : dexUseInfo.getLoaderIsas()) {
             int dexoptNeeded = getDexoptNeeded(
+                    PackageManagerService.PLATFORM_PACKAGE_NAME,
                     dexPath,
                     isa,
                     options.getCompilerFilter(),
                     dexUseInfo.getClassLoaderContext(),
                     PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES,
-                    /* downgrade= */ false);
+                    /* downgrade= */ false,
+                    dexoptFlags,
+                    /* oatDir= */ null);
 
             if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
                 continue;
@@ -714,7 +781,7 @@ public class PackageDexOptimizer {
     }
 
     /**
-     * Returns the compiler filter that should be used to optimize the package code.
+     * Returns the compiler filter that should be used to optimize the secondary dex.
      * The target filter will be updated if the package code is used by other apps
      * or if it has the safe mode flag set.
      */
@@ -754,12 +821,12 @@ public class PackageDexOptimizer {
     }
 
     /**
-     * Returns the compiler filter that should be used to optimize the package code.
-     * The target filter will be updated if the package code is used by other apps
-     * or if it has the safe mode flag set.
+     * Returns the compiler filter that should be used to optimize the primary dex.
+     * The target filter will be updated if the package has the safe mode flag set. Note that this
+     * method does NOT take other app use into account. The caller should be responsible for
+     * handling the case where the package code is used by other apps.
      */
-    private String getRealCompilerFilter(AndroidPackage pkg, String targetCompilerFilter,
-            boolean isUsedByOtherApps) {
+    private String getRealCompilerFilter(AndroidPackage pkg, String targetCompilerFilter) {
         // When an app or priv app is configured to run out of box, only verify it.
         if (pkg.isUseEmbeddedDex()
                 || (pkg.isPrivileged()
@@ -783,12 +850,6 @@ public class PackageDexOptimizer {
             return getSafeModeCompilerFilter(targetCompilerFilter);
         }
 
-        if (isProfileGuidedCompilerFilter(targetCompilerFilter) && isUsedByOtherApps) {
-            // If the dex files is used by other apps, apply the shared filter.
-            return PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
-                    PackageManagerService.REASON_SHARED);
-        }
-
         return targetCompilerFilter;
     }
 
@@ -799,14 +860,16 @@ public class PackageDexOptimizer {
     private int getDexFlags(ApplicationInfo info, String compilerFilter, DexoptOptions options) {
         return getDexFlags((info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0,
                 info.getHiddenApiEnforcementPolicy(), info.splitDependencies,
-                info.requestsIsolatedSplitLoading(), compilerFilter, options);
+                info.requestsIsolatedSplitLoading(), compilerFilter, false /* useCloudProfile */,
+                options);
     }
+
     private int getDexFlags(AndroidPackage pkg, @NonNull PackageStateInternal pkgSetting,
-            String compilerFilter, DexoptOptions options) {
+            String compilerFilter, boolean useCloudProfile, DexoptOptions options) {
         return getDexFlags(pkg.isDebuggable(),
                 AndroidPackageUtils.getHiddenApiEnforcementPolicy(pkg, pkgSetting),
                 pkg.getSplitDependencies(), pkg.isIsolatedSplitLoading(), compilerFilter,
-                options);
+                useCloudProfile, options);
     }
 
     /**
@@ -815,13 +878,15 @@ public class PackageDexOptimizer {
      */
     private int getDexFlags(boolean debuggable, int hiddenApiEnforcementPolicy,
             SparseArray<int[]> splitDependencies, boolean requestsIsolatedSplitLoading,
-            String compilerFilter, DexoptOptions options) {
+            String compilerFilter, boolean useCloudProfile, DexoptOptions options) {
         // Profile guide compiled oat files should not be public unles they are based
         // on profiles from dex metadata archives.
         // The flag isDexoptInstallWithDexMetadata applies only on installs when we know that
         // the user does not have an existing profile.
+        // The flag useCloudProfile applies only when the cloud profile should be used.
         boolean isProfileGuidedFilter = isProfileGuidedCompilerFilter(compilerFilter);
-        boolean isPublic = !isProfileGuidedFilter || options.isDexoptInstallWithDexMetadata();
+        boolean isPublic = !isProfileGuidedFilter || options.isDexoptInstallWithDexMetadata()
+                || useCloudProfile;
         int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
         // Some apps are executed with restrictions on hidden API usage. If this app is one
         // of them, pass a flag to dexopt to enable the same restrictions during compilation.
@@ -866,8 +931,19 @@ public class PackageDexOptimizer {
      * Assesses if there's a need to perform dexopt on {@code path} for the given
      * configuration (isa, compiler filter, profile).
      */
-    private int getDexoptNeeded(String path, String isa, String compilerFilter,
-            String classLoaderContext, int profileAnalysisResult, boolean downgrade) {
+    @GuardedBy("mInstallLock")
+    private int getDexoptNeeded(String packageName, String path, String isa, String compilerFilter,
+            String classLoaderContext, int profileAnalysisResult, boolean downgrade,
+            int dexoptFlags, String oatDir) {
+        final boolean shouldBePublic = (dexoptFlags & DEXOPT_PUBLIC) != 0;
+        // If the artifacts should be public while the current artifacts are not, we should
+        // re-compile anyway.
+        if (shouldBePublic && isOdexPrivate(packageName, path, isa, oatDir)) {
+            // Ensure compilation by pretending a compiler filter change on the apk/odex location
+            // (the reason for the '-'. A positive value means the 'oat' location).
+            return adjustDexoptNeeded(-DexFile.DEX2OAT_FOR_FILTER);
+        }
+
         int dexoptNeeded;
         try {
             // A profile guided optimizations with an empty profile is essentially 'verify' and
@@ -899,6 +975,18 @@ public class PackageDexOptimizer {
     /** Returns true if the compiler filter depends on profiles (e.g speed-profile). */
     private boolean compilerFilterDependsOnProfiles(String compilerFilter) {
         return compilerFilter.endsWith("-profile");
+    }
+
+    /** Returns true if the current artifacts of the app are private to the app itself. */
+    @GuardedBy("mInstallLock")
+    private boolean isOdexPrivate(String packageName, String path, String isa, String oatDir) {
+        try {
+            return mInstaller.getOdexVisibility(packageName, path, isa, oatDir)
+                    == Installer.ODEX_IS_PRIVATE;
+        } catch (Exception e) {
+            Slog.w(TAG, "Failed to get odex visibility for " + path, e);
+            return false;
+        }
     }
 
     /**

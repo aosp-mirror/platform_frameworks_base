@@ -131,6 +131,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
+            @GoToSleepReason int pmSleepReason, int globalWakefulness) {
+    }
+
+    @Override
     public void screenTurningOn(int displayId, ScreenOnListener screenOnListener) {
     }
 

@@ -42,11 +42,6 @@ interface ISplitScreen {
     oneway void unregisterSplitScreenListener(in ISplitScreenListener listener) = 2;
 
     /**
-     * Hides the side-stage if it is currently visible.
-     */
-    oneway void setSideStageVisibility(boolean visible) = 3;
-
-    /**
      * Removes a task from the side stage.
      */
     oneway void removeFromSideStage(int taskId) = 4;

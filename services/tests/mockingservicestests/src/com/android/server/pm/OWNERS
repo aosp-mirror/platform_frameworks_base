@@ -1,3 +1,4 @@
 include /services/core/java/com/android/server/pm/OWNERS
 
+per-file BackgroundDexOptServiceUnitTest.java = file:/services/core/java/com/android/server/pm/dex/OWNERS
 per-file StagingManagerTest.java = dariofreni@google.com, ioffe@google.com, olilan@google.com

@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.util.ListenerSet;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -275,13 +274,12 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         mUser = user;
     }
 
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("HeadsUpManager state:");
-        dumpInternal(fd, pw, args);
+        dumpInternal(pw, args);
     }
 
-    protected void dumpInternal(
-            @NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    protected void dumpInternal(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("  mTouchAcceptanceDelay="); pw.println(mTouchAcceptanceDelay);
         pw.print("  mSnoozeLengthMs="); pw.println(mSnoozeLengthMs);
         pw.print("  now="); pw.println(mClock.currentTimeMillis());

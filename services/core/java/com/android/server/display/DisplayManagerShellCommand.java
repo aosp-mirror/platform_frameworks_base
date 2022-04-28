@@ -60,8 +60,6 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setDisplayModeDirectorLoggingEnabled(false);
             case "dwb-set-cct":
                 return setAmbientColorTemperatureOverride();
-            case "constrain-launcher-metrics":
-                return setConstrainLauncherMetrics();
             case "set-user-preferred-display-mode":
                 return setUserPreferredDisplayMode();
             case "clear-user-preferred-display-mode":
@@ -112,9 +110,6 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Disable display mode director logging.");
         pw.println("  dwb-set-cct CCT");
         pw.println("    Sets the ambient color temperature override to CCT (use -1 to disable).");
-        pw.println("  constrain-launcher-metrics [true|false]");
-        pw.println("    Sets if Display#getRealSize and getRealMetrics should be constrained for ");
-        pw.println("    Launcher.");
         pw.println("  set-user-preferred-display-mode WIDTH HEIGHT REFRESH-RATE "
                 + "DISPLAY_ID (optional)");
         pw.println("    Sets the user preferred display mode which has fields WIDTH, HEIGHT and "
@@ -202,17 +197,6 @@ class DisplayManagerShellCommand extends ShellCommand {
             return 1;
         }
         mService.setAmbientColorTemperatureOverride(cct);
-        return 0;
-    }
-
-    private int setConstrainLauncherMetrics() {
-        String constrainText = getNextArg();
-        if (constrainText == null) {
-            getErrPrintWriter().println("Error: no value specified");
-            return 1;
-        }
-        boolean constrain = Boolean.parseBoolean(constrainText);
-        mService.setShouldConstrainMetricsForLauncher(constrain);
         return 0;
     }
 

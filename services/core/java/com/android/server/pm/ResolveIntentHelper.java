@@ -27,6 +27,8 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -50,23 +52,52 @@ import android.util.Slog;
 
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.resolution.ComponentResolverApi;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 final class ResolveIntentHelper {
-    private final PackageManagerService mPm;
+    @NonNull
+    private final Context mContext;
+    @NonNull
+    private final PlatformCompat mPlatformCompat;
+    @NonNull
+    private final UserManagerService mUserManager;
+    @NonNull
     private final PreferredActivityHelper mPreferredActivityHelper;
+    @NonNull
+    private final DomainVerificationManagerInternal mDomainVerificationManager;
+    @NonNull
+    private final UserNeedsBadgingCache mUserNeedsBadging;
+    @NonNull
+    private final Supplier<ResolveInfo> mResolveInfoSupplier;
+    @NonNull
+    private final Supplier<ActivityInfo> mInstantAppInstallerActivitySupplier;
 
-    // TODO(b/198166813): remove PMS dependency
-    ResolveIntentHelper(PackageManagerService pm, PreferredActivityHelper preferredActivityHelper) {
-        mPm = pm;
+    ResolveIntentHelper(@NonNull Context context,
+            @NonNull PreferredActivityHelper preferredActivityHelper,
+            @NonNull PlatformCompat platformCompat, @NonNull UserManagerService userManager,
+            @NonNull DomainVerificationManagerInternal domainVerificationManager,
+            @NonNull UserNeedsBadgingCache userNeedsBadgingCache,
+            @NonNull Supplier<ResolveInfo> resolveInfoSupplier,
+            @NonNull Supplier<ActivityInfo> instantAppInstallerActivitySupplier) {
+        mContext = context;
         mPreferredActivityHelper = preferredActivityHelper;
+        mPlatformCompat = platformCompat;
+        mUserManager = userManager;
+        mDomainVerificationManager = domainVerificationManager;
+        mUserNeedsBadging = userNeedsBadgingCache;
+        mResolveInfoSupplier = resolveInfoSupplier;
+        mInstantAppInstallerActivitySupplier = instantAppInstallerActivitySupplier;
     }
 
     /**
@@ -74,35 +105,33 @@ final class ResolveIntentHelper {
      * However, if {@code resolveForStart} is {@code true}, all instant apps are visible
      * since we need to allow the system to start any installed application.
      */
-    public ResolveInfo resolveIntentInternal(Intent intent, String resolvedType,
+    public ResolveInfo resolveIntentInternal(Computer computer, Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags, int userId,
             boolean resolveForStart, int filterCallingUid) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveIntent");
 
-            if (!mPm.mUserManager.exists(userId)) return null;
+            if (!mUserManager.exists(userId)) return null;
             final int callingUid = Binder.getCallingUid();
-            flags = mPm.updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
-                    mPm.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId,
+            flags = computer.updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
+                    computer.isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId,
                             resolvedType, flags));
-            mPm.enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
+            computer.enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
                     false /*checkShell*/, "resolve intent");
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
-            final List<ResolveInfo> query = mPm.queryIntentActivitiesInternal(intent, resolvedType,
-                    flags, privateResolveFlags, filterCallingUid, userId, resolveForStart,
-                    true /*allowDynamicSplits*/);
+            final List<ResolveInfo> query = computer.queryIntentActivitiesInternal(intent,
+                    resolvedType, flags, privateResolveFlags, filterCallingUid, userId,
+                    resolveForStart, true /*allowDynamicSplits*/);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             final boolean queryMayBeFiltered =
                     UserHandle.getAppId(filterCallingUid) >= Process.FIRST_APPLICATION_UID
                             && !resolveForStart;
 
-            final ResolveInfo bestChoice =
-                    chooseBestActivity(
-                            intent, resolvedType, flags, privateResolveFlags, query, userId,
-                            queryMayBeFiltered);
+            final ResolveInfo bestChoice = chooseBestActivity(computer, intent, resolvedType, flags,
+                    privateResolveFlags, query, userId, queryMayBeFiltered);
             final boolean nonBrowserOnly =
                     (privateResolveFlags & PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY) != 0;
             if (nonBrowserOnly && bestChoice != null && bestChoice.handleAllWebDataURI) {
@@ -114,7 +143,7 @@ final class ResolveIntentHelper {
         }
     }
 
-    private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
+    private ResolveInfo chooseBestActivity(Computer computer, Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags,
             List<ResolveInfo> query, int userId, boolean queryMayBeFiltered) {
@@ -141,9 +170,9 @@ final class ResolveIntentHelper {
                 }
                 // If we have saved a preference for a preferred activity for
                 // this Intent, use that.
-                ResolveInfo ri = mPreferredActivityHelper.findPreferredActivityNotLocked(intent,
-                        resolvedType, flags, query, true, false, debug, userId,
-                        queryMayBeFiltered);
+                ResolveInfo ri = mPreferredActivityHelper.findPreferredActivityNotLocked(computer,
+                        intent, resolvedType, flags, query, true, false, debug,
+                        userId, queryMayBeFiltered);
                 if (ri != null) {
                     return ri;
                 }
@@ -156,9 +185,10 @@ final class ResolveIntentHelper {
                     // If we have an ephemeral app, use it
                     if (ri.activityInfo.applicationInfo.isInstantApp()) {
                         final String packageName = ri.activityInfo.packageName;
-                        final PackageStateInternal ps = mPm.getPackageStateInternal(packageName);
+                        final PackageStateInternal ps =
+                                computer.getPackageStateInternal(packageName);
                         if (ps != null && PackageManagerServiceUtils.hasAnyDomainApproval(
-                                mPm.mDomainVerificationManager, ps, intent, flags, userId)) {
+                                mDomainVerificationManager, ps, intent, flags, userId)) {
                             return ri;
                         }
                     }
@@ -167,7 +197,7 @@ final class ResolveIntentHelper {
                         & PackageManagerInternal.RESOLVE_NON_RESOLVER_ONLY) != 0) {
                     return null;
                 }
-                ri = new ResolveInfo(mPm.getResolveInfo());
+                ri = new ResolveInfo(mResolveInfoSupplier.get());
                 // if all resolve options are browsers, mark the resolver's info as if it were
                 // also a browser.
                 ri.handleAllWebDataURI = browserCount == n;
@@ -184,7 +214,7 @@ final class ResolveIntentHelper {
                 if (!TextUtils.isEmpty(intentPackage) && allHavePackage(query, intentPackage)) {
                     final ApplicationInfo appi = query.get(0).activityInfo.applicationInfo;
                     ri.resolvePackageName = intentPackage;
-                    if (mPm.userNeedsBadging(userId)) {
+                    if (mUserNeedsBadging.get(userId)) {
                         ri.noResourceId = true;
                     } else {
                         ri.icon = appi.icon;
@@ -225,13 +255,14 @@ final class ResolveIntentHelper {
         return true;
     }
 
-    public IntentSender getLaunchIntentSenderForPackage(String packageName, String callingPackage,
-            String featureId, int userId) throws RemoteException {
+    public IntentSender getLaunchIntentSenderForPackage(@NonNull Computer computer,
+            String packageName, String callingPackage, String featureId, int userId)
+            throws RemoteException {
         Objects.requireNonNull(packageName);
         final int callingUid = Binder.getCallingUid();
-        mPm.enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
+        computer.enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
                 false /* checkShell */, "get launch intent sender for package");
-        final int packageUid = mPm.getPackageUid(callingPackage, 0 /* flags */, userId);
+        final int packageUid = computer.getPackageUid(callingPackage, 0 /* flags */, userId);
         if (!UserHandle.isSameApp(callingUid, packageUid)) {
             throw new SecurityException("getLaunchIntentSenderForPackage() from calling uid: "
                     + callingUid + " does not own package: " + callingPackage);
@@ -242,17 +273,17 @@ final class ResolveIntentHelper {
         final Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
         intentToResolve.addCategory(Intent.CATEGORY_INFO);
         intentToResolve.setPackage(packageName);
-        String resolvedType = intentToResolve.resolveTypeIfNeeded(
-                mPm.mContext.getContentResolver());
-        List<ResolveInfo> ris = mPm.queryIntentActivitiesInternal(intentToResolve, resolvedType,
+        final ContentResolver contentResolver = mContext.getContentResolver();
+        String resolvedType = intentToResolve.resolveTypeIfNeeded(contentResolver);
+        List<ResolveInfo> ris = computer.queryIntentActivitiesInternal(intentToResolve, resolvedType,
                 0 /* flags */, 0 /* privateResolveFlags */, callingUid, userId,
                 true /* resolveForStart */, false /* allowDynamicSplits */);
         if (ris == null || ris.size() <= 0) {
             intentToResolve.removeCategory(Intent.CATEGORY_INFO);
             intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
             intentToResolve.setPackage(packageName);
-            resolvedType = intentToResolve.resolveTypeIfNeeded(mPm.mContext.getContentResolver());
-            ris = mPm.queryIntentActivitiesInternal(intentToResolve, resolvedType,
+            resolvedType = intentToResolve.resolveTypeIfNeeded(contentResolver);
+            ris = computer.queryIntentActivitiesInternal(intentToResolve, resolvedType,
                     0 /* flags */, 0 /* privateResolveFlags */, callingUid, userId,
                     true /* resolveForStart */, false /* allowDynamicSplits */);
         }
@@ -277,17 +308,17 @@ final class ResolveIntentHelper {
 
     // In this method, we have to know the actual calling UID, but in some cases Binder's
     // call identity is removed, so the UID has to be passed in explicitly.
-    public @NonNull List<ResolveInfo> queryIntentReceiversInternal(Intent intent,
+    public @NonNull List<ResolveInfo> queryIntentReceiversInternal(Computer computer, Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId,
             int filterCallingUid) {
-        if (!mPm.mUserManager.exists(userId)) return Collections.emptyList();
-        mPm.enforceCrossUserPermission(filterCallingUid, userId, false /*requireFullPermission*/,
+        if (!mUserManager.exists(userId)) return Collections.emptyList();
+        computer.enforceCrossUserPermission(filterCallingUid, userId, false /*requireFullPermission*/,
                 false /*checkShell*/, "query intent receivers");
-        final String instantAppPkgName = mPm.getInstantAppPackageName(filterCallingUid);
-        flags = mPm.updateFlagsForResolve(
-                flags, userId, filterCallingUid, false /*includeInstantApps*/,
-                mPm.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
-                        flags));
+        final String instantAppPkgName = computer.getInstantAppPackageName(filterCallingUid);
+        flags = computer.updateFlagsForResolve(flags, userId, filterCallingUid,
+                false /*includeInstantApps*/,
+                computer.isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId,
+                        resolvedType, flags));
         Intent originalIntent = null;
         ComponentName comp = intent.getComponent();
         if (comp == null) {
@@ -297,9 +328,10 @@ final class ResolveIntentHelper {
                 comp = intent.getComponent();
             }
         }
+        final ComponentResolverApi componentResolver = computer.getComponentResolver();
         List<ResolveInfo> list = Collections.emptyList();
         if (comp != null) {
-            final ActivityInfo ai = mPm.getReceiverInfo(comp, flags, userId);
+            final ActivityInfo ai = computer.getReceiverInfo(comp, flags, userId);
             if (ai != null) {
                 // When specifying an explicit component, we prevent the activity from being
                 // used when either 1) the calling package is normal and the activity is within
@@ -335,28 +367,25 @@ final class ResolveIntentHelper {
                     list = new ArrayList<>(1);
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            mPm.mInjector.getCompatibility(), mPm.mComponentResolver,
-                            list, true, intent, resolvedType, filterCallingUid);
+                            mPlatformCompat, componentResolver, list, true, intent,
+                            resolvedType, filterCallingUid);
                 }
             }
         } else {
-            // reader
-            synchronized (mPm.mLock) {
-                String pkgName = intent.getPackage();
-                if (pkgName == null) {
-                    final List<ResolveInfo> result = mPm.mComponentResolver.queryReceivers(
-                            intent, resolvedType, flags, userId);
-                    if (result != null) {
-                        list = result;
-                    }
+            String pkgName = intent.getPackage();
+            if (pkgName == null) {
+                final List<ResolveInfo> result = componentResolver
+                        .queryReceivers(computer, intent, resolvedType, flags, userId);
+                if (result != null) {
+                    list = result;
                 }
-                final AndroidPackage pkg = mPm.mPackages.get(pkgName);
-                if (pkg != null) {
-                    final List<ResolveInfo> result = mPm.mComponentResolver.queryReceivers(
-                            intent, resolvedType, flags, pkg.getReceivers(), userId);
-                    if (result != null) {
-                        list = result;
-                    }
+            }
+            final AndroidPackage pkg = computer.getPackage(pkgName);
+            if (pkg != null) {
+                final List<ResolveInfo> result = componentResolver.queryReceivers(computer,
+                        intent, resolvedType, flags, pkg.getReceivers(), userId);
+                if (result != null) {
+                    list = result;
                 }
             }
         }
@@ -364,21 +393,22 @@ final class ResolveIntentHelper {
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                    mPm.mInjector.getCompatibility(), mPm.mComponentResolver,
+                    mPlatformCompat, componentResolver,
                     list, true, originalIntent, resolvedType, filterCallingUid);
         }
 
-        return mPm.applyPostResolutionFilter(
-                list, instantAppPkgName, false, filterCallingUid, false, userId, intent);
+        return computer.applyPostResolutionFilter(list, instantAppPkgName, false, filterCallingUid,
+                false, userId, intent);
     }
 
 
-    public ResolveInfo resolveServiceInternal(Intent intent, String resolvedType,
-            @PackageManager.ResolveInfoFlagsBits long flags, int userId, int callingUid) {
-        if (!mPm.mUserManager.exists(userId)) return null;
-        flags = mPm.updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
+    public ResolveInfo resolveServiceInternal(@NonNull Computer computer, Intent intent,
+            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId,
+            int callingUid) {
+        if (!mUserManager.exists(userId)) return null;
+        flags = computer.updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
                 false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
-        List<ResolveInfo> query = mPm.queryIntentServicesInternal(
+        List<ResolveInfo> query = computer.queryIntentServicesInternal(
                 intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/);
         if (query != null) {
             if (query.size() >= 1) {
@@ -391,12 +421,12 @@ final class ResolveIntentHelper {
     }
 
     public @NonNull List<ResolveInfo> queryIntentContentProvidersInternal(
-            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            int userId) {
-        if (!mPm.mUserManager.exists(userId)) return Collections.emptyList();
+            @NonNull Computer computer, Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
+        if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
-        final String instantAppPkgName = mPm.getInstantAppPackageName(callingUid);
-        flags = mPm.updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
+        final String instantAppPkgName = computer.getInstantAppPackageName(callingUid);
+        flags = computer.updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
                 false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
@@ -407,7 +437,7 @@ final class ResolveIntentHelper {
         }
         if (comp != null) {
             final List<ResolveInfo> list = new ArrayList<>(1);
-            final ProviderInfo pi = mPm.getProviderInfo(comp, flags, userId);
+            final ProviderInfo pi = computer.getProviderInfo(comp, flags, userId);
             if (pi != null) {
                 // When specifying an explicit component, we prevent the provider from being
                 // used when either 1) the provider is in an instant application and the
@@ -432,8 +462,8 @@ final class ResolveIntentHelper {
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                 && isTargetHiddenFromInstantApp));
                 final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
-                        && mPm.shouldFilterApplication(
-                        mPm.getPackageStateInternal(pi.applicationInfo.packageName,
+                        && computer.shouldFilterApplication(
+                        computer.getPackageStateInternal(pi.applicationInfo.packageName,
                                 Process.SYSTEM_UID), callingUid, userId);
                 if (!blockResolution && !blockNormalResolution) {
                     final ResolveInfo ri = new ResolveInfo();
@@ -444,46 +474,40 @@ final class ResolveIntentHelper {
             return list;
         }
 
-        // reader
-        synchronized (mPm.mLock) {
-            String pkgName = intent.getPackage();
-            if (pkgName == null) {
-                final List<ResolveInfo> resolveInfos = mPm.mComponentResolver.queryProviders(intent,
-                        resolvedType, flags, userId);
-                if (resolveInfos == null) {
-                    return Collections.emptyList();
-                }
-                return applyPostContentProviderResolutionFilter(
-                        resolveInfos, instantAppPkgName, userId, callingUid);
+        final ComponentResolverApi componentResolver = computer.getComponentResolver();
+        String pkgName = intent.getPackage();
+        if (pkgName == null) {
+            final List<ResolveInfo> resolveInfos = componentResolver.queryProviders(computer,
+                    intent, resolvedType, flags, userId);
+            if (resolveInfos == null) {
+                return Collections.emptyList();
             }
-            final AndroidPackage pkg = mPm.mPackages.get(pkgName);
-            if (pkg != null) {
-                final List<ResolveInfo> resolveInfos = mPm.mComponentResolver.queryProviders(intent,
-                        resolvedType, flags,
-                        pkg.getProviders(), userId);
-                if (resolveInfos == null) {
-                    return Collections.emptyList();
-                }
-                return applyPostContentProviderResolutionFilter(
-                        resolveInfos, instantAppPkgName, userId, callingUid);
-            }
-            return Collections.emptyList();
+            return applyPostContentProviderResolutionFilter(computer, resolveInfos,
+                    instantAppPkgName, userId, callingUid);
         }
+        final AndroidPackage pkg = computer.getPackage(pkgName);
+        if (pkg != null) {
+            final List<ResolveInfo> resolveInfos = componentResolver.queryProviders(computer,
+                    intent, resolvedType, flags, pkg.getProviders(), userId);
+            if (resolveInfos == null) {
+                return Collections.emptyList();
+            }
+            return applyPostContentProviderResolutionFilter(computer, resolveInfos,
+                    instantAppPkgName, userId, callingUid);
+        }
+        return Collections.emptyList();
     }
 
-    private List<ResolveInfo> applyPostContentProviderResolutionFilter(
+    private List<ResolveInfo> applyPostContentProviderResolutionFilter(@NonNull Computer computer,
             List<ResolveInfo> resolveInfos, String instantAppPkgName,
             @UserIdInt int userId, int callingUid) {
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
 
             if (instantAppPkgName == null) {
-                SettingBase callingSetting =
-                        mPm.mSettings.getSettingLPr(UserHandle.getAppId(callingUid));
-                PackageStateInternal resolvedSetting =
-                        mPm.getPackageStateInternal(info.providerInfo.packageName, 0);
-                if (!mPm.mAppsFilter.shouldFilterApplication(
-                        callingUid, callingSetting, resolvedSetting, userId)) {
+                PackageStateInternal resolvedSetting = computer.getPackageStateInternal(
+                        info.providerInfo.packageName, 0);
+                if (!computer.shouldFilterApplication(resolvedSetting, callingUid, userId)) {
                     continue;
                 }
             }
@@ -494,7 +518,7 @@ final class ResolveIntentHelper {
                 if (info.providerInfo.splitName != null
                         && !ArrayUtils.contains(info.providerInfo.applicationInfo.splitNames,
                         info.providerInfo.splitName)) {
-                    if (mPm.mInstantAppInstallerActivity == null) {
+                    if (mInstantAppInstallerActivitySupplier.get() == null) {
                         if (DEBUG_INSTANT) {
                             Slog.v(TAG, "No installer - not adding it to the ResolveInfo list");
                         }
@@ -507,7 +531,7 @@ final class ResolveIntentHelper {
                         Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
                     }
                     final ResolveInfo installerInfo = new ResolveInfo(
-                            mPm.getInstantAppInstallerInfo());
+                            computer.getInstantAppInstallerInfo());
                     installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
                             null /*failureActivity*/,
                             info.providerInfo.packageName,
@@ -531,20 +555,21 @@ final class ResolveIntentHelper {
         return resolveInfos;
     }
 
-    public @NonNull List<ResolveInfo> queryIntentActivityOptionsInternal(ComponentName caller,
-            Intent[] specifics, String[] specificTypes, Intent intent,
+    public @NonNull List<ResolveInfo> queryIntentActivityOptionsInternal(Computer computer,
+            ComponentName caller, Intent[] specifics, String[] specificTypes, Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
-        if (!mPm.mUserManager.exists(userId)) return Collections.emptyList();
+        if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
-        flags = mPm.updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                mPm.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
-                        flags));
-        mPm.enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
+        flags = computer.updateFlagsForResolve(flags, userId, callingUid,
+                false /*includeInstantApps*/,
+                computer.isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId,
+                        resolvedType, flags));
+        computer.enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
                 false /*checkShell*/, "query intent activity options");
         final String resultsAction = intent.getAction();
 
-        final List<ResolveInfo> results = mPm.queryIntentActivitiesInternal(intent, resolvedType,
-                flags | PackageManager.GET_RESOLVED_FILTER, userId);
+        final List<ResolveInfo> results = computer.queryIntentActivitiesInternal(intent,
+                resolvedType, flags | PackageManager.GET_RESOLVED_FILTER, userId);
 
         if (DEBUG_INTENT_MATCHING) {
             Log.v(TAG, "Query " + intent + ": " + results);
@@ -584,21 +609,20 @@ final class ResolveIntentHelper {
 
                 ComponentName comp = sintent.getComponent();
                 if (comp == null) {
-                    ri = mPm.resolveIntent(
-                            sintent,
-                            specificTypes != null ? specificTypes[i] : null,
-                            flags, userId);
+                    ri = resolveIntentInternal(computer, sintent,
+                            specificTypes != null ? specificTypes[i] : null, flags,
+                            0 /*privateResolveFlags*/, userId, false, Binder.getCallingUid());
                     if (ri == null) {
                         continue;
                     }
-                    if (ri == mPm.getResolveInfo()) {
+                    if (ri == mResolveInfoSupplier.get()) {
                         // ACK!  Must do something better with this.
                     }
                     ai = ri.activityInfo;
                     comp = new ComponentName(ai.applicationInfo.packageName,
                             ai.name);
                 } else {
-                    ai = mPm.getActivityInfo(comp, flags, userId);
+                    ai = computer.getActivityInfo(comp, flags, userId);
                     if (ai == null) {
                         continue;
                     }

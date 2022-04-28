@@ -307,6 +307,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
         removeAction(OneTouchPlayAction.class);
         removeAction(DevicePowerStatusAction.class);
+        removeAction(AbsoluteVolumeAudioStatusAction.class);
 
         super.disableDevice(initiatedByCec, callback);
     }

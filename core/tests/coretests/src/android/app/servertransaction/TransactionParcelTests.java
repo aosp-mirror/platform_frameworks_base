@@ -203,6 +203,7 @@ public class TransactionParcelTests {
                 .setPendingResults(resultInfoList()).setActivityOptions(ActivityOptions.makeBasic())
                 .setPendingNewIntents(referrerIntentList()).setIsForward(true)
                 .setAssistToken(new Binder()).setShareableActivityToken(new Binder())
+                .setTaskFragmentToken(new Binder())
                 .build();
 
         writeAndPrepareForReading(item);
@@ -424,6 +425,7 @@ public class TransactionParcelTests {
 
         @Override
         public void bindApplication(String s, ApplicationInfo applicationInfo,
+                String sdkSandboxClientAppPackage,
                 ProviderInfoList list, ComponentName componentName, ProfilerInfo profilerInfo,
                 Bundle bundle, IInstrumentationWatcher iInstrumentationWatcher,
                 IUiAutomationConnection iUiAutomationConnection, int i, boolean b, boolean b1,

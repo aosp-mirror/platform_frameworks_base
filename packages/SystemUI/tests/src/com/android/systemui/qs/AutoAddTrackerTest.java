@@ -145,7 +145,7 @@ public class AutoAddTrackerTest extends SysuiTestCase {
     public void testBroadcastReceiverRegistered() {
         verify(mBroadcastDispatcher).registerReceiver(
                 any(), mIntentFilterArgumentCaptor.capture(), any(), eq(UserHandle.of(USER)),
-                anyInt());
+                anyInt(), any());
 
         assertTrue(
                 mIntentFilterArgumentCaptor.getValue().hasAction(Intent.ACTION_SETTING_RESTORED));
@@ -158,13 +158,14 @@ public class AutoAddTrackerTest extends SysuiTestCase {
         InOrder inOrder = Mockito.inOrder(mBroadcastDispatcher);
         inOrder.verify(mBroadcastDispatcher).unregisterReceiver(any());
         inOrder.verify(mBroadcastDispatcher)
-                .registerReceiver(any(), any(), any(), eq(UserHandle.of(USER + 1)), anyInt());
+                .registerReceiver(any(), any(), any(), eq(UserHandle.of(USER + 1)), anyInt(),
+                        any());
     }
 
     @Test
     public void testSettingRestoredWithTilesNotRemovedInSource_noAutoAddedInTarget() {
         verify(mBroadcastDispatcher).registerReceiver(
-                mBroadcastReceiverArgumentCaptor.capture(), any(), any(), any(), anyInt());
+                mBroadcastReceiverArgumentCaptor.capture(), any(), any(), any(), anyInt(), any());
 
         // These tiles were present in the original device
         String restoredTiles = "saver,work,internet,cast";
@@ -188,7 +189,7 @@ public class AutoAddTrackerTest extends SysuiTestCase {
     public void testSettingRestoredWithTilesRemovedInSource_noAutoAddedInTarget() {
         verify(mBroadcastDispatcher)
                 .registerReceiver(mBroadcastReceiverArgumentCaptor.capture(), any(), any(), any(),
-                        anyInt());
+                        anyInt(), any());
 
         // These tiles were present in the original device
         String restoredTiles = "saver,internet,cast";
@@ -212,7 +213,7 @@ public class AutoAddTrackerTest extends SysuiTestCase {
     public void testSettingRestoredWithTilesRemovedInSource_sameAutoAddedinTarget() {
         verify(mBroadcastDispatcher)
                 .registerReceiver(mBroadcastReceiverArgumentCaptor.capture(), any(), any(), any(),
-                        anyInt());
+                        anyInt(), any());
 
         // These tiles were present in the original device
         String restoredTiles = "saver,internet,cast";
@@ -237,7 +238,7 @@ public class AutoAddTrackerTest extends SysuiTestCase {
     public void testSettingRestoredWithTilesRemovedInSource_othersAutoAddedinTarget() {
         verify(mBroadcastDispatcher)
                 .registerReceiver(mBroadcastReceiverArgumentCaptor.capture(), any(), any(), any(),
-                        anyInt());
+                        anyInt(), any());
 
         // These tiles were present in the original device
         String restoredTiles = "saver,internet,cast";

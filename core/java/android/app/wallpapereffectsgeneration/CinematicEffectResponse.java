@@ -39,27 +39,66 @@ import java.util.Objects;
 public final class CinematicEffectResponse implements Parcelable {
     /** @hide */
     @IntDef(prefix = {"CINEMATIC_EFFECT_STATUS_"},
-            value = {CINEMATIC_EFFECT_STATUS_UNKNOWN,
+            value = {CINEMATIC_EFFECT_STATUS_ERROR,
                     CINEMATIC_EFFECT_STATUS_OK,
-                    CINEMATIC_EFFECT_STATUS_ERROR,
                     CINEMATIC_EFFECT_STATUS_NOT_READY,
                     CINEMATIC_EFFECT_STATUS_PENDING,
-                    CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS})
+                    CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS,
+                    CINEMATIC_EFFECT_STATUS_FEATURE_DISABLED,
+                    CINEMATIC_EFFECT_STATUS_IMAGE_FORMAT_NOT_SUITABLE,
+                    CINEMATIC_EFFECT_STATUS_CONTENT_UNSUPPORTED,
+                    CINEMATIC_EFFECT_STATUS_CONTENT_TARGET_ERROR,
+                    CINEMATIC_EFFECT_STATUS_CONTENT_TOO_FLAT,
+                    CINEMATIC_EFFECT_STATUS_ANIMATION_FAILURE
+            })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CinematicEffectStatusCode {}
 
-    /** Cinematic effect generation unknown status. */
-    public static final int CINEMATIC_EFFECT_STATUS_UNKNOWN = 0;
+    /** Cinematic effect generation failure with generic error. */
+    public static final int CINEMATIC_EFFECT_STATUS_ERROR = 0;
+
     /** Cinematic effect generation success. */
     public static final int CINEMATIC_EFFECT_STATUS_OK = 1;
-    /** Cinematic effect generation failure. */
-    public static final int CINEMATIC_EFFECT_STATUS_ERROR = 2;
-    /** Service not ready for cinematic effect generation. */
-    public static final int CINEMATIC_EFFECT_STATUS_NOT_READY = 3;
-    /** Cienmatic effect generation process is pending. */
-    public static final int CINEMATIC_EFFECT_STATUS_PENDING = 4;
-    /** Too manay requests for server to handle. */
-    public static final int CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS = 5;
+
+    /**
+     * Service not ready for cinematic effect generation, e.g. a
+     * dependency is unavailable.
+     */
+    public static final int CINEMATIC_EFFECT_STATUS_NOT_READY = 2;
+
+    /**
+     * There is already a task being processed for the same task id.
+     * Client should wait for the response and not send the same request
+     * again.
+     */
+    public static final int CINEMATIC_EFFECT_STATUS_PENDING = 3;
+
+    /** Too many requests (with different task id) for server to handle. */
+    public static final int CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS = 4;
+
+    /** Feature is disabled, for example, in an emergency situation. */
+    public static final int CINEMATIC_EFFECT_STATUS_FEATURE_DISABLED = 5;
+
+    /** Image format related problems (i.e. resolution or aspect ratio problems). */
+    public static final int CINEMATIC_EFFECT_STATUS_IMAGE_FORMAT_NOT_SUITABLE = 6;
+
+    /**
+     * The cinematic effect feature is not supported on certain types of images,
+     * for example, some implementation only support portrait.
+     */
+    public static final int CINEMATIC_EFFECT_STATUS_CONTENT_UNSUPPORTED = 7;
+
+    /**
+     * Cannot generate cinematic effect with the targets on the image, for example,
+     * too many targets on the image.
+     */
+    public static final int CINEMATIC_EFFECT_STATUS_CONTENT_TARGET_ERROR = 8;
+
+    /** Image is too flat to generate cinematic effect. */
+    public static final int CINEMATIC_EFFECT_STATUS_CONTENT_TOO_FLAT = 9;
+
+    /** Something is wrong with generating animation. */
+    public static final int CINEMATIC_EFFECT_STATUS_ANIMATION_FAILURE = 10;
 
     /** @hide */
     @IntDef(prefix = {"IMAGE_CONTENT_TYPE_"},
@@ -71,13 +110,13 @@ public final class CinematicEffectResponse implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImageContentType {}
 
-    /** Image content unknown. */
+    /** Unable to determine image type. */
     public static final int IMAGE_CONTENT_TYPE_UNKNOWN = 0;
     /** Image content is people portrait. */
     public static final int IMAGE_CONTENT_TYPE_PEOPLE_PORTRAIT = 1;
     /** Image content is landscape. */
     public static final int IMAGE_CONTENT_TYPE_LANDSCAPE = 2;
-    /** Image content is doesn't belong to other types. */
+    /** Image content is not people portrait or landscape. */
     public static final int IMAGE_CONTENT_TYPE_OTHER = 3;
 
 
