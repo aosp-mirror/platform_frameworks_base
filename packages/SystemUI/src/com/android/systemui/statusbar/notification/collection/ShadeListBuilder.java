@@ -749,7 +749,7 @@ public class ShadeListBuilder implements Dumpable {
                         continue;
                     }
                     if (group.wasAttachedInPreviousPass()
-                            && !getStabilityManager().isGroupChangeAllowed(group.getSummary())) {
+                            && !getStabilityManager().isGroupPruneAllowed(group)) {
                         checkState(!children.isEmpty(), "empty group should have been pruned");
                         // This group was previously attached and group changes aren't
                         //  allowed; keep it around until group changes are allowed again.

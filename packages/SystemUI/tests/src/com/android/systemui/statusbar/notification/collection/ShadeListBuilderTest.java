@@ -1439,14 +1439,16 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         // WHEN a new child is added and the old one gets filtered while group changes are disabled.
         mStabilityManager.setAllowGroupChanges(false);
+        mStabilityManager.setAllowGroupPruning(false);
         mFinalizeFilter.mIndicesToFilter.add(1);
         addGroupChild(2, PACKAGE_1, GROUP_1);
 
         dispatchBuild();
 
         // THEN the new child should be shown without a group
+        // (Note that this is the same as the expected result if there were no stability rules.)
         verifyBuiltList(
-                notif(2)  // previously promoted child
+                notif(2)  // new child
         );
     }
 
@@ -2269,6 +2271,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     private static class TestableStabilityManager extends NotifStabilityManager {
         boolean mAllowPipelineRun = true;
         boolean mAllowGroupChanges = true;
+        boolean mAllowGroupPruning = true;
         boolean mAllowSectionChanges = true;
         boolean mAllowEntryReodering = true;
 
@@ -2278,6 +2281,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         TestableStabilityManager setAllowGroupChanges(boolean allowGroupChanges) {
             mAllowGroupChanges = allowGroupChanges;
+            return this;
+        }
+
+        TestableStabilityManager setAllowGroupPruning(boolean allowGroupPruning) {
+            mAllowGroupPruning = allowGroupPruning;
             return this;
         }
 
@@ -2308,6 +2316,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         @Override
         public boolean isGroupChangeAllowed(@NonNull NotificationEntry entry) {
             return mAllowGroupChanges;
+        }
+
+        @Override
+        public boolean isGroupPruneAllowed(@NonNull GroupEntry entry) {
+            return mAllowGroupPruning;
         }
 
         @Override
