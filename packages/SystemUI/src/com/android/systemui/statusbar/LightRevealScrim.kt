@@ -17,7 +17,6 @@ import android.util.MathUtils.lerp
 import android.view.View
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.statusbar.LightRevealEffect.Companion.getPercentPastThreshold
-import com.android.systemui.util.getColorWithAlpha
 import java.util.function.Consumer
 
 /**
@@ -368,7 +367,7 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
         }
 
         if (startColorAlpha > 0f) {
-            canvas.drawColor(getColorWithAlpha(revealGradientEndColor, startColorAlpha))
+            canvas.drawColor(updateColorAlpha(revealGradientEndColor, startColorAlpha))
         }
 
         with(shaderGradientMatrix) {
@@ -384,7 +383,15 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
 
     private fun setPaintColorFilter() {
         gradientPaint.colorFilter = PorterDuffColorFilter(
-            getColorWithAlpha(revealGradientEndColor, revealGradientEndColorAlpha),
+            updateColorAlpha(revealGradientEndColor, revealGradientEndColorAlpha),
             PorterDuff.Mode.MULTIPLY)
     }
+
+    private fun updateColorAlpha(color: Int, alpha: Float): Int =
+        Color.argb(
+            (alpha * 255).toInt(),
+            Color.red(color),
+            Color.green(color),
+            Color.blue(color)
+        )
 }
