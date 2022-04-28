@@ -20,7 +20,6 @@ import static android.os.PowerExemptionManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
-import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.PACKAGE_SCHEME;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.TAG;
@@ -86,11 +85,14 @@ public final class BroadcastHelper {
             } else {
                 resolvedUserIds = userIds;
             }
-            doSendBroadcast(action, pkg, extras, flags, targetPkg, finishedReceiver,
-                    resolvedUserIds, false, broadcastAllowList, bOptions);
-            if (instantUserIds != null && instantUserIds != EMPTY_INT_ARRAY) {
+
+            if (ArrayUtils.isEmpty(instantUserIds)) {
                 doSendBroadcast(action, pkg, extras, flags, targetPkg, finishedReceiver,
-                        instantUserIds, true, null, bOptions);
+                        resolvedUserIds, false /* isInstantApp */, broadcastAllowList, bOptions);
+            } else {
+                // send restricted broadcasts for instant apps
+                doSendBroadcast(action, pkg, extras, flags, targetPkg, finishedReceiver,
+                        instantUserIds, true /* isInstantApp */, null, bOptions);
             }
         } catch (RemoteException ex) {
         }
@@ -318,17 +320,6 @@ public final class BroadcastHelper {
         sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                 packageName, extras, 0, null, null, userIds, instantUserIds,
                 broadcastAllowlist, null);
-    }
-
-    public void sendDistractingPackagesChanged(String[] pkgList, int[] uidList, int userId,
-            int distractionFlags) {
-        final Bundle extras = new Bundle(3);
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
-        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, distractionFlags);
-        sendPackageBroadcast(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null, extras,
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null, new int[]{userId}, null, null,
-                null);
     }
 
     public void sendFirstLaunchBroadcast(String pkgName, String installerPkg,

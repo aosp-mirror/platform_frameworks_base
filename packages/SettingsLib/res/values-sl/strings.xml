@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Baterija na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: napolnjenost baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: napolnjenost baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktivna"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktivno, samo levo"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktivno, samo desno"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktivno, levo in desno"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Zvok predstavnosti"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonski klici"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prenos datoteke"</string>
@@ -379,7 +376,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Simul. barvnega prostora"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Omogoči sledi OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Onem. usmerjanje zvoka prek USB"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Onem. samod. usmerjanja na zun. zvoč. naprave USB."</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Onem. samod. usmerjanje na zun. zvoč. naprave USB."</string>
     <string name="debug_layout" msgid="1659216803043339741">"Prikaži meje postavitve"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Pokaži meje obrezovanja, obrobe ipd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Vsili od desne proti levi"</string>
@@ -396,7 +393,7 @@
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Merilo animacije okna"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Merilo animacije prehoda"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Merilo trajanja animacije"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simul. sekund. prikazov."</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simuliraj sekundarne zaslone"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacije"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ne obdrži dejavnosti"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Uniči vsako dejavnost, ko uporabnik preneha z njo."</string>
@@ -592,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Ustvarjanje novega uporabnika ni uspelo."</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Ustvarjanje novega gosta ni uspelo."</string>
     <string name="user_nickname" msgid="262624187455825083">"Vzdevek"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
-    <string name="guest_new_guest" msgid="3482026122932643557">"Dodajanje gosta"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Odstranitev gosta"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Dodaj uporabnika"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Dodaj gosta"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Odstrani gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Ponastavi gosta"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Želite ponastaviti gosta?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Želite odstraniti gosta?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Ponastavi"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Odstrani"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Ponastavljanje gosta …"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotografiranje"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Izberi sliko"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Izbira fotografije"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Preveč napačnih poskusov. Podatki v napravi bodo izbrisani."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Preveč napačnih poskusov. Uporabnik bo izbrisan."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Preveč napačnih poskusov. Delovni profil in podatki v njem bodo izbrisani."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Opusti"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Privzeta nastavitev naprave"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Onemogočeno"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Omogočeno"</string>
@@ -660,4 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Vklop zaslona"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dovoli vklop zaslona"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dovolite aplikaciji, da vklopi zaslon. Če ji to odobrite, lahko aplikacija kadar koli brez vašega eksplicitnega namena vklopi zaslon."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Optično branje kode QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Če želite začeti poslušati, postavite spodnjo kodo QR na sredino."</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Koda QR nima pravilne oblike zapisa."</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Želite ustaviti oddajanje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Če oddajate aplikacijo <xliff:g id="SWITCHAPP">%1$s</xliff:g> ali spremenite izhod, bo trenutno oddajanje ustavljeno."</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Oddajaj aplikacijo <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Sprememba izhoda"</string>
 </resources>

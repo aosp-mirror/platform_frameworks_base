@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"ഇടത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ബാറ്ററി, വലത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ബാറ്ററി"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"സജീവം"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"സജീവമാണ്, ഇടത്തേത് മാത്രം"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"സജീവമാണ്, വലത്തേത് മാത്രം"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"സജീവമാണ്, ഇടത്തേതും വലത്തേതും"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"മീഡിയ ഓഡിയോ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ഫോണ്‍‌ കോളുകൾ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ഫയൽ കൈമാറൽ"</string>
@@ -450,7 +447,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"വർണ്ണാന്ധത (ചുവപ്പ്-പച്ച‌)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"പ്രോട്ടാനോമലി (ചുവപ്പ്-പച്ച)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ട്രിട്ടാനോമലി (നീല-മഞ്ഞ)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"നിറം ക്രമീകരിക്കൽ"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"നിറം ശരിയാക്കൽ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"ഇനിപ്പറയുന്ന കാര്യങ്ങൾ ചെയ്യാൻ ആഗ്രഹിക്കുമ്പോൾ നിറം ശരിയാക്കൽ സഹായകരമാകും:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;നിറങ്ങൾ കൂടുതൽ കൃത്യമായി കാണാൻ&lt;/li&gt; &lt;li&gt;&amp;nbsp;ഫോക്കസ് ചെയ്യാൻ നിങ്ങളെ സഹായിക്കുന്നതിന് നിറങ്ങൾ നീക്കം ചെയ്യാൻ&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ഉപയോഗിച്ച് അസാധുവാക്കി"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -573,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"നിയന്ത്രിത പ്രൊഫൈൽ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"പുതിയ ഉപയോക്താവിനെ ചേർക്കണോ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"കൂടുതൽ ഉപയോക്താക്കളെ സൃഷ്‌ടിച്ചുകൊണ്ട് ഈ ഉപകരണം മറ്റുള്ളവരുമായി നിങ്ങൾക്ക് പങ്കിടാം. ആപ്പുകളും വാൾപേപ്പറുകളും മറ്റും ഉപയോഗിച്ച് ഇഷ്‌ടാനുസൃതമാക്കാൻ ഓരോ ഉപയോക്താവിനും സാധിക്കും. വൈഫൈ പോലെ എല്ലാവരെയും ബാധിക്കുന്ന ഉപകരണ ക്രമീകരണവും ഉപയോക്താക്കൾക്ക് ക്രമീകരിക്കാം.\n\nനിങ്ങളൊരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിക്ക് സ്വന്തമായ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\n എല്ലാ ഉപയോക്താക്കൾക്കുമായി ആപ്പുകൾ അപ്‌ഡേറ്റ് ചെയ്യാൻ ഏതൊരു ഉപയോക്താവിനുമാവും. ഉപയോഗസഹായി ക്രമീകരണവും സേവനങ്ങളും പുതിയ ഉപയോക്താവിന് കൈമാറുകയില്ല."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിയ്‌ക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും അപ്ലിക്കേഷനുകൾ അപ്‌ഡേറ്റുചെയ്യാനാവും."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിയ്‌ക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും ആപ്പുകൾ അപ്‌ഡേറ്റ് ചെയ്യാനാവും."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ഉപയോക്താവിനെ ഇപ്പോൾ സജ്ജീകരിക്കണോ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ഉപകരണം എടുത്ത് ഇടം സജ്ജീകരിക്കുന്നതിന് വ്യക്തി ലഭ്യമാണെന്ന് ഉറപ്പാക്കുക"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ഇപ്പോൾ പ്രൊഫൈൽ സജ്ജീകരിക്കണോ?"</string>
@@ -592,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കാനായില്ല"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"പുതിയ അതിഥിയെ സൃഷ്‌ടിക്കാനായില്ല"</string>
     <string name="user_nickname" msgid="262624187455825083">"വിളിപ്പേര്"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"ഉപയോക്താവിനെ ചേർക്കുക"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"അതിഥിയെ ചേർക്കുക"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"അതിഥിയെ നീക്കം ചെയ്യുക"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"അതിഥിയെ റീസെറ്റ് ചെയ്യുക"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"അതിഥിയെ റീസെറ്റ് ചെയ്യണോ?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"അതിഥിയെ നീക്കം ചെയ്യണോ?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"റീസെറ്റ് ചെയ്യുക"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"നീക്കം ചെയ്യുക"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"അതിഥിയെ റീസെറ്റ് ചെയ്യുന്നു…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ഒരു ഫോട്ടോ എടുക്കുക"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ഒരു ചിത്രം തിരഞ്ഞെടുക്കുക"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ഫോട്ടോ തിരഞ്ഞെടുക്കുക"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഉപകരണത്തിലെ ഡാറ്റ ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഉപയോക്താവ് ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"ഒരുപാട് തെറ്റായ ശ്രമങ്ങൾ. ഈ ഔദ്യോഗിക പ്രൊഫൈലും അതിന്റെ ഡാറ്റയും ഇല്ലാതാക്കപ്പെടും."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ഉപകരണത്തിന്റെ ഡിഫോൾട്ട് പ്രവർത്തനം"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"പ്രവർത്തനക്ഷമമാക്കി"</string>
@@ -660,4 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"സ്ക്രീൻ ഓണാക്കുക"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"സ്ക്രീൻ ഓണാക്കാൻ അനുവദിക്കുക"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"സ്ക്രീൻ ഓണാക്കാൻ ആപ്പിനെ അനുവദിക്കുക. അനുവദിക്കുകയാണെങ്കിൽ, നിങ്ങളുടെ താൽപ്പര്യം കൂടാതെ ഏതുസമയത്തും സ്ക്രീൻ ഓണാക്കാൻ ആപ്പിന് കഴിയും."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR കോഡ് സ്‌കാൻ ചെയ്യുക"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"കേട്ട് തുടങ്ങാൻ ചുവടെയുള്ള QR കോഡിലേക്ക് കേന്ദ്രീകരിക്കുക"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR കോഡ് ഫോർമാറ്റ് അസാധുവാണ്"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ബ്രോഡ്‌കാസ്റ്റ് ചെയ്യുന്നത് അവസാനിപ്പിക്കണോ?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"നിങ്ങൾ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ബ്രോഡ്‌കാസ്റ്റ് ചെയ്യുകയോ ഔട്ട്പുട്ട് മാറ്റുകയോ ചെയ്താൽ നിങ്ങളുടെ നിലവിലുള്ള ബ്രോഡ്‌കാസ്റ്റ് അവസാനിക്കും"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ബ്രോഡ്‌കാസ്റ്റ് ചെയ്യുക"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ഔട്ട്പുട്ട് മാറ്റുക"</string>
 </resources>

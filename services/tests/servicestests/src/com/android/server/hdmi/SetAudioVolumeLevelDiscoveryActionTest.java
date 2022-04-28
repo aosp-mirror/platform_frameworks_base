@@ -20,6 +20,7 @@ import static android.hardware.hdmi.DeviceFeatures.FEATURE_NOT_SUPPORTED;
 import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
 import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORT_UNKNOWN;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -81,7 +82,8 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mContextSpy = spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
 
-        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList()));
+        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
 
@@ -98,6 +100,7 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mHdmiControlServiceSpy.setHdmiMhlController(
                 HdmiMhlControllerStub.create(mHdmiControlServiceSpy));
         mHdmiControlServiceSpy.initService();
+        mHdmiControlServiceSpy.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);
 

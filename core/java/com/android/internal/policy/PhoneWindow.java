@@ -111,7 +111,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.window.OnBackInvokedDispatcher;
-import android.window.OnBackInvokedDispatcherOwner;
 import android.window.ProxyOnBackInvokedDispatcher;
 
 import com.android.internal.R;
@@ -137,8 +136,7 @@ import java.util.List;
  *
  * @hide
  */
-public class PhoneWindow extends Window implements MenuBuilder.Callback,
-        OnBackInvokedDispatcherOwner {
+public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private final static String TAG = "PhoneWindow";
 
@@ -2153,7 +2151,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback,
     /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
     void onViewRootImplSet(ViewRootImpl viewRoot) {
         viewRoot.setActivityConfigCallback(mActivityConfigCallback);
-        mProxyOnBackInvokedDispatcher.setActualDispatcherOwner(viewRoot);
+        mProxyOnBackInvokedDispatcher.setActualDispatcher(viewRoot.getOnBackInvokedDispatcher());
         applyDecorFitsSystemWindows();
     }
 

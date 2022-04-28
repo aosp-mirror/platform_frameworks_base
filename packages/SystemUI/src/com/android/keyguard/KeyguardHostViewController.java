@@ -327,7 +327,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
      * @param fraction amount of the screen that should show.
      */
     public void setExpansion(float fraction) {
-        float scaledFraction = BouncerPanelExpansionCalculator.getHostViewScaledExpansion(fraction);
+        float scaledFraction = BouncerPanelExpansionCalculator.showBouncerProgress(fraction);
         mView.setAlpha(MathUtils.constrain(1 - scaledFraction, 0f, 1f));
         mView.setTranslationY(scaledFraction * mTranslationY);
     }

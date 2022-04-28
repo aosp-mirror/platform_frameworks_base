@@ -14,9 +14,20 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <corners android:radius="@dimen/pip_menu_border_radius" />
-    <stroke android:width="@dimen/pip_menu_border_width"
-            android:color="@color/tv_pip_menu_focus_border" />
-</shape>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:exitFadeDuration="@integer/pip_menu_fade_animation_duration">
+    <item android:state_activated="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/pip_menu_border_corner_radius" />
+            <stroke android:width="@dimen/pip_menu_border_width"
+                    android:color="@color/tv_pip_menu_focus_border" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/pip_menu_border_corner_radius" />
+            <stroke android:width="@dimen/pip_menu_border_width"
+                    android:color="@color/tv_pip_menu_background"/>
+        </shape>
+    </item>
+</selector>

@@ -737,6 +737,101 @@ public class JobSchedulerServiceTest {
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
     }
 
+    @Test
+    public void testGetRescheduleJobForPeriodic_outsideWindow_flex_failedJob_longPeriod() {
+        JobStatus job = createJobStatus(
+                "testGetRescheduleJobForPeriodic_outsideWindow_flex_failedJob_longPeriod",
+                createJobInfo().setPeriodic(7 * DAY_IN_MILLIS, 9 * HOUR_IN_MILLIS));
+        JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job);
+        // First window starts 6.625 days from now.
+        advanceElapsedClock(6 * DAY_IN_MILLIS + 15 * HOUR_IN_MILLIS);
+        long now = sElapsedRealtimeClock.millis();
+        long nextWindowStartTime = now + 7 * DAY_IN_MILLIS;
+        long nextWindowEndTime = nextWindowStartTime + 9 * HOUR_IN_MILLIS;
+
+        advanceElapsedClock(6 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS);
+        // Say the job ran at the very end of its previous window. The intended JSS behavior is to
+        // have consistent windows, so the new window should start as soon as the previous window
+        // ended and end PERIOD time after the previous window ended.
+        JobStatus rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        advanceElapsedClock(DAY_IN_MILLIS);
+        // Say the job ran a day late. Since the period is massive compared to the flex, JSS should
+        // put the rescheduled job in the original window.
+        rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // 1 day before the start of the next window. Given the large period, respect the original
+        // next window.
+        advanceElapsedClock(nextWindowStartTime - sElapsedRealtimeClock.millis() - DAY_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // 1 hour before the start of the next window. It's too close to the next window, so the
+        // returned job should be for the window after.
+        long oneHourBeforeNextWindow =
+                nextWindowStartTime - sElapsedRealtimeClock.millis() - HOUR_IN_MILLIS;
+        long fiveMinsBeforeNextWindow =
+                nextWindowStartTime - sElapsedRealtimeClock.millis() - 5 * MINUTE_IN_MILLIS;
+        advanceElapsedClock(oneHourBeforeNextWindow);
+        nextWindowStartTime += 7 * DAY_IN_MILLIS;
+        nextWindowEndTime += 7 * DAY_IN_MILLIS;
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // 5 minutes before the start of the next window. It's too close to the next window, so the
+        // returned job should be for the window after.
+        advanceElapsedClock(fiveMinsBeforeNextWindow);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        advanceElapsedClock(14 * DAY_IN_MILLIS);
+        // Say that the job ran at this point, probably because the phone was off the entire time.
+        // The next window should be consistent (start and end at the time it would have had the job
+        // run normally in previous windows).
+        nextWindowStartTime += 14 * DAY_IN_MILLIS;
+        nextWindowEndTime += 14 * DAY_IN_MILLIS;
+
+        rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // Test original job again but with a huge delay from the original execution window
+
+        // 1 day before the start of the next window. Given the large period, respect the original
+        // next window.
+        advanceElapsedClock(nextWindowStartTime - sElapsedRealtimeClock.millis() - DAY_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // 1 hour before the start of the next window. It's too close to the next window, so the
+        // returned job should be for the window after.
+        oneHourBeforeNextWindow =
+                nextWindowStartTime - sElapsedRealtimeClock.millis() - HOUR_IN_MILLIS;
+        fiveMinsBeforeNextWindow =
+                nextWindowStartTime - sElapsedRealtimeClock.millis() - 5 * MINUTE_IN_MILLIS;
+        advanceElapsedClock(oneHourBeforeNextWindow);
+        nextWindowStartTime += 7 * DAY_IN_MILLIS;
+        nextWindowEndTime += 7 * DAY_IN_MILLIS;
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // 5 minutes before the start of the next window. It's too close to the next window, so the
+        // returned job should be for the window after.
+        advanceElapsedClock(fiveMinsBeforeNextWindow);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+    }
+
     /** Tests that rare job batching works as expected. */
     @Test
     public void testRareJobBatching() {

@@ -41,14 +41,13 @@ import java.lang.annotation.Retention;
  * @hide
  */
 public class WindowContextController {
-    // TODO(220049234): Disable attach debug logging before shipping.
-    private static final boolean DEBUG_ATTACH = true;
+    private static final boolean DEBUG_ATTACH = false;
     private static final String TAG = "WindowContextController";
 
     /**
-     * {@link AttachStatus.STATUS_ATTACHED} to indicate that the {@code mToken} is associated with a
+     * {@link AttachStatus#STATUS_ATTACHED} to indicate that the {@code mToken} is associated with a
      * {@link com.android.server.wm.DisplayArea}. Note that {@code mToken} is able to attach a
-     * WindowToken after this flag sets to {@link AttachStatus.STATUS_ATTACHED}.
+     * WindowToken after this flag sets to {@link AttachStatus#STATUS_ATTACHED}.
      */
     @VisibleForTesting
     public int mAttachedToDisplayArea = AttachStatus.STATUS_INITIALIZED;

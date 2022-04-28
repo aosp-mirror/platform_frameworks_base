@@ -78,8 +78,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
      * Whether this {@link DisplayArea} should ignore fixed-orientation request. If {@code true}, it
      * can never specify orientation, but shows the fixed-orientation apps below it in the
      * letterbox; otherwise, it rotates based on the fixed-orientation request.
+     *
+     * <p>Note: use {@link #getIgnoreOrientationRequest} to access outside of {@link
+     * #setIgnoreOrientationRequest} since the value can be overridden at runtime on a device level.
      */
-    protected boolean mIgnoreOrientationRequest;
+    protected boolean mSetIgnoreOrientationRequest;
 
     DisplayArea(WindowManagerService wms, Type type, String name) {
         this(wms, type, name, FEATURE_UNDEFINED);
@@ -140,7 +143,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     @Override
     int getOrientation(int candidate) {
         mLastOrientationSource = null;
-        if (mIgnoreOrientationRequest) {
+        if (getIgnoreOrientationRequest()) {
             return SCREEN_ORIENTATION_UNSET;
         }
 
@@ -149,14 +152,15 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     boolean handlesOrientationChangeFromDescendant() {
-        return !mIgnoreOrientationRequest && super.handlesOrientationChangeFromDescendant();
+        return !getIgnoreOrientationRequest()
+                && super.handlesOrientationChangeFromDescendant();
     }
 
     @Override
     boolean onDescendantOrientationChanged(WindowContainer requestingContainer) {
         // If this is set to ignore the orientation request, we don't propagate descendant
         // orientation request.
-        return !mIgnoreOrientationRequest
+        return !getIgnoreOrientationRequest()
                 && super.onDescendantOrientationChanged(requestingContainer);
     }
 
@@ -167,10 +171,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
      * @return Whether the display orientation changed after calling this method.
      */
     boolean setIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
-        if (mIgnoreOrientationRequest == ignoreOrientationRequest) {
+        if (mSetIgnoreOrientationRequest == ignoreOrientationRequest) {
             return false;
         }
-        mIgnoreOrientationRequest = ignoreOrientationRequest;
+        mSetIgnoreOrientationRequest = ignoreOrientationRequest;
 
         // Check whether we should notify Display to update orientation.
         if (mDisplayContent == null) {
@@ -204,7 +208,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     boolean getIgnoreOrientationRequest() {
-        return mIgnoreOrientationRequest;
+        // Adding an exception for when ignoreOrientationRequest is overridden at runtime for all
+        // DisplayArea-s. For example, this is needed for the Kids Mode since many Kids apps aren't
+        // optimised to support both orientations and it will be hard for kids to understand the
+        // app compat mode.
+        return mSetIgnoreOrientationRequest && !mWmService.isIgnoreOrientationRequestDisabled();
     }
 
     /**
@@ -289,8 +297,8 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         super.dump(pw, prefix, dumpAll);
-        if (mIgnoreOrientationRequest) {
-            pw.println(prefix + "mIgnoreOrientationRequest=true");
+        if (mSetIgnoreOrientationRequest) {
+            pw.println(prefix + "mSetIgnoreOrientationRequest=true");
         }
         if (hasRequestedOverrideConfiguration()) {
             pw.println(prefix + "overrideConfig=" + getRequestedOverrideConfiguration());
@@ -600,7 +608,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         @Override
         int getOrientation(int candidate) {
             mLastOrientationSource = null;
-            if (mIgnoreOrientationRequest) {
+            if (getIgnoreOrientationRequest()) {
                 return SCREEN_ORIENTATION_UNSET;
             }
 

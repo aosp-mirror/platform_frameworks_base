@@ -51,7 +51,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
-import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.settings.FakeSettings;
 
 import com.google.common.collect.ImmutableList;
 
@@ -70,11 +70,11 @@ public class LocationControllerImplTest extends SysuiTestCase {
     private TestableLooper mTestableLooper;
     private DeviceConfigProxy mDeviceConfigProxy;
     private UiEventLoggerFake mUiEventLogger;
+    private FakeSettings mSecureSettings;
 
     @Mock private PackageManager mPackageManager;
     @Mock private AppOpsController mAppOpsController;
     @Mock private UserTracker mUserTracker;
-    @Mock private SecureSettings mSecureSettings;
 
     @Before
     public void setup() {
@@ -85,7 +85,7 @@ public class LocationControllerImplTest extends SysuiTestCase {
                 .thenReturn(ImmutableList.of(new UserInfo(0, "name", 0)));
         mDeviceConfigProxy = new DeviceConfigProxyFake();
         mUiEventLogger = new UiEventLoggerFake();
-
+        mSecureSettings = new FakeSettings();
         mTestableLooper = TestableLooper.get(this);
 
         mLocationController = new LocationControllerImpl(mContext,
@@ -248,8 +248,7 @@ public class LocationControllerImplTest extends SysuiTestCase {
 
     @Test
     public void testCallbackNotified_additionalOps_shouldShowSystem() {
-        when(mSecureSettings.getInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 0))
-                .thenReturn(1);
+        mSecureSettings.putInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 1);
         LocationChangeCallback callback = mock(LocationChangeCallback.class);
         mLocationController.addCallback(callback);
         mDeviceConfigProxy.setProperty(
@@ -282,8 +281,7 @@ public class LocationControllerImplTest extends SysuiTestCase {
 
         verify(callback, times(1)).onLocationActiveChanged(false);
 
-        when(mSecureSettings.getInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 0))
-                .thenReturn(0);
+        mSecureSettings.putInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 0);
         mLocationController.onActiveStateChanged(AppOpsManager.OP_FINE_LOCATION, 0,
                 "com.system.app", true);
 
@@ -366,5 +364,47 @@ public class LocationControllerImplTest extends SysuiTestCase {
 
         // No new callbacks
         verify(callback).onLocationSettingsChanged(anyBoolean());
+    }
+
+    @Test
+    public void testExperimentFlipsSystemFlag() throws Exception {
+        mSecureSettings.putInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 0);
+        mDeviceConfigProxy.setProperty(
+                DeviceConfig.NAMESPACE_PRIVACY,
+                SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SMALL_ENABLED,
+                "true",
+                true);
+        // Show system experiment not running
+        mDeviceConfigProxy.setProperty(
+                DeviceConfig.NAMESPACE_PRIVACY,
+                SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SHOW_SYSTEM,
+                "false",
+                false);
+        mTestableLooper.processAllMessages();
+
+        // Flip experiment on
+        mDeviceConfigProxy.setProperty(
+                DeviceConfig.NAMESPACE_PRIVACY,
+                SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SHOW_SYSTEM,
+                "true",
+                true);
+        mTestableLooper.processAllMessages();
+
+        // Verify settings were flipped
+        assertThat(mSecureSettings.getInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS))
+                .isEqualTo(1);
+        assertThat(mSecureSettings.getInt(Settings.Secure.LOCATION_INDICATOR_EXPERIMENT_STARTED))
+                .isEqualTo(1);
+
+        // Flip experiment off
+        mDeviceConfigProxy.setProperty(
+                DeviceConfig.NAMESPACE_PRIVACY,
+                SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SHOW_SYSTEM,
+                "false",
+                false);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mSecureSettings.getInt(Settings.Secure.LOCATION_INDICATOR_EXPERIMENT_STARTED))
+                .isEqualTo(0);
     }
 }

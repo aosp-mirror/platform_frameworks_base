@@ -116,14 +116,14 @@ public final class JobConcurrencyManagerTest {
         assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(topJob));
 
         // Pending jobs shouldn't affect TOP job's status.
-        for (int i = 1; i <= JobSchedulerService.MAX_JOB_CONTEXTS_COUNT; ++i) {
+        for (int i = 1; i <= JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
             final JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE + i);
             mPendingJobQueue.add(job);
         }
         assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(topJob));
 
         // Already running jobs shouldn't affect TOP job's status.
-        for (int i = 1; i <= JobSchedulerService.MAX_JOB_CONTEXTS_COUNT; ++i) {
+        for (int i = 1; i <= JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
             final JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE, i);
             mJobConcurrencyManager.addRunningJobForTesting(job);
         }
@@ -183,9 +183,9 @@ public final class JobConcurrencyManagerTest {
         spyOn(testEj);
         doReturn(true).when(testEj).shouldTreatAsExpeditedJob();
 
-        setConcurrencyConfig(JobSchedulerService.MAX_JOB_CONTEXTS_COUNT);
+        setConcurrencyConfig(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT);
 
-        for (int i = 0; i < JobSchedulerService.MAX_JOB_CONTEXTS_COUNT; ++i) {
+        for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
             final JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE + i, i + 1);
             mPendingJobQueue.add(job);
         }

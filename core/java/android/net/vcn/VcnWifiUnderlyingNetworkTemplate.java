@@ -147,7 +147,9 @@ public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
     /** @hide */
     @Override
     void dumpTransportSpecificFields(IndentingPrintWriter pw) {
-        pw.println("mSsids: " + mSsids);
+        if (!mSsids.isEmpty()) {
+            pw.println("mSsids: " + mSsids);
+        }
     }
 
     /**

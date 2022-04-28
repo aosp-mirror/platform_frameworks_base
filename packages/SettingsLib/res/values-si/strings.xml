@@ -47,7 +47,7 @@
     <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
     <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"නැත/වැඩි දියුණු කළ විවෘත"</string>
-    <string name="wifi_security_owe" msgid="3343421403561657809">"වැඩි දියුණු කළ විවෘත"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise බිටු-192"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"සුරකින ලදි"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"විසන්ධි විය"</string>
@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"ව: බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ද: බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ක්‍රියාකාරී"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"සක්‍රිය, වම පමණි"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"සක්‍රිය, දකුණ පමණි"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"සක්‍රිය, වම සහ දකුණ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"මාධ්‍ය ශ්‍රව්‍ය"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"දුරකථන ඇමතුම්"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ගොනු හුවමාරුව"</string>
@@ -592,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"නව පරිශීලකයෙකු තැනීමට අසමත් විය"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"නව අමුත්තකු තැනීම අසාර්ථක විය"</string>
     <string name="user_nickname" msgid="262624187455825083">"අපනාමය"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"පරිශීලකයා එක් කරන්න"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"අමුත්තා එක් කරන්න"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"අමුත්තා ඉවත් කරන්න"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ආගන්තුකයා යළි සකසන්න"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"අමුත්තා යළි සකසන්නද?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"අමුත්තා ඉවත් කරන්නද?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"යළි සකසන්න"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ඉවත් කරන්න"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"අමුත්තා යළි සකසමින්…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ඡායාරූපයක් ගන්න"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"රූපයක් තෝරන්න"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ඡායාරූපය තෝරන්න"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"වැරදි උත්සාහයන් ඉතා වැඩි ගණනකි. මෙම උපාංගයෙහි දත්ත මකනු ඇත."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"වැරදි උත්සාහයන් ඉතා වැඩි ගණනකි. මෙම පරිශීලකයා මකනු ඇත."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"වැරදි උත්සාහයන් ඉතා වැඩි ගණනකි. මෙම කාර්යාල පැතිකඩ සහ එහි දත්ත මකනු ඇත."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"ඉවත ලන්න"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"උපාංගයේ පෙරනිමිය"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"අබල කළා"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"සබලයි"</string>
@@ -660,4 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"තිරය ක්‍රියාත්මක කරන්න"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"තිරය ක්‍රියාත්මක කිරීමට ඉඩ දෙන්න"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"යෙදුමකට තිරය ක්‍රියාත්මක කිරීමට ඉඩ දෙන්න. ඉඩ දුනහොත්, යෙදුම ඔබගේ පැහැදිලි අභිප්‍රායෙන් තොරව ඕනෑම වේලාවක තිරය ක්‍රියාත්මක කළ හැකිය."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR කේතය ස්කෑන් කරන්න"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"සවන් දීම ආරම්භ කිරීමට, පහත QR කේතය මධ්‍යගත කරන්න"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR කේතය වලංගු ආකෘතියක් නොවේ"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> විකාශනය කිරීම නවත්වන්නද?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ඔබ <xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය කළහොත් හෝ ප්‍රතිදානය වෙනස් කළහොත්, ඔබගේ වත්මන් විකාශනය නවතිනු ඇත."</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ප්‍රතිදානය වෙනස් කරන්න"</string>
 </resources>

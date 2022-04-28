@@ -26,8 +26,7 @@
     <string name="permission_apps_summary" msgid="798718816711515431">"የስልክዎን መተግበሪያዎች በዥረት ይልቀቁ"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ይህን መረጃ ከስልክዎ እንዲደርስበት ይፍቀዱለት"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"መሣሪያ ተሻጋሪ አገልግሎቶች"</string>
-    <!-- no translation found for helper_summary_app_streaming (7380294597268573523) -->
-    <skip />
+    <string name="helper_summary_app_streaming" msgid="7380294597268573523">"<xliff:g id="APP_NAME">%1$s</xliff:g> የእርስዎን ስልክ ፎቶዎች፣ ሚዲያ እና ማሳወቂያዎች ለመድረስ የእርስዎን <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ወክሎ ፈቃድ እየጠየቀ ነው"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ይህን መረጃ ከስልክዎ ላይ እንዲደርስ ይፍቀዱለት"</string>
@@ -37,14 +36,12 @@
     <string name="permission_storage" msgid="6831099350839392343">"ፎቶዎች እና ሚዲያ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"የGoogle Play አገልግሎቶች"</string>
-    <!-- no translation found for helper_summary_computer (1676407599909474428) -->
-    <skip />
+    <string name="helper_summary_computer" msgid="1676407599909474428">"<xliff:g id="APP_NAME">%1$s</xliff:g> በእርስዎ መሣሪያዎች መካከል መተግበሪያዎችን በዥረት ለመልቀቅ የእርስዎን <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ወክሎ ፈቃድ እየጠየቀ ነው"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"መሣሪያ"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"ፍቀድ"</string>
     <string name="consent_no" msgid="2640796915611404382">"አትፍቀድ"</string>
-    <!-- no translation found for consent_back (2560683030046918882) -->
-    <skip />
+    <string name="consent_back" msgid="2560683030046918882">"ተመለስ"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"የመተግበሪያ ፈቃዶችን ወደ የእጅ ሰዓትዎ ያስተላልፉ"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"የእጅ ሰዓትዎን ማቀናበርን ለማቅለል በማዋቀር ጊዜ በእጅ ሰዓትዎ ላይ የተጫኑ መተግበሪያዎች እንደ ስልክዎ ተመሳሳይ ፈቃዶችን ይጠቀማሉ።\n\n እነዚህ ፈቃዶች የእጅ ሰዓትዎ ማይክሮፎን እና አካባቢ መዳረሻን ሊያካትቱ ይችላሉ።"</string>
 </resources>

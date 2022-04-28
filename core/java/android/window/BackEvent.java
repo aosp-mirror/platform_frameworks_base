@@ -46,8 +46,8 @@ public class BackEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SwipeEdge{}
 
-    private final int mTouchX;
-    private final int mTouchY;
+    private final float mTouchX;
+    private final float mTouchY;
     private final float mProgress;
 
     @SwipeEdge
@@ -58,14 +58,14 @@ public class BackEvent implements Parcelable {
     /**
      * Creates a new {@link BackEvent} instance.
      *
-     * @param touchX Absolute X location of the touch point.
-     * @param touchY Absolute Y location of the touch point.
+     * @param touchX Absolute X location of the touch point of this event.
+     * @param touchY Absolute Y location of the touch point of this event.
      * @param progress Value between 0 and 1 on how far along the back gesture is.
      * @param swipeEdge Indicates which edge the swipe starts from.
      * @param departingAnimationTarget The remote animation target of the departing application
      *                                 window.
      */
-    public BackEvent(int touchX, int touchY, float progress, @SwipeEdge int swipeEdge,
+    public BackEvent(float touchX, float touchY, float progress, @SwipeEdge int swipeEdge,
             @Nullable RemoteAnimationTarget departingAnimationTarget) {
         mTouchX = touchX;
         mTouchY = touchY;
@@ -75,8 +75,8 @@ public class BackEvent implements Parcelable {
     }
 
     private BackEvent(@NonNull Parcel in) {
-        mTouchX = in.readInt();
-        mTouchY = in.readInt();
+        mTouchX = in.readFloat();
+        mTouchY = in.readFloat();
         mProgress = in.readFloat();
         mSwipeEdge = in.readInt();
         mDepartingAnimationTarget = in.readTypedObject(RemoteAnimationTarget.CREATOR);
@@ -101,8 +101,8 @@ public class BackEvent implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mTouchX);
-        dest.writeInt(mTouchY);
+        dest.writeFloat(mTouchX);
+        dest.writeFloat(mTouchY);
         dest.writeFloat(mProgress);
         dest.writeInt(mSwipeEdge);
         dest.writeTypedObject(mDepartingAnimationTarget, flags);
@@ -118,14 +118,14 @@ public class BackEvent implements Parcelable {
     /**
      * Returns the absolute X location of the touch point.
      */
-    public int getTouchX() {
+    public float getTouchX() {
         return mTouchX;
     }
 
     /**
      * Returns the absolute Y location of the touch point.
      */
-    public int getTouchY() {
+    public float getTouchY() {
         return mTouchY;
     }
 

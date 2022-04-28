@@ -109,12 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Trái: Mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Phải: Mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Đang hoạt động"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (7084887715570971441) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (8574683234077567230) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (407704460573163973) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Đang hoạt động, chỉ tai bên trái"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Đang hoạt động, chỉ tai phải"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Đang hoạt động, cả tai phải và tai trái"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Âm thanh nội dung nghe nhìn"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Cuộc gọi điện thoại"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Chuyển tệp"</string>
@@ -592,27 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Không tạo được người dùng mới"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Không tạo được khách mới"</string>
     <string name="user_nickname" msgid="262624187455825083">"Biệt hiệu"</string>
-    <!-- no translation found for user_add_user (7876449291500212468) -->
-    <skip />
+    <string name="user_add_user" msgid="7876449291500212468">"Thêm người dùng"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Thêm khách"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Xóa phiên khách"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Xóa khách"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Đặt lại phiên khách"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Đặt lại phiên khách?"</string>
-    <!-- no translation found for guest_remove_guest_dialog_title (4548511006624088072) -->
-    <skip />
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Xoá khách?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Đặt lại"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Xoá"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Đang đặt lại phiên khách…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Chụp ảnh"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Chọn một hình ảnh"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Chọn ảnh"</string>
-    <!-- no translation found for failed_attempts_now_wiping_device (4016329172216428897) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_user (469060411789668050) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_profile (7626589520888963129) -->
-    <skip />
-    <!-- no translation found for failed_attempts_now_wiping_dialog_dismiss (2749889771223578925) -->
-    <skip />
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Quá nhiều lần thử không chính xác. Dữ liệu trên thiết bị này sẽ bị xoá."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Quá nhiều lần thử không chính xác. Người dùng này sẽ bị xoá."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Quá nhiều lần thử không chính xác. Hồ sơ công việc này và dữ liệu của hồ sơ công việc sẽ bị xoá."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Đóng"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Theo giá trị mặc định của thiết bị"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Đã tắt"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Đã bật"</string>
@@ -660,4 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Bật màn hình"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Cho phép bật màn hình"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Cho phép ứng dụng bật màn hình. Nếu được phép, ứng dụng có thể bật màn hình bất kỳ lúc nào kể cả khi bạn không có ý định như vậy."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Quét mã QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Để bắt đầu nghe, hãy hướng máy ảnh vào mã QR bên dưới và căn sao cho mã nằm chính giữa"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Định dạng của mã QR là không hợp lệ"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Dừng phát <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Nếu bạn phát <xliff:g id="SWITCHAPP">%1$s</xliff:g> hoặc thay đổi đầu ra, phiên truyền phát hiện tại sẽ dừng"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Phát <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Thay đổi đầu ra"</string>
 </resources>

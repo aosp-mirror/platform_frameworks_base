@@ -52,9 +52,6 @@ public final class TaskFragmentInfo implements Parcelable {
     @NonNull
     private final Configuration mConfiguration = new Configuration();
 
-    /** Whether the TaskFragment contains any child Window Container. */
-    private final boolean mIsEmpty;
-
     /** The number of the running activities in the TaskFragment. */
     private final int mRunningActivityCount;
 
@@ -77,21 +74,27 @@ public final class TaskFragmentInfo implements Parcelable {
      */
     private final boolean mIsTaskClearedForReuse;
 
+    /**
+     * Whether the last running activity in the TaskFragment was reparented to a different Task
+     * because it is entering PiP.
+     */
+    private final boolean mIsTaskFragmentClearedForPip;
+
     /** @hide */
     public TaskFragmentInfo(
             @NonNull IBinder fragmentToken, @NonNull WindowContainerToken token,
-            @NonNull Configuration configuration, boolean isEmpty, int runningActivityCount,
+            @NonNull Configuration configuration, int runningActivityCount,
             boolean isVisible, @NonNull List<IBinder> activities, @NonNull Point positionInParent,
-            boolean isTaskClearedForReuse) {
+            boolean isTaskClearedForReuse, boolean isTaskFragmentClearedForPip) {
         mFragmentToken = requireNonNull(fragmentToken);
         mToken = requireNonNull(token);
         mConfiguration.setTo(configuration);
-        mIsEmpty = isEmpty;
         mRunningActivityCount = runningActivityCount;
         mIsVisible = isVisible;
         mActivities.addAll(activities);
         mPositionInParent = requireNonNull(positionInParent);
         mIsTaskClearedForReuse = isTaskClearedForReuse;
+        mIsTaskFragmentClearedForPip = isTaskFragmentClearedForPip;
     }
 
     @NonNull
@@ -110,7 +113,7 @@ public final class TaskFragmentInfo implements Parcelable {
     }
 
     public boolean isEmpty() {
-        return mIsEmpty;
+        return mRunningActivityCount == 0;
     }
 
     public boolean hasRunningActivity() {
@@ -140,6 +143,11 @@ public final class TaskFragmentInfo implements Parcelable {
         return mIsTaskClearedForReuse;
     }
 
+    /** @hide */
+    public boolean isTaskFragmentClearedForPip() {
+        return mIsTaskFragmentClearedForPip;
+    }
+
     @WindowingMode
     public int getWindowingMode() {
         return mConfiguration.windowConfiguration.getWindowingMode();
@@ -156,25 +164,25 @@ public final class TaskFragmentInfo implements Parcelable {
 
         return mFragmentToken.equals(that.mFragmentToken)
                 && mToken.equals(that.mToken)
-                && mIsEmpty == that.mIsEmpty
                 && mRunningActivityCount == that.mRunningActivityCount
                 && mIsVisible == that.mIsVisible
                 && getWindowingMode() == that.getWindowingMode()
                 && mActivities.equals(that.mActivities)
                 && mPositionInParent.equals(that.mPositionInParent)
-                && mIsTaskClearedForReuse == that.mIsTaskClearedForReuse;
+                && mIsTaskClearedForReuse == that.mIsTaskClearedForReuse
+                && mIsTaskFragmentClearedForPip == that.mIsTaskFragmentClearedForPip;
     }
 
     private TaskFragmentInfo(Parcel in) {
         mFragmentToken = in.readStrongBinder();
         mToken = in.readTypedObject(WindowContainerToken.CREATOR);
         mConfiguration.readFromParcel(in);
-        mIsEmpty = in.readBoolean();
         mRunningActivityCount = in.readInt();
         mIsVisible = in.readBoolean();
         in.readBinderList(mActivities);
         mPositionInParent = requireNonNull(in.readTypedObject(Point.CREATOR));
         mIsTaskClearedForReuse = in.readBoolean();
+        mIsTaskFragmentClearedForPip = in.readBoolean();
     }
 
     /** @hide */
@@ -183,12 +191,12 @@ public final class TaskFragmentInfo implements Parcelable {
         dest.writeStrongBinder(mFragmentToken);
         dest.writeTypedObject(mToken, flags);
         mConfiguration.writeToParcel(dest, flags);
-        dest.writeBoolean(mIsEmpty);
         dest.writeInt(mRunningActivityCount);
         dest.writeBoolean(mIsVisible);
         dest.writeBinderList(mActivities);
         dest.writeTypedObject(mPositionInParent, flags);
         dest.writeBoolean(mIsTaskClearedForReuse);
+        dest.writeBoolean(mIsTaskFragmentClearedForPip);
     }
 
     @NonNull
@@ -210,12 +218,12 @@ public final class TaskFragmentInfo implements Parcelable {
         return "TaskFragmentInfo{"
                 + " fragmentToken=" + mFragmentToken
                 + " token=" + mToken
-                + " isEmpty=" + mIsEmpty
                 + " runningActivityCount=" + mRunningActivityCount
                 + " isVisible=" + mIsVisible
                 + " activities=" + mActivities
                 + " positionInParent=" + mPositionInParent
                 + " isTaskClearedForReuse=" + mIsTaskClearedForReuse
+                + " isTaskFragmentClearedForPip" + mIsTaskFragmentClearedForPip
                 + "}";
     }
 

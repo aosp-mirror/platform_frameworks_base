@@ -46,6 +46,8 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 
+import java.util.List;
+
 /**
  * Base adapter for media output dialog.
  */
@@ -94,7 +96,18 @@ public abstract class MediaOutputBaseAdapter extends
 
     boolean isCurrentlyConnected(MediaDevice device) {
         return TextUtils.equals(device.getId(),
-                mController.getCurrentConnectedMediaDevice().getId());
+                mController.getCurrentConnectedMediaDevice().getId())
+                || (mController.getSelectedMediaDevice().size() == 1
+                && isDeviceIncluded(mController.getSelectedMediaDevice(), device));
+    }
+
+    boolean isDeviceIncluded(List<MediaDevice> deviceList, MediaDevice targetDevice) {
+        for (MediaDevice device : deviceList) {
+            if (TextUtils.equals(device.getId(), targetDevice.getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     boolean isDragging() {
@@ -131,6 +144,7 @@ public abstract class MediaOutputBaseAdapter extends
         final LinearLayout mTwoLineLayout;
         final ImageView mStatusIcon;
         final CheckBox mCheckBox;
+        final LinearLayout mEndTouchArea;
         private String mDeviceId;
 
         MediaDeviceBaseViewHolder(View view) {
@@ -146,6 +160,7 @@ public abstract class MediaOutputBaseAdapter extends
             mSeekBar = view.requireViewById(R.id.volume_seekbar);
             mStatusIcon = view.requireViewById(R.id.media_output_item_status);
             mCheckBox = view.requireViewById(R.id.check_box);
+            mEndTouchArea = view.requireViewById(R.id.end_action_area);
         }
 
         void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {

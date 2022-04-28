@@ -41,7 +41,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dreams.complication.DreamPreviewComplication;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -100,9 +99,6 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     DreamOverlayStateController mStateController;
 
     @Mock
-    DreamPreviewComplication mPreviewComplication;
-
-    @Mock
     ViewGroup mDreamOverlayContainerViewParent;
 
     @Mock
@@ -133,7 +129,6 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mDreamOverlayComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
-                mPreviewComplication,
                 mUiEventLogger);
     }
 
@@ -206,31 +201,6 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         mService.onBind(intent);
 
         assertThat(mService.shouldShowComplications()).isTrue();
-    }
-
-    @Test
-    public void testPreviewModeFalseByDefault() {
-        mService.onBind(new Intent());
-
-        assertThat(mService.isPreviewMode()).isFalse();
-    }
-
-    @Test
-    public void testPreviewModeSetByIntentExtra() {
-        final Intent intent = new Intent();
-        intent.putExtra(DreamService.EXTRA_IS_PREVIEW, true);
-        mService.onBind(intent);
-
-        assertThat(mService.isPreviewMode()).isTrue();
-    }
-
-    @Test
-    public void testDreamLabel() {
-        final Intent intent = new Intent();
-        intent.putExtra(DreamService.EXTRA_DREAM_LABEL, "TestDream");
-        mService.onBind(intent);
-
-        assertThat(mService.getDreamLabel()).isEqualTo("TestDream");
     }
 
     @Test

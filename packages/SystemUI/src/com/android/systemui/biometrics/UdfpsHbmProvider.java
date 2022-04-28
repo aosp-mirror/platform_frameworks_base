@@ -17,9 +17,6 @@
 package com.android.systemui.biometrics;
 
 import android.annotation.Nullable;
-import android.view.Surface;
-
-import com.android.systemui.biometrics.UdfpsHbmTypes.HbmType;
 
 /**
  * Interface for controlling the high-brightness mode (HBM). UdfpsView can use this callback to
@@ -36,23 +33,20 @@ public interface UdfpsHbmProvider {
      * This method must be called from the UI thread. The callback, if provided, will also be
      * invoked from the UI thread.
      *
-     * @param hbmType The type of HBM that should be enabled. See {@link UdfpsHbmTypes}.
-     * @param surface The surface for which the HBM is requested, in case the HBM implementation
-     *                needs to set special surface flags to enable the HBM. Can be null.
      * @param onHbmEnabled A runnable that will be executed once HBM is enabled.
      */
-    void enableHbm(@HbmType int hbmType, @Nullable Surface surface,
-            @Nullable Runnable onHbmEnabled);
+    void enableHbm(@Nullable Runnable onHbmEnabled);
 
     /**
-     * UdfpsView will call this to disable the HBM when the illumination is not longer needed.
+     * UdfpsView will call this to disable HBM when illumination is no longer needed.
      *
-     * This method is a no-op when HBM is already disabled. If HBM is enabled, this method will
-     * disable HBM for the {@code hbmType} and {@code surface} that were provided to the
-     * corresponding {@link #enableHbm(int, Surface, Runnable)}.
+     * This method will disable HBM if HBM is enabled. Otherwise, if HBM is already disabled,
+     * this method is a no-op.
      *
      * The call must be made from the UI thread. The callback, if provided, will also be invoked
      * from the UI thread.
+     *
+     *
      *
      * @param onHbmDisabled A runnable that will be executed once HBM is disabled.
      */

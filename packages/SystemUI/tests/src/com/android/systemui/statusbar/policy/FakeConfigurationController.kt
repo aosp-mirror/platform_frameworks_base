@@ -5,22 +5,22 @@ import android.content.res.Configuration
 /** Fake implementation of [ConfigurationController] for tests. */
 class FakeConfigurationController : ConfigurationController {
 
-    private var listener: ConfigurationController.ConfigurationListener? = null
+    private var listeners = mutableListOf<ConfigurationController.ConfigurationListener>()
 
     override fun addCallback(listener: ConfigurationController.ConfigurationListener) {
-        this.listener = listener
+        listeners += listener
     }
 
     override fun removeCallback(listener: ConfigurationController.ConfigurationListener) {
-        this.listener = null
+        listeners -= listener
     }
 
     override fun onConfigurationChanged(newConfiguration: Configuration?) {
-        listener?.onConfigChanged(newConfiguration)
+        listeners.forEach { it.onConfigChanged(newConfiguration) }
     }
 
     override fun notifyThemeChanged() {
-        listener?.onThemeChanged()
+        listeners.forEach { it.onThemeChanged() }
     }
 
     fun notifyConfigurationChanged() {

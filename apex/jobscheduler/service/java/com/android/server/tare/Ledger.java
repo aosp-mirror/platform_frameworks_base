@@ -18,9 +18,9 @@ package com.android.server.tare;
 
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 
+import static com.android.server.tare.TareUtils.cakeToString;
 import static com.android.server.tare.TareUtils.dumpTime;
 import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
-import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -129,7 +129,7 @@ class Ledger {
     }
 
     void dump(IndentingPrintWriter pw, int numRecentTransactions) {
-        pw.print("Current balance", narcToString(getCurrentBalance())).println();
+        pw.print("Current balance", cakeToString(getCurrentBalance())).println();
 
         final int size = mTransactions.size();
         for (int i = Math.max(0, size - numRecentTransactions); i < size; ++i) {
@@ -146,9 +146,9 @@ class Ledger {
                 pw.print(")");
             }
             pw.print(" --> ");
-            pw.print(narcToString(transaction.delta));
+            pw.print(cakeToString(transaction.delta));
             pw.print(" (ctp=");
-            pw.print(narcToString(transaction.ctp));
+            pw.print(cakeToString(transaction.ctp));
             pw.println(")");
         }
     }

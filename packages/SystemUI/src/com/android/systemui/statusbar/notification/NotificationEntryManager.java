@@ -65,7 +65,6 @@ import com.android.systemui.util.Assert;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.leak.LeakDetector;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -183,7 +182,7 @@ public class NotificationEntryManager implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("NotificationEntryManager state:");
         pw.println("  mAllNotifications=");
         if (mAllNotifications.size() == 0) {

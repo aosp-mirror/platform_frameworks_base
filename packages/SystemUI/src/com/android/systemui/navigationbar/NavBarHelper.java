@@ -52,7 +52,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -327,7 +326,7 @@ public final class NavBarHelper implements
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("NavbarTaskbarFriendster");
         pw.println("  longPressHomeEnabled=" + mLongPressHomeEnabled);
         pw.println("  mAssistantTouchGestureEnabled=" + mAssistantTouchGestureEnabled);

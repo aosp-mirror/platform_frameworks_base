@@ -23,7 +23,6 @@ import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import java.io.FileDescriptor
 import java.io.PrintWriter
 
 /**
@@ -45,5 +44,5 @@ interface NotificationsController {
     fun resetUserExpandedStates()
     fun setNotificationSnoozed(sbn: StatusBarNotification, snoozeOption: SnoozeOption)
     fun getActiveNotificationsCount(): Int
-    fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>, dumpTruck: Boolean)
+    fun dump(pw: PrintWriter, args: Array<String>, dumpTruck: Boolean)
 }
