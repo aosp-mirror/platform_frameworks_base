@@ -35,6 +35,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
@@ -66,11 +67,13 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.permission.LegacyPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.provider.Telephony;
 import android.telecom.TelecomManager;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -106,6 +109,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -163,6 +167,7 @@ public final class PermissionPolicyService extends SystemService {
     private PackageManagerInternal mPackageManagerInternal;
     private PermissionManagerServiceInternal mPermissionManagerInternal;
     private NotificationManagerInternal mNotificationManager;
+    private TelephonyManager mTelephonyManager;
     private final KeyguardManager mKeyguardManager;
     private final PackageManager mPackageManager;
     private final Handler mHandler;
@@ -384,6 +389,13 @@ public final class PermissionPolicyService extends SystemService {
     public void onBootPhase(int phase) {
         if (DEBUG) Slog.i(LOG_TAG, "onBootPhase(" + phase + ")");
 
+        if (phase == PHASE_DEVICE_SPECIFIC_SERVICES_READY) {
+            registerCarrierPrivilegesCallbacks();
+            IntentFilter filter =
+                    new IntentFilter(TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED);
+            mContext.registerReceiver(mSimConfigBroadcastReceiver, filter);
+        }
+
         if (phase == PHASE_ACTIVITY_MANAGER_READY) {
             final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
 
@@ -407,6 +419,94 @@ public final class PermissionPolicyService extends SystemService {
         }
 
     }
+
+    private void initTelephonyManagerIfNeeded() {
+        if (mTelephonyManager == null) {
+            mTelephonyManager = TelephonyManager.from(mContext);
+        }
+    }
+
+    private void registerCarrierPrivilegesCallbacks() {
+        initTelephonyManagerIfNeeded();
+        if (mTelephonyManager == null) {
+            return;
+        }
+
+        int numPhones = mTelephonyManager.getActiveModemCount();
+        for (int i = 0; i < numPhones; i++) {
+            PhoneCarrierPrivilegesCallback callback = new PhoneCarrierPrivilegesCallback(i);
+            mPhoneCarrierPrivilegesCallbacks.add(callback);
+            mTelephonyManager.registerCarrierPrivilegesCallback(i, mContext.getMainExecutor(),
+                    callback);
+        }
+    }
+
+    private void unregisterCarrierPrivilegesCallback() {
+        initTelephonyManagerIfNeeded();
+        if (mTelephonyManager == null) {
+            return;
+        }
+
+        for (int i = 0; i < mPhoneCarrierPrivilegesCallbacks.size(); i++) {
+            PhoneCarrierPrivilegesCallback callback = mPhoneCarrierPrivilegesCallbacks.get(i);
+            if (callback != null) {
+                mTelephonyManager.unregisterCarrierPrivilegesCallback(callback);
+            }
+        }
+        mPhoneCarrierPrivilegesCallbacks.clear();
+    }
+
+    private final class PhoneCarrierPrivilegesCallback
+            implements TelephonyManager.CarrierPrivilegesCallback {
+        private int mPhoneId;
+
+        PhoneCarrierPrivilegesCallback(int phoneId) {
+            mPhoneId = phoneId;
+        }
+        @Override
+        public void onCarrierPrivilegesChanged(
+                @NonNull Set<String> privilegedPackageNames,
+                @NonNull Set<Integer> privilegedUids) {
+            initTelephonyManagerIfNeeded();
+            if (mTelephonyManager == null) {
+                Log.e(LOG_TAG, "Cannot grant default permissions to Carrier Service app. "
+                        + "TelephonyManager is null");
+                return;
+            }
+
+            String servicePkg = mTelephonyManager.getCarrierServicePackageNameForLogicalSlot(
+                    mPhoneId);
+            if (servicePkg == null) {
+                return;
+            }
+            int[] users = LocalServices.getService(UserManagerInternal.class).getUserIds();
+            LegacyPermissionManager legacyPermManager =
+                    mContext.getSystemService(LegacyPermissionManager.class);
+            for (int i = 0; i < users.length; i++) {
+                try {
+                    mPackageManager.getPackageInfoAsUser(servicePkg, 0, users[i]);
+                    legacyPermManager.grantDefaultPermissionsToCarrierServiceApp(
+                            servicePkg, users[i]);
+                } catch (PackageManager.NameNotFoundException e) {
+                    // Do nothing if the package does not exist for the specified user
+                }
+            }
+        }
+    }
+
+    private final ArrayList<PhoneCarrierPrivilegesCallback> mPhoneCarrierPrivilegesCallbacks =
+            new ArrayList<>();
+
+    private final BroadcastReceiver mSimConfigBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED.equals(intent.getAction())) {
+                return;
+            }
+            unregisterCarrierPrivilegesCallback();
+            registerCarrierPrivilegesCallbacks();
+        }
+    };
 
     /**
      * @return Whether the user is started but not yet stopped
@@ -1067,7 +1167,8 @@ public final class PermissionPolicyService extends SystemService {
                             ActivityInterceptorInfo info) {
                         super.onActivityLaunched(taskInfo, activityInfo, info);
                         if (!shouldShowNotificationDialogOrClearFlags(taskInfo,
-                                activityInfo.packageName, info.intent, info.checkedOptions, true)
+                                activityInfo.packageName, info.callingPackage, info.intent,
+                                info.checkedOptions, activityInfo.name, true)
                                 || isNoDisplayActivity(activityInfo)) {
                             return;
                         }
@@ -1138,9 +1239,9 @@ public final class PermissionPolicyService extends SystemService {
 
         @Override
         public boolean shouldShowNotificationDialogForTask(TaskInfo taskInfo, String currPkg,
-                Intent intent) {
-            return shouldShowNotificationDialogOrClearFlags(
-                    taskInfo, currPkg, intent, null, false);
+                String callingPkg, Intent intent, String activityName) {
+            return shouldShowNotificationDialogOrClearFlags(taskInfo, currPkg, callingPkg, intent,
+                    null, activityName, false);
         }
 
         private boolean isNoDisplayActivity(@NonNull ActivityInfo aInfo) {
@@ -1166,23 +1267,61 @@ public final class PermissionPolicyService extends SystemService {
          * 1. The isEligibleForLegacyPermissionPrompt ActivityOption is set, or
          * 2. The intent is a launcher intent (action is ACTION_MAIN, category is LAUNCHER), or
          * 3. The activity belongs to the same package as the one which launched the task
-         * originally, and the task was started with a launcher intent
+         * originally, and the task was started with a launcher intent, or
+         * 4. The activity is the first activity in a new task, and was started by the app the
+         * activity belongs to, and that app has another task that is currently focused, which was
+         * started with a launcher intent. This case seeks to identify cases where an app launches,
+         * then immediately trampolines to a new activity and task.
          * @param taskInfo The task to be checked
          * @param currPkg The package of the current top visible activity
+         * @param callingPkg The package that initiated this dialog action
          * @param intent The intent of the current top visible activity
+         * @param options The ActivityOptions of the newly started activity, if this is called due
+         *                to an activity start
+         * @param startedActivity The ActivityInfo of the newly started activity, if this is called
+         *                        due to an activity start
          */
         private boolean shouldShowNotificationDialogOrClearFlags(TaskInfo taskInfo, String currPkg,
-                Intent intent, ActivityOptions options, boolean activityStart) {
-            if (intent == null || currPkg == null || taskInfo == null
+                String callingPkg, Intent intent, ActivityOptions options,
+                String topActivityName, boolean startedActivity) {
+            if (intent == null || currPkg == null || taskInfo == null || topActivityName == null
                     || (!(taskInfo.isFocused && taskInfo.isVisible && taskInfo.isRunning)
-                    && !activityStart)) {
+                    && !startedActivity)) {
                 return false;
             }
-
             return isLauncherIntent(intent)
                     || (options != null && options.isEligibleForLegacyPermissionPrompt())
-                    || (currPkg.equals(taskInfo.baseActivity.getPackageName())
-                    && isLauncherIntent(taskInfo.baseIntent));
+                    || isTaskStartedFromLauncher(currPkg, taskInfo)
+                    || (isTaskPotentialTrampoline(topActivityName, currPkg, callingPkg, taskInfo,
+                    intent)
+                    && (!startedActivity || pkgHasRunningLauncherTask(currPkg, taskInfo)));
+        }
+
+        private boolean isTaskPotentialTrampoline(String activityName, String currPkg,
+                String callingPkg, TaskInfo taskInfo, Intent intent) {
+            return currPkg.equals(callingPkg) && taskInfo.baseIntent.filterEquals(intent)
+                    && taskInfo.numActivities == 1
+                    && activityName.equals(taskInfo.topActivityInfo.name);
+        }
+
+        private boolean pkgHasRunningLauncherTask(String currPkg, TaskInfo taskInfo) {
+            ActivityTaskManagerInternal m =
+                    LocalServices.getService(ActivityTaskManagerInternal.class);
+            try {
+                // TODO(b/230616478) Investigate alternatives like ActivityMetricsLaunchObserver
+                List<ActivityManager.AppTask> tasks =
+                        m.getAppTasks(currPkg, mPackageManager.getPackageUid(currPkg, 0));
+                for (int i = 0; i < tasks.size(); i++) {
+                    TaskInfo other = tasks.get(i).getTaskInfo();
+                    if (other.taskId != taskInfo.taskId && other.isFocused && other.isRunning
+                            && isTaskStartedFromLauncher(currPkg, other)) {
+                        return true;
+                    }
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // Fall through
+            }
+            return false;
         }
 
         private boolean isLauncherIntent(Intent intent) {
@@ -1191,6 +1330,11 @@ public final class PermissionPolicyService extends SystemService {
                     && (intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)
                     || intent.getCategories().contains(Intent.CATEGORY_LEANBACK_LAUNCHER)
                     || intent.getCategories().contains(Intent.CATEGORY_CAR_LAUNCHER));
+        }
+
+        private boolean isTaskStartedFromLauncher(String currPkg, TaskInfo taskInfo) {
+            return currPkg.equals(taskInfo.baseActivity.getPackageName())
+                    && isLauncherIntent(taskInfo.baseIntent);
         }
 
         private void clearNotificationReviewFlagsIfNeeded(String packageName, UserHandle user) {

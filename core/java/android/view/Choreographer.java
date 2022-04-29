@@ -785,9 +785,7 @@ public final class Choreographer {
                         }
                     }
                     frameTimeNanos = startNanos - lastFrameOffset;
-                    DisplayEventReceiver.VsyncEventData latestVsyncEventData =
-                            mDisplayEventReceiver.getLatestVsyncEventData();
-                    frameData.updateFrameData(frameTimeNanos, latestVsyncEventData);
+                    frameData.updateFrameData(frameTimeNanos);
                 }
 
                 if (frameTimeNanos < mLastFrameTimeNanos) {
@@ -885,9 +883,7 @@ public final class Choreographer {
                     }
                     frameTimeNanos = now - lastFrameOffset;
                     mLastFrameTimeNanos = frameTimeNanos;
-                    DisplayEventReceiver.VsyncEventData latestVsyncEventData =
-                            mDisplayEventReceiver.getLatestVsyncEventData();
-                    frameData.updateFrameData(frameTimeNanos, latestVsyncEventData);
+                    frameData.updateFrameData(frameTimeNanos);
                 }
             }
         }
@@ -1022,6 +1018,11 @@ public final class Choreographer {
             return mVsyncId;
         }
 
+        /** Reset the vsync ID to invalid. */
+        void resetVsyncId() {
+            mVsyncId = FrameInfo.INVALID_VSYNC_ID;
+        }
+
         /**
          * The time in {@link System#nanoTime()} timebase which this frame is expected to be
          * presented.
@@ -1069,12 +1070,14 @@ public final class Choreographer {
         private FrameTimeline[] mFrameTimelines;
         private FrameTimeline mPreferredFrameTimeline;
 
-        void updateFrameData(long frameTimeNanos,
-                DisplayEventReceiver.VsyncEventData latestVsyncEventData) {
+        void updateFrameData(long frameTimeNanos) {
             mFrameTimeNanos = frameTimeNanos;
-            mFrameTimelines = convertFrameTimelines(latestVsyncEventData);
-            mPreferredFrameTimeline =
-                mFrameTimelines[latestVsyncEventData.preferredFrameTimelineIndex];
+            for (FrameTimeline ft : mFrameTimelines) {
+                // The ID is no longer valid because the frame time that was registered with the ID
+                // no longer matches.
+                // TODO(b/205721584): Ask SF for valid vsync information.
+                ft.resetVsyncId();
+            }
         }
 
         /** The time in nanoseconds when the frame started being rendered. */
