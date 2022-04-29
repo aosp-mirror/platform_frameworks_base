@@ -186,5 +186,40 @@
         }
       ]
     }
+  ],
+  "platinum-postsubmit": [
+      {
+        "name": "CtsIncrementalInstallHostTestCases",
+        "options": [
+            {
+                "exclude-annotation": "androidx.test.filters.FlakyTest"
+            }
+        ]
+      },
+      {
+        "name": "CtsAppSecurityHostTestCases",
+        "options": [
+            {
+                "include-filter": "android.appsecurity.cts.SplitTests"
+            },
+            {
+                "include-filter": "android.appsecurity.cts.EphemeralTest"
+            },
+            {
+                "exclude-annotation": "androidx.test.filters.FlakyTest"
+            }
+        ]
+      },
+      {
+        "name": "CtsContentTestCases",
+        "options":[
+            {
+                "include-filter": "android.content.cts.IntentFilterTest"
+            },
+            {
+                "exclude-annotation": "androidx.test.filters.FlakyTest"
+            }
+        ]
+      }
   ]
 }
