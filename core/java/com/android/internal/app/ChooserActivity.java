@@ -2507,11 +2507,6 @@ public class ChooserActivity extends ResolverActivity implements
                     offset += findViewById(R.id.tabs).getHeight();
                 }
 
-                View tabDivider = findViewById(R.id.resolver_tab_divider);
-                if (tabDivider.getVisibility() == View.VISIBLE) {
-                    offset += tabDivider.getHeight();
-                }
-
                 if (recyclerView.getVisibility() == View.VISIBLE) {
                     int directShareHeight = 0;
                     rowsToShow = Math.min(4, rowsToShow);
@@ -2700,7 +2695,7 @@ public class ChooserActivity extends ResolverActivity implements
         if (mResolverDrawerLayout == null) {
             return;
         }
-        int elevatedViewResId = shouldShowTabs() ? R.id.resolver_tab_divider : R.id.chooser_header;
+        int elevatedViewResId = shouldShowTabs() ? R.id.tabs : R.id.chooser_header;
         final View elevatedView = mResolverDrawerLayout.findViewById(elevatedViewResId);
         final float defaultElevation = elevatedView.getElevation();
         final float chooserHeaderScrollElevation =
