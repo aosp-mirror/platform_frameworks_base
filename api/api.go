@@ -208,12 +208,6 @@ func createMergedFrameworkImpl(ctx android.LoadHookContext, modules []string) {
 	props := libraryProps{}
 	props.Name = proptools.StringPtr("all-framework-module-impl")
 	props.Static_libs = transformArray(modules, "", ".impl")
-	// Media module's impl jar is called "updatable-media"
-	for i, v := range props.Static_libs {
-		if v == "framework-media.impl" {
-			props.Static_libs[i] = "updatable-media"
-		}
-	}
 	props.Sdk_version = proptools.StringPtr("module_current")
 	props.Visibility = []string{"//frameworks/base"}
 	ctx.CreateModule(java.LibraryFactory, &props)
