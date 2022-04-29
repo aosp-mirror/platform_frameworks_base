@@ -451,12 +451,22 @@ class KeyguardUnlockAnimationController @Inject constructor(
         surfaceBehindRemoteAnimationTarget = target
         surfaceBehindRemoteAnimationStartTime = startTime
 
-        // If we specifically requested that the surface behind be made visible, it means we are
-        // swiping to unlock. In that case, the surface visibility is tied to the dismiss amount,
-        // and we'll handle that in onKeyguardDismissAmountChanged(). If we didn't request that, the
-        // keyguard is being dismissed for a different reason (biometric auth, etc.) and we should
-        // play a canned animation to make the surface fully visible.
-        if (!requestedShowSurfaceBehindKeyguard) {
+        // If we specifically requested that the surface behind be made visible (vs. it being made
+        // visible because we're unlocking), then we're in the middle of a swipe-to-unlock touch
+        // gesture and the surface behind the keyguard should be made visible.
+        if (requestedShowSurfaceBehindKeyguard) {
+            // Fade in the surface, as long as we're not now flinging. The touch gesture ending in
+            // a fling during the time it takes the keyguard exit animation to start is an edge
+            // case race condition, and we'll handle it by playing a canned animation on the
+            // now-visible surface to finish unlocking.
+            if (!keyguardStateController.isFlingingToDismissKeyguard) {
+                fadeInSurfaceBehind()
+            } else {
+                playCannedUnlockAnimation()
+            }
+        } else {
+            // The surface was made visible since we're unlocking not from a swipe (fingerprint,
+            // lock icon long-press, etc). Play the full unlock animation.
             playCannedUnlockAnimation()
         }
 
@@ -612,7 +622,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
             !keyguardViewMediator.get().requestedShowSurfaceBehindKeyguard()) {
 
             keyguardViewMediator.get().showSurfaceBehindKeyguard()
-            fadeInSurfaceBehind()
         } else if (dismissAmount < DISMISS_AMOUNT_SHOW_SURFACE_THRESHOLD &&
                 keyguardViewMediator.get().requestedShowSurfaceBehindKeyguard()) {
             // We're no longer past the threshold but we are showing the surface. Animate it

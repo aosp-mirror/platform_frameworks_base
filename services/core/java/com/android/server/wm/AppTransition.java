@@ -22,6 +22,7 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
@@ -1251,6 +1252,9 @@ public class AppTransition implements Dump {
                 "TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER"));
         sFlagToString.add(new Pair<>(TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
                 "TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION"));
+        sFlagToString.add(new Pair<>(
+                TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT,
+                "TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_WITH_IN_WINDOW_ANIMATIONS"));
         sFlagToString.add(new Pair<>(TRANSIT_FLAG_APP_CRASHED,
                 "TRANSIT_FLAG_APP_CRASHED"));
         sFlagToString.add(new Pair<>(TRANSIT_FLAG_OPEN_BEHIND,
