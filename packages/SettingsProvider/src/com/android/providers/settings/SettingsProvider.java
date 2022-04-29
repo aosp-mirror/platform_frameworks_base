@@ -818,9 +818,6 @@ public class SettingsProvider extends ContentProvider {
             getContext().enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS,
                     "Access files from the settings of another user");
         }
-        if (mode.contains("w")) {
-            enforceWritePermission(Manifest.permission.WRITE_SETTINGS);
-        }
         uri = ContentProvider.getUriWithoutUserId(uri);
 
         final String cacheRingtoneSetting;
