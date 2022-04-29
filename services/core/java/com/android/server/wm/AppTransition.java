@@ -676,6 +676,9 @@ public class AppTransition implements Dump {
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
             a = mTransitionAnimation.loadAppTransitionAnimation(mNextAppTransitionPackage,
                     enter ? mNextAppTransitionEnter : mNextAppTransitionExit);
+            if (mNextAppTransitionBackgroundColor != 0) {
+                a.setBackdropColor(mNextAppTransitionBackgroundColor);
+            }
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s nextAppTransition=ANIM_CUSTOM transit=%s "
                             + "isEntrance=%b Callers=%s",
@@ -834,10 +837,6 @@ public class AppTransition implements Dump {
                     Debug.getCallers(3));
         }
         setAppTransitionFinishedCallbackIfNeeded(a);
-
-        if (mNextAppTransitionBackgroundColor != 0) {
-            a.setBackdropColor(mNextAppTransitionBackgroundColor);
-        }
 
         return a;
     }
