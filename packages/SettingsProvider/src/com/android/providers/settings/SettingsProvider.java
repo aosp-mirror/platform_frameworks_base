@@ -818,6 +818,13 @@ public class SettingsProvider extends ContentProvider {
             getContext().enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS,
                     "Access files from the settings of another user");
         }
+        final String callingPackage = getCallingPackage();
+        if (mode.contains("w") && !Settings.checkAndNoteWriteSettingsOperation(getContext(),
+                Binder.getCallingUid(), callingPackage, getCallingAttributionTag(),
+                true /* throwException */)) {
+            Slog.e(LOG_TAG, "Package: " + callingPackage + " is not allowed to modify "
+                    + "system settings files.");
+        }
         uri = ContentProvider.getUriWithoutUserId(uri);
 
         final String cacheRingtoneSetting;
