@@ -72,7 +72,7 @@ import javax.inject.Inject;
 /** */
 @CentralSurfacesComponent.CentralSurfacesScope
 public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callbacks {
-    private final CentralSurfaces mCentralSurfaces;
+    private final CentralSurfacesInt mCentralSurfaces;
     private final Context mContext;
     private final ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
@@ -106,7 +106,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Inject
     CentralSurfacesCommandQueueCallbacks(
-            CentralSurfaces centralSurfaces,
+            CentralSurfacesInt centralSurfaces,
             Context context,
             @Main Resources resources,
             ShadeController shadeController,
@@ -207,8 +207,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void animateExpandNotificationsPanel() {
-        if (CentralSurfaces.SPEW) {
-            Log.d(CentralSurfaces.TAG,
+        if (CentralSurfacesInt.SPEW) {
+            Log.d(CentralSurfacesInt.TAG,
                     "animateExpand: mExpandedVisible=" + mCentralSurfaces.isExpandedVisible());
         }
         if (!mCommandQueue.panelsEnabled()) {
@@ -220,8 +220,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void animateExpandSettingsPanel(@Nullable String subPanel) {
-        if (CentralSurfaces.SPEW) {
-            Log.d(CentralSurfaces.TAG,
+        if (CentralSurfacesInt.SPEW) {
+            Log.d(CentralSurfacesInt.TAG,
                     "animateExpand: mExpandedVisible=" + mCentralSurfaces.isExpandedVisible());
         }
         if (!mCommandQueue.panelsEnabled()) {
@@ -244,7 +244,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void dismissKeyboardShortcutsMenu() {
-        mCentralSurfaces.resendMessage(CentralSurfaces.MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU);
+        mCentralSurfaces.resendMessage(CentralSurfacesInt.MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU);
     }
     /**
      * State is one or more of the DISABLE constants from StatusBarManager.
@@ -257,7 +257,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
         int state2BeforeAdjustment = state2;
         state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
-        Log.d(CentralSurfaces.TAG,
+        Log.d(CentralSurfacesInt.TAG,
                 mDisableFlagsLogger.getDisableFlagsString(
                         /* old= */ new DisableFlagsLogger.DisableState(
                                 mCentralSurfaces.getDisabled1(), mCentralSurfaces.getDisabled2()),
@@ -306,8 +306,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
      */
     @Override
     public void handleSystemKey(int key) {
-        if (CentralSurfaces.SPEW) {
-            Log.d(CentralSurfaces.TAG, "handleNavigationKey: " + key);
+        if (CentralSurfacesInt.SPEW) {
+            Log.d(CentralSurfacesInt.TAG, "handleNavigationKey: " + key);
         }
         if (!mCommandQueue.panelsEnabled() || !mKeyguardUpdateMonitor.isDeviceInteractive()
                 || mKeyguardStateController.isShowing() && !mKeyguardStateController.isOccluded()) {
@@ -345,15 +345,15 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     public void onCameraLaunchGestureDetected(int source) {
         mCentralSurfaces.setLastCameraLaunchSource(source);
         if (mCentralSurfaces.isGoingToSleep()) {
-            if (CentralSurfaces.DEBUG_CAMERA_LIFT) {
-                Slog.d(CentralSurfaces.TAG, "Finish going to sleep before launching camera");
+            if (CentralSurfacesInt.DEBUG_CAMERA_LIFT) {
+                Slog.d(CentralSurfacesInt.TAG, "Finish going to sleep before launching camera");
             }
             mCentralSurfaces.setLaunchCameraOnFinishedGoingToSleep(true);
             return;
         }
         if (!mNotificationPanelViewController.canCameraGestureBeLaunched()) {
-            if (CentralSurfaces.DEBUG_CAMERA_LIFT) {
-                Slog.d(CentralSurfaces.TAG, "Can't launch camera right now");
+            if (CentralSurfacesInt.DEBUG_CAMERA_LIFT) {
+                Slog.d(CentralSurfacesInt.TAG, "Can't launch camera right now");
             }
             return;
         }
@@ -364,7 +364,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         vibrateForCameraGesture();
 
         if (source == StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP) {
-            Log.v(CentralSurfaces.TAG, "Camera launch");
+            Log.v(CentralSurfacesInt.TAG, "Camera launch");
             mKeyguardUpdateMonitor.onCameraLaunched();
         }
 
@@ -379,11 +379,11 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 // Avoid flickering of the scrim when we instant launch the camera and the bouncer
                 // comes on.
                 mCentralSurfaces.acquireGestureWakeLock(
-                        CentralSurfaces.LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
+                        CentralSurfacesInt.LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
             }
             if (isWakingUpOrAwake()) {
-                if (CentralSurfaces.DEBUG_CAMERA_LIFT) {
-                    Slog.d(CentralSurfaces.TAG, "Launching camera");
+                if (CentralSurfacesInt.DEBUG_CAMERA_LIFT) {
+                    Slog.d(CentralSurfacesInt.TAG, "Launching camera");
                 }
                 if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                     mStatusBarKeyguardViewManager.reset(true /* hide */);
@@ -396,8 +396,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 // we will dismiss us too early since we are waiting on an activity to be drawn and
                 // incorrectly get notified because of the screen on event (which resumes and pauses
                 // some activities)
-                if (CentralSurfaces.DEBUG_CAMERA_LIFT) {
-                    Slog.d(CentralSurfaces.TAG, "Deferring until screen turns on");
+                if (CentralSurfacesInt.DEBUG_CAMERA_LIFT) {
+                    Slog.d(CentralSurfacesInt.TAG, "Deferring until screen turns on");
                 }
                 mCentralSurfaces.setLaunchCameraOnFinishedWaking(true);
             }
@@ -409,7 +409,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         Intent emergencyIntent = mCentralSurfaces.getEmergencyActionIntent();
 
         if (emergencyIntent == null) {
-            Log.wtf(CentralSurfaces.TAG, "Couldn't find an app to process the emergency intent.");
+            Log.wtf(CentralSurfacesInt.TAG, "Couldn't find an app to process the emergency intent.");
             return;
         }
 
@@ -438,7 +438,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             // Avoid flickering of the scrim when we instant launch the camera and the bouncer
             // comes on.
             mCentralSurfaces.acquireGestureWakeLock(
-                    CentralSurfaces.LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
+                    CentralSurfacesInt.LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
         }
 
         if (isWakingUpOrAwake()) {
@@ -492,7 +492,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void toggleKeyboardShortcutsMenu(int deviceId) {
-        mCentralSurfaces.resendMessage(new CentralSurfaces.KeyboardShortcutsMessage(deviceId));
+        mCentralSurfaces.resendMessage(new CentralSurfacesInt.KeyboardShortcutsMessage(deviceId));
     }
 
     @Override
@@ -580,8 +580,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             // Make sure to pass -1 for repeat so VibratorManagerService doesn't stop us when going
             // to sleep.
             return VibrationEffect.createWaveform(
-                    CentralSurfaces.CAMERA_LAUNCH_GESTURE_VIBRATION_TIMINGS,
-                    CentralSurfaces.CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES,
+                    CentralSurfacesInt.CAMERA_LAUNCH_GESTURE_VIBRATION_TIMINGS,
+                    CentralSurfacesInt.CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES,
                     /* repeat= */ -1);
         }
 

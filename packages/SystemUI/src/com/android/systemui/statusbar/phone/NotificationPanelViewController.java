@@ -1099,7 +1099,7 @@ public class NotificationPanelViewController extends PanelViewController {
         return mKeyguardStatusViewController.hasCustomClock();
     }
 
-    private void setCentralSurfaces(CentralSurfaces centralSurfaces) {
+    private void setCentralSurfaces(CentralSurfacesInt centralSurfaces) {
         // TODO: this can be injected.
         mCentralSurfaces = centralSurfaces;
         mKeyguardBottomArea.setCentralSurfaces(mCentralSurfaces);
@@ -3950,7 +3950,7 @@ public class NotificationPanelViewController extends PanelViewController {
      * @param hideExpandedRunnable a runnable to run when we need to hide the expanded panel.
      */
     public void initDependencies(
-            CentralSurfaces centralSurfaces,
+            CentralSurfacesInt centralSurfaces,
             Runnable hideExpandedRunnable,
             NotificationShelfController notificationShelfController) {
         setCentralSurfaces(centralSurfaces);

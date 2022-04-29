@@ -187,7 +187,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     protected LockPatternUtils mLockPatternUtils;
     protected ViewMediatorCallback mViewMediatorCallback;
-    protected CentralSurfaces mCentralSurfaces;
+    protected CentralSurfacesInt mCentralSurfaces;
     private NotificationPanelViewController mNotificationPanelViewController;
     private BiometricUnlockController mBiometricUnlockController;
 
@@ -289,7 +289,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     @Override
-    public void registerCentralSurfaces(CentralSurfaces centralSurfaces,
+    public void registerCentralSurfaces(CentralSurfacesInt centralSurfaces,
             NotificationPanelViewController notificationPanelViewController,
             PanelExpansionStateManager panelExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
@@ -672,7 +672,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
-     * If {@link CentralSurfaces} is pulsing.
+     * If {@link CentralSurfacesInt} is pulsing.
      */
     public void setPulsing(boolean pulsing) {
         if (mPulsing != pulsing) {
