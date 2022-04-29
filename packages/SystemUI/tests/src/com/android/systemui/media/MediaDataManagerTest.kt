@@ -7,6 +7,7 @@ import android.app.smartspace.SmartspaceAction
 import android.app.smartspace.SmartspaceTarget
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.Icon
 import android.media.MediaDescription
 import android.media.MediaMetadata
 import android.media.session.MediaController
@@ -97,6 +98,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     lateinit var smartspaceMediaDataProvider: SmartspaceMediaDataProvider
     @Mock lateinit var mediaSmartspaceTarget: SmartspaceTarget
     @Mock private lateinit var mediaRecommendationItem: SmartspaceAction
+    lateinit var validRecommendationList: List<SmartspaceAction>
     @Mock private lateinit var mediaSmartspaceBaseAction: SmartspaceAction
     @Mock private lateinit var mediaFlags: MediaFlags
     @Mock private lateinit var logger: MediaUiEventLogger
@@ -172,12 +174,17 @@ class MediaDataManagerTest : SysuiTestCase() {
             putString("package_name", PACKAGE_NAME)
             putParcelable("dismiss_intent", DISMISS_INTENT)
         }
+        val icon = Icon.createWithResource(context, android.R.drawable.ic_media_play)
         whenever(mediaSmartspaceBaseAction.extras).thenReturn(recommendationExtras)
         whenever(mediaSmartspaceTarget.baseAction).thenReturn(mediaSmartspaceBaseAction)
         whenever(mediaRecommendationItem.extras).thenReturn(recommendationExtras)
+        whenever(mediaRecommendationItem.icon).thenReturn(icon)
+        validRecommendationList = listOf(
+            mediaRecommendationItem, mediaRecommendationItem, mediaRecommendationItem
+        )
         whenever(mediaSmartspaceTarget.smartspaceTargetId).thenReturn(KEY_MEDIA_SMARTSPACE)
         whenever(mediaSmartspaceTarget.featureType).thenReturn(SmartspaceTarget.FEATURE_MEDIA)
-        whenever(mediaSmartspaceTarget.iconGrid).thenReturn(listOf(mediaRecommendationItem))
+        whenever(mediaSmartspaceTarget.iconGrid).thenReturn(validRecommendationList)
         whenever(mediaSmartspaceTarget.creationTimeMillis).thenReturn(1234L)
         whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(false)
         whenever(logger.getNewInstanceId()).thenReturn(instanceIdSequence.newInstanceId())
@@ -507,10 +514,9 @@ class MediaDataManagerTest : SysuiTestCase() {
             eq(SmartspaceMediaData(
                 targetId = KEY_MEDIA_SMARTSPACE,
                 isActive = true,
-                isValid = true,
                 packageName = PACKAGE_NAME,
                 cardAction = mediaSmartspaceBaseAction,
-                recommendations = listOf(mediaRecommendationItem),
+                recommendations = validRecommendationList,
                 dismissIntent = DISMISS_INTENT,
                 headphoneConnectionTimeMillis = 1234L,
                 instanceId = InstanceId.fakeInstanceId(instanceId))),
@@ -529,7 +535,6 @@ class MediaDataManagerTest : SysuiTestCase() {
             eq(EMPTY_SMARTSPACE_MEDIA_DATA.copy(
                 targetId = KEY_MEDIA_SMARTSPACE,
                 isActive = true,
-                isValid = false,
                 dismissIntent = DISMISS_INTENT,
                 headphoneConnectionTimeMillis = 1234L,
                 instanceId = InstanceId.fakeInstanceId(instanceId))),
@@ -555,7 +560,6 @@ class MediaDataManagerTest : SysuiTestCase() {
             eq(EMPTY_SMARTSPACE_MEDIA_DATA.copy(
                 targetId = KEY_MEDIA_SMARTSPACE,
                 isActive = true,
-                isValid = false,
                 dismissIntent = null,
                 headphoneConnectionTimeMillis = 1234L,
                 instanceId = InstanceId.fakeInstanceId(instanceId))),
