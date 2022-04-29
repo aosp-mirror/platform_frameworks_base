@@ -791,7 +791,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void testDumpBarTransitions_DoesNotCrash() {
-        CentralSurfacesInt.dumpBarTransitions(
+        CentralSurfaces.dumpBarTransitions(
                 new PrintWriter(new ByteArrayOutputStream()), "var", /* transitions= */ null);
     }
 
