@@ -3966,7 +3966,7 @@ public class UserManagerService extends IUserManager.Stub {
         for (int i = 0; i < userSize; i++) {
             final UserData user = mUsers.valueAt(i);
             if (DBG) Slog.d(LOG_TAG, i + ":" + user.info.toFullString());
-            if (user.info.preCreated && user.info.userType.equals(userType)) {
+            if (user.info.preCreated && !user.info.partial && user.info.userType.equals(userType)) {
                 if (!user.info.isInitialized()) {
                     Slog.w(LOG_TAG, "found pre-created user of type " + userType
                             + ", but it's not initialized yet: " + user.info.toFullString());
