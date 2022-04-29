@@ -224,9 +224,10 @@ public final class OutputConfiguration implements Parcelable {
      * display subsystem for smoother display of camera frames. An output target of SurfaceView
      * uses this time base by default.</p>
      *
-     * <p>The choreographer synchronized timestamps are also reasonable to use when drawing to a
-     * TextureView. So this timestamp base can be used for a SurfaceTexture as part of a
-     * TextureView, in addition to SurfaceView.</p>
+     * <p>This timestamp base isn't applicable to SurfaceTexture targets. SurfaceTexture's
+     * {@link android.graphics.SurfaceTexture#updateTexImage updateTexImage} function always
+     * uses the latest image from the camera stream. In the case of a TextureView, the image is
+     * displayed right away.</p>
      *
      * <p>Timestamps with this time base cannot directly match the timestamps in
      * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted} or the sensor timestamps in
