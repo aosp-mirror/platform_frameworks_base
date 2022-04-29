@@ -105,7 +105,7 @@ private fun Int.toLayoutGravity(@Surface.Rotation rotation: Int): Int = when (ro
         DisplayCutout.BOUNDS_POSITION_LEFT -> Gravity.BOTTOM
         DisplayCutout.BOUNDS_POSITION_TOP -> Gravity.LEFT
         DisplayCutout.BOUNDS_POSITION_RIGHT -> Gravity.TOP
-        else /* DisplayCutout.BOUNDS_POSITION_BOTTOM */ -> Gravity.LEFT
+        else /* DisplayCutout.BOUNDS_POSITION_BOTTOM */ -> Gravity.RIGHT
     }
     Surface.ROTATION_270 -> when (this) {
         DisplayCutout.BOUNDS_POSITION_LEFT -> Gravity.TOP
