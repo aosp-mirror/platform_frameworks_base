@@ -46,7 +46,6 @@ import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.StatusBarManager;
 import android.app.WindowConfiguration;
-import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.IntArray;
@@ -461,22 +460,10 @@ class InsetsPolicy {
 
     private InsetsState adjustInsetsForRoundedCorners(WindowState w, InsetsState originalState,
             boolean copyState) {
-        final WindowState roundedCornerWindow = mPolicy.getRoundedCornerWindow();
         final Task task = w.getTask();
-        if (task != null && !task.getWindowConfiguration().tasksAreFloating()
-                && (roundedCornerWindow != null || task.inSplitScreen())) {
-            // Instead of using display frame to calculating rounded corner, for the fake rounded
-            // corners drawn by divider bar or task bar, we need to re-calculate rounded corners
-            // based on task bounds and if the task bounds is intersected with task bar, we should
-            // exclude the intersected part.
+        if (task != null && !task.getWindowConfiguration().tasksAreFloating()) {
+            // Use task bounds to calculating rounded corners if the task is not floating.
             final Rect roundedCornerFrame = new Rect(task.getBounds());
-            if (roundedCornerWindow != null
-                    && roundedCornerWindow.getControllableInsetProvider() != null) {
-                final InsetsSource source =
-                        roundedCornerWindow.getControllableInsetProvider().getSource();
-                final Insets insets = source.calculateInsets(roundedCornerFrame, false);
-                roundedCornerFrame.inset(insets);
-            }
             final InsetsState state = copyState ? new InsetsState(originalState) : originalState;
             state.setRoundedCornerFrame(roundedCornerFrame);
             return state;
