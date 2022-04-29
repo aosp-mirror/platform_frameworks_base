@@ -73,7 +73,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private DragDownHelper mDragDownHelper;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private ShadeController mShadeController;
-    @Mock private CentralSurfacesInt mCentralSurfaces;
+    @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private DockManager mDockManager;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;

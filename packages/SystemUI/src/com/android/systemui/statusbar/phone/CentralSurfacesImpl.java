@@ -272,7 +272,7 @@ import dagger.Lazy;
  */
 @SysUISingleton
 public class CentralSurfacesImpl extends CoreStartable implements
-        CentralSurfacesInt {
+        CentralSurfaces {
 
     private static final String BANNER_ACTION_CANCEL =
             "com.android.systemui.statusbar.banner_action_cancel";
@@ -1781,7 +1781,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                         .create(mContext)
                         .addNextIntent(intent)
                         .startActivities(
-                                CentralSurfacesInt.getActivityOptions(getDisplayId(), adapter),
+                                CentralSurfaces.getActivityOptions(getDisplayId(), adapter),
                                 userHandle));
     }
 
@@ -2298,8 +2298,8 @@ public class CentralSurfacesImpl extends CoreStartable implements
             pw.println("Current Status Bar state:");
             pw.println("  mExpandedVisible=" + mExpandedVisible);
             pw.println("  mDisplayMetrics=" + mDisplayMetrics);
-            pw.println("  mStackScroller: " + CentralSurfacesInt.viewInfo(mStackScroller));
-            pw.println("  mStackScroller: " + CentralSurfacesInt.viewInfo(mStackScroller)
+            pw.println("  mStackScroller: " + CentralSurfaces.viewInfo(mStackScroller));
+            pw.println("  mStackScroller: " + CentralSurfaces.viewInfo(mStackScroller)
                     + " scroll " + mStackScroller.getScrollX()
                     + "," + mStackScroller.getScrollY());
         }
@@ -2315,7 +2315,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         pw.println("  ShadeWindowView: ");
         if (mNotificationShadeWindowViewController != null) {
             mNotificationShadeWindowViewController.dump(pw, args);
-            CentralSurfacesInt.dumpBarTransitions(
+            CentralSurfaces.dumpBarTransitions(
                     pw, "PhoneStatusBarTransitions", mStatusBarTransitions);
         }
 
@@ -2494,7 +2494,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             mActivityLaunchAnimator.startIntentWithAnimation(animController,
                     animate, intent.getPackage(), (adapter) -> {
                         ActivityOptions options = new ActivityOptions(
-                                CentralSurfacesInt.getActivityOptions(mDisplayId, adapter));
+                                CentralSurfaces.getActivityOptions(mDisplayId, adapter));
                         options.setDisallowEnterPictureInPictureWhileLaunching(
                                 disallowEnterPictureInPictureWhileLaunching);
                         if (CameraIntents.isInsecureCameraIntent(intent)) {
@@ -4107,7 +4107,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                         controller, animate, intent.getCreatorPackage(),
                         (animationAdapter) -> {
                             ActivityOptions options = new ActivityOptions(
-                                    CentralSurfacesInt.getActivityOptions(
+                                    CentralSurfaces.getActivityOptions(
                                             mDisplayId, animationAdapter));
                             // TODO b/221255671: restrict this to only be set for notifications
                             options.setEligibleForLegacyPermissionPrompt(true);

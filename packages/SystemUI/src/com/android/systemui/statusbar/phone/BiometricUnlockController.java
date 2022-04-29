@@ -699,7 +699,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             public void run() {
                 mNotificationShadeWindowController.setForceDozeBrightness(false);
             }
-        }, CentralSurfacesInt.FADE_KEYGUARD_DURATION_PULSING);
+        }, CentralSurfaces.FADE_KEYGUARD_DURATION_PULSING);
     }
 
     public void finishKeyguardFadingAway() {

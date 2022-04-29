@@ -54,7 +54,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 
 import java.io.PrintWriter;
 
-public interface CentralSurfacesInt extends Dumpable, ActivityStarter, LifecycleOwner {
+public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwner {
     boolean MULTIUSER_DEBUG = false;
     // Should match the values in PhoneWindowManager
     String SYSTEM_DIALOG_REASON_KEY = "reason";
