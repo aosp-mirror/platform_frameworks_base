@@ -33,14 +33,14 @@
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Non, grazas"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Xirar pantalla automaticamente"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Queres permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Queres permitir que a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> acceda ao dispositivo (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?\nEsta aplicación non está autorizada para realizar gravacións, pero pode capturar audio a través deste dispositivo USB."</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Queres permitir que a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Queres abrir a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> para utilizar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Esta aplicación non está autorizada a realizar gravacións, pero pode capturar audio a través deste dispositivo USB. Ao usar a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> con este dispositivo, é posible que non se escoiten chamadas, notificacións nin alarmas."</string>
+    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Queres permitir que a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> acceda ao dispositivo (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?\nEsta aplicación non está autorizada para realizar gravacións, pero podería capturar audio a través deste dispositivo USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para usar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Esta aplicación non está autorizada a realizar gravacións, pero podería capturar audio a través deste dispositivo USB. Ao usar a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> con este dispositivo, é posible que non se escoiten chamadas, notificacións nin alarmas."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ao usar a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> con este dispositivo, é posible que non se escoiten chamadas, notificacións nin alarmas."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Queres permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Queres abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para utilizar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Queres abrir a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> para xestionar o dispositivo (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?\nEsta aplicación non está autorizada a realizar gravacións, pero pode capturar audio a través deste dispositivo USB."</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Queres abrir a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> para xestionar o dispositivo (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?\nEsta aplicación non está autorizada a realizar gravacións, pero podería capturar audio a través deste dispositivo USB."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Queres abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para utilizar <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Ningunha aplicación instalada funciona co accesorio USB. Máis información: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"Accesorio USB"</string>
@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"A túa organización é propietaria deste dispositivo e pode controlar o tráfico de rede"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> é a organización propietaria deste dispositivo e pode controlar o tráfico de rede"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> proporciona este dispositivo"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Este dispositivo pertence á túa organización e está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado a <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Este dispositivo pertence á túa organización e está conectado a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado a Internet a través de <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Este dispositivo pertence á túa organización"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Este dispositivo pertence á túa organización e está conectado a varias VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado a varias VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Este dispositivo pertence á túa organización e está conectado a Internet a través de varias VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado a Internet a través de varias VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"A túa organización pode controlar o tráfico de rede do teu perfil de traballo"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> pode controlar o tráfico de rede do teu perfil de traballo"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"O teu administrador de TI pode ver a actividade de rede do perfil de traballo"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"É posible que se controle a rede"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Este dispositivo está conectado a varias VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"O teu perfil de traballo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"O teu perfil persoal está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Este dispositivo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Este dispositivo está conectado a Internet a través de varias VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"As túas aplicacións do traballo están conectadas a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"As túas aplicacións persoais están conectadas a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Este dispositivo está conectado a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> proporciona este dispositivo"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Xestión de dispositivos"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Este dispositivo ten unha autoridade de certificación instalada. É posible que se controle ou se modifique o teu tráfico de rede segura."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"O administrador activou o rexistro na rede, que controla o tráfico do teu dispositivo."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"O administrador activou o rexistro na rede, que supervisa o tráfico do teu perfil de traballo, pero non o do perfil persoal."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Estás conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode controlar a túa actividade na rede, mesmo os correos electrónicos, as aplicacións e os sitios web."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Estás conectado a <xliff:g id="VPN_APP_0">%1$s</xliff:g> e a <xliff:g id="VPN_APP_1">%2$s</xliff:g>, que poden controlar a túa actividade na rede, mesmo os correos electrónicos, as aplicacións e os sitios web."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"O teu perfil de traballo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode controlar a túa actividade na rede, mesmo os correos electrónicos, as aplicacións e os sitios web."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"O teu perfil persoal está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode controlar a túa actividade na rede, mesmo os correos electrónicos, as aplicacións e os sitios web."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Este dispositivo está conectado a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. O teu administrador de TI pode ver a actividade que levas a cabo na rede (por exemplo, os correos electrónicos e os datos de navegación)."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Este dispositivo está conectado a Internet a través de <xliff:g id="VPN_APP_0">%1$s</xliff:g> e de <xliff:g id="VPN_APP_1">%2$s</xliff:g>. O teu administrador de TI pode ver a actividade que levas a cabo na rede (por exemplo, os correos electrónicos e os datos de navegación)."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"As túas aplicacións do traballo están conectadas a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. O teu administrador de TI e o fornecedor da VPN poden ver a actividade que levas a cabo na rede a través das aplicacións do traballo (por exemplo, os correos electrónicos e os datos de navegación)."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"As túas aplicacións persoais están conectadas a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. O fornecedor da VPN pode ver a actividade que levas a cabo na rede (por exemplo, os correos electrónicos e os datos de navegación)."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir configuración da VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"O teu pai ou nai xestiona este dispositivo e pode ver e xestionar información como as aplicacións que usas, a túa localización e o tempo diante da pantalla."</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nome da difusión"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Contrasinal"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Gardar"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Iniciando…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Non se puido iniciar a emisión"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilación"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Copiouse o número de compilación no portapapeis."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversa aberta"</string>
@@ -919,11 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Engadir atallo"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Non engadir atallo"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleccionar usuario"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other">Hai <xliff:g id="COUNT_1">%s</xliff:g> aplicacións activas</item>
+      <item quantity="one">Hai <xliff:g id="COUNT_0">%s</xliff:g> aplicación activa</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nova información"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplicacións activas"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Aínda que non as esteas utilizando, estas aplicacións seguen estando activas, o que podería afectarlle á duración da batería"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Deter"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Detida"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Feito"</string>

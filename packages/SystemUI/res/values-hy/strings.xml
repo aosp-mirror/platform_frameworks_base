@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ձեր կազմակերպությունը այս սարքի սեփականատերն է և կարող է վերահսկել ցանցային թրաֆիկը"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"«<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությունը այս սարքի սեփականատերն է և կարող է վերահսկել ցանցային թրաֆիկը"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Այս սարքը տրամադրվել է <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> կազմակերպության կողմից"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Այս սարքը պատկանում է ձեր կազմակերպությանը և միացված է <xliff:g id="VPN_APP">%1$s</xliff:g> ցանցին"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը և միացված է <xliff:g id="VPN_APP">%2$s</xliff:g> ցանցին"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Այս սարքը պատկանում է ձեր կազմակերպությանը և համացանցին միացած է <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Այս սարքը պատկանում է <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> կազմակերպությանը և համացանցին միացած է <xliff:g id="VPN_APP">%2$s</xliff:g>-ի միջոցով"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Այս սարքը պատկանում է ձեր կազմակերպությանը"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Այս սարքը պատկանում է ձեր կազմակերպությանը և միացված է վիրտուալ մասնավոր ցանցերի"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>» կազմակերպությանը և միացված է վիրտուալ մասնավոր ցանցերի"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Այս սարքը պատկանում է ձեր կազմակերպությանը և համացանցին միացած է VPN-ների միջոցով"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Այս սարքը պատկանում է <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> կազմակերպությանը և համացանցին միացած է VPN-ների միջոցով"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ձեր կազմակերպությունը կարող է վերահսկել ձեր աշխատանքային պրոֆիլի ցանցային թրաֆիկը"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> կազմակերպությունը կարող է վերահսկել ձեր աշխատանքային պրոֆիլի ցանցային թրաֆիկը"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Աշխատանքային պրոֆիլով կատարված գործողությունները տեսանելի են ՏՏ ադմինիստրատորին"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Ցանցը կարող է վերահսկվել"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Այս սարքը միացված է վիրտուալ մասնավոր ցանցերի"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Ձեր աշխատանքային պրոֆիլը միացված է <xliff:g id="VPN_APP">%1$s</xliff:g> ցանցին"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Ձեր անձնական պրոֆիլը միացված է <xliff:g id="VPN_APP">%1$s</xliff:g> ցանցին"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Այս սարքը միացված է <xliff:g id="VPN_APP">%1$s</xliff:g> ցանցին"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Այս սարքը համացանցին միացած է VPN-ների միջոցով"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Ձեր աշխատանքային հավելվածները համացանցին միացած են <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Անձնական հավելվածները համացանցին միացած են <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Այս սարքը համացանցին միացած է <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Այս սարքը տրամադրվել է <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> կազմակերպության կողմից"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Սարքերի կառավարում"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Այս սարքում տեղադրված է վկայագրման կենտրոն։ Ձեր ցանցի ապահով թրաֆիկը կարող է վերահսկվել կամ փոփոխվել։"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ձեր ադմինիստրատորը միացրել է ցանցային իրադարձությունների գրանցումը, որը վերահսկում է ձեր սարքի թրաֆիկը։"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Ձեր ադմինիստրատորը միացրել է ցանցային իրադարձությունների գրանցումը, որը վերահսկում է ձեր աշխատանքային պրոֆիլի թրաֆիկը (այլ ոչ անձնական պրոֆիլը)։"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Դուք կապակցված եք <xliff:g id="VPN_APP">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել ձեր ցանցային գործողությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը:"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Դուք կապակցված եք <xliff:g id="VPN_APP_0">%1$s</xliff:g> և <xliff:g id="VPN_APP_1">%2$s</xliff:g> հավելվածներին, որոնք կարող են վերահսկել ձեր ցանցային գործունեությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը:"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Ձեր աշխատանքային պրոֆիլը կապակցված է <xliff:g id="VPN_APP">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել ձեր ցանցային գործունեությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը:"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Ձեր անձնական պրոֆիլը կապակցված է <xliff:g id="VPN_APP">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել ձեր ցանցային գործունեությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը:"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Այս սարքը միացած է համացանցին <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով։ Ձեր ցանցային գործողությունները աշխատանքային հավելվածներում, ներառյալ էլփոստում և դիտարկիչում արված գործողությունների տվյալները, տեսանելի են ձեր ՏՏ ադմինիստրատորին։"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Այս սարքը համացանցին միացած է <xliff:g id="VPN_APP_0">%1$s</xliff:g>-ի և <xliff:g id="VPN_APP_1">%2$s</xliff:g>-ի միջոցով։ Ձեր ցանցային գործողությունները աշխատանքային հավելվածներում, ներառյալ էլփոստում և դիտարկիչում արված գործողությունների տվյալները, տեսանելի են ձեր ՏՏ ադմինիստրատորին։"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Աշխատանքային հավելվածները համացանցին միացած են <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով։ Ձեր ցանցային գործողությունները աշխատանքային հավելվածներում, ներառյալ էլփոստում և դիտարկիչում արված գործողությունների տվյալները, տեսանելի են ձեր ՏՏ ադմինիստրատորին և VPN-ի մատակարարին։"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Անձնական հավելվածները համացանցին միացած են <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով։ Ձեր ցանցային գործողությունները անձնական հավելվածներում, ներառյալ էլփոստում և դիտարկիչում արված գործողությունների տվյալները, տեսանելի են ձեր VPN-ի մատակարարին։"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Բացել VPN-ի կարգավորումները"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Այս սարքը կառավարում է ձեր ծնողը։ Նա կարող է դիտել և փոփոխել որոշակի տեղեկություններ, օրինակ՝ հավելվածները, որոնք դուք օգտագործում եք, ձեր տեղադրությունը և սարքի օգտագործման ժամանակը։"</string>
@@ -500,7 +500,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Կանխադրված"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Ավտոմատ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Առանց ձայնի կամ թրթռոցի"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Հայտնվում է զրույցների ցանկի ներքևում, առանց ձայնի և թրթռոցի"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Առանց ձայնի և թրթռոցի, հայտնվում է զրույցների ցանկի ներքևում"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Կարող է զնգալ կամ թրթռալ (հեռախոսի կարգավորումներից կախված)"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Կարող է զնգալ կամ թրթռալ (հեռախոսի կարգավորումներից կախված)։ <xliff:g id="APP_NAME">%1$s</xliff:g>-ի զրույցներն ըստ կանխադրման հայտնվում են ամպիկների տեսքով։"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Թող համակարգն ավտոմատ որոշի՝ արդյոք այս ծանուցումը ձայնով, թե թրթռոցով է պետք մատուցել"</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Հեռարձակման անվանումը"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Գաղտնաբառ"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Պահել"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Սկսվում է…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Չհաջողվեց հեռարձակել"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Կառուցման համարը"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Կառուցման համարը պատճենվեց սեղմատախտակին։"</string>
     <string name="basic_status" msgid="2315371112182658176">"Բաց զրույց"</string>
@@ -919,11 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Ավելացնել սալիկ"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Չավելացնել սալիկ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Ընտրեք օգտատեր"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> հավելված ակտիվ է</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> հավելված ակտիվ է</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Նոր տեղեկություն"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ակտիվ հավելվածներ"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Այս հավելվածներն ակտիվ են և կարող են ազդել մարտկոցի աշխատաժամանակի վրա, նույնիսկ երբ չեք օգտվում դրանցից։"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Կանգնեցնել"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Կանգնեցված է"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Պատրաստ է"</string>

@@ -36,7 +36,7 @@
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Izinkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nAplikasi ini belum diberi izin merekam, tetapi dapat merekam audio melalui perangkat USB ini."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Izinkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Buka <xliff:g id="APPLICATION">%1$s</xliff:g> untuk menangani <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Aplikasi ini tidak diberi izin merekam, tetapi dapat merekam audio melalui perangkat USB ini. Menggunakan <xliff:g id="APPLICATION">%1$s</xliff:g> dengan perangkat ini dapat mencegah Anda mendengar panggilan, notifikasi, dan alarm."</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Aplikasi ini tidak diberi izin merekam, tetapi dapat merekam audio melalui perangkat USB ini. Menggunakan <xliff:g id="APPLICATION">%1$s</xliff:g> dengan perangkat ini mungkin dapat mencegah Anda mendengar panggilan, notifikasi, dan alarm."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Menggunakan <xliff:g id="APPLICATION">%1$s</xliff:g> dengan perangkat ini dapat mencegah Anda mendengar panggilan, notifikasi, dan alarm."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Izinkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Buka <xliff:g id="APPLICATION">%1$s</xliff:g> untuk menangani <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisasi Anda memiliki perangkat ini dan mungkin memantau traffic jaringan"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> memiliki perangkat ini dan mungkin memantau traffic jaringan"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Perangkat ini disediakan oleh <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Perangkat ini milik organisasi Anda dan terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Perangkat ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan terhubung ke <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Perangkat ini milik organisasi Anda dan terhubung ke internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Perangkat ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan terhubung ke internet melalui <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Perangkat ini milik organisasi Anda"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Perangkat ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Perangkat ini milik organisasi Anda dan terhubung ke VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Perangkat ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan terhubung ke VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Perangkat ini milik organisasi Anda dan terhubung ke internet melalui beberapa VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Perangkat ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan terhubung ke internet melalui beberapa VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Organisasi dapat memantau traffic jaringan di profil kerja"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> mungkin memantau traffic jaringan di profil kerja Anda"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Aktivitas jaringan profil kerja dapat dilihat oleh admin IT Anda"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Jaringan mungkin dipantau"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Perangkat ini terhubung ke VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Profil kerja Anda terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Profil pribadi Anda terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Perangkat ini terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Perangkat ini terhubung ke internet melalui beberapa VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Aplikasi kerja terhubung ke internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Aplikasi pribadi Anda terhubung ke internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Perangkat ini terhubung ke internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Perangkat ini disediakan oleh <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Pengelolaan perangkat"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Otoritas sertifikat diinstal di perangkat. Traffic jaringan aman Anda mungkin dipantau atau diubah."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Admin telah mengaktifkan pencatatan log jaringan, yang memantau traffic di perangkat."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Admin telah mengaktifkan pencatatan log jaringan, yang memantau traffic di profil kerja, tetapi tidak di profil pribadi."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Anda terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Anda terhubung ke <xliff:g id="VPN_APP_0">%1$s</xliff:g> dan <xliff:g id="VPN_APP_1">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Profil kerja Anda terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Profil pribadi Anda terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Perangkat ini terhubung ke internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktivitas jaringan Anda, termasuk email dan data penjelajahan, dapat dilihat oleh admin IT."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Perangkat ini terhubung ke internet melalui <xliff:g id="VPN_APP_0">%1$s</xliff:g> dan <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Aktivitas jaringan Anda, termasuk email dan data penjelajahan, dapat dilihat oleh admin IT."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Aplikasi kerja Anda terhubung ke internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktivitas jaringan Anda di aplikasi kerja, termasuk email dan data penjelajahan, dapat dilihat oleh admin IT dan penyedia VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Aplikasi pribadi Anda terhubung ke internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktivitas jaringan Anda, termasuk email dan data penjelajahan, dapat dilihat oleh penyedia VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Buka setelan VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Perangkat ini dikelola oleh orang tuamu. Orang tuamu bisa melihat dan mengelola berbagai informasi, seperti aplikasi yang kamu gunakan, lokasimu, dan lama pemakaian perangkat."</string>
@@ -510,8 +510,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Diberi Peringkat Lebih Rendah"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, mengganggu fitur Jangan Ganggu"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon, mengganggu fitur Jangan Ganggu"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, mengganggu mode Jangan Ganggu"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon, mengganggu mode Jangan Ganggu"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung fitur percakapan"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Notifikasi ini tidak dapat diubah."</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nama Siaran"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Sandi"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Simpan"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Memulai …"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Tidak dapat menyiarkan"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nomor build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nomor versi disalin ke papan klip."</string>
     <string name="basic_status" msgid="2315371112182658176">"Membuka percakapan"</string>
@@ -919,11 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Tambahkan kartu"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Jangan tambah kartu"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Pilih pengguna"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplikasi aktif</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplikasi aktif</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Informasi baru"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplikasi aktif"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Aplikasi ini tetap aktif dan dapat memengaruhi masa pakai baterai meskipun tidak sedang digunakan"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Hentikan"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Dihentikan"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Selesai"</string>

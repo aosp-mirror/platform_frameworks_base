@@ -36,8 +36,8 @@
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"是否允许<xliff:g id="APPLICATION">%1$s</xliff:g>访问<xliff:g id="USB_DEVICE">%2$s</xliff:g>？\n此应用未获得录音权限，但能通过此 USB 设备录制音频。"</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"允许“<xliff:g id="APPLICATION">%1$s</xliff:g>”访问<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"打开“<xliff:g id="APPLICATION">%1$s</xliff:g>”来处理<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"此应用未获得录音权限，但能通过此 USB 设备录制音频。在此设备上使用“<xliff:g id="APPLICATION">%1$s</xliff:g>”可能会将来电、通知和闹钟静音。"</string>
-    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"在此设备上使用“<xliff:g id="APPLICATION">%1$s</xliff:g>”可能会将来电、通知和闹钟静音。"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"此应用未获得录音权限，但能通过此 USB 设备录制音频。如果在此设备上使用“<xliff:g id="APPLICATION">%1$s</xliff:g>”，您可能无法听见来电、通知和闹钟的音效。"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"如果在此设备上使用“<xliff:g id="APPLICATION">%1$s</xliff:g>”，您可能无法听见来电、通知和闹钟的音效。"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"要允许<xliff:g id="APPLICATION">%1$s</xliff:g>访问<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>吗？"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"要打开<xliff:g id="APPLICATION">%1$s</xliff:g>来处理<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"要打开<xliff:g id="APPLICATION">%1$s</xliff:g>来使用<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？\n此应用未获得录音权限，但能通过此 USB 设备录制音频。"</string>
@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"贵单位拥有此设备，且可能会监控网络流量"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>拥有此设备，且可能会监控网络流量"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"此设备由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>提供"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"此设备归贵单位所有，且已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"此设备归<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>所有，且已连接到“<xliff:g id="VPN_APP">%2$s</xliff:g>”"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"此设备归贵组织所有，已通过“<xliff:g id="VPN_APP">%1$s</xliff:g>”连接到互联网"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"此设备归<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>所有，已通过“<xliff:g id="VPN_APP">%2$s</xliff:g>”连接到互联网"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"此设备归贵单位所有"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"此设备归<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>所有"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"此设备归贵单位所有，且已连接到多个 VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"此设备归<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>所有，且已连接到多个 VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"此设备归贵组织所有，已通过 VPN 连接到互联网"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"此设备归<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>所有，已通过 VPN 连接到互联网"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"您所在的单位可能会监控您工作资料中的网络流量"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"“<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>”可能会监控您工作资料中的网络流量"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"IT 管理员可以看到工作资料的网络活动记录"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"网络可能会受到监控"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"此设备已连接到多个 VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"您的工作资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"您的个人资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"此设备已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"此设备已通过 VPN 连接到互联网"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"您的工作应用已通过“<xliff:g id="VPN_APP">%1$s</xliff:g>”连接到互联网"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"您的个人应用已通过“<xliff:g id="VPN_APP">%1$s</xliff:g>”连接到互联网"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"此设备已通过“<xliff:g id="VPN_APP">%1$s</xliff:g>”连接到互联网"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"此设备由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>提供"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"设备管理"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"此设备上已安装证书授权中心。您的安全网络流量可能会受到监控或修改。"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"您的管理员已开启网络日志记录功能（该功能会监控您设备上的流量）。"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"您的管理员已开启网络日志记录功能，该功能会监控您的工作资料的流量，但不会监控您个人资料的流量。"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"您已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”（该应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"您已连接到“<xliff:g id="VPN_APP_0">%1$s</xliff:g>”和“<xliff:g id="VPN_APP_1">%2$s</xliff:g>”（这两个应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"您的工作资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”（该应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"您的个人资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”（该应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"此设备已通过“<xliff:g id="VPN_APP">%1$s</xliff:g>”连接到互联网。您的 IT 管理员可以查看您的网络活动，包括电子邮件和浏览数据。"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"此设备已通过“<xliff:g id="VPN_APP_0">%1$s</xliff:g>”和“<xliff:g id="VPN_APP_1">%2$s</xliff:g>”连接到互联网。您的 IT 管理员可以查看您的网络活动，包括电子邮件和浏览数据。"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"您的工作应用已通过“<xliff:g id="VPN_APP">%1$s</xliff:g>”连接到互联网。您的 IT 管理员和 VPN 提供商可以查看工作应用的网络活动，包括电子邮件和浏览数据。"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"您的个人应用已通过“<xliff:g id="VPN_APP">%1$s</xliff:g>”连接到互联网。您的 VPN 提供商可以查看您的网络活动，包括电子邮件和浏览数据。"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"打开 VPN 设置"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"此设备由您的家长管理。您的家长可以查看和管理相关信息，例如您使用的应用、您的位置信息和设备使用时间。"</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"广播名称"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"密码"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"保存"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"即将开始…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"无法广播"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已将版本号复制到剪贴板。"</string>
     <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
@@ -919,11 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"添加图块"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加图块"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"选择用户"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 个应用处于活动状态</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 个应用处于活动状态</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新信息"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"使用中的应用"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"即使您未使用这些应用，它们仍会处于活动状态，并可能会影响电池续航时间"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完成"</string>

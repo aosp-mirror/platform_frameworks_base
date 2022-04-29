@@ -34,14 +34,14 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automatsko rotiranje ekrana"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Dozvoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup uređaju: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Dozvoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nOvoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Dozvoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup dodatku: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje uređajem: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Dozvoliti da <xliff:g id="APPLICATION">%1$s</xliff:g> pristupa uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> da upravlja uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Ovoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja. Korištenje aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s ovim uređajem može vas spriječiti da čujete pozive, obavještenja i alarme."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Korištenje aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s ovim uređajem može vas spriječiti da čujete pozive, obavještenja i alarme."</string>
-    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Dozvoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup dodatku: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje uređajem: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Dozvoliti da <xliff:g id="APPLICATION">%1$s</xliff:g> pristupa uređaju <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> da upravlja uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Želite li upravljati uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g> putem aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g>?\nOvoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje uređajem: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> da upravlja uređajem <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Nema instaliranih aplikacija za ovaj USB uređaj. Saznajte više o uređaju na <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB periferni uređaj"</string>
     <string name="label_view" msgid="6815442985276363364">"Prikaži"</string>
@@ -81,7 +81,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Uredite"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Uredite snimak ekrana"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Dijeljenje snimka ekrana"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Snimite više"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Snimi više"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Odbacite snimak ekrana"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pregled snimka ekrana"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Gornja granica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
@@ -377,20 +377,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Vaša organizacija je vlasnik ovog uređaja i može nadzirati mrežni saobraćaj"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> upravlja ovim uređajem i može nadzirati mrežni saobraćaj"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Ovaj uređaj pruža <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Ovaj uređaj pripada vašoj organizaciji i povezan je s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i povezan je s aplikacijom <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Ovaj uređaj pripada vašoj organizaciji i povezan je na internet putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i povezan je na internet putem aplikacije <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Ovaj uređaj pripada vašoj organizaciji"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Ovaj uređaj pripada vašoj organizaciji i povezan je s VPN-ovima"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i povezan je VPN-ovima"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Ovaj uređaj pripada vašoj organizaciji i povezan je na internet putem VPN-ova"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i povezan je na internet putem VPN-ova"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Vaša organizacija može pratiti mrežni saobraćaj na vašem profilu."</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> može pratiti mrežni saobraćaj na vašem radnom profilu"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Mrežna aktivnost radnog profila je vidljiva vašem IT administratoru"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Mreža može biti nadzirana"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Ovaj uređaj je povezan VPN-ovima"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Vaš radni profil je povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Vaš lični profil je povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Ovaj uređaj je povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Ovaj uređaj je povezan na internet putem VPN-ova"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Vaše poslovne aplikacije su povezane s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Vaše lične aplikacije su povezane na internet putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Ovaj uređaj je povezan na internet putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Ovaj uređaj pruža <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Upravljanje uređajem"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN mreža"</string>
@@ -406,10 +406,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"CA certifikat je instaliran na ovom uređaju. Vaš saobraćaj preko sigurne mreže može se pratiti."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Vaš administrator je uključio zapisivanje na mreži, čime se prati saobraćaj na vašem uređaju."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator je uključio zapisivanje na mreži, čime se nadzire saobraćaj na vašem radnom profilu, ali ne i na ličnom profilu."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Povezani ste s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g> koja može pratiti vašu aktivnost na mreži, uključujući e-poštu i web lokacije."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Povezani ste s aplikacijama <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g> koje mogu pratiti vašu aktivnost na mreži, uključujući e-poštu, aplikacije i web lokacije."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Vaš radni profil je povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>, koja može pratiti vašu aktivnost na mreži, uključujući e-poruke i web lokacije."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Vaš lični profil je povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>, koja može pratiti vašu aktivnost na mreži, uključujući e-poruke, aplikacije i web lokacije."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Ovaj uređaj je povezan na internet putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem IT administratoru."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Ovaj uređaj je povezan na internet putem aplikacija <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem IT administratoru."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vaše poslovne aplikacije su povezane na internet putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša mrežna aktivnost u poslovnim aplikacijama, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem IT administratoru i pružaocu VPN usluga."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Vaše lične aplikacije su povezane na internet putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem pružaocu VPN usluga."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Otvorite postavke VPN mreže"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Ovim uređajem upravlja tvoj roditelj. Roditelj može vidjeti i upravljati informacijama kao što su aplikacije koje koristiš, lokacija i vrijeme korištenja uređaja."</string>
@@ -504,8 +504,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatski"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Bez zvuka ili vibracije"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Bez zvuka ili vibracije i pojavljuje se pri dnu odjeljka razgovora"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Može zvoniti ili vibrirati na osnovu postavki vašeg telefona"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Može zvoniti ili vibrirati na osnovu postavki vašeg telefona. Razgovori iz oblačića u aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> kao zadana opcija."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Može zvoniti ili vibrirati na osnovu postavki telefona"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Može zvoniti ili vibrirati na osnovu postavki telefona. Razgovori iz oblačića u aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> kao zadana opcija."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Neka sistem odluči treba li se ovo obavještenje oglasiti zvukom ili vibracijom"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; je unaprijeđen u Zadano"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; je unazađen u Nečujno"</string>
@@ -857,10 +857,12 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Naziv emitiranja"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Lozinka"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Sačuvaj"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Pokretanje…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Nije moguće emitirati"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Broj verzije"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Broj verzije je kopiran u međumemoriju."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvoreni razgovor"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"Vidžeti za razgovor"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Vidžeti razgovora"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Dodirnite razgovor da ga dodate na početni ekran"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Vaši nedavni razgovori će se pojaviti ovdje"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritetni razgovori"</string>
@@ -932,7 +934,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nove informacije"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Čak i ako ne korististite te aplikacije, one su i dalje aktivne i mogu utjecati na trajanje baterije"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Čak i ako ne koristite ove aplikacije, one su i dalje aktivne te mogu uticati na vijek trajanja baterije"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zaustavi"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zaustavljeno"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gotovo"</string>

@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Your organisation owns this device and may monitor network traffic"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> owns this device and may monitor network traffic"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"This device is provided by <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"This device belongs to your organisation and is connected to <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> and is connected to <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"This device belongs to your organisation and is connected to the Internet through <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> and is connected to the Internet through <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"This device belongs to your organisation"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"This device belongs to your organisation and is connected to VPNs"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> and is connected to VPNs"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"This device belongs to your organisation and is connected to the Internet through VPNs"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> and is connected to the Internet through VPNs"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Your organisation may monitor network traffic in your work profile"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> may monitor network traffic in your work profile"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Work profile network activity is visible to your IT admin"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Network may be monitored"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"This device is connected to VPNs"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Your work profile is connected to <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Your personal profile is connected to <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"This device is connected to <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"This device is connected to the Internet through VPNs"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Your work apps are connected to the Internet through <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Your personal apps are connected to the Internet through <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"This device is connected to the Internet through <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"This device is provided by <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Device management"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"A certificate authority is installed on this device. Your secure network traffic may be monitored or modified."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Your admin has turned on network logging, which monitors traffic on your device."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Your admin has turned on network logging, which monitors traffic in your work profile but not in your personal profile."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"You\'re connected to <xliff:g id="VPN_APP">%1$s</xliff:g>, which can monitor your network activity, including emails, apps and websites."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"You\'re connected to <xliff:g id="VPN_APP_0">%1$s</xliff:g> and <xliff:g id="VPN_APP_1">%2$s</xliff:g>, which can monitor your network activity, including emails, apps and websites."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Your work profile is connected to <xliff:g id="VPN_APP">%1$s</xliff:g>, which can monitor your network activity, including emails, apps and websites."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Your personal profile is connected to <xliff:g id="VPN_APP">%1$s</xliff:g>, which can monitor your network activity, including emails, apps and websites."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"This device is connected to the Internet through <xliff:g id="VPN_APP">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"This device is connected to the Internet through <xliff:g id="VPN_APP_0">%1$s</xliff:g> and <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Your work apps are connected to the Internet through <xliff:g id="VPN_APP">%1$s</xliff:g>. Your network activity in work apps, including emails and browsing data, is visible to your IT admin and VPN provider."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Your personal apps are connected to the Internet through <xliff:g id="VPN_APP">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your VPN provider."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Open VPN settings"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"This device is managed by your parent. Your parent can see and manage information such as the apps that you use, your location and your screen time."</string>
@@ -414,7 +414,7 @@
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Kept unlocked by trust agent"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Sound settings"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatically subtitle media"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatically caption media"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Close captions tip"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Captions overlay"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"enable"</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Broadcast name"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Password"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Save"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Starting…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Can’t broadcast"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build number"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Build number copied to clipboard."</string>
     <string name="basic_status" msgid="2315371112182658176">"Open conversation"</string>

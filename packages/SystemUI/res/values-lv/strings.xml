@@ -377,20 +377,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Šī ierīce pieder jūsu organizācijai, un jūsu organizācija var uzraudzīt tīkla datplūsmu."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Šī ierīce pieder organizācijai<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, un šī organizācija var uzraudzīt tīkla datplūsmu."</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Šo ierīci nodrošina <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Šī ierīce pieder jūsu organizācijai un ir saistīta ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> un ir savienota ar: <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Šī ierīce pieder jūsu organizācijai; tajā izveidots savienojums ar internetu, izmantojot lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>; tajā ir izveidots savienojums ar internetu, izmantojot lietotni <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Šī ierīce pieder jūsu organizācijai."</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Šī ierīce pieder jūsu organizācijai un ir savienota ar virtuālajiem privātajiem tīkliem."</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Šī ierīce pieder organizācijai<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> un ir savienota ar virtuālajiem privātajiem tīkliem."</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Šī ierīce pieder jūsu organizācijai; tajā izveidots savienojums ar internetu, izmantojot VPN tīklus."</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>; tajā ir izveidots savienojums ar internetu, izmantojot VPN tīklus."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Jūsu organizācija var uzraudzīt jūsu darba profila tīkla datplūsmu."</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> var uzraudzīt jūsu profila tīkla datplūsmu."</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"IT administrators var skatīt tīklā veiktās darbības, kurām izmantojat darba profilu"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Var tikt pārraudzītas tīklā veiktās darbības."</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Šī ierīce ir saistīta ar virtuālajiem privātajiem tīkliem."</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Jūsu darba profils ir savienots ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Jūsu personīgais profils ir saistīts ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Šī ierīce ir savienota ar: <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Šajā ierīcē ir izveidots savienojums ar internetu, izmantojot VPN tīklus."</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Jūsu darba lietotnēs ir izveidots savienojums ar internetu, izmantojot lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Jūsu personīgajās lietotnēs ir izveidots savienojums ar internetu, izmantojot lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Šajā ierīcē ir izveidots savienojums ar internetu, izmantojot lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Šo ierīci nodrošina <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Ierīces pārvaldība"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -406,10 +406,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Šajā ierīcē ir instalēts sertifikāts. Drošā tīkla datplūsma var tikt uzraudzīta."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrators ieslēdza tīkla reģistrēšanu, kuru izmanto, lai pārraudzītu datplūsmu jūsu ierīcē."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrators ir ieslēdzis tīkla reģistrēšanu, kuru izmanto, lai pārraudzītu datplūsmu jūsu darba profilā, bet ne personīgajā profilā."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Ir izveidots savienojums ar lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>, kas var pārraudzīt jūsu darbības tīklā, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Ir izveidots savienojums ar lietotnēm <xliff:g id="VPN_APP_0">%1$s</xliff:g> un <xliff:g id="VPN_APP_1">%2$s</xliff:g>, kas var pārraudzīt jūsu darbības tīklā, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Jūsu darba profilam ir izveidots savienojums ar lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>, kas var pārraudzīt jūsu darbības tīklā, tostarp saņemtos un nosūtītos e-pasta ziņojumus, instalētās lietotnes un apmeklētās tīmekļa vietnes."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Jūsu personīgais profils ir piesaistīts lietotnei <xliff:g id="VPN_APP">%1$s</xliff:g>, kas var pārraudzīt jūsu darbības tīklā, tostarp saņemtos un nosūtītos e-pasta ziņojumus, instalētās lietotnes un apmeklētās tīmekļa vietnes."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Šajā ierīcē ir izveidots savienojums ar internetu, izmantojot lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>. IT administratoram ir redzamas jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumi un pārlūkošanas dati."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Šajā ierīcē ir izveidots savienojums ar internetu, izmantojot lietotnes <xliff:g id="VPN_APP_0">%1$s</xliff:g> un <xliff:g id="VPN_APP_1">%2$s</xliff:g>. IT administratoram ir redzamas jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumi un pārlūkošanas dati."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Jūsu darba lietotnēs ir izveidots savienojums ar internetu, izmantojot lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>. IT administratoram un VPN nodrošinātājam ir redzamas jūsu tīklā veiktās darbības darba lietotnēs, tostarp e-pasta ziņojumi un pārlūkošanas dati."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Jūsu personīgajās lietotnēs ir izveidots savienojums ar internetu, izmantojot lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>. VPN nodrošinātājam ir redzamas jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumi un pārlūkošanas dati."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Atvērt VPN iestatījumus"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Šo ierīci pārvalda viens no jūsu vecākiem. Vecāki var skatīt un pārvaldīt tādu informāciju kā jūsu izmantotās lietotnes, atrašanās vieta un izmantošanas ilgums."</string>
@@ -857,6 +857,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Apraides nosaukums"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Parole"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Saglabāt"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Notiek palaišana…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Nevar apraidīt"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versijas numurs"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versijas numurs ir kopēts starpliktuvē."</string>
     <string name="basic_status" msgid="2315371112182658176">"Atvērt sarunu"</string>
@@ -925,11 +927,14 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Pievienot elementu"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nepievienot elementu"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Lietotāja atlase"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="zero"><xliff:g id="COUNT_1">%s</xliff:g> lietotnes ir aktīvas</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> lietotne ir aktīva</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> lietotnes ir aktīvas</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Jauna informācija"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktīvās lietotnes"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Pat ja neizmantojat šīs lietotnes, tās joprojām ir aktīvas un var ietekmēt akumulatora darbības ilgumu."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Apturēt"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Apturēta"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gatavs"</string>

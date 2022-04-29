@@ -35,12 +35,12 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"به <xliff:g id="APPLICATION">%1$s</xliff:g> برای دسترسی به <xliff:g id="USB_DEVICE">%2$s</xliff:g> اجازه داده شود؟"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏به <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه می‌دهید به <xliff:g id="USB_DEVICE">%2$s</xliff:g>دسترسی داشته باشد؟\nمجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"به <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه دسترسی به <xliff:g id="USB_DEVICE">%2$s</xliff:g> داده شود؟"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> برای استفاده از <xliff:g id="USB_DEVICE">%2$s</xliff:g> باز شود؟"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"برای استفاده از <xliff:g id="USB_DEVICE">%2$s</xliff:g>، <xliff:g id="APPLICATION">%1$s</xliff:g> باز شود؟"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"‏اجازه ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند. استفاده از <xliff:g id="APPLICATION">%1$s</xliff:g> با این دستگاه می‌تواند مانع از شنیدن تماس‌ها، اعلان‌ها، و زنگ‌های ساعت شود."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"استفاده از <xliff:g id="APPLICATION">%1$s</xliff:g> با این دستگاه می‌تواند مانع از شنیدن تماس‌ها، اعلان‌ها، و زنگ‌های ساعت شود."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"به <xliff:g id="APPLICATION">%1$s</xliff:g> برای دسترسی به <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> اجازه داده شود؟"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"برای استفاده از <xliff:g id="USB_DEVICE">%2$s</xliff:g>، <xliff:g id="APPLICATION">%1$s</xliff:g> باز شود؟"</string>
-    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"‏<xliff:g id="APPLICATION">%1$s</xliff:g> برای رسیدگی به <xliff:g id="USB_DEVICE">%2$s</xliff:g> باز شود؟\nمجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"‏برای استفاده از <xliff:g id="USB_DEVICE">%2$s</xliff:g>، <xliff:g id="APPLICATION">%1$s</xliff:g> باز شود؟\nمجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"برای استفاده از <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>، <xliff:g id="APPLICATION">%1$s</xliff:g> باز شود؟"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"‏هیچ برنامه نصب شده‌ای با این وسیله جانبی USB کار نمی‌کند. در <xliff:g id="URL">%1$s</xliff:g> دربارهٔ این وسیله جانبی اطلاعات بیشتری کسب کنید"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"‏لوازم جانبی USB"</string>
@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"مالک این دستگاه سازمان شما است و ممکن است ترافیک شبکه را پایش کند"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"مالک این دستگاه <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> است و ممکن است ترافیک شبکه را پایش کند"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"این دستگاه را <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین شده است"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"این دستگاه به سازمان شما تعلق دارد و به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"این دستگاه به <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> تعلق دارد و به <xliff:g id="VPN_APP">%2$s</xliff:g> متصل است"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"این دستگاه متعلق به سازمان شما است و ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"این دستگاه متعلق به <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> است و ازطریق <xliff:g id="VPN_APP">%2$s</xliff:g> به اینترنت متصل شده است"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"این دستگاه به سازمان شما تعلق دارد"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"این دستگاه به <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> تعلق دارد"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"‏این دستگاه به سازمان شما تعلق دارد و به شبکه‌های VPN متصل است"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"‏این دستگاه به <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> تعلق دارد و به VPN متصل است"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"‏این دستگاه متعلق به سازمان شما است و ازطریق چند VPN به اینترنت متصل شده است"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"‏این دستگاه متعلق به <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> است و ازطریق چند VPN به اینترنت متصل شده است"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ممکن است سازمان شما ترافیک شبکه را در نمایه کاری‌تان پایش کند"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ممکن است ترافیک شبکه را در نمایه کاری شما پایش کند"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"سرپرست سیستم می‌تواند فعالیت شبکه نمایه کاری را ببیند"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ممکن است شبکه پایش شود"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"‏این دستگاه به شبکه‌های VPN متصل است"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"نمایه کاری به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"نمایه شخصی شما به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"این دستگاه به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"‏این دستگاه ازطریق چند VPN به اینترنت متصل شده است"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"برنامه‌های کاری‌تان ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"برنامه‌های شخصی‌تان ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"این دستگاه ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"این دستگاه را <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تأمین کرده است"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"مدیریت دستگاه"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"مرجع گواهینامه‌ای در این دستگاه نصب شده است. ممکن است ترافیک امن شبکه شما پایش یا تغییر داده شود."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"سرپرست سیستم شما گزارش‌گیری از شبکه را (که ترافیک دستگاه شما را پایش می‌کند) روشن کرده است."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"سرپرست شما گزارش‌گیری شبکه را که بر ترافیک نمایه کاری‌تان نظارت می‌کند، اما بر ترافیک نمایه شخصی‌تان نظارت نمی‌کند روشن کرده است."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل شده‌اید، که می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها، برنامه‌‌ها و وب‌سایت‌ها) پایش کند."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"به <xliff:g id="VPN_APP_0">%1$s</xliff:g> و <xliff:g id="VPN_APP_1">%2$s</xliff:g> متصل شده‌اید، که می‌توانند فعالیت شما را در شبکه (ازجمله ایمیل‌ها، برنامه‌‌ها و وب‌سایت‌ها) پایش کنند."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"نمایه کاری شما به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است، که می‌تواند فعالیت شما در شبکه (ازجمله ایمیل‌ها، برنامه‌ها و وب‌سایت‌ها) را پایش کند."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"نمایه شخصی شما به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل شده‌ است، که می‌تواند فعالیت شما در شبکه (ازجمله ایمیل‌ها، برنامه‌‌ها و وب‌سایت‌ها) را پایش کند."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"این دستگاه ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. سرپرست سیستم شما می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها و داده‌های مرور) ببیند."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"این دستگاه ازطریق <xliff:g id="VPN_APP_0">%1$s</xliff:g> و <xliff:g id="VPN_APP_1">%2$s</xliff:g> به اینترنت متصل شده است. سرپرست سیستم شما می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها و داده‌های مرور) ببیند."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏برنامه‌های کاری‌تان ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. ارائه‌دهنده VPN و سرپرست سیستم شما می‌توانند فعالیت شبکه شما در برنامه‌های کاری را (ازجمله ایمیل‌ها و داده‌های مرور) ببینند."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"‏برنامه‌های شخصی‌تان ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. ارائه‌دهنده VPN شما می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها و داده‌های مرور) ببیند."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏باز کردن تنظیمات VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"این دستگاه را ولی‌تان مدیریت می‌کند. ولی‌تان می‌تواند اطلاعاتی مثل برنامه‌هایی که استفاده می‌کنید، مکانتان، و مدت تماشای صفحه‌تان را ببیند و مدیریت کند."</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"نام همه‌فرستی"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"گذرواژه"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"ذخیره کردن"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"درحال شروع…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"همه‌فرستی انجام نشد"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"شماره ساخت"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"شماره ساخت در بریده‌دان کپی شد."</string>
     <string name="basic_status" msgid="2315371112182658176">"باز کردن مکالمه"</string>

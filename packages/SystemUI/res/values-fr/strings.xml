@@ -340,7 +340,7 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Station de charge • Chargé dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Changer d\'utilisateur"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Toutes les applications et les données de cette session seront supprimées."</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bienvenue à nouveau dans la session Invité"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Heureux de vous revoir, Invité"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Voulez-vous poursuivre la dernière session ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Non, nouvelle session"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Oui, continuer"</string>
@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Cet appareil appartient à votre organisation, qui peut contrôler votre trafic réseau"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Cet appareil appartient à <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, qui peut contrôler votre trafic réseau"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Cet appareil est fourni par <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Cet appareil appartient à votre organisation et il est connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Cet appareil appartient à <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> et il est connecté à <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Cet appareil appartient à votre organisation et est connecté à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Cet appareil appartient à <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> et est connecté à Internet via <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Cet appareil appartient à votre organisation"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Cet appareil appartient à <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Cet appareil appartient à votre organisation et il est connecté à des VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Cet appareil appartient à <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> et il est connecté à des VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Cet appareil appartient à votre organisation et est connecté à Internet via des VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Cet appareil appartient à <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> et est connecté à Internet via des VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Votre entreprise peut contrôler votre trafic réseau dans votre profil professionnel"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> peut contrôler votre trafic réseau dans votre profil professionnel"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Votre administrateur IT peut voir l\'activité sur le réseau de votre profil professionnel"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Il est possible que le réseau soit surveillé"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Cet appareil est connecté à des VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Votre profil professionnel est connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Votre profil personnel est connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Cet appareil est connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Cet appareil est connecté à Internet via des VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Vos applis professionnelles sont connectées à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Vos applis personnelles sont connectées à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Cet appareil est connecté à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Cet appareil est fourni par <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gestion des appareils"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Une autorité de certification est installée sur cet appareil. Votre trafic sur le réseau sécurisé peut être contrôlé ou modifié."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Votre administrateur a activé la journalisation du réseau, pour contrôler le trafic sur votre appareil."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Votre administrateur a activé la journalisation réseau, qui surveille le trafic de votre profil professionnel, mais pas celui de votre profil personnel."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Vous êtes connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>, qui peut contrôler votre activité sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Vous êtes connecté à <xliff:g id="VPN_APP_0">%1$s</xliff:g> et à <xliff:g id="VPN_APP_1">%2$s</xliff:g>, qui peuvent contrôler votre activité sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Votre profil professionnel est connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>, qui peut contrôler votre activité sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Votre profil personnel est connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>, qui peut contrôler votre activité sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Cet appareil est connecté à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Votre administrateur informatique a accès à votre activité réseau (e-mails, données de navigation, etc.)."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Cet appareil est connecté à Internet via <xliff:g id="VPN_APP_0">%1$s</xliff:g> et <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Votre administrateur informatique a accès à votre activité réseau (e-mails, données de navigation, etc.)."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vos applis professionnelles sont connectées à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Votre administrateur informatique et votre fournisseur de VPN ont accès à votre activité réseau dans les applis professionnelles (e-mails, données de navigation, etc.)."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Vos applis personnelles sont connectées à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Votre fournisseur de VPN a accès à votre activité réseau (e-mails, données de navigation, etc.)."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Ouvrir les paramètres VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Cet appareil est géré par tes parents. Ils peuvent voir et gérer certaines informations, telles que les applications que tu utilises, ta position et ton temps d\'utilisation de l\'appareil."</string>
@@ -414,7 +414,7 @@
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Maintenu déverrouillé par TrustAgent"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Paramètres audio"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Sous-titres automatiques"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Sous-titrer automatiquement"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Fermer l\'info-bulle des sous-titres"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Sous-titres en superposition"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activer"</string>
@@ -456,7 +456,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"réactiver le son"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"activer le vibreur"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Commandes de volume %s"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Sons activés pour les appels et les notifications (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Les appels et les notifications sonneront (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barre d\'état"</string>
     <string name="demo_mode" msgid="263484519766901593">"Mode de démonstration de l\'interface du système"</string>
@@ -499,8 +499,8 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Silencieux"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Par défaut"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatique"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Aucun son ni vibration"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Aucun son ni vibration, s\'affiche plus bas dans la section des conversations"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Ni son, ni vibreur"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Ni son, ni vibreur ; s\'affiche plus bas dans la section des conversations"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Son ou vibreur, selon les paramètres du téléphone"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Son ou vibreur, selon les paramètres du téléphone. Les conversations provenant de <xliff:g id="APP_NAME">%1$s</xliff:g> s\'affichent sous forme de bulles par défaut."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Laisser le système déterminer si cette notification doit être accompagnée d\'un son ou d\'une vibration"</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nom de l\'annonce"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Mot de passe"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Enregistrer"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Démarrage…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Impossible de diffuser"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numéro de build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numéro de build copié dans le presse-papiers."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversation ouverte"</string>
@@ -918,12 +920,14 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> veut ajouter le bloc suivant aux Réglages rapides"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Ajouter le bloc"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne pas ajouter bloc"</string>
-    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Choisir utilisateur"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Choisir l\'utilisateur"</string>
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> appli est active</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> applis sont actives</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nouvelles informations"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Applis actives"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Même si vous n\'utilisez pas ces applis, elles restent actives et peuvent affecter l\'autonomie de la batterie"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Arrêter"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Arrêtée"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"OK"</string>

@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Din organisation ejer denne enhed og overvåger muligvis netværkstrafikken"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ejer denne enhed og overvåger muligvis netværkstrafikken"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Denne enhed er leveret af <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Denne enhed tilhører din organisation og har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> og har forbindelse til <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Denne enhed tilhører din organisation, og den har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, og den har forbindelse til nettet via <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Denne enhed tilhører din organisation"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Denne enhed tilhører din organisation og har forbindelse til VPN-netværk"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> og har forbindelse til VPN-netværk"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Denne enhed tilhører din organisation, og den har forbindelse til nettet via VPN-forbindelser"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, og den har forbindelse til nettet via VPN-forbindelser"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Din organisation kan overvåge netværkstrafikken på din arbejdsprofil"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kan overvåge netværkstrafik på din arbejdsprofil"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Din it-administrator kan se netværksaktivitet på din arbejdsprofil"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Netværket kan være overvåget"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Denne enhed har forbindelse til VPN-netværk"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Din arbejdsprofil har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Din personlige profil har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Denne enhed har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Denne enhed har forbindelse til nettet via VPN-forbindelser"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Dine arbejdsapps har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Dine personlige apps har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Denne enhed har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Denne enhed er leveret af <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Administration af enheder"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Der er installeret et nøglecenter på denne enhed. Din sikre netværkstrafik kan overvåges eller ændres."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Din administrator har aktiveret netværksregistrering, som overvåger trafik på din enhed."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Din administrator har aktiveret netværkslogging, som overvåger trafik på din arbejdsprofil, men ikke på din personlige profil."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Du har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Du har forbindelse til <xliff:g id="VPN_APP_0">%1$s</xliff:g> og <xliff:g id="VPN_APP_1">%2$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Din arbejdsprofil har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Din personlige profil har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Denne enhed har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Din netværksaktivitet, herunder mails og browserdata, er synlig for din it-administrator."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Denne enhed har forbindelse til nettet via <xliff:g id="VPN_APP_0">%1$s</xliff:g> og <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Din netværksaktivitet, herunder mails og browserdata, er synlig for din it-administrator."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Dine arbejdsapps har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Din netværksaktivitet i arbejdsapps, herunder mails og browserdata, er synlig for din it-administrator og VPN-udbyder."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Dine personlige apps har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Din netværksaktivitet, herunder mails og browserdata, er synlig for din VPN-udbyder."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Åbn VPN-indstillinger"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Denne enhed administreres af din forælder. Din forælder kan se og administrere oplysninger såsom de apps, du bruger, din lokation og din skærmtid."</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Navn på udsendelse"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Adgangskode"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Gem"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Starter…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Der kan ikke udsendes en fællesbesked"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildnummeret blev kopieret til udklipsholderen."</string>
     <string name="basic_status" msgid="2315371112182658176">"Åben samtale"</string>
@@ -919,11 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Tilføj handlingsfelt"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Tilføj ikke felt"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Vælg bruger"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> app er aktiv</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apps er aktive</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nye oplysninger"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktive apps"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Disse apps er stadig aktive og kan påvirke batteritiden, også hvis du ikke bruger dem"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stop"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Stoppet"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Udfør"</string>

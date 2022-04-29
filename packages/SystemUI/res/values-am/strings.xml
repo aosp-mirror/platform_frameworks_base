@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"የእርስዎ ድርጅት የዚህ መሣሪያ ባለቤት ነው፣ እና የአውታረ መረብ ትራፊክን ሊከታተል ይችላል"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> የዚህ መሣሪያ ባለቤት ነው፣ እና የአውታረ መረብ ትራፊክን ሊከታተል ይችላል"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ይህ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> የሚቀርብ ነው"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ይህ መሣሪያ የድርጅትዎ ሲሆን ከ<xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ይህ መሳሪያ ንብረትነቱ የ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ሲሆን ከ<xliff:g id="VPN_APP">%2$s</xliff:g> ጋር ተገናኝቷል"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"ይህ መሣሪያ የድርጅትዎ ሲሆን በ <xliff:g id="VPN_APP">%1$s</xliff:g>በኩል ከበይነመረብ ጋር ተገናኝቷል"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"ይህ መሳሪያ ንብረትነቱ የ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ሲሆን በ <xliff:g id="VPN_APP">%2$s</xliff:g> በኩል ከበይነመረብ ጋር ተገናኝቷል"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ይህ መሣሪያ የድርጅትዎ ነው"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ይህ መሳሪያ ንብረትነቱ የ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ነው"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"ይህ መሣሪያ የድርጅትዎ ሲሆን ከቪፒኤን ጋር ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ይህ መሳሪያ ንብረትነቱ የ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ሲሆን ከቪፒኤን ጋር ተገናኝቷል"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"ይህ መሣሪያ የድርጅትዎ ሲሆን በVPNs በኩል ከበይነመረብ ጋር ተገናኝቷል"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"ይህ መሣሪያ ንብረትነቱ የ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ሲሆን በ VPNs በኩል ከበይነመረብ ጋር ተገናኝቷል"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"የእርስዎ ድርጅት በእርስዎ የሥራ መገለጫ ያለን የአውታረ መረብ ትራፊክን ሊቆጣጠር ይችል ይሆናል"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> በእርስዎ የሥራ መገለጫ ውስጥ የአውታረ መረብ ትራፊክ ላይ ክትትል ሊያደርግ ይችላል"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"የስራ መገለጫ አውታረ መረብ እንቅስቃሴ ለአይቲ አስተዳዳሪዎ ይታያል"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"አውታረ መረብ ክትትል የሚደረግበት ሊሆን ይችላል"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ይህ መሳሪያ ከቪፒኤን ጋር ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"የእርስዎ የሥራ መገለጫ ከ<xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል።"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"የእርስዎ የግል መገለጫ ከ<xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ይህ መሳሪያ ከ<xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"ይህ መሣሪያ በVPNs በኩል ከበይነመረብ ጋር ተገናኝቷል"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"የእርስዎ የስራ መተግበሪያዎች በ<xliff:g id="VPN_APP">%1$s</xliff:g> በኩል ከበይነመረብ ጋር ተገናኝተዋል"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"የእርስዎ ግላዊ መተግበሪያዎች በ<xliff:g id="VPN_APP">%1$s</xliff:g> በኩል ከበይነመረብ ጋር ተገናኝተዋል"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"ይህ መሣሪያ በ <xliff:g id="VPN_APP">%1$s</xliff:g> በኩል ከበይነመረብ ጋር ተገናኝቷል"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ይህ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> የሚቀርብ ነው"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"የመሣሪያ አስተዳደር"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"የእውቅና ማረጋገጫ ሰጪ ባለሥልጣን በዚህ መሣሪያ ላይ ተጭኗል። የእርስዎ ደኅንነቱ የተጠበቀ አውታረ መረብ ትራፊክ ክትትል ሊደረግበት እና ሊሻሻል ይችላል።"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"የእርስዎ አስተዳዳሪ የአውታረ መረብ ምዝግብ ማስታወሻ መያዝን አብርተዋል፣ ይህም በመሣሪያዎ ላይ ያለውን ትራፊክ ይከታተላል።"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"የእርስዎ አስተዳዳሪ በስራ መገለጫዎ ውስጥ፣ ግን በግል መገለጫዎ ላይ ሳይሆን፣ ትራፊክን የሚቆጣጠር የአውታረ መረብ ምዝግብ ማስታወሻ አብርተዋል።"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችሉት <xliff:g id="VPN_APP_0">%1$s</xliff:g> እና <xliff:g id="VPN_APP_1">%2$s</xliff:g> ጋር ተገናኝተዋል።"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"የእርስዎ የሥራ መገለጫ የእርስዎን ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል።"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"የእርስዎ የግል መገለጫ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል።"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"ይህ መሣሪያ በ <xliff:g id="VPN_APP">%1$s</xliff:g> በኩል ከበይነመረብ ጋር ተገናኝቷል። ኢሜይሎችን እና የአሰሳ ውሂብን ጨምሮ የእርስዎ የአውታረ መረብ እንቅስቃሴ ለአይቲ አስተዳዳሪዎ ይታያል።"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"ይህ መሣሪያ በ <xliff:g id="VPN_APP_0">%1$s</xliff:g> እና <xliff:g id="VPN_APP_1">%2$s</xliff:g> በኩል ከበይነመረብ ጋር ተገናኝቷል። ኢሜይሎችን እና የአሰሳ ውሂብን ጨምሮ የእርስዎ የአውታረ መረብ እንቅስቃሴ ለአይቲ አስተዳዳሪዎ ይታያል።"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"የእርስዎ የሥራ መተግበሪያዎች በ <xliff:g id="VPN_APP">%1$s</xliff:g> በኩል ከበይነመረብ ጋር ተገናኝተዋል። ኢሜይሎችን እና የአሰሳ ውሂብን ጨምሮ በሥራ መተግበሪያዎች ውስጥ ያለው የአውታረ መረብ እንቅስቃሴዎ ለአይቲ አስተዳዳሪዎ እና ለVPN አቅራቢዎ ይታያል።"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"የእርስዎ ግላዊ መተግበሪያዎች በ<xliff:g id="VPN_APP">%1$s</xliff:g> በኩል ከበይነመረብ ጋር ተገናኝተዋል። ኢሜይሎችን እና የአሰሳ ውሂብን ጨምሮ የአውታረ መረብ እንቅስቃሴዎ ለVPN አቅራቢዎ ይታያል።"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"የቪፒኤን ቅንብሮችን ይክፈቱ"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ይህ መሣሪያ በእርስዎ ወላጅ የሚተዳደር ነው። ወላጅዎ የሚጠቀሙባቸውን መተግበሪያዎች፣ አካባቢዎን እና የማያ ገጽ ጊዜዎን የመሳሰሉ መረጃዎችን ማየት እና ማስተዳደር ይችላል።"</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"የስርጭት ስም"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"የይለፍ ቃል"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"አስቀምጥ"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"በመጀመር ላይ…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"መሰራጨት አይችልም"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"የግንብ ቁጥር"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"የገንባ ቁጥር ወደ ቅንጥብ ሰሌዳ ተቀድቷል።"</string>
     <string name="basic_status" msgid="2315371112182658176">"ውይይት ይክፈቱ"</string>

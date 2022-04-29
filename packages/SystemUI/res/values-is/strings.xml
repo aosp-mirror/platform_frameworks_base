@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Fyrirtækið þitt á þetta tæki og fylgist hugsanlega með netumferð"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> á þetta tæki og fylgist hugsanlega með netumferð"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Þetta tæki er frá <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Þetta tæki tilheyrir fyrirtækinu þínu og er tengt við <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Þetta tæki tilheyrir <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> og er tengt við <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Þetta tæki tilheyrir fyrirtækinu þínu og er nettengt í gegnum <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Þetta tæki tilheyrir <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> og er nettengt í gegnum <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Þetta tæki tilheyrir fyrirtækinu þínu"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Þetta tæki tilheyrir <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Þetta tæki tilheyrir fyrirtækinu þínu og er tengt við VPN-net"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Þetta tæki tilheyrir <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> og er tengt við VPN-net"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Þetta tæki tilheyrir fyrirtækinu þínu og er nettengt í gegnum VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Þetta tæki tilheyrir <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> og er nettengt í gegnum VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Fyrirtækið þitt kann að fylgjast með netnotkun á vinnusniðinu þínu"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kann að fylgjast með netnotkun á vinnusniðinu þínu"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Kerfisstjóri getur séð netvirkni á vinnusniðinu þínu"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Hugsanlega er fylgst með netinu"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Þetta tæki er tengt við VPN-net"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Vinnusniðið þitt er tengt við <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Einkaprófíllinn þinn er tengdur við <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Þetta tæki er tengt við <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Þetta tæki er nettengt í gegnum VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Vinnuforritin þín eru nettengd í gegnum <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Forritin þín til einkanota eru nettengd í gegnum <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Þetta tæki er nettengt í gegnum <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Þetta tæki er frá <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Tækjastjórnun"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -399,14 +399,14 @@
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"Mögulegt er að <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> fái aðgang að gögnum sem tengjast þessu tæki, geti stjórnað forritum og breytt stillingum tækisins.\n\nEf spurningar vakna skaltu hafa samband við <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Þetta tæki tilheyrir fyrirtækinu þínu.\n\nKerfisstjórinn getur fylgst með og breytt stillingum, fyrirtækjaaðgangi, forritum, gögnum sem tengjast tækinu þínu og staðsetningarupplýsingum tækisins.\n\nHafðu samband við kerfisstjórann til að fá frekari upplýsingar."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Fyrirtækið þitt setti upp CA-vottorð á þessu tæki. Eftirlit kann að vera haft með öruggri netnotkun þinni eða henni kann að vera breytt."</string>
-    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Fyrirtækið þitt setti upp CA-vottorð á vinnusniðinu þínu. Eftirlit kann að vera haft með öruggri netnotkun þinni eða henni kann að vera breytt."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Fyrirtækið þitt setti upp CA-vottorð á vinnuprófílnum þínum. Eftirlit kann að vera haft með öruggri netnotkun þinni eða henni kann að vera breytt."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"CA-vottorð er uppsett á þessu tæki. Eftirlit kann að vera haft með öruggri netnotkun þinni eða henni kann að vera breytt."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Kerfisstjóri hefur kveikt á eftirliti netkerfa, sem fylgist með netumferð á tækinu þínu."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Stjórnandinn kveikti á eftirliti netkerfa sem fylgist með netumferð á vinnusniðinu þínu en ekki á eigin sniði."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Þú ert með tengingu við <xliff:g id="VPN_APP">%1$s</xliff:g>, sem getur fylgst með netnotkun þinni, þ. á m. tölvupósti, forritum og vefsvæðum."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Þú ert með tengingu við <xliff:g id="VPN_APP_0">%1$s</xliff:g> og <xliff:g id="VPN_APP_1">%2$s</xliff:g>, sem geta fylgst með netnotkun þinni, þar á meðal tölvupósti, forritum og vefsvæðum."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Vinnusniðið þitt er tengt <xliff:g id="VPN_APP">%1$s</xliff:g>, sem getur fylgst með netnotkun þinni, þ. á m. tölvupósti, forritum og vefsvæðum."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Einkaprófíllinn þinn er tengdur við <xliff:g id="VPN_APP">%1$s</xliff:g>, sem getur fylgst með netnotkun þinni, þar á meðal tölvupósti, forritum og vefsvæðum."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Þetta tæki er nettengt í gegnum <xliff:g id="VPN_APP">%1$s</xliff:g>. Kerfisstjórinn þinn getur séð netvirkni þína í vinnuforritum, þar á meðal tölvupósta og vefskoðunargögn."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Þetta tæki er nettengt í gegnum <xliff:g id="VPN_APP_0">%1$s</xliff:g> og <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Kerfisstjórinn þinn getur séð netvirkni þína í vinnuforritum, þar á meðal tölvupósta og vefskoðunargögn."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vinnuforritin þín eru nettengd í gegnum <xliff:g id="VPN_APP">%1$s</xliff:g>. Kerfisstjórinn þinn og VPN-þjónustuaðilinn geta séð netvirkni þína í vinnuforritum, þar á meðal tölvupósta og vefskoðunargögn."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Forritin þín til einkanota eru nettengd í gegnum <xliff:g id="VPN_APP">%1$s</xliff:g>. VPN-þjónustuaðilinn þinn getur séð netvirkni þína í vinnuforritum, þar á meðal tölvupósta og vefskoðunargögn."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Opna VPN-stillingar"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Foreldri þitt stjórnar þessu tæki. Foreldri þitt getur séð og stjórnað upplýsingum eins og forritunum sem þú notar, staðsetningu þinni og skjátímanum."</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Heiti útsendingar"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Aðgangsorð"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Vista"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Ræsir…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Ekki hægt að senda út"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Útgáfunúmer smíðar"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Útgáfunúmer smíðar afritað á klippiborð."</string>
     <string name="basic_status" msgid="2315371112182658176">"Opna samtal"</string>

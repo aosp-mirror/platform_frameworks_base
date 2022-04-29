@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"貴機構擁有這部裝置，而且可能會監控網路流量"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」，而且該機構可能會監控網路流量"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"這是「<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>」提供的裝置"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"這部裝置的擁有者為貴機構，並且已連線到「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」，並且已連線到「<xliff:g id="VPN_APP">%2$s</xliff:g>」"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"這部裝置的擁有者為貴機構，並已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連線到網際網路"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」，並已透過「<xliff:g id="VPN_APP">%2$s</xliff:g>」連線到網際網路"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"這部裝置的擁有者為貴機構"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"這部裝置的擁有者為貴機構，並且已連線到 VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」，並且已連線到 VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"這部裝置的擁有者為貴機構，並已透過 VPN 連線到網際網路"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」，並已透過 VPN 連線到網際網路"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"貴機構可能會監控你工作資料夾的網路流量"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」可能會監控你工作資料夾的網路流量"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"IT 管理員可以查看工作資料夾的網路活動"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"網路可能會受到監控"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"這部裝置已連線到 VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"你的工作資料夾已連線到「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"你的個人資料夾已連線到「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"這部裝置已連線到「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"這部裝置已透過 VPN 連線到網際網路"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"你的工作應用程式已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連線到網際網路"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"你的個人應用程式已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連線到網際網路"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"這部裝置已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連線到網際網路"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"這是「<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>」提供的裝置"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"裝置管理"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"這個裝置已安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"你的管理員已啟用網路記錄功能，可監控你裝置的流量。"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"你的管理員已啟用網路記錄功能，可監控你的工作資料夾流量，但不會監控個人資料夾的流量。"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"由於你已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"由於你已連結至「<xliff:g id="VPN_APP_0">%1$s</xliff:g>」和「<xliff:g id="VPN_APP_1">%2$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這兩個應用程式監控。"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"由於你的工作資料夾已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"由於你的個人設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"這部裝置已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連線到網際網路。請注意，IT 管理員可以看見你的網路活動，包括電子郵件和瀏覽資料。"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"這部裝置已透過「<xliff:g id="VPN_APP_0">%1$s</xliff:g>」和「<xliff:g id="VPN_APP_1">%2$s</xliff:g>」連線到網際網路。請注意，IT 管理員可以看見你的網路活動，包括電子郵件和瀏覽資料。"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"你的工作應用程式已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連線到網際網路。請注意，IT 管理員和 VPN 供應商可以看見你在工作應用程式中的網路活動，包括電子郵件和瀏覽資料。"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"你的個人應用程式已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連線到網際網路。請注意，VPN 供應商可以看見你的網路活動，包括電子郵件和瀏覽資料。"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"開啟 VPN 設定"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"這個裝置是由你的家長管理。家長可以查看及管理裝置上的資訊，例如你使用的應用程式、所在位置和裝置使用時間。"</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"廣播名稱"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"密碼"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"儲存"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"啟動中…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"無法廣播"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本號碼"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已將版本號碼複製到剪貼簿。"</string>
     <string name="basic_status" msgid="2315371112182658176">"開放式對話"</string>
@@ -919,11 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"新增設定方塊"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不要新增設定方塊"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"選取使用者"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 個應用程式正在運作</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 個應用程式正在運作</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新資訊"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"使用中的應用程式"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"即使你並未使用這些應用程式，這些應用程式仍會持續運作，並可能影響電池續航力"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完成"</string>

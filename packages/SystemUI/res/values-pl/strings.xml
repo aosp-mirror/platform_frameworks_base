@@ -34,7 +34,7 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Autoobracanie ekranu"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do urządzenia <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTa aplikacja nie ma uprawnień do nagrywania, ale może rejestrować dźwięk za pomocą tego urządzenia USB."</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> ma mieć dostęp do: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Otworzyć <xliff:g id="APPLICATION">%1$s</xliff:g> dla urządzenia <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Ta aplikacja nie ma uprawnień do nagrywania, ale może rejestrować dźwięk za pomocą tego urządzenia USB. Używanie aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na tym urządzeniu może zakłócać słyszenie połączeń, powiadomień i alertów."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Używanie aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na tym urządzeniu może zakłócać słyszenie połączeń, powiadomień i alertów."</string>
@@ -380,20 +380,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Twoja organizacja jest właścicielem tego urządzenia i może monitorować ruch w sieci"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Organizacja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> jest właścicielem tego urządzenia i może monitorować ruch w sieci"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"To urządzenie dostarcza organizacja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"To urządzenie należy do Twojej organizacji i jest połączone z siecią <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"To urządzenie należy do organizacji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i jest połączone z siecią <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"To urządzenie należy do Twojej organizacji i jest połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"To urządzenie należy do organizacji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i jest połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"To urządzenie należy do Twojej organizacji"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Właściciel tego urządzenia: <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"To urządzenie należy do Twojej organizacji i jest połączone z sieciami VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"To urządzenie należy do organizacji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i jest połączone z sieciami VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"To urządzenie należy do Twojej organizacji i jest połączone z internetem za pomocą sieci VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"To urządzenie należy do organizacji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i jest połączone z internetem za pomocą sieci VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Twoja organizacja może monitorować ruch w sieci w Twoim profilu służbowym"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Organizacja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> może monitorować ruch w sieci w Twoim profilu służbowym"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Aktywność w sieci w profilu służbowym jest widoczna dla administratora IT"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Sieć może być monitorowana"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"To urządzenie jest połączone z sieciami VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Twój profil służbowy jest połączony z siecią <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Twój profil osobisty jest połączony z siecią <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"To urządzenie jest połączone z siecią <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"To urządzenie jest połączone z internetem za pomocą sieci VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Twoje aplikacje służbowe są połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Twoje aplikacje osobiste są połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"To urządzenie jest połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"To urządzenie dostarcza organizacja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Zarządzanie urządzeniami"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -409,10 +409,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Urząd certyfikacji zainstalowany na tym urządzeniu. Twój zabezpieczony ruch w sieci może być monitorowany i zmieniany."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim profilu służbowym, ale nie na profilu osobistym."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Łączysz się z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Łączysz się z aplikacjami <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>, które mogą monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Twój profil służbowy jest połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Twój profil osobisty jest połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"To urządzenie jest połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%1$s</xliff:g>. Twoja aktywność w sieci, w tym poczta e-mail i dane przeglądania, są widoczne dla administratora IT."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"To urządzenie jest połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Twoja aktywność w sieci, w tym poczta e-mail i dane przeglądania, są widoczne dla administratora IT."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Twoje aplikacje służbowe są połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%1$s</xliff:g>. Twoja aktywność w sieci w aplikacjach służbowych, w tym poczta e-mail i dane przeglądania, są widoczne dla administratora IT i firmy świadczącej usługi VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Twoje aplikacje osobiste są połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%1$s</xliff:g>. Twoja aktywność w sieci, w tym poczta e-mail i dane przeglądania, są widoczne dla firmy świadczącej usługi VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">"  "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Otwórz ustawienia VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Tym urządzeniem zarządza Twój rodzic. Rodzic może zobaczyć różne informacje, np. o aplikacjach, których używasz, lokalizacji i czasie korzystania z urządzenia, a także zarządzać tymi danymi."</string>
@@ -863,6 +863,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nazwa transmisji"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Hasło"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Zapisz"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Uruchamiam…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Nie można przesyłać"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numer kompilacji"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numer kompilacji został skopiowany do schowka."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otwarta rozmowa"</string>

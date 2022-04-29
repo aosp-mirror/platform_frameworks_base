@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Shirika lako linamiliki kifaa hiki na huenda likafuatilia trafiki ya mtandao"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> inamiliki kifaa hiki na huenda ikafuatilia trafiki ya mtandao"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Kifaa hiki kimetolewa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Kifaa hiki kinamilikiwa na shirika lako na kimeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Kifaa hiki kinamilikiwa na <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> na kimeunganishwa kwenye <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Kifaa hiki kinamilikiwa na shirika lako na kimeunganishwa kwenye intaneti kupitia <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Kifaa hiki kinamilikiwa na <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> na kimeunganishwa kwenye intaneti kupitia <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Kifaa hiki kinamilikiwa na shirika lako"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Kifaa hiki kinamilikiwa na <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Kifaa hiki kinamilikiwa na shirika lako na kimeunganishwa kwenye VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Kifaa hiki kinamilikiwa na <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> na kimeunganishwa kwenye VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Kifaa hiki kinamilikiwa na shirika lako na kimeunganishwa kwenye intaneti kupitia VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Kifaa hiki kinamilikiwa na <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> na kimeunganishwa kwenye intaneti kupitia VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Huenda shirika lako likafuatilia shughuli kwenye mtandao katika wasifu wako wa kazini"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Huenda <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ikafuatilia shughuli kwenye mtandao katika wasifu wako wa kazini"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Shughuli za mtandao za wasifu wa kazini zinaonekana kwa msimamizi wako wa TEHAMA."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Huenda mtandao unafuatiliwa"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Kifaa hiki kimeunganishwa kwenye VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Wasifu wako wa kazini umeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Wasifu wako wa binafsi umeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Kifaa hiki kimeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Kifaa hiki kimeunganishwa kwenye intaneti kupitia VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Programu zako za kazini zimeunganishwa kwenye intaneti kupitia <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Programu zako binafsi zimeunganishwa kwenye intaneti kupitia <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Kifaa hiki kimeunganishwa kwenye intaneti kupitia <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Kifaa hiki kimetolewa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Udhibiti wa kifaa"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Mamlaka ya cheti imesakinishwa kwenye kifaa hiki. Huenda shughuli kwenye mtandao wako salama zikafuatiliwa au kubadilishwa."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Msimamizi wako amewasha kumbukumbu ya kuingia mtandaoni, ambayo hufuatilia shughuli kwenye kifaa chako."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Msimamizi wako amewasha kumbukumbu ya kuingia mtandaoni ambayo hufuatilia shughuli kwenye wasifu wako wa kazini ila si kwenye wasifu wako wa binafsi."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Umeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>, ambayo inaweza kufuatilia shughuli za mtandao wako, ikiwa ni pamoja na barua pepe, programu na tovuti."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Umeunganishwa kwenye <xliff:g id="VPN_APP_0">%1$s</xliff:g> na <xliff:g id="VPN_APP_1">%2$s</xliff:g>, ambazo zinaweza kufuatilia shughuli za mtandao wako, ikiwa ni pamoja na barua pepe, programu na tovuti."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Wasifu wako wa kazini umeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>, ambayo inaweza kufuatilia shughuli za mtandao wako, ikiwa ni pamoja na barua pepe, programu na tovuti."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Wasifu wako wa binafsi umeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>, ambayo inaweza kufuatilia shughuli za mtandao wako, ikiwa ni pamoja na barua pepe, programu na tovuti."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Kifaa hiki kimeunganishwa kwenye intaneti kupitia <xliff:g id="VPN_APP">%1$s</xliff:g>. Shughuli zako za mtandaoni kwenye programu za kazini, ikijumuisha barua pepe na data ya kuvinjari, zinaonekana kwa msimamizi wako wa TEHAMA na mtoa huduma wa VPN."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Kifaa hiki kimeunganishwa kwenye intaneti kupitia <xliff:g id="VPN_APP_0">%1$s</xliff:g> na <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Shughuli zako za mtandaoni kwenye programu za kazini, ikijumuisha barua pepe na data ya kuvinjari, zinaonekana kwa msimamizi wako wa TEHAMA na mtoa huduma wa VPN."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Programu zako za kazini zimeunganishwa kwenye intaneti kupitia<xliff:g id="VPN_APP">%1$s</xliff:g>. Shughuli zako za mtandaoni kwenye programu za kazini, ikijumuisha barua pepe na data ya kuvinjari, zinaonekana kwa msimamizi wako TEHAMA na mtoa huduma wa VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Programu zako binafsi zimeunganishwa kwenye intaneti kupitia <xliff:g id="VPN_APP">%1$s</xliff:g>. Shughuli zako za mtandaoni kwenye programu za kazini, ikijumuisha barua pepe na data ya kuvinjari, zinaonekana kwa mtoa huduma wako wa VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Fungua mipangilio ya VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Kifaa hiki kinadhibitiwa na mzazi wako. Mzazi wako anaweza kuona na kudhibiti maelezo kama vile programu unazotumia, mahali ulipo na muda unaotumia kwenye kifaa."</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Jina la Tangazo"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Nenosiri"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Hifadhi"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Inaanza…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Imeshindwa kutuma arifa"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nambari ya muundo"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nambari ya muundo imewekwa kwenye ubao wa kunakili."</string>
     <string name="basic_status" msgid="2315371112182658176">"Fungua mazungumzo"</string>
@@ -919,11 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Kiongeze"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Kisiongezwe"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Chagua mtumiaji"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other">Programu <xliff:g id="COUNT_1">%s</xliff:g> zinatumika</item>
+      <item quantity="one">Programu <xliff:g id="COUNT_0">%s</xliff:g> inatumika</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Maelezo mapya"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Programu zinazotumika"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Hata ikiwa hutumii programu hizi, bado zinatumika na huenda zikaathiri muda wa matumizi ya betri"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Simamisha"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Imesimamishwa"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Imemaliza"</string>

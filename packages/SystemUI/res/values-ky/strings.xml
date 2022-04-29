@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Бул түзмөк уюмуңузга таандык. Уюмуңуз тармактын трафигин көзөмөлдөй алат"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык. Уюм тармактын трафигин көзөмөлдөй алат"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Бул түзмөктү <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> камсыздады."</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Бул түзмөк уюмуңузга таандык жана <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташтырылган"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана <xliff:g id="VPN_APP">%2$s</xliff:g> колдонмосуна туташтырылган"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Бул түзмөк уюмуңузга таандык жана Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турат"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана Интернетке <xliff:g id="VPN_APP">%2$s</xliff:g> аркылуу туташып турат"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Бул түзмөк уюмуңузга таандык"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Бул түзмөк төмөнкүгө таандык: <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Бул түзмөк уюмуңузга таандык жана VPN\'дерге туташтырылган"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана VPN\'дерге туташтырылган"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Бул түзмөк уюмуңузга таандык жана Интернетке VPN\'дер аркылуу туташып турат"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана Интернетке VPN\'дер аркылуу туташып турат"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ишканаңыз жумуш профилиңиздин тармак трафигин көзөмөлдөй алат"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> жумуш профилиңиздеги тармак трафигин көзөмөлдөй алат"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Жумуш профилинин тармактагы аракеттери IT администраторуна көрүнөт"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Тармак көзөмөлдөнүшү мүмкүн"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Бул түзмөк VPN\'дерге туташтырылган"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Жумуш профилиңиз <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташып турат"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Жеке профилиңиз <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташтырылган"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Бул түзмөк <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташтырылган"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Бул түзмөк Интернетке VPN\'дер аркылуу туташып турат"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Жумуш колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Жеке колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Бул түзмөк Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турат"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Бул түзмөктү <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> камсыздады."</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Түзмөктү башкаруу"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Бул түзмөктө тастыктоочу борбор орнотулган. Коопсуз тармагыңыздын трафиги көзөмөлдөнүп же өзгөртүлүшү мүмкүн."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Администраторуңуз түзмөгүңүздөгү трафикти көзөмөлдөөчү тармактын таржымалын каттоо функциясын иштетти."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Администраторуңуз жумуш профилиңиздеги трафикке көз салуу үчүн, тармактын таржымалын иштетип койду (жеке профилиңизден маалымат алынбайт)."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди тескей турган <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташып турасыз."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди көзөмөлдөй турган <xliff:g id="VPN_APP_0">%1$s</xliff:g> жана <xliff:g id="VPN_APP_1">%2$s</xliff:g> колдонмолоруна туташып турасыз."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Жумуш профилиңиз электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактык аракеттериңизди көзөмөлдөй турган <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташып турат."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Жеке профилиңиз электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди көзөмөлдөй турган <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташып турат."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Бул түзмөк Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турат. Тармакта аткарган аракеттериңиз, анын ичинде электрондук каттарыңыз жана серептөө дайындары IT администраторуна көрүнөт."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Бул түзмөк Интернетке <xliff:g id="VPN_APP_0">%1$s</xliff:g> жана <xliff:g id="VPN_APP_1">%2$s</xliff:g> аркылуу туташып турат. Тармакта аткарган аракеттериңиз, анын ичинде электрондук каттарыңыз жана серептөө дайындары IT администраторуна көрүнөт."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Жумуш колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат. Жумуш колдонмолоруңуз аркылуу тармакта аткарган аракеттериңиз, анын ичинде электрондук каттарыңыз жана серептөө дайындары IT администраторуна жана VPN провайдерине көрүнөт."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Жеке колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат. Тармакта аткарган аракеттериңиз, анын ичинде электрондук каттарыңыз жана серептөө дайындары VPN провайдерине көрүнөт."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN жөндөөлөрүн ачуу"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Бул түзмөктү ата-энең башкарат. Ата-энең сен иштеткен колдонмолорду, кайда жүргөнүңдү жана түзмөктү канча убакыт колдонгонуңду көрүп, башкарып турат."</string>
@@ -501,8 +501,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автоматтык"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Үнү чыкпайт жана дирилдебейт"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Үнү чыкпайт же дирилдебейт жана сүйлөшүүлөр тизмесинин ылдый жагында көрүнөт"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн. <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосундагы жазышуулар демейки жөндөө боюнча калкып чыкма билдирмелер түрүндө көрүнөт."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефондун параметрлерине жараша шыңгырап же дирилдеши мүмкүн"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефондун параметрлерине жараша шыңгырап же дирилдеши мүмкүн. <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосундагы жазышуулар демейки жөндөө боюнча калкып чыкма билдирмелер түрүндө көрүнөт."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Билдирменин үнүн чыгартууну же басууну тутумга тапшырыңыз"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Абалы:&lt;/b&gt; Демейкиге өзгөрдү"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Абалы:&lt;/b&gt; Үнсүз абалга төмөндөдү"</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Кабарлоонун аталышы"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Сырсөз"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Сактоо"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Кабарлап баштады…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Кабарлоого болбойт"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Курама номери"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Курама номери алмашуу буферине көчүрүлдү."</string>
     <string name="basic_status" msgid="2315371112182658176">"Ачык сүйлөшүү"</string>
@@ -861,7 +863,7 @@
     <string name="recent_conversations" msgid="8531874684782574622">"Акыркы сүйлөшүүлөр"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> күн мурун"</string>
     <string name="one_week_timestamp" msgid="4925600765473875590">"1 апта мурун"</string>
-    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 апта мурда"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 апта мурун"</string>
     <string name="over_one_week_timestamp" msgid="3770560704420807142">"1 аптадан ашык мурда"</string>
     <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"2 аптадан ашык мурда"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Туулган күн"</string>
@@ -882,7 +884,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Мазмун бир аздан кийин көрүнөт"</string>
     <string name="missed_call" msgid="4228016077700161689">"Жооп берилбеген чалуу"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Акыркы билдирүүлөрдү, жооп берилбеген чалууларды жана статустардын жаңырганын көрөсүз"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Соңку билдирүүлөрдү, жооп берилбеген чалууларды жана статустардын жаңырганын көрөсүз"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Сүйлөшүү"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"\"Тынчымды алба\" режими тындырды"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> билдирүү жөнөттү: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
@@ -919,11 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Ыкчам баскыч кошуу"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ыкчам баскыч кошулбасын"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Колдонуучуну тандоо"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> колдонмо иштеп жатат</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> колдонмо иштеп жатат</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Жаңы маалымат"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Жигердүү колдонмолор"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Бул колдонмолорду пайдаланбасаңыз да, алар иштеп, батареянын кубатынын мөөнөтүн азайтып жатышы мүмкүн"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Токтотуу"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Токтотулду"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Бүттү"</string>

@@ -380,20 +380,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Toto zařízení vlastní vaše organizace, která může sledovat síťový provoz"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Toto zařízení spravuje organizace <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, která může sledovat síťový provoz"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Toto zařízení poskytuje <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Toto zařízení patří vaší organizaci a je připojené k síti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> a je připojené k síti <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Toto zařízení patří vaší organizaci a je připojeno k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> a je připojeno k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Toto zařízení patří vaší organizaci"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Toto zařízení patří vaší organizaci a je připojené k sítím VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> a je připojené k sítím VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Toto zařízení patří vaší organizaci a je připojeno k internetu prostřednictvím sítí VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> a je připojeno k internetu prostřednictvím sítí VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Organizace může ve vašem pracovním profilu sledovat síťový provoz"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> může ve vašem pracovním profilu sledovat síťový provoz"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Aktivitu pracovního profilu na síti vidí administrátor IT"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Síť může být sledována"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Toto zařízení je připojené k sítím VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Váš pracovní profil je připojen k síti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Váš osobní profil je připojený k síti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Toto zařízení je připojené k síti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Toto zařízení je připojeno k internetu prostřednictvím sítí VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Vaše pracovní aplikace jsou připojeny k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Vaše osobní aplikace jsou připojeny k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Toto zařízení je připojeno k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Toto zařízení poskytuje <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Správa zařízení"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -409,10 +409,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V zařízení je nainstalována certifikační autorita. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrátor zapnul protokolování sítě, které monitoruje síťový provoz v zařízení."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrátor zapnul protokolování sítě, které monitoruje síťový provoz ve vašem pracovním profilu (ale ne v osobním)."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Jste připojeni k aplikaci <xliff:g id="VPN_APP">%1$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Jste připojeni k aplikacím <xliff:g id="VPN_APP_0">%1$s</xliff:g> a <xliff:g id="VPN_APP_1">%2$s</xliff:g>, které mohou sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Váš pracovní profil je připojen k aplikaci <xliff:g id="VPN_APP">%1$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Váš osobní profil je připojen k aplikaci <xliff:g id="VPN_APP">%1$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Toto zařízení je připojeno k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaší síťovou aktivitu (jako jsou e-maily a údaje o prohlížení) vidí administrátor IT."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Toto zařízení je připojeno k internetu prostřednictvím aplikací <xliff:g id="VPN_APP_0">%1$s</xliff:g> a <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vaší síťovou aktivitu (jako jsou e-maily a údaje o prohlížení) vidí administrátor IT."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vaše pracovní aplikace jsou připojeny k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaší síťovou aktivitu v pracovních aplikacích (jako jsou e-maily a údaje o prohlížení) vidí administrátor IT a poskytovatel VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Vaše osobní aplikace jsou připojeny k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaší síťovou aktivitu (jako jsou e-maily a údaje o prohlížení) vidí poskytovatel VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Otevřít nastavení VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Toto zařízení spravuje rodič. Rodič může zobrazit údaje, jako jsou používané aplikace, tvá poloha a čas strávený na zařízení."</string>
@@ -863,6 +863,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Název vysílání"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Heslo"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Uložit"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Spouštění…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Vysílání se nezdařilo"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Číslo sestavení"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Číslo sestavení bylo zkopírováno do schránky."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otevřít konverzaci"</string>
@@ -890,7 +892,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Poslouchá"</string>
     <string name="game_status" msgid="1340694320630973259">"Hraji hru"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Přátelé"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Pojďme chatovat."</string>
+    <string name="empty_status" msgid="5938893404951307749">"Pojďme chatovat!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Obsah se brzy zobrazí"</string>
     <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>

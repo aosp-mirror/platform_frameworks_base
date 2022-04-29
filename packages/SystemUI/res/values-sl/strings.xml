@@ -380,20 +380,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Vaša organizacija je lastnica te naprave in lahko nadzira omrežni promet"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Organizacija <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> je lastnica te naprave in lahko nadzira omrežni promet"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"To napravo zagotavlja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Ta naprava pripada vaši organizaciji in je povezana v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> in je povezana v aplikacijo <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Ta naprava pripada vaši organizaciji in je povezana z internetom prek omrežja <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> in je povezana z internetom prek omrežja <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Ta naprava pripada vaši organizaciji"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Ta naprava pripada vaši organizaciji in je povezana v omrežja VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> in je povezana v omrežja VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Ta naprava pripada vaši organizaciji in je povezana z internetom prek omrežij VPN."</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Ta naprava pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> in je povezana z internetom prek omrežij VPN."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Vaša organizacija lahko nadzira omrežni promet v vašem delovnem profilu"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> lahko nadzira omrežni promet v vašem delovnem profilu"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Omrežna dejavnost delovnega profila je vidna skrbniku za IT."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Omrežje je morda nadzorovano"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Ta naprava je povezana v omrežja VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Delovni profil je povezan v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Osebni profil je povezan v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Ta naprava je povezava v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Ta naprava je povezana z internetom prek omrežij VPN."</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Vaše delovne aplikacije so povezane z internetom prek omrežja <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Vaše osebne aplikacije so povezane z internetom prek omrežja <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Ta naprava je povezana z internetom prek omrežja <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"To napravo zagotavlja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Upravljanje naprav"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -409,10 +409,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V tej napravi je nameščen overitelj potrdil. Varni omrežni promet se lahko nadzira ali spreminja."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Skrbnik je vklopil beleženje omrežnega prometa, ki nadzira promet v napravi."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Skrbnik je vklopil beleženje omrežnega prometa, ki nadzoruje samo promet v delovnem profilu, tistega v osebnem profilu pa ne."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Povezani ste z aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>, ki lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Povezani ste z aplikacijama <xliff:g id="VPN_APP_0">%1$s</xliff:g> in <xliff:g id="VPN_APP_1">%2$s</xliff:g>, ki lahko nadzirata omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Delovni profil je povezan z aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>, ki lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Osebni profil je povezan z aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>, ki lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Ta naprava je povezana z internetom prek omrežja <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša omrežna dejavnost, vključno z e-pošto in podatki brskanja, je vidna skrbniku za IT."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Ta naprava je povezana z internetom prek omrežij <xliff:g id="VPN_APP_0">%1$s</xliff:g> in <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vaša omrežna dejavnost, vključno z e-pošto in podatki brskanja, je vidna skrbniku za IT."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vaše delovne aplikacije so povezane z internetom prek omrežja <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša omrežna dejavnost v delovnih aplikacijah, vključno z e-pošto in podatki brskanja, je vidna skrbniku za IT in ponudniku omrežja VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Vaše osebne aplikacije so povezane z internetom prek omrežja <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša omrežna dejavnost, vključno z e-pošto in podatki brskanja, je vidna ponudniku omrežja VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Odpri nastavitve omrežja VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"To napravo upravlja tvoj starš. Lahko si ogleda in upravlja podatke, na primer katere aplikacije uporabljaš, tvojo lokacijo in koliko časa uporabljaš napravo."</string>
@@ -863,6 +863,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Ime oddajanja"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Geslo"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Shrani"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Začenjanje …"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Oddajanje ni mogoče"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Delovna različica"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Delovna različica je bila kopirana v odložišče."</string>
     <string name="basic_status" msgid="2315371112182658176">"Odprt pogovor"</string>

@@ -39,9 +39,9 @@
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Opneemtoestemming is nie aan hierdie program verleen nie, maar dit kan oudio deur hierdie USB-toestel opneem. As jy <xliff:g id="APPLICATION">%1$s</xliff:g> met hierdie toestel gebruik, kan dit verhinder dat jy oproepe, kennisgewings en wekkers hoor."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"As jy <xliff:g id="APPLICATION">%1$s</xliff:g> met hierdie toestel gebruik, kan dit verhinder dat jy oproepe, kennisgewings en wekkers hoor."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Gee <xliff:g id="APPLICATION">%1$s</xliff:g> toegang tot <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Maak <xliff:g id="APPLICATION">%1$s</xliff:g> oop om <xliff:g id="USB_DEVICE">%2$s</xliff:g> te hanteer?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Hanteer <xliff:g id="USB_DEVICE">%2$s</xliff:g> met <xliff:g id="APPLICATION">%1$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Maak <xliff:g id="APPLICATION">%1$s</xliff:g> oop om <xliff:g id="USB_DEVICE">%2$s</xliff:g> te hanteer?\nOpneemtoestemming is nie aan hierdie program verleen nie, maar dit kan oudio deur hierdie USB-toestel vasvang."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Maak <xliff:g id="APPLICATION">%1$s</xliff:g> oop om <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> te hanteer?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Hanteer <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> met <xliff:g id="APPLICATION">%1$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Geen geïnstalleerde programme werk met hierdie USB-toebehoorsel nie. Vind meer uit oor hierdie toebehoorsel by <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB-toebehoorsel"</string>
     <string name="label_view" msgid="6815442985276363364">"Sien"</string>
@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Jou organisasie besit hierdie toestel en kan netwerkverkeer monitor"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> besit hierdie toestel en kan netwerkverkeer monitor"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Hierdie toestel word verskaf deur <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Hierdie toestel behoort aan jou organisasie en is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Hierdie toestel behoort aan <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> en is gekoppel aan <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Hierdie toestel behoort aan jou organisasie en is gekoppel aan die internet deur <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Hierdie toestel behoort aan <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> en is gekoppel aan die internet deur <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Hierdie toestel behoort aan jou organisasie"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Hierdie toestel behoort aan <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Hierdie toestel behoort aan jou organisasie en is gekoppel aan VPN\'e"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Hierdie toestel behoort aan <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> en is gekoppel aan VPN\'e"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Hierdie toestel behoort aan jou organisasie en is gekoppel aan die internet deur VPN\'e"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Hierdie toestel behoort aan <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> en is gekoppel aan die internet deur VPN\'e"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Jou organisasie kan netwerkverkeer in jou werkprofiel monitor"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kan netwerkverkeer in jou werkprofiel monitor"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Jou IT-admin kan netwerkaktiwiteit op jou werkprofiel sien"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Netwerk kan gemonitor word"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Hierdie toestel is gekoppel aan VPN\'e"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Jou werkprofiel is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Jou persoonlike profiel is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Hierdie toestel is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Hierdie toestel is gekoppel aan die internet deur VPN\'e."</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Jou werkprogramme is deur <xliff:g id="VPN_APP">%1$s</xliff:g> aan die internet gekoppel"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Jou persoonlike programme is gekoppel aan die internet deur <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Hierdie toestel is gekoppel aan die internet deur <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Hierdie toestel word verskaf deur <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Toestelbestuur"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"\'n Sertifikaatoutoriteit is op hierdie toestel geïnstalleer. Jou veilige netwerkverkeer kan gemonitor of gewysig word."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Jou administrateur het netwerkloginskrywing aangeskakel, wat verkeer op jou toestel monitor."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Jou administrateur het netwerkloglêers aangeskakel wat verkeer in jou werkprofiel monitor, maar nie in jou persoonlike profiel nie."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Jy is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Jy is gekoppel aan <xliff:g id="VPN_APP_0">%1$s</xliff:g> en <xliff:g id="VPN_APP_1">%2$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Jou werkprofiel is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Jy persoonlike profiel is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Hierdie toestel is gekoppel aan die internet deur <xliff:g id="VPN_APP">%1$s</xliff:g>. Jou IT-admin kan jou netwerkaktiwiteit sien, insluitend jou e-posse en blaaierdata."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Hierdie toestel is gekoppel aan die internet deur <xliff:g id="VPN_APP_0">%1$s</xliff:g> en <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Jou IT-admin kan jou netwerkaktiwiteit sien, insluitend jou e-posse en blaaierdata."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Jou werkprogramme is gekoppel aan die internet deur <xliff:g id="VPN_APP">%1$s</xliff:g>. Jou IT-admin en VPN-verskaffer kan jou netwerkaktiwiteit in werkprogramme sien, insluitend jou e-posse en blaaierdata."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Jou persoonlike programme is gekoppel aan die internet deur <xliff:g id="VPN_APP">%1$s</xliff:g>. Jou VPN-verskaffer kan jou netwerkaktiwiteit sien, insluitend jou e-posse en blaaierdata."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Maak VPN-instellings oop"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Hierdie toestel word deur jou ouer bestuur. Jou ouer kan inligting sien en bestuur soos die programme wat jy gebruik, jou ligging en jou skermtyd."</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Uitsaainaam"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Wagwoord"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Stoor"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Begin tans …"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Kan nie uitsaai nie"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Bounommer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Bounommer is na knipbord gekopieer."</string>
     <string name="basic_status" msgid="2315371112182658176">"Maak gesprek oop"</string>

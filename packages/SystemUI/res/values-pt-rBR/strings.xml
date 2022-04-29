@@ -35,7 +35,7 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Permitir que o app <xliff:g id="APPLICATION">%1$s</xliff:g> acesse <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acesse <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsse app não tem permissão de gravação, mas pode capturar áudio pelo dispositivo USB."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Permitir que o app <xliff:g id="APPLICATION">%1$s</xliff:g> acesse este dispositivo: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Abrir o app <xliff:g id="APPLICATION">%1$s</xliff:g> para lidar com este dispositivo: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para controlar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Esse app não tem permissão de gravação, mas pode capturar áudio pelo dispositivo USB. O uso do app <xliff:g id="APPLICATION">%1$s</xliff:g> com esse dispositivo pode impedir que você ouça chamadas, notificações e alarmes."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"O uso do app <xliff:g id="APPLICATION">%1$s</xliff:g> com esse dispositivo pode impedir que você ouça chamadas, notificações e alarmes."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Permitir que o app <xliff:g id="APPLICATION">%1$s</xliff:g> acesse <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Sua organização é dona deste dispositivo e pode monitorar o tráfego de rede"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"A organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> é dona deste dispositivo e pode monitorar o tráfego de rede"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Este dispositivo é fornecido pela <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Este dispositivo pertence à sua organização e está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Este dispositivo pertence à organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado a <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Este dispositivo pertence à sua organização e está conectado à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Este dispositivo pertence à organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado à Internet usando o <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Este dispositivo pertence à sua organização"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Este dispositivo pertence à organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Este dispositivo pertence à sua organização e está conectado a VPNs"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Este dispositivo pertence á organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado a VPNs"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Este dispositivo pertence à sua organização e está conectado à Internet usando VPNs"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Este dispositivo pertence à organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado à Internet usando VPNs"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Sua organização pode monitorar o tráfego de rede no seu perfil de trabalho"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> pode monitorar o tráfego de rede no seu perfil de trabalho"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"A atividade de rede do perfil de trabalho fica visível para o administrador de TI"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"A rede pode ser monitorada"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Este dispositivo está conectado a VPNs"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Seu perfil de trabalho está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Seu perfil pessoal está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Este dispositivo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Este dispositivo está conectado à Internet usando VPNs"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Seus apps de trabalho estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Seus apps pessoais estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Este dispositivo está conectado à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Este dispositivo é fornecido pela <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gerenciamento de dispositivos"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Uma autoridade de certificação foi instalada neste dispositivo. É possível monitorar ou modificar seu tráfego de rede seguro."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"O administrador ativou o registro de rede, que monitora o tráfego no seu dispositivo."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"O administrador ativou o registro de rede, que monitora o tráfego no seu perfil de trabalho, mas não no perfil pessoal."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Você está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorar sua atividade na rede, incluindo e-mails, apps e websites."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Você está conectado a <xliff:g id="VPN_APP_0">%1$s</xliff:g> e <xliff:g id="VPN_APP_1">%2$s</xliff:g>, que podem monitorar sua atividade de rede, incluindo e-mails, apps e websites."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Seu perfil de trabalho está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorar sua atividade de rede, incluindo e-mails, apps e websites."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Seu perfil pessoal está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorar sua atividade de rede, incluindo e-mails, apps e websites."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Este dispositivo está conectado à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>. Suas atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o administrador de TI."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Seu dispositivo está conectado à Internet usando o <xliff:g id="VPN_APP_0">%1$s</xliff:g> e <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Suas atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o administrador de TI."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Seus apps de trabalho estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>. Suas atividades de rede em apps de trabalho, incluindo e-mails e dados de navegação, estão visíveis para o administrador de TI e o provedor de VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Seus apps pessoais estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>. Suas atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o provedor de VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir configurações de VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Este dispositivo é gerenciado pelo seu pai/mãe, que pode ver e gerenciar informações como os apps que você usa, sua localização e seu tempo de uso."</string>
@@ -510,8 +510,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; classificada com menor prioridade"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Aparece na parte superior das notificações de conversa e como uma foto do perfil na tela de bloqueio"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Aparece na parte superior das notificações de conversa, como uma foto do perfil na tela de bloqueio e como um balão"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Aparece na parte superior das notificações de conversa e como uma foto do perfil na tela de bloqueio. Interrompe o Não perturbe"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Aparece na parte superior das notificações de conversa, como uma foto do perfil na tela de bloqueio e como um balão. Interrompe o Não perturbe"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Aparecem na parte superior das notificações de conversa e como uma foto do perfil na tela de bloqueio. Interrompem o Não perturbe."</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Aparecem na parte superior das notificações de conversa, como uma foto do perfil na tela de bloqueio e como um balão. Interrompem o Não perturbe."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritárias"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não é compatível com recursos de conversa"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Não é possível modificar essas notificações."</string>
@@ -851,12 +851,14 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nome da transmissão"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Senha"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Salvar"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Iniciando…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Não foi possível fazer a transmissão"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número da versão"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Número da versão copiado para a área de transferência."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversa aberta"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversa"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Toque em uma conversa para adicioná-la à tela inicial"</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"Suas conversas recentes serão exibidas aqui"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Suas conversas recentes vão aparecer aqui"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Conversas prioritárias"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversas recentes"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"Há <xliff:g id="DURATION">%1$s</xliff:g> dias"</string>

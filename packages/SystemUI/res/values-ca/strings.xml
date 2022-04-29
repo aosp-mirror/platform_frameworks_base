@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"La teva organització és propietària del dispositiu i és possible que supervisi el trànsit de xarxa"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> és propietària d\'aquest dispositiu i és possible que supervisi el trànsit de xarxa"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> proporciona aquest dispositiu"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Aquest dispositiu pertany a la teva organització i està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Aquest dispositiu pertany a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i està connectat a <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Aquest dispositiu pertany a la teva organització i es connecta a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Aquest dispositiu pertany a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i es connecta a Internet a través de <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Aquest dispositiu pertany a la teva organització"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Aquest dispositiu pertany a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Aquest dispositiu pertany a la teva organització i està connectat a xarxes VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Aquest dispositiu pertany a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i està connectat a xarxes VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Aquest dispositiu pertany a la teva organització i es connecta a Internet a través de VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Aquest dispositiu pertany a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i es connecta a Internet a través de VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"És possible que la teva organització supervisi el trànsit de xarxa al teu perfil de treball"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"És possible que <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> supervisi el trànsit de xarxa del teu perfil de treball"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"L\'administrador de TI pot veure l\'activitat de la xarxa del perfil de treball"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"És possible que la xarxa estigui supervisada"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Aquest dispositiu està connectat a xarxes VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"El teu perfil de treball està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"El teu perfil personal està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Aquest dispositiu està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Aquest dispositiu es connecta a Internet a través de VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Les aplicacions de treball es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Les aplicacions personals es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> proporciona aquest dispositiu"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gestió del dispositiu"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"S\'ha instal·lat una autoritat de certificació en aquest dispositiu. És possible que el trànsit de xarxa segura se supervisi o es modifiqui."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"L\'administrador ha activat el registre de xarxa, que supervisa el trànsit del teu dispositiu."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"L\'administrador ha activat el registre de xarxa, que monitora el trànsit al teu perfil de treball, però no al personal."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Estàs connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Estàs connectat a <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>, que poden supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"El teu perfil de treball està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"El teu perfil personal està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>,que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. El teu administrador de TI pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Les aplicacions de treball es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI i el teu proveïdor de VPN poden veure l\'activitat de la teva xarxa en aplicacions de treball, inclosos els correus electrònics i les dades de navegació."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Les aplicacions personals es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu proveïdor de VPN pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Obre la configuració de la VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"El teu pare o mare gestionen aquest dispositiu, i poden veure i gestionar informació com ara les aplicacions que utilitzes, la teva ubicació i el teu temps de connexió."</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nom de l\'emissió"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Contrasenya"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Desa"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"S\'està iniciant…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"No es pot emetre"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilació"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"El número de compilació s\'ha copiat al porta-retalls."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversa oberta"</string>
@@ -919,11 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Afegeix la icona"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"No afegeixis la icona"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Selecciona un usuari"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplicacions estan actives</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplicació està activa</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Informació nova"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplicacions actives"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Encara que no utilitzis aquestes aplicacions, estan actives i poden afectar la durada de la bateria"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Atura"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Aturada"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Fet"</string>
