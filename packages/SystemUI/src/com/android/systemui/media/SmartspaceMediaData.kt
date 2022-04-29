@@ -31,10 +31,6 @@ data class SmartspaceMediaData(
      */
     val isActive: Boolean,
     /**
-     * Indicates if all the required data field is valid.
-     */
-    val isValid: Boolean,
-    /**
      * Package name of the media recommendations' provider-app.
      */
     val packageName: String,
@@ -58,4 +54,19 @@ data class SmartspaceMediaData(
      * Instance ID for [MediaUiEventLogger]
      */
     val instanceId: InstanceId
-)
+) {
+    /**
+     * Indicates if all the data is valid.
+     *
+     * TODO(b/230333302): Make MediaControlPanel more flexible so that we can display fewer than
+     *     [NUM_REQUIRED_RECOMMENDATIONS].
+     */
+    fun isValid() = getValidRecommendations().size >= NUM_REQUIRED_RECOMMENDATIONS
+
+    /**
+     * Returns the list of [recommendations] that have valid data.
+     */
+    fun getValidRecommendations() = recommendations.filter { it.icon != null }
+}
+
+const val NUM_REQUIRED_RECOMMENDATIONS = 3
