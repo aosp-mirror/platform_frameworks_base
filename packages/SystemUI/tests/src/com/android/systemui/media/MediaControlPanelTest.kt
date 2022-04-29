@@ -124,7 +124,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var collapsedSet: ConstraintSet
     @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
-    @Mock private lateinit var mediaCarouselScrollHandler: MediaCarouselScrollHandler
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var transitionParent: ViewGroup
     private lateinit var appIcon: ImageView
@@ -270,7 +269,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         smartspaceData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
             packageName = PACKAGE,
             instanceId = instanceId,
-            recommendations = listOf(smartspaceAction),
+            recommendations = listOf(smartspaceAction, smartspaceAction, smartspaceAction),
             cardAction = smartspaceAction
         )
     }
@@ -294,9 +293,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
      */
     private fun initMediaViewHolderMocks() {
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
-        whenever(mediaCarouselController.mediaCarouselScrollHandler)
-            .thenReturn(mediaCarouselScrollHandler)
-        whenever(mediaCarouselScrollHandler.qsExpanded).thenReturn(false)
 
         // Set up mock views for the players
         appIcon = ImageView(context)
@@ -1445,6 +1441,66 @@ public class MediaControlPanelTest : SysuiTestCase() {
         captor.value.onClick(recommendationViewHolder.recommendations)
 
         verify(logger).logRecommendationItemTap(eq(PACKAGE), eq(instanceId), eq(0))
+    }
+
+    @Test
+    fun bindRecommendation_listHasTooFewRecs_notDisplayed() {
+        player.attachRecommendation(recommendationViewHolder)
+        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", "title1")
+                    .setSubtitle("subtitle1")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "title2")
+                    .setSubtitle("subtitle2")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+            )
+        )
+
+        player.bindRecommendation(data)
+
+        assertThat(recTitle1.text).isEqualTo("")
+        verify(mediaViewController, never()).refreshState()
+    }
+
+    @Test
+    fun bindRecommendation_listHasTooFewRecsWithIcons_notDisplayed() {
+        player.attachRecommendation(recommendationViewHolder)
+        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", "title1")
+                    .setSubtitle("subtitle1")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "title2")
+                    .setSubtitle("subtitle2")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "empty icon 1")
+                    .setSubtitle("subtitle2")
+                    .setIcon(null)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "empty icon 2")
+                    .setSubtitle("subtitle2")
+                    .setIcon(null)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+            )
+        )
+
+        player.bindRecommendation(data)
+
+        assertThat(recTitle1.text).isEqualTo("")
+        verify(mediaViewController, never()).refreshState()
     }
 
     @Test

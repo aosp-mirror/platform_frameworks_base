@@ -166,7 +166,7 @@ class MediaDataFilter @Inject constructor(
             shouldPrioritizeMutable = true
         }
 
-        if (!data.isValid) {
+        if (!data.isValid()) {
             Log.d(TAG, "Invalid recommendation data. Skip showing the rec card")
             return
         }
@@ -203,7 +203,6 @@ class MediaDataFilter @Inject constructor(
         if (smartspaceMediaData.isActive) {
             smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
                 targetId = smartspaceMediaData.targetId,
-                isValid = smartspaceMediaData.isValid,
                 instanceId = smartspaceMediaData.instanceId)
         }
         listeners.forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
@@ -260,7 +259,6 @@ class MediaDataFilter @Inject constructor(
             }
             smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
                 targetId = smartspaceMediaData.targetId,
-                isValid = smartspaceMediaData.isValid,
                 instanceId = smartspaceMediaData.instanceId)
             mediaDataManager.dismissSmartspaceRecommendation(smartspaceMediaData.targetId,
                 delay = 0L)
@@ -272,13 +270,13 @@ class MediaDataFilter @Inject constructor(
      */
     fun hasActiveMediaOrRecommendation() =
             userEntries.any { it.value.active } ||
-                    (smartspaceMediaData.isActive && smartspaceMediaData.isValid)
+                    (smartspaceMediaData.isActive && smartspaceMediaData.isValid())
 
     /**
      * Are there any media entries we should display?
      */
     fun hasAnyMediaOrRecommendation() = userEntries.isNotEmpty() ||
-            (smartspaceMediaData.isActive && smartspaceMediaData.isValid)
+            (smartspaceMediaData.isActive && smartspaceMediaData.isValid())
 
     /**
      * Are there any media notifications active (excluding the recommendation)?
