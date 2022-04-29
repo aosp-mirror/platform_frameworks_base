@@ -626,7 +626,7 @@
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Απομακρύνετε περισσότερο το τηλέφωνο."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Πλησιάστε περισσότερο το τηλέφωνο."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Μετακινήστε το τηλέφωνο πιο ψηλά."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Μετακινήστε πιο χαμηλά το τηλέφωνο."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Μετακινήστε το τηλέφωνο πιο χαμηλά."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Μετακινήστε το τηλέφωνο στα αριστερά."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Μετακινήστε το τηλέφωνο στα δεξιά."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Κοιτάξτε απευθείας τη συσκευή σας."</string>
@@ -1964,8 +1964,8 @@
     <string name="importance_from_user" msgid="2782756722448800447">"Μπορείτε να ρυθμίσετε τη βαρύτητα αυτών των ειδοποιήσεων."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Αυτό είναι σημαντικό λόγω των ατόμων που συμμετέχουν."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Προσαρμοσμένη ειδοποίηση εφαρμογής"</string>
-    <string name="user_creation_account_exists" msgid="2239146360099708035">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν τον λογαριασμό);"</string>
-    <string name="user_creation_adding" msgid="7305185499667958364">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
+    <string name="user_creation_account_exists" msgid="2239146360099708035">"Επιτρέπετε στο <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν τον λογαριασμό);"</string>
+    <string name="user_creation_adding" msgid="7305185499667958364">"Επιτρέπετε στο <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Προσθήκη γλώσσας"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Προτίμηση περιοχής"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Εισαγ. όνομα γλώσσας"</string>

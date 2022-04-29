@@ -1914,7 +1914,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Před uvolněním požádat o PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Před uvolněním požádat o bezpečnostní gesto"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Před uvolněním požádat o heslo"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Před odepnutím požádat o heslo"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Nainstalováno administrátorem"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Smazáno administrátorem"</string>

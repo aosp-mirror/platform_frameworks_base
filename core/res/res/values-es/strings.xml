@@ -215,7 +215,7 @@
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opciones del tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opciones de Android TV"</string>
     <string name="power_dialog" product="default" msgid="1107775420270203046">"Opciones del teléfono"</string>
-    <string name="silent_mode" msgid="8796112363642579333">"Modo silencio"</string>
+    <string name="silent_mode" msgid="8796112363642579333">"Modo Silencio"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"Activar conexión inalámbrica"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Desactivar función inalámbrica"</string>
     <string name="screen_lock" msgid="2072642720826409809">"Bloqueo de pantalla"</string>
@@ -235,8 +235,8 @@
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"El reloj se apagará."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"El teléfono se apagará."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"¿Seguro que quieres apagar el teléfono?"</string>
-    <string name="reboot_safemode_title" msgid="5853949122655346734">"Reiniciar en modo seguro"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"¿Quieres reiniciar el sistema en modo seguro? Se inhabilitarán todas las aplicaciones externas que hayas instalado. Esas aplicaciones se restaurarán la próxima vez que reinicies del sistema."</string>
+    <string name="reboot_safemode_title" msgid="5853949122655346734">"Reiniciar en modo Seguro"</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"¿Quieres reiniciar el sistema en modo Seguro? Se inhabilitarán todas las aplicaciones externas que hayas instalado. Esas aplicaciones se restaurarán la próxima vez que reinicies del sistema."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"Reciente"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"No hay aplicaciones recientes."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Opciones del tablet"</string>
@@ -250,7 +250,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Informe de errores"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Finalizar sesión"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Captura de pantalla"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Informar de un error"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Informar error"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Se recopilará información sobre el estado actual de tu dispositivo y se enviará por correo electrónico. Pasarán unos minutos desde que empiece a generarse el informe de errores hasta que se envíe."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Informe interactivo"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Usa esta opción en la mayoría de los casos. Te permite realizar un seguimiento del progreso del informe, introducir más información sobre el problema y hacer capturas de pantalla. Es posible que se omitan algunas secciones menos utilizadas y que requieran más tiempo."</string>
@@ -262,12 +262,12 @@
     </plurals>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Se ha hecho la captura de pantalla con el informe de errores"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"No se ha podido hacer la captura de pantalla con el informe de errores"</string>
-    <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo silencio"</string>
+    <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo Silencio"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"El sonido está desactivado. Activar"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"El sonido está activado. Desactivar"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Modo avión"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Modo avión activado. Desactivar"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"Modo avión desactivado. Activar"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Modo Avión"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Modo Avión activado. Desactivar"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"Modo Avión desactivado. Activar"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"Ajustes"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Asistencia"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Asistente voz"</string>
@@ -298,7 +298,7 @@
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplicaciones están usando la batería"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Toca para ver información detallada sobre el uso de datos y de la batería"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
-    <string name="safeMode" msgid="8974401416068943888">"Modo seguro"</string>
+    <string name="safeMode" msgid="8974401416068943888">"Modo Seguro"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Cambiar al perfil personal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Cambiar al perfil de trabajo"</string>
@@ -1717,7 +1717,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar acceso directo"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de color"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Corrección de color"</string>
-    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo una mano"</string>
+    <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo Una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Atenuación extra"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Al mantener pulsadas las teclas de volumen, se ha activado <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Se han mantenido pulsadas las teclas de volumen. Se ha desactivado <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
@@ -2126,7 +2126,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"Hoja de cálculo <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Presentación"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Presentación <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
-    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"El Bluetooth seguirá activado en el modo avión"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"El Bluetooth seguirá activado en el modo Avión"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Cargando"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> y <xliff:g id="COUNT_3">%d</xliff:g> archivos</item>
@@ -2134,7 +2134,7 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hay sugerencias de personas con las que compartir"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicaciones"</string>
-    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta aplicación no tiene permiso para grabar, pero podría registrar audio con este dispositivo USB."</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta aplicación no tiene permiso para grabar, pero podría capturar audio con este dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Inicio"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Atrás"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Aplicaciones recientes"</string>

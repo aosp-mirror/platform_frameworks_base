@@ -632,7 +632,7 @@
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Odsuń telefon."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Przybliż telefon."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Przesuń telefon wyżej."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Obniż telefon."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Przesuń telefon niżej."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Przesuń telefon w lewo."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Przesuń telefon w prawo."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Patrz prosto na urządzenie."</string>
@@ -1278,7 +1278,7 @@
     <string name="launch_warning_original" msgid="3332206576800169626">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została pierwotnie uruchomiona."</string>
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Skala"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"Zawsze pokazuj"</string>
-    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Włącz ponownie, wybierając Ustawienia systemowe &gt; Aplikacje &gt; Pobrane."</string>
+    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Włącz ponownie, wybierając Ustawienia systemu &gt; Aplikacje &gt; Pobrane."</string>
     <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje obecnie ustawionego rozmiaru wyświetlacza i może działać niestabilnie."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Zawsze pokazuj"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została skompilowana pod niezgodną wersję systemu Android i może zachowywać się niezgodnie z oczekiwaniami. Sprawdź, czy jest dostępna zaktualizowana wersja aplikacji."</string>

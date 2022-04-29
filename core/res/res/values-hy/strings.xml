@@ -435,7 +435,7 @@
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"Այս հավելվածը կարող է ավելացնել, հեռացնել կամ փոխել օրացույցի միջոցառումները ձեր Android TV սարքում: Այս հավելվածը կարող է ուղարկել հաղորդագրություններ օրացույցի սեփականատերերի անունից կամ փոխել միջոցառումները առանց դրանց սեփականատերերին ծանուցելու:"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Այս հավելվածը կարող է ավելացնել, հեռացնել կամ փոխել օրացույցի միջոցառումները ձեր հեռախոսում: Այս հավելվածը կարող է ուղարկել հաղորդագրություններ օրացույցի սեփականատերերի անունից կամ փոխել միջոցառումները առանց դրանց սեփականատերերին ծանուցելու:"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"օգտագործել տեղադրություն տրամադրող հավելվյալ հրամաններ"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Ծրագրին թույլ է տալիս օգտագործել տեղադրության մասին տվյալների աղբյուրների կառավարման լրացուցիչ հրահանգներ: Սա կարող է ծրագրին թույլ տալ միջամտել GPS-ի կամ տեղադրության մասին տվյալների այլ աղբյուրների գործառույթներին:"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Հավելվածին թույլ է տալիս օգտագործել տեղադրության մասին տվյալների աղբյուրների կառավարման լրացուցիչ հրահանգներ: Սա կարող է ծրագրին թույլ տալ միջամտել GPS-ի կամ տեղադրության մասին տվյալների այլ աղբյուրների գործառույթներին:"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"Տեղադրության ճշգրիտ տվյալների հասանելիություն միայն ֆոնային ռեժիմում"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Երբ հավելվածն ակտիվ է, այն կարող է տեղորոշման ծառայություններից ստանալ ձեր ճշգրիտ տեղադրության տվյալները։ Որպես նախապայման՝ ձեր սարքի տեղորոշման ծառայությունները պետք է միացված լինեն։ Դա կարող է ավելի արագ սպառել մարտկոցի լիցքը։"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"տեղադրության մոտավոր տվյալների հասանելիություն միայն ակտիվ ռեժիմում"</string>
@@ -673,7 +673,7 @@
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"փոփոխել կամ ջնջել ձեր ընդհանուր հիշողության բովանդակությունը"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Հավելվածին թույլ է տալիս փոփոխել ձեր ընդհանուր հիշողության պարունակությունը:"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"կատարել կամ ստանալ SIP զանգեր"</string>
-    <string name="permdesc_use_sip" msgid="3590270893253204451">"Ծրագրին թույլ է տալիս կատարել և ստանալ SIP զանգեր:"</string>
+    <string name="permdesc_use_sip" msgid="3590270893253204451">"Հավելվածին թույլ է տալիս կատարել և ստանալ SIP զանգեր:"</string>
     <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"գրանցել նոր հեռահաղորդակցության SIM կապեր"</string>
     <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"Հավելվածին թույլ է տալիս գրանցել հեռահաղորդակցության նոր SIM կապեր:"</string>
     <string name="permlab_register_call_provider" msgid="6135073566140050702">"գրանցել նոր հեռահաղորդակցության կապեր"</string>
@@ -707,11 +707,11 @@
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"փոփոխել մուտքի սարքի չափաբերումը"</string>
     <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"Թույլ է տալիս ծրագրին փոփոխել հպէկրանի չափաբերման կարգավորումները: Սովորական ծրագրերի համար երբեք պետք չի գալու:"</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"DRM հավաստագրերի մատչում"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"Ծրագրին թույլ է տալիս տրամադրել և օգտագործել DRM վկայագրեր: Սովորական ծրագրերի համար երբեք պետք չի գալիս:"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"Հավելվածին թույլ է տալիս տրամադրել և օգտագործել DRM վկայագրեր: Սովորական ծրագրերի համար երբեք պետք չի գալիս:"</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"ստանալ Android Beam-ով փոխանցման կարգավիճակը"</string>
-    <string name="permdesc_handoverStatus" msgid="3842269451732571070">"Ծրագրին թույլ է տալիս ստանալ Android Beam-ով ընթացիկ փոխանցումների մասին տեղեկատվություն:"</string>
+    <string name="permdesc_handoverStatus" msgid="3842269451732571070">"Հավելվածին թույլ է տալիս ստանալ Android Beam-ով ընթացիկ փոխանցումների մասին տեղեկատվություն:"</string>
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"հեռացնել DRM վկայագրեր"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"Ծրագրին թույլ է տալիս հեռացնել DRM վկայագրեր: Սովորական ծրագրերի համար երբեք պետք չի գալիս:"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"Հավելվածին թույլ է տալիս հեռացնել DRM վկայագրեր: Սովորական ծրագրերի համար երբեք պետք չի գալիս:"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"Միացում օպերատորի հաղորդագրությունների ծառայության հետ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Թույլ է տալիս տիրոջը կապվել օպերատորի հաղորդագրությունների ծառայության վերին մակարդակի միջերեսի հետ: Սա երբեք չի պահանջվում սովորական հավելվածների համար:"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"կապվել օպերատորի ծառայություններին"</string>
@@ -1455,7 +1455,7 @@
     <string name="permlab_route_media_output" msgid="8048124531439513118">"երթուղել մեդիա արտածումը"</string>
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"Թույլ է տալիս հավելվածին մեդիա արտածումը երթուղել այլ արտաքին սարքեր:"</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"կարդալ տեղադրման աշխատաշրջանները"</string>
-    <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"Ծրագրին թույլ է տալիս կարդալ տեղադրման աշխատաշրջանները: Սա թույլ է տալիս տեղեկանալ փաթեթների ակտիվ տեղադրումների մանրամասներին:"</string>
+    <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"Հավելվածին թույլ է տալիս կարդալ տեղադրման աշխատաշրջանները: Սա թույլ է տալիս տեղեկանալ փաթեթների ակտիվ տեղադրումների մանրամասներին:"</string>
     <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"պահանջել տեղադրման փաթեթներ"</string>
     <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"Թույլ է տալիս հավելվածին պահանջել փաթեթների տեղադրումը:"</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"պահանջել փաթեթների ջնջում"</string>
@@ -1978,7 +1978,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Մանրամասն"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Չեղարկել դադարեցումը"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"Միացնե՞լ հավելվածները"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Միացրեք աշխատանքային հավելվածներն ու ծանուցումները"</string>
+    <string name="work_mode_off_message" msgid="7319580997683623309">"Ձեզ հասանելի կդառնան ձեր աշխատանքային հավելվածներն ու ծանուցումները"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Միացնել"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
@@ -2164,7 +2164,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Այս բովանդակությունը հնարավոր չէ ուղարկել անձնական հավելվածներով"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Այս բովանդակությունը հնարավոր չէ բացել անձնական հավելվածներով"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Աշխատանքային պրոֆիլի ծառայությունը դադարեցված է"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Հպեք՝ միացնելու համար"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Հպեք միացնելու համար"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Աշխատանքային հավելվածներ չկան"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Անձնական հավելվածներ չկան"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Բացե՞լ <xliff:g id="APP">%s</xliff:g> հավելվածում անձնական պրոֆիլով"</string>

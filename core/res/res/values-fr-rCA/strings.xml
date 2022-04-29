@@ -348,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permet à l\'application de réduire ou de développer la barre d\'état."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"afficher les notifications en mode plein écran sur un appareil verrouillé"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Permet à l\'application d\'afficher les notifications en mode plein écran sur un appareil verrouillé."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"installer des raccourcis"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Installer des raccourcis"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permet à une application d\'ajouter des raccourcis sans l\'intervention de l\'utilisateur."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"désinstaller des raccourcis"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permet à l\'application de supprimer des raccourcis de la page d\'accueil sans intervention de l\'utilisateur."</string>

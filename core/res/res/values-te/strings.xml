@@ -1149,7 +1149,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"అన్నింటినీ ఎంచుకోండి"</string>
     <string name="cut" msgid="2561199725874745819">"కత్తిరించు"</string>
-    <string name="copy" msgid="5472512047143665218">"కాపీ చేయి"</string>
+    <string name="copy" msgid="5472512047143665218">"కాపీ చేయండి"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"క్లిప్‌బోర్డ్‌కు కాపీ చేయడంలో విఫలమైంది"</string>
     <string name="paste" msgid="461843306215520225">"అతికించు"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"సాదా వచనం లాగా అతికించు"</string>
@@ -1243,7 +1243,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"ఎల్లప్పుడూ చూపు"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Android OS యొక్క అననుకూల వెర్షన్ కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> రూపొందించబడింది మరియు ఊహించని సమస్యలు తలెత్తవచ్చు. యాప్ యొక్క అప్‌డేట్ చేసిన వెర్షన్ అందుబాటులో ఉండవచ్చు."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"ఎల్లప్పుడూ చూపు"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"అప్‌డేట్ కోసం తనిఖీ చేయి"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"అప్‌డేట్ కోసం చెక్ చేయండి"</string>
     <string name="smv_application" msgid="3775183542777792638">"<xliff:g id="APPLICATION">%1$s</xliff:g> యాప్ (<xliff:g id="PROCESS">%2$s</xliff:g> ప్రాసెస్) అది స్వయంగా అమలు చేసే ఖచ్చితమైన మోడ్ విధానాన్ని ఉల్లంఘించింది."</string>
     <string name="smv_process" msgid="1398801497130695446">"ప్రక్రియ <xliff:g id="PROCESS">%1$s</xliff:g> అది స్వయంగా అమలు చేసే ఖచ్చితమైన మోడ్ విధానాన్ని ఉల్లంఘించింది."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"ఫోన్ అప్‌డేట్‌ అవుతోంది…"</string>
@@ -1983,7 +1983,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"యాప్ అందుబాటులో లేదు"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ఈ యాప్ పాత వెర్షన్ Android కోసం రూపొందించబడింది మరియు అది సరిగ్గా పని చేయకపోవచ్చు. అప్‌డేట్‌ల కోసం తనిఖీ చేయడానికి ప్రయత్నించండి లేదా డెవలపర్‌ని సంప్రదించండి."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"అప్‌డేట్ కోసం తనిఖీ చేయండి"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"అప్‌డేట్ కోసం చెక్ చేయండి"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"మీకు కొత్త మెసేజ్‌లు ఉన్నాయి"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"వీక్షించడానికి SMS యాప్‌ను తెరవండి"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"కొంత ఫంక్షనాలిటీ పరిమితం కావచ్చు"</string>
@@ -2164,7 +2164,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ఈ కంటెంట్ వ్యక్తిగత యాప్‌తో షేర్ చేయడం సాధ్యం కాదు"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ఈ కంటెంట్ వ్యక్తిగత యాప్‌తో తెరవడం సాధ్యం కాదు"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"వర్క్ ప్రొఫైల్ పాజ్ చేయబడింది"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"ఆన్ చేయడానికి ట్యాప్ చేయి"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"ఆన్ చేయడానికి ట్యాప్ చేయండి"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"వర్క్ యాప్‌లు లేవు"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"వ్యక్తిగత యాప్‌లు లేవు"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"వ్యక్తిగత ప్రొఫైల్‌లో <xliff:g id="APP">%s</xliff:g>లో తెరవాలా?"</string>

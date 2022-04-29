@@ -625,8 +625,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"暗すぎます。もっと明るい場所でお試しください。"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"スマートフォンをもっと離してください。"</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"スマートフォンをもっと近づけてください。"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"スマートフォンをもっと高い位置に上げてください。"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"スマートフォンをもっと低い位置に下げてください。"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"スマートフォンを上に動かしてください。"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"スマートフォンを下に動かしてください。"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"スマートフォンを左に動かしてください。"</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"スマートフォンを右に動かしてください。"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"もっとまっすぐデバイスに顔を向けてください。"</string>
@@ -804,7 +804,7 @@
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"FAX（自宅）"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"ポケベル"</string>
     <string name="phoneTypeOther" msgid="6918196243648754715">"その他"</string>
-    <string name="phoneTypeCallback" msgid="3455781500844157767">"かけ直す"</string>
+    <string name="phoneTypeCallback" msgid="3455781500844157767">"コールバック"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"クルマ"</string>
     <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"会社代表番号"</string>
     <string name="phoneTypeIsdn" msgid="2496238954533998512">"ISDN"</string>
@@ -2164,7 +2164,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"このコンテンツを個人用アプリと共有することはできません"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"このコンテンツを個人用アプリで開くことはできません"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"仕事用プロファイルが一時停止しています"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップすると有効になります"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップして有効化"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"仕事用アプリはありません"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"個人用アプリはありません"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"個人用プロファイルで <xliff:g id="APP">%s</xliff:g> を開きますか？"</string>
