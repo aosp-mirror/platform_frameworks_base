@@ -131,6 +131,14 @@ class DumpBadgingCommand : public DumpApkCommand {
                       &options_.include_meta_data);
   }
 
+  void SetIncludeMetaData(bool value) {
+    options_.include_meta_data = value;
+  }
+
+  void SetOnlyPermissions(bool value) {
+    options_.only_permissions = value;
+  }
+
   int Dump(LoadedApk* apk) override {
     return DumpManifest(apk, options_, GetPrinter(), GetDiagnostics());
   }

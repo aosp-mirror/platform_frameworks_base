@@ -24,6 +24,7 @@ package {
 }
 
 toolSources = [
+    "cmd/ApkInfo.cpp",
     "cmd/Command.cpp",
     "cmd/Compile.cpp",
     "cmd/Convert.cpp",
@@ -159,6 +160,7 @@ cc_library_host_static {
         "xml/XmlDom.cpp",
         "xml/XmlPullParser.cpp",
         "xml/XmlUtil.cpp",
+        "ApkInfo.proto",
         "Configuration.proto",
         "Resources.proto",
         "ResourcesInternal.proto",
@@ -191,6 +193,7 @@ cc_test_host {
         "integration-tests/CompileTest/**/*",
         "integration-tests/CommandTests/**/*",
         "integration-tests/ConvertTest/**/*",
+        "integration-tests/DumpTest/**/*",
     ],
 }
 
