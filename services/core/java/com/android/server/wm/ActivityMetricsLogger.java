@@ -98,7 +98,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
-import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -178,7 +177,6 @@ class ActivityMetricsLogger {
      * in-order on the same thread to fulfill the "happens-before" guarantee in LaunchObserver.
      */
     private final LaunchObserverRegistryImpl mLaunchObserver;
-    @VisibleForTesting static final int LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE = 512;
     private final ArrayMap<String, Boolean> mLastHibernationStates = new ArrayMap<>();
     private AppHibernationManagerInternal mAppHibernationManagerInternal;
 
@@ -677,7 +675,7 @@ class ActivityMetricsLogger {
             launchObserverNotifyActivityLaunched(newInfo);
         } else {
             // As abort for no process switch.
-            launchObserverNotifyIntentFailed();
+            launchObserverNotifyIntentFailed(newInfo.mTransitionStartTimeNs);
         }
         scheduleCheckActivityToBeDrawnIfSleeping(launchedActivity);
 
@@ -918,7 +916,7 @@ class ActivityMetricsLogger {
         }
         if (DEBUG_METRICS) Slog.i(TAG, "abort launch cause=" + cause);
         state.stopTrace(true /* abort */);
-        launchObserverNotifyIntentFailed();
+        launchObserverNotifyIntentFailed(state.mCurrentTransitionStartTimeNs);
     }
 
     /** Aborts tracking of current launch metrics. */
@@ -1195,7 +1193,7 @@ class ActivityMetricsLogger {
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         // Notify reportFullyDrawn event.
-        launchObserverNotifyReportFullyDrawn(r, currentTimestampNs);
+        launchObserverNotifyReportFullyDrawn(info, currentTimestampNs);
 
         return infoSnapshot;
     }
@@ -1539,11 +1537,11 @@ class ActivityMetricsLogger {
      * aborted due to intent failure (e.g. intent resolve failed or security error, etc) or
      * intent being delivered to the top running activity.
      */
-    private void launchObserverNotifyIntentFailed() {
+    private void launchObserverNotifyIntentFailed(long id) {
        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 "MetricsLogger:launchObserverNotifyIntentFailed");
 
-        mLaunchObserver.onIntentFailed();
+        mLaunchObserver.onIntentFailed(id);
 
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -1560,8 +1558,8 @@ class ActivityMetricsLogger {
                 convertTransitionTypeToLaunchObserverTemperature(info.mTransitionType);
 
         // Beginning a launch is timing sensitive and so should be observed as soon as possible.
-        mLaunchObserver.onActivityLaunched(convertActivityRecordToProto(info.mLastLaunchedActivity),
-                temperature);
+        mLaunchObserver.onActivityLaunched(info.mTransitionStartTimeNs,
+                info.mLastLaunchedActivity.mActivityComponent, temperature);
 
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -1569,10 +1567,10 @@ class ActivityMetricsLogger {
     /**
      * Notifies the {@link ActivityMetricsLaunchObserver} the reportFullDrawn event.
      */
-    private void launchObserverNotifyReportFullyDrawn(ActivityRecord r, long timestampNs) {
+    private void launchObserverNotifyReportFullyDrawn(TransitionInfo info, long timestampNs) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
             "MetricsLogger:launchObserverNotifyReportFullyDrawn");
-        mLaunchObserver.onReportFullyDrawn(convertActivityRecordToProto(r), timestampNs);
+        mLaunchObserver.onReportFullyDrawn(info.mTransitionStartTimeNs, timestampNs);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -1584,10 +1582,7 @@ class ActivityMetricsLogger {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 "MetricsLogger:launchObserverNotifyActivityLaunchCancelled");
 
-        final @ActivityMetricsLaunchObserver.ActivityRecordProto byte[] activityRecordProto =
-                info != null ? convertActivityRecordToProto(info.mLastLaunchedActivity) : null;
-
-        mLaunchObserver.onActivityLaunchCancelled(activityRecordProto);
+        mLaunchObserver.onActivityLaunchCancelled(info.mTransitionStartTimeNs);
 
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -1600,31 +1595,10 @@ class ActivityMetricsLogger {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 "MetricsLogger:launchObserverNotifyActivityLaunchFinished");
 
-        mLaunchObserver.onActivityLaunchFinished(
-                convertActivityRecordToProto(info.mLastLaunchedActivity), timestampNs);
+        mLaunchObserver.onActivityLaunchFinished(info.mTransitionStartTimeNs,
+                info.mLastLaunchedActivity.mActivityComponent, timestampNs);
 
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-    }
-
-    @VisibleForTesting
-    static @ActivityMetricsLaunchObserver.ActivityRecordProto byte[]
-            convertActivityRecordToProto(ActivityRecord record) {
-        // May take non-negligible amount of time to convert ActivityRecord into a proto,
-        // so track the time.
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                "MetricsLogger:convertActivityRecordToProto");
-
-        // There does not appear to be a way to 'reset' a ProtoOutputBuffer stream,
-        // so create a new one every time.
-        final ProtoOutputStream protoOutputStream =
-                new ProtoOutputStream(LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE);
-        // Write this data out as the top-most ActivityRecordProto (i.e. it is not a sub-object).
-        record.dumpDebug(protoOutputStream, WindowTraceLogLevel.ALL);
-        final byte[] bytes = protoOutputStream.getBytes();
-
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-
-        return bytes;
     }
 
     private static @ActivityMetricsLaunchObserver.Temperature int
