@@ -14,9 +14,9 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.CentralSurfacesInt.CLOSE_PANEL_WHEN_EMPTIED;
-import static com.android.systemui.statusbar.phone.CentralSurfacesInt.DEBUG;
-import static com.android.systemui.statusbar.phone.CentralSurfacesInt.MULTIUSER_DEBUG;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.CLOSE_PANEL_WHEN_EMPTIED;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.MULTIUSER_DEBUG;
 
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -104,7 +104,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     private final DozeScrimController mDozeScrimController;
     private final ScrimController mScrimController;
     private final KeyguardIndicationController mKeyguardIndicationController;
-    private final CentralSurfacesInt mCentralSurfaces;
+    private final CentralSurfaces mCentralSurfaces;
     private final ShadeController mShadeController;
     private final LockscreenShadeTransitionController mShadeTransitionController;
     private final CommandQueue mCommandQueue;
@@ -135,7 +135,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardStateController keyguardStateController,
             KeyguardIndicationController keyguardIndicationController,
-            CentralSurfacesInt centralSurfaces,
+            CentralSurfaces centralSurfaces,
             ShadeController shadeController,
             LockscreenShadeTransitionController shadeTransitionController,
             CommandQueue commandQueue,

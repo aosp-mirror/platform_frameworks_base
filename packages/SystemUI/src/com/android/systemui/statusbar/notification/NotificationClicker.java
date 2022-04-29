@@ -24,7 +24,7 @@ import android.view.View;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
@@ -39,7 +39,7 @@ public final class NotificationClicker implements View.OnClickListener {
     private static final String TAG = "NotificationClicker";
 
     private final NotificationClickerLogger mLogger;
-    private final Optional<CentralSurfacesInt> mCentralSurfacesOptional;
+    private final Optional<CentralSurfaces> mCentralSurfacesOptional;
     private final Optional<Bubbles> mBubblesOptional;
     private final NotificationActivityStarter mNotificationActivityStarter;
 
@@ -53,7 +53,7 @@ public final class NotificationClicker implements View.OnClickListener {
 
     private NotificationClicker(
             NotificationClickerLogger logger,
-            Optional<CentralSurfacesInt> centralSurfacesOptional,
+            Optional<CentralSurfaces> centralSurfacesOptional,
             Optional<Bubbles> bubblesOptional,
             NotificationActivityStarter notificationActivityStarter) {
         mLogger = logger;
@@ -137,7 +137,7 @@ public final class NotificationClicker implements View.OnClickListener {
 
         /** Builds an instance. */
         public NotificationClicker build(
-                Optional<CentralSurfacesInt> centralSurfacesOptional,
+                Optional<CentralSurfaces> centralSurfacesOptional,
                 Optional<Bubbles> bubblesOptional,
                 NotificationActivityStarter notificationActivityStarter
         ) {

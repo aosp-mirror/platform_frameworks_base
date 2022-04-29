@@ -48,7 +48,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.power.PowerUI.WarningsUI;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -89,8 +89,8 @@ public class PowerUITest extends SysuiTestCase {
     private IThermalEventListener mSkinThermalEventListener;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private CommandQueue mCommandQueue;
-    @Mock private Lazy<Optional<CentralSurfacesInt>> mCentralSurfacesOptionalLazy;
-    @Mock private CentralSurfacesInt mCentralSurfaces;
+    @Mock private Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    @Mock private CentralSurfaces mCentralSurfaces;
 
     @Before
     public void setup() {

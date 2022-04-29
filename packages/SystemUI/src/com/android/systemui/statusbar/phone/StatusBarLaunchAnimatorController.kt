@@ -10,7 +10,7 @@ import com.android.systemui.animation.LaunchAnimator
  */
 class StatusBarLaunchAnimatorController(
     private val delegate: ActivityLaunchAnimator.Controller,
-    private val centralSurfaces: CentralSurfacesInt,
+    private val centralSurfaces: CentralSurfaces,
     private val isLaunchForActivity: Boolean = true
 ) : ActivityLaunchAnimator.Controller by delegate {
     // Always sync the opening window with the shade, given that we draw a hole punch in the shade
