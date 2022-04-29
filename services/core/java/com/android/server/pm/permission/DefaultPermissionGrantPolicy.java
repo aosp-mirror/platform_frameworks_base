@@ -21,6 +21,7 @@ import static android.os.Process.FIRST_APPLICATION_UID;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.SearchManager;
@@ -1091,6 +1092,14 @@ final class DefaultPermissionGrantPolicy {
                         userId);
             }
         }
+    }
+
+    public void grantDefaultPermissionsToCarrierServiceApp(@NonNull String packageName,
+            @UserIdInt int userId) {
+        Log.i(TAG, "Grant permissions to Carrier Service app " + packageName + " for user:"
+                + userId);
+        grantPermissionsToPackage(NO_PM_CACHE, packageName, userId, /* ignoreSystemPackage */ false,
+               /* whitelistRestricted */ true, NOTIFICATION_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackage(PackageManagerWrapper pm,
