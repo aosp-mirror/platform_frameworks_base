@@ -153,7 +153,7 @@ public final class AmbientContextManager {
      *   eventTypes.add(AmbientContextEvent.EVENT_SNORE);
      *
      *   // Create Consumer
-     *   Consumer<Integer> statusConsumer = response -> {
+     *   Consumer<Integer> statusConsumer = status -> {
      *     int status = status.getStatusCode();
      *     if (status == AmbientContextManager.STATUS_SUCCESS) {
      *       // Show user it's enabled

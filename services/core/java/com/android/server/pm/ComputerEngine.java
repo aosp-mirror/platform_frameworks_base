@@ -4219,7 +4219,11 @@ public class ComputerEngine implements Computer {
     }
 
     @Override
-    public int checkSignatures(@NonNull String pkg1, @NonNull String pkg2) {
+    public int checkSignatures(@NonNull String pkg1, @NonNull String pkg2, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
+                false /* checkShell */, "checkSignatures");
+
         final AndroidPackage p1 = mPackages.get(pkg1);
         final AndroidPackage p2 = mPackages.get(pkg2);
         final PackageStateInternal ps1 =
@@ -4229,10 +4233,8 @@ public class ComputerEngine implements Computer {
         if (p1 == null || ps1 == null || p2 == null || ps2 == null) {
             return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
         }
-        final int callingUid = Binder.getCallingUid();
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        if (shouldFilterApplicationIncludingUninstalled(ps1, callingUid, callingUserId)
-                || shouldFilterApplicationIncludingUninstalled(ps2, callingUid, callingUserId)) {
+        if (shouldFilterApplicationIncludingUninstalled(ps1, callingUid, userId)
+                || shouldFilterApplicationIncludingUninstalled(ps2, callingUid, userId)) {
             return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
         }
         return checkSignaturesInternal(p1.getSigningDetails(), p2.getSigningDetails());

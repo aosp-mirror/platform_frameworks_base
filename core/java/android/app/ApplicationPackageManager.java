@@ -960,7 +960,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public int checkSignatures(String pkg1, String pkg2) {
         try {
-            return mPM.checkSignatures(pkg1, pkg2);
+            return mPM.checkSignatures(pkg1, pkg2, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -33,6 +33,12 @@ public class HandwritingTestUtil {
     }
 
     public static View createView(Rect handwritingArea, boolean autoHandwritingEnabled) {
+        return createView(handwritingArea, autoHandwritingEnabled, 0, 0, 0, 0);
+    }
+
+    public static View createView(Rect handwritingArea, boolean autoHandwritingEnabled,
+            float handwritingBoundsOffsetLeft, float handwritingBoundsOffsetTop,
+            float handwritingBoundsOffsetRight, float handwritingBoundsOffsetBottom) {
         final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         final Context context = instrumentation.getTargetContext();
         // mock a parent so that HandwritingInitiator can get
@@ -52,6 +58,10 @@ public class HandwritingTestUtil {
         when(view.isAttachedToWindow()).thenReturn(true);
         when(view.isAggregatedVisible()).thenReturn(true);
         when(view.getHandwritingArea()).thenReturn(handwritingArea);
+        when(view.getHandwritingBoundsOffsetLeft()).thenReturn(handwritingBoundsOffsetLeft);
+        when(view.getHandwritingBoundsOffsetTop()).thenReturn(handwritingBoundsOffsetTop);
+        when(view.getHandwritingBoundsOffsetRight()).thenReturn(handwritingBoundsOffsetRight);
+        when(view.getHandwritingBoundsOffsetBottom()).thenReturn(handwritingBoundsOffsetBottom);
         view.setAutoHandwritingEnabled(autoHandwritingEnabled);
         parent.addView(view);
         return view;

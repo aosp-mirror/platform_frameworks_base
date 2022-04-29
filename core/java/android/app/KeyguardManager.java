@@ -51,6 +51,7 @@ import android.view.IWindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.util.Preconditions;
@@ -756,7 +757,9 @@ public class KeyguardManager {
         }
     }
 
-    private boolean checkInitialLockMethodUsage() {
+    /** @hide */
+    @VisibleForTesting
+    public boolean checkInitialLockMethodUsage() {
         if (!hasPermission(Manifest.permission.SET_INITIAL_LOCK)) {
             throw new SecurityException("Requires SET_INITIAL_LOCK permission.");
         }

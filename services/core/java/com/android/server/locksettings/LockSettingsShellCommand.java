@@ -212,7 +212,10 @@ class LockSettingsShellCommand extends ShellCommand {
             if ("--old".equals(opt)) {
                 mOld = getNextArgRequired();
             } else if ("--user".equals(opt)) {
-                mCurrentUserId = Integer.parseInt(getNextArgRequired());
+                mCurrentUserId = UserHandle.parseUserArg(getNextArgRequired());
+                if (mCurrentUserId == UserHandle.USER_CURRENT) {
+                    mCurrentUserId = ActivityManager.getCurrentUser();
+                }
             } else {
                 getErrPrintWriter().println("Unknown option: " + opt);
                 throw new IllegalArgumentException();

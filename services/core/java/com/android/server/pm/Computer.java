@@ -373,7 +373,7 @@ public interface Computer extends PackageDataSnapshot {
     PackageStateInternal getPackageStateFiltered(@NonNull String packageName, int callingUid,
             @UserIdInt int userId);
 
-    int checkSignatures(@NonNull String pkg1, @NonNull String pkg2);
+    int checkSignatures(@NonNull String pkg1, @NonNull String pkg2, int userId);
 
     int checkUidSignatures(int uid1, int uid2);
 

@@ -32,6 +32,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
@@ -121,9 +122,11 @@ import com.android.server.BundleUtils;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemService;
+import com.android.server.UiThread;
 import com.android.server.am.UserState;
 import com.android.server.pm.UserManagerInternal.UserLifecycleListener;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
+import com.android.server.power.ShutdownThread;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -5602,11 +5605,16 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println("      (where MODE is the allowlist mode integer as defined by "
                     + "config_userTypePackageWhitelistMode)");
             pw.println();
-            pw.println("  set-system-user-mode-emulation [headless | full | default]");
-            pw.println("    Changes whether the system user is headless or full.");
+            pw.println("  set-system-user-mode-emulation [--reboot | --no-restart] "
+                    + "<headless | full | default>");
+            pw.println("    Changes whether the system user is headless, full, or default (as "
+                    + "defined by OEM).");
             pw.println("    WARNING: this command is meant just for development and debugging "
                     + "purposes.");
             pw.println("             It should NEVER be used on automated tests.");
+            pw.println("    NOTE: by default it restarts the Android runtime, unless called with");
+            pw.println("          --reboot (which does a full reboot) or");
+            pw.println("          --no-restart (which requires a manual restart)");
             pw.println();
         }
 
@@ -5769,6 +5777,27 @@ public class UserManagerService extends IUserManager.Stub {
                 return -1;
             }
 
+            boolean restart = true;
+            boolean reboot = false;
+            String opt;
+            while ((opt = getNextOption()) != null) {
+                switch (opt) {
+                    case "--reboot":
+                        reboot = true;
+                        break;
+                    case "--no-restart":
+                        restart = false;
+                        break;
+                    default:
+                        pw.println("Invalid option: " + opt);
+                        return -1;
+                }
+            }
+            if (reboot && !restart) {
+                getErrPrintWriter().println("You can use --reboot or --no-restart, but not both");
+                return -1;
+            }
+
             final String mode = getNextArgRequired();
             final boolean isHeadlessSystemUserModeCurrently = UserManager
                     .isHeadlessSystemUserMode();
@@ -5785,7 +5814,7 @@ public class UserManagerService extends IUserManager.Stub {
                     changed = true; // Always update when resetting to default
                     break;
                 default:
-                    pw.printf("Invalid arg: %s\n", mode);
+                    getErrPrintWriter().printf("Invalid arg: %s\n", mode);
                     return -1;
             }
 
@@ -5799,10 +5828,46 @@ public class UserManagerService extends IUserManager.Stub {
                     UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY, mode);
 
             SystemProperties.set(UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY, mode);
-            pw.println("System user mode changed - please reboot (or restart Android runtime) "
-                    + "to continue");
-            pw.println("NOTICE: after restart, some apps might be uninstalled (and their data "
-                    + "will be lost)");
+
+            if (reboot) {
+                Slog.i(LOG_TAG, "Rebooting to finalize the changes");
+                pw.println("Rebooting to finalize changes");
+                UiThread.getHandler()
+                        .post(() -> ShutdownThread.reboot(
+                                ActivityThread.currentActivityThread().getSystemUiContext(),
+                                "To switch headless / full system user mode",
+                                /* confirm= */ false));
+            } else if (restart) {
+                Slog.i(LOG_TAG, "Shutting PackageManager down");
+                getPackageManagerInternal().shutdown();
+
+                final IActivityManager am = ActivityManager.getService();
+                if (am != null) {
+                    try {
+                        Slog.i(LOG_TAG, "Shutting ActivityManager down");
+                        am.shutdown(/* timeout= */ 10_000);
+                    } catch (RemoteException e) {
+                    }
+                }
+
+                final int pid = Process.myPid();
+                Slogf.i(LOG_TAG, "Restarting Android runtime(PID=%d) to finalize changes", pid);
+                pw.println("Restarting Android runtime to finalize changes");
+                pw.flush();
+
+                // Ideally there should be a cleaner / safer option to restart system_server, but
+                // that doesn't seems to be the case. For example, ShutdownThread.reboot() calls
+                // pm.shutdown() and am.shutdown() (which we already are calling above), but when
+                // the system is restarted through 'adb shell stop && adb shell start`, these
+                // methods are not called, so just killing the process seems to be fine.
+
+                Process.killProcess(pid);
+            } else {
+                pw.println("System user mode changed - please reboot (or restart Android runtime) "
+                        + "to continue");
+                pw.println("NOTICE: after restart, some apps might be uninstalled (and their data "
+                        + "will be lost)");
+            }
             return 0;
         }
 
