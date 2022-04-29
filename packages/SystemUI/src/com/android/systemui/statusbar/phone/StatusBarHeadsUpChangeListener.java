@@ -29,7 +29,7 @@ import com.android.systemui.statusbar.window.StatusBarWindowController;
 import javax.inject.Inject;
 
 /**
- * Ties the {@link CentralSurfaces} to {@link com.android.systemui.statusbar.policy.HeadsUpManager}.
+ * Ties the {@link CentralSurfacesInt} to {@link com.android.systemui.statusbar.policy.HeadsUpManager}.
  */
 @CentralSurfacesComponent.CentralSurfacesScope
 public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener {

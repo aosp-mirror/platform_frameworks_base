@@ -82,7 +82,7 @@ import com.android.systemui.statusbar.notification.collection.provider.HighPrior
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.wmshell.BubblesManager;
@@ -124,7 +124,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private NotificationInfo.CheckSaveListener mCheckSaveListener;
     @Mock private OnSettingsClickListener mOnSettingsClickListener;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
-    @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private CentralSurfacesInt mCentralSurfaces;
     @Mock private AccessibilityManager mAccessibilityManager;
     @Mock private HighPriorityProvider mHighPriorityProvider;
     @Mock private INotificationManager mINotificationManager;

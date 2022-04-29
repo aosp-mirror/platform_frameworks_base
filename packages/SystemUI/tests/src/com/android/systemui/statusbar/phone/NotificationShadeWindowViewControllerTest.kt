@@ -63,7 +63,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var mStatusBarStateController: SysuiStatusBarStateController
     @Mock
-    private lateinit var mCentralSurfaces: CentralSurfaces
+    private lateinit var mCentralSurfaces: CentralSurfacesInt
     @Mock
     private lateinit var mDockManager: DockManager
     @Mock
