@@ -82,7 +82,7 @@ public class NotificationShadeWindowViewController {
     private boolean mExpandAnimationRunning;
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarViewController mStatusBarViewController;
-    private final CentralSurfaces mService;
+    private final CentralSurfacesInt mService;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
     private boolean mDoubleTapEnabled;
@@ -111,7 +111,7 @@ public class NotificationShadeWindowViewController {
             StatusBarWindowStateController statusBarWindowStateController,
             LockIconViewController lockIconViewController,
             Optional<LowLightClockController> lowLightClockController,
-            CentralSurfaces centralSurfaces,
+            CentralSurfacesInt centralSurfaces,
             NotificationShadeWindowController controller,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             AmbientState ambientState) {
@@ -252,7 +252,7 @@ public class NotificationShadeWindowViewController {
                 }
 
                 if (mStatusBarStateController.isDozing()) {
-                    mService.mDozeScrimController.extendPulse();
+                    mService.extendDozePulse();
                 }
                 mLockIconViewController.onTouchEvent(
                         ev,

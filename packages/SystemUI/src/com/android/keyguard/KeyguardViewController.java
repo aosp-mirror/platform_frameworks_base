@@ -24,7 +24,7 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
@@ -183,7 +183,7 @@ public interface KeyguardViewController {
     /**
      * Registers the CentralSurfaces to which this Keyguard View is mounted.
      */
-    void registerCentralSurfaces(CentralSurfaces centralSurfaces,
+    void registerCentralSurfaces(CentralSurfacesInt centralSurfaces,
             NotificationPanelViewController notificationPanelViewController,
             @Nullable PanelExpansionStateManager panelExpansionStateManager,
             BiometricUnlockController biometricUnlockController,

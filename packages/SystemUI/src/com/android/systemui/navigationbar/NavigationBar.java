@@ -54,8 +54,8 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
-import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG_WINDOW_STATE;
-import static com.android.systemui.statusbar.phone.CentralSurfaces.dumpBarTransitions;
+import static com.android.systemui.statusbar.phone.CentralSurfacesInt.DEBUG_WINDOW_STATE;
+import static com.android.systemui.statusbar.phone.CentralSurfacesInt.dumpBarTransitions;
 
 import android.annotation.IdRes;
 import android.app.ActivityTaskManager;
@@ -140,7 +140,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -187,7 +187,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final SysUiState mSysUiFlagsContainer;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    private final Lazy<Optional<CentralSurfacesInt>> mCentralSurfacesOptionalLazy;
     private final ShadeController mShadeController;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final OverviewProxyService mOverviewProxyService;
@@ -499,7 +499,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             CommandQueue commandQueue,
             Optional<Pip> pipOptional,
             Optional<Recents> recentsOptional,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            Lazy<Optional<CentralSurfacesInt>> centralSurfacesOptionalLazy,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationShadeDepthController notificationShadeDepthController,
@@ -1189,13 +1189,13 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         // If an incoming call is ringing, HOME is totally disabled.
         // (The user is already on the InCallUI at this point,
         // and their ONLY options are to answer or reject the call.)
-        final Optional<CentralSurfaces> centralSurfacesOptional = mCentralSurfacesOptionalLazy.get();
+        final Optional<CentralSurfacesInt> centralSurfacesOptional = mCentralSurfacesOptionalLazy.get();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mHomeBlockedThisTouch = false;
                 if (mTelecomManagerOptional.isPresent()
                         && mTelecomManagerOptional.get().isRinging()) {
-                    if (centralSurfacesOptional.map(CentralSurfaces::isKeyguardShowing)
+                    if (centralSurfacesOptional.map(CentralSurfacesInt::isKeyguardShowing)
                             .orElse(false)) {
                         Log.i(TAG, "Ignoring HOME; there's a ringing incoming call. " +
                                 "No heads up");
@@ -1212,7 +1212,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 mHandler.removeCallbacks(mOnVariableDurationHomeLongClick);
-                centralSurfacesOptional.ifPresent(CentralSurfaces::awakenDreams);
+                centralSurfacesOptional.ifPresent(CentralSurfacesInt::awakenDreams);
                 break;
         }
         return false;
@@ -1246,7 +1246,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 AssistManager.INVOCATION_TYPE_KEY,
                 AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
         mAssistManagerLazy.get().startAssist(args);
-        mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::awakenDreams);
+        mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfacesInt::awakenDreams);
         mView.abortCurrentGesture();
         return true;
     }
@@ -1272,7 +1272,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             LatencyTracker.getInstance(mContext).onActionStart(
                     LatencyTracker.ACTION_TOGGLE_RECENTS);
         }
-        mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::awakenDreams);
+        mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfacesInt::awakenDreams);
         mCommandQueue.toggleRecentApps();
     }
 
@@ -1454,7 +1454,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private void checkBarModes() {
         // We only have status bar on default display now.
         if (mIsOnDefaultDisplay) {
-            mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::checkBarModes);
+            mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfacesInt::checkBarModes);
         } else {
             checkNavBarModes();
         }
@@ -1473,7 +1473,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
      */
     public void checkNavBarModes() {
         final boolean anim =
-                mCentralSurfacesOptionalLazy.get().map(CentralSurfaces::isDeviceInteractive)
+                mCentralSurfacesOptionalLazy.get().map(CentralSurfacesInt::isDeviceInteractive)
                         .orElse(false)
                 && mNavigationBarWindowState != WINDOW_STATE_HIDDEN;
         getBarTransitions().transitionTo(mTransitionMode, anim);

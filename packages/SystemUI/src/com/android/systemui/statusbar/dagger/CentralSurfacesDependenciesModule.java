@@ -60,7 +60,8 @@ import com.android.systemui.statusbar.notification.collection.legacy.Notificatio
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
+import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
@@ -87,7 +88,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * This module provides instances needed to construct {@link CentralSurfaces}. These are moved to
+ * This module provides instances needed to construct {@link CentralSurfacesImpl}. These are moved to
  * this separate from {@link CentralSurfacesModule} module so that components that wish to build
  * their own version of CentralSurfaces can include just dependencies, without injecting
  * CentralSurfaces itself.
@@ -105,7 +106,7 @@ public interface CentralSurfacesDependenciesModule {
             NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager notificationEntryManager,
             RemoteInputNotificationRebuilder rebuilder,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            Lazy<Optional<CentralSurfacesInt>> centralSurfacesOptionalLazy,
             StatusBarStateController statusBarStateController,
             Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
@@ -134,7 +135,7 @@ public interface CentralSurfacesDependenciesModule {
     @Provides
     static NotificationMediaManager provideNotificationMediaManager(
             Context context,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            Lazy<Optional<CentralSurfacesInt>> centralSurfacesOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager notificationEntryManager,

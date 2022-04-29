@@ -37,7 +37,7 @@ class ScreenOffAnimationController @Inject constructor(
     private val animations: List<ScreenOffAnimation> =
         listOfNotNull(foldToAodAnimation, unlockedScreenOffAnimation)
 
-    fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {
+    fun initialize(centralSurfaces: CentralSurfacesInt, lightRevealScrim: LightRevealScrim) {
         animations.forEach { it.initialize(centralSurfaces, lightRevealScrim) }
         wakefulnessLifecycle.addObserver(this)
     }
@@ -197,7 +197,7 @@ class ScreenOffAnimationController @Inject constructor(
 }
 
 interface ScreenOffAnimation {
-    fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {}
+    fun initialize(centralSurfaces: CentralSurfacesInt, lightRevealScrim: LightRevealScrim) {}
 
     /**
      * Called when started going to sleep, should return true if the animation will be played

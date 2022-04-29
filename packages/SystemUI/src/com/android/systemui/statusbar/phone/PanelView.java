@@ -27,7 +27,7 @@ public abstract class PanelView extends FrameLayout {
     public static final String TAG = PanelView.class.getSimpleName();
     private PanelViewController.TouchHandler mTouchHandler;
 
-    protected CentralSurfaces mCentralSurfaces;
+    protected CentralSurfacesInt mCentralSurfaces;
     protected HeadsUpManagerPhone mHeadsUpManager;
 
     protected KeyguardBottomAreaView mKeyguardBottomArea;

@@ -58,7 +58,7 @@ import java.util.Optional;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
-    @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private CentralSurfacesInt mCentralSurfaces;
     @Mock private ShadeController mShadeController;
     @Mock private CommandQueue mCommandQueue;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
