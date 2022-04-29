@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रीनशॉट दोबारा लेने की कोशिश करें"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"स्क्रीनशॉट को सेव नहीं किया जा सकता"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ऐप्लिकेशन या आपका संगठन स्क्रीनशॉट लेने की अनुमति नहीं देता"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"बदलाव करें"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"स्क्रीनशॉट में बदलाव करें"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"स्क्रीनशॉट शेयर करें"</string>
@@ -335,7 +337,7 @@
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"उपयोगकर्ता बदलें"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सेशन के सभी ऐप्लिकेशन और डेटा को हटा दिया जाएगा."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"मेहमान, आपका फिर से स्वागत है!"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"क्‍या आप अपना सत्र जारी रखना चाहते हैं?"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"क्‍या आपको अपना सेशन जारी रखना है?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"फिर से शुरू करें"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"हां, जारी रखें"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"अब और उपयोगकर्ता नहीं जोड़े जा सकते"</string>
@@ -365,28 +367,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है. आपका संगठन, नेटवर्क के ट्रैफ़िक की निगरानी कर सकता है"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> के पास है. आपका संगठन, नेटवर्क के ट्रैफ़िक की निगरानी कर सकता है"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"यह डिवाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ने दिया है"</string>
-    <!-- no translation found for quick_settings_disclosure_management_named_vpn (4137564460025113168) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (2169227918166358741) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"यह डिवाइस आपके संगठन का है. इसे <xliff:g id="VPN_APP">%1$s</xliff:g> के ज़रिए इंटरनेट से कनेक्ट किया गया है"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"यह डिवाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> का है. इसे <xliff:g id="VPN_APP">%2$s</xliff:g> के ज़रिए इंटरनेट से कनेक्ट किया गया है"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> के पास है"</string>
-    <!-- no translation found for quick_settings_disclosure_management_vpns (929181757984262902) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_vpns (3312645578322079185) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"यह डिवाइस आपके संगठन का है. इसे वीपीएन के ज़रिए इंटरनेट से कनेक्ट किया गया है"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"यह डिवाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> का है. इसे वीपीएन के ज़रिए इंटरनेट से कनेक्ट किया गया है"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"आपका संगठन आपकी वर्क प्रोफ़ाइल में नेटवर्क ट्रैफ़िक की निगरानी कर सकता है"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> आपकी वर्क प्रोफ़ाइल में नेटवर्क ट्रैफ़िक की निगरानी कर सकता है"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"आईटी एडमिन आपकी वर्क प्रोफ़ाइल के नेटवर्क से जुड़ी गतिविधि देख सकता है"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"नेटवर्क की निगरानी की जा सकती है"</string>
-    <!-- no translation found for quick_settings_disclosure_vpns (3586175303518266301) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (153393105176944100) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (451254750289172191) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_vpn (6191822916936028208) -->
-    <skip />
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"इस डिवाइस को वीपीएन के ज़रिए इंटरनेट से कनेक्ट किया गया है"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"ऑफ़िस के काम से जुड़े आपके ऐप्लिकेशन, <xliff:g id="VPN_APP">%1$s</xliff:g> के ज़रिए इंटरनेट से कनेक्ट किए गए हैं"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"आपके निजी ऐप्लिकेशन, <xliff:g id="VPN_APP">%1$s</xliff:g> के ज़रिए इंटरनेट से कनेक्ट किए गए हैं"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"इस डिवाइस को <xliff:g id="VPN_APP">%1$s</xliff:g> के ज़रिए इंटरनेट से कनेक्ट किया गया है"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"यह डिवाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ने दिया है"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"डिवाइस मैनेजमेंट"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"वीपीएन"</string>
@@ -402,14 +396,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"इस डिवाइस पर एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"आपके व्यवस्थापक ने नेटवर्क लॉगिंग चालू किया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"आपके एडमिन ने नेटवर्क लॉगिंग की सुविधा चालू कर दी है. इससे आपकी वर्क प्रोफ़ाइल पर आने वाले ट्रैफ़िक की निगरानी की जाती है. हालांकि, इससे आपकी निजी प्रोफ़ाइल की निगरानी नहीं की जाती."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7502657784155456414) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (6726394451199620634) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_profile_named_vpn (7254359257263069766) -->
-    <skip />
-    <!-- no translation found for monitoring_description_personal_profile_named_vpn (5083909710727365452) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"इस डिवाइस को <xliff:g id="VPN_APP">%1$s</xliff:g> के ज़रिए इंटरनेट से कनेक्ट किया गया है. नेटवर्क पर की गई गतिविधि से जुड़ी जानकारी, आपके आईटी एडमिन को दिखती है. इस जानकारी में, ईमेल और ब्राउज़िंग डेटा शामिल है."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"इस डिवाइस को <xliff:g id="VPN_APP_0">%1$s</xliff:g> और <xliff:g id="VPN_APP_1">%2$s</xliff:g> के ज़रिए इंटरनेट से कनेक्ट किया गया है. नेटवर्क पर की गई गतिविधि से जुड़ी जानकारी, आपके आईटी एडमिन को दिखती है. इस जानकारी में, ईमेल और ब्राउज़िंग डेटा शामिल है."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन, <xliff:g id="VPN_APP">%1$s</xliff:g> के ज़रिए इंटरनेट से कनेक्ट किए गए हैं. ऑफ़िस के काम से जुड़े ऐप्लिकेशन में, नेटवर्क पर की गई गतिविधि से जुड़ी जानकारी आपके आईटी एडमिन और वीपीएन सेवा देने वाले को दिखती है. इस जानकारी में, ईमेल और ब्राउज़िंग डेटा शामिल है."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"आपके निजी ऐप्लिकेशन, <xliff:g id="VPN_APP">%1$s</xliff:g> के ज़रिए इंटरनेट से कनेक्ट किए गए हैं. नेटवर्क पर की गई गतिविधि से जुड़ी जानकारी, वीपीएन सेवा देने वाले को दिखती है. इस जानकारी में, ईमेल और ब्राउज़िंग डेटा शामिल है."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN सेटिंग खोलें"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"इस डिवाइस का प्रबंधन आपके अभिभावक करते हैं. अभिभावक आपके डिवाइस से जुड़ी जानकारी देख सकते हैं. साथ ही, इसे प्रबंधित कर सकते हैं. इनमें आपके इस्तेमाल किए गए ऐप्लिकेशन, जगह की जानकारी, और डिवाइस के इस्तेमाल में बिताए गए समय जैसी जानकारी शामिल है."</string>
@@ -730,6 +720,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"जब बैटरी खत्म होने वाली हो तब \'बैटरी सेवर\' चालू करें"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"जी नहीं, शुक्रिया"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ऐप्लिकेशन आपकी <xliff:g id="TYPES_LIST">%s</xliff:g> का इस्तेमाल कर रहे हैं."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" और "</string>
@@ -855,10 +847,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"ब्रॉडकास्ट का नाम"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"पासवर्ड"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"सेव करें"</string>
-    <!-- no translation found for media_output_broadcast_starting (8130153654166235557) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_start_failed (3670835946856129775) -->
-    <skip />
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"शुरू हो रहा है…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ब्रॉडकास्ट नहीं किया जा सकता"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नंबर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नंबर को क्लिपबोर्ड पर कॉपी किया गया."</string>
     <string name="basic_status" msgid="2315371112182658176">"ऐसी बातचीत जिसमें इंटरैक्शन डेटा मौजूद नहीं है"</string>
