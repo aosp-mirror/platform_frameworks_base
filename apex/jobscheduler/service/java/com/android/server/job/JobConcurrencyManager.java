@@ -690,6 +690,12 @@ class JobConcurrencyManager {
         int projectedRunningCount = numRunningJobs;
         while ((nextPending = pendingJobQueue.next()) != null) {
             if (mRunningJobs.contains(nextPending)) {
+                // Should never happen.
+                Slog.wtf(TAG, "Pending queue contained a running job");
+                if (DEBUG) {
+                    Slog.e(TAG, "Pending+running job: " + nextPending);
+                }
+                pendingJobQueue.remove(nextPending);
                 continue;
             }
 
@@ -1137,7 +1143,8 @@ class JobConcurrencyManager {
             }
         }
 
-        if (mActiveServices.size() >= STANDARD_CONCURRENCY_LIMIT) {
+        final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
+        if (mActiveServices.size() >= STANDARD_CONCURRENCY_LIMIT || pendingJobQueue.size() == 0) {
             worker.clearPreferredUid();
             // We're over the limit (because the TOP app scheduled a lot of EJs). Don't start
             // running anything new until we get back below the limit.
@@ -1145,7 +1152,6 @@ class JobConcurrencyManager {
             return;
         }
 
-        final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         if (worker.getPreferredUid() != JobServiceContext.NO_PREFERRED_UID) {
             updateCounterConfigLocked();
             // Preemption case needs special care.
@@ -1162,6 +1168,12 @@ class JobConcurrencyManager {
             pendingJobQueue.resetIterator();
             while ((nextPending = pendingJobQueue.next()) != null) {
                 if (mRunningJobs.contains(nextPending)) {
+                    // Should never happen.
+                    Slog.wtf(TAG, "Pending queue contained a running job");
+                    if (DEBUG) {
+                        Slog.e(TAG, "Pending+running job: " + nextPending);
+                    }
+                    pendingJobQueue.remove(nextPending);
                     continue;
                 }
 
@@ -1239,6 +1251,12 @@ class JobConcurrencyManager {
             while ((nextPending = pendingJobQueue.next()) != null) {
 
                 if (mRunningJobs.contains(nextPending)) {
+                    // Should never happen.
+                    Slog.wtf(TAG, "Pending queue contained a running job");
+                    if (DEBUG) {
+                        Slog.e(TAG, "Pending+running job: " + nextPending);
+                    }
+                    pendingJobQueue.remove(nextPending);
                     continue;
                 }
 
