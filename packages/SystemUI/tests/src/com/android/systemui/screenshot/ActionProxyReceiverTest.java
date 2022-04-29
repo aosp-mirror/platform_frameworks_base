@@ -19,7 +19,7 @@ package com.android.systemui.screenshot;
 import static com.android.systemui.screenshot.ScreenshotController.ACTION_TYPE_SHARE;
 import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ID;
 import static com.android.systemui.screenshot.ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED;
-import static com.android.systemui.statusbar.phone.CentralSurfaces.SYSTEM_DIALOG_REASON_SCREENSHOT;
+import static com.android.systemui.statusbar.phone.CentralSurfacesInt.SYSTEM_DIALOG_REASON_SCREENSHOT;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -41,7 +41,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +59,7 @@ import java.util.concurrent.TimeoutException;
 public class ActionProxyReceiverTest extends SysuiTestCase {
 
     @Mock
-    private CentralSurfaces mMockCentralSurfaces;
+    private CentralSurfacesInt mMockCentralSurfaces;
     @Mock
     private ActivityManagerWrapper mMockActivityManagerWrapper;
     @Mock

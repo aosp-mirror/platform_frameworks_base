@@ -47,7 +47,7 @@ public class ShadeControllerImpl implements ShadeController {
     protected final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final int mDisplayId;
-    protected final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    protected final Lazy<Optional<CentralSurfacesInt>> mCentralSurfacesOptionalLazy;
     private final Lazy<AssistManager> mAssistManagerLazy;
 
     private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
@@ -59,7 +59,7 @@ public class ShadeControllerImpl implements ShadeController {
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             WindowManager windowManager,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            Lazy<Optional<CentralSurfacesInt>> centralSurfacesOptionalLazy,
             Lazy<AssistManager> assistManagerLazy
     ) {
         mCommandQueue = commandQueue;
@@ -208,7 +208,7 @@ public class ShadeControllerImpl implements ShadeController {
         }
     }
 
-    private CentralSurfaces getCentralSurfaces() {
+    private CentralSurfacesInt getCentralSurfaces() {
         return mCentralSurfacesOptionalLazy.get().get();
     }
 

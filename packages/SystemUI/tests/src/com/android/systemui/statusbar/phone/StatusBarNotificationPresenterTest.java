@@ -80,7 +80,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private CommandQueue mCommandQueue;
     private FakeMetricsLogger mMetricsLogger;
     private ShadeController mShadeController = mock(ShadeController.class);
-    private CentralSurfaces mCentralSurfaces = mock(CentralSurfaces.class);
+    private CentralSurfacesInt mCentralSurfaces = mock(CentralSurfacesInt.class);
     private InitController mInitController = new InitController();
 
     @Before

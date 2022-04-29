@@ -53,7 +53,7 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesInt;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -101,7 +101,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final StatusBarIconController mIconController;
     private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
     private int mCurrentUser;
-    private final Optional<CentralSurfaces> mCentralSurfacesOptional;
+    private final Optional<CentralSurfacesInt> mCentralSurfacesOptional;
     private Context mUserContext;
     private UserTracker mUserTracker;
     private SecureSettings mSecureSettings;
@@ -120,7 +120,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             Provider<AutoTileManager> autoTiles,
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
-            Optional<CentralSurfaces> centralSurfacesOptional,
+            Optional<CentralSurfacesInt> centralSurfacesOptional,
             QSLogger qsLogger,
             UiEventLogger uiEventLogger,
             UserTracker userTracker,
@@ -226,17 +226,17 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
     @Override
     public void collapsePanels() {
-        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateCollapsePanels);
+        mCentralSurfacesOptional.ifPresent(CentralSurfacesInt::postAnimateCollapsePanels);
     }
 
     @Override
     public void forceCollapsePanels() {
-        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateForceCollapsePanels);
+        mCentralSurfacesOptional.ifPresent(CentralSurfacesInt::postAnimateForceCollapsePanels);
     }
 
     @Override
     public void openPanels() {
-        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateOpenPanels);
+        mCentralSurfacesOptional.ifPresent(CentralSurfacesInt::postAnimateOpenPanels);
     }
 
     @Override

@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 
-import static com.android.systemui.statusbar.phone.CentralSurfaces.getActivityOptions;
+import static com.android.systemui.statusbar.phone.CentralSurfacesInt.getActivityOptions;
 
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
@@ -125,7 +125,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     private final MetricsLogger mMetricsLogger;
     private final StatusBarNotificationActivityStarterLogger mLogger;
 
-    private final CentralSurfaces mCentralSurfaces;
+    private final CentralSurfacesInt mCentralSurfaces;
     private final NotificationPresenter mPresenter;
     private final NotificationPanelViewController mNotificationPanel;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
@@ -166,7 +166,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             MetricsLogger metricsLogger,
             StatusBarNotificationActivityStarterLogger logger,
             OnUserInteractionCallback onUserInteractionCallback,
-            CentralSurfaces centralSurfaces,
+            CentralSurfacesInt centralSurfaces,
             NotificationPresenter presenter,
             NotificationPanelViewController panel,
             ActivityLaunchAnimator activityLaunchAnimator,
