@@ -50,6 +50,7 @@ int register_android_graphics_Paint(JNIEnv* env);
 int register_android_graphics_Path(JNIEnv* env);
 int register_android_graphics_PathMeasure(JNIEnv* env);
 int register_android_graphics_Region(JNIEnv* env);
+int register_android_graphics_drawable_AnimatedVectorDrawable(JNIEnv* env);
 int register_android_graphics_drawable_VectorDrawable(JNIEnv* env);
 int register_android_graphics_fonts_Font(JNIEnv* env);
 int register_android_graphics_fonts_FontFamily(JNIEnv* env);
@@ -82,6 +83,7 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_PathEffect),
         REG_JNI(register_android_graphics_PathMeasure),
         REG_JNI(register_android_graphics_Region),
+        REG_JNI(register_android_graphics_drawable_AnimatedVectorDrawable),
         REG_JNI(register_android_graphics_drawable_VectorDrawable),
         REG_JNI(register_android_graphics_RenderEffect),
         REG_JNI(register_android_graphics_Shader),
