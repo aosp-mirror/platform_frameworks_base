@@ -1409,7 +1409,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         t.traceBegin("create package manager");
         final PackageManagerTracedLock lock = new PackageManagerTracedLock();
         final Object installLock = new Object();
-        HandlerThread backgroundThread = new HandlerThread("PackageManagerBg");
+
+        HandlerThread backgroundThread = new ServiceThread("PackageManagerBg",
+                Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
         backgroundThread.start();
         Handler backgroundHandler = new Handler(backgroundThread.getLooper());
 
@@ -1461,7 +1463,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> domainVerificationService,
                 (i, pm) -> {
                     HandlerThread thread = new ServiceThread(TAG,
-                            Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
+                            Process.THREAD_PRIORITY_DEFAULT, true /*allowIo*/);
                     thread.start();
                     return new PackageHandler(thread.getLooper(), pm);
                 },
