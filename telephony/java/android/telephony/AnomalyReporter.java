@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import static com.android.internal.telephony.TelephonyStatsLog.TELEPHONY_ANOMALY_DETECTED;
+
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.content.Context;
@@ -24,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.ParcelUuid;
 
+import com.android.internal.telephony.TelephonyStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.telephony.Rlog;
 
@@ -82,6 +85,12 @@ public final class AnomalyReporter {
             Rlog.w(TAG, "AnomalyReporter not yet initialized, dropping event=" + eventId);
             return;
         }
+
+        TelephonyStatsLog.write(
+                TELEPHONY_ANOMALY_DETECTED,
+                0, // TODO: carrier id needs to be populated
+                eventId.getLeastSignificantBits(),
+                eventId.getMostSignificantBits());
 
         // If this event has already occurred, skip sending intents for it; regardless log its
         // invocation here.
