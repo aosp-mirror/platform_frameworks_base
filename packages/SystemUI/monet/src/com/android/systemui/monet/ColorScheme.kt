@@ -23,6 +23,7 @@ import com.android.internal.graphics.ColorUtils
 import com.android.internal.graphics.cam.Cam
 import com.android.internal.graphics.cam.CamUtils.lstarFromInt
 import kotlin.math.absoluteValue
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 const val TAG = "ColorScheme"
@@ -78,36 +79,32 @@ internal class HueSubtract(val amountDegrees: Double) : Hue {
 }
 
 internal class HueVibrantSecondary() : Hue {
-    val hueToRotations = listOf(Pair(24, 15), Pair(53, 15), Pair(91, 15), Pair(123, 15),
-            Pair(141, 15), Pair(172, 15), Pair(198, 15), Pair(234, 18), Pair(272, 18),
-            Pair(302, 18), Pair(329, 30), Pair(354, 15))
+    val hueToRotations = listOf(Pair(0, 18), Pair(41, 15), Pair(61, 10), Pair(101, 12),
+            Pair(131, 15), Pair(181, 18), Pair(251, 15), Pair(301, 12))
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
 }
 
 internal class HueVibrantTertiary() : Hue {
-    val hueToRotations = listOf(Pair(24, 30), Pair(53, 30), Pair(91, 15), Pair(123, 30),
-            Pair(141, 27), Pair(172, 27), Pair(198, 30), Pair(234, 35), Pair(272, 30),
-            Pair(302, 30), Pair(329, 60), Pair(354, 30))
+    val hueToRotations = listOf(Pair(0, 35), Pair(41, 30), Pair(61, 20), Pair(101, 25),
+            Pair(131, 30), Pair(181, 35), Pair(251, 30), Pair(301, 25))
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
 }
 
 internal class HueExpressiveSecondary() : Hue {
-    val hueToRotations = listOf(Pair(24, 95), Pair(53, 45), Pair(91, 45), Pair(123, 20),
-            Pair(141, 45), Pair(172, 45), Pair(198, 15), Pair(234, 15),
-            Pair(272, 45), Pair(302, 45), Pair(329, 45), Pair(354, 45))
+    val hueToRotations = listOf(Pair(0, 45), Pair(21, 95), Pair(51, 45), Pair(121, 20),
+            Pair(141, 45), Pair(191, 90), Pair(271, 45), Pair(321, 45))
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
 }
 
 internal class HueExpressiveTertiary() : Hue {
-    val hueToRotations = listOf(Pair(24, 20), Pair(53, 20), Pair(91, 20), Pair(123, 45),
-            Pair(141, 20), Pair(172, 20), Pair(198, 90), Pair(234, 90), Pair(272, 20),
-            Pair(302, 20), Pair(329, 120), Pair(354, 120))
+    val hueToRotations = listOf(Pair(0, 120), Pair(21, 120), Pair(51, 20), Pair(121, 45),
+            Pair(141, 20), Pair(191, 15), Pair(271, 20), Pair(321, 120))
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
@@ -140,18 +137,15 @@ internal interface Chroma {
     }
 }
 
-internal class ChromaConstant(val chroma: Double) : Chroma {
+internal class ChromaMinimum(val chroma: Double) : Chroma {
     override fun get(sourceColor: Cam): Double {
-        return chroma
+        return max(sourceColor.chroma.toDouble(), chroma)
     }
 }
 
-internal class ChromaExpressiveNeutral() : Chroma {
-    val hueToChromas = listOf(Pair(24, 8), Pair(53, 8), Pair(91, 8), Pair(123, 8),
-            Pair(141, 6), Pair(172, 6), Pair(198, 8), Pair(234, 8), Pair(272, 8),
-            Pair(302, 8), Pair(329, 8), Pair(354, 8))
+internal class ChromaConstant(val chroma: Double) : Chroma {
     override fun get(sourceColor: Cam): Double {
-        return getSpecifiedChroma(sourceColor.hue, hueToChromas)
+        return chroma
     }
 }
 
@@ -187,17 +181,17 @@ enum class Style(internal val coreSpec: CoreSpec) {
             n2 = TonalSpec(HueSource(), ChromaConstant(8.0))
     )),
     VIBRANT(CoreSpec(
-            a1 = TonalSpec(HueSource(), ChromaConstant(48.0)),
+            a1 = TonalSpec(HueSource(), ChromaMinimum(48.0)),
             a2 = TonalSpec(HueVibrantSecondary(), ChromaConstant(24.0)),
             a3 = TonalSpec(HueVibrantTertiary(), ChromaConstant(32.0)),
-            n1 = TonalSpec(HueSource(), ChromaConstant(6.0)),
+            n1 = TonalSpec(HueSource(), ChromaConstant(10.0)),
             n2 = TonalSpec(HueSource(), ChromaConstant(12.0))
     )),
     EXPRESSIVE(CoreSpec(
             a1 = TonalSpec(HueAdd(240.0), ChromaConstant(40.0)),
             a2 = TonalSpec(HueExpressiveSecondary(), ChromaConstant(24.0)),
-            a3 = TonalSpec(HueExpressiveTertiary(), ChromaConstant(40.0)),
-            n1 = TonalSpec(HueAdd(15.0), ChromaExpressiveNeutral()),
+            a3 = TonalSpec(HueExpressiveTertiary(), ChromaConstant(32.0)),
+            n1 = TonalSpec(HueAdd(15.0), ChromaConstant(8.0)),
             n2 = TonalSpec(HueAdd(15.0), ChromaConstant(12.0))
     )),
     RAINBOW(CoreSpec(
