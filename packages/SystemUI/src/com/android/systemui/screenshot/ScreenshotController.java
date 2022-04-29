@@ -674,15 +674,21 @@ public class ScreenshotController {
         if (mLastScrollCaptureRequest != null) {
             mLastScrollCaptureRequest.cancel(true);
         }
-        mLastScrollCaptureRequest = mScrollCaptureClient.request(DEFAULT_DISPLAY);
+        final ListenableFuture<ScrollCaptureResponse> future =
+                mScrollCaptureClient.request(DEFAULT_DISPLAY);
+        mLastScrollCaptureRequest = future;
         mLastScrollCaptureRequest.addListener(() ->
-                onScrollCaptureResponseReady(mLastScrollCaptureRequest), mMainExecutor);
+                onScrollCaptureResponseReady(future), mMainExecutor);
     }
 
     private void onScrollCaptureResponseReady(Future<ScrollCaptureResponse> responseFuture) {
         try {
             if (mLastScrollCaptureResponse != null) {
                 mLastScrollCaptureResponse.close();
+                mLastScrollCaptureResponse = null;
+            }
+            if (responseFuture.isCancelled()) {
+                return;
             }
             mLastScrollCaptureResponse = responseFuture.get();
             if (!mLastScrollCaptureResponse.isConnected()) {
@@ -707,8 +713,6 @@ public class ScreenshotController {
                 // delay starting scroll capture to make sure the scrim is up before the app moves
                 mScreenshotView.post(() -> runBatchScrollCapture(response));
             });
-        } catch (CancellationException e) {
-            // Ignore
         } catch (InterruptedException | ExecutionException e) {
             Log.e(TAG, "requestScrollCapture failed", e);
         }
