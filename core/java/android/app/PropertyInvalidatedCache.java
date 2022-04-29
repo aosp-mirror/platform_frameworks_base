@@ -374,10 +374,6 @@ public class PropertyInvalidatedCache<Query, Result> {
     private static final String TAG = "PropertyInvalidatedCache";
     private static final boolean DEBUG = false;
     private static final boolean VERIFY = false;
-    // If this is true, dumpsys will dump the cache entries along with cache statistics.
-    // Most of the time this causes dumpsys to fail because the output stream is too
-    // large.  Only set it to true in development images.
-    private static final boolean DETAILED = false;
 
     // Per-Cache performance counters. As some cache instances are declared static,
     @GuardedBy("mLock")
@@ -1358,7 +1354,69 @@ public class PropertyInvalidatedCache<Query, Result> {
         }
     }
 
-    private void dumpContents(PrintWriter pw) {
+    /**
+     * Switches that can be used to control the detail emitted by a cache dump.  The
+     * "CONTAINS" switches match if the cache (property) name contains the switch
+     * argument.  The "LIKE" switches match if the cache (property) name matches the
+     * switch argument as a regex.  The regular expression must match the entire name,
+     * which generally means it may need leading/trailing "." expressions.
+     */
+    final static String NAME_CONTAINS = "-name-has=";
+    final static String NAME_LIKE = "-name-like=";
+    final static String PROPERTY_CONTAINS = "-property-has=";
+    final static String PROPERTY_LIKE = "-property-like=";
+
+    /**
+     * Return true if any argument is a detailed specification switch.
+     */
+    private static boolean anyDetailed(String[] args) {
+        for (String a : args) {
+            if (a.startsWith(NAME_CONTAINS) || a.startsWith(NAME_LIKE)
+                || a.startsWith(PROPERTY_CONTAINS) || a.startsWith(PROPERTY_LIKE)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * A helper method to determine if a string matches a switch.
+     */
+    private static boolean chooses(String arg, String key, String reference, boolean contains) {
+        if (arg.startsWith(key)) {
+            final String value = arg.substring(key.length());
+            if (contains) {
+                return reference.contains(value);
+            } else {
+                return reference.matches(value);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return true if this cache should be dumped in detail.  This method is not called
+     * unless it has already been determined that there is at least one match requested.
+     */
+    private boolean showDetailed(String[] args) {
+        for (String a : args) {
+            if (chooses(a, NAME_CONTAINS, cacheName(), true)
+                || chooses(a, NAME_LIKE, cacheName(), false)
+                || chooses(a, PROPERTY_CONTAINS, mPropertyName, true)
+                || chooses(a, PROPERTY_LIKE, mPropertyName, false)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void dumpContents(PrintWriter pw, boolean detailed, String[] args) {
+        // If the user has requested specific caches and this is not one of them, return
+        // immediately.
+        if (detailed && !showDetailed(args)) {
+            return;
+        }
+
         long invalidateCount;
         long corkedInvalidates;
         synchronized (sCorkLock) {
@@ -1386,9 +1444,15 @@ public class PropertyInvalidatedCache<Query, Result> {
                     mCache.size(), mMaxEntries, mHighWaterMark, mMissOverflow));
             pw.println(TextUtils.formatSimple("    Enabled: %s", mDisabled ? "false" : "true"));
             pw.println("");
+            pw.flush();
 
+            // No specific cache was requested.  This is the default, and no details
+            // should be dumped.
+            if (!detailed) {
+                return;
+            }
             Set<Map.Entry<Query, Result>> cacheEntries = mCache.entrySet();
-            if (!DETAILED || cacheEntries.size() == 0) {
+            if (cacheEntries.size() == 0) {
                 return;
             }
 
@@ -1399,17 +1463,34 @@ public class PropertyInvalidatedCache<Query, Result> {
 
                 pw.println(TextUtils.formatSimple("      Key: %s\n      Value: %s\n", key, value));
             }
+            pw.flush();
         }
     }
 
     /**
-     * Dumps contents of every cache in the process to the provided ParcelFileDescriptor.
+     * Dump the corking status.
+     */
+    @GuardedBy("sCorkLock")
+    private static void dumpCorkInfo(PrintWriter pw) {
+        ArrayList<Map.Entry<String, Integer>> activeCorks = getActiveCorks();
+        if (activeCorks.size() > 0) {
+            pw.println("  Corking Status:");
+            for (int i = 0; i < activeCorks.size(); i++) {
+                Map.Entry<String, Integer> entry = activeCorks.get(i);
+                pw.println(TextUtils.formatSimple("    Property Name: %s Count: %d",
+                                entry.getKey(), entry.getValue()));
+            }
+        }
+    }
+
+    /**
+     * Without arguments, this dumps statistics from every cache in the process to the
+     * provided ParcelFileDescriptor.  Optional switches allow the caller to choose
+     * specific caches (selection is by cache name or property name); if these switches
+     * are used then the output includes both cache statistics and cache entries.
      * @hide
      */
     public static void dumpCacheInfo(@NonNull ParcelFileDescriptor pfd, @NonNull String[] args) {
-        ArrayList<PropertyInvalidatedCache> activeCaches;
-        ArrayList<Map.Entry<String, Integer>> activeCorks;
-
         try  (
             FileOutputStream fout = new FileOutputStream(pfd.getFileDescriptor());
             PrintWriter pw = new FastPrintWriter(fout);
@@ -1419,24 +1500,21 @@ public class PropertyInvalidatedCache<Query, Result> {
                 return;
             }
 
+            // See if detailed is requested for any cache.  If there is a specific detailed request,
+            // then only that cache is reported.
+            boolean detail = anyDetailed(args);
+
+            ArrayList<PropertyInvalidatedCache> activeCaches;
             synchronized (sCorkLock) {
                 activeCaches = getActiveCaches();
-                activeCorks = getActiveCorks();
-
-                if (activeCorks.size() > 0) {
-                    pw.println("  Corking Status:");
-                    for (int i = 0; i < activeCorks.size(); i++) {
-                        Map.Entry<String, Integer> entry = activeCorks.get(i);
-                        pw.println(TextUtils.formatSimple("    Property Name: %s Count: %d",
-                                entry.getKey(), entry.getValue()));
-                    }
+                if (!detail) {
+                    dumpCorkInfo(pw);
                 }
             }
 
             for (int i = 0; i < activeCaches.size(); i++) {
                 PropertyInvalidatedCache currentCache = activeCaches.get(i);
-                currentCache.dumpContents(pw);
-                pw.flush();
+                currentCache.dumpContents(pw, detail, args);
             }
         } catch (IOException e) {
             Log.e(TAG, "Failed to dump PropertyInvalidatedCache instances");
