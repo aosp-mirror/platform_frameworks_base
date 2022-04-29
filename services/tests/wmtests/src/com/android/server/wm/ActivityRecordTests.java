@@ -757,6 +757,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(activity.getTask()).build();
         topActivity.setOccludesParent(false);
+        // The requested occluding state doesn't affect whether it fills parent.
+        assertTrue(topActivity.fillsParent());
         activity.setState(STOPPED, "Testing");
         activity.setVisibility(true);
         activity.makeActiveIfNeeded(null /* activeActivity */);
@@ -1218,7 +1220,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         task.setPausingActivity(currentTop);
         currentTop.finishing = true;
         currentTop.setState(PAUSED, "test");
-        currentTop.completeFinishing("completePauseLocked");
+        currentTop.completeFinishing(false /* updateVisibility */, "completePause");
 
         // Current top becomes stopping because it is visible and the next is invisible.
         assertEquals(STOPPING, currentTop.getState());
