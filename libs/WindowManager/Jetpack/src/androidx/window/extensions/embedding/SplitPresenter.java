@@ -16,11 +16,10 @@
 
 package androidx.window.extensions.embedding;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import android.app.Activity;
 import android.app.WindowConfiguration;
-import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -112,16 +111,13 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 primaryActivity, primaryRectBounds, null);
 
         // Create new empty task fragment
-        final int taskId = primaryContainer.getTaskId();
         final TaskFragmentContainer secondaryContainer = mController.newContainer(
-                null /* activity */, primaryActivity, taskId);
+                null /* activity */, primaryActivity, primaryContainer.getTaskId());
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds,
                 rule, isLtr(primaryActivity, rule));
-        final int windowingMode = mController.getTaskContainer(taskId)
-                .getWindowingModeForSplitTaskFragment(secondaryRectBounds);
         createTaskFragment(wct, secondaryContainer.getTaskFragmentToken(),
                 primaryActivity.getActivityToken(), secondaryRectBounds,
-                windowingMode);
+                WINDOWING_MODE_MULTI_WINDOW);
         secondaryContainer.setLastRequestedBounds(secondaryRectBounds);
 
         // Set adjacent to each other so that the containers below will be invisible.
@@ -177,7 +173,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         createTaskFragment(wct, newContainer.getTaskFragmentToken(),
-                launchingActivity.getActivityToken(), new Rect(), WINDOWING_MODE_UNDEFINED);
+                launchingActivity.getActivityToken(), new Rect(), WINDOWING_MODE_MULTI_WINDOW);
 
         applyTransaction(wct);
         return newContainer;
@@ -193,17 +189,15 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             @NonNull Rect bounds, @Nullable TaskFragmentContainer containerToAvoid) {
         TaskFragmentContainer container = mController.getContainerWithActivity(
                 activity.getActivityToken());
-        final int taskId = container != null ? container.getTaskId() : activity.getTaskId();
-        final int windowingMode = mController.getTaskContainer(taskId)
-                .getWindowingModeForSplitTaskFragment(bounds);
         if (container == null || container == containerToAvoid) {
-            container = mController.newContainer(activity, taskId);
+            container = mController.newContainer(activity, activity.getTaskId());
+
             final TaskFragmentCreationParams fragmentOptions =
                     createFragmentOptions(
                             container.getTaskFragmentToken(),
                             activity.getActivityToken(),
                             bounds,
-                            windowingMode);
+                            WINDOWING_MODE_MULTI_WINDOW);
             wct.createTaskFragment(fragmentOptions);
 
             wct.reparentActivityToTaskFragment(container.getTaskFragmentToken(),
@@ -212,7 +206,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             container.setLastRequestedBounds(bounds);
         } else {
             resizeTaskFragmentIfRegistered(wct, container, bounds);
-            updateTaskFragmentWindowingModeIfRegistered(wct, container, windowingMode);
         }
 
         return container;
@@ -244,17 +237,14 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                     launchingActivity.getTaskId());
         }
 
-        final int taskId = primaryContainer.getTaskId();
         TaskFragmentContainer secondaryContainer = mController.newContainer(null /* activity */,
-                launchingActivity, taskId);
-        final int windowingMode = mController.getTaskContainer(taskId)
-                .getWindowingModeForSplitTaskFragment(primaryRectBounds);
+                launchingActivity, primaryContainer.getTaskId());
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         mController.registerSplit(wct, primaryContainer, launchingActivity, secondaryContainer,
                 rule);
         startActivityToSide(wct, primaryContainer.getTaskFragmentToken(), primaryRectBounds,
                 launchingActivity, secondaryContainer.getTaskFragmentToken(), secondaryRectBounds,
-                activityIntent, activityOptions, rule, windowingMode);
+                activityIntent, activityOptions, rule);
         if (isPlaceholder) {
             // When placeholder is launched in split, we should keep the focus on the primary.
             wct.requestFocusOnTaskFragment(primaryContainer.getTaskFragmentToken());
@@ -302,12 +292,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             // When placeholder is shown in split, we should keep the focus on the primary.
             wct.requestFocusOnTaskFragment(primaryContainer.getTaskFragmentToken());
         }
-        final TaskContainer taskContainer = mController.getTaskContainer(
-                updatedContainer.getTaskId());
-        final int windowingMode = taskContainer.getWindowingModeForSplitTaskFragment(
-                primaryRectBounds);
-        updateTaskFragmentWindowingModeIfRegistered(wct, primaryContainer, windowingMode);
-        updateTaskFragmentWindowingModeIfRegistered(wct, secondaryContainer, windowingMode);
     }
 
     private void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
@@ -337,15 +321,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             return;
         }
         resizeTaskFragment(wct, container.getTaskFragmentToken(), bounds);
-    }
-
-    private void updateTaskFragmentWindowingModeIfRegistered(
-            @NonNull WindowContainerTransaction wct,
-            @NonNull TaskFragmentContainer container,
-            @WindowingMode int windowingMode) {
-        if (container.getInfo() != null) {
-            wct.setWindowingMode(container.getInfo().getToken(), windowingMode);
-        }
     }
 
     @Override
