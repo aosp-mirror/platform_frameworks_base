@@ -57,4 +57,7 @@
     <dimen name="screen_percentage_10">0dp</dimen>
     <dimen name="screen_percentage_12">0dp</dimen>
     <dimen name="screen_percentage_15">0dp</dimen>
+
+    <!-- dialog elevation [overrides 18dp] -->
+    <dimen name="floating_window_z">2dp</dimen>
   </resources>
