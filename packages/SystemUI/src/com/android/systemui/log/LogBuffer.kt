@@ -19,13 +19,14 @@ package com.android.systemui.log
 import android.os.Trace
 import android.util.Log
 import com.android.systemui.log.dagger.LogModule
+import com.android.systemui.util.collection.RingBuffer
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
-import java.util.ArrayDeque
 import java.util.Locale
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import kotlin.concurrent.thread
+import kotlin.math.max
 
 /**
  * A simple ring buffer of recyclable log messages
@@ -63,29 +64,22 @@ import kotlin.concurrent.thread
  *
  * Buffers are provided by [LogModule]. Instances should be created using a [LogBufferFactory].
  *
- * @param name The name of this buffer
- * @param maxLogs The maximum number of messages to keep in memory at any one time, including the
- * unused pool. Must be >= [poolSize].
- * @param poolSize The maximum amount that the size of the buffer is allowed to flex in response to
- * sequential calls to [document] that aren't immediately followed by a matching call to [push].
+ * @param name The name of this buffer, printed when the buffer is dumped and in some other
+ * situations.
+ * @param maxSize The maximum number of messages to keep in memory at any one time. Buffers start
+ * out empty and grow up to [maxSize] as new messages are logged. Once the buffer's size reaches
+ * the maximum, it behaves like a ring buffer.
  */
 class LogBuffer @JvmOverloads constructor(
     private val name: String,
-    private val maxLogs: Int,
-    private val poolSize: Int,
+    private val maxSize: Int,
     private val logcatEchoTracker: LogcatEchoTracker,
     private val systrace: Boolean = true
 ) {
-    init {
-        if (maxLogs < poolSize) {
-            throw IllegalArgumentException("maxLogs must be greater than or equal to poolSize, " +
-                    "but maxLogs=$maxLogs < $poolSize=poolSize")
-        }
-    }
+    private val buffer = RingBuffer(maxSize) { LogMessageImpl.create() }
 
-    private val buffer: ArrayDeque<LogMessageImpl> = ArrayDeque()
-    private val echoMessageQueue: BlockingQueue<LogMessageImpl>? =
-            if (logcatEchoTracker.logInBackgroundThread) ArrayBlockingQueue(poolSize) else null
+    private val echoMessageQueue: BlockingQueue<LogMessage>? =
+            if (logcatEchoTracker.logInBackgroundThread) ArrayBlockingQueue(10) else null
 
     init {
         if (logcatEchoTracker.logInBackgroundThread && echoMessageQueue != null) {
@@ -103,6 +97,9 @@ class LogBuffer @JvmOverloads constructor(
 
     var frozen = false
         private set
+
+    private val mutable
+        get() = !frozen && maxSize > 0
 
     /**
      * Logs a message to the log buffer
@@ -138,34 +135,19 @@ class LogBuffer @JvmOverloads constructor(
         initializer: LogMessage.() -> Unit,
         noinline printer: LogMessage.() -> String
     ) {
-        if (!frozen) {
-            val message = obtain(tag, level, printer)
-            initializer(message)
-            push(message)
-        }
-    }
-
-    /**
-     * Same as [log], but doesn't push the message to the buffer. Useful if you need to supply a
-     * "reason" for doing something (the thing you supply the reason to will presumably call [push]
-     * on that message at some point).
-     */
-    inline fun document(
-        tag: String,
-        level: LogLevel,
-        initializer: LogMessage.() -> Unit,
-        noinline printer: LogMessage.() -> String
-    ): LogMessage {
         val message = obtain(tag, level, printer)
         initializer(message)
-        return message
+        commit(message)
     }
 
     /**
-     * Obtains an instance of [LogMessageImpl], usually from the object pool. If the pool has been
-     * exhausted, creates a new instance.
+     * You should call [log] instead of this method.
      *
-     * In general, you should call [log] or [document] instead of this method.
+     * Obtains the next [LogMessage] from the ring buffer. If the buffer is not yet at max size,
+     * grows the buffer by one.
+     *
+     * After calling [obtain], the message will now be at the end of the buffer. The caller must
+     * store any relevant data on the message and then call [commit].
      */
     @Synchronized
     fun obtain(
@@ -173,28 +155,26 @@ class LogBuffer @JvmOverloads constructor(
         level: LogLevel,
         printer: (LogMessage) -> String
     ): LogMessageImpl {
-        val message = when {
-            frozen -> LogMessageImpl.create()
-            buffer.size > maxLogs - poolSize -> buffer.removeFirst()
-            else -> LogMessageImpl.create()
+        if (!mutable) {
+            return FROZEN_MESSAGE
         }
+        val message = buffer.advance()
         message.reset(tag, level, System.currentTimeMillis(), printer)
         return message
     }
 
     /**
-     * Pushes a message into buffer, possibly evicting an older message if the buffer is full.
+     * You should call [log] instead of this method.
+     *
+     * After acquiring a message via [obtain], call this method to signal to the buffer that you
+     * have finished filling in its data fields. The message will be echoed to logcat if
+     * necessary.
      */
     @Synchronized
-    fun push(message: LogMessage) {
-        if (frozen) {
+    fun commit(message: LogMessage) {
+        if (!mutable) {
             return
         }
-        if (buffer.size == maxLogs) {
-            Log.e(TAG, "LogBuffer $name has exceeded its pool size")
-            buffer.removeFirst()
-        }
-        buffer.add(message as LogMessageImpl)
         // Log in the background thread only if echoMessageQueue exists and has capacity (checking
         // capacity avoids the possibility of blocking this thread)
         if (echoMessageQueue != null && echoMessageQueue.remainingCapacity() > 0) {
@@ -210,7 +190,7 @@ class LogBuffer @JvmOverloads constructor(
     }
 
     /** Sends message to echo after determining whether to use Logcat and/or systrace. */
-    private fun echoToDesiredEndpoints(message: LogMessageImpl) {
+    private fun echoToDesiredEndpoints(message: LogMessage) {
         val includeInLogcat = logcatEchoTracker.isBufferLoggable(name, message.level) ||
                 logcatEchoTracker.isTagLoggable(message.tag, message.level)
         echo(message, toLogcat = includeInLogcat, toSystrace = systrace)
@@ -219,19 +199,17 @@ class LogBuffer @JvmOverloads constructor(
     /** Converts the entire buffer to a newline-delimited string */
     @Synchronized
     fun dump(pw: PrintWriter, tailLength: Int) {
-        val start = if (tailLength <= 0) { 0 } else { buffer.size - tailLength }
+        val iterationStart = if (tailLength <= 0) { 0 } else { max(0, buffer.size - tailLength) }
 
-        for ((i, message) in buffer.withIndex()) {
-            if (i >= start) {
-                dumpMessage(message, pw)
-            }
+        for (i in iterationStart until buffer.size) {
+            dumpMessage(buffer[i], pw)
         }
     }
 
     /**
-     * "Freezes" the contents of the buffer, making them immutable until [unfreeze] is called.
-     * Calls to [log], [document], [obtain], and [push] will not affect the buffer and will return
-     * dummy values if necessary.
+     * "Freezes" the contents of the buffer, making it immutable until [unfreeze] is called.
+     * Calls to [log], [obtain], and [commit] will not affect the buffer and will return dummy
+     * values if necessary.
      */
     @Synchronized
     fun freeze() {
@@ -293,3 +271,4 @@ class LogBuffer @JvmOverloads constructor(
 
 private const val TAG = "LogBuffer"
 private val DATE_FORMAT = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
+private val FROZEN_MESSAGE = LogMessageImpl.create()
