@@ -106,7 +106,7 @@ class TaskContainer {
     int getWindowingModeForSplitTaskFragment(@Nullable Rect taskFragmentBounds) {
         // Only set to multi-windowing mode if the pair are showing side-by-side. Otherwise, it
         // will be set to UNDEFINED which will then inherit the Task windowing mode.
-        if (taskFragmentBounds == null || taskFragmentBounds.isEmpty()) {
+        if (taskFragmentBounds == null || taskFragmentBounds.isEmpty() || isInPictureInPicture()) {
             return WINDOWING_MODE_UNDEFINED;
         }
         // We use WINDOWING_MODE_MULTI_WINDOW when the Task is fullscreen.

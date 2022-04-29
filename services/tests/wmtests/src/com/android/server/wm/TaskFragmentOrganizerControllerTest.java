@@ -202,9 +202,17 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(any(), any());
 
-        // Trigger callback if the info is changed.
+        // Trigger callback if the size is changed.
         parentConfig.smallestScreenWidthDp = 100;
+        mController.onTaskFragmentParentInfoChanged(
+                mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
 
+        verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mFragmentToken), any());
+
+        // Trigger callback if the windowing mode is changed.
+        clearInvocations(mOrganizer);
+        parentConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_PINNED);
         mController.onTaskFragmentParentInfoChanged(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
