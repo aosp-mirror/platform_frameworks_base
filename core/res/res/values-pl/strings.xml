@@ -307,12 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"wysyłanie i wyświetlanie SMS‑ów"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Pliki i dokumenty"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Pliki i dokumenty"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"dostęp do plików i dokumentów na urządzeniu"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muzyka i inne dźwięki"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"dostęp do plików audio na urządzeniu"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Zdjęcia i filmy"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"dostęp do plików graficznych i wideo na urządzeniu"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzyka i dźwięk"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"dostęp do muzyki i dźwięku na urządzeniu"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Zdjęcia i filmy"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"dostęp do zdjęć i filmów na urządzeniu"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nagrywanie dźwięku"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Aktywność fizyczna"</string>
@@ -642,7 +642,7 @@
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Odsuń telefon."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Przybliż telefon."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Przesuń telefon wyżej."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Obniż telefon."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Przesuń telefon niżej."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Przesuń telefon w lewo."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Przesuń telefon w prawo."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Patrz prosto na urządzenie."</string>
@@ -1221,7 +1221,7 @@
     <string name="launch_warning_original" msgid="3332206576800169626">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została pierwotnie uruchomiona."</string>
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Skala"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"Zawsze pokazuj"</string>
-    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Włącz ponownie, wybierając Ustawienia systemowe &gt; Aplikacje &gt; Pobrane."</string>
+    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Włącz ponownie, wybierając Ustawienia systemu &gt; Aplikacje &gt; Pobrane."</string>
     <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje obecnie ustawionego rozmiaru wyświetlacza i może działać niestabilnie."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Zawsze pokazuj"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została skompilowana pod niezgodną wersję systemu Android i może zachowywać się niezgodnie z oczekiwaniami. Sprawdź, czy jest dostępna zaktualizowana wersja aplikacji."</string>
@@ -2055,8 +2055,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Zmiany w trybie Nie przeszkadzać"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Kliknij, by sprawdzić, co jest zablokowane."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Sprawdź ustawienia powiadomień"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"W Androidzie 13 i nowszych zainstalowane aplikacje będą potrzebowały zezwolenia na wysyłanie powiadomień. Kliknij, aby zmienić uprawnienia dla istniejących aplikacji."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Przypomnij później"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Odrzuć"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>

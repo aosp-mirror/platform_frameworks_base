@@ -307,12 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"доступ к календарю"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"отправлять и просматривать SMS-сообщения"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Файлы и документы"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файлы и документы"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"Доступ к файлам и документам на вашем устройстве"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Музыка и другие аудиозаписи"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"доступ к аудиофайлам на вашем устройстве"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Фото и видео"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"доступ к изображениям и видеофайлам на вашем устройстве"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музыка и аудио"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"доступ к музыке и аудио на вашем устройстве"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Фото и видео"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"доступ к фотографиям и видео на вашем устройстве"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"записывать аудио"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Физическая активность"</string>
@@ -352,7 +352,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Показ уведомлений в полноэкранном режиме на заблокированном устройстве"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Приложение сможет показывать уведомления в полноэкранном режиме на заблокированном устройстве"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Создание ярлыков"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Приложение сможет добавлять ярлыки на главный экран без вмешательства пользователя."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"приложения смогут добавлять ярлыки на главный экран без вмешательства пользователя."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"Удаление ярлыков"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Приложение сможет удалять ярлыки с главного экрана без вмешательства пользователя."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"Перенаправление исходящих вызовов"</string>
@@ -2055,8 +2055,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Настройки режима \"Не беспокоить\" изменены"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Нажмите, чтобы проверить настройки."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Проверьте настройки уведомлений"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"В Android 13 и более поздних версий приложения могут отправлять вам уведомления только в том случае, если вы предоставили им такое разрешение. Нажмите, чтобы настроить разрешения для установленных приложений."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Напомнить позже"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Закрыть"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Система"</string>

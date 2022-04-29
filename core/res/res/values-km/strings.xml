@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ចូលប្រើប្រិតិទិនរបស់អ្នក"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"សារ SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ផ្ញើ និងមើលសារ SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ឯកសារ"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ឯកសារ"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"ចូលប្រើ​ឯកសារ​នៅលើ​ឧបករណ៍​របស់អ្នក"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"តន្ត្រី និងសំឡេងផ្សេងទៀត"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"ចូលប្រើឯកសារសំឡេងនៅលើឧបករណ៍របស់អ្នក"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"រូបថត និងវីដេអូ"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"ចូលប្រើឯកសាររូបភាព និងវីដេអូនៅលើឧបករណ៍របស់អ្នក"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"តន្រ្តី និងសំឡេង"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ចូលប្រើតន្ត្រី និងសំឡេងនៅលើឧបករណ៍របស់អ្នក"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"រូបថត និងវីដេអូ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ចូលប្រើរូបថត និងវីដេអូនៅលើឧបករណ៍របស់អ្នក"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"មីក្រូ​ហ្វូន"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ថតសំឡេង"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"សកម្មភាព​រាងកាយ"</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"មុខងារ​កុំ​រំខាន​ត្រូវ​បាន​ប្ដូរ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"សូមចុច​ដើម្បី​មើល​ថា​​បានទប់ស្កាត់អ្វីខ្លះ។"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ពិនិត្យមើលការកំណត់ការជូនដំណឹង"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"ចាប់ពី Android 13 ឡើងទៅ កម្មវិធីដែលអ្នកដំឡើងត្រូវការ​ការអនុញ្ញាតរបស់អ្នក ដើម្បីផ្ញើការជូនដំណឹង។ សូមចុចដើម្បីផ្លាស់ប្ដូរការអនុញ្ញាតនេះសម្រាប់កម្មវិធីដែលមានស្រាប់។"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"រំលឹក​ខ្ញុំ​ពេលក្រោយ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ច្រានចោល"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ប្រព័ន្ធ"</string>

@@ -171,7 +171,7 @@
     <string name="httpErrorBadUrl" msgid="754447723314832538">"Kunne ikke åpne siden fordi nettadressen er ugyldig."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"Fikk ikke tilgang til filen."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"Fant ikke den forespurte filen."</string>
-    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"For mange forespørsler blir behandlet. Prøv igjen senere."</string>
+    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"For mange forespørsler blir behandlet. Prøv på nytt senere."</string>
     <string name="notification_title" msgid="5783748077084481121">"Påloggingsfeil for <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="2341041749565687871">"Synkronisering"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"Kan ikke synkronisere"</string>
@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"åpne kalenderen din"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sende og lese SMS-meldinger"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Filer og dokumenter"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Filer og dokumenter"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"åpne filer og dokumenter på enheten din"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musikk og annen lyd"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"få tilgang til lydfiler på enheten"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Bilder og videoer"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"få tilgang til bilder og videofiler på enheten"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musikk og lyd"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"bruke musikk og lyd på enheten"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Bilder og videoer"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"bruke bilder og videoer på enheten"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ta opp lyd"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysisk aktivitet"</string>
@@ -609,7 +609,7 @@
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeravtrykk-operasjonen ble avbrutt av brukeren."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"For mange forsøk. Prøv på nytt senere."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"For mange forsøk. Fingeravtrykkssensoren er slått av."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Prøv igjen."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Prøv på nytt."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ingen fingeravtrykk er registrert."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Denne enheten har ikke fingeravtrykkssensor."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensoren er midlertidig slått av."</string>
@@ -634,7 +634,7 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Opplåsing med fingeravtrykk"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Kan ikke bruke fingeravtrykkssensoren"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Gå til en reparasjonsleverandør."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Kunne ikke ta opp nøyaktige ansiktsdata Prøv igjen"</string>
+    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Kunne ikke ta opp nøyaktige ansiktsdata Prøv på nytt"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"For lyst. Prøv svakere belysning."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"For mørkt. Prøv sterkere belysning."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Flytt telefonen lengre unna"</string>
@@ -647,7 +647,7 @@
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Hold ansiktet ditt rett foran telefonen."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"For mye bevegelse. Hold telefonen stødig."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registrer ansiktet ditt på nytt."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Kan ikke gjenkjenne ansiktet lenger. Prøv igjen."</string>
+    <string name="face_acquired_too_different" msgid="4699657338753282542">"Kan ikke gjenkjenne ansiktet lenger. Prøv på nytt."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"For likt – endre posituren din."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Vri hodet ditt litt mindre."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Vri hodet litt mindre."</string>
@@ -661,10 +661,10 @@
     <string name="face_error_no_space" msgid="5649264057026021723">"Kan ikke lagre nye ansiktsdata. Slett gamle data først."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansikt-operasjonen ble avbrutt."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Ansiktslås ble avbrutt av brukeren"</string>
-    <string name="face_error_lockout" msgid="7864408714994529437">"For mange forsøk. Prøv igjen senere."</string>
+    <string name="face_error_lockout" msgid="7864408714994529437">"For mange forsøk. Prøv på nytt senere."</string>
     <string name="face_error_lockout_permanent" msgid="3277134834042995260">"For mange forsøk. Ansiktslås er slått av."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"For mange forsøk. Skriv inn skjermlås i stedet."</string>
-    <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kan ikke bekrefte ansiktet. Prøv igjen."</string>
+    <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kan ikke bekrefte ansiktet. Prøv på nytt."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Du har ikke konfigurert ansiktslås"</string>
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"Ansiktslås støttes ikke på denne enheten"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensoren er midlertidig slått av."</string>
@@ -952,7 +952,7 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"Du har foretatt <xliff:g id="NUMBER">%d</xliff:g> mislykkede opplåsinger av nettbrettet. Nettbrettet blir nå tilbakestilt til fabrikkinnstillingene."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"Du har prøvd å låse opp Android TV-enheten din <xliff:g id="NUMBER">%d</xliff:g> ganger. Android TV-enheten din tilbakestilles nå til fabrikkstandard."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"Du har foretatt <xliff:g id="NUMBER">%d</xliff:g> mislykkede opplåsinger av telefonen. Telefonen blir nå tilbakestilt til fabrikkinnstillingene."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"Prøv igjen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"Prøv på nytt om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Har du glemt mønsteret?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Opplåsing av konto"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"For mange forsøk på tegning av mønster"</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ikke forstyrr er endret"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Trykk for å sjekke hva som er blokkert."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Gjennomgå varslingsinnstillingene"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Fra og med Android 13 må apper du installerer, få tillatelse til å sende varsler. Trykk for å endre denne tillatelsen for eksisterende apper."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Påminn meg senere"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Lukk"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>

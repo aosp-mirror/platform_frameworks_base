@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарь руу хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Файл болон документ"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файл, документ"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"таны төхөөрөмж дээрх файл болон документод хандах"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Хөгжим, бусад аудио"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"таны төхөөрөмж дээрх аудио файлд хандах"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Зураг, видео"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"таны төхөөрөмж дээрх зураг болон видео файлд хандах"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Хөгжим, аудио"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"төхөөрөмж дээрээ хөгжим болон аудионд хандах"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Зураг, видео"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"төхөөрөмж дээрээ зураг болон видеонд хандах"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"дуу хураах"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Дасгал хөдөлгөөн"</string>
@@ -350,7 +350,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"мэдэгдлийг түгжигдсэн төхөөрөмж дээр бүтэн дэлгэцийн үйл ажиллагаа байдлаар үзүүлэх"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Аппад мэдэгдлийг түгжигдсэн төхөөрөмж дээр бүтэн дэлгэцийн үйл ажиллагаа байдлаар үзүүлэхийг зөвшөөрдөг"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"товчлол суулгах"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Аппликейшн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг нэмж чадна."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Аппликейшн нь хэрэглэгчийн оролцоогүйгээр Үндсэн нүүрний товчлолыг нэмж чадна."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"товчлолыг устгах"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Аппликейшн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг устгаж чадна."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"гарсан дуудлагыг чиглэлийг өөрчлөх"</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Бүү саад бол горимыг өөрчилсөн"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Блоклосон зүйлийг шалгахын тулд товшино уу."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Мэдэгдлийн тохиргоог шалгах"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13-аас эхлэн таны суулгасан аппууд мэдэгдэл илгээхийн тулд танаас зөвшөөрөл авах шаардлагатай. Одоо байгаа аппуудын уг зөвшөөрлийг өөрчлөхийн тулд товшино уу."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Надад дараа сануул"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Хаах"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Систем"</string>

@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceder ao teu calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar e consultar mensaxes de SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Ficheiros e documentos"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Ficheiros e documentos"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"acceder a ficheiros e documentos do dispositivo"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Música e outro contido de audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"acceder a ficheiros de audio do teu dispositivo"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotos e vídeos"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"acceder a ficheiros de imaxe e de vídeo do teu dispositivo"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música e audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acceder a música e audio do dispositivo"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos e vídeos"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"acceder a fotos e vídeos do dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrófono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Actividade física"</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"O modo Non molestar cambiou"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toca para comprobar o contido bloqueado."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Consulta a configuración de notificacións"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Desde Android 13, as aplicacións que instales necesitan o teu permiso para enviar notificacións. Toca para cambiar este permiso nas aplicacións que xa teñas."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Lembrarmo máis tarde"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Pechar"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
@@ -2104,7 +2103,7 @@
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ficheiro}other{{file_name} + # ficheiros}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Non hai recomendacións de persoas coas que compartir contido"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicacións"</string>
-    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta aplicación non está autorizada a realizar gravacións, pero pode capturar audio a través deste dispositivo USB."</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta aplicación non está autorizada a realizar gravacións, pero podería capturar audio a través deste dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Inicio"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Volver"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Aplicacións recentes"</string>

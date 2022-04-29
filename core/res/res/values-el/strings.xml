@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"έχει πρόσβαση στο ημερολόγιό σας"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"στέλνει και να διαβάζει μηνύματα SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Αρχεία και έγγραφα"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Αρχεία και έγγραφα"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"πρόσβαση σε αρχεία και έγγραφα στη συσκευή σας"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Μουσική και άλλο ηχητικό περιεχόμενο"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"πρόσβαση σε αρχεία ήχου στη συσκευή σας"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Φωτογραφίες και βίντεο"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"πρόσβαση σε αρχεία εικόνας και βίντεο στη συσκευή σας"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Μουσική και ήχος"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"πρόσβαση στη μουσική και σε αρχεία ήχου στη συσκευή σας"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Φωτογραφίες και βίντεο"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"πρόσβαση στις φωτογραφίες και τα βίντεο στη συσκευή σας"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Μικρόφωνο"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ηχογραφεί"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Σωματική δραστ/τητα"</string>
@@ -640,7 +640,7 @@
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Απομακρύνετε περισσότερο το τηλέφωνο."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Πλησιάστε περισσότερο το τηλέφωνο."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Μετακινήστε το τηλέφωνο πιο ψηλά."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Μετακινήστε πιο χαμηλά το τηλέφωνο."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Μετακινήστε το τηλέφωνο πιο χαμηλά."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Μετακινήστε το τηλέφωνο στα αριστερά."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Μετακινήστε το τηλέφωνο στα δεξιά."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Κοιτάξτε απευθείας τη συσκευή σας."</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Η λειτουργία \"Μην ενοχλείτε\" άλλαξε"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Πατήστε για να ελέγξετε το περιεχόμενο που έχει αποκλειστεί."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Έλεγχος ρυθμίσεων ειδοποιήσεων"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Από το Android 13 και έπειτα, οι εφαρμογές που εγκαθιστάτε θα χρειάζονται την άδειά σας για την αποστολή ειδοποιήσεων. Πατήστε για να αλλάξετε αυτήν την άδεια για υπάρχουσες εφαρμογές."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Υπενθύμιση αργότερα"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Παράβλεψη"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Σύστημα"</string>

@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"เข้าถึงปฏิทิน"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ส่งและดูข้อความ SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ไฟล์และเอกสาร"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ไฟล์และเอกสาร"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"เข้าถึงไฟล์และเอกสารในอุปกรณ์"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"เพลงและเสียงอื่นๆ"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"เข้าถึงไฟล์เสียงในอุปกรณ์"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"รูปภาพและวิดีโอ"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"เข้าถึงไฟล์ภาพและวิดีโอในอุปกรณ์"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"เพลงและเสียง"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"เข้าถึงเพลงและเสียงในอุปกรณ์ได้"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"รูปภาพและวิดีโอ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"เข้าถึงรูปภาพและวิดีโอในอุปกรณ์ได้"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ไมโครโฟน"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"บันทึกเสียง"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"การเคลื่อนไหวร่างกาย"</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"เปลี่ยน \"ห้ามรบกวน\" แล้ว"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"แตะเพื่อดูรายการที่ถูกบล็อก"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ตรวจสอบการตั้งค่าการแจ้งเตือน"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"ตั้งแต่ Android 13 เป็นต้นไป แอปที่คุณติดตั้งจะต้องได้รับสิทธิ์จากคุณเพื่อส่งการแจ้งเตือน แตะเพื่อเปลี่ยนแปลงสิทธิ์นี้สำหรับแอปที่มีอยู่"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"เตือนภายหลัง"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ปิด"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ระบบ"</string>
@@ -2104,7 +2103,7 @@
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ไฟล์}other{{file_name} + # ไฟล์}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ไม่พบใครที่แนะนำให้แชร์ด้วย"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"รายชื่อแอป"</string>
-    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"แอปนี้ไม่ได้รับอนุญาตให้บันทึกเสียงแต่จะบันทึกเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"แอปนี้ไม่ได้รับอนุญาตให้บันทึกเสียงแต่อาจเก็บเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"หน้าแรก"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"กลับ"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"แอปล่าสุด"</string>

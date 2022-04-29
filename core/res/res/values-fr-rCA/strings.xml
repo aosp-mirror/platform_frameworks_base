@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accéder à votre agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Messagerie texte"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envoyer et afficher des messages texte"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fichiers et documents"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fichiers et documents"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"accédez aux fichiers et aux documents sur votre appareil"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musique et autres fichiers audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"accéder aux fichiers audio de votre appareil"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Photos et vidéos"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"accéder aux fichiers d\'image et aux fichiers vidéo de votre appareil"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musique et audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accédez aux fichiers musicaux et audio sur votre appareil"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Photos et vidéos"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accédez aux photos et aux vidéos sur votre appareil"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
@@ -349,7 +349,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Permet à l\'application de réduire ou de développer la barre d\'état."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"afficher les notifications en mode plein écran sur un appareil verrouillé"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Permet à l\'application d\'afficher les notifications en mode plein écran sur un appareil verrouillé."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"installer des raccourcis"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Installer des raccourcis"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permet à une application d\'ajouter des raccourcis sans l\'intervention de l\'utilisateur."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"désinstaller des raccourcis"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permet à l\'application de supprimer des raccourcis de la page d\'accueil sans intervention de l\'utilisateur."</string>
@@ -427,7 +427,7 @@
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permet à l\'application de lire le journal d\'appels de votre téléphone, y compris les données relatives aux appels entrants et sortants. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier votre journal d\'appels."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"Accéder aux données des capteurs corporels si en utilisation (fréq. card., etc.)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permet à l\'application d\'accéder aux données des capteurs corporels telles que la fréquence cardiaque, la température et le pourcentage d\'oxygène dans le sang pendant l\'utilisation de l\'application."</string>
-    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accéder aux données des capteurs corporels si en arrière-plan (fréq. card., etc.)"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accéder aux données des capteurs corporels (comme la fréq. card.) en arrière-plan"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permet à l\'application d\'accéder aux données des capteurs corporels telles que la fréquence cardiaque, la température et le pourcentage d\'oxygène dans le sang pendant que l\'application s\'exécute en arrière-plan."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lire les événements d\'agenda et leurs détails"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Cette application peut lire tous les événements d\'agenda stockés sur votre tablette et partager ou enregistrer les données de votre agenda."</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Les paramètres du mode Ne pas déranger ont changé"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Touchez l\'écran pour vérifier ce qui est bloqué."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Examiner les paramètres de notification"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"À partir d\'Android 13, les applications que vous installez ont besoin de votre autorisation pour envoyer des notifications. Touchez pour modifier cette autorisation pour les applications existantes."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Me rappeler plus tard"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Fermer"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Système"</string>
