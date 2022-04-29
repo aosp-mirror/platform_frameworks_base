@@ -16,13 +16,6 @@
 
 package androidx.window.extensions.embedding;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -68,56 +61,6 @@ public class TaskContainerTest {
         assertTrue(taskContainer.setTaskBounds(TASK_BOUNDS));
 
         assertFalse(taskContainer.setTaskBounds(TASK_BOUNDS));
-    }
-
-    @Test
-    public void testIsWindowingModeInitialized() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
-
-        assertFalse(taskContainer.isWindowingModeInitialized());
-
-        taskContainer.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-
-        assertTrue(taskContainer.isWindowingModeInitialized());
-    }
-
-    @Test
-    public void testGetWindowingModeForSplitTaskFragment() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
-        final Rect splitBounds = new Rect(0, 0, 500, 1000);
-
-        assertEquals(WINDOWING_MODE_MULTI_WINDOW,
-                taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
-
-        taskContainer.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-
-        assertEquals(WINDOWING_MODE_MULTI_WINDOW,
-                taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
-
-        taskContainer.setWindowingMode(WINDOWING_MODE_FREEFORM);
-
-        assertEquals(WINDOWING_MODE_FREEFORM,
-                taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
-
-        // Empty bounds means the split pair are stacked, so it should be UNDEFINED which will then
-        // inherit the Task windowing mode
-        assertEquals(WINDOWING_MODE_UNDEFINED,
-                taskContainer.getWindowingModeForSplitTaskFragment(new Rect()));
-    }
-
-    @Test
-    public void testIsInPictureInPicture() {
-        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
-
-        assertFalse(taskContainer.isInPictureInPicture());
-
-        taskContainer.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-
-        assertFalse(taskContainer.isInPictureInPicture());
-
-        taskContainer.setWindowingMode(WINDOWING_MODE_PINNED);
-
-        assertTrue(taskContainer.isInPictureInPicture());
     }
 
     @Test
