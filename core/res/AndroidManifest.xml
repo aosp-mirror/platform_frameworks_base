@@ -6793,7 +6793,7 @@
                   android:excludeFromRecents="true"
                   android:exported="true"
                   android:permission="android.permission.MANAGE_GAME_ACTIVITY"
-                  android:theme="@style/Theme.Translucent.NoTitleBar">
+                  android:theme="@style/Theme.GameSessionTrampoline">
         </activity>
 
         <receiver android:name="com.android.server.BootReceiver"
