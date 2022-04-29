@@ -108,6 +108,8 @@ public abstract class PanelViewController {
      */
     private boolean mIsSpringBackAnimation;
 
+    private boolean mInSplitShade;
+
     private void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
@@ -303,8 +305,9 @@ public abstract class PanelViewController {
         mSlopMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
         mHintDistance = mResources.getDimension(R.dimen.hint_move_distance);
         mPanelFlingOvershootAmount = mResources.getDimension(R.dimen.panel_overshoot_amount);
-        mUnlockFalsingThreshold = mResources.getDimensionPixelSize(
-                R.dimen.unlock_falsing_threshold);
+        mUnlockFalsingThreshold =
+                mResources.getDimensionPixelSize(R.dimen.unlock_falsing_threshold);
+        mInSplitShade = mResources.getBoolean(R.bool.config_use_split_notification_shade);
     }
 
     protected float getTouchSlop(MotionEvent event) {
@@ -600,10 +603,12 @@ public abstract class PanelViewController {
         }
         mIsFlinging = true;
         // we want to perform an overshoot animation when flinging open
-        final boolean addOverscroll = expand
-                && mStatusBarStateController.getState() != StatusBarState.KEYGUARD
-                && mOverExpansion == 0.0f
-                && vel >= 0;
+        final boolean addOverscroll =
+                expand
+                        && !mInSplitShade // Split shade has its own overscroll logic
+                        && mStatusBarStateController.getState() != StatusBarState.KEYGUARD
+                        && mOverExpansion == 0.0f
+                        && vel >= 0;
         final boolean shouldSpringBack = addOverscroll || (mOverExpansion != 0.0f && expand);
         float overshootAmount = 0.0f;
         if (addOverscroll) {
@@ -777,7 +782,8 @@ public abstract class PanelViewController {
             }
             float maxPanelHeight = getMaxPanelHeight();
             if (mHeightAnimator == null) {
-                if (mTracking) {
+                // Split shade has its own overscroll logic
+                if (mTracking && !mInSplitShade) {
                     float overExpansionPixels = Math.max(0, h - maxPanelHeight);
                     setOverExpansionInternal(overExpansionPixels, true /* isFromGesture */);
                 }
