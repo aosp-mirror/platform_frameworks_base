@@ -261,6 +261,8 @@ class MediaDataManager(
         // Set up links back into the pipeline for listeners that need to send events upstream.
         mediaTimeoutListener.timeoutCallback = { key: String, timedOut: Boolean ->
             setTimedOut(key, timedOut) }
+        mediaTimeoutListener.stateCallback = { key: String, state: PlaybackState ->
+            updateState(key, state) }
         mediaResumeListener.setManager(this)
         mediaDataFilter.mediaDataManager = this
 
@@ -502,6 +504,21 @@ class MediaDataManager(
         }
     }
 
+    /**
+     * Called when the player's [PlaybackState] has been updated with new actions and/or state
+     */
+    private fun updateState(key: String, state: PlaybackState) {
+        mediaEntries.get(key)?.let {
+            val actions = createActionsFromState(it.packageName,
+                    mediaControllerFactory.create(it.token), UserHandle(it.userId))
+            val data = it.copy(
+                    semanticActions = actions,
+                    isPlaying = isPlayingState(state.state))
+            if (DEBUG) Log.d(TAG, "State updated outside of notification")
+            onMediaDataLoaded(key, key, data)
+        }
+    }
+
     private fun removeEntry(key: String) {
         mediaEntries.remove(key)?.let {
             logger.logMediaRemoved(it.appUid, it.packageName, it.instanceId)
@@ -673,11 +690,8 @@ class MediaDataManager(
         // Otherwise, use the notification actions
         var actionIcons: List<MediaAction> = emptyList()
         var actionsToShowCollapsed: List<Int> = emptyList()
-        var semanticActions: MediaButton? = null
-        if (mediaFlags.areMediaSessionActionsEnabled(sbn.packageName, sbn.user) &&
-                mediaController.playbackState != null) {
-            semanticActions = createActionsFromState(sbn.packageName, mediaController)
-        } else {
+        val semanticActions = createActionsFromState(sbn.packageName, mediaController, sbn.user)
+        if (semanticActions == null) {
             val actions = createActionsFromNotification(sbn)
             actionIcons = actions.first
             actionsToShowCollapsed = actions.second
@@ -789,13 +803,17 @@ class MediaDataManager(
      * @return a Pair consisting of a list of media actions, and a list of ints representing which
      *      of those actions should be shown in the compact player
      */
-    private fun createActionsFromState(packageName: String, controller: MediaController):
-            MediaButton? {
+    private fun createActionsFromState(
+        packageName: String,
+        controller: MediaController,
+        user: UserHandle
+    ): MediaButton? {
         val state = controller.playbackState
-        if (state == null) {
-            return MediaButton()
+        if (state == null || !mediaFlags.areMediaSessionActionsEnabled(packageName, user)) {
+            return null
         }
-        // First, check for} standard actions
+
+        // First, check for standard actions
         val playOrPause = if (isConnectingState(state.state)) {
             // Spinner needs to be animating to render anything. Start it here.
             val drawable = context.getDrawable(
