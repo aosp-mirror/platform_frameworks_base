@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"存取您的日曆"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"短訊"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"傳送和查看短訊"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"檔案和文件"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"存取裝置上的檔案和文件"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"音樂和音訊"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"在裝置上使用音樂和音訊"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"相片和影片"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"在裝置上使用相片和影片"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"麥克風"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"錄音"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"體能活動"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"指紋解鎖"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"無法使用指紋感應器"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"請諮詢維修服務供應商。"</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"無法擷取準確的臉容資料。請再試一次。"</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"無法建立面部模型，請再試一次。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"影像太亮。請嘗試在更暗的環境下使用。"</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"影像太暗。請嘗試在更明亮的環境下使用。"</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"請將手機移遠一點。"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"請將手機移近一點。"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"請將手機向上移。"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"請將手機向下移。"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"請將手機向左移。"</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"請將手機向右移。"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"請嘗試在更明亮的環境下使用"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"請將手機移遠一點"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"請將手機移近一點"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"請將手機向上移"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"請將手機向下移"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"請將手機向左移"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"請將手機向右移"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"請以更直視的角度看著裝置。"</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"將手機對準您的臉孔正面。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到您的臉。將手機保持與視線同高。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"裝置不夠穩定。請拿穩手機。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"請重新註冊臉孔。"</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"無法再識別臉孔。請再試一次。"</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"臉孔位置太相近，請改變您的姿勢。"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"減少頭部左右轉動幅度。"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"減少頭部傾斜幅度。"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"減少頭部左右轉動幅度。"</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"無法辨識面孔，請再試一次。"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"請稍微變更頭部的位置"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"盡可能直視手機"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"盡可能直視手機"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"盡可能直視手機"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"移除遮住您臉孔的任何東西。"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"請清理螢幕頂部，包括黑色列"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"您必須展示整個面孔。"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"您必須展示整個面孔。"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"無法建立面部模型，請再試一次。"</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"偵測到深色眼鏡。您必須展示整個面孔。"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"偵測到面部遮蓋物。您必須展示整個面孔。"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"無法驗證臉孔，硬件無法使用。"</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"請勿騷擾已變更"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"輕按即可查看封鎖內容。"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"查看通知設定"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"由 Android 13 開始，您安裝的應用程式須獲得授權才能傳送通知。輕按即可變更現有應用程式的這項權限。"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"稍後提醒我"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"關閉"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"系統"</string>

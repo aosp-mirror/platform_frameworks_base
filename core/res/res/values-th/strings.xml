@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"เข้าถึงปฏิทิน"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ส่งและดูข้อความ SMS"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ไฟล์และเอกสาร"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"เข้าถึงไฟล์และเอกสารในอุปกรณ์"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"เพลงและเสียง"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"เข้าถึงเพลงและเสียงในอุปกรณ์ได้"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"รูปภาพและวิดีโอ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"เข้าถึงรูปภาพและวิดีโอในอุปกรณ์ได้"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ไมโครโฟน"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"บันทึกเสียง"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"การเคลื่อนไหวร่างกาย"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ปลดล็อกด้วยลายนิ้วมือ"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ใช้เซ็นเซอร์ลายนิ้วมือไม่ได้"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"โปรดติดต่อผู้ให้บริการซ่อม"</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"บันทึกข้อมูลใบหน้าที่ถูกต้องไม่ได้ ลองอีกครั้ง"</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"สร้างรูปแบบใบหน้าไม่ได้ โปรดลองอีกครั้ง"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"สว่างเกินไป ลองหาตำแหน่งที่แสงน้อยกว่านี้"</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"มืดเกินไป ลองหาตำแหน่งที่สว่างขึ้น"</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"เลื่อนโทรศัพท์ออกไปไกลกว่านี้"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"เลื่อนโทรศัพท์เข้าไปใกล้กว่านี้"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ยกโทรศัพท์ให้สูงขึ้น"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ถือโทรศัพท์ให้ต่ำลง"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"เลื่อนโทรศัพท์ไปทางซ้าย"</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"เลื่อนโทรศัพท์ไปทางขวา"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ลองหาตำแหน่งที่สว่างขึ้น"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"ถือโทรศัพท์ให้ห่างกว่านี้"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"ถือโทรศัพท์ให้ใกล้กว่านี้"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ยกโทรศัพท์ให้สูงขึ้น"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ถือโทรศัพท์ให้ต่ำลง"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"เลื่อนโทรศัพท์ไปทางซ้าย"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"เลื่อนโทรศัพท์ไปทางขวา"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"โปรดมองตรงมาที่อุปกรณ์"</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"หันหน้าให้ตรงกับโทรศัพท์"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"ไม่เห็นใบหน้า ถือโทรศัพท์ไว้ที่ระดับสายตา"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"มีการเคลื่อนไหวมากเกินไป ถือโทรศัพท์นิ่งๆ"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"โปรดลงทะเบียนใบหน้าอีกครั้ง"</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"จำใบหน้าไม่ได้แล้ว ลองอีกครั้ง"</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"ใกล้เคียงเกินไป โปรดเปลี่ยนท่าโพส"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"จัดตำแหน่งศีรษะให้ตรง"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"ปรับมุมศีรษะให้ตรง"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"จัดตำแหน่งศีรษะให้ตรง"</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"ไม่รู้จักใบหน้า โปรดลองอีกครั้ง"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"เปลี่ยนตำแหน่งของศีรษะเล็กน้อย"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"โปรดมองตรงไปที่โทรศัพท์"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"โปรดมองตรงไปที่โทรศัพท์"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"โปรดมองตรงไปที่โทรศัพท์"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"เอาสิ่งที่ปิดบังใบหน้าออก"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ทำความสะอาดด้านบนของหน้าจอ รวมถึงแถบสีดำ"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"ต้องมองเห็นใบหน้าของคุณทั้งหมด"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"ต้องมองเห็นใบหน้าของคุณทั้งหมด"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"สร้างรูปแบบใบหน้าไม่ได้ โปรดลองอีกครั้ง"</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"ตรวจพบแว่นตาดำ ต้องมองเห็นใบหน้าของคุณทั้งหมด"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ตรวจพบหน้ากากอนามัย ต้องมองเห็นใบหน้าของคุณทั้งหมด"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ยืนยันใบหน้าไม่ได้ ฮาร์ดแวร์ไม่พร้อมใช้งาน"</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"เปลี่ยน \"ห้ามรบกวน\" แล้ว"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"แตะเพื่อดูรายการที่ถูกบล็อก"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ตรวจสอบการตั้งค่าการแจ้งเตือน"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"ตั้งแต่ Android 13 เป็นต้นไป แอปที่คุณติดตั้งจะต้องได้รับสิทธิ์จากคุณเพื่อส่งการแจ้งเตือน แตะเพื่อเปลี่ยนแปลงสิทธิ์นี้สำหรับแอปที่มีอยู่"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"เตือนภายหลัง"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ปิด"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ระบบ"</string>

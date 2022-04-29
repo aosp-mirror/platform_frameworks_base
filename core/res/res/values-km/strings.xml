@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ចូលប្រើប្រិតិទិនរបស់អ្នក"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"សារ SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ផ្ញើ និងមើលសារ SMS"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ឯកសារ"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"ចូលប្រើ​ឯកសារ​នៅលើ​ឧបករណ៍​របស់អ្នក"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"តន្រ្តី និងសំឡេង"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ចូលប្រើតន្ត្រី និងសំឡេងនៅលើឧបករណ៍របស់អ្នក"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"រូបថត និងវីដេអូ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ចូលប្រើរូបថត និងវីដេអូនៅលើឧបករណ៍របស់អ្នក"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"មីក្រូ​ហ្វូន"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ថតសំឡេង"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"សកម្មភាព​រាងកាយ"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ការដោះសោ​ដោយប្រើ​ស្នាមម្រាមដៃ"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"មិនអាចប្រើ​ឧបករណ៍ចាប់ស្នាមម្រាមដៃ​បានទេ"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ទាក់ទងក្រុមហ៊ុន​ផ្ដល់ការជួសជុល។"</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"មិនអាច​ថត​ទិន្នន័យទម្រង់មុខ​បាន​ត្រឹមត្រូវទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"មិនអាចបង្កើតគំរូមុខរបស់អ្នកបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ភ្លឺពេក។ សូមសាកល្បង​ប្រើ​ពន្លឺស្រាលជាងនេះ។"</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"ងងឹតជ្រុល។ សូមសាកល្បង​ប្រើ​ពន្លឺភ្លឺជាងនេះ។"</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"រំកិល​ទូរសព្ទឱ្យឆ្ងាយ​ជាងមុន។"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ផ្លាស់ទី​ទូរសព្ទ​ឱ្យ​ជិត​ជាង​មុន។"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ផ្លាស់ទីទូរសព្ទឱ្យខ្ពស់ជាងមុន។"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ផ្លាស់ទីទូរសព្ទឱ្យទាបជាងមុន។"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"ផ្លាស់ទី​ទូរសព្ទទៅខាងឆ្វេង។"</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"ផ្លាស់ទីទូរសព្ទទៅខាងស្ដាំ។"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"សាកល្បងប្រើ​ពន្លឺភ្លឺជាងនេះ"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"ដាក់​ទូរសព្ទឱ្យឆ្ងាយ​ជាងមុន"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"ដាក់​ទូរសព្ទ​ឱ្យជិត​ជាងមុន"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ដាក់​ទូរសព្ទ​ឱ្យខ្ពស់​ជាងមុន"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ដាក់​ទូរសព្ទ​ឱ្យទាប​ជាងមុន"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ដាក់​ទូរសព្ទ​ទៅខាងឆ្វេងអ្នក"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ដាក់ទូរសព្ទ​ទៅខាងស្ដាំអ្នក"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"សូមមើល​ឱ្យចំ​ឧបករណ៍​របស់អ្នក​ជាងមុន។"</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"បែរមុខ​របស់អ្នក​ឱ្យចំ​ពីមុខ​ទូរសព្ទ​ផ្ទាល់។"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"មើលមិនឃើញ​មុខរបស់អ្នកទេ។ កាន់ទូរសព្ទរបស់អ្នក​ដាក់ត្រឹមភ្នែក។"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"មាន​ចលនា​ខ្លាំងពេក។ សូមកាន់​ទូរសព្ទ​ឱ្យនឹង។"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"សូម​​ស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត។"</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"មិន​អាច​សម្គាល់មុខ​បាន​ទៀតទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"ស្រដៀងគ្នា​ពេក សូមផ្លាស់ប្ដូរ​កាយវិការ​របស់អ្នក។"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ងាកក្បាល​របស់អ្នកតិចជាងមុន​បន្តិច។"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"ផ្អៀងក្បាល​របស់អ្នក​តិចជាងនេះ​បន្តិច។"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ងាកក្បាល​របស់អ្នក​បន្តិចទៀត។"</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"មិនអាចសម្គាល់មុខបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"ប្ដូរទីតាំងក្បាល​របស់អ្នកតិចៗ"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"មើល​ទូរសព្ទ​របស់អ្នក​ឱ្យចំជាងនេះ"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"មើល​ទូរសព្ទ​របស់អ្នក​ឱ្យចំជាងនេះ"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"មើល​ទូរសព្ទ​របស់អ្នក​ឱ្យចំជាងនេះ"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"យកអ្វី​ដែលបាំង​មុខ​របស់អ្នកចេញ។"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"សម្អាតផ្នែកខាង​លើនៃ​អេក្រង់​របស់​អ្នក រួមទាំង​របារខ្មៅ"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"មុខរបស់អ្នកត្រូវតែ​អាចមើលឃើញ​ពេញលេញ"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"មុខរបស់អ្នកត្រូវតែ​អាចមើលឃើញ​ពេញលេញ"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"មិនអាចបង្កើតគំរូមុខរបស់អ្នកបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"បានរកឃើញ​វ៉ែនតាខ្មៅ។ មុខរបស់អ្នកត្រូវតែ​អាចមើលឃើញ​ពេញលេញ។"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"បានរកឃើញ​គ្រឿងពាក់លើមុខ។ មុខរបស់អ្នកត្រូវតែ​អាចមើលឃើញ​ពេញលេញ។"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"មិនអាច​ផ្ទៀងផ្ទាត់​មុខបានទេ។ មិនមាន​ហាតវែរទេ។"</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"មុខងារ​កុំ​រំខាន​ត្រូវ​បាន​ប្ដូរ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"សូមចុច​ដើម្បី​មើល​ថា​​បានទប់ស្កាត់អ្វីខ្លះ។"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ពិនិត្យមើលការកំណត់ការជូនដំណឹង"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"ចាប់ពី Android 13 ឡើងទៅ កម្មវិធីដែលអ្នកដំឡើងត្រូវការ​ការអនុញ្ញាតរបស់អ្នក ដើម្បីផ្ញើការជូនដំណឹង។ សូមចុចដើម្បីផ្លាស់ប្ដូរការអនុញ្ញាតនេះសម្រាប់កម្មវិធីដែលមានស្រាប់។"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"រំលឹក​ខ្ញុំ​ពេលក្រោយ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ច្រានចោល"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ប្រព័ន្ធ"</string>

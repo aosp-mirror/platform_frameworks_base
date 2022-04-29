@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"atzitu egutegia"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMSak"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"bidali eta ikusi SMS mezuak"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"fitxategiak eta dokumentuak"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"gailuko fitxategiak eta dokumentuak atzitu"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"musika eta audioa"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"atzitu gailuko musika eta audioak"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"argazkiak eta bideoak"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"atzitu gailuko argazkiak eta bideoak"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofonoa"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"grabatu audioa"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Jarduera fisikoa"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Hatz-marka bidez desblokeatzea"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Ezin da erabili hatz-marken sentsorea"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Jarri harremanetan konponketak egiten dituen hornitzaile batekin."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Ezin izan dira bildu argazkiaren datu zehatzak. Saiatu berriro."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Ezin da sortu aurpegi-eredua. Saiatu berriro."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Argi gehiegi dago. Joan toki ilunago batera."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Ilunegi dago. Erabili argi gehiago."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Urrundu telefonoa."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Hurbildu telefonoa."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Goratu telefonoa."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Beheratu telefonoa."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Mugitu telefonoa ezkerretara."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Mugitu telefonoa eskuinetara."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Erabili argi gehiago"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Urrundu telefonoa"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Hurbildu telefonoa"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Igo telefonoa"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Jaitsi telefonoa"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Eraman telefonoa ezkerrera"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Eraman telefonoa eskuinera"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Begiratu zuzenago gailuari."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Ipini aurrez aurre aurpegia eta telefonoa."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Ez da hauteman aurpegia. Eutsi telefonoari begien parean."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Mugimendu gehiegi dago. Eutsi tinko telefonoari."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Erregistratu berriro aurpegia."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Ez dugu ezagutzen aurpegi hori. Saiatu berriro."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Jarrera berdintsuegia da. Alda ezazu."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Biratu burua pixka bat gutxiago."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Makurtu burua pixka bat gutxiago."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Biratu burua pixka bat gutxiago."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Ez da hauteman aurpegia. Saiatu berriro."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Aldatu buruaren posizioa apur bat"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Begiratu zuzenago telefonoari"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Begiratu zuzenago telefonoari"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Begiratu zuzenago telefonoari"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Kendu aurpegia estaltzen dizuten gauzak."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Garbitu pantailaren goialdea, barra beltza barne"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Aurpegi osoak egon behar du ikusgai"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Aurpegi osoak egon behar du ikusgai"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Ezin da sortu aurpegi-eredua. Saiatu berriro."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Betaurreko ilunak hauteman dira. Aurpegi osoak egon behar du ikusgai."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Maskara bat hauteman da. Aurpegi osoak egon behar du ikusgai."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ezin da egiaztatu aurpegia. Hardwarea ez dago erabilgarri."</string>
@@ -1886,9 +1886,9 @@
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"USSD eskaera ohiko deira aldatu da"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"USSD eskaera SS eskaerara aldatu da"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="8343001461299302472">"USSD eskaera berrira aldatu da"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"USSD eskaera bideo-deira aldatu da"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"USSD eskaera bideodeira aldatu da"</string>
     <string name="stk_cc_ss_to_dial" msgid="4087396658768717077">"SS eskaera ohiko deira aldatu da"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS eskaera bideo-deira aldatu da"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS eskaera bideodeira aldatu da"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS eskaera USSD eskaerara aldatu da"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"SS eskaera berrira aldatu da"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Phishing-alerta"</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ez molestatzeko modua aldatu da"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Sakatu zer dagoen blokeatuta ikusteko."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Berrikusi jakinarazpen-ezarpenak"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 ezkero, jakinarazpenak bidaltzeko baimena eman behar diezu instalatzen dituzun aplikazioei. Sakatu hau lehendik dauden aplikazioen baimenak aldatzeko."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Gogorarazi geroago"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Baztertu"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>

@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"toegang krijgen tot je agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sms\'jes verzenden en bekijken"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Bestanden en documenten"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"bestanden en documenten op je apparaat openen"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muziek en audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"muziek en audio op je apparaat openen"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto\'s en video\'s"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"foto\'s en video\'s op je apparaat openen"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfoon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"audio opnemen"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysieke activiteit"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Ontgrendelen met vingerafdruk"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Kan vingerafdruksensor niet gebruiken"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Ga naar een reparateur."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Geen accurate gegevens. Probeer het nog eens."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kan gezichtsmodel niet maken. Probeer het opnieuw."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Overbelicht. Probeer een minder felle belichting."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Te donker. Probeer een fellere verlichting."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Beweeg de telefoon verder weg."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Houd de telefoon dichterbij."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Houd de telefoon hoger."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Houd de telefoon lager."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Beweeg je telefoon meer naar links."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Beweeg je telefoon meer naar rechts."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Probeer fellere verlichting"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Houd de telefoon verder weg"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Houd de telefoon dichterbij"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Houd de telefoon hoger"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Houd de telefoon lager"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Beweeg de telefoon naar links"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Beweeg de telefoon naar rechts"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Kijk rechter naar je apparaat."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Houd je gezicht recht voor de telefoon."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Je gezicht is niet te zien. Houd je telefoon op ooghoogte."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Te veel beweging. Houd je telefoon stil."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registreer je gezicht opnieuw."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Herkent gezicht niet meer. Probeer het nog eens."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Lijkt te veel op elkaar. Verander je pose."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Draai je hoofd iets minder."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Kantel je hoofd iets minder."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Draai je hoofd iets minder."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Gezicht niet herkend. Probeer het opnieuw."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Verander de positie van je hoofd een beetje"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Kijk goed recht naar je telefoon"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Kijk goed recht naar je telefoon"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Kijk goed recht naar je telefoon"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Zorg dat je gezicht volledig zichtbaar is."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Reinig de bovenkant van je scherm, inclusief de zwarte balk"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Je gezicht moet geheel zichtbaar zijn"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Je gezicht moet geheel zichtbaar zijn"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan gezichtsmodel niet maken. Probeer het opnieuw."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Donkere bril waargenomen. Je gezicht moet geheel zichtbaar zijn."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gezichtsbedekking waargenomen. Je gezicht moet geheel zichtbaar zijn."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan gezicht niet verifiëren. Hardware niet beschikbaar."</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'Niet storen\' is gewijzigd"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tik om te controleren wat er is geblokkeerd."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Instellingen voor meldingen bekijken"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Vanaf Android 13 hebben de apps die je installeert je toestemming nodig om meldingen te sturen. Tik om deze toestemming voor bestaande apps te wijzigen."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Later herinneren"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Sluiten"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systeem"</string>

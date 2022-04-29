@@ -307,17 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"wysyłanie i wyświetlanie SMS‑ów"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Pliki i dokumenty"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"dostęp do plików i dokumentów na urządzeniu"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzyka i dźwięk"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"dostęp do muzyki i dźwięku na urządzeniu"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Zdjęcia i filmy"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"dostęp do zdjęć i filmów na urządzeniu"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nagrywanie dźwięku"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Aktywność fizyczna"</string>
@@ -641,26 +636,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odblokowywanie odciskiem palca"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nie można użyć czytnika linii papilarnych"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Odwiedź serwis."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Nie udało się zarejestrować danych twarzy. Spróbuj ponownie."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nie można utworzyć modelu twarzy. Spróbuj ponownie."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Zbyt jasno. Spróbuj przy słabszym świetle."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Zbyt ciemno. Spróbuj w jaśniejszym świetle."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Odsuń telefon."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Przybliż telefon."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Przesuń telefon wyżej."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Obniż telefon."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Przesuń telefon w lewo."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Przesuń telefon w prawo."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Spróbuj w jaśniejszym świetle"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Odsuń telefon"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Przybliż telefon"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Przesuń telefon wyżej"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Przesuń telefon niżej"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Przesuń telefon w lewo"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Przesuń telefon w prawo"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Patrz prosto na urządzenie."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Ustaw twarz dokładnie na wprost telefonu."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Nie widzę twarzy. Trzymaj telefon na wysokości oczu."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Telefon się porusza. Trzymaj go nieruchomo."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Zarejestruj swoją twarz ponownie."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Nie można już rozpoznać twarzy. Spróbuj ponownie."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Za mała różnica. Zmień pozycję."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Trochę mniej obróć głowę."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Trochę mniej pochyl głowę."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Trochę mniej obróć głowę."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Nie rozpoznaję twarzy. Spróbuj ponownie."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Lekko zmień położenie głowy"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Patrz prosto na telefon"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Patrz prosto na telefon"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Patrz prosto na telefon"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Usuń wszystko, co zasłania Ci twarz."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Wyczyść górną krawędź ekranu, w tym czarny pasek"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Twarz musi być widoczna w całości"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Twarz musi być widoczna w całości"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Nie można utworzyć modelu twarzy. Spróbuj ponownie."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Wykryto ciemne okulary. Twarz musi być widoczna w całości."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Wykryto zasłonę twarzy. Twarz musi być widoczna w całości."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nie można zweryfikować twarzy. Sprzęt niedostępny."</string>
@@ -1226,7 +1226,7 @@
     <string name="launch_warning_original" msgid="3332206576800169626">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została pierwotnie uruchomiona."</string>
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Skala"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"Zawsze pokazuj"</string>
-    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Włącz ponownie, wybierając Ustawienia systemowe &gt; Aplikacje &gt; Pobrane."</string>
+    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Włącz ponownie, wybierając Ustawienia systemu &gt; Aplikacje &gt; Pobrane."</string>
     <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje obecnie ustawionego rozmiaru wyświetlacza i może działać niestabilnie."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Zawsze pokazuj"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została skompilowana pod niezgodną wersję systemu Android i może zachowywać się niezgodnie z oczekiwaniami. Sprawdź, czy jest dostępna zaktualizowana wersja aplikacji."</string>
@@ -2060,8 +2060,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Zmiany w trybie Nie przeszkadzać"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Kliknij, by sprawdzić, co jest zablokowane."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Sprawdź ustawienia powiadomień"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"W Androidzie 13 i nowszych zainstalowane aplikacje będą potrzebowały zezwolenia na wysyłanie powiadomień. Kliknij, aby zmienić uprawnienia dla istniejących aplikacji."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Przypomnij później"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Odrzuć"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>

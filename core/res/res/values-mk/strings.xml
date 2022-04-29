@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"пристапува до календарот"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"испраќа и прикажува SMS-пораки"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Датотеки и документи"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"да пристапува до датотеки и документи на уредот"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музика и аудио"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"пристапувајте до музика и аудио на вашиот уред"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Фотографии и видеа"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"пристапувајте до фотографии и видеа на вашиот уред"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"снима аудио"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Физичка активност"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отклучување со отпечаток на прст"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не може да се користи сензорот за отпечатоци"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Однесете го на поправка."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Не се сними прецизна слика. Обидете се повторно."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Не може да создаде модел на лик. Обидете се пак."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Премногу светла. Пробајте со послабо осветлување."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Премногу темна. Пробајте со посилно осветлување."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Оддалечете го телефонот."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Доближете го телефонот."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Поткренете го телефонот."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Снижете го телефонот."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Поместете го телефонот налево."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Поместете го телефонот надесно."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Пробајте со посилно осветлување"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Оддалечете го телефонот"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Доближете го телефонот"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Кренете го телефонот погоре"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Спуштете го телефонот подолу"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Поместете го телефонот налево"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Поместете го телефонот надесно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Погледнете подиректно во уредот."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Наместете го лицето директно пред телефонот."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не ви се гледа лицето. Држете го телефонот во висина на очите."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Премногу движење. Држете го телефонот стабилно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Повторно регистрирајте го лицето."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Ликот не се препознава. Обидете се повторно."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Премногу слично, сменете ја позата."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Не вртете ја главата толку многу."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Не навалувајте ја главата толку многу."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Не вртете ја главата толку многу."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Не се препознава ликот. Обидете се пак."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Малку сменете ја положбата на главата"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Гледајте подиректно во телефонот"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Гледајте подиректно во телефонот"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Гледајте подиректно во телефонот"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Отстранете ги работите што ви го покриваат лицето."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Исчистете го врвот на екранот, вклучувајќи ја црната лента"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Лицето мора да ви се гледа целосно"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Лицето мора да ви се гледа целосно"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Не може да создаде модел на лик. Обидете се пак."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Носите темни очила. Лицето мора да ви се гледа целосно."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Лицето е покриено. Лицето мора да ви се гледа целосно."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ликот не може да се потврди. Хардвер - недостапен."</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Поставките за „Не вознемирувај“ се изменија"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Допрете за да проверите што е блокирано."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Прегледајте ги поставките за известувања"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Почнувајќи од Android 13, на апликациите што ги инсталирате им е потребна ваша дозвола за испраќање известувања. Допрете за да ја промените оваа дозвола за постојни апликации."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Потсети ме подоцна"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Отфрли"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Систем"</string>
@@ -2139,7 +2138,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"За работа"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Личен приказ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Работен приказ"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Блокирано од вашиот IT-администратор"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Блокирано од IT-администраторот"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Овие содржини не може да се споделуваат со работни апликации"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Овие содржини не може да се отвораат со работни апликации"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Овие содржини не може да се споделуваат со лични апликации"</string>

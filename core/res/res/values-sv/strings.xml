@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"få tillgång till din kalender"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"skicka och visa sms"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Filer och dokument"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"visa filer och dokument på enheten"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musik och ljud"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"få åtkomst till musik och ljud på enheten"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foton och videor"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"få åtkomst till foton och videor på enheten"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"spela in ljud"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysisk aktivitet"</string>
@@ -594,7 +589,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Det gick inte att bearbeta fingeravtrycket. Försök igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Rengör fingeravtryckssensorn och försök igen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Rengör sensorn och försök igen"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tryck på sensorn med ett stadigt tryck"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tryck hårt på sensorn"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du rörde fingret för långsamt. Försök igen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Testa ett annat fingeravtryck"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Det är för ljust"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingeravtryckslås"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Det går inte att använda fingeravtryckssensorn"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Besök ett reparationsställe."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Det gick inte att fånga ansiktsdata. Försök igen."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Ansiktsmodellen kunde inte skapas. Försök igen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Det är för ljust. Testa lägre belysning."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Det är för mörkt. Testa med bättre belysning."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Flytta mobilen längre bort."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"För mobilen närmare."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Höj mobilen."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Sänk mobilen."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Flytta mobilen åt vänster."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Flytta mobilen åt höger."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Testa med bättre belysning"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Flytta telefonen längre bort"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"För telefonen närmare"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Höj telefonen"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Sänk telefonen"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Flytta telefonen åt vänster"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Flytta telefonen åt höger"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Titta rakt på enheten."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Ha ansiktet direkt framför telefonen."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Ansiktet syns inte. Håll telefonen i ögonhöjd."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"För mycket rörelse. Håll mobilen stilla."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registrera ansiktet på nytt."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Ansiktet kan inte längre kännas igen. Försök igen."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"För likt. Ändra ansiktsposition."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Vrid mindre på huvudet."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Vinkla huvudet mindre."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Vrid mindre på huvudet."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Ansiktet kändes inte igen. Försök igen."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Rör lite på huvudet."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Titta rakt på telefonen"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Titta rakt på telefonen"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Titta rakt på telefonen"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Ta bort allt som täcker ansiktet."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Rengör skärmens överkant, inklusive det svarta fältet"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Hela ansiktet måste synas"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Hela ansiktet måste synas"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Ansiktsmodellen kunde inte skapas. Försök igen."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Mörka glasögon identifierades. Hela ansiktet måste synas."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Något som täcker ansiktet identifierades. Hela ansiktet måste synas."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansiktsverifiering går ej. Otillgänglig maskinvara."</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Stör ej har ändrats"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tryck om du vill se vad som blockeras."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Granska aviseringsinställningarna"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"I Android 13 behöver appar som du installerar behörighet att skicka aviseringar. Tryck om du vill ändra denna behörighet för befintliga appar."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Påminn mig senare"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Stäng"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>

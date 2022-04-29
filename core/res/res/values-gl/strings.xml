@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceder ao teu calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar e consultar mensaxes de SMS"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Ficheiros e documentos"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"acceder a ficheiros e documentos do dispositivo"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música e audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acceder a música e audio do dispositivo"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos e vídeos"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"acceder a fotos e vídeos do dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrófono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Actividade física"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo dactilar"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Non se puido usar o sensor de impresión dixital"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visita un provedor de reparacións."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Sen datos faciais exactos. Téntao de novo."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Non se pode crear o modelo facial. Téntao de novo."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Hai demasiada iluminación. Proba cunha máis suave."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Hai demasiada escuridade. Proba con máis luz."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Separa máis o teléfono."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Achega máis o teléfono."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Eleva o teléfono."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Baixa o teléfono."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Move o teléfono cara á esquerda."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Move o teléfono cara á dereita."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Proba con máis luz"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Afasta o teléfono"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Achega o teléfono"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Sube o teléfono"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Baixa o teléfono"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Move o teléfono cara á esquerda"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Move o teléfono cara á dereita"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Mira o dispositivo de forma máis directa."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Coloca a cara directamente diante do teléfono."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Non se pode ver a túa cara. Coloca o teléfono á altura dos ollos."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Demasiado movemento. Non movas o teléfono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Volve rexistrar a túa cara."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Xa non se pode recoñecer a cara. Téntao de novo."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"É moi similar. Cambia a pose."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Xira a cabeza un pouco menos."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Inclina a cabeza un pouco menos."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Xira a cabeza un pouco menos."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Non se recoñeceu a cara. Téntao de novo."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Cambia lixeiramente a posición da cabeza"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Mira o teléfono de forma máis directa"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Mira o teléfono de forma máis directa"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Mira o teléfono de forma máis directa"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Quita todo o que oculte a túa cara."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpa a parte superior da pantalla, incluída a barra de cor negra"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"A cara debe poder verse por completo"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"A cara debe poder verse por completo"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Non se pode crear o modelo facial. Téntao de novo."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Detectáronse lentes escuras. A cara debe poder verse por completo."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Detectouse unha máscara. A cara debe poder verse por completo."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Sen verificar a cara. Hardware non dispoñible."</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"O modo Non molestar cambiou"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toca para comprobar o contido bloqueado."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Consulta a configuración de notificacións"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Desde Android 13, as aplicacións que instales necesitan o teu permiso para enviar notificacións. Toca para cambiar este permiso nas aplicacións que xa teñas."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Lembrarmo máis tarde"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Pechar"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>

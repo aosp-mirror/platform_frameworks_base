@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"օգտագործել օրացույցը"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ուղարկել և դիտել SMS-ները"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Ֆայլեր և փաստաթղթեր"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"սարքի ֆայլերի և փաստաթղթերի օգտագործման թույլտվություն"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Երաժշտություն և աուդիո"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"սարքի երաժշտության և աուդիո ֆայլերի հասանելիություն"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Լուսանկարներ և տեսանյութեր"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"սարքի լուսանկարների և տեսանյութերի հասանելիություն"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Խոսափող"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ձայնագրել"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Ֆիզիկական ակտիվություն"</string>
@@ -443,7 +438,7 @@
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"Այս հավելվածը կարող է ավելացնել, հեռացնել կամ փոխել օրացույցի միջոցառումները ձեր Android TV սարքում: Այս հավելվածը կարող է ուղարկել հաղորդագրություններ օրացույցի սեփականատերերի անունից կամ փոխել միջոցառումները առանց դրանց սեփականատերերին ծանուցելու:"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Այս հավելվածը կարող է ավելացնել, հեռացնել կամ փոխել օրացույցի միջոցառումները ձեր հեռախոսում: Այս հավելվածը կարող է ուղարկել հաղորդագրություններ օրացույցի սեփականատերերի անունից կամ փոխել միջոցառումները առանց դրանց սեփականատերերին ծանուցելու:"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"օգտագործել տեղադրություն տրամադրող հավելվյալ հրամաններ"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Ծրագրին թույլ է տալիս օգտագործել տեղադրության մասին տվյալների աղբյուրների կառավարման լրացուցիչ հրահանգներ: Սա կարող է ծրագրին թույլ տալ միջամտել GPS-ի կամ տեղադրության մասին տվյալների այլ աղբյուրների գործառույթներին:"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Հավելվածին թույլ է տալիս օգտագործել տեղադրության մասին տվյալների աղբյուրների կառավարման լրացուցիչ հրահանգներ: Սա կարող է ծրագրին թույլ տալ միջամտել GPS-ի կամ տեղադրության մասին տվյալների այլ աղբյուրների գործառույթներին:"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"Տեղադրության ճշգրիտ տվյալների հասանելիություն միայն ֆոնային ռեժիմում"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Երբ հավելվածն ակտիվ է, այն կարող է տեղորոշման ծառայություններից ստանալ ձեր ճշգրիտ տեղադրության տվյալները։ Որպես նախապայման՝ ձեր սարքի տեղորոշման ծառայությունները պետք է միացված լինեն։ Դա կարող է ավելի արագ սպառել մարտկոցի լիցքը։"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"տեղադրության մոտավոր տվյալների հասանելիություն միայն ակտիվ ռեժիմում"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Մատնահետքով ապակողպում"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Մատնահետքերի սկաները հնարավոր չէ օգտագործել"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Այցելեք սպասարկման կենտրոն։"</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Չհաջողվեց գրանցել դեմքի ճշգրիտ տվյալները։ Կրկնեք։"</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Չհաջողվեց ստեղծել ձեր դեմքի մոդելը։ Նորից փորձեք։"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Շատ լուսավոր է։ Փորձեք ավելի թեթև լուսավորություն։"</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Շատ մութ է։ Փորձեք ավելի պայծառ լուսավորություն։"</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Փոքր-ինչ հեռու պահեք հեռախոսը։"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Մոտեցրեք հեռախոսը։"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Բարձրացրեք հեռախոսը։"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Իջեցրեք հեռախոսը։"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Տեղափոխեք հեռախոսը ձախ:"</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Տեղափոխեք հեռախոսը աջ:"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Ավելի պայծառ դարձրեք լուսավորությունը"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Փոքր-ինչ հեռու պահեք հեռախոսը"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Մոտեցրեք հեռախոսը"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Բարձրացրեք հեռախոսը"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Իջեցրեք հեռախոսը"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Տեղափոխեք հեռախոսը ձախ"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Տեղափոխեք հեռախոսը աջ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Նայեք ուղիղ էկրանին։"</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Պահեք ձեր դեմքն անմիջապես հեռախոսի էկրանի դիմաց:"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Ձեր դեմքը չի երևում։ Հեռախոսը պահեք աչքերի մակարդակում։"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Շատ եք շարժում։ Հեռախոսն անշարժ պահեք։"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Նորից փորձեք։"</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Չհաջողվեց ճանաչել դեմքը։ Նորից փորձեք:"</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Շատ նման է նախորդին։ Փոխեք ձեր դիրքը։"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Գլուխն ուղիղ պահեք։"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Գլուխը մի փոքր իջեցրեք։"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Գլուխն ուղիղ պահեք։"</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Դեմքը չի հաջողվում ճանաչել։ Նորից փորձեք։"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Թեթևակի փոխեք գլխի դիրքը"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Նայեք ուղիղ էկրանին"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Նայեք ուղիղ էկրանին"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Նայեք ուղիղ էկրանին"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Հեռացրեք այն ամենը, ինչը թաքցնում է ձեր երեսը:"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Մաքրեք էկրանի վերևի մասը, ներառյալ սև գոտին"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Ձեր դեմքը պետք է ամբողջովին տեսանելի լինի"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Ձեր դեմքը պետք է ամբողջովին տեսանելի լինի"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Չհաջողվեց ստեղծել ձեր դեմքի մոդելը։ Նորից փորձեք։"</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Հանեք ակնոցը։ Ձեր դեմքը պետք է ամբողջովին տեսանելի լինի։"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Դեմքի մի մասը ծածկված է։ Ձեր դեմքը պետք է ամբողջովին տեսանելի լինի։"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Չհաջողվեց հաստատել դեմքը։ Սարքն անհասանելի է:"</string>
@@ -699,7 +699,7 @@
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"փոփոխել կամ ջնջել ձեր ընդհանուր հիշողության բովանդակությունը"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Հավելվածին թույլ է տալիս փոփոխել ձեր ընդհանուր հիշողության պարունակությունը:"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"կատարել կամ ստանալ SIP զանգեր"</string>
-    <string name="permdesc_use_sip" msgid="3590270893253204451">"Ծրագրին թույլ է տալիս կատարել և ստանալ SIP զանգեր:"</string>
+    <string name="permdesc_use_sip" msgid="3590270893253204451">"Հավելվածին թույլ է տալիս կատարել և ստանալ SIP զանգեր:"</string>
     <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"գրանցել նոր հեռահաղորդակցության SIM կապեր"</string>
     <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"Հավելվածին թույլ է տալիս գրանցել հեռահաղորդակցության նոր SIM կապեր:"</string>
     <string name="permlab_register_call_provider" msgid="6135073566140050702">"գրանցել նոր հեռահաղորդակցության կապեր"</string>
@@ -733,11 +733,11 @@
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"փոփոխել մուտքի սարքի չափաբերումը"</string>
     <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"Թույլ է տալիս ծրագրին փոփոխել հպէկրանի չափաբերման կարգավորումները: Սովորական ծրագրերի համար երբեք պետք չի գալու:"</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"DRM հավաստագրերի մատչում"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"Ծրագրին թույլ է տալիս տրամադրել և օգտագործել DRM վկայագրեր: Սովորական ծրագրերի համար երբեք պետք չի գալիս:"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"Հավելվածին թույլ է տալիս տրամադրել և օգտագործել DRM վկայագրեր: Սովորական ծրագրերի համար երբեք պետք չի գալիս:"</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"ստանալ Android Beam-ով փոխանցման կարգավիճակը"</string>
-    <string name="permdesc_handoverStatus" msgid="3842269451732571070">"Ծրագրին թույլ է տալիս ստանալ Android Beam-ով ընթացիկ փոխանցումների մասին տեղեկատվություն:"</string>
+    <string name="permdesc_handoverStatus" msgid="3842269451732571070">"Հավելվածին թույլ է տալիս ստանալ Android Beam-ով ընթացիկ փոխանցումների մասին տեղեկատվություն:"</string>
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"հեռացնել DRM վկայագրեր"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"Ծրագրին թույլ է տալիս հեռացնել DRM վկայագրեր: Սովորական ծրագրերի համար երբեք պետք չի գալիս:"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"Հավելվածին թույլ է տալիս հեռացնել DRM վկայագրեր: Սովորական ծրագրերի համար երբեք պետք չի գալիս:"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"Միացում օպերատորի հաղորդագրությունների ծառայության հետ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Թույլ է տալիս տիրոջը կապվել օպերատորի հաղորդագրությունների ծառայության վերին մակարդակի միջերեսի հետ: Սա երբեք չի պահանջվում սովորական հավելվածների համար:"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"կապվել օպերատորի ծառայություններին"</string>
@@ -1447,7 +1447,7 @@
     <string name="permlab_route_media_output" msgid="8048124531439513118">"երթուղել մեդիա արտածումը"</string>
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"Թույլ է տալիս հավելվածին մեդիա արտածումը երթուղել այլ արտաքին սարքեր:"</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"կարդալ տեղադրման աշխատաշրջանները"</string>
-    <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"Ծրագրին թույլ է տալիս կարդալ տեղադրման աշխատաշրջանները: Սա թույլ է տալիս տեղեկանալ փաթեթների ակտիվ տեղադրումների մանրամասներին:"</string>
+    <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"Հավելվածին թույլ է տալիս կարդալ տեղադրման աշխատաշրջանները: Սա թույլ է տալիս տեղեկանալ փաթեթների ակտիվ տեղադրումների մանրամասներին:"</string>
     <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"պահանջել տեղադրման փաթեթներ"</string>
     <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"Թույլ է տալիս հավելվածին պահանջել փաթեթների տեղադրումը:"</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"պահանջել փաթեթների ջնջում"</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"«Չանհանգստացնել» ռեժիմի կարգավորումները փոխվել են"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Հպեք՝ տեսնելու, թե ինչ է արգելափակվել:"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Ստուգեք ծանուցումների կարգավորումները"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Հավելվածներին, որոնք տեղադրում եք Android 13 և ավելի նոր տարբերակներով սարքերում, անհրաժեշտ է տրամադրել ծանուցումներ ուղարկելու թույլտվություն։ Հպեք և փոխեք այս թույլտվությունն արդեն տեղադրված հավելվածների համար։"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Հիշեցնել ավելի ուշ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Փակել"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Համակարգ"</string>

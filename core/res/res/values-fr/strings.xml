@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accéder à votre agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envoyer et consulter des SMS"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fichiers et documents"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"accéder aux fichiers et documents sur votre appareil"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musique et audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accéder aux contenus musicaux et audio sur votre appareil"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Photos et vidéos"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accéder aux photos et aux vidéos sur votre appareil"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
@@ -599,7 +594,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Essayez une autre empreinte"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Trop de lumière"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Essayez de repositionner le doigt"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Changez légèrement de position chaque fois"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Changez légèrement de position à chaque fois"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Empreinte digitale non reconnue"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Déverrouillage par empreinte digitale"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Impossible d\'utiliser le lecteur d\'empreinte digitale"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Contactez un réparateur."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Capture du visage impossible. Réessayez."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Impossible de créer empreinte faciale. Réessayez."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Trop lumineux. Essayez de baisser la lumière."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Trop sombre. Essayez une éclairage plus lumineux."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Éloignez le téléphone."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Rapprochez le téléphone."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Déplacez le téléphone vers le haut."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Baissez le téléphone."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Déplacez le téléphone vers la gauche."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Déplacez le téléphone vers la droite."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Essayez un éclairage plus lumineux"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Éloignez le téléphone"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Rapprochez le téléphone"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Déplacez le téléphone vers le haut"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Déplacez le téléphone vers le bas"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Déplacez le téléphone vers la gauche"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Déplacez le téléphone vers la droite"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Veuillez regarder plus directement l\'appareil."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Placez votre visage en face du téléphone."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Visage non détecté. Tenez votre téléphone à hauteur des yeux."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Trop de mouvement. Ne bougez pas le téléphone."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Veuillez enregistrer à nouveau votre visage."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Impossible de reconnaître le visage. Réessayez."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Ressemble à un visage existant, changez de pose."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Tournez un peu moins la tête."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Penchez un peu moins la tête."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Tournez un peu moins la tête."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Visage non reconnu. Réessayez."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Déplacez légèrement votre tête"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Regardez plus directement votre téléphone"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Regardez plus directement votre téléphone"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Regardez plus directement votre téléphone"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Retirez tout ce qui cache votre visage."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Nettoyez la partie supérieure de l\'écran, y compris la barre noire"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Votre visage doit être entièrement visible"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Votre visage doit être entièrement visible"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Impossible de créer votre empreinte faciale. Réessayez."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Lunettes sombres détectées. Votre visage doit être entièrement visible."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Masque détecté. Votre visage doit être entièrement visible."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. valider visage. Matériel non disponible."</string>
@@ -1714,7 +1714,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour changer de fonctionnalité, balayez l\'écran vers le haut avec trois doigts et appuyez de manière prolongée."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Agrandissement"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g>..."</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Passage à <xliff:g id="NAME">%1$s</xliff:g>..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Déconnexion de <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Propriétaire"</string>
     <string name="guest_name" msgid="8502103277839834324">"Invité"</string>
@@ -2049,8 +2049,8 @@
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne plus afficher"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> souhaite afficher des éléments de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifier"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibreur pour les appels et les notifications"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Sons désactivés pour les appels et les notifications"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Les appels et les notifications vibreront"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Les appels et les notifications seront silencieux"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modifications du système"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne pas déranger"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nouveau : Le mode Ne pas déranger masque les notifications"</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Le mode Ne pas déranger a été modifié"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Appuyez pour vérifier les contenus bloqués."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Consulter les paramètres de notification"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"À partir d\'Android 13, les applis que vous installez ont besoin de votre autorisation pour vous envoyer des notifications. Appuyez pour modifier cette autorisation pour les applis déjà installées."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Plus tard"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Fermer"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Système"</string>

@@ -309,17 +309,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول إلى تقويمك"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"الملفات والمستندات"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"الوصول إلى الملفات والمستندات على جهازك"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"الموسيقى والمقاطع الصوتية"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"تسمح فئة أذونات التطبيق هذه بالوصول إلى الموسيقى والمقاطع الصوتية على جهازك."</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"الصور والفيديوهات"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"تسمح فئة أذونات التطبيق هذه بالوصول إلى الصور والفيديوهات على جهازك."</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"الميكروفون"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"تسجيل الصوت"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"النشاط البدني"</string>
@@ -594,11 +589,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"خطأ في المصادقة"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"استخدام قفل الشاشة"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"أدخِل قفل الشاشة للمتابعة"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"اضغط بقوة على المستشعر."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"اضغط بقوة على المستشعر"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"تعذرت معالجة بصمة الإصبع. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"يُرجى تنظيف مستشعر بصمات الإصبع ثم إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"تنظيف المستشعر ثم إعادة المحاولة"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"اضغط بقوة على المستشعر."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"اضغط بقوة على المستشعر"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"تم تحريك الإصبع ببطء شديد. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"يمكنك تجربة بصمة إصبع أخرى."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"الصورة ساطعة للغاية."</string>
@@ -643,26 +638,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"فتح الجهاز ببصمة الإصبع"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"لا يمكن استخدام مستشعر بصمات الإصبع"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"يُرجى التواصل مع مقدِّم خدمات إصلاح."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"تعذّر تسجيل بيانات دقيقة للوجه. حاول مرة أخرى."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"يتعذّر إنشاء نموذج الوجه. يُرجى إعادة المحاولة."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ساطع للغاية. تجربة مستوى سطوع أقلّ."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"الصورة معتمة للغاية. يُرجى زيادة السطوع."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"يُرجى نقل الهاتف مسافة أبعد."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"انقل الهاتف إلى مكان قريب."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"يُرجى رفع الهاتف للأعلى."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"يُرجى خفض الهاتف للأسفل."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"يُرجى نقل الهاتف إلى اليمين."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"يُرجى نقل الهاتف إلى اليسار."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"جرِّب زيادة سطوع الشاشة."</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"يُرجى إبعاد الهاتف عنك."</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"يُرجى تقريب الهاتف منك."</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"يُرجى رفع الهاتف للأعلى."</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"يُرجى خفض الهاتف للأسفل."</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"يُرجى تحريك الهاتف جهة اليسار."</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"يُرجى تحريك الهاتف جهة اليمين."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"يُرجى النظر إلى جهازك مباشرة أكثر."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"ضع وجهك أمام الهاتف مباشرة."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"تتعذّر رؤية وجهك. اِرفع هاتفك ليكون في مستوى العينَين."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حركة أكثر من اللازم يُرجى حمل بدون حركة."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"يُرجى إعادة تسجيل وجهك."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"لم يعُد يمكن التعرّف على الوجه. حاول مرة أخرى."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"الوجه مشابه جدًا، يُرجى تغيير وضعيتك."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"حرّك رأسك قليلاً نحو الأمام مباشرة."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"يُرجى إمالة رأسك أقل قليلاً."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"حرّك رأسك قليلاً نحو الوسط."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"يتعذّر التعرّف على الوجه. يُرجى إعادة المحاولة."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"غيِّر موضع رأسك قليلاً."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"يُرجى النظر إلى هاتفك مباشرةً."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"يُرجى النظر إلى هاتفك مباشرةً."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"يُرجى النظر إلى هاتفك مباشرةً."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"عليك بإزالة أي شيء يُخفي وجهك."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"يُرجى تنظيف الجزء العلوي من الشاشة، بما في ذلك الشريط الأسود."</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"يجب أن يكون وجهك ظاهرًا بالكامل."</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"يجب أن يكون وجهك ظاهرًا بالكامل."</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"يتعذّر إنشاء نموذج الوجه. يُرجى إعادة المحاولة."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"تمّ رصد نظارة شمسية. يجب أن يكون وجهك ظاهرًا بالكامل."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"تمّ رصد قناع على الوجه. يجب أن يكون وجهك ظاهرًا بالكامل."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"يتعذّر التحقُّق من الوجه. الجهاز غير مُتاح."</string>
@@ -2062,8 +2062,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"تم تغيير ميزة \"عدم الإزعاج\""</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"انقر للاطّلاع على ما تم حظره."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"مراجعة إعدادات الإشعارات"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"‏بدءً من نظام التشغيل Android 13، يجب أن تحصل التطبيقات التي تُثبِّتها على إذن لإرسال الإشعارات. انقر لتغيير هذا الإذن للتطبيقات الحالية."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"تذكيري لاحقًا"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"إغلاق"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"النظام"</string>
@@ -2111,7 +2110,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"سيظل البلوتوث مفعَّلاً أثناء استخدام \"وضع الطيران\"."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"جارٍ التحميل"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + ملف واحد}zero{{file_name} + # ملف}two{{file_name} + ملفان}few{{file_name} + # ملفات}many{{file_name} + # ملفًا}other{{file_name} + # ملف}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ليس هناك أشخاص مقترحون للمشاركة معهم."</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ما مِن أشخاص مقترحين للمشاركة معهم."</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"قائمة التطبيقات"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"‏لم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"الشاشة الرئيسية"</string>

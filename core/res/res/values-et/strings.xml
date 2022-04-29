@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"juurdepääs kalendrile"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"saata ja vaadata SMS-sõnumeid"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Failid ja dokumendid"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"juurdepääs teie seadmes olevatele failidele ja dokumentidele"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muusika ja heli"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"teie seadmes muusikale ja helile juurdepääsemine"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotod ja videod"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"teie seadmes fotodele ja videotele juurdepääsemine"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"heli salvestamine"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Füüsiline tegevus"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sõrmejäljega avamine"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Sõrmejäljeandurit ei saa kasutada"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Külastage remonditeenuse pakkujat."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Näoandmeid ei saanud jäädvustada. Proovige uuesti."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Teie näomudelit ei saa luua. Proovige uuesti."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Liiga ere. Proovige hämaramat valgust."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Liiga pime. Proovige parema valgustusega kohas."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Liigutage telefon kaugemale."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Liigutage telefon lähemale."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Liigutage telefoni kõrgemale."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Liigutage telefoni allapoole."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Liigutage telefoni vasakule."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Liigutage telefoni paremale."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Proovige parema valgustusega kohas"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Liigutage telefoni kaugemale"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Liigutage telefoni lähemale"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Liigutage telefoni kõrgemale"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Liigutage telefoni allapoole"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Liigutage telefoni vasakule"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Liigutage telefoni paremale"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Vaadake otse oma seadmesse."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Hoidke oma nägu otse telefoni ees."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Teie nägu ei ole näha. Hoidke telefoni silmade kõrgusel."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Liiga palju liikumist. Hoidke telefoni paigal."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registreerige oma nägu uuesti."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Nägu ei õnnestu enam tuvastada. Proovige uuesti."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Liiga sarnane, palun muutke oma asendit."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Pöörake oma pead veidi vähem."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Kallutage oma pead pisut vähem."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Pöörake oma pead veidi vähem."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Nägu ei õnnestu tuvastada. Proovige uuesti."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Muutke pisut oma pea asendit"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Vaadake otse telefoni"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Vaadake otse telefoni"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Vaadake otse telefoni"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Eemaldage kõik, mis varjab teie nägu."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Puhastage ekraani ülaosa, sh musta värvi riba"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Teie nägu peab olema täielikult nähtaval"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Teie nägu peab olema täielikult nähtaval"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Teie näomudelit ei saa luua. Proovige uuesti."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Tuvastati tumedad prillid. Teie nägu peab olema täielikult nähtaval."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Tuvastati nägu kattev ese. Teie nägu peab olema täielikult nähtaval."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nägu ei saa kinnitada. Riistvara pole saadaval."</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režiimi Mitte segada muudeti"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Puudutage, et kontrollida, mis on blokeeritud."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Vaadake üle märguandeseaded"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Alates operatsioonisüsteemist Android 13 vajavad installitavad rakendused märguannete saatmiseks teie luba. Puudutage, et muuta seda luba olemasolevate rakenduste jaoks."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Tuleta hiljem meelde"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Loobu"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Süsteem"</string>

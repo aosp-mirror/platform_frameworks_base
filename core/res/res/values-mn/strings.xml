@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарь руу хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файл, документ"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"таны төхөөрөмж дээрх файл болон документод хандах"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Хөгжим, аудио"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"төхөөрөмж дээрээ хөгжим болон аудионд хандах"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Зураг, видео"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"төхөөрөмж дээрээ зураг болон видеонд хандах"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"дуу хураах"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Дасгал хөдөлгөөн"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Хурууны хээгээр түгжээ тайлах"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Хурууны хээ мэдрэгч ашиглах боломжгүй"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Засварын үйлчилгээ үзүүлэгчид зочилно уу."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Царайн өгөгдлийг зөв авч чадсангүй. Дахин оролдоно уу."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Нүүрний загвар үүсгэж чадсангүй. Дахин оролдоно уу."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Хэт цайвар байна. Гэрэл багатай газар оролдоно уу."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Хэт харанхуй байна. Гэрэлтэй орчинд туршина уу."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Утсаа холдуулна уу."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Утсаа ойртуулна уу."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Утсаа дээшлүүлнэ үү."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Утсаа доошлуулна уу."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Утсаа зүүн тийш болгоно уу."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Утсаа баруун тийш болгоно уу."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Гэрэлтэй орчинд туршина уу"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Утсаа холдуулна уу"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Утсаа ойртуулна уу"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Утсаа дээшлүүлнэ үү"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Утсаа доошлуулна уу"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Утсаа зүүн тийш болгоно уу"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Утсаа баруун тийш болгоно уу"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Төхөөрөмж рүүгээ аль болох эгц харна уу."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Царайгаа утасны урд эгц байрлуулна уу"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Таны нүүрийг харагдахгүй байна. Утсаа нүднийхээ түвшинд барина уу."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Хэт их хөдөлгөөнтэй байна. Утсаа хөдөлгөөнгүй барина уу."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Нүүрээ дахин бүртгүүлнэ үү."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Царайг таних боломжгүй боллоо. Дахин оролдоно уу."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Хэт адилхан байгаа тул байрлалаа өөрчилнө үү."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Толгойгоо арай багаар эргүүлнэ үү."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Толгойгоо арай бага хазайлгана уу."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Толгойгоо арай багаар эргүүлнэ үү."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Царайг танихгүй байна. Дахин оролдоно уу."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Толгойныхоо байрлалыг бага зэрэг өөрчилнө үү"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Утас руугаа аль болох эгц харна уу"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Утас руугаа аль болох эгц харна уу"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Утас руугаа аль болох эгц харна уу"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Таны нүүрийг далдалж буй аливаа зүйлийг хасна уу."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Хар хэсэг зэрэг дэлгэцийнхээ дээд хэсгийг цэвэрлэнэ үү"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Таны нүүр бүтэн харагдах ёстой"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Таны нүүр бүтэн харагдах ёстой"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Нүүрний загвар үүсгэж чадсангүй. Дахин оролдоно уу."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Хар шил илэрлээ. Таны нүүр бүтэн харагдах ёстой."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Нүүрний халхавч илэрлээ. Таны нүүр бүтэн харагдах ёстой."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Царайг бататгаж чадсангүй. Техник хангамж боломжгүй байна."</string>

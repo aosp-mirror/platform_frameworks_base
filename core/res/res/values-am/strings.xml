@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"የእርስዎን ቀን መቁጠሪያ ይድረሱበት"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"ኤስኤምኤስ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ፋይሎች እና ሰነዶች"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"ፋይሎች እና ሰነዶች ዘንድ በመሳሪያዎ ላይ ይድረሱ"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ሙዚቃ እና ኦዲዮ"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"በመሣሪያዎ ላይ ሙዚቃን እና ኦዲዮን መድረስ"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ፎቶዎች እና ቪዲዮዎች"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"በመሣሪያዎ ላይ ፎቶዎችን እና ቪዲዮዎችን መድረስ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ማይክሮፎን"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ኦዲዮ ይቅዱ"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"አካላዊ እንቅስቃሴ"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"በጣት አሻራ መክፈቻ"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"የጣት አሻራ ዳሳሽን መጠቀም አይቻልም"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"የጥገና አገልግሎት ሰጪን ይጎብኙ።"</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"ትክክለኛ የፊት ውሂብ ማንሳት አልተቻለም። እንደገና ይሞክሩ።"</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"የመልክዎን ሞዴል መፍጠር አልተቻለም። እንደገና ይሞክሩ።"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ከልክ በላይ ፈካ ያለ። ይበልጥ ረጋ ያለ ብርሃን አጠቃቀምን ይሞክሩ።"</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"ከልክ በላይ ጨለማ ነው። ከዚህ ፈካ ያለ ብርሃን አጠቃቀምን ይሞክሩ።"</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"ስልክን ይበልጥ አርቀው ያንቀሳቅሱት።"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ስልክን ወደ ቅርብ ቦታ ያንቀሳቅሱ።"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ስልኩን ከፍ ወዳለ ቦታ ያንቀሳቅሱት።"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ስልክን ወደ ታች ዝቅ ያድርጉ።"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"ስልክን ወደ ግራ ያንቀሳቅሱ።"</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"ስልክን ወደ ቀኝ ያንቀሳቅሱ።"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ከዚህ ፈካ ያለ ብርሃንን ይሞክሩ"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"ስልኩን ያርቁት"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"ስልኩን ያቅርቡት"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ስልኩን ከፍ ወዳለ ቦታ ይውሰዱት"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ስልኩን ወደ ታች ዝቅ ያድርጉ"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ስልክዎን ወደ በስተግራዎ ይውሰዱት"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ስልኩን ወደ በስተቀኝዎ ይውሰዱት"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"እባክዎ መሣሪያዎን ይበልጥ በቀጥታ ይመልከቱ።"</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"መልክዎን በቀጥታ ከስልኩ ፊት ያድርጉት።"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"የእርስዎን መልክ ማየት አይችልም። ስልክዎን በዓይን ትክክል ይያዙ።"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"ከልክ በላይ ብዙ እንቅስቃሴ። ስልኩን ቀጥ አድርገው ይያዙት።"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"እባክዎ ፊትዎን እንደገና ያስመዝግቡ"</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"ከእንግዲህ ፊትን ለይቶ ማወቅ አይችልም። እንደገና ይሞክሩ።"</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"በጣም ይመሳሰላል፣ እባክዎ የእርስዎን ፎቶ አነሳስ ይለውጡ"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ጭንቅላትዎን ትንሽ ብቻ ያዙሩት።"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"ጭንቅላትዎን ትንሽ ብቻ ያጋድሉት።"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ጭንቅላትዎን ትንሽ ብቻ ያዙሩት።"</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"መልክን መለየት አልተቻለም። እንደገና ይሞክሩ።"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"የጭንቅላትዎን ቦታ በትንሹ ይለዋውጡ"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"ስልክዎን ይበልጥ በቀጥታ ይመልከቱ"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"ስልክዎን ይበልጥ በቀጥታ ይመልከቱ"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"ስልክዎን ይበልጥ በቀጥታ ይመልከቱ"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"የእርስዎን ፊት የሚደብቀውን ሁሉንም ነገር በማስወገድ ላይ"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"የማያ ገጽዎን አናት ያጽዱት፣ ጥቁር አሞሌውን ጨምሮ"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"መልክዎ ሙሉ በሙሉ መታየት አለበት"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"መልክዎ ሙሉ በሙሉ መታየት አለበት"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"የመልክዎን ሞዴል መፍጠር አልተቻለም። እንደገና ይሞክሩ።"</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"ጠቆር ያሉ መነጽሮች ተገኝተዋል። መልክዎ ሙሉ በሙሉ መታየት አለበት።"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"የመልክ መሸፈኛ ተገኝቷል። መልክዎ ሙሉ በሙሉ መታየት አለበት።"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"መልክን ማረጋገጥ አይቻልም። ሃርድዌር የለም።"</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"አትረብሽ ተቀይሯል"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ምን እንደታገደ ለመፈተሽ መታ ያድርጉ።"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"የማሳወቂያ ቅንብሮችን ይገምግሙ"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"ከAndroid 13 ጀምረው የሚጭኗቸው መተግበሪያዎች ማሳወቂያዎችን ለመላክ የእርስዎ ፈቃድ ያስፈልጋቸዋል። ይህን ፈቃድ ለነባር መተግበሪያዎች ለመቀየር መታ ያድርጉ።"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"በኋላ አስታውሰኝ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"አሰናብት"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ሥርዓት"</string>

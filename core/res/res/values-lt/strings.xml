@@ -307,17 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"pasiekti kalendorių"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"siųsti ir peržiūrėti SMS pranešimus"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Failai ir dokumentai"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"pasiekti failus ir dokumentus jūsų įrenginyje"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzika ir garso įrašai"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"pasiekti muziką ir garso įrašus jūsų įrenginyje"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Nuotraukos ir vaizdo įrašai"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"pasiekti nuotraukas ir vaizdo įrašus jūsų įrenginyje"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofonas"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"įrašyti garso įrašą"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fizinė veikla"</string>
@@ -641,26 +636,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Atrakinimas kontroliniu kodu"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Negalima naudoti kontrolinio kodo jutiklio"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Apsilankykite pas taisymo paslaugos teikėją."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Neužfiks. tikslūs veido duom. Bandykite dar kartą."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nepavyko sukurti veido modelio. Band. dar kartą."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Per šviesu. Išbandykite mažesnį apšvietimą."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Per tamsu. Išbandykite šviesesnį apšvietimą."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Laikykite telefoną toliau."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Laikykite telefoną arčiau."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Laikykite telefoną aukščiau."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Laikykite telefoną žemiau."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Pasukite telefoną kairėn."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Pasukite telefoną dešinėn."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Išbandykite šviesesnį apšvietimą"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Laikykite telefoną toliau"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Laikykite telefoną arčiau"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Laikykite telefoną aukščiau"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Laikykite telefoną žemiau"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Laikykite telefoną kairiau"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Laikykite telefoną dešiniau"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Žiūrėkite tiesiai į įrenginį."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Veidas turi būti prieš telefoną."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Nepavyko pamatyti jūsų veido. Laikykite telefoną akių lygyje."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Įrenginys per daug judinamas. Nejudink. telefono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Užregistruokite veidą iš naujo."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Nebegalima atpažinti veido. Bandykite dar kartą."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Per daug panašu, pakeiskite veido išraišką."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Nesukite tiek galvos."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Pakreipkite galvą šiek tiek mažiau."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Nesukite tiek galvos."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Veidas neatpažintas. Bandykite dar kartą."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Kaskart šiek tiek pakeiskite galvos poziciją"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Žiūrėkite tiesiai į telefoną"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Žiūrėkite tiesiai į telefoną"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Žiūrėkite tiesiai į telefoną"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Patraukite viską, kas užstoja jūsų veidą."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Išvalykite ekrano viršų, įskaitant juodą juostą"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Veidas turi būti visas matomas"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Veidas turi būti visas matomas"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Nepavyko sukurti veido modelio. Band. dar kartą."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Aptikti akiniai nuo saulės. Visas veidas turi būti matomas."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Aptikta veido kaukė. Visas veidas turi būti matomas."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nepavyko patv. veido. Aparatinė įranga negalima."</string>
@@ -2060,8 +2060,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Netrukdymo režimas pakeistas"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Palieskite, kad patikrintumėte, kas blokuojama."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Peržiūrėkite pranešimų nustatymus"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Tryliktos ir naujesnių versijų „Android” jūsų įdiegtoms programoms reikia suteikti leidimą siųsti pranešimus. Palieskite, kad pakeistumėte šį leidimą esamoms programoms."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Priminti vėliau"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Atsisakyti"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>

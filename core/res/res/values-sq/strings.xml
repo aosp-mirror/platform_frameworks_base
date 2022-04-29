@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"qasje te kalendari yt"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"dërgo dhe shiko mesazhet SMS"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Skedarët dhe dokumentet"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"përfito qasje te skedarët dhe dokumentet në pajisjen tënde"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzika dhe audioja"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"të qaset te muzika dhe audioja në pajisjen tënde"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotografitë dhe videot"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"të qaset te fotografitë dhe videot në pajisjen tënde"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"regjistro audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Aktiviteti fizik"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Shkyçja me gjurmën e gishtit"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Sensori i gjurmës së gishtit nuk mund të përdoret"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Vizito një ofrues të shërbimit të riparimit."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"S\'mund të regjistroheshin të dhëna të sakta të fytyrës. Provo përsëri."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Modeli i fytyrës nuk krijohet. Provo sërish."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Me shumë ndriçim. Provo një ndriçim më të butë."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Shumë i errët. Provo një ndriçim më të fortë."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Lëvize telefonin më larg."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Afroje telefonin."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Ngrije telefonin më lart."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Ule telefonin më poshtë."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Lëvize telefonin majtas."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Lëvize telefonin djathtas"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Provo një ndriçim më të fortë"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Lëvize telefonin më larg"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Lëvize telefonin më afër"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Lëvize telefonin më lart"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Lëvize telefonin më poshtë"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Lëvize telefonin në të majtën tënde"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Lëvize telefonin në të djathtën tënde"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Shiko më drejt në pajisjen tënde."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Pozicionoje fytyrën tënde direkt përpara telefonit."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Fytyra jote nuk mund të shihet. Mbaje telefonin në nivelin e syve."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Ka shumë lëvizje. Mbaje telefonin të palëvizur."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Regjistroje përsëri fytyrën tënde."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Fytyra nuk mund të njihet më. Provo përsëri."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Tepër e ngjashme, ndrysho pozën"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Ktheje kokën pak më pak."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Anoje kokën më pak."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Ktheje kokën pak më pak."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Fytyra nuk mund të njihet. Provo sërish."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Ndrysho pak pozicionin e kokës"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Shiko më shumë drejtpërdrejt telefonit"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Shiko më shumë drejtpërdrejt telefonit"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Shiko më shumë drejtpërdrejt telefonit"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Hiq gjithçka që fsheh fytyrën tënde."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Pastro kreun e ekranit, duke përfshirë shiritin e zi"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Fytyra jote duhet të jetë plotësisht e dukshme"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Fytyra jote duhet të jetë plotësisht e dukshme"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Modeli i fytyrës nuk krijohet. Provo sërish."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"U zbuluan syze të errëta. Fytyra jote duhet të jetë plotësisht e dukshme."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"U zbulua mbulim i fytyrës. Fytyra jote duhet të jetë plotësisht e dukshme."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Fytyra s\'mund të verifikohet. Hardueri nuk ofrohet."</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Mos shqetëso\" ka ndryshuar"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Trokit për të shënuar atë që është bllokuar"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Rishiko cilësimet e njoftimeve"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Nga Android 13, aplikacionet që instalon kanë nevojë për lejen tënde për të dërguar njoftime. Trokit për ta ndryshuar këtë leje për aplikacionet ekzistuese."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Më kujto më vonë"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Hiq"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistemi"</string>

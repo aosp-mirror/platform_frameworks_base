@@ -307,17 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"отримувати доступ до календаря"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"надсилати та переглядати SMS-повідомлення"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файли й документи"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"отримувати доступ до файлів і документів на вашому пристрої"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музика й аудіо"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"отримувати доступ до музики й аудіо на пристрої"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Фото й відео"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"отримувати доступ до фото й відео на пристрої"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Мікрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"записувати аудіо"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Фізична активність"</string>
@@ -641,26 +636,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Розблокування відбитком пальця"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не вдається скористатися сканером відбитків пальців"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Зверніться до постачальника послуг із ремонту."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Не вдалося чітко зняти обличчя. Повторіть спробу."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Модель обличчя не створено. Повторіть спробу."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Занадто яскраво. Потрібно менше світла."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Занадто темно. Потрібно більше світла."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Тримайте телефон далі від обличчя."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Тримайте телефон ближче до обличчя."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Тримайте телефон вище."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Тримайте телефон нижче."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Тримайте телефон лівіше."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Тримайте телефон правіше."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Потрібно більше світла"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Тримайте телефон далі від обличчя"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Тримайте телефон ближче до обличчя"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Підніміть телефон вище"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Опустіть телефон нижче"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Тримайте телефон лівіше"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Тримайте телефон правіше"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Дивіться просто на пристрій."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Тримайте телефон просто перед обличчям."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Обличчя не видно. Утримуйте телефон на рівні очей."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Забагато рухів. Тримайте телефон нерухомо."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Повторно проскануйте обличчя."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Розпізнати обличчя вже не вдається. Повторіть спробу."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Надто схоже на попередню спробу, змініть позу."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Трохи перемістіть обличчя."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Трохи зменште нахил голови."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Трохи поверніть обличчя."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Обличчя не розпізнано. Повторіть спробу."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Трохи змініть положення голови"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Дивіться на телефон прямо"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Дивіться на телефон прямо"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Дивіться на телефон прямо"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Приберіть об’єкти, які затуляють ваше обличчя."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Очистьте верхню частину екрана, зокрема чорну панель"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Обличчя має бути видно повністю"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Обличчя має бути видно повністю"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Не вдається створити модель обличчя. Повторіть спробу."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Виявлено темні окуляри. Обличчя має бути видно повністю."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Виявлено аксесуар, який закриває обличчя. Обличчя має бути видно повністю."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Не вдається перевірити обличчя. Апаратне забезпечення недоступне."</string>
@@ -1484,7 +1484,7 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Спеціальні можливості"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Фоновий мал."</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Змінити фоновий малюнок"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Служба читання сповіщень"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Сервіс читання сповіщень"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR-режим"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Постачальник умов"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Служба встановлення пріоритетності сповіщень"</string>
@@ -2060,8 +2060,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Налаштування режиму \"Не турбувати\" змінено"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Торкніться, щоб перевірити, що заблоковано."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Перегляньте налаштування сповіщень"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Починаючи з ОС Android 13, установленим додаткам потрібно надати дозвіл, щоб вони могли надсилати сповіщення. Натисніть, щоб змінити цей дозвіл для наявних додатків."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Нагадати пізніше"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Закрити"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Система"</string>
@@ -2109,7 +2108,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"У режимі польоту Bluetooth залишатиметься ввімкненим"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Завантаження"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} і ще # файл}one{{file_name} і ще # файл}few{{file_name} і ще # файли}many{{file_name} і ще # файлів}other{{file_name} і ще # файлу}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Немає рекомендацій щодо людей, з якими можна поділитися"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Немає рекомендацій про те, з ким поділитися"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Список додатків"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Цей додаток не має дозволу на запис, але він може фіксувати звук через цей USB-пристрій."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"На головний екран"</string>

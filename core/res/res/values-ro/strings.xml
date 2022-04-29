@@ -306,17 +306,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceseze calendarul"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"trimită și să vadă mesajele SMS"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fișiere și documente"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"să acceseze fișiere și documente de pe dispozitiv"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzică și conținut audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"să acceseze muzică și conținut audio pe dispozitiv"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotografii și videoclipuri"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"să acceseze fotografii și videoclipuri pe dispozitiv"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"înregistreze sunet"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activitate fizică"</string>
@@ -640,26 +635,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Deblocare cu amprenta"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nu se poate folosi senzorul de amprentă"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Vizitați un furnizor de servicii de reparații."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Nu s-a putut fotografia fața cu precizie. Încercați din nou."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nu se poate crea modelul facial. Reîncercați."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Prea luminos. Încercați o lumină mai slabă."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Prea întunecat. Încercați o lumină mai puternică."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Mutați telefonul mai departe."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Mutați telefonul mai aproape."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Mutați telefonul mai sus."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Mutați telefonul mai jos."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Mutați telefonul spre stânga."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Mutați telefonul spre dreapta."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Încercați o lumină mai puternică"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Mutați telefonul mai departe"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Mutați telefonul mai aproape"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Mutați telefonul mai sus"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Mutați telefonul mai jos"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Mutați telefonul spre stânga"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Mutați telefonul spre dreapta"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Priviți mai direct spre dispozitiv."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Stați cu capul direct în fața telefonului."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Nu vi se vede fața. Țineți telefonul la nivelul ochilor."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Prea multă mișcare. Țineți telefonul nemișcat."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Reînregistrați-vă chipul."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Nu se mai poate recunoaște fața. Încercați din nou."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Prea asemănător, schimbați poziția."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Întoarceți capul mai puțin."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Înclinați capul mai puțin."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Întoarceți capul mai puțin."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Chipul nu a fost recunoscut. Reîncercați."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Schimbați ușor poziția capului"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Priviți direct spre telefon"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Priviți direct spre telefon"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Priviți direct spre telefon"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Eliminați orice vă ascunde chipul."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Curățați partea de sus a ecranului, inclusiv bara neagră"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Chipul trebuie să fie vizibil în totalitate"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Chipul trebuie să fie vizibil în totalitate"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Nu se poate crea modelul facial. Reîncercați."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"S-au detectat ochelari de culoare închisă. Chipul trebuie să fie vizibil în totalitate."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"S-a detectat un articol care acoperă chipul. Chipul trebuie să fie vizibil în totalitate."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nu se poate confirma fața. Hardware-ul nu este disponibil."</string>
@@ -2059,8 +2059,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Funcția Nu deranja s-a schimbat"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Atingeți pentru a verifica ce este blocat."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Examinați setările pentru notificări"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Începând cu Android 13, aplicațiile pe care le instalați necesită permisiunea de a trimite notificări. Atingeți ca să modificați permisiunea pentru aplicațiile existente."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Mai târziu"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Închideți"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>

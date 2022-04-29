@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"күнтізбеге кіру"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS хабарларын жіберу және көру"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файлдар мен құжаттар"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"құрылғыдағы файлдар мен құжаттарды пайдалану"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музыка және аудио"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"құрылғыдағы музыка мен аудиомазмұнды пайдалану рұқсаты"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Фотосуреттер мен бейнелер"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"құрылғыдағы фотосуреттер мен бейнелерді пайдалану рұқсаты"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"аудио жазу"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Қимыл-қозғалыс"</string>
@@ -355,9 +350,9 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"құлыпталған құрылғыда хабарландыруларды толық экрандағы әрекеттер түрінде көрсету"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Қолданбаның құлыпталған құрылғыда хабарландыруларды толық экрандағы әрекеттер түрінде көрсетуіне рұқсат береді."</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"таңбаша орнату"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз қосу мүмкіндігін береді."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Қолданбаға Негізгі экранға таңбашаларды пайдаланушының қатысуынсыз қосу мүмкіндігін береді."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"төте пернелерді алып тастау"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз алып тастау мүмкіндігін береді."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Қолданбаға Негізгі экрандағы таңбашаларды пайдаланушының қатысуынсыз өшіру мүмкіндігін береді."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"шығыс қоңырауларды қайта бағыттау"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Қолданбаға шығыс қоңырау кезінде қоңырауды басқа нөмірге қайта бағыттау немесе қоңырауды мүлде доғару опциясы бар теріліп жатқан нөмірді көруге рұқсат береді."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"телефон қоңырауларына жауап беру"</string>
@@ -594,7 +589,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Саусақ ізін өңдеу мүмкін емес. Әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Саусақ ізін оқу сканерін тазалап, әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сканерді тазалап, әрекетті қайталаңыз."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Сканерге қатты басыңыз."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Сканерді қатты басыңыз."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Саусағыңызды тым баяу қозғалттыңыз. Әрекетті қайталап көріңіз."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Басқа саусақ ізін байқап көріңіз."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Тым жарық."</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Құлыпты саусақ ізімен ашу"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Саусақ ізін оқу сканерін пайдалану мүмкін емес"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Жөндеу қызметіне барыңыз."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Бет деректері дұрыс алынбады. Әрекетті қайталаңыз."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Бет үлгісі жасалмады. Қайталап көріңіз."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Тым ашық. Күңгірттеу жарық керек."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Тым қараңғы. Молырақ жарық керек."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Телефонды алшақ ұстаңыз."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Телефонды жақынырақ ұстаңыз."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Телефонды жоғарырақ ұстаңыз."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Телефонды төменірек ұстаңыз."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Телефонды солға жылжытыңыз."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Телефонды оңға жылжытыңыз."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Жарық деңгейін арттырыңыз."</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Телефонды алшақ ұстаңыз."</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Телефонды жақынырақ ұстаңыз."</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонды жоғарырақ ұстаңыз."</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Телефонды төменірек ұстаңыз."</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонды солға қарай ұстаңыз."</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонды оңға қарай ұстаңыз."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Құрылғының камерасына тура қараңыз."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Бетіңізді телефонға тура қаратыңыз."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Бетіңіз көрінбей тұр. Телефонды көз деңгейінде ұстаңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Қозғалыс тым көп. Телефонды қозғалтпаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Қайта тіркеліңіз."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Енді бет анықтау мүмкін емес. Әрекетті қайталаңыз."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Алдыңғысына тым ұқсас, басқаша қалыпта түсіңіз."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Басыңызды түзурек ұстаңыз."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Басыңызды түзуірек ұстаңыз."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Басыңызды кішкене бұрыңыз."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Бет танылмады. Қайталап көріңіз."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Басыңыздың қалпын сәл өзгертіңіз."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонға барынша тура қараңыз."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонға барынша тура қараңыз."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонға барынша тура қараңыз."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Бетіңізді жауып тұрған нәрсені алып тастаңыз."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Экранның жоғарғы жағын, сонымен қатар қара жолақты өшіріңіз."</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Бетіңіз толық көрініп тұруы керек."</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Бетіңіз толық көрініп тұруы керек."</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Бет үлгісі жасалмады. Қайталап көріңіз."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Қою түсті көзілдірік анықталды. Бетіңіз толық көрініп тұруы керек."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Бетперде анықталды. Бетіңіз толық көрініп тұруы керек."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Бетті тану мүмкін емес. Жабдық қолжетімді емес."</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Мазаламау режимі өзгерді"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Түймені түртіп, неге тыйым салынатынын көріңіз."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Хабарландыру параметрлерін қарау"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 нұсқасынан бастап орнатылатын қолданбалар үшін хабарландыру жіберу рұқсаты керек. Бұрынғы қолданбаларда осы рұқсатты өзгерту үшін түртіңіз."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Кейінірек еске салу"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Жабу"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Жүйе"</string>

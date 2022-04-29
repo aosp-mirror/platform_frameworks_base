@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS మెసేజ్‌లను పంపడం, వీక్షించడం"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ఫైల్స్, డాక్యుమెంట్‌లు"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"మీ పరికరంలోని ఫైల్‌లు, డాక్యుమెంట్‌లను యాక్సెస్ చేయండి"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"మ్యూజిక్, ఆడియో"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"మీ పరికరంలో మ్యూజిక్, ఆడియోను యాక్సెస్ చేయండి"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ఫోటోలు, వీడియోలు"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"మీ పరికరంలో ఫోటోలు, వీడియోలను యాక్సెస్ చేయండి"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"మైక్రోఫోన్"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ఆడియోను రికార్డ్ చేయడానికి"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ఫిజికల్ యాక్టివిటీ"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"వేలిముద్ర అన్‌లాక్"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"ముఖం డేటా సరిగ్గా రాలేదు. మళ్లీ ప్రయత్నించండి."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"మీ ఫేస్‌మోడల్ క్రియేషన్ కుదరదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"వెలుతురు అధికంగా ఉంది. తక్కువ ఉండేలా చూడండి."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"చాలా చీకటిగా ఉంది. బాగా వెలుతురులో ప్రయత్నించండి."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"ఫోన్‌ను కాస్త దూరంగా పట్టుకోండి."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ఫోన్‌ను దగ్గరగా పట్టుకోండి"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ఫోన్‌ను పైకి పట్టుకోండి."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ఫోన్‌ను కిందికి దించండి."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"ఫోన్‌ను ఎడమవైపునకు జరపండి."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"ఫోన్‌ను కుడివైపునకు జరపండి."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ప్రకాశవంతమైన లైటింగ్‌లో ట్రై చేయండి"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"ఫోన్‌ను కాస్త దూరంగా జరపండి"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"ఫోన్‌ను దగ్గరగా పట్టుకోండి"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ఫోన్‌ను పైకి పట్టుకోండి"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ఫోన్‌ను కిందికి దించండి"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ఫోన్‌ను మీ ఎడమ వైపునకు జరపండి"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ఫోన్‌ను మీ కుడి వైపునకు జరపండి"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"దయచేసి మీ పరికరం వైపు మరింత నేరుగా చూడండి."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"మీ ముఖాన్ని ఫోన్‌కు ఎదురుగా ఉంచండి."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"మీ ముఖం కనిపించడం లేదు. మీ ఫోన్‌ను కంటి స్థాయిలో పట్టుకోండి."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"బాగా కదుపుతున్నారు. ఫోన్‌ను స్థిరంగా పట్టుకోండి"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"దయచేసి మీ ముఖాన్ని మళ్లీ నమోదు చేయండి."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"ఇక ముఖం గుర్తించలేదు. మళ్లీ ప్రయత్నించండి."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"ఒకే మాదిరిగా ఉంది, దయచేసి భంగిమను మార్చండి."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"మీ తలను ఇంకాస్త తక్కువ తిప్పండి."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"మీ తలను కొంచెం తక్కువగా వంపండి."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"మీ తలను ఎడమ/కుడి వైపుగా ఇంకాస్త తిప్పండి."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"ముఖం గుర్తించబడలేదు. మళ్లీ ట్రై చేయండి."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"మీ తల స్థానాన్ని కొద్దిగా మార్చండి"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"మీ ముఖానికి అడ్డుగా ఉన్నవాటిని తీసివేస్తుంది."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"నల్లని పట్టీతో సహా మీ స్క్రీన్ పైభాగం అంతటినీ శుభ్రంగా తుడవండి"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"మీ ముఖం పూర్తిగా కనిపించాలి"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"మీ ముఖం పూర్తిగా కనిపించాలి"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"మీ ఫేస్‌మోడల్ క్రియేషన్ కుదరదు. మళ్లీ ట్రై చేయండి."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"డార్క్ గ్లాసెస్ గుర్తించబడ్డాయి. మీ ముఖం పూర్తిగా కనిపించాలి."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ముఖం కవర్ చేయబడింది. మీ ముఖం పూర్తిగా కనిపించాలి."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ముఖం ధృవీకరించలేరు. హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
