@@ -122,8 +122,9 @@ public class InsetsSourceConsumer {
      *                  animation should be run after setting the control.
      * @param hideTypes An integer array with a single entry that determines which types a hide
      *                  animation should be run after setting the control.
+     * @return Whether the control has changed from the server
      */
-    public void setControl(@Nullable InsetsSourceControl control,
+    public boolean setControl(@Nullable InsetsSourceControl control,
             @InsetsType int[] showTypes, @InsetsType int[] hideTypes) {
         if (mType == ITYPE_IME) {
             ImeTracing.getInstance().triggerClientDump("InsetsSourceConsumer#setControl",
@@ -134,7 +135,7 @@ public class InsetsSourceConsumer {
                 mSourceControl.release(SurfaceControl::release);
                 mSourceControl = control;
             }
-            return;
+            return false;
         }
         SurfaceControl oldLeash = mSourceControl != null ? mSourceControl.getLeash() : null;
 
@@ -201,6 +202,7 @@ public class InsetsSourceConsumer {
         if (lastControl != null) {
             lastControl.release(SurfaceControl::release);
         }
+        return true;
     }
 
     @VisibleForTesting
