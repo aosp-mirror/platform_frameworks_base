@@ -709,8 +709,8 @@ public class ShadeListBuilder implements Dumpable {
                 new ArraySet<>(groupsWithChildrenLostToStability);
         // Any group which lost a child to filtering or promotion is exempt from having its summary
         // promoted when it has no attached children.
-        getGroupsWithChildrenLostToFiltering(groupsExemptFromSummaryPromotion);
-        getGroupsWithChildrenLostToPromotion(shadeList, groupsExemptFromSummaryPromotion);
+        addGroupsWithChildrenLostToFiltering(groupsExemptFromSummaryPromotion);
+        addGroupsWithChildrenLostToPromotion(shadeList, groupsExemptFromSummaryPromotion);
 
         // Iterate backwards, so that we can remove elements without affecting indices of
         // yet-to-be-accessed entries.
@@ -865,7 +865,7 @@ public class ShadeListBuilder implements Dumpable {
      *
      * These groups will be exempt from appearing without any children.
      */
-    private void getGroupsWithChildrenLostToPromotion(List<ListEntry> shadeList, Set<String> out) {
+    private void addGroupsWithChildrenLostToPromotion(List<ListEntry> shadeList, Set<String> out) {
         for (int i = 0; i < shadeList.size(); i++) {
             final ListEntry tle = shadeList.get(i);
             if (tle.getAttachState().getPromoter() != null) {
@@ -882,13 +882,13 @@ public class ShadeListBuilder implements Dumpable {
      *
      * These groups will be exempt from appearing without any children.
      */
-    private void getGroupsWithChildrenLostToFiltering(Set<String> out) {
+    private void addGroupsWithChildrenLostToFiltering(Set<String> out) {
         for (ListEntry tle : mAllEntries) {
             StatusBarNotification sbn = tle.getRepresentativeEntry().getSbn();
             if (sbn.isGroup()
                     && !sbn.getNotification().isGroupSummary()
                     && tle.getAttachState().getExcludingFilter() != null) {
-                out.add(sbn.getGroup());
+                out.add(sbn.getGroupKey());
             }
         }
     }
