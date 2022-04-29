@@ -46,7 +46,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -89,14 +88,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         mAppTransitionController = new AppTransitionController(mWm, mDisplayContent);
     }
 
-    @Override
-    ActivityRecord createActivityRecord(DisplayContent dc, int windowingMode, int activityType) {
-        final ActivityRecord r = super.createActivityRecord(dc, windowingMode, activityType);
-        // Ensure that ActivityRecord#setOccludesParent takes effect.
-        doCallRealMethod().when(r).fillsParent();
-        return r;
-    }
-
     @Test
     public void testSkipOccludedActivityCloseTransition() {
         final ActivityRecord behind = createActivityRecord(mDisplayContent,
@@ -135,7 +126,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final ActivityRecord translucentOpening = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        translucentOpening.setOccludesParent(false);
+        doReturn(false).when(translucentOpening).fillsParent();
         translucentOpening.setVisible(false);
         mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
         mDisplayContent.mOpeningApps.add(behind);
@@ -153,7 +144,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final ActivityRecord translucentClosing = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        translucentClosing.setOccludesParent(false);
+        doReturn(false).when(translucentClosing).fillsParent();
         mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
         mDisplayContent.mClosingApps.add(translucentClosing);
         assertEquals(WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE,

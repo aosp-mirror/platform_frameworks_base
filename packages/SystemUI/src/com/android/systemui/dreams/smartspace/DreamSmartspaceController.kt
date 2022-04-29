@@ -46,7 +46,7 @@ import javax.inject.Named
  * Controller for managing the smartspace view on the dream
  */
 @SysUISingleton
-class DreamsSmartspaceController @Inject constructor(
+class DreamSmartspaceController @Inject constructor(
     private val context: Context,
     private val smartspaceManager: SmartspaceManager,
     private val execution: Execution,
@@ -58,7 +58,7 @@ class DreamsSmartspaceController @Inject constructor(
     @Named(DREAM_SMARTSPACE_DATA_PLUGIN) optionalPlugin: Optional<BcSmartspaceDataPlugin>
 ) {
     companion object {
-        private const val TAG = "DreamsSmartspaceCtrlr"
+        private const val TAG = "DreamSmartspaceCtrlr"
     }
 
     private var session: SmartspaceSession? = null
