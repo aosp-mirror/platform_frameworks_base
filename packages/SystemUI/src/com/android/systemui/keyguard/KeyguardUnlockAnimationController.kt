@@ -723,7 +723,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         willUnlockWithSmartspaceTransition = false
 
         // The lockscreen surface is gone, so it is now safe to re-show the smartspace.
-        lockscreenSmartspace!!.visibility = View.VISIBLE
+        lockscreenSmartspace?.visibility = View.VISIBLE
 
         listeners.forEach { it.onUnlockAnimationFinished() }
     }
