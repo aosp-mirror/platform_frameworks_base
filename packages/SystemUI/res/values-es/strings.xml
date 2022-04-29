@@ -47,11 +47,11 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"Configurar métodos de entrada"</string>
     <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"Teclado físico"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"¿Permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"¿Quieres que <xliff:g id="APPLICATION">%1$s</xliff:g> pueda acceder a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsta aplicación no tiene permisos para grabar, pero podría captar audio a través de este dispositivo USB."</string>
+    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"¿Quieres que <xliff:g id="APPLICATION">%1$s</xliff:g> pueda acceder a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsta aplicación no tiene permisos para grabar, pero podría capturar audio a través de este dispositivo USB."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"¿Permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"¿Quieres abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para utilizar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"¿Quieres abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para gestionar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsta aplicación no tiene permisos para grabar, pero puede capturar audio mediante este dispositivo USB."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"¿Quieres abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para utilizar <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"¿Abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para usar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"¿Abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para controlar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsta aplicación no tiene permisos para grabar, pero puede capturar audio mediante este dispositivo USB."</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"¿Abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para usar <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Ninguna aplicación instalada funciona con este accesorio USB. Más información: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"Accesorio USB"</string>
     <string name="label_view" msgid="6815442985276363364">"Ver"</string>
@@ -225,7 +225,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Datos móviles activados"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Desactivados"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Compartir conexión por Bluetooth"</string>
-    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modo avión"</string>
+    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modo Avión"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"La red VPN está activada."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"No hay tarjeta SIM."</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Abrir detalles de la batería"</string>
@@ -240,7 +240,7 @@
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"Obteniendo ubicación..."</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teletipo habilitado"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Modo vibración"</string>
-    <string name="accessibility_ringer_silent" msgid="8994620163934249882">"Modo silencio"</string>
+    <string name="accessibility_ringer_silent" msgid="8994620163934249882">"Modo Silencio"</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
     <skip />
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
@@ -258,10 +258,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wi-Fi activado."</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"Móvil <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"Batería <xliff:g id="STATE">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"Modo avión desactivado."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"Modo avión activado."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Modo avión desactivado."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Modo avión activado."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"Modo Avión desactivado."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"Modo Avión activado."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Modo Avión desactivado."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Modo Avión activado."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"silencio total"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"solo alarmas"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"No molestar."</string>
@@ -483,8 +483,8 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"¿Quitar invitado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán todas las aplicaciones y datos de esta sesión."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Quitar"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Hola de nuevo, invitado"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres continuar con la sesión?"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Hola de nuevo, invitado!"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres continuar con tu sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continuar"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"Usuario invitado"</string>
@@ -494,7 +494,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Salir de usuario actual"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"SALIR DE USUARIO"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"¿Añadir nuevo usuario?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Al añadir un nuevo usuario, este debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Al añadir un nuevo usuario, debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Has alcanzado el límite de usuarios"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Puedes añadir hasta <xliff:g id="COUNT">%d</xliff:g> usuarios.</item>
@@ -598,7 +598,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Ajustes de sonido"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Mostrar"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Ocultar"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Transcripción instantánea"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Subtitular automáticamente"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Cerrar las recomendaciones de subtítulos"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Superposición de subtítulos"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activar"</string>
@@ -661,9 +661,9 @@
     <string name="quick_settings" msgid="6211774484997470203">"Ajustes rápidos"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de estado"</string>
     <string name="overview" msgid="3522318590458536816">"Aplicaciones recientes"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Modo de demostración de UI del sistema"</string>
-    <string name="enable_demo_mode" msgid="3180345364745966431">"Habilitar modo demo"</string>
-    <string name="show_demo_mode" msgid="3677956462273059726">"Mostrar modo demo"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Modo Demo de UI del sistema"</string>
+    <string name="enable_demo_mode" msgid="3180345364745966431">"Habilitar modo Demo"</string>
+    <string name="show_demo_mode" msgid="3677956462273059726">"Mostrar modo Demo"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
@@ -676,7 +676,7 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"Se ha producido un problema al obtener tus tarjetas. Inténtalo de nuevo más tarde."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Ajustes de pantalla de bloqueo"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabajo"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"Modo avión"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"Modo Avión"</string>
     <string name="add_tile" msgid="6239678623873086686">"Añadir recuadro"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"Recuadro de emisión"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>) a menos que desactives esta opción antes"</string>
@@ -850,7 +850,7 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendario"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"Mostrar con controles de volumen"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"No molestar"</string>
-    <string name="volume_dnd_silent" msgid="4154597281458298093">"Combinación de teclas para los botones de volumen"</string>
+    <string name="volume_dnd_silent" msgid="4154597281458298093">"Acceso directo de los botones de volumen"</string>
     <string name="volume_up_silent" msgid="1035180298885717790">"Salir de No molestar al subir el volumen"</string>
     <string name="battery" msgid="769686279459897127">"Batería"</string>
     <string name="clock" msgid="8978017607326790204">"Reloj"</string>

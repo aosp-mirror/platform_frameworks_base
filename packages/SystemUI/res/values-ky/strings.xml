@@ -47,10 +47,10 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"Киргизүү ыкмасын тууралоо"</string>
     <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"Аппараттык тергич"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу <xliff:g id="USB_DEVICE">%2$s</xliff:g> түзмөгүн колдоно берсинби?"</string>
-    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу үчүн <xliff:g id="USB_DEVICE">%2$s</xliff:g> түзмөгүнө мүмкүнчүлүк алууга уруксат бересизби?\nБул колдонмонун жаздырууга уруксаты жок, бирок бул USB түзмөгү аркылуу аудиону жаздыра алат."</string>
+    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу <xliff:g id="USB_DEVICE">%2$s</xliff:g> түзмөгүн колдоно берсинби?\nБул колдонмого жаздырууга уруксат берилген эмес, бирок ушул USB түзмөгү аркылуу үндөрдү жаза алат."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> кабелин колдоно берсинби?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> түзмөгүнө туташуу үчүн <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу ачылсынбы?"</string>
-    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> кабелине туташуу үчүн <xliff:g id="APPLICATION">%1$s</xliff:g> ачылсынбы?\nБул колдонмонун жаздырууга уруксаты жок, бирок бул USB түзмөгү аркылуу аудиону жаздыра алат."</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> түзмөгүн колдонуу үчүн <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосун ачасызбы?\nБул колдонмого жаздырууга уруксат берилген эмес, бирок ушул USB түзмөгү аркылуу үндөрдү жаза алат."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> колдонуу үчүн <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосун ачасызбы?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Эч бир орнотулган колдонмо USB аксессуар м-н иштебейт. Кенен маалыматтар: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB шайманы"</string>
@@ -671,7 +671,7 @@
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Баарын көрсөтүү"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Төлөө үчүн кулпусун ачыңыз"</string>
     <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Картаны кошуу"</string>
-    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Жаңыртылууда"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Жаңырууда"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Колдонуу үчүн кулпусун ачыңыз"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Кыйытмаларды алууда ката кетти. Бир аздан кийин кайталап көрүңүз."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Кулпуланган экран жөндөөлөрү"</string>
@@ -735,8 +735,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автоматтык"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Үнү чыкпайт жана дирилдебейт"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Үнү чыкпайт же дирилдебейт жана сүйлөшүүлөр тизмесинин ылдый жагында көрүнөт"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн. <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосундагы жазышуулар демейки жөндөө боюнча калкып чыкма билдирмелер түрүндө көрүнөт."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефондун параметрлерине жараша шыңгырап же дирилдеши мүмкүн"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефондун параметрлерине жараша шыңгырап же дирилдеши мүмкүн. <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосундагы жазышуулар демейки жөндөө боюнча калкып чыкма билдирмелер түрүндө көрүнөт."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Калкыма ыкчам баскыч менен көңүлүңүздү бул мазмунга буруп турат."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Билдирменин үнүн чыгартууну же басууну тутумга тапшырыңыз"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Абалы:&lt;/b&gt; Демейкиге өзгөрдү"</string>
@@ -1123,7 +1123,7 @@
     <string name="okay" msgid="6490552955618608554">"Макул"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"<xliff:g id="DURATION">%1$s</xliff:g> күн мурун"</string>
     <string name="one_week_timestamp" msgid="4925600765473875590">"1 апта мурун"</string>
-    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 апта мурда"</string>
+    <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 апта мурун"</string>
     <string name="over_one_week_timestamp" msgid="3770560704420807142">"1 аптадан ашык мурда"</string>
     <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"2 аптадан ашык мурда"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Туулган күн"</string>
@@ -1144,7 +1144,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Мазмун бир аздан кийин көрүнөт"</string>
     <string name="missed_call" msgid="4228016077700161689">"Жооп берилбеген чалуу"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Акыркы билдирүүлөрдү, жооп берилбеген чалууларды жана статустардын жаңырганын көрөсүз"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Соңку билдирүүлөрдү, жооп берилбеген чалууларды жана статустардын жаңырганын көрөсүз"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Сүйлөшүү"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"\"Тынчымды алба\" режими тындырды"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> билдирүү жөнөттү: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>

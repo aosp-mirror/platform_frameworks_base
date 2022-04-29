@@ -481,10 +481,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"उपयोगकर्ता जोड़ें"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नया उपयोगकर्ता"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"क्या आप मेहमान को हटाना चाहते हैं?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सत्र के सभी ऐप्लिकेशन और डेटा को हटा दिया जाएगा."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सेशन के सभी ऐप्लिकेशन और डेटा को हटा दिया जाएगा."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"निकालें"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"मेहमान, आपका फिर से स्वागत है!"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"क्‍या आप अपना सत्र जारी रखना चाहते हैं?"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"क्‍या आपको अपना सेशन जारी रखना है?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"फिर से शुरू करें"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"हां, जारी रखें"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"अतिथि उपयोगकर्ता"</string>
@@ -494,7 +494,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"मौजूदा उपयोगकर्ता से प्रस्थान करें"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"उपयोगकर्ता को प्रस्थान करवाएं"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"नया उपयोगकर्ता जोड़ें?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"जब आप कोई नया उपयोगकर्ता जोड़ते हैं, तो उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"कोई नया उपयोगकर्ता जोड़ने पर, उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"अब और उपयोगकर्ता नहीं जोड़े जा सकते"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">आप ज़्यादा से ज़्यादा <xliff:g id="COUNT">%d</xliff:g> उपयोगकर्ता जोड़ सकते हैं.</item>
@@ -607,7 +607,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"ऐप्लिकेशन पिन किया गया है"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"इससे वह तब तक दिखता रहता है, जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' को दबाकर रखें."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम और वापस जाएं वाले बटन को दबाकर रखें."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"इससे ऐप्लिकेशन की स्क्रीन तब तक दिखाई देती है, जब तक आप उसे अनपिन नहीं करते. अनपिन करने के लिए ऊपर स्वाइप करें और स्क्रीन दबाकर रखें."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"इससे ऐप्लिकेशन की स्क्रीन तब तक दिखती है, जब तक उसे अनपिन नहीं किया जाता. अनपिन करने के लिए ऊपर स्वाइप करें और स्क्रीन दबाकर रखें."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"इससे वह तब तक दिखता रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'खास जानकारी\' को दबाकर रखें."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम बटन को दबाकर रखें."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"निजी डेटा ऐक्सेस किया जा सकता है, जैसे कि संपर्क और ईमेल का कॉन्टेंट."</string>
@@ -746,7 +746,7 @@
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"यह कई तरीकों से दिखती है, जैसे कि लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर और बातचीत वाली सूचनाओं में सबसे ऊपर"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"यह कई तरीकों से दिखती है, जैसे कि बातचीत वाली सूचनाओं में सबसे ऊपर, बबल के तौर पर, और लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"यह कई तरीकों से दिखती है, जैसे कि लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर और बातचीत वाली सूचनाओं में सबसे ऊपर. साथ ही, इसकी वजह से, \'परेशान न करें\' सुविधा में भी रुकावट आती है"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"यह कई तरीकों से दिखती है, जैसे कि बातचीत वाली सूचनाओं में सबसे ऊपर, बबल के तौर पर, और लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर. साथ ही, इसकी वजह से, \'परेशान न करें\' सुविधा में भी रुकावट आती है"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"यह कई तरीकों से दिखती है, जैसे कि बातचीत वाली सूचनाओं में सबसे ऊपर, बबल के तौर पर, और लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर. साथ ही, यह \'परेशान न करें\' मोड को बायपास कर सकती है"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर बातचीत की सुविधाएं काम नहीं करतीं"</string>

@@ -481,7 +481,7 @@
     <string name="user_add_user" msgid="4336657383006913022">"Ավելացնել օգտատեր"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Նոր օգտատեր"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Հեռացնե՞լ հյուրին"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր ծրագրերն ու տվյալները կջնջվեն:"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր հավելվածներն ու տվյալները կջնջվեն:"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Հեռացնել"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Բարի վերադարձ, հյուր"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Շարունակե՞լ աշխատաշրջանը։"</string>
@@ -719,7 +719,7 @@
     <string name="inline_done_button" msgid="6043094985588909584">"Փակել"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Կիրառել"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"Ցուցադրե՞լ այս ծանուցումները։"</string>
-    <string name="inline_stop_button" msgid="2453460935438696090">"Չցուցադրել ծանուցումներ"</string>
+    <string name="inline_stop_button" msgid="2453460935438696090">"Ցույց չտալ ծանուցումներ"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"Առաքել անձայն"</string>
     <string name="inline_block_button" msgid="479892866568378793">"Արգելափակել"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Ցուցադրել"</string>
@@ -734,7 +734,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Կանխադրված"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Ավտոմատ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Առանց ձայնի կամ թրթռոցի"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Հայտնվում է զրույցների ցանկի ներքևում, առանց ձայնի և թրթռոցի"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Առանց ձայնի և թրթռոցի, հայտնվում է զրույցների ցանկի ներքևում"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Կարող է զնգալ կամ թրթռալ (հեռախոսի կարգավորումներից կախված)"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Կարող է զնգալ կամ թրթռալ (հեռախոսի կարգավորումներից կախված)։ <xliff:g id="APP_NAME">%1$s</xliff:g>-ի զրույցներն ըստ կանխադրման հայտնվում են ամպիկների տեսքով։"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Լողացող դյուրանցման միջոցով ձեր ուշադրությունն է գրավում բովանդակության նկատմամբ"</string>

@@ -422,7 +422,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Egunsentira arte"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Aktibatze-ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Desaktibatze-ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
+    <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFCa"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Desgaituta dago NFC"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Gaituta dago NFC"</string>
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Pantaila-grabaketa"</string>
@@ -456,7 +456,7 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Pasatu hatza gora irekitzeko"</string>
     <string name="keyguard_unlock_press" msgid="8488350566398524740">"Sakatu irekitzeko"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Berriro saiatzeko, pasatu hatza gora"</string>
-    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desblokea ezazu NFC erabiltzeko"</string>
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desblokea ezazu NFCa erabiltzeko"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Gailu hau zure erakundearena da"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Gailu hau <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> erakundearena da"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> erakundeak eman du gailu hau"</string>
@@ -618,7 +618,7 @@
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Ados"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ez, eskerrik asko"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Ainguratu da aplikazioa"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Kendu da aplikazioaren aingura"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Kendu zaio aingura aplikazioari"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ezkutatu nahi duzu?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Ezarpenetan aktibatzen duzun hurrengoan agertuko da berriro."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Ezkutatu"</string>
@@ -734,7 +734,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Lehenetsia"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatikoa"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Ez du tonurik jotzen edo dar-dar egiten"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Ez du tonurik jotzen edo dar-dar egiten, eta elkarrizketaren atalaren behealdean agertzen da"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Ez du tonurik jotzen edo dar-dar egiten, eta elkarrizketen atalaren behealdean agertzen da"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Tonua jo edo dar-dar egin dezake, telefonoaren ezarpenen arabera"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Tonua jo edo dar-dar egin dezake, telefonoaren ezarpenen arabera. Modu lehenetsian, <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioko elkarrizketak burbuila gisa agertzen dira."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Eduki honetarako lasterbide gainerakor bat eskaintzen dizu, arretarik gal ez dezazun."</string>

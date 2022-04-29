@@ -456,7 +456,7 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Balayer vers le haut pour ouvrir"</string>
     <string name="keyguard_unlock_press" msgid="8488350566398524740">"Appuyez pour ouvrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Balayez l\'écran vers le haut pour réessayer"</string>
-    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Déverrouillez l\'écran pour pouvoir utiliser NFC"</string>
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Déverrouillez l\'écran pour pouvoir utiliser la NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Cet appareil appartient à votre organisation"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Cet appareil appartient à <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Cet appareil est fourni par <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -483,7 +483,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Supprimer l\'invité ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Toutes les applications et les données de cette session seront supprimées."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Supprimer"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bienvenue à nouveau dans la session Invité"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Heureux de vous revoir, Invité"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Voulez-vous poursuivre la dernière session ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Non, nouvelle session"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Oui, continuer"</string>
@@ -598,7 +598,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Paramètres audio"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Développer"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Réduire"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Sous-titres automatiques"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Sous-titrer automatiquement"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Fermer l\'info-bulle des sous-titres"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Sous-titres en superposition"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activer"</string>
@@ -647,7 +647,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"réactiver le son"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"activer le vibreur"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Commandes de volume %s"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Sons activés pour les appels et les notifications (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Les appels et les notifications sonneront (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="3938776561655668350">"Sortie multimédia"</string>
     <string name="output_calls_title" msgid="7085583034267889109">"Sortie de l\'appel téléphonique"</string>
     <string name="output_none_found" msgid="5488087293120982770">"Aucun appareil détecté"</string>
@@ -733,8 +733,8 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Silencieux"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Par défaut"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatique"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Aucun son ni vibration"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Aucun son ni vibration, s\'affiche plus bas dans la section des conversations"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Ni son, ni vibreur"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Ni son, ni vibreur ; s\'affiche plus bas dans la section des conversations"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Son ou vibreur, selon les paramètres du téléphone"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Son ou vibreur, selon les paramètres du téléphone. Les conversations provenant de <xliff:g id="APP_NAME">%1$s</xliff:g> s\'affichent sous forme de bulles par défaut."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Attire votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>

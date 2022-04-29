@@ -493,8 +493,8 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"ୟୁଜରଙ୍କୁ ଲଗଆଉଟ୍‍ କରନ୍ତୁ"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ବର୍ତ୍ତମାନର ୟୁଜରଙ୍କୁ ଲଗଆଉଟ୍‍ କରନ୍ତୁ"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ୟୁଜରଙ୍କୁ ଲଗଆଉଟ୍‍ କରନ୍ତୁ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"ନୂତନ ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରିବେ?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"ଆପଣ ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କଲେ,ତାଙ୍କୁ ସ୍ପେସ୍ ସେଟ୍ ଅପ୍ କରିବାକୁ ପଡ଼ିବ। \n \n ଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପଗୁଡ଼ିକୁ ଅପଡେଟ୍‌ କରିପାରିବେ।"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରିବେ?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"ଆପଣ ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବା ବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ତାଙ୍କ ସ୍ପେସ ସେଟ ଅପ କରିବାକୁ ପଡ଼ିବ।\n\nଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ, ଆପଗୁଡ଼ିକୁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଅପଡେଟ କରିପାରିବେ।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"ଉପଯୋଗକର୍ତ୍ତା ସୀମାରେ ପହଞ୍ଚିଛି"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">କେବଳ <xliff:g id="COUNT">%d</xliff:g> ଉପଯୋଗକର୍ତ୍ତା ହିଁ ତିଆରି କରିହେବ।</item>

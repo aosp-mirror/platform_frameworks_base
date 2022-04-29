@@ -151,7 +151,7 @@
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Bekreft"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Prøv på nytt"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Trykk for å avbryte autentiseringen"</string>
-    <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Prøv igjen"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Prøv på nytt"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"Ser etter ansiktet ditt"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Ansiktet er autentisert"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bekreftet"</string>
@@ -673,7 +673,7 @@
     <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Legg til et kort"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Oppdaterer"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås opp for å bruke"</string>
-    <string name="wallet_error_generic" msgid="257704570182963611">"Det oppsto et problem med henting av kortene. Prøv igjen senere"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"Det oppsto et problem med henting av kortene. Prøv på nytt senere"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Innstillinger for låseskjermen"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Work-profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flymodus"</string>

@@ -647,7 +647,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"geluid aanzetten"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"trillen"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s-volumeknoppen"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Gesprekken en meldingen gaan over (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Geluid bij gesprekken en meldingen (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="3938776561655668350">"Media-uitvoer"</string>
     <string name="output_calls_title" msgid="7085583034267889109">"Uitvoer van telefoongesprek"</string>
     <string name="output_none_found" msgid="5488087293120982770">"Geen apparaten gevonden"</string>

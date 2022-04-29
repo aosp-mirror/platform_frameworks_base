@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"میانای کاربر سیستم"</string>
+    <string name="app_label" msgid="4811759950673118541">"واسط کاربری سیستم"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"پاک کردن"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"اعلانی موجود نیست"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"در حال انجام"</string>
@@ -50,7 +50,7 @@
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏به <xliff:g id="APPLICATION">%1$s</xliff:g> اجازه می‌دهید به <xliff:g id="USB_DEVICE">%2$s</xliff:g>دسترسی داشته باشد؟\nمجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"به <xliff:g id="APPLICATION">%1$s</xliff:g> برای دسترسی به <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> اجازه داده شود؟"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"برای استفاده از <xliff:g id="USB_DEVICE">%2$s</xliff:g>، <xliff:g id="APPLICATION">%1$s</xliff:g> باز شود؟"</string>
-    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"‏<xliff:g id="APPLICATION">%1$s</xliff:g> برای رسیدگی به <xliff:g id="USB_DEVICE">%2$s</xliff:g> باز شود؟\nمجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"‏برای استفاده از <xliff:g id="USB_DEVICE">%2$s</xliff:g>، <xliff:g id="APPLICATION">%1$s</xliff:g> باز شود؟\nمجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"برای استفاده از <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>، <xliff:g id="APPLICATION">%1$s</xliff:g> باز شود؟"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"‏هیچ برنامه نصب شده‌ای با این وسیله جانبی USB کار نمی‌کند. در <xliff:g id="URL">%1$s</xliff:g> دربارهٔ این وسیله جانبی اطلاعات بیشتری کسب کنید"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"‏لوازم جانبی USB"</string>
@@ -191,7 +191,7 @@
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"دکمه بزرگ‌نمایی سازگار."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="2617218726091234073">"بزرگ‌نمایی از صفحه‌های کوچک تا بزرگ."</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"بلوتوث متصل است."</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7195823280221275929">"بلوتوث قطع شده است."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7195823280221275929">"بلوتوث قطع شده."</string>
     <string name="accessibility_no_battery" msgid="3789287732041910804">"باتری موجود نیست."</string>
     <string name="accessibility_battery_one_bar" msgid="8868347318237585329">"یک نوار برای باتری."</string>
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"دو نوار برای باتری."</string>
@@ -655,13 +655,13 @@
     <string name="output_service_bt" msgid="4315362133973911687">"بلوتوث"</string>
     <string name="output_service_wifi" msgid="9003667810868222134">"Wi-Fi"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"‏بلوتوث و Wi-Fi"</string>
-    <string name="system_ui_tuner" msgid="1471348823289954729">"تنظیم‌کننده میانای کاربری سیستم"</string>
+    <string name="system_ui_tuner" msgid="1471348823289954729">"تنظیم‌کننده واسط کاربری سیستم"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"نمایش درصد شارژ باتری جاسازی شده"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"نمایش درصد سطح باتری در نماد نوار وضعیت، هنگامی که باتری شارژ نمی‌شود"</string>
     <string name="quick_settings" msgid="6211774484997470203">"تنظیمات سریع"</string>
     <string name="status_bar" msgid="4357390266055077437">"نوار وضعیت"</string>
     <string name="overview" msgid="3522318590458536816">"نمای کلی"</string>
-    <string name="demo_mode" msgid="263484519766901593">"حالت نمایشی میانای کاربر سیستم"</string>
+    <string name="demo_mode" msgid="263484519766901593">"حالت نمایشی واسط کاربری سیستم"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"فعال کردن حالت نمایشی"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"نمایش حالت نمایشی"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"اترنت"</string>
@@ -687,12 +687,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"نقطه اتصال"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"نمایه کاری"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"برای بعضی افراد سرگرم‌کننده است اما نه برای همه"</string>
-    <string name="tuner_warning" msgid="1861736288458481650">"‏«تنظیم‌کننده میانای کاربری سیستم» روش‌های بیشتری برای تنظیم دقیق و سفارشی کردن واسط کاربری Android در اختیار شما قرار می‌دهد. ممکن است این ویژگی‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده جود نداشته باشند. با احتیاط ادامه دهید."</string>
+    <string name="tuner_warning" msgid="1861736288458481650">"‏«تنظیم‌کننده واسط کاربری سیستم» روش‌های بیشتری برای تنظیم دقیق و سفارشی کردن واسط کاربری Android در اختیار شما قرار می‌دهد. ممکن است این ویژگی‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده جود نداشته باشند. با احتیاط ادامه دهید."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"ممکن است این قابلیت‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده وجود نداشته باشد. بااحتیاط ادامه دهید."</string>
     <string name="got_it" msgid="477119182261892069">"متوجه شدم"</string>
-    <string name="tuner_toast" msgid="3812684836514766951">"تبریک می‌گوییم! «تنظیم‌کننده میانای کاربری سیستم» به «تنظیمات» اضافه شد"</string>
+    <string name="tuner_toast" msgid="3812684836514766951">"تبریک! «تنظیم‌کننده واسط کاربری سیستم» به «تنظیمات» اضافه شد"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"حذف از تنظیمات"</string>
-    <string name="remove_from_settings_prompt" msgid="551565437265615426">"«تنظیم‌کننده میانای کاربری سیستم» از تنظیمات حذف شود و همه ویژگی‌های آن متوقف شوند؟"</string>
+    <string name="remove_from_settings_prompt" msgid="551565437265615426">"«تنظیم‌کننده واسط کاربری سیستم» از «تنظیمات» حذف شود و استفاده از همه ویژگی‌های آن متوقف شود؟"</string>
     <string name="activity_not_found" msgid="8711661533828200293">"برنامه در دستگاه شما نصب نیست"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"نمایش ثانیه‌های ساعت"</string>
     <string name="clock_seconds_desc" msgid="2415312788902144817">"ثانیه‌های ساعت را در نوار وضعیت نشان می‌دهد. ممکن است بر ماندگاری باتری تأثیر بگذارد."</string>

@@ -598,7 +598,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Sound settings"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Expand"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Collapse"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatically subtitle media"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatically caption media"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Close captions tip"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Captions overlay"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"enable"</string>

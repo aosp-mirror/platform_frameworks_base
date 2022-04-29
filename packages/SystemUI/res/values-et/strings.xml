@@ -89,7 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Rakendus või teie organisatsioon ei luba ekraanipilte jäädvustada"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Muutmine"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Ekraanipildi muutmine"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Jäädvustage rohkem"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Jäädvusta rohkem"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekraanipildist loobumine"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekraanipildi eelvaade"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Ülapiir: <xliff:g id="PERCENT">%1$d</xliff:g> protsenti"</string>

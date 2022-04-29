@@ -483,7 +483,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Rimuovere l\'ospite?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tutte le app e i dati di questa sessione verranno eliminati."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Rimuovi"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Ti ridiamo il benvenuto alla sessione Ospite."</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Ti ridiamo il benvenuto nella sessione Ospite."</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vuoi continuare la sessione?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Ricomincia"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sì, continua"</string>
@@ -494,7 +494,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Disconnetti utente corrente"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"DISCONNETTI UTENTE"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Aggiungere un nuovo utente?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Il nuovo utente, una volta aggiunto, deve impostare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Il nuovo utente, una volta aggiunto, deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite di utenti raggiunto"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Puoi aggiungere fino a <xliff:g id="COUNT">%d</xliff:g> utenti.</item>
@@ -611,7 +611,7 @@
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Panoramica."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Home."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"I dati personali potrebbero essere accessibili (ad esempio i contatti e i contenuti delle email)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"L\'app bloccata su schermo potrebbe aprire altre app."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"L\'app bloccata sullo schermo potrebbe aprire altre app."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Per sbloccare questa app, tocca e tieni premuti i pulsanti Indietro e Panoramica"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Per sbloccare questa app, tocca e tieni premuti i pulsanti Indietro e Home"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Per sbloccare questa app, scorri verso l\'alto e tieni premuto"</string>
@@ -746,7 +746,7 @@
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Appare in cima alle notifiche delle conversazioni e compare come immagine del profilo nella schermata di blocco"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Appare in cima alle notifiche delle conversazioni, nonché compare come immagine del profilo nella schermata di blocco e come bolla"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Appare in cima alle notifiche delle conversazioni, interrompe la modalità Non disturbare e compare come immagine del profilo nella schermata di blocco"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Appare in cima alle notifiche delle conversazioni, interrompe la modalità Non disturbare, nonché compare come immagine del profilo nella schermata di blocco e come bolla"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Appare in cima alle notifiche delle conversazioni, come immagine del profilo nella schermata di blocco e sotto forma di bolla, inoltre interrompe la modalità Non disturbare"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Impostazioni"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorità"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> non supporta le funzionalità delle conversazioni"</string>

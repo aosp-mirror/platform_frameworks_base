@@ -47,7 +47,7 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"Ρύθμιση μεθόδων εισαγωγής"</string>
     <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"Κανονικό πληκτρολόγιο"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
-    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> να έχει πρόσβαση στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;\nΔεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο."</string>
+    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Να επιτρέπεται στο <xliff:g id="APPLICATION">%1$s</xliff:g> να έχει πρόσβαση στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;\nΔεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στο αξεσουάρ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>;"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Να ανοίγει η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> για τη διαχείριση της συσκευής <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Άνοιγμα της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> για τον χειρισμό της συσκευής <xliff:g id="USB_DEVICE">%2$s</xliff:g>;\nΔεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο."</string>
@@ -990,10 +990,10 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Δεν θα έχετε πρόσβαση σε δεδομένα ή στο διαδίκτυο μέσω της εταιρείας κινητής τηλεφωνίας <xliff:g id="CARRIER">%s</xliff:g>. Θα έχετε πρόσβαση στο διαδίκτυο μόνο μέσω Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"η εταιρεία κινητής τηλεφωνίας"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Επειδή μια εφαρμογή αποκρύπτει ένα αίτημα άδειας, δεν είναι δυνατή η επαλήθευση της απάντησής σας από τις Ρυθμίσεις."</string>
-    <string name="slice_permission_title" msgid="3262615140094151017">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APP_0">%1$s</xliff:g> να εμφανίζει τμήματα της εφαρμογής <xliff:g id="APP_2">%2$s</xliff:g>;"</string>
+    <string name="slice_permission_title" msgid="3262615140094151017">"Να επιτρέπεται στο <xliff:g id="APP_0">%1$s</xliff:g> να εμφανίζει τμήματα της εφαρμογής <xliff:g id="APP_2">%2$s</xliff:g>;"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Μπορεί να διαβάζει πληροφορίες από την εφαρμογή <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- Μπορεί να εκτελεί ενέργειες εντός της εφαρμογής <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="slice_permission_checkbox" msgid="4242888137592298523">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να εμφανίζει τμήματα από οποιαδήποτε εφαρμογή"</string>
+    <string name="slice_permission_checkbox" msgid="4242888137592298523">"Να επιτρέπεται στο <xliff:g id="APP">%1$s</xliff:g> να εμφανίζει τμήματα από οποιαδήποτε εφαρμογή"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Επιτρέπεται"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Δεν επιτρέπεται"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Πατήστε για προγραμματισμό της Εξοικονόμησης μπαταρίας"</string>

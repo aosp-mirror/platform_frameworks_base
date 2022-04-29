@@ -616,7 +616,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ekran będzie widoczny, dopóki go nie odepniesz. Przesuń palcem w górę i przytrzymaj, by odpiąć."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, kliknij i przytrzymaj Przegląd."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, naciśnij i przytrzymaj Ekran główny."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dostępne mogą być dane osobiste (np. kontakty czy treść e-maili)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dostępne mogą być dane prywatne (np. kontakty czy treść e-maili)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Przypięta aplikacja może otwierać inne aplikacje."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Aby odpiąć tę aplikację, naciśnij i przytrzymaj przyciski Wstecz oraz Przegląd"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Aby odpiąć tę aplikację, naciśnij i przytrzymaj przyciski Wstecz oraz Ekran główny"</string>

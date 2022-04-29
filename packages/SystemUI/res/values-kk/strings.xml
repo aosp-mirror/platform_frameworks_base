@@ -1144,7 +1144,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Мазмұн жақында көрсетіледі."</string>
     <string name="missed_call" msgid="4228016077700161689">"Өткізіп алған қоңырау"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Соңғы хабарларды, өткізіп алған қоңыраулар мен жаңартылған күйлерді көруге болады."</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Соңғы хабарлар, өткізіп алған қоңыраулар мен статустың жаңаруы көрсетіледі."</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Әңгіме"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Мазаламау режимі арқылы кідіртілді."</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> хабар жіберді: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>

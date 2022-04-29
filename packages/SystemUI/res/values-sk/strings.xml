@@ -613,7 +613,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikácia je pripnutá"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidiel Späť a Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidiel Späť a Domov."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Táto možnosť ponechá položku v zobrazení, dokým ju neodopnete. Odpojíte ju potiahnutím nahor a pridržaním."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Táto možnosť ponechá položku v zobrazení, dokým ju neodopnete potiahnutím nahor a pridržaním."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidla Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidla Domov."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Môže mať prístup k osobným údajom (napríklad kontaktom a obsahu správ)."</string>

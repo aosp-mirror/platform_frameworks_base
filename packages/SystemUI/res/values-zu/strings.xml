@@ -604,7 +604,7 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"nika amandla"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"khubaza"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Shintsha idivayisi yokukhipha"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"Uhlelo lokusebenza luphiniwe"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"I-app iphiniwe"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Lokhu kuyigcina ibukeka uze ususe ukuphina. Thinta uphinde ubambe okuthi Emuva Nokubuka konke ukuze ususe ukuphina."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Lokhu kuyigcina ibonakala uze uyisuse. Thinta uphinde ubambe okuthi Emuva nokuthi Ekhaya ukuze ususe ukuphina."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Lokhu kuyigcina ibonakala uze ususe ukuphina. Swayiphela phezulu uphinde ubambe ukuze ususe ukuphina."</string>
