@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -153,8 +154,6 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private void setPanelExpansion(float expansion, float dragDownAmount) {
         mCurrentExpansion = expansion;
-        mCentralSurfaces.ifPresent(centralSurfaces -> centralSurfaces.setBouncerShowingOverDream(
-                mCurrentExpansion != KeyguardBouncer.EXPANSION_HIDDEN));
         PanelExpansionChangeEvent event =
                 new PanelExpansionChangeEvent(
                         /* fraction= */ mCurrentExpansion,

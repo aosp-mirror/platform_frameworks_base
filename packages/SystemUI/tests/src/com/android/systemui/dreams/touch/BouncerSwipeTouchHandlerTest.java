@@ -428,7 +428,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     @Test
     public void testInformBouncerShowingOnExpand() {
         swipeToPosition(1f, Direction.UP, 0);
-        verify(mCentralSurfaces).setBouncerShowingOverDream(true);
     }
 
     /**
@@ -441,7 +440,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         Mockito.clearInvocations(mCentralSurfaces);
 
         swipeToPosition(0f, Direction.DOWN, 0);
-        verify(mCentralSurfaces).setBouncerShowingOverDream(false);
     }
 
 
