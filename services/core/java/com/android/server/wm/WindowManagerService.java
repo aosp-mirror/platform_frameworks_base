@@ -8755,8 +8755,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     return new ArrayList<>();
                 }
 
-                // Retrieve the DisplayInfo for all possible rotations across all possible display
-                // layouts.
+                // Retrieve the DisplayInfo across all possible display layouts.
                 return List.copyOf(mPossibleDisplayInfoMapper.getPossibleDisplayInfos(displayId));
             }
         } finally {
