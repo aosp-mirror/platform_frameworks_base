@@ -454,8 +454,11 @@ public class BubbleExpandedView extends LinearLayout {
                     p.beginRecording(mOverflowView.getWidth(), mOverflowView.getHeight()));
             p.endRecording();
             Bitmap snapshot = Bitmap.createBitmap(p);
-            return new SurfaceControl.ScreenshotHardwareBuffer(snapshot.getHardwareBuffer(),
-                    snapshot.getColorSpace(), false /* containsSecureLayers */);
+            return new SurfaceControl.ScreenshotHardwareBuffer(
+                    snapshot.getHardwareBuffer(),
+                    snapshot.getColorSpace(),
+                    false /* containsSecureLayers */,
+                    false /* containsHdrLayers */);
         }
         if (mTaskView == null || mTaskView.getSurfaceControl() == null) {
             return null;
