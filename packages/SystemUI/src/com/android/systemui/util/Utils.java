@@ -105,6 +105,25 @@ public class Utils {
     }
 
     /**
+     * Returns the color provided at the specified {@param attrIndex} in {@param a} if it exists,
+     * otherwise, returns the color from the private attribute {@param privAttrId}.
+     */
+    public static int getPrivateAttrColorIfUnset(ContextThemeWrapper ctw, TypedArray a,
+            int attrIndex, int defColor, int privAttrId) {
+        // If the index is specified, use that value
+        if (a.hasValue(attrIndex)) {
+            return a.getColor(attrIndex, defColor);
+        }
+
+        // Otherwise fallback to the value of the private attribute
+        int[] customAttrs = { privAttrId };
+        a = ctw.obtainStyledAttributes(customAttrs);
+        int color = a.getColor(0, defColor);
+        a.recycle();
+        return color;
+    }
+
+    /**
      * Gets the {@link R.dimen#status_bar_header_height_keyguard}.
      */
     public static int getStatusBarHeaderHeightKeyguard(Context context) {

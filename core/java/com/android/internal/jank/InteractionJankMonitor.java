@@ -28,6 +28,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_WIDGET;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_ALL_APPS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_QUICK_SWITCH;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_LAUNCH_CAMERA;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_APPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_DISAPPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PATTERN_APPEAR;
@@ -189,7 +190,8 @@ public class InteractionJankMonitor {
     public static final int CUJ_SUW_LOADING_SCREEN_FOR_STATUS = 48;
     public static final int CUJ_SPLIT_SCREEN_ENTER = 49;
     public static final int CUJ_SPLIT_SCREEN_EXIT = 50;
-    public static final int CUJ_SPLIT_SCREEN_RESIZE = 51;
+    public static final int CUJ_LOCKSCREEN_LAUNCH_CAMERA = 51; // reserved.
+    public static final int CUJ_SPLIT_SCREEN_RESIZE = 52;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -249,6 +251,7 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_SCREEN_FOR_STATUS,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_ENTER,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_EXIT,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_LAUNCH_CAMERA,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_RESIZE,
     };
 
@@ -321,6 +324,7 @@ public class InteractionJankMonitor {
             CUJ_SUW_LOADING_SCREEN_FOR_STATUS,
             CUJ_SPLIT_SCREEN_ENTER,
             CUJ_SPLIT_SCREEN_EXIT,
+            CUJ_LOCKSCREEN_LAUNCH_CAMERA,
             CUJ_SPLIT_SCREEN_RESIZE
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -742,6 +746,8 @@ public class InteractionJankMonitor {
                 return "SPLIT_SCREEN_ENTER";
             case CUJ_SPLIT_SCREEN_EXIT:
                 return "SPLIT_SCREEN_EXIT";
+            case CUJ_LOCKSCREEN_LAUNCH_CAMERA:
+                return "CUJ_LOCKSCREEN_LAUNCH_CAMERA";
             case CUJ_SPLIT_SCREEN_RESIZE:
                 return "CUJ_SPLIT_SCREEN_RESIZE";
         }

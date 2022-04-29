@@ -27,7 +27,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dreams.smartspace.DreamsSmartspaceController;
+import com.android.systemui.dreams.smartspace.DreamSmartspaceController;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 
 import org.junit.Before;
@@ -47,7 +47,7 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
     private Context mContext;
 
     @Mock
-    private DreamsSmartspaceController mSmartspaceController;
+    private DreamSmartspaceController mSmartspaceController;
 
     @Mock
     private DreamOverlayStateController mDreamOverlayStateController;
