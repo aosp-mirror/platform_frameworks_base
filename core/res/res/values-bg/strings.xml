@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"има достъп до календара ви"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"да изпраща и преглежда SMS съобщения"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Файлове и документи"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файлове и документи"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"достъп до файловете и документите на устройството ви"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Музика и друго аудиосъдържание"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"да има достъп до аудиофайловете на устройството ви"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Снимки и видеоклипове"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"да има достъп до графичните и видеофайловете на устройството ви"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музика и аудио"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"достъп до музиката и аудиото на устройството ви"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Снимки и видеоклипове"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"достъп до снимките и видеоклиповете на устройството ви"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"записва звук"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Физическа активност"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отключване с отпечатък"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Сензорът за отпечатъци не може да се използва"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Посетете оторизиран сервиз."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Лицето не бе заснето точно. Опитайте отново."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Моделът на лицето ви не бе създаден. Опитайте пак."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Твърде светло е. Опитайте при по-слабо осветление."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Твърде тъмно е. Опитайте при по-силно осветление."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Отдалечете телефона."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Доближете телефона."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Преместете телефона по-високо."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Преместете телефона по-ниско."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Преместете телефона наляво."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Преместете телефона надясно."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Опитайте при по-силно осветление"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Отдалечете телефона"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Доближете телефона"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Преместете телефона по-високо"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Преместете телефона по-ниско"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Преместете телефона наляво"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Преместете телефона надясно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Моля, гледайте точно към устройството си."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Позиционирайте лицето си директно пред телефона."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Лицето ви не се вижда. Дръжте телефона на нивото на очите си."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Твърде много движение. Дръжте телефона неподвижно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Моля, регистрирайте лицето си отново."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Лицето не бе разпознато. Опитайте отново."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Позата ви е сходна с предишна. Моля, променете я."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Не завъртайте главата си толкова много."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Не накланяйте главата си толкова много."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Не завъртайте главата си толкова много."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Лицето не е разпознато. Опитайте отново."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Леко променете позицията на главата си"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Гледайте директно към телефона си"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Гледайте директно към телефона си"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Гледайте директно към телефона си"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Премахнете всичко, което закрива лицето ви."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Почистете горната част на екрана си, включително черната лента"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Лицето ви трябва да е напълно видимо"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Лицето ви трябва да е напълно видимо"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Моделът на лицето ви не бе създаден. Опитайте отново."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Изглежда, че носите тъмни очила. То трябва да е напълно видимо."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Изглежда, че лицето ви е покрито. То трябва да е напълно видимо."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Лицето не може да се потвърди. Хардуерът не е налице."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Настройките за „Не безпокойте“ са променени"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Докоснете, за да проверите какво е блокирано."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Преглед на настройките за известия"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"От Android 13 инсталираните от вас приложения трябва да получат разрешението ви, за да изпращат известия. Докоснете, за да промените това разрешение за съществуващите приложения."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Напомняне по-късно"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Отхвърляне"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Система"</string>

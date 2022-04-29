@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಮತ್ತು ನಿರ್ವಹಿಸಲು"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ಫೈಲ್‌ಗಳು ಮತ್ತು ಡಾಕ್ಯುಮೆಂಟ್‌ಗಳು"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ಫೈಲ್‌ಗಳು ಮತ್ತು ಡಾಕ್ಯುಮೆಂಟ್‌ಗಳು"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಫೈಲ್‌ಗಳು ಮತ್ತು ಡಾಕ್ಯುಮೆಂಟ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"ಸಂಗೀತ ಮತ್ತು ಇತರ ಆಡಿಯೋ"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೊಗಳು"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಚಿತ್ರಗಳು ಮತ್ತು ವೀಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ಸಂಗೀತ ಮತ್ತು ಆಡಿಯೋ"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಸಂಗೀತ ಮತ್ತು ಆಡಿಯೊವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೊಗಳು"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೊಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ಮೈಕ್ರೋಫೋನ್‌"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ಆಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ದೈಹಿಕ ಚಟುವಟಿಕೆ"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್‌ಲಾಕ್"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಅನ್ನು ಬಳಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ರಿಪೇರಿ ಮಾಡುವವರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"ಸರಿಯಾಗಿ ಮುಖ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಲಾಗಲಿಲ್ಲ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"ಫೇಸ್ ಮಾಡೆಲ್ ರಚಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ತುಂಬಾ ಪ್ರಕಾಶಮಾನವಾಗಿದೆ ಮಂದ ಪ್ರಕಾಶಮಾನವಿರುವ ಲೈಟ್ ಬಳಸಿ"</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"ತುಂಬಾ ಕಪ್ಪು ಛಾಯೆಯಿದೆ. ಪ್ರಕಾಶಮಾನವಾದ ಲೈಟಿಂಗ್ ಬಳಸಿ."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"ಫೋನ್ ಅನ್ನು ದೂರಕ್ಕೆ ಸರಿಸಿ."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ಫೋನ್ ಅನ್ನು ಸಮೀಪಕ್ಕೆ ತನ್ನಿ."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ಫೋನ್ ಅನ್ನು ಎತ್ತರಕ್ಕೆ ಹಿಡಿಯಿರಿ."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ಫೋನ್ ಅನ್ನು ಕೆಳಗೆ ಸರಿಸಿ."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"ಫೋನ್ ಅನ್ನು ಎಡಕ್ಕೆ ಸರಿಸಿ."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"ಫೋನ್ ಅನ್ನು ಬಲಕ್ಕೆ ಸರಿಸಿ."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ಪ್ರಕಾಶಮಾನವಾದ ಲೈಟಿಂಗ್ ಬಳಸಿ"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"ಫೋನ್ ಅನ್ನು ದೂರಕ್ಕೆ ಸರಿಸಿ"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"ಫೋನ್ ಅನ್ನು ಸಮೀಪಕ್ಕೆ ತನ್ನಿ"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ಫೋನ್ ಅನ್ನು ಎತ್ತರಕ್ಕೆ ಹಿಡಿಯಿರಿ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ಫೋನ್ ಅನ್ನು ಕೆಳಗೆ ಸರಿಸಿ"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ಫೋನ್ ಅನ್ನು ನಿಮ್ಮ ಎಡಕ್ಕೆ ಸರಿಸಿ"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ಫೋನ್ ಅನ್ನು ನಿಮ್ಮ ಬಲಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಹೆಚ್ಚಿನದ್ದನ್ನು ನೇರವಾಗಿ ನೋಡಿ."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"ನಿಮ್ಮ ಮುಖವನ್ನು ಫೋನ್‌ಗೆ ನೇರವಾಗಿ ಇರಿಸಿ."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"ನಿಮ್ಮ ಮುಖ ಕಾಣಿಸುತ್ತಿಲ್ಲ. ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಕಣ್ಣಿನ ನೇರಕ್ಕೆ ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"ತುಂಬಾ ಅಲುಗಾಡುತ್ತಿದೆ ಫೋನ್ ಅನ್ನು ಸ್ಥಿರವಾಗಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರುನೋಂದಣಿ ಮಾಡಿ."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"ಮುಖ ಗುರುತಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"ತುಂಬಾ ಸಮಾನ, ನಿಮ್ಮ ಪೋಸ್ ಬದಲಾಯಿಸಿ."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ನಿಮ್ಮ ತಲೆಯನ್ನು ಹೆಚ್ಚು ತಿರುಗಿಸಬೇಡಿ."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"ನಿಮ್ಮ ತಲೆಯನ್ನು ಸ್ವಲ್ಪ ಓರೆಯಾಗಿಸಿ."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ನಿಮ್ಮ ತಲೆಯನ್ನು ಸ್ವಲ್ಪ ಕಡಿಮೆ ತಿರುಗಿಸಿ."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"ಮುಖ ಗುರುತಿಸಲಾಗುತ್ತಿಲ್ಲ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"ನಿಮ್ಮ ತಲೆಯ ಸ್ಥಾನವನ್ನು ಸ್ವಲ್ಪ ಬದಲಾಯಿಸಿ"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೇರವಾಗಿ ನೋಡಿ"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೇರವಾಗಿ ನೋಡಿ"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೇರವಾಗಿ ನೋಡಿ"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರೆಮಾಡುವ ಯಾವುದನ್ನಾದರೂ ತೆಗೆದುಹಾಕಿ."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ಬ್ಲ್ಯಾಕ್ ಬಾರ್ ಸೇರಿದಂತೆ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲ್ಭಾಗವನ್ನು ತೆರವುಗೊಳಿಸಿ"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"ನಿಮ್ಮ ಮುಖವು ಸಂಪೂರ್ಣವಾಗಿ ಗೋಚರಿಸಬೇಕು"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"ನಿಮ್ಮ ಮುಖವು ಸಂಪೂರ್ಣವಾಗಿ ಗೋಚರಿಸಬೇಕು"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"ಫೇಸ್ ಮಾಡೆಲ್ ರಚಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"ಕಪ್ಪು ಕನ್ನಡಕ ಪತ್ತೆಯಾಗಿದೆ. ನಿಮ್ಮ ಮುಖವು ಸಂಪೂರ್ಣವಾಗಿ ಗೋಚರಿಸಬೇಕು."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ಮುಖವಾಡ ಪತ್ತೆಯಾಗಿದೆ. ನಿಮ್ಮ ಮುಖವು ಸಂಪೂರ್ಣವಾಗಿ ಗೋಚರಿಸಬೇಕು."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ಮುಖ ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಹಾರ್ಡ್‌ವೇರ್ ಲಭ್ಯವಿಲ್ಲ."</string>
@@ -1012,7 +1017,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"ಈ ಪುಟದಿಂದ ಹೊರಬನ್ನಿ"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ಈ ಪುಟದಲ್ಲಿಯೇ ಇರಿ"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nನೀವು ಈ ಪುಟದಿಂದಾಚೆಗೆ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಲು ಖಚಿತವಾಗಿ ಬಯಸುವಿರಾ?"</string>
-    <string name="save_password_label" msgid="9161712335355510035">"ದೃಢೀಕರಿಸು"</string>
+    <string name="save_password_label" msgid="9161712335355510035">"ದೃಢೀಕರಿಸಿ"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"ಸಲಹೆ: ಝೂಮ್ ಇನ್ ಮತ್ತು ಝೂಮ್ ಔಟ್ ಮಾಡಲು ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"ಸ್ವಯಂತುಂಬುವಿಕೆ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"ಸ್ವಯಂತುಂಬುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಬದಲಾಗಿದೆ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ಏನನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ಪರೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 ನಿಂದ ಪ್ರಾರಂಭಿಸಿ, ನೀವು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡುವ ಆ್ಯಪ್‌ಗಳಿಗೆ, ಅಧಿಸೂಚನೆಗಳನ್ನು ಕಳುಹಿಸಲು ನಿಮ್ಮ ಅನುಮತಿಯ ಅಗತ್ಯವಿದೆ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಆ್ಯಪ್‌ಗಳಿಗಾಗಿ ಈ ಅನುಮತಿಯನ್ನು ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ನಂತರ ರಿಮೈಂಡ್ ಮಾಡಿ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ವಜಾಗೊಳಿಸಿ"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ಸಿಸ್ಟಂ"</string>

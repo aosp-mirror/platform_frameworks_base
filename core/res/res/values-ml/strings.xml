@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കുകയും കാണുകയും ചെയ്യുക"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ഫയലുകളും ഡോക്യുമെന്റുകളും"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ഫയലുകളും ഡോക്യുമെന്റുകളും"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"നിങ്ങളുടെ ഉപകരണത്തിലെ ഫയലുകളും ഡോക്യുമെന്റുകളും ആക്സസ് ചെയ്യുക"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"സംഗീതവും മറ്റ് ഓഡിയോയും"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"നിങ്ങളുടെ ഉപകരണത്തിലെ ഓഡിയോ ഫയലുകൾ ആക്‌സസ് ചെയ്യുക"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ഫോട്ടോകളും വീഡിയോകളും"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"നിങ്ങളുടെ ഉപകരണത്തിലെ വീഡിയോ ഫയലുകൾ ആക്‌സസ് ചെയ്യുക"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"സംഗീതവും ഓഡിയോയും"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"നിങ്ങളുടെ ഉപകരണത്തിൽ സംഗീതവും ഓഡിയോയും ആക്‌സസ് ചെയ്യുക"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ഫോട്ടോകളും വീഡിയോകളും"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഫോട്ടോകളും വീഡിയോകളും ആക്‌സസ് ചെയ്യുക"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"മൈക്രോഫോണ്‍"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ശാരീരിക ആക്റ്റിവിറ്റി"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ഫിംഗർപ്രിന്റ് അൺലോക്ക്"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"വിരലടയാള സെൻസർ ഉപയോഗിക്കാനാകുന്നില്ല"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"റിപ്പയർ കേന്ദ്രം സന്ദർശിക്കുക."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"കൃത്യ മുഖ ഡാറ്റ എടുക്കാനായില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"മുഖ മോഡൽ സൃഷ്ടിക്കാനാകില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"വളരെയധികം തെളിച്ചം. സൗമ്യതയേറിയ പ്രകാശം ശ്രമിക്കൂ."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"വളരെ ഇരുണ്ടത്. തിളക്കമേറിയ ലൈറ്റിംഗ് പരീക്ഷിക്കുക."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"ഫോൺ കൂടുതൽ അകലേയ്ക്ക് നീക്കുക."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ഫോൺ അടുത്തേക്ക് നീക്കുക."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ഫോൺ കൂടുതൽ ഉയരത്തിലേക്ക് നീക്കുക."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ഫോൺ കൂടുതൽ താഴേക്ക് നീക്കുക."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"ഫോൺ ഇടത്തോട്ട് നീക്കുക."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"ഫോൺ വലത്തോട്ട് നീക്കുക."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"തിളക്കമേറിയ ലൈറ്റിംഗ് പരീക്ഷിച്ച് നോക്കൂ"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"ഫോൺ കൂടുതൽ ദൂരേയ്ക്ക് നീക്കുക"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"ഫോൺ അടുത്തേക്ക് നീക്കുക"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ഫോൺ മുകളിലേക്ക് ഉയർത്തുക"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ഫോൺ കൂടുതൽ താഴേക്ക് നീക്കുക"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ഫോൺ നിങ്ങളുടെ ഇടതുവശത്തേക്ക് നീക്കുക"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ഫോൺ നിങ്ങളുടെ വലതുവശത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"നിങ്ങളുടെ ഉപകരണത്തിന് നേരെ കൂടുതൽ നന്നായി നോക്കുക."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"നിങ്ങളുടെ മുഖം ക്യാമറയ്‌ക്ക് നേരെയാക്കുക."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"നിങ്ങളുടെ മുഖം കാണാനാകുന്നില്ല. നിങ്ങളുടെ ഫോൺ കണ്ണിന് നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"വളരെയധികം ചലനം. ഫോൺ അനക്കാതെ നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യുക."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"ഇനി മുഖം തിരിച്ചറിയാനാവില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"വളരെയധികം സമാനത, നിങ്ങളുടെ പോസ് മാറ്റുക."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"നിങ്ങളുടെ തല ഇത്ര തിരിക്കേണ്ട."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"നിങ്ങളുടെ തല ചെറുതായി ടിൽറ്റ് ചെയ്യുക."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"നിങ്ങളുടെ തല ഇത്ര തിരിക്കേണ്ട."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"മുഖം തിരിച്ചറിയാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"നിങ്ങളുടെ തലയുടെ സ്ഥാനം ചെറുതായി മാറ്റുക"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"കൂടുതൽ കൃത്യമായി ഫോണിന് നേരെ നോക്കുക"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"കൂടുതൽ കൃത്യമായി ഫോണിന് നേരെ നോക്കുക"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"കൂടുതൽ കൃത്യമായി ഫോണിന് നേരെ നോക്കുക"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"നിങ്ങളുടെ മുഖം മറയ്‌ക്കുന്നത് എല്ലാം നീക്കം ചെയ്യൂ."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"കറുപ്പ് ബാർ ഉൾപ്പെടെ നിങ്ങളുടെ സ്ക്രീനിന്റെ മുകൾഭാഗം വൃത്തിയാക്കുക"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"നിങ്ങളുടെ മുഖം പൂർണ്ണമായും ദൃശ്യമായിരിക്കണം"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"നിങ്ങളുടെ മുഖം പൂർണ്ണമായും ദൃശ്യമായിരിക്കണം"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"മുഖ മോഡൽ സൃഷ്ടിക്കാനാകില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"കറുത്ത കണ്ണട കണ്ടെത്തി. നിങ്ങളുടെ മുഖം പൂർണ്ണമായും ദൃശ്യമായിരിക്കണം."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"മുഖം മറച്ചിരിക്കുന്നതായി കണ്ടെത്തി. നിങ്ങളുടെ മുഖം പൂർണ്ണമായും ദൃശ്യമായിരിക്കണം."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ശല്യപ്പെടുത്തരുത്\' മാറ്റി"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"എന്തിനെയാണ് ബ്ലോക്ക് ചെയ്‌തതെന്ന് പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"അറിയിപ്പ് ക്രമീകരണം അവലോകനം ചെയ്യുക"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 മുതൽ, നിങ്ങൾ ഇൻസ്‌റ്റാൾ ചെയ്യുന്ന ആപ്പുകൾക്ക് അറിയിപ്പുകൾ അയയ്‌ക്കാൻ നിങ്ങളുടെ അനുമതി വേണം. നിലവിലുള്ള ആപ്പുകൾക്ക് ഈ അനുമതി മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"പിന്നീട് ഓർമ്മിപ്പിക്കൂ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"സിസ്റ്റം"</string>

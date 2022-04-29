@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS સંદેશા મોકલવાની અને જોવાની"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ફાઇલો અને દસ્તાવેજો"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ફાઇલો અને દસ્તાવેજો"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"તમારા ડિવાઇસ પર ફાઇલો અને દસ્તાવેજો ઍક્સેસ કરો"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"મ્યુઝિક અને અન્ય ઑડિયો"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"તમારા ડિવાઇસ પર ઑડિયો ફાઇલો ઍક્સેસ કરવા માટે"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ફોટા અને વીડિયો"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"તમારા ડિવાઇસ પર છબીઓ અને વીડિયો ફાઇલો ઍક્સેસ કરવા માટે"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"મ્યુઝિક અને ઑડિયો"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"તમારા ડિવાઇસ પર મ્યુઝિક અને ઑડિયો ઍક્સેસ કરવા માટે"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ફોટા અને વીડિયો"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"તમારા ડિવાઇસ પર ફોટા અને વીડિયો ઍક્સેસ કરવા માટે"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"માઇક્રોફોન"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ઑડિઓ રેકોર્ડ કરવાની"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"શારીરિક પ્રવૃત્તિ"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ફિંગરપ્રિન્ટ અનલૉક"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ફિંગરપ્રિન્ટ સેન્સરનો ઉપયોગ કરી શકાતો નથી"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"રિપેર કરવાની સેવા આપતા પ્રદાતાની મુલાકાત લો."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"ચહેરાનો સચોટ ડેટા કૅપ્ચર ન થયો. ફરી પ્રયાસ કરો."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"તમારા ચહેરાનું મૉડલ ન બનાવી શકાય. ફરી પ્રયાસ કરો."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"અતિશય પ્રકાશિત. થોડો હળવો પ્રકાશ અજમાવી જુઓ."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"અતિશય ઘેરી. વધુ ઝળહળતો પ્રકાશ અજમાવો"</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"ફોનને વધુ દૂર ખસેડો."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ફોનને વધુ નજીક લાવો."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ફોનને વધુ ઊંચે ખસેડો."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ફોનને થોડો નીચે ખસેડો."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"ફોનને ડાબી બાજુ ખસેડો."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"ફોનને જમણી બાજુ ખસેડો."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"વધુ પ્રકાશિત લાઇટિંગ અજમાવો"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"ફોનને વધુ દૂર લઈ જાઓ"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"ફોનને વધુ નજીક લાવો"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ફોનને વધુ ઊંચે લઈ જાઓ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ફોનને થોડો નીચે લઈ જાઓ"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ફોનને તમારી ડાબી બાજુએ લઈ જાઓ"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ફોનને તમારી જમણી બાજુએ લઈ જાઓ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"કૃપા કરીને તમારા ડિવાઇસ તરફ સીધું જુઓ."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"તમારો ચહેરો તમારા ફોનની બિલકુલ સામે રાખો."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"તમારો ચહેરો દેખાતો નથી. તમારા ફોનને આંખના લેવલ પર પકડી રાખો."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"ડિવાઇસ અસ્થિર છે. ફોનને સ્થિર રાખો."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"કૃપા કરીને તમારા ચહેરાની ફરી નોંધણી કરાવો."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"ચહેરો ઓળખી શકાતો નથી. ફરી પ્રયાસ કરો."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"ઘણી સમાનતા ધરાવે છે, કૃપા કરીને તમારો પોઝ બદલો."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"તમારું માથું થોડું ફેરવો."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"તમારું માથું થોડું ઓછું ટિલ્ટ કરો."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"તમારું માથું થોડું ઓછું ફેરવો."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"ચહેરો ઓળખી શકતા નથી. ફરી પ્રયાસ કરો."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"તમારા માથાની સ્થિતિ સહેજ બદલો"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"વધારે પ્રમાણમાં સીધું તમારા ફોન તરફ જુઓ"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"વધારે પ્રમાણમાં સીધું તમારા ફોન તરફ જુઓ"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"વધારે પ્રમાણમાં સીધું તમારા ફોન તરફ જુઓ"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"તમારા ચહેરાને છુપાવતી કંઈપણ વસ્તુ દૂર કરો."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"કાળી પટ્ટી સહિત, તમારી સ્ક્રીનની ટોચ સાફ કરો"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"તમારો આખો ચહેરો દેખાવો આવશ્યક છે"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"તમારો આખો ચહેરો દેખાવો આવશ્યક છે"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"તમારા ચહેરાનું મૉડલ ન બનાવી શકાય. ફરી પ્રયાસ કરો."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"કાળા ચશ્માંની ભાળ મળી. તમારો આખો ચહેરો દેખાવો આવશ્યક છે."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ચહેરો ઢંકાયેલો હોવાની ભાળ મળી. તમારો આખો ચહેરો દેખાવો આવશ્યક છે."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ચહેરો ચકાસી શકાતો નથી. હાર્ડવેર ઉપલબ્ધ નથી."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ખલેલ પાડશો નહીંમાં ફેરફાર થયો છે"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"શું બ્લૉક કરેલ છે તે તપાસવા માટે ટૅપ કરો."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"નોટિફિકેશનના સેટિંગ રિવ્યૂ કરો"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13થી શરૂઆત કરીને, તમે જે પણ ઍપ ઇન્સ્ટૉલ કરશો, તેને નોટિફિકેશન મોકલવા માટે તમારી પરવાનગીની જરૂર રહેશે. હાલની બધી ઍપ માટે આ પરવાનગીમાં ફેરફાર કરવા માટે ટૅપ કરો."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"મને પછી યાદ અપાવજો"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"છોડી દો"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"સિસ્ટમ"</string>

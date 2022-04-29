@@ -306,12 +306,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"pristupa vašem kalendaru"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"šalje i pregleda SMS poruke"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fajlovi i dokumenti"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fajlovi i dokumenti"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"pristup datotekama i dokumentima na vašem uređaju"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muzika i drugi zvučni zapisi"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"pristup audio fajlovima na vašem uređaju"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotografije i videozapisi"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"pristup fajlovima slika i videozapisa na vašem uređaju"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzika i zvuk"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"pristupanje muzici i zvuku na vašem uređaju"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotografije i videozapisi"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"pristupanje fotografijama i videozapisima na vašem uređaju"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"snima zvuk"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fizička aktivnost"</string>
@@ -595,7 +595,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Pokušajte s drugim otiskom prsta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Presvijetlo"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Pokušajte podesiti"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Svaki put blago promijenite položaj prsta"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Svaki put pomalo promijenite položaj prsta"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Otisak prsta nije prepoznat"</string>
@@ -635,26 +635,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Otključavanje otiskom prsta"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nije moguće koristiti senzor za otisak prsta"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Posjetite pružaoca usluga za popravke."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Lice nije snimljeno precizno. Pokušajte ponovo."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nije moguće kreirati model lica. Pokušajte ponovo."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Previše svijetlo. Probajte s blažim osvjetljenjem."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Previše je tamno. Pokušajte s jačim osvjetljenjem."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Odmaknite telefon."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Primaknite telefon."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Podignite telefon."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Spustite telefon."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Pomjerite telefon ulijevo."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Pomjerite telefon udesno."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Pokušajte s jačim osvjetljenjem"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Odmaknite telefon"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Primaknite telefon"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Pomjerite telefon naviše"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Pomjerite telefon naniže"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Pomjerite telefon ulijevo"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Pomjerite telefon udesno"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Gledajte direktno u uređaj."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Postavite lice direktno ispred telefona"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Ne vidi se lice. Držite telefon u visini očiju."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Previše pokreta. Držite telefon mirno."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Ponovo registrirajte lice."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Više nije moguće prepoznati lice. Pokušajte opet."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Previše slično, promijenite položaj."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Malo manje zakrenite glavu."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Malo manje nagnite glavu."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Malo manje zakrenite glavu."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Nije moguće prepoznati lice. Pokušajte ponovo."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Malo promijenite položaj glave"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Gledajte direktno u telefon"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Gledajte direktno u telefon"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Gledajte direktno u telefon"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Uklonite prepreke koje blokiraju vaše lice."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Očistite vrh ekrana, uključujući crnu traku"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Lice se mora u potpunosti vidjeti"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Lice se mora u potpunosti vidjeti"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Nije moguće kreirati model lica. Pokušajte ponovo."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Otkrivene su tamne naočale. Lice se mora u potpunosti vidjeti."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Otkriveno je pokrivalo preko lica. Lice se mora u potpunosti vidjeti."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nije moguće potvrditi lice. Hardver nije dostupan."</string>
@@ -2054,8 +2059,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Način rada Ne ometaj je promijenjen"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Dodirnite da provjerite šta je blokirano."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Pregledajte postavke obavještenja"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Počevši od Androida 13, aplikacije koje instalirate trebaju odobrenje da šalju obavještenja. Dodirnite da promijenite ovo odobrenje za postojeće aplikacije."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Podsjeti me kasnije"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Odbaci"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
@@ -2103,7 +2107,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth će ostati uključen tokom načina rada u avionu"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Učitavanje"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} i # fajl}one{{file_name} i # fajl}few{{file_name} i # fajla}other{{file_name} i # fajlova}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nema preporučenih osoba za dijeljenje"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nema preporučenih osoba s kojima biste dijelili"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista aplikacija"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ovoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Početna stranica"</string>
