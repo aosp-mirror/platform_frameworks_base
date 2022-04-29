@@ -3196,12 +3196,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mFalsingCollector.onTrackingStarted(!mKeyguardStateController.canDismissLockScreen());
         super.onTrackingStarted();
         mScrimController.onTrackingStarted();
-        // normally we want to set mQsExpandImmediate for every split shade case (at least when
-        // expanding), but keyguard tracking logic is different - this callback is called when
-        // unlocking with swipe up but not when swiping down to reveal shade
-        if (mShouldUseSplitNotificationShade && !mKeyguardShowing) {
-            mQsExpandImmediate = true;
-        }
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
             setShowShelfOnly(true);
@@ -4948,6 +4942,12 @@ public class NotificationPanelViewController extends PanelViewController {
             mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
         if (state == STATE_OPENING) {
+            // we need to ignore it on keyguard as this is a false alarm - transition from unlocked
+            // to locked will trigger this event and we're not actually in the process of opening
+            // the shade, lockscreen is just always expanded
+            if (mShouldUseSplitNotificationShade && !isOnKeyguard()) {
+                mQsExpandImmediate = true;
+            }
             mCentralSurfaces.makeExpandedVisible(false);
         }
         if (state == STATE_CLOSED) {
