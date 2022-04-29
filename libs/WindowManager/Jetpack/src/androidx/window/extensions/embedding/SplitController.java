@@ -257,9 +257,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (taskContainer == null) {
             return;
         }
-        final boolean wasInPip = taskContainer.isInPictureInPicture();
+        final boolean wasInPip = isInPictureInPicture(taskContainer.getConfiguration());
         final boolean isInPIp = isInPictureInPicture(config);
-        taskContainer.setWindowingMode(config.windowConfiguration.getWindowingMode());
+        taskContainer.setConfiguration(config);
 
         // We need to check the animation override when enter/exit PIP or has bounds changed.
         boolean shouldUpdateAnimationOverride = wasInPip != isInPIp;
@@ -278,9 +278,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * bounds is large enough for at least one split rule.
      */
     private void updateAnimationOverride(@NonNull TaskContainer taskContainer) {
-        if (!taskContainer.isTaskBoundsInitialized()
-                || !taskContainer.isWindowingModeInitialized()) {
-            // We don't know about the Task bounds/windowingMode yet.
+        if (!taskContainer.isTaskBoundsInitialized()) {
+            // We don't know about the Task bounds yet.
             return;
         }
 
@@ -294,7 +293,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     private boolean supportSplit(@NonNull TaskContainer taskContainer) {
         // No split inside PIP.
-        if (taskContainer.isInPictureInPicture()) {
+        if (isInPictureInPicture(taskContainer.getConfiguration())) {
             return false;
         }
         // Check if the parent container bounds can support any split rule.
@@ -462,12 +461,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             if (!taskContainer.setTaskBounds(taskBounds)) {
                 Log.w(TAG, "Can't find bounds from activity=" + activityInTask);
             }
+            updateAnimationOverride(taskContainer);
         }
-        if (!taskContainer.isWindowingModeInitialized()) {
-            taskContainer.setWindowingMode(activityInTask.getResources().getConfiguration()
-                    .windowConfiguration.getWindowingMode());
-        }
-        updateAnimationOverride(taskContainer);
         return container;
     }
 
