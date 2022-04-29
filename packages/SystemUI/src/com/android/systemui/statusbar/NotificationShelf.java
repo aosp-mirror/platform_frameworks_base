@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.notification.row.NotificationBackgroundView;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
@@ -411,7 +410,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setBackgroundTop(backgroundTop);
         setFirstElementRoundness(firstElementRoundness);
         mShelfIcons.setSpeedBumpIndex(mHostLayoutController.getSpeedBumpIndex());
-        mShelfIcons.calculateIconTranslations();
+        mShelfIcons.calculateIconXTranslations();
         mShelfIcons.applyIconStates();
         for (int i = 0; i < mHostLayoutController.getChildCount(); i++) {
             View child = mHostLayoutController.getChildAt(i);
@@ -636,7 +635,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         float viewEnd = viewStart + fullHeight;
         float fullTransitionAmount = 0.0f;
         float iconTransitionAmount = 0.0f;
-        float shelfStart = getTranslationY();
+        float shelfStart = getTranslationY() - mPaddingBetweenElements;
         if (mAmbientState.isExpansionChanging() && !mAmbientState.isOnKeyguard()) {
             // TODO(b/172289889) handle icon placement for notification that is clipped by the shelf
             if (mIndexOfFirstViewInShelf != -1 && i >= mIndexOfFirstViewInShelf) {
