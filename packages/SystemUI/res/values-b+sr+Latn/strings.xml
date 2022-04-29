@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Probajte da ponovo napravite snimak ekrana"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Čuvanje snimka ekrana nije uspelo"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Aplikacija ili organizacija ne dozvoljavaju pravljenje snimaka ekrana"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Izmeni"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Izmenite snimak ekrana"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Delite snimak ekrana"</string>
@@ -348,8 +350,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Da, nastavi"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Režim gosta"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Koristite režim gosta"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Dodajete novog korisnika?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Kada dodate novog korisnika, ta osoba treba da podesi svoj prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Dodavanjem novog korisnika izaći ćete iz režima gosta i izbrisaćete sve aplikacije i podatke iz aktuelne sesije gosta."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dostignut maksimalni broj korisnika"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -379,20 +379,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organizacija je vlasnik uređaja i može da nadgleda mrežni saobraćaj"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> je vlasnik ovog uređaja i može da nadgleda mrežni saobraćaj"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Ovaj uređaj pruža <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Ovaj uređaj pripada organizaciji i povezan je sa aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i povezan je sa aplikacijom <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Ovaj uređaj pripada vašoj organizaciji i povezan je na internet preko: <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Vlasnik ovog uređaja je <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, a povezan je na internet preko: <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Ovaj uređaj pripada organizaciji"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Ovaj uređaj pripada organizaciji i povezan je sa VPN-ovima"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i povezan je sa VPN-ovima"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Ovaj uređaj pripada vašoj organizaciji i povezan je na internet preko VPN-ova"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Vlasnik ovog uređaja je <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, a povezan je na internet preko VPN-ova"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Organizacija može da prati mrežni saobraćaj na poslovnom profilu"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> može da nadgleda mrežni saobraćaj na poslovnom profilu"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Aktivnost na mreži poslovnog profila je vidljiva IT administratoru"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Mreža se možda nadgleda"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Ovaj uređaj je povezan sa VPN-ovima"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Poslovni profil je povezan sa aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Vaš lični profil je povezan sa aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Ovaj uređaj je povezan sa aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Ovaj uređaj je povezan na internet preko VPN-ova"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Vaše poslovne aplikacije su povezane na internet preko: <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Vaše lične aplikacije su povezane na internet preko: <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Ovaj uređaj je povezan na internet preko: <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Ovaj uređaj pruža <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Upravljanje uređajima"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -408,10 +408,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Na ovom uređaju je instaliran autoritet za izdavanje sertifikata. Bezbedni mrežni saobraćaj može da se prati ili menja."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator je uključio evidentiranje mreže, koje prati saobraćaj na uređaju."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator je uključio evidentiranje mreže, koje prati saobraćaj na poslovnom profilu, ali ne i na ličnom profilu."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Povezani ste sa aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>, koja može da nadgleda aktivnosti na mreži, uključujući imejlove, aplikacije i veb-sajtove."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Povezani ste sa aplikacijama <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>, koje mogu da nadgledaju aktivnosti na mreži, uključujući imejlove, aplikacije i veb-sajtove."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Poslovni profil je povezan sa aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>, koja može da nadgleda aktivnosti na mreži, uključujući imejlove, aplikacije i veb-sajtove."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Lični profil je povezan sa aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>, koja može da nadgleda aktivnosti na mreži, uključujući imejlove, aplikacije i veb-sajtove."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Ovaj uređaj je povezan na internet preko: <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša aktivnost na mreži, uključujući imejlove i podatke pregledanja, vidljiva je IT administratoru."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Ovaj uređaj je povezan na internet preko: <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vaša aktivnost na mreži, uključujući imejlove i podatke pregledanja, vidljiva je IT administratoru."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vaše poslovne aplikacije su povezane na internet preko: <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša aktivnost na mreži u poslovnim aplikacijama, uključujući imejlove i podatke pregledanja, vidljiva je IT administratoru i dobavljaču VPN-a."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Vaše lične aplikacije su povezane na internet preko: <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša aktivnost na mreži, uključujući imejlove i podatke pregledanja, vidljiva je dobavljaču VPN-a."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Otvori podešavanja VPN-a"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Ovim uređajem upravlja roditelj. Roditelj može da vidi informacije, kao što su aplikacije koje koristiš, tvoju lokaciju i vreme ispred ekrana, i da upravlja njima."</string>
@@ -734,6 +734,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Uključite ako će baterija verovatno da se isprazni"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Ne, hvala"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Izdvoji SysUI mem."</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikacije koriste <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" i "</string>
@@ -860,6 +862,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Naziv emitovanja"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Lozinka"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Sačuvaj"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Pokreće se…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Emitovanje nije uspelo"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Broj verzije"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Broj verzije je kopiran u privremenu memoriju."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvorite konverzaciju"</string>

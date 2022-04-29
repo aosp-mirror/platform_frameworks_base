@@ -33,14 +33,14 @@
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"ไม่เป็นไร"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"หมุนหน้าจออัตโนมัติ"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
-    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
+    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่อาจเก็บเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"แอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้ การใช้ <xliff:g id="APPLICATION">%1$s</xliff:g> กับอุปกรณ์นี้อาจทำให้คุณไม่ได้ยินเสียงสายเรียกเข้า การแจ้งเตือน และการปลุก"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"แอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่อาจเก็บเสียงเสียงผ่านอุปกรณ์ USB นี้ได้ การใช้ <xliff:g id="APPLICATION">%1$s</xliff:g> กับอุปกรณ์นี้อาจทำให้คุณไม่ได้ยินเสียงสายเรียกเข้า การแจ้งเตือน และการปลุก"</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"การใช้ <xliff:g id="APPLICATION">%1$s</xliff:g> กับอุปกรณ์นี้อาจทำให้คุณไม่ได้ยินเสียงสายเรียกเข้า การแจ้งเตือน และการปลุก"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
-    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่อาจเก็บเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ไหม"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"แอปพลิเคชันที่ติดตั้งใช้กับอุปกรณ์ USB นี้ไม่ได้ ดูข้อมูลเพิ่มเติมเกี่ยวกับอุปกรณ์เสริมนี้ที่ <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"อุปกรณ์เสริม USB"</string>
@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ลองบันทึกภาพหน้าจออีกครั้ง"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"บันทึกภาพหน้าจอไม่ได้"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"แอปหรือองค์กรของคุณไม่อนุญาตให้จับภาพหน้าจอ"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"แก้ไข"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"แก้ไขภาพหน้าจอ"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"แชร์ภาพหน้าจอ"</string>
@@ -340,14 +342,12 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • กำลังชาร์จบนแท่นชาร์จ • จะเต็มในอีก <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"สลับผู้ใช้"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้เข้าร่วมกลับมาอีกครั้ง"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้ใช้ชั่วคราวกลับมาอีกครั้ง"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"เริ่มต้นใหม่"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ใช่ ดำเนินการต่อ"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"โหมดผู้มาเยือน"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"คุณอยู่ในโหมดผู้มาเยือน"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"ต้องการเพิ่มผู้ใช้ใหม่ใช่ไหม"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"เมื่อคุณเพิ่มผู้ใช้ใหม่ ผู้ใช้ดังกล่าวจะต้องตั้งค่าพื้นที่ของตนเอง\n\nผู้ใช้ทุกคนสามารถอัปเดตแอปสำหรับผู้ใช้รายอื่นทุกคนได้"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"การเพิ่มผู้ใช้ใหม่จะเป็นการออกจากโหมดผู้มาเยือน และจะลบแอปและข้อมูลจากเซสชันผู้มาเยือนในปัจจุบัน"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"ถึงขีดจำกัดผู้ใช้แล้ว"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -376,20 +376,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> เป็นเจ้าของอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"อุปกรณ์นี้ให้บริการโดย <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้ และอุปกรณ์เชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> เป็นเจ้าของอุปกรณ์นี้ และอุปกรณ์เชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"อุปกรณ์นี้เป็นขององค์กรและเชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"อุปกรณ์นี้เป็นของ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> และเชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> เป็นเจ้าของอุปกรณ์นี้"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้ และอุปกรณ์เชื่อมต่ออยู่กับ VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> เป็นเจ้าของอุปกรณ์นี้ และอุปกรณ์เชื่อมต่ออยู่กับ VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"อุปกรณ์นี้เป็นขององค์กรและเชื่อมต่ออินเทอร์เน็ตผ่าน VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"อุปกรณ์นี้เป็นของ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> และเชื่อมต่ออินเทอร์เน็ตผ่าน VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"องค์กรของคุณอาจตรวจสอบการจราจรของข้อมูลในเครือข่ายในโปรไฟล์งาน"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> อาจตรวจสอบการจราจรของข้อมูลในเครือข่ายในโปรไฟล์งานของคุณ"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"ผู้ดูแลระบบไอทีจะเห็นกิจกรรมในเครือข่ายโปรไฟล์งาน"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"อาจมีการตรวจสอบเครือข่าย"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"อุปกรณ์นี้เชื่อมต่ออยู่กับ VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"โปรไฟล์งานของคุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"โปรไฟล์ส่วนตัวของคุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"อุปกรณ์นี้เชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"แอปงานเชื่อมต่ออินเทอร์เน็ตผ่าน <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"แอปส่วนตัวเชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"อุปกรณ์นี้ให้บริการโดย <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"การจัดการอุปกรณ์"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -405,10 +405,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"มีการติดตั้งผู้ออกใบรับรองในอุปกรณ์นี้ อาจมีการตรวจสอบหรือแก้ไขการจราจรของข้อมูลในเครือข่ายที่ปลอดภัยของคุณ"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในอุปกรณ์ของคุณ"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในโปรไฟล์งานแต่ไม่ตรวจสอบในโปรไฟล์ส่วนตัวของคุณ"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"คุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"คุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP_0">%1$s</xliff:g> และ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"โปรไฟล์งานของคุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"โปรไฟล์ส่วนตัวของคุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ดูแลระบบไอทีสามารถดูกิจกรรมที่คุณทำในเครือข่ายรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP_0">%1$s</xliff:g> และ<xliff:g id="VPN_APP_1">%2$s</xliff:g> ผู้ดูแลระบบไอทีสามารถดูกิจกรรมที่คุณทำในเครือข่ายรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"แอปงานเชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ดูแลระบบไอทีและผู้ให้บริการ VPN สามารถดูกิจกรรมที่คุณทำในเครือข่ายในแอปงานได้ ซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บ"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"แอปส่วนตัวเชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ให้บริการ VPN สามารถดูกิจกรรมที่คุณทำในเครือข่ายซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"เปิดการตั้งค่า VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"อุปกรณ์นี้จัดการโดยผู้ปกครอง ผู้ปกครองจะดูและจัดการข้อมูลต่างๆ ได้ เช่น แอปที่คุณใช้ ตำแหน่งของคุณ และเวลาอยู่หน้าจอ"</string>
@@ -729,6 +729,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"เปิดเมื่อมีแนวโน้มว่าแบตเตอรี่จะหมด"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"ไม่เป็นไร"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"หลายแอปพลิเคชันใช้<xliff:g id="TYPES_LIST">%s</xliff:g>ของคุณอยู่"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" และ "</string>
@@ -854,6 +856,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"ชื่อการออกอากาศ"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"รหัสผ่าน"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"บันทึก"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"กำลังเริ่มต้น…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ออกอากาศไม่ได้"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"หมายเลขบิลด์"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"คัดลอกหมายเลขบิลด์ไปยังคลิปบอร์ดแล้ว"</string>
     <string name="basic_status" msgid="2315371112182658176">"เปิดการสนทนา"</string>
@@ -881,7 +885,7 @@
     <string name="audio_status" msgid="4237055636967709208">"กำลังฟัง"</string>
     <string name="game_status" msgid="1340694320630973259">"กำลังเล่น"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"เพื่อน"</string>
-    <string name="empty_status" msgid="5938893404951307749">"คืนนี้มาแชทกัน"</string>
+    <string name="empty_status" msgid="5938893404951307749">"คืนนี้คุยกันนะ"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"เนื้อหาจะแสดงขึ้นเร็วๆ นี้"</string>
     <string name="missed_call" msgid="4228016077700161689">"สายที่ไม่ได้รับ"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>

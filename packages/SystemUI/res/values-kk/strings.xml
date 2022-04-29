@@ -34,8 +34,8 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Авто айналатын экран"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасына <xliff:g id="USB_DEVICE">%2$s</xliff:g> құрылғысына кіруге рұқсат берілсін бе?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасына <xliff:g id="USB_DEVICE">%2$s</xliff:g> құрылғысын пайдалануға рұқсат етілсін бе?\nҚолданбаның жазу рұқсаты жоқ, бірақ осы USB құрылғысы арқылы аудио жаза алады."</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасына <xliff:g id="USB_DEVICE">%2$s</xliff:g> құрылғысына кіруге рұқсат берілсін бе?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> құрылғысын басқару үшін <xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасы ашылсын ба?"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> құрылғысын <xliff:g id="APPLICATION">%1$s</xliff:g> пайдалансын ба?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> басқару үшін <xliff:g id="APPLICATION">%1$s</xliff:g> ашылсын ба?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Қолданбаға жазу рұқсаты берілмеді, бірақ ол осы USB құрылғысы арқылы дыбыс жаза алады. Осы құрылғыда <xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасын пайдаланған кезде, қоңырау, хабарландыру және дабыл дыбыстары естілмей қалуы мүмкін."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Осы құрылғыда <xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасын пайдаланған кезде, қоңырау, хабарландыру және дабыл дыбыстары естілмей қалуы мүмкін."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасына <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> жабдығына кіруге рұқсат берілсін бе?"</string>
@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Қайта скриншот жасап көріңіз"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Скриншотты сақтау мүмкін емес."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Қолданба немесе ұйым скриншоттар түсіруге рұқсат етпейді"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Өзгерту"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Скриншотты өзгерту"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Скриншотты бөлісу"</string>
@@ -346,8 +348,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Иә, жалғастыру"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Қонақ режимі"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Сіз қонақ режиміндесіз"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Жаңа пайдаланушы қосылсын ба?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Жаңа пайдаланушыны қосқанда, сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Жаңа пайдаланушы қосылған кезде, қонақ режимі жабылады, ағымдағы қонақ сеансындағы барлық қолданба мен дерек жойылады."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Пайдаланушылар саны шегіне жетті"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -376,20 +376,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ұйымыңыз осы құрылғыны басқарады және желі трафигін бақылауы мүмкін."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> осы құрылғыны басқарады және желі трафигін бақылауы мүмкін."</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Бұл құрылғыны <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ұсынады."</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Бұл құрылғы ұйымыңызға тиесілі және <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Бұл құрылғы <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ұйымына тиесілі және <xliff:g id="VPN_APP">%2$s</xliff:g> қолданбасына қосылған."</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Бұл құрылғы ұйымыңызға тиесілі және интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Бұл құрылғы <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ұйымына тиесілі және интернетке <xliff:g id="VPN_APP">%2$s</xliff:g> арқылы қосылған."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Бұл құрылғы ұйымыңызға тиесілі."</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Бұл құрылғы <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ұйымына тиесілі."</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Бұл құрылғы ұйымыңызға тиесілі және VPN-дерге қосылған."</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Бұл құрылғы <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ұйымына тиесілі және VPN-дерге қосылған."</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Бұл құрылғы ұйымыңызға тиесілі және интернетке VPN желілері арқылы қосылған."</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Бұл құрылғы <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ұйымына тиесілі және интернетке VPN желілері арқылы қосылған."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ұйымыңыз жұмыс профиліңіздегі желі трафигін бақылауы мүмкін"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> жұмыс профиліңіздегі желі трафигін бақылауы мүмкін"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Желіде жұмыс профилі арқылы не істелгені әкімшіге көрініп тұрады."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Желі бақылануы мүмкін"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Бұл құрылғы VPN-дерге қосылған."</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Жұмыс профиліңіз <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Жеке профиліңіз <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Бұл құрылғы <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Бұл құрылғы интернетке VPN желілері арқылы қосылған."</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Жұмыс қолданбаларыңыз интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған."</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Жеке қолданбаларыңыз интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған."</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Бұл желі интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған."</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Бұл құрылғыны <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ұсынады"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Құрылғыны басқару"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -405,10 +405,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Осы құрылғыда сертификат орнатылған. Қорғалған желі трафигіңіз бақылануы немесе өзгертілуі мүмкін."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Әкімші құрылғыңыздағы трафикті бақылайтын желі журналын жүргізуді қосқан."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Әкімші жұмыс профиліндегі трафикті (жеке профильдегі трафик қаралмайды) қадағалау үшін желі журналын жүргізуді қосып қойған."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Желідегі әрекеттеріңізді, соның ішінде электрондық хабарларды, қолданбаларды және вебсайттарды бақылай алатын <xliff:g id="VPN_APP">%1$s</xliff:g> желісіне қосылдыңыз."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Желідегі әрекеттеріңізді, соның ішінде электрондық хабарларды, қолданбаларды және вебсайттарды бақылай алатын <xliff:g id="VPN_APP_0">%1$s</xliff:g> және <xliff:g id="VPN_APP_1">%2$s</xliff:g> желілеріне қосылдыңыз."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Жұмыс профиліңіз желідегі белсенділігіңізді, соның ішінде электрондық хабарларды, қолданбаларды және веб-сайттарды бақылай алатын <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Жеке профиліңіз желідегі белсенділігіңізді, соның ішінде электрондық хабарларды, қолданбаларды және веб-сайттарды бақылай алатын <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Бұл құрылғы интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған. Желідегі әрекетіңіз, соның ішінде электрондық пошталар мен браузерді пайдалану деректеріңіз әкімшіге көрінеді."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Бұл құрылғы интернетке <xliff:g id="VPN_APP_0">%1$s</xliff:g> және <xliff:g id="VPN_APP_1">%2$s</xliff:g> арқылы қосылған. Желідегі әрекетіңіз, соның ішінде электрондық пошталар мен браузерді пайдалану деректеріңіз әкімшіге көрінеді."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Жұмыс қолданбаларыңыз интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған. Жұмыс қолданбаларында жасаған желідегі әрекетіңіз, соның ішінде электрондық пошталар мен браузерді пайдалану деректеріңіз әкімшіге және VPN провайдеріне көрінеді."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Жеке қолданбаларыңыз интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған. Желідегі әрекетіңіз, соның ішінде электрондық пошталар мен браузерді пайдалану деректеріңіз VPN провайдеріне көрінеді."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN параметрлерін ашу"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Бұл құрылғыны ата-анаңыз басқарады. Ата-анаңыз сіз пайдаланатын қолданбалар, геодерегіңіз және пайдалану уақытыңыз сияқты ақпаратты көре және басқара алады."</string>
@@ -729,6 +729,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Батареяның заряды бітуге жақындағанда қосыңыз."</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Жоқ, рақмет"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Қолданбаларда <xliff:g id="TYPES_LIST">%s</xliff:g> пайдаланылуда."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" және "</string>
@@ -854,6 +856,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Тарату хабарының аты"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Құпия сөз"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Сақтау"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Басталып жатыр…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Тарату мүмкін емес"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Құрама нөмірі"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Құрама нөмірі буферге көшірілді."</string>
     <string name="basic_status" msgid="2315371112182658176">"Ашық әңгіме"</string>
@@ -885,7 +889,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Мазмұн жақында көрсетіледі."</string>
     <string name="missed_call" msgid="4228016077700161689">"Өткізіп алған қоңырау"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Соңғы хабарларды, өткізіп алған қоңыраулар мен жаңартылған күйлерді көруге болады."</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Соңғы хабарлар, өткізіп алған қоңыраулар мен статустың жаңаруы көрсетіледі."</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Әңгіме"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Мазаламау режимі арқылы кідіртілді."</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> хабар жіберді: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>

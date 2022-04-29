@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ხელახლა ცადეთ ეკრანის ანაბეჭდის გაკეთება"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ეკრანის ანაბეჭდის შენახვა ვერ ხერხდება"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ეკრანის ანაბეჭდების შექმნა არ არის ნებადართული აპის ან თქვენი ორგანიზაციის მიერ"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"რედაქტირება"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ეკრანის ანაბეჭდის რედაქტირება"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"ეკრანის ანაბეჭდის გაზიარება"</string>
@@ -346,8 +348,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"დიახ, გავაგრძელოთ"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"სტუმრის რეჟიმი"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"თქვენ სტუმრის რეჟიმში ხართ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"დაემატოს ახალი მომხმარებელი?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"ახალი მომხმარებლის დამატებისას, ამ მომხმარებელს საკუთარი სივრცის შექმნა მოუწევს.\n\nნებისმიერ მომხმარებელს შეუძლია აპები ყველა სხვა მომხმარებლისათვის განაახლოს."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"თუ ახალ მომხმარებელს დაამატებთ, სტუმრის რეჟიმი დაიხურება და სტუმრის რეჟიმის მიმდინარე სესიიდან ყველა აპი და მონაცემი წაიშლება."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"მიღწეულია მომხმარებელთა ლიმიტი"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -376,20 +376,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია და მას ქსელის ტრაფიკის მონიტორინგი შეუძლია"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"ამ მოწყობილობას ფლობს <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> და მას ქსელის ტრაფიკის მონიტორინგი შეუძლია"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ამ მოწყობილობის მომწოდებელია <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია და ის დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ამ მოწყობილობას ფლობს <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> და ის დაკავშირებულია <xliff:g id="VPN_APP">%2$s</xliff:g>-თან"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"ეს მოწყობილობა ეკუთვნის თქვენს ორგანიზაციას და დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"ეს მოწყობილობა ეკუთვნის <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ორგანიზაციას და დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%2$s</xliff:g> აპით"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ამ მოწყობილობას ფლობს <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია და ის დაკავშირებულია VPN-ებთან"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ამ მოწყობილობას ფლობს <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> და ის დაკავშირებულია VPN-ებთან"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"ეს მოწყობილობა ეკუთვნის თქვენს ორგანიზაციას დაკავშირებულია ინტერნეტთან VPN-ებით."</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"ეს მოწყობილობა ეკუთვნის <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ორგანიზაციას და დაკავშირებულია ინტერნეტთან VPN-ებით"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"თქვენს ორგანიზაციას სამსახურის პროფილში ქსელის ტრაფიკის მონიტორინგი შეუძლია"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-ს სამსახურის პროფილში ქსელის ტრაფიკის მონიტორინგი შეუძლია"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"სამსახურის პროფილის ქსელის აქტივობა ხილულია თქვენი IT ადმინისტრატორისთვის"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ქსელზე შესაძლოა ხორციელდებოდეს მონიტორინგი"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ეს მოწყობილობა დაკავშირებულია VPN-ებთან"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"თქვენი სამსახურის პროფილი დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"თქვენი პერსონალური პროფილი დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ეს მოწყობილობა დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"ეს მოწყობილობა დაკავშირებულია ინტერნეტთან VPN-ებით"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"თქვენი სამსახურის აპები დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"თქვენი პირადი აპები დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"ეს მოწყობილობა დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ამ მოწყობილობის მომწოდებელია <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"მოწყობილობის მართვა"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -405,10 +405,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ამ მოწყობილობაზე დაინსტალირებულია სერტიფიცირების ორგანო. თქვენი ქსელის დაცული ტრაფიკი შეიძლება შეიცვალოს, ან მასზე მონიტორინგი განხორციელდეს."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"თქვენმა ადმინისტრატორმა ჩართო ქსელის ჟურნალირება, რომელიც თქვენი მოწყობილობის ტრაფიკის მონიტორინგს ახორციელებს."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"თქვენმა ადმინისტრატორმა ქსელის ჟურნალირება ჩართო, რომელიც ახორციელებს თქვენი სამსახურის პროფილის, მაგრამ არა პირადი პროფილის, ტრაფიკის მონიტორინგს."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"თქვენ დაკავშირებული ხართ <xliff:g id="VPN_APP">%1$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"თქვენ დაკავშირებული ხართ <xliff:g id="VPN_APP_0">%1$s</xliff:g>-სა და <xliff:g id="VPN_APP_1">%2$s</xliff:g>-თან, რომელთაც შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"თქვენი სამსახურის პროფილი დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"თქვენი პირადი პროფილი დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"ეს მოწყობილობა დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით. თქვენი ქსელის აქტივობა, მათ შორის, ელფოსტები და დათვალიერების მონაცემები, ხილულია თქვენი IT ადმინისტრატორისთვის."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"ეს მოწყობილობა დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP_0">%1$s</xliff:g> და <xliff:g id="VPN_APP_1">%2$s</xliff:g> აპებით. თქვენი ქსელის აქტივობა, მათ შორის, ელფოსტები და დათვალიერების მონაცემები, ხილულია თქვენი IT ადმინისტრატორისთვის."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"თქვენი სამსახურის აპები დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით. თქვენი ქსელის აქტივობა სამსახურის აპებში, მათ შორის, ელფოსტები და დათვალიერების მონაცემები, ხილულია IT ადმინისტრატორისა და VPN პროვაიდერისთვის."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"თქვენი პირადი აპები დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით. თქვენი ქსელის აქტივობა, მათ შორის, ელფოსტები და დათვალიერების მონაცემები, ხილულია VPN პროვაიდერისთვის."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN-ის პარამეტრების გახსნა"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ამ მოწყობილობას თქვენი მშობელი მართავს. თქვენი მშობელი ხედავს და მართავს ისეთ ინფორმაციას, როგორიც არის თქვენ მიერ გამოყენებული აპები, თქვენი მდებარეობა და თქვენ მიერ ეკრანთან გატარებული დრო."</string>
@@ -729,6 +729,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"ჩაირთოს, როცა ბატარეა დაცლის პირას არის"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"არა, გმადლობთ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI გროვის გამოტანა"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"აპლიკაციების მიერ გამოიყენება თქვენი <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" და "</string>
@@ -854,6 +856,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"ტრანსლაციის სახელი"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"პაროლი"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"შენახვა"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"იწყება…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ტრანსლაცია შეუძლებელია"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ანაწყობის ნომერი"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ანაწყობის ნომერი დაკოპირებულია გაცვლის ბუფერში."</string>
     <string name="basic_status" msgid="2315371112182658176">"მიმოწერის გახსნა"</string>

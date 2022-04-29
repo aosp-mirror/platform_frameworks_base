@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Încercați să faceți din nou o captură de ecran"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Nu se poate salva captura de ecran"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Crearea capturilor de ecran nu este permisă de aplicație sau de organizația dvs."</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editați"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editați captura de ecran"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Trimiteți captura de ecran"</string>
@@ -348,8 +350,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Da, continuați"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Modul pentru invitați"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Folosiți modul pentru invitați"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Adăugați un utilizator nou?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Când adăugați un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOrice utilizator poate actualiza aplicațiile pentru toți ceilalți utilizatori."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Dacă adăugați un utilizator nou, veți ieși din modul pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea pentru invitați actuală."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Ați atins limita de utilizatori"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -379,20 +379,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organizația dvs. deține acest dispozitiv și poate monitoriza traficul de rețea"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> deține acest dispozitiv și poate monitoriza traficul din rețea"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Acest dispozitiv este oferit de <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Dispozitivul aparține organizației dvs. și este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Dispozitivul aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și este conectat la <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Acest dispozitiv aparține organizației dvs. și este conectat la internet prin aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și este conectat la internet prin aplicația <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Dispozitivul aparține organizației dvs."</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Dispozitivul aparține organizației dvs. și este conectat la VPN-uri"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Dispozitivul aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și este conectat la VPN-uri"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Acest dispozitiv aparține organizației dvs. și este conectat la internet prin rețele VPN."</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și este conectat la internet prin rețele VPN."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Este posibil ca organizația dvs. să monitorizeze traficul de rețea în profilul dvs. de serviciu"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Este posibil ca <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> să monitorizeze traficul de rețea din profilul dvs. de serviciu"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Adminul IT poate vedea profilul de serviciu"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Este posibil ca rețeaua să fie monitorizată"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Dispozitivul este conectat la VPN-uri"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Profilul dvs. de serviciu este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Profilul dvs. personal este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Dispozitivul este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Acest dispozitiv este conectat la internet prin rețele VPN."</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Aplicațiile dvs. pentru lucru sunt conectate la internet prin <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Aplicațiile dvs. personale sunt conectate la internet prin aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Acest dispozitiv este conectat la internet prin aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Acest dispozitiv este oferit de <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gestionarea dispozitivului"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -408,10 +408,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Pe acest dispozitiv este instalat un certificat CA. Traficul dvs. sigur de rețea poate fi monitorizat sau modificat."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratorul dvs. a activat înregistrarea în jurnal pentru rețea, funcție ce monitorizează traficul de pe dispozitivul dvs."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratorul a activat înregistrarea în jurnal pentru rețea, funcție ce monitorizează traficul în profilul dvs. de serviciu, dar nu și în profilul personal."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"V-ați conectat la aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile accesate."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"V-ați conectat la <xliff:g id="VPN_APP_0">%1$s</xliff:g> și la <xliff:g id="VPN_APP_1">%2$s</xliff:g>, care vă pot monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile accesate."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Profilul dvs. de serviciu este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile accesate."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Profilul dvs. personal este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile accesate."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Acest dispozitiv este conectat la internet prin aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>. Activitatea în rețea, inclusiv e-mailurile și datele de navigare, sunt vizibile pentru administratorul IT."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Acest dispozitiv este conectat la internet prin aplicațiile <xliff:g id="VPN_APP_0">%1$s</xliff:g> și <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Activitatea în rețea, inclusiv e-mailurile și datele de navigare, sunt vizibile pentru administratorul IT."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Aplicațiile dvs. pentru lucru sunt conectate la internet prin aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>. Activitatea în rețea cu aplicațiile pentru lucru, inclusiv e-mailurile și datele de navigare, sunt vizibile pentru administratorul IT și pentru furnizorul de servicii VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Aplicațiile dvs. personale sunt conectate la internet prin aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>. Activitatea în rețea, inclusiv e-mailurile și datele de navigare, sunt vizibile pentru furnizorul de servicii VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Deschideți Setări VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Dispozitivul este gestionat de unul dintre părinți. Părintele poate să vadă și să gestioneze informații cum ar fi aplicațiile pe care le folosești, locația ta și durata de folosire a dispozitivului."</string>
@@ -734,6 +734,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Porniți dacă este probabil ca bateria să se descarce"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nu, mulțumesc"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Extrageți memoria SysUI"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplicațiile folosesc <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" și "</string>
@@ -860,6 +862,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Numele transmisiei"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Parolă"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Salvați"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Începe…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Nu se poate transmite"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numărul versiunii"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numărul versiunii s-a copiat în clipboard."</string>
     <string name="basic_status" msgid="2315371112182658176">"Deschideți conversația"</string>

@@ -34,7 +34,7 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Képernyő automatikus forgatása"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Engedélyezi a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> számára, hogy hozzáférjen a következőhöz: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Lehetővé teszi a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazásnak, hogy hozzáférjen a következőhöz: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEz az alkalmazás nem rendelkezik rögzítési engedéllyel, de ezzel az USB-eszközzel képes a hangfelvételre."</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> hozzáférhet ehhez: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"A(z) <xliff:g id="APPLICATION">%1$s</xliff:g> hozzáférhet ehhez: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Megnyitja a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> appot a(z) <xliff:g id="USB_DEVICE">%2$s</xliff:g> kezeléséhez?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Ez az alkalmazás nem rendelkezik rögzítési engedéllyel, de ezzel az USB-eszközzel képes a hangfelvételre. Ha a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazást használja ezzel az eszközzel, előfordulhat, hogy nem hallja meg a hívásokat, értesítéseket és riasztásokat."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ha a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazást használja ezzel az eszközzel, előfordulhat, hogy nem hallja meg a hívásokat, értesítéseket és riasztásokat."</string>
@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Próbálja meg újra elkészíteni a képernyőképet"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Nem lehetséges a képernyőkép mentése"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Az alkalmazás vagy az Ön szervezete nem engedélyezi képernyőkép készítését"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Szerkesztés"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Képernyőkép szerkesztése"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Képernyőkép megosztása"</string>
@@ -346,8 +348,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Igen, folytatom"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Vendég mód"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Vendég módban van"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Új felhasználó hozzáadása?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Ha új felhasználót ad hozzá, az illetőnek be kell állítania saját tárterületét.\n\nBármely felhasználó frissítheti az alkalmazásokat valamennyi felhasználó számára."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Új felhasználó felvételével kilép a vendég módból, és az aktuális vendégmunkamenetből származó összes alkalmazás és adat törlődik majd."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Maximális felhasználószám elérve"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -376,20 +376,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Az eszköz az Ön szervezetének tulajdonában van, és lehetséges, hogy a hálózati forgalmat is figyelik"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Az eszköz a(z) <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tulajdonában van, és lehetséges, hogy a hálózati forgalmat is figyelik"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Ezt az eszközt a(z) <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> szervezet biztosítja"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Ez az eszköz az Ön szervezetének tulajdonában van, és össze van kapcsolva a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazással"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Ez az eszköz a(z) <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tulajdonában van, és össze van kapcsolva a(z) <xliff:g id="VPN_APP">%2$s</xliff:g> alkalmazással"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Ez az eszköz az Ön szervezete tulajdonában van, és ezen keresztül csatlakozik az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Ez az eszköz a(z) <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tulajdonában van, és a következőn keresztül csatlakozik az internethez: <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Ez az eszköz az Ön szervezetének tulajdonában van"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Ez az eszköz a(z) <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tulajdonában van"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Ez az eszköz az Ön szervezetének tulajdonában van, és VPN-ekhez van csatlakoztatva"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Ez az eszköz a(z) <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tulajdonában van, és VPN-ekhez van csatlakoztatva"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Ez az eszköz az Ön szervezete tulajdonában van, és VPN-eken keresztül csatlakozik az internethez"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Ez az eszköz a(z) <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tulajdonában van, és VPN-eken keresztül csatlakozik az internethez"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Szervezete figyelheti a munkaprofil hálózati forgalmát"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"A(z) <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> figyelheti a munkaprofil hálózati forgalmát"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Munkaprofilja hálózati tevékenységét láthatja a rendszergazdája"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Elképzelhető, hogy a hálózatot figyelik"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Ez az eszköz VPN-ekhez van csatlakoztatva"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Munkaprofilja össze van kapcsolva a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazással"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Személyes profilja össze van kapcsolva a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazással"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Ez az eszköz össze van kapcsolva a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazással"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Ez az eszköz VPN-eken keresztül csatlakozik az internethez"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Munkahelyi alkalmazásai a következő VPN-alkalmazáson keresztül csatlakoznak az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Személyes alkalmazásai a következőn keresztül csatlakoznak az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Ez az eszköz a következőn keresztül csatlakozik az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Ezt az eszközt a(z) <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> szervezet biztosítja"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Eszközkezelés"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -405,10 +405,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Az eszközre tanúsítványkibocsátó van telepítve. Ezáltal figyelhetik és befolyásolhatják az Ön biztonságos hálózati forgalmát."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"A rendszergazda bekapcsolta az eszköz forgalmát figyelő hálózati naplózást."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"A rendszergazda bekapcsolta a hálózati naplózást, amely a munkaprofilban figyeli a forgalmat, a személyes profilban azonban nem."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Ön kapcsolódik a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazáshoz, amely figyelheti hálózati tevékenységét, beleértve a levelezést, valamint az alkalmazás- és webhelyhasználatot."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Ön csatlakozik a(z) <xliff:g id="VPN_APP_0">%1$s</xliff:g> és a(z) <xliff:g id="VPN_APP_1">%2$s</xliff:g> alkalmazásokhoz, amelyek figyelhetik hálózati tevékenységét, beleértve a levelezést, valamint az alkalmazás- és webhelyhasználatot."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Munkaprofilja csatlakozik a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazáshoz, amely figyelheti hálózati tevékenységét, beleértve a levelezést, az alkalmazásokat és a webhelyeket."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Az Ön személyes profilja csatlakozik a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazáshoz, amely figyelheti hálózati tevékenységeit, beleértve a levelezést, az alkalmazásokat és a webhelyeket."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Ez az eszköz a következőn keresztül csatlakozik az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>. Hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a rendszergazdája és VPN-szolgáltatója számára."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Ez az eszköz a következőkön keresztül csatlakozik az internethez: <xliff:g id="VPN_APP_0">%1$s</xliff:g> és <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a rendszergazdája és VPN-szolgáltatója számára."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Munkahelyi alkalmazásai a következőn keresztül csatlakoznak az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>. A munkahelyi alkalmazásaiban végzett hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a rendszergazdája és VPN-szolgáltatója számára."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Személyes alkalmazásai a következőn keresztül csatlakoznak az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>. Hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a VPN-szolgáltatója számára."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN-beállítások megnyitása"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Az eszközt a szülőd felügyeli. A szülőd megtekintheti és kezelheti például a használt alkalmazásokra, a tartózkodási helyre és a képernyőidőre vonatkozó adatokat."</string>
@@ -729,11 +729,13 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Kapcsolja be, ha az akkumulátor hamarosan lemerül"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nem"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI-memória-kiírás"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Több alkalmazás használja a következőket: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" és "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Jelenleg a következő használja: <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Legutóbb a következő használta: <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Jelenleg használja: <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Legutóbb használta: <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(munkahely)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonhívás"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(a következőn keresztül: <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
@@ -854,6 +856,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Közvetítés neve"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Jelszó"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Mentés"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Indítás…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Nem sikerült a közvetítés"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildszám"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildszám a vágólapra másolva."</string>
     <string name="basic_status" msgid="2315371112182658176">"Beszélgetés megnyitása"</string>

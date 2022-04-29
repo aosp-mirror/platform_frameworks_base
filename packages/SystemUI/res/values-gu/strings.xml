@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ફરીથી સ્ક્રીનશૉટ લેવાનો પ્રયાસ કરો"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"સ્ક્રીનશૉટ સાચવી શકાતો નથી"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ઍપ્લિકેશન કે તમારી સંસ્થા દ્વારા સ્ક્રીનશૉટ લેવાની મંજૂરી નથી"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ફેરફાર કરો"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"સ્ક્રીનશૉટમાં ફેરફાર કરો"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"સ્ક્રીનશૉટ શેર કરો"</string>
@@ -346,8 +348,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"હા, ચાલુ રાખો"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"અતિથિ મોડ"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"તમે અતિથિ મોડમાં છો"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"નવા વપરાશકર્તાને ઉમેરીએ?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"કોઈ નવા વપરાશકર્તાને ઉમેરવાથી અતિથિ મોડમાંથી નીકળી જવાશે તેમજ હાલના અતિથિ સત્રમાંથી તમામ ઍપ અને ડેટા ડિલીટ થઈ જશે."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"વપરાશકર્તા સંખ્યાની મર્યાદા"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -376,20 +376,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"તમારી સંસ્થા આ ડિવાઇસની માલિકી ધરાવે છે અને નેટવર્ક ટ્રાફિકનું નિરીક્ષણ કરી શકે છે"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ની માલિકીનું છે અને નેટવર્ક ટ્રાફિકનું નિરીક્ષણ કરી શકે છે"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> દ્વારા પ્રદાન કરવામાં આવેલું છે"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"આ ડિવાઇસ તમારી સંસ્થાની માલિકીનું છે અને <xliff:g id="VPN_APP">%1$s</xliff:g>થી કનેક્ટ કરેલું છે"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ની માલિકીનું છે અને <xliff:g id="VPN_APP">%2$s</xliff:g>થી કનેક્ટ કરેલું છે"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"આ ડિવાઇસ તમારી સંસ્થાની માલિકીનું છે અને <xliff:g id="VPN_APP">%1$s</xliff:g> મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ની માલિકીનું છે અને <xliff:g id="VPN_APP">%2$s</xliff:g> મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"આ ડિવાઇસ તમારી સંસ્થાની માલિકીનું છે"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ની માલિકીનું છે"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"આ ડિવાઇસ તમારી સંસ્થાની માલિકીનું છે અને VPNsથી કનેક્ટ કરેલું છે"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ની માલિકીનું છે અને VPNsથી કનેક્ટ કરેલું છે"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"આ ડિવાઇસ તમારી સંસ્થાની માલિકીનું છે અને VPNs મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ની માલિકીનું છે અને VPNs મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"તમારી સંસ્થા તમારી કાર્ય પ્રોફાઇલમાં નેટવર્ક ટ્રાફિકનું નિયમન કરી શકે છે"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> તમારી કાર્ય પ્રોફાઇલમાં નેટવર્ક ટ્રાફિકનું નિયમન કરી શકે છે"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"ઑફિસ માટેની ઍપની નેટવર્ક પ્રવૃત્તિને તમારા IT વ્યવસ્થાપક જોઈ શકે છે"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"નેટવર્કનું નિયમન કરવામાં આવી શકે છે"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"આ ડિવાઇસ VPNsથી કનેક્ટ કરેલું છે"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"તમારી ઑફિસની પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g>થી કનેક્ટ કરેલી છે"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"તમારી વ્યક્તિગત પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g>થી કનેક્ટ કરેલી છે"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"આ ડિવાઇસ <xliff:g id="VPN_APP">%1$s</xliff:g>થી કનેક્ટ કરેલું છે"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"આ ડિવાઇસ VPNs મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"તમારી ઑફિસ માટેની ઍપ <xliff:g id="VPN_APP">%1$s</xliff:g> મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"તમારી વ્યક્તિગત ઍપ <xliff:g id="VPN_APP">%1$s</xliff:g> મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"આ ડિવાઇસ <xliff:g id="VPN_APP">%1$s</xliff:g> મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> દ્વારા પ્રદાન કરવામાં આવેલું છે"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ડિવાઇસ મેનેજમેન્ટ"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -405,10 +405,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"આ ઉપકરણ પર પ્રમાણપત્ર સત્તાધિકારી ઇન્સ્ટૉલ કરેલ છે. તમારા સુરક્ષિત નેટવર્ક ટ્રાફિકનું નિયમન થઈ શકે છે અથવા તેમાં ફેરફાર કરવામાં આવી શકે છે."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"તમારા વ્યવસ્થાપકે નેટવર્ક લૉગિંગ ચાલુ કર્યું છે, જે તમારા ઉપકરણ પર નેટવર્ક ટ્રાફિકનું નિયમન કરે છે."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"તમારા વ્યવસ્થાપકે નેટવર્ક લૉગ ઇન ચાલુ કર્યું છે, જે તમારી વ્યક્તિગત પ્રોફાઇલમાં નહીં, પરંતુ ઑફિસની પ્રોફાઇલમાં ટ્રાફિકનું નિરીક્ષણ કરે છે."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"તમે <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટ સહિત તમારી નેટવર્ક પ્રવૃત્તિનું નિરીક્ષણ કરી શકે છે."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"તમે <xliff:g id="VPN_APP_0">%1$s</xliff:g> અને <xliff:g id="VPN_APP_1">%2$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટ સહિત તમારી નેટવર્ક પ્રવૃત્તિનું નિરીક્ષણ કરી શકે છે."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"તમારી કાર્યાલયની પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ કરેલ છે, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિતની તમારી નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"તમારી વ્યક્તિગત પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ કરેલ છે, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિતની તમારી નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"આ ડિવાઇસ <xliff:g id="VPN_APP">%1$s</xliff:g> મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે. ઇમેઇલ અને બ્રાઉઝિંગ ડેટા સહિતની તમારી નેટવર્ક પ્રવૃત્તિ, તમારા IT ઍડમિન જોઈ શકે છે."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"આ ડિવાઇસ <xliff:g id="VPN_APP_0">%1$s</xliff:g> અને <xliff:g id="VPN_APP_1">%2$s</xliff:g> મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે. ઇમેઇલ અને બ્રાઉઝિંગ ડેટા સહિતની તમારી નેટવર્ક પ્રવૃત્તિ, તમારા IT ઍડમિન જોઈ શકે છે."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"તમારી ઑફિસ માટેની ઍપ <xliff:g id="VPN_APP">%1$s</xliff:g> મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે. ઇમેઇલ અને બ્રાઉઝિંગ ડેટા સહિતની ઑફિસ માટેની ઍપમાંની તમારી નેટવર્ક પ્રવૃત્તિ, તમારા IT ઍડમિન અને VPN પ્રદાતા જોઈ શકે છે."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"તમારી વ્યક્તિગત ઍપ <xliff:g id="VPN_APP">%1$s</xliff:g> મારફતે ઇન્ટરનેટ સાથે કનેક્ટેડ છે. ઇમેઇલ અને બ્રાઉઝિંગ ડેટા સહિતની તમારી નેટવર્ક પ્રવૃત્તિ, તમારા VPN પ્રદાતા જોઈ શકે છે."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN સેટિંગ ખોલો"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"આ ડિવાઇસ તમારા માતાપિતા દ્વારા મેનેજ કરવામાં આવે છે. તમે જેનો ઉપયોગ કરો છો તે ઍપ, તમારું સ્થાન અને તમારા સ્ક્રીન સમય જેવી માહિતીને તમારા માતાપિતા જોઈ અને મેનેજ કરી શકે છે."</string>
@@ -729,6 +729,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"જ્યારે બૅટરી સંભવિત રૂપે પૂરી થવામાં હોય ત્યારે બૅટરી સેવર ચાલુ કરો"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"ના, આભાર"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ઍપ્લિકેશન તમારા <xliff:g id="TYPES_LIST">%s</xliff:g>નો ઉપયોગ કરી રહી છે."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" અને "</string>
@@ -854,6 +856,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"બ્રોડકાસ્ટનું નામ"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"પાસવર્ડ"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"સાચવો"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"શરૂ થઈ રહ્યું છે…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"બ્રોડકાસ્ટ કરી શકતા નથી"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"બિલ્ડ નંબર"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"બિલ્ડ નંબર ક્લિપબૉર્ડ પર કૉપિ કર્યો."</string>
     <string name="basic_status" msgid="2315371112182658176">"વાતચીત ખોલો"</string>
@@ -885,7 +889,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"ટૂંક સમયમાં કન્ટેન્ટ બતાવવામાં આવશે"</string>
     <string name="missed_call" msgid="4228016077700161689">"ચૂકી ગયેલો કૉલ"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"તાજેતરના સંદેશા, ચૂકી ગયેલા કૉલ અને સ્ટેટસ અપડેટ જુઓ"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"તાજેતરના મેસેજ, ચૂકી ગયેલા કૉલ અને સ્ટેટસ અપડેટ જુઓ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"વાતચીત"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"\'ખલેલ પાડશો નહીં\'ની સુવિધા દ્વારા થોભાવેલું"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કોઈ સંદેશ મોકલવામાં આવ્યો: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
