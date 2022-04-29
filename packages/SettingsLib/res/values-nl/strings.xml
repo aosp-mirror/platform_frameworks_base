@@ -312,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Toon opties voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Verhoog het logniveau voor wifi, toon per SSID RSSI in wifi-kiezer"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaag het batterijverbruik en verbeter de netwerkprestaties"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Als dit aanstaat, kan het MAC-adres van dit apparaat veranderen telkens als het apparaat verbinding maakt met een netwerk waarvoor MAC-herschikking aanstaat."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Als dit aanstaat, kan het MAC-adres van dit apparaat veranderen telkens als het apparaat verbinding maakt met een netwerk waarvoor MAC-herschikking aanstaat"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Met datalimiet"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Gratis"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger-buffergrootten"</string>
@@ -326,7 +326,7 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"Neplocaties toestaan"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Neplocaties toestaan"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Inspectie van weergavekenmerk aanzetten"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Houd mobiele data altijd actief, ook als wifi actief is (voor sneller schakelen tussen netwerken)."</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Houd mobiele data altijd actief, ook als wifi actief is (voor sneller schakelen tussen netwerken)"</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Gebruik hardwareversnelling voor tethering indien beschikbaar"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB-foutopsporing toestaan?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-foutopsporing is alleen bedoeld voor ontwikkeldoeleinden. Het kan worden gebruikt om gegevens te kopiëren tussen je computer en je apparaat, apps zonder melding op je apparaat te installeren en loggegevens te lezen."</string>
@@ -621,8 +621,8 @@
     <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Te veel onjuiste pogingen. Dit werkprofiel en de bijbehorende gegevens worden verwijderd."</string>
     <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Sluiten"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Apparaatstandaard"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Uitgezet"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aangezet"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Uit"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aan"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Je apparaat moet opnieuw worden opgestart om deze wijziging toe te passen. Start nu opnieuw op of annuleer de wijziging."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade hoofdtelefoon"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aan"</string>

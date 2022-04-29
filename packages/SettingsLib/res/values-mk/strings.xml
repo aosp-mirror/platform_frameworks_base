@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Се исклучува..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Се поврзува..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Поврзување..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Се спарува..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без телефон)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без аудиовизуелни содржини)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без пристап до пораките)"</string>
@@ -255,12 +255,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Код за спарување преку Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Спарувањето е неуспешно"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Погрижете се уредот да биде поврзан на истата мрежа."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Спарете го уредот преку Wi‑Fi со скенирање QR-код"</string>
-    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Се спарува уред…"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Скенирајте QR-код за да го спарите уредот преку Wi‑Fi"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Се спарува уредот…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Уредот не успеа да се спари. Или QR-кодот беше погрешен или уредот не е поврзан на истата мрежа."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-адреса и порта"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Скенирајте QR-код"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Спарете го уредот преку Wi‑Fi со скенирање QR-код"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Скенирајте QR-код за да го спарите уредот преку Wi‑Fi"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Поврзете се на Wi-Fi мрежа"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, отстранува грешка, програмер"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Кратенка за извештај за грешка"</string>
