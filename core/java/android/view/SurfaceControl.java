@@ -3883,8 +3883,8 @@ public final class SurfaceControl implements Parcelable {
         @Deprecated
         public Transaction setColorSpace(SurfaceControl sc, ColorSpace colorSpace) {
             checkPreconditions(sc);
-            if (colorSpace.getId() == ColorSpace.Named.DCI_P3.ordinal()) {
-                setDataSpace(sc, DataSpace.DATASPACE_DCI_P3);
+            if (colorSpace.getId() == ColorSpace.Named.DISPLAY_P3.ordinal()) {
+                setDataSpace(sc, DataSpace.DATASPACE_DISPLAY_P3);
             } else {
                 setDataSpace(sc, DataSpace.DATASPACE_SRGB);
             }
