@@ -305,12 +305,17 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарь руу хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Файл болон документ"</string>
+    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"таны төхөөрөмж дээрх файл болон документод хандах"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Хөгжим, бусад аудио"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"таны төхөөрөмж дээрх аудио файлд хандах"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Зураг, видео"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"таны төхөөрөмж дээрх зураг болон видео файлд хандах"</string>
+    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
+    <skip />
+    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"дуу хураах"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Дасгал хөдөлгөөн"</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Бүү саад бол горимыг өөрчилсөн"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Блоклосон зүйлийг шалгахын тулд товшино уу."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Мэдэгдлийн тохиргоог шалгах"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13-аас эхлэн таны суулгасан аппууд мэдэгдэл илгээхийн тулд танаас зөвшөөрөл авах шаардлагатай. Одоо байгаа аппуудын уг зөвшөөрлийг өөрчлөхийн тулд товшино уу."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Надад дараа сануул"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Хаах"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Систем"</string>

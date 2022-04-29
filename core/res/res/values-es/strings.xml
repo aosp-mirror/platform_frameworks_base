@@ -305,12 +305,17 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceder a tu calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar y ver mensajes SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Archivos y documentos"</string>
+    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"acceder a archivos y documentos de tu dispositivo"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Música y otros archivos de audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"acceder a los archivos de audio de tu dispositivo"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotos y vídeos"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"acceder a los archivos de vídeo de tu dispositivo"</string>
+    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
+    <skip />
+    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrófono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"grabar audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Actividad física"</string>
