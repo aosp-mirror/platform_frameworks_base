@@ -591,35 +591,35 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Override
     public void onPointerDown(long requestId, int sensorId, int x, int y,
             float minor, float major) {
-        final BaseClientMonitor client =
-                mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.e(getTag(), "onPointerDown received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onPointerDown(x, y, minor, major);
+        mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.e(getTag(), "onPointerDown received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onPointerDown(x, y, minor, major);
+        });
     }
 
     @Override
     public void onPointerUp(long requestId, int sensorId) {
-        final BaseClientMonitor client =
-                mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.e(getTag(), "onPointerUp received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onPointerUp();
+        mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.e(getTag(), "onPointerUp received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onPointerUp();
+        });
     }
 
     @Override
     public void onUiReady(long requestId, int sensorId) {
-        final BaseClientMonitor client =
-                mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.e(getTag(), "onUiReady received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onUiReady();
+        mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.e(getTag(), "onUiReady received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onUiReady();
+        });
     }
 
     @Override
