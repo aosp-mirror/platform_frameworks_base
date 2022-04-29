@@ -251,8 +251,6 @@ public class DreamService extends Service implements Window.Callback {
         // A Queue of pending requests to execute on the overlay.
         private final ArrayDeque<Consumer<IDreamOverlay>> mRequests;
 
-        private Handler mHandler = new Handler(Looper.getMainLooper());
-
         private boolean mBound;
 
         OverlayConnection() {
@@ -261,40 +259,34 @@ public class DreamService extends Service implements Window.Callback {
 
         public void bind(Context context, @Nullable ComponentName overlayService,
                 ComponentName dreamService) {
-            mHandler.post(() -> {
-                if (overlayService == null) {
-                    return;
-                }
+            if (overlayService == null) {
+                return;
+            }
 
-                final ServiceInfo serviceInfo = fetchServiceInfo(context, dreamService);
+            final ServiceInfo serviceInfo = fetchServiceInfo(context, dreamService);
 
-                final Intent overlayIntent = new Intent();
-                overlayIntent.setComponent(overlayService);
-                overlayIntent.putExtra(EXTRA_SHOW_COMPLICATIONS,
-                        fetchShouldShowComplications(context, serviceInfo));
+            final Intent overlayIntent = new Intent();
+            overlayIntent.setComponent(overlayService);
+            overlayIntent.putExtra(EXTRA_SHOW_COMPLICATIONS,
+                    fetchShouldShowComplications(context, serviceInfo));
 
-                context.bindService(overlayIntent,
-                        this, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);
-                mBound = true;
-            });
+            context.bindService(overlayIntent,
+                    this, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);
+            mBound = true;
         }
 
         public void unbind(Context context) {
-            mHandler.post(() -> {
-                if (!mBound) {
-                    return;
-                }
+            if (!mBound) {
+                return;
+            }
 
-                context.unbindService(this);
-                mBound = false;
-            });
+            context.unbindService(this);
+            mBound = false;
         }
 
         public void request(Consumer<IDreamOverlay> request) {
-            mHandler.post(() -> {
-                mRequests.push(request);
-                evaluate();
-            });
+            mRequests.push(request);
+            evaluate();
         }
 
         private void evaluate() {
@@ -312,19 +304,15 @@ public class DreamService extends Service implements Window.Callback {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mHandler.post(() -> {
-                // Store Overlay and execute pending requests.
-                mOverlay = IDreamOverlay.Stub.asInterface(service);
-                evaluate();
-            });
+            // Store Overlay and execute pending requests.
+            mOverlay = IDreamOverlay.Stub.asInterface(service);
+            evaluate();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mHandler.post(() -> {
-                // Clear Overlay binder to prevent further request processing.
-                mOverlay = null;
-            });
+            // Clear Overlay binder to prevent further request processing.
+            mOverlay = null;
         }
     }
 
