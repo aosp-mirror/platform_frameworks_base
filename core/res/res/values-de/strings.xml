@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"auf deinen Kalender zugreifen"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS senden und abrufen"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Dateien und Dokumente"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Dateien und Dokumente"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"Auf Dateien und Dokumente auf deinem Gerät zugreifen"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musik &amp; andere Audiodateien"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"Zugriff auf Audiodateien auf deinem Gerät"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotos &amp; Videos"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"Zugriff auf Bild- und Videodateien auf deinem Gerät"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musik und Audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"Zugriff auf Musik und Audio auf deinem Gerät"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos und Videos"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"Zugriff auf Fotos und Videos auf deinem Gerät"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"Audio aufnehmen"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Körperliche Aktivität"</string>
@@ -594,7 +594,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Anderen Fingerabdruck verwenden"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Zu hell"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Versuche, den Finger anders aufzulegen"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ändere jedes Mal die Position deines Fingers"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ändere jedes Mal leicht die Position deines Fingers"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Fingerabdruck nicht erkannt"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Entsperrung per Fingerabdruck"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Der Fingerabdrucksensor kann nicht verwendet werden"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Suche einen Reparaturdienstleister auf."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Gesichtsdaten nicht gut erfasst. Erneut versuchen."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kein Gesichtsmodell möglich. Versuche es erneut."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Zu hell. Schwächere Beleuchtung ausprobieren."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Zu dunkel. Probier eine hellere Beleuchtung aus."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Beweg das Telefon weiter weg."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Beweg das Telefon näher heran."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Halte das Smartphone höher."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Beweg das Smartphone nach unten."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Beweg das Smartphone nach links."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Beweg das Smartphone nach rechts."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Probiere es mit einer helleren Beleuchtung"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Bewege das Smartphone weiter weg"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Bewege das Smartphone näher heran"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Bewege das Smartphone nach oben"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Bewege das Smartphone nach unten"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smartphone nach links"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Bewege das Smartphone nach rechts"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Bitte sieh direkt auf dein Gerät."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Halte dein Gesicht direkt vor dein Smartphone."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Dein Gesicht wurde nicht erkannt. Halte dein Smartphone auf Augenhöhe."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Zu viel Unruhe. Halte das Smartphone ruhig."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Bitte registriere dein Gesicht noch einmal."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Gesicht wird nicht mehr erkannt. Erneut versuchen."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Zu ähnlich. Bitte dreh deinen Kopf etwas."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Dreh den Kopf etwas weniger zur Seite."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Neig den Kopf etwas weniger stark."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Neig den Kopf etwas weniger stark."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Gesicht nicht erkannt. Versuche es noch einmal."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Ändere die Position deines Kopfes leicht"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Sieh direkt auf dein Smartphone"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Sieh direkt auf dein Smartphone"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Sieh direkt auf dein Smartphone"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Entferne alles, was dein Gesicht verdeckt."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Reinige den oberen Teil deines Bildschirms, einschließlich der schwarzen Leiste"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Dein Gesicht muss vollständig sichtbar sein"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Dein Gesicht muss vollständig sichtbar sein"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Dein Gesichtsmodell kann nicht erstellt werden. Versuche es noch einmal."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Dunkle Brille erkannt. Dein Gesicht muss vollständig sichtbar sein."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Dein Gesicht ist bedeckt. Es muss vollständig sichtbar sein."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Gesicht nicht erkannt. Hardware nicht verfügbar."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„Bitte nicht stören“ wurde geändert"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tippe, um zu überprüfen, welche Inhalte blockiert werden."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Benachrichtigungseinstellungen überprüfen"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Ab Android 13 benötigen Apps, die du installierst, die Berechtigung zum Senden von Benachrichtigungen. Wenn du diese Berechtigung für bereits installierte Apps ändern möchtest, tippe hier."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Später erinnern"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Schließen"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>

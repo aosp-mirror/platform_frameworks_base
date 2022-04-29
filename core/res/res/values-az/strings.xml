@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"təqvimə daxil olun"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"göndərin və SMS mesajlarına baxın"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fayllar &amp; sənədlər"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fayllar və sənədlər"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"cihazınızda fayllara və sənədlərə giriş"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musiqi və digər audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"cihazınızdakı audio fayllarına giriş"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto və videolar"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"cihazınızdakı şəkil və video fayllarına giriş"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musiqi və audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"cihazınızdakı musiqi və audioya giriş"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto və videolar"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"cihazınızdakı foto və videolara giriş"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"səsi qeydə alın"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fiziki fəaliyyət"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Barmaq izi ilə kiliddən çıxarma"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Barmaq izi sensorundan istifadə etmək mümkün deyil"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Təmir provayderini ziyarət edin."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Dəqiq üz datası əldə edilmədi. Yenidən cəhd edin."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Üz modelinizi yaratmaq olmur. Yenə cəhd edin."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Çox işıqlıdır. Daha az işıqlı şəkli sınayın."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Çox qaranlıqdır. Parlaq işıqdan istifadə edin."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Telefonu uzaq tutun."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Telefonu yaxına tutun."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Telefonu yuxarı tutun."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Telefonu aşağı tutun."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Telefonu sola hərəkət etdirin."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Telefonu sağa hərəkət etdirin."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Parlaq işıqdan istifadə edin"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Telefonu uzaq tutun"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Telefonu yaxına tutun"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefonu yuxarı tutun"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Telefonu aşağı tutun"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Telefonu sola tutun"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Telefonu sağa tutun"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Birbaşa cihaza baxın."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Üzünüzü telefonun qarşısında sabit saxlayın."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Üzünüz görünmür. Telefonunuzu göz səviyyəsində saxlayın."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Cihaz stabil deyil. Telefonu tərpətməyin."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Üzünüzü yenidən qeydiyyatdan keçirin."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Üzü artıq tanımaq olmur. Yenidən cəhd edin."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Digəri ilə oxşardır, pozanızı dəyişin."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Başınızı bir az döndərin."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Başınızı azca əyin."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Başınızı bir az döndərin."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Üzü tanımaq olmur. Yenə cəhd edin."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Başınızın yerini bir az dəyişdirin"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Telefonunuza düz baxın"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Telefonunuza düz baxın"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Telefonunuza düz baxın"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Üzünüzü gizlədən maneələri kənarlaşdırın."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Qara panel daxil olmaqla, ekranın yuxarısını təmizləyin"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Üzünüz tam görünməlidir"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Üzünüz tam görünməlidir"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Üz modelinizi yaratmaq olmur. Yenə cəhd edin."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Tünd eynək aşkar edildi. Üzünüz tam görünməlidir."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Üz örtüyü aşkar edildi. Üzünüz tam görünməlidir."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Üz doğrulanmadı. Avadanlıq əlçatan deyil."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Narahat Etməyin\" rejimi dəyişdirildi"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nəyin blok edildiyini yoxlamaq üçün klikləyin."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Bildiriş ayarlarını nəzərdən keçirin"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13-dən başlayaraq quraşdırdığınız tətbiqlər bildiriş göndərmək üçün icazənizi tələb edir. Mövcud tətbiqlər üçün bu icazəni dəyişmək üçün toxunun."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Sonra xatırladın"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Qapadın"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>

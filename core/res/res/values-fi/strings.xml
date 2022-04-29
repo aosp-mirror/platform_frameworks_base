@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"käyttää kalenteria"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Tekstiviestit"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"lähettää ja tarkastella tekstiviestejä"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Tiedostot ja dokumentit"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Tiedostot ja dokumentit"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"pääsyn laitteesi tiedostoihin ja dokumentteihin"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musiikki ja muu audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"pääsy laitteesi audiotiedostoihin"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Kuvat ja videot"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"pääsy laitteesi kuviin ja videotiedostoihin"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musiikki ja audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"pääsy laitteen musiikkiin ja audioon"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Valokuvat ja videot"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"pääsy laitteen kuviin ja videoihin"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"tallentaa ääntä"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Liikkuminen"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sormenjälkiavaus"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Sormenjälkitunnistinta ei voi käyttää"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Ota yhteys korjauspalveluun."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Tarkan kasvodatan tallennus epäonnistui. Yritä uudelleen."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kasvomallia ei voi luoda. Yritä uudelleen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Liian kirkasta. Kokeile pehmeämpää valaistusta."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Liian pimeää. Kokeile kirkkaampaa valaistusta."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Siirrä puhelinta kauemmas."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Siirrä puhelinta lähemmäs."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Siirrä puhelinta ylemmäs."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Siirrä puhelinta alemmas."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Siirrä puhelinta vasemmalle."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Siirrä puhelinta oikealle."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Kokeile kirkkaampaa valaistusta"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Vie puhelin kauemmas"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Tuo puhelin lähemmäs"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Siirrä puhelinta ylemmäs"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Siirrä puhelinta alemmas"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Siirrä puhelinta vasemmalle"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Siirrä puhelinta oikealle"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Katso suoremmin laitteeseen."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Aseta kasvosi suoraan puhelimen eteen."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Kasvoja ei näy. Pidä puhelinta silmien korkeudella."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Laite liikkui liikaa. Pidä puhelin vakaana."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Rekisteröi kasvot uudelleen."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Ei enää tunnista kasvoja. Yritä uudelleen."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Liian samanlainen, vaihda asentoa."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Käännä päätä vähän vähemmän."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Kallista päätäsi vähän vähemmän."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Käännä päätä vähän vähemmän."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Kasvoja ei voi tunnistaa. Yritä uudelleen."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Liikuta päätä hieman"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Katso suoremmin puhelimeen"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Katso suoremmin puhelimeen"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Katso suoremmin puhelimeen"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Poista esteet kasvojesi edestä."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Puhdista näytön yläreuna, mukaan lukien musta palkki"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Kasvojen täytyy näkyä kokonaan"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Kasvojen täytyy näkyä kokonaan"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kasvomallia ei voi luoda. Yritä uudelleen."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Tummat lasit havaittu. Kasvojen täytyy näkyä kokonaan."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Kasvot peittävä asia havaittu. Kasvojen täytyy näkyä kokonaan."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kasvoja ei voi vahvistaa. Laitteisto ei käytettäv."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Älä häiritse ‑tila muuttui"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Napauta niin näet, mitä on estetty."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Tarkista ilmoitusasetukset"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Asentamasi sovellukset tarvitsevat sinulta luvan ilmoitusten lähettämiseen Android 13 ‑käyttöjärjestelmästä alkaen. Napauta muuttaaksesi nykyisten sovellusten lupia."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Muistuta myöhemmin"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Ohita"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Järjestelmä"</string>

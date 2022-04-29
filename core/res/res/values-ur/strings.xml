@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"اپنے کیلنڈر تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏SMS پیغامات بھیجیں اور دیکھیں"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"فائلز اور دستاویزات"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"فائلز اور دستاویزات"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"آپ کے آلے پر فائلز اور دستاویزات تک رسائی حاصل کریں"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"موسیقی اور دیگر آڈیو"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"آپ کے آلے پر آڈیو فائلز تک رسائی حاصل کریں"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"تصاویر اور ویڈیوز"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"آپ کے آلے پر تصاویر اور ویڈیو فائلز تک رسائی حاصل کریں"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"موسیقی اور آڈیو"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"اپنے آلے پر موسیقی اور آڈیو تک رسائی حاصل کریں"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"تصاویر اور ویڈیوز"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"اپنے آلے پر تصاویر اور ویڈیوز تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"مائیکروفون"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"آڈیو ریکارڈ کریں"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"جسمانی سرگرمی"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"فنگر پرنٹ اَن لاک"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"فنگر پرنٹ سینسر کا استعمال نہیں کر سکتے"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ایک مرمت فراہم کنندہ کو ملاحظہ کریں۔"</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"چہرے کا درست ڈيٹا کیپچر نہیں ہو سکا۔ پھر آزمائيں۔"</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"آپ کے چہرے کا ماڈل تخلیق نہیں کیا جا سکتا۔ پھر کوشش کریں۔"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"کافی روشنی ہے۔ ہلکی روشنی میں آزمائیں۔"</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"کافی اندھیرا ہے۔ تیز روشنی میں آزمائیں۔"</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"فون کو تھوڑا دور کریں۔"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"فون کو تھوڑا قریب کریں۔"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"فون کو تھوڑا اوپر لے جائیں۔"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"فون تھوڑا نیچے کریں۔"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"فون کو بائیں جانب لے جائيں۔"</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"فون کو دائیں جانب لے جائیں۔"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"تیز روشنی میں آزمائیں"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"فون کو تھوڑا دور کریں"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"فون کو تھوڑا قریب کریں"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"فون کو تھوڑا اوپر لے جائیں"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"فون تھوڑا نیچے کریں"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"فون کو اپنی بائیں جانب لے جائیں"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"فون کو اپنی دائیں جانب لے جائیں"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"براہ کرم اپنے آلہ کی طرف چہرے کو سیدھا رکھیں۔"</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"اپنے چہرے کو براہ راست فون کے سامنے رکھیں۔"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"آپ کا چہرہ دکھائی نہیں دے رہا۔ اپنے فون کو آنکھ کی سطح پر پکڑیں۔"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"کافی حرکت ہو رہی ہے۔ فون کو مضبوطی سے پکڑیں۔"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"براہ کرم اپنے چہرے کو دوبارہ مندرج کریں۔"</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"اب چہرے کی شناخت نہیں کر سکتے۔ پھر آزمائيں۔"</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"کافی ملتا جلتا ہے، براہ کرم اپنا پوز بدلیں۔"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"اپنا سر تھوڑا کم کریں۔"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"اپنا سر تھوڑا کم جھکائیں۔"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"اپنا سر تھوڑا کم کریں۔"</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"چہرے کی شناخت نہیں ہو سکی۔ پھر کوشش کریں۔"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"اپنے سر کی پوزیشن کو تھوڑا تبدیل کریں"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"اپنے فون کی طرف چہرے کو سیدھا رکھیں"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"اپنے فون کی طرف چہرے کو سیدھا رکھیں"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"اپنے فون کی طرف چہرے کو سیدھا رکھیں"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"آپ کے چہرہ کو چھپانے والی ہر چیز کو ہٹائیں۔"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"سیاہ بار سمیت، اپنی اسکرین کے اوپری حصے کو صاف کریں"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"آپ کا چہرہ مکمل طور پر دکھائی دینا ضروری ہے"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"آپ کا چہرہ مکمل طور پر دکھائی دینا ضروری ہے"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"آپ کے چہرے کا ماڈل تخلیق نہیں کیا جا سکتا۔ پھر کوشش کریں۔"</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"گہرے چشمے کا پتہ چلا۔ آپ کا چہرہ مکمل طور پر دکھائی دینا ضروری ہے۔"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"چہرے کو ڈھانپنے کا پتہ چلا۔ آپ کا چہرہ مکمل طور پر دکھائی دینا ضروری ہے۔"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"چہرے کی توثیق نہیں کی جا سکی۔ ہارڈ ویئر دستیاب نہیں ہے۔"</string>
@@ -1616,7 +1621,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"اسکرین کو آلہ پر کاسٹ کریں"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"آلات تلاش کر رہا ہے…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ترتیبات"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"غیر مربوط کریں"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"منقطع کریں"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"اسکین کر رہا ہے…"</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"مربوط ہو رہا ہے…"</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"دستیاب"</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ڈسٹرب نہ کریں\' تبدیل ہو گيا ہے"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"مسدود کی گئی چیزوں کو چیک کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"اطلاع کی ترتیبات کا جائزہ لیں"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"‏Android 13 کے ساتھ اب آپ جو بھی ایپس انسٹال کریں گے انہیں اطلاعات بھیجنے کے لیے آپ کی اجازت درکار ہوگی۔ موجودہ ایپس کے لیے اس اجازت کو تبدیل کرنے کی خاطر تھپتھپائیں۔"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"بعد میں یاد دلائیں"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"برخاست کریں"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"سسٹم"</string>

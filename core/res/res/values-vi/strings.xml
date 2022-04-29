@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"truy cập lịch của bạn"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Tin nhắn SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"gửi và xem tin nhắn SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Tệp và tài liệu"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Tệp và tài liệu"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"truy cập vào các tệp và tài liệu trên thiết bị của bạn"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Nhạc và âm thanh khác"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"truy cập vào tệp âm thanh trên thiết bị"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Ảnh và video"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"truy cập vào tệp hình ảnh và video trên thiết bị"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Nhạc và âm thanh"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"truy cập vào âm nhạc và âm thanh trên thiết bị của bạn"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Ảnh và video"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"truy cập vào ảnh và video trên thiết bị của bạn"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrô"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ghi âm"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Hoạt động thể chất"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Mở khóa bằng vân tay"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Không thể dùng cảm biến vân tay"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Hãy liên hệ với một nhà cung cấp dịch vụ sửa chữa."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Không thể ghi lại đúng dữ liệu mặt. Hãy thử lại."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Không thể tạo mẫu khuôn mặt của bạn. Hãy thử lại."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Quá sáng. Hãy thử giảm độ sáng."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Quá tối. Hãy thử tăng độ sáng."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Đưa điện thoại ra xa hơn."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Đưa điện thoại lại gần hơn."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Nâng điện thoại lên cao hơn."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Hạ thấp điện thoại xuống."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Đưa điện thoại sang bên trái."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Đưa điện thoại sang bên phải."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Hãy thử tăng độ sáng"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Đưa điện thoại ra xa hơn"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Đưa điện thoại lại gần hơn"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Nâng điện thoại lên cao hơn"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Hạ thấp điện thoại xuống"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Đưa điện thoại sang bên trái"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Đưa điện thoại sang bên phải"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Vui lòng nhìn thẳng vào thiết bị."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Hướng thẳng khuôn mặt về phía trước điện thoại."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Không thấy khuôn mặt bạn. Cầm điện thoại ngang tầm mắt"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Thiết bị di chuyển quá nhiều. Giữ yên thiết bị."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Vui lòng đăng ký lại khuôn mặt của bạn."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Không nhận ra khuôn mặt. Hãy thử lại."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Khuôn mặt quá giống nhau, vui lòng đổi tư thế."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Hãy bớt di chuyển đầu."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Hãy bớt ngửa hoặc cúi đầu."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Hãy bớt di chuyển đầu."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Không thể nhận dạng khuôn mặt. Hãy thử lại."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Nghiêng đầu của bạn một chút"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Nhìn thẳng vào điện thoại"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Nhìn thẳng vào điện thoại"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Nhìn thẳng vào điện thoại"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Hãy loại bỏ mọi thứ che khuất khuôn mặt bạn."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Vệ sinh phần đầu màn hình, bao gồm cả thanh màu đen"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Toàn bộ khuôn mặt của bạn phải được hiển thị"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Toàn bộ khuôn mặt của bạn phải được hiển thị"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Không thể tạo mẫu khuôn mặt của bạn. Hãy thử lại."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Đã phát hiện đeo kính đen. Toàn bộ khuôn mặt của bạn phải được hiển thị."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Đã phát hiện khuôn mặt bị che khuất. Toàn bộ khuôn mặt của bạn phải được hiển thị."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Không thể xác minh khuôn mặt. Phần cứng không có sẵn."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Cài đặt Không làm phiền đã thay đổi"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nhấn để xem những thông báo bị chặn."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Xem lại chế độ cài đặt thông báo"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Bắt đầu trên Android 13, các ứng dụng bạn cài đặt sẽ cần bạn cấp quyền để gửi thông báo. Hãy nhấn để thay đổi quyền này cho các ứng dụng hiện có."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Nhắc tôi sau"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Đóng"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Hệ thống"</string>

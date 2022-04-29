@@ -306,12 +306,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"piekļūt jūsu kalendāram"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Īsziņas"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sūtīt un skatīt īsziņas"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Faili un dokumenti"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Faili un dokumenti"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"piekļuve failiem un dokumentiem jūsu ierīcē"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Mūzika un cits audio saturs"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"piekļūt audio failiem jūsu ierīcē"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotoattēli un videoklipi"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"piekļūt attēlu un video failiem jūsu ierīcē"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Mūzika un audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"piekļuve mūzikai un audio jūsu ierīcē"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotoattēli un videoklipi"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"piekļuve fotoattēliem un videoklipiem jūsu ierīcē"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofons"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ierakstīt audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fiziskās aktivitātes"</string>
@@ -635,26 +635,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Autorizācija ar pirksta nospiedumu"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nevar izmantot pirksta nospieduma sensoru"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Sazinieties ar remonta pakalpojumu sniedzēju."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Neizdevās tvert sejas datus. Mēģiniet vēlreiz."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nevar izveidot sejas modeli. Mēģiniet vēlreiz."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Pārāk spilgts. Izmēģiniet maigāku apgaismojumu."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Pārāk tumšs. Izmēģiniet spožāku apgaismojumu."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Pārvietojiet tālruni tālāk."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Pārvietojiet tālruni tuvāk."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Paceliet tālruni augstāk."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Nolaidiet tālruni zemāk"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Pārvietojiet tālruni pa kreisi."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Pārvietojiet tālruni pa labi."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Izmēģiniet spožāku apgaismojumu."</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Pārvietojiet tālruni tālāk."</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Pārvietojiet tālruni tuvāk."</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Paceliet tālruni augstāk."</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Nolaidiet tālruni zemāk."</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Pārvietojiet tālruni pa kreisi."</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Pārvietojiet tālruni pa labi."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Lūdzu, tiešāk skatieties uz savu ierīci."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Novietojiet savu seju tieši pretī tālrunim."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Seja nav redzama. Turiet tālruni acu līmenī."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Pārāk daudz kustību. Nekustīgi turiet tālruni."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Lūdzu, atkārtoti reģistrējiet savu seju."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Seju vairs nevar atpazīt. Mēģiniet vēlreiz."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Pārāk līdzīgi. Lūdzu, mainiet pozu."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Pagrieziet galvu nedaudz mazāk."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Nedaudz mazāk nolieciet galvu."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Pagrieziet galvu nedaudz mazāk."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Nevar atpazīt seju. Mēģiniet vēlreiz."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Nedaudz mainiet galvas pozīciju."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Skatieties tieši uz tālruni."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Skatieties tieši uz tālruni."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Skatieties tieši uz tālruni."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Noņemiet visu, kas aizsedz jūsu seju."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Notīriet ekrāna augšdaļu, tostarp melno joslu."</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Sejai ir jābūt pilnībā redzamai."</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Sejai ir jābūt pilnībā redzamai."</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Nevar izveidot sejas modeli. Mēģiniet vēlreiz."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Konstatētas tumšas brilles. Sejai ir jābūt pilnībā redzamai."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Konstatēts sejas aizsegs. Sejai ir jābūt pilnībā redzamai."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nevar verificēt seju. Aparatūra nav pieejama."</string>
@@ -1671,10 +1676,10 @@
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vai izmantot pieejamības saīsni?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kad īsinājumtaustiņš ir ieslēgts, nospiežot abas skaļuma pogas un 3 sekundes turot tās, tiks aktivizēta pieejamības funkcija."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vai ieslēgt pieejamības funkciju saīsni?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Turot nospiestus abus skaļuma taustiņus dažas sekundes, tiek ieslēgtas pieejamības funkcijas. Tas var mainīt ierīces darbību.\n\nPašreizējās funkcijas:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAtlasītās funkcijas varat mainīt šeit: Iestatījumi &gt; Pieejamība."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Turot nospiestas abas skaļuma pogas dažas sekundes, tiek ieslēgtas pieejamības funkcijas. Tas var mainīt ierīces darbību.\n\nPašreizējās funkcijas:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAtlasītās funkcijas varat mainīt šeit: Iestatījumi &gt; Pieejamība."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Vai ieslēgt <xliff:g id="SERVICE">%1$s</xliff:g> saīsni?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Turot nospiestus abus skaļuma taustiņus dažas sekundes, tiek ieslēgta pieejamības funkcija <xliff:g id="SERVICE">%1$s</xliff:g>. Tas var mainīt ierīces darbību.\n\nŠo saīsni uz citu funkciju varat mainīt šeit: Iestatījumi &gt; Pieejamība."</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Turot nospiestas abas skaļuma pogas dažas sekundes, tiek ieslēgta pieejamības funkcija <xliff:g id="SERVICE">%1$s</xliff:g>. Tas var mainīt ierīces darbību.\n\nŠo saīsni uz citu funkciju varat mainīt šeit: Iestatījumi &gt; Pieejamība."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ieslēgt"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Neieslēgt"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"IESLĒGTA"</string>
@@ -1701,7 +1706,7 @@
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Papildu aptumšošana"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Turējāt nospiestas skaļuma pogas. Pakalpojums <xliff:g id="SERVICE_NAME">%1$s</xliff:g> tika ieslēgts."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Turējāt nospiestas skaļuma pogas. Pakalpojums <xliff:g id="SERVICE_NAME">%1$s</xliff:g> tika izslēgts."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Lai izmantotu pakalpojumu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, nospiediet abus skaļuma taustiņus un turiet tos trīs sekundes."</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Lai izmantotu pakalpojumu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, nospiediet abus skaļuma pogas un turiet tos trīs sekundes."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Izvēlieties funkciju, ko izmantot, kad pieskaraties pieejamības pogai."</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Izvēlieties funkciju, ko izmantot ar pieejamības žestu (vilkšana ar diviem pirkstiem augšup no ekrāna apakšdaļas)."</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Izvēlieties funkciju, ko izmantot ar pieejamības žestu (vilkšana ar trīs pirkstiem augšup no ekrāna apakšdaļas)."</string>
@@ -2054,8 +2059,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režīms “Netraucēt” ir mainīts"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Pieskarieties, lai uzzinātu, kas tiek bloķēts."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Pārskatīt paziņojumu iestatījumus"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Operētājsistēmā Android 13 un jaunākās versijās jūsu instalētajām lietotnēm ir nepieciešama atļauja sūtīt paziņojumus. Pieskarieties, lai mainītu šo atļauju esošajām lietotnēm."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Atgādināt vēlāk"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Noraidīt"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistēma"</string>

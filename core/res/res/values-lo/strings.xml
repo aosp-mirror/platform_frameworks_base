@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ເຂົ້າ​ຫາ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ສົ່ງ ແລະ​ເບິ່ງ​ຂໍ້​ຄວາມ SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ໄຟລ໌ ແລະ ເອກະສານ"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ໄຟລ໌ ແລະ ເອກະສານ"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"ເຂົ້າເຖິງໄຟລ໌ ແລະ ເອກະສານຢູ່ອຸປະກອນຂອງທ່ານ"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"ເພງ ແລະ ສຽງອື່ນໆ"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"ເຂົ້າເຖິງໄຟລ໌ສຽງຢູ່ອຸປະກອນຂອງທ່ານ"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ຮູບພາບ ແລະ ວິດີໂອ"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"ເຂົ້າເຖິງໄຟລ໌ຮູບ ແລະ ວິດີໂອຢູ່ອຸປະກອນຂອງທ່ານ"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ເພງ ແລະ ສຽງ"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ເຂົ້າເຖິງເພງ ແລະ ສຽງຢູ່ອຸປະກອນຂອງທ່ານ"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ຮູບພາບ ແລະ ວິດີໂອ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ເຂົ້າເຖິງຮູບພາບ ແລະ ວິດີໂອຢູ່ອຸປະກອນຂອງທ່ານ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ໄມໂຄຣໂຟນ"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ບັນທຶກສຽງ"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ກິດຈະກຳທາງກາຍະພາບ"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ປົດລັອກດ້ວຍລາຍນິ້ວມື"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ບໍ່ສາມາດໃຊ້ເຊັນ​ເຊີລາຍນິ້ວ​ມືໄດ້"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ກະລຸນາໄປຫາຜູ້ໃຫ້ບໍລິການສ້ອມແປງ."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"ບໍ່ສາມາດບັນທຶກຂໍ້ມູນໃບໜ້າທີ່ຖືກຕ້ອງໄດ້. ກະລຸນາລອງໃໝ່."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"ບໍ່ສາມາດສ້າງຮູບແບບໃບໜ້າຂອງທ່ານໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ແຈ້ງເກີນໄປ. ລອງຄ່ອຍແສງໄຟລົງ."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"ມືດເກີນ. ກະລຸນາລອງໃຊ້ສະພາບແສງທີ່ແຈ້ງຂຶ້ນ."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"ຍ້າຍໂທລະສັບອອກໄປໄກຂຶ້ນ."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ຍ້າຍໂທລະສັບເຂົ້າໄປໃກ້ຂຶ້ນ."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ຍົກໂທລະສັບໃຫ້ສູງຂຶ້ນ."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ເລື່ອນໂທລະສັບຕ່ຳລົງ."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"ຍ້າຍໂທລະສັບໄປທາງຊ້າຍ."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"ຍ້າຍໂທລະສັບໄປທາງຂວາ."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ກະລຸນາລອງໃຊ້ສະພາບແສງທີ່ແຈ້ງຂຶ້ນ"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"ເລື່ອນໂທລະສັບອອກໄປໄກຂຶ້ນ"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"ເລື່ອນໂທລະສັບເຂົ້າໄປໃກ້ຂຶ້ນ"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ຍົກໂທລະສັບໃຫ້ສູງຂຶ້ນ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ເລື່ອນໂທລະສັບຕ່ຳລົງ"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ເລື່ອນໂທລະສັບໄປທາງຊ້າຍຂອງທ່ານ"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ເລື່ອນໂທລະສັບໄປທາງຂວາຂອງທ່ານ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"ກະລຸນາເບິ່ງອຸປະກອນຂອງທ່ານໃຫ້ຊື່ໆ."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"ຫັນໜ້າຂອງທ່ານໄປໃສ່ໜ້າໂທລະສັບໂດຍກົງ."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"ບໍ່ເຫັນໃບໜ້າຂອງທ່ານ. ຖືໂທລະສັບຂອງທ່ານໄວ້ໃນລະດັບສາຍຕາ."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"ເຄື່ອນໄຫວຫຼາຍເກີນໄປ. ກະລຸນາຖືໂທລະສັບໄວ້ຊື່ໆ."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"ກະລຸນາລົງທະບຽນອຸປະກອນຂອງທ່ານອີກເທື່ອໜຶ່ງ."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"ບໍ່ສາມາດຈຳແນກໃບໜ້າໄດ້ອີກຕໍ່ໄປ. ກະລຸນາລອງໃໝ່."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"ຄ້າຍກັນເກີນໄປ, ກະລຸນາປ່ຽນທ່າຂອງທ່ານ."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ອຽງຫົວຂອງທ່ານໜ້ອຍໜຶ່ງ."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"ປັບມຸມໜ້າຂອງທ່ານໃຫ້ຕັ້ງຊື່."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ອຽງຫົວຂອງທ່ານໜ້ອຍໜຶ່ງ."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"ບໍ່ສາມາດຈຳແນກໃບໜ້າໄດ້. ກະລຸນາລອງໃໝ່."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"ປ່ຽນຕຳແໜ່ງຂອງຫົວທ່ານເລັກນ້ອຍ"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"ເບິ່ງຊື່ໆໄປຫາໂທລະສັບຂອງທ່ານໃຫ້ຫຼາຍຂຶ້ນ"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"ເບິ່ງຊື່ໆໄປຫາໂທລະສັບຂອງທ່ານໃຫ້ຫຼາຍຂຶ້ນ"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"ເບິ່ງຊື່ໆໄປຫາໂທລະສັບຂອງທ່ານໃຫ້ຫຼາຍຂຶ້ນ"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"ນຳສິ່ງທີ່ກີດຂວາງໃບໜ້າທ່ານອອກ."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ທຳຄວາມສະອາດສ່ວນເທິງສຸດຂອງໜ້າຈໍທ່ານ, ຮວມທັງແຖບດຳນຳ"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"ໃບໜ້າຂອງທ່ານຕ້ອງສະແດງໃຫ້ເຫັນໝົດ"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"ໃບໜ້າຂອງທ່ານຕ້ອງສະແດງໃຫ້ເຫັນໝົດ"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"ບໍ່ສາມາດສ້າງຮູບແບບໃບໜ້າຂອງທ່ານໄດ້. ກະລຸນາລອງໃໝ່."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"ກວດພົບແວ່ນຕາດຳ. ໃບໜ້າຂອງທ່ານຕ້ອງສະແດງໃຫ້ເຫັນໝົດ."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ກວດພົບການປົກປິດໃບໜ້າ. ໃບໜ້າຂອງທ່ານຕ້ອງສະແດງໃຫ້ເຫັນໝົດ."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ບໍ່ສາມາດຢັ້ງຢືນໃບໜ້າໄດ້. ບໍ່ມີຮາດແວໃຫ້ໃຊ້."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ປ່ຽນໂໝດຫ້າມລົບກວນແລ້ວ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ແຕະເພື່ອກວດສອບວ່າມີຫຍັງຖືກບລັອກໄວ້ແດ່."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ກວດສອບ​ການ​ຕັ້ງ​ຄ່າ​ການ​ແຈ້ງ​ເຕືອນ"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"ເລີ່ມຕົ້ນໃນ Android 13, ແອັບຕ່າງໆທີ່ທ່ານຕິດຕັ້ງຈະຕ້ອງໃຊ້ການອະນຸຍາດຂອງທ່ານເພື່ອສົ່ງການແຈ້ງເຕືອນ. ແຕະເພື່ອປ່ຽນການອະນຸຍາດນີ້ສຳລັບແອັບທີ່ມີຢູ່ກ່ອນແລ້ວ."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ແຈ້ງເຕືອນຂ້ອຍພາຍຫຼັງ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ປິດໄວ້"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ລະບົບ"</string>

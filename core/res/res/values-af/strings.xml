@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"by jou kalender in te gaan"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS-boodskappe te stuur en te bekyk"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Lêers en dokumente"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Lêers en dokumente"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"kry toegang tot lêers en dokumente op jou toestel"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musiek en ander oudio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"kry toegang tot oudiolêers op jou toestel"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto\'s en video\'s"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"kry toegang tot prente en videolêers op jou toestel"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musiek en oudio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"kry toegang tot musiek en oudio op jou toestel"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto\'s en video\'s"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"kry toegang tot foto\'s en video\'s op jou toestel"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofoon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"oudio op te neem"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fisieke aktiwiteit"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Vingerafdrukslot"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Kan nie vingerafdruksensor gebruik nie"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Besoek \'n verskaffer wat herstelwerk doen."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Kon nie gesigdata akkuraat vasvang nie. Probeer weer."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kan nie jou gesigmodel skep nie. Probeer weer."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Te helder. Probeer sagter beligting."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Te donker. Probeer helderder beligting."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Beweeg foon verder weg"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Beweeg foon nader."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Beweeg foon hoër op."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Beweeg foon laer af."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Beweeg foon na links."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Beweeg foon na regs."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Probeer helderder beligting"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Beweeg foon verder weg"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Beweeg foon nader"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Beweeg foon hoër op"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Beweeg foon laer af"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Beweeg foon na jou linkerkant"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Beweeg foon na jou regterkant"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Kyk asseblief meer reguit na jou toestel."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Posisioneer jou gesig direk voor die foon."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Kan nie jou gesig sien nie. Hou jou foon op oogvlak."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Te veel beweging. Hou foon stil."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Skryf jou gesig asseblief weer in."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Kan nie meer gesig herken nie. Probeer weer."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Te eenders. Verander asseblief jou pose."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Draai jou kop \'n bietjie minder."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Kantel jou kop \'n bietjie minder."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Draai jou kop \'n bietjie minder."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Kan nie gesig herken nie. Probeer weer."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Verander die posisie van jou kop effens"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Kyk meer reguit na jou foon"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Kyk meer reguit na jou foon"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Kyk meer reguit na jou foon"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Verwyder enigiets wat jou gesig versteek."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Maak die bokant van jou skerm skoon, insluitend die swart balk"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Jou gesig moet heeltemal sigbaar wees"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Jou gesig moet heeltemal sigbaar wees"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan nie jou gesigmodel skep nie. Probeer weer."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Donkerbril bespeur. Jou gesig moet heeltemal sigbaar wees."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gesigbedekking bespeur. Jou gesig moet heeltemal sigbaar wees."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan nie gesig verifieer nie. Hardeware nie beskikbaar nie."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Moenie Steur Nie het verander"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tik om te kyk wat geblokkeer word."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Gaan kennisgewinginstellings na"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Vanaf Android 13 het programme wat jy installeer jou toestemming nodig om kennisgewings te stuur. Tik om hierdie toestemming vir bestaande programme te verander."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Herinner my later"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Maak toe"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Stelsel"</string>

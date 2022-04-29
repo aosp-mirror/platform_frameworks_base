@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"mengakses kalendar"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"menghantar dan melihat mesej SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fail &amp; dokumen"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fail dan dokumen"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"akses fail dan dokumen pada peranti anda"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muzik &amp; audio lain"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"berikan akses fail audio pada peranti anda"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto &amp; video"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"berikan akses imej dan fail video pada peranti anda"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzik dan audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"akses muzik dan audio pada peranti anda"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto dan video"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"akses foto dan video pada peranti anda"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"rakam audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Aktiviti fizikal"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Buka Kunci Cap Jari"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Tidak boleh menggunakan penderia cap jari"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Lawati penyedia pembaikan."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Gagal menangkap data wajah dgn tepat. Cuba lagi."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Tidak dapat membuat model wajah anda. Cuba lagi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Terlalu terang. Cuba pencahayaan yang lebih lembut."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Terlalu gelap. Cuba pencahayaan yang lebih cerah."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Jauhkan telefon."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Dekatkan telefon."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Tinggikan lagi telefon."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Rendahkan lagi telefon."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Alihkan telefon ke kiri."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Alihkan telefon ke kanan."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Cuba pencahayaan yang lebih cerah"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Jauhkan telefon"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Dekatkan telefon"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Tinggikan lagi telefon"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Rendahkan lagi telefon"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Gerakkan telefon ke kiri anda"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Gerakkan telefon ke kanan anda"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Sila lihat terus pada peranti anda."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Letakkan wajah anda betul-betul di depan telefon."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Gagal mengesan wajah anda. Pegang telefon anda pada paras mata."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Terlalu bnyk gerakan. Pegang telefon dgn stabil."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Sila daftarkan semula wajah anda."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Tidak lagi dapat mengecam wajah. Cuba lagi."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Terlalu serupa, sila ubah lagak gaya anda."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Pusingkan kepala anda kurang sedikit."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Sengetkan kepala anda kurang sedikit."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Pusingkan kepala anda kurang sedikit."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Tidak dapat mengecam wajah. Cuba lagi."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Tukar sedikit kedudukan kepala anda"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Lihat terus pada telefon anda"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Lihat terus pada telefon anda"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Lihat terus pada telefon anda"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Alih keluar apa saja yang melindungi wajah anda."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Bersihkan bahagian atas skrin anda, termasuk bar hitam"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Wajah anda mesti terlihat sepenuhnya"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Wajah anda mesti terlihat sepenuhnya"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Tidak dapat membuat model wajah anda. Cuba lagi."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Cermin mata gelap dikesan. Wajah anda mesti terlihat sepenuhnya."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Pelitup muka dikesan. Wajah anda mesti terlihat sepenuhnya."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tdk dpt sahkan wajah. Perkakasan tidak tersedia."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Jangan Ganggu telah berubah"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ketik untuk menyemak item yang disekat."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Semak tetapan pemberitahuan"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Bermula dengan Android 13, apl yang anda pasang memerlukan kebenaran anda untuk menghantar pemberitahuan. Ketik untuk menukar kebenaran ini bagi apl sedia ada."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ingatkan saya nanti"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Ketepikan"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>

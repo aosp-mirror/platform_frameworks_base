@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"دسترسی به تقویم شما"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"پیامک"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ارسال و مشاهده پیامک‌ها"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"فایل‌ها و اسناد"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"فایل‌ها و سندها"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"دسترسی به فایل‌ها و اسناد موجود در دستگاه"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"موسیقی و فایل‌های صوتی دیگر"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"دسترسی به فایل‌های صوتی موجود در دستگاه"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"عکس‌ها و ویدیوها"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"دسترسی به فایل‌های تصویری و ویدیویی موجود در دستگاه"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"موسیقی و صدا"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"دسترسی به موسیقی و صدا در دستگاه شما"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"عکس‌ها و ویدیوها"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"دسترسی به عکس‌ها و ویدیوها در دستگاه شما"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"میکروفن"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ضبط صدا"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"فعالیت فیزیکی"</string>
@@ -604,7 +604,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"سخت‌افزار اثرانگشت در دسترس نیست."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"اثر انگشت راه‌اندازی نشد"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"درنگ ثبت اثر انگشت به پایان رسید. دوباره امتحان کنید."</string>
+    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"مهلت ثبت اثر انگشت به‌پایان رسید. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"عملکرد اثر انگشت لغو شد."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"کاربر عملیات اثر انگشت را لغو کرد"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"تلاش‌های زیادی انجام شده است. بعداً دوباره امتحان کنید."</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"قفل‌گشایی با اثر انگشت"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"امکان استفاده از حسگر اثر انگشت وجود ندارد"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"به ارائه‌دهنده خدمات تعمیر مراجعه کنید."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"داده‌های دقیق چهره ضبط نشد. دوباره امتحان کنید."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"مدل چهره‌تان ایجاد نشد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"خیلی روشن است. روشنایی‌اش را ملایم‌تر کنید."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"خیلی تاریک است. تصویر را روشن‌تر کنید."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"تلفن را به دورتر منتقل کنید."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"تلفن را نزدیک‌تر بیاورید."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"تلفن را بالاتر ببرید."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"تلفن را پایین‌تر بیاورید."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"تلفن را به‌سمت چپ حرکت دهید."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"تلفن را به سمت راست حرکت دهید."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"نور را بیشتر کنید"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"تلفن را دورتر ببرید"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"تلفن را نزدیک‌تر بیاورید"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"تلفن را بالاتر ببرید"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"تلفن را پایین‌تر ببرید"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"تلفن را به‌سمت چپ ببرید"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"تلفن را به‌سمت راست ببرید"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"لطفاً مستقیم به دستگاه نگه کنید."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"صورتتان را مستقیماً روبروی تلفن قرار دهید."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"چهره‌تان دیده نمی‌شود. تلفن را هم‌سطح چشمانتان نگه دارید."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حرکت خیلی زیاد است. تلفن را ثابت نگه‌دارید."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"لطفاً چهره‌تان را مجدداً ثبت کنید."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"دیگر چهره را تشخیص نمی‌دهد. دوباره امتحان کنید."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"بسیار شبیه قبلی است، لطفاً قیافه دیگری بگیرید."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"سرتان را کمی صاف بگیرید."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"سرتان را کمی کج بگیرید."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"سرتان را کمی صاف بگیرید."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"چهره شناسایی نشد. دوباره امتحان کنید."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"موقعیت سرتان را کمی تغییر دهید"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"مستقیم‌تر به تلفن نگاه کنید"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"مستقیم‌تر به تلفن نگاه کنید"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"مستقیم‌تر به تلفن نگاه کنید"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"هرچیزی را که حائل چهره‌تان است بردارید."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"بالای صفحه و همچنین نوار مشکی را تمیز کنید."</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"چهره‌تان باید کاملاً نمایان باشد"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"چهره‌تان باید کاملاً نمایان باشد"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"مدل چهره‌تان ایجاد نشد. دوباره امتحان کنید."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"عینک تیره شناسایی شد. چهره‌تان باید کاملاً نمایان باشد."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"پوشش صورت شناسایی شد. چهره‌تان باید کاملاً نمایان باشد."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"چهره تأیید نشد. سخت‌افزار در دسترس نیست."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"«مزاحم نشوید» تغییر کرده است"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"برای بررسی موارد مسدودشده ضربه بزنید."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"مرور تنظیمات اعلان"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"‏از Android نسخه ۱۳ به بعد، برنامه‌هایی که نصب می‌کنید برای ارسال اعلان به اجازه شما نیاز دارند. برای تغییر دادن این اجازه در برنامه‌های موجود، ضربه بزنید."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"بعداً یادآوری شود"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"رد شدن"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"سیستم"</string>
