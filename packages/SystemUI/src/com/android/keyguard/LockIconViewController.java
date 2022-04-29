@@ -668,7 +668,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
-        mVibrator.cancel();
     }
 
     private boolean inLockIconArea(MotionEvent event) {
