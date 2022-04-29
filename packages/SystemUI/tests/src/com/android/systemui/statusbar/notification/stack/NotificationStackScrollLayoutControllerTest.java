@@ -74,6 +74,7 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -135,6 +136,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private StackStateLogger mStackLogger;
     @Mock private NotificationStackScrollLogger mLogger;
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
+    @Mock private ShadeTransitionController mShadeTransitionController;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -179,6 +181,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mNotifCollection,
                 mEntryManager,
                 mLockscreenShadeTransitionController,
+                mShadeTransitionController,
                 mIStatusBarService,
                 mUiEventLogger,
                 mLayoutInflater,
