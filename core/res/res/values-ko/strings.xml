@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"캘린더에 액세스"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS 메시지 전송 및 보기"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"파일 및 문서"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"기기의 파일 및 문서에 액세스"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"음악 및 오디오"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"기기의 음악 및 오디오에 액세스"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"사진 및 동영상"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"기기의 사진 및 동영상에 액세스"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"마이크"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"오디오 녹음"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"신체 활동"</string>
@@ -599,7 +594,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"조정 시도"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않습니다."</string>
@@ -645,7 +640,7 @@
     <string name="face_acquired_too_close" msgid="1628767882971469833">"휴대전화를 더 멀리 위치시키세요."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"휴대전화를 더 가깝게 위치시키세요."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"휴대전화를 위쪽으로 이동하세요."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"휴대전화를 아래쪽으로 이동하세요."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"휴대전화를 아래로 이동하세요"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"휴대전화를 왼쪽으로 이동하세요."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"휴대전화를 오른쪽으로 이동하세요."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"기기에서 더 똑바로 바라보세요."</string>
@@ -2058,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"방해 금지 모드 변경"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"차단된 항목을 확인하려면 탭하세요."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"알림 설정 검토"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13부터 설치된 앱에는 알림을 전송하기 위한 권한이 필요합니다. 기존 앱의 알림 전송 권한을 변경하려면 탭하세요."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"나중에 알림"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"닫기"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"시스템"</string>

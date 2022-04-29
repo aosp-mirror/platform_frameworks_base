@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS మెసేజ్‌లను పంపడం, వీక్షించడం"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ఫైల్స్, డాక్యుమెంట్‌లు"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"మీ పరికరంలోని ఫైల్‌లు, డాక్యుమెంట్‌లను యాక్సెస్ చేయండి"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"మ్యూజిక్, ఆడియో"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"మీ పరికరంలో మ్యూజిక్, ఆడియోను యాక్సెస్ చేయండి"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ఫోటోలు, వీడియోలు"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"మీ పరికరంలో ఫోటోలు, వీడియోలను యాక్సెస్ చేయండి"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"మైక్రోఫోన్"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ఆడియోను రికార్డ్ చేయడానికి"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ఫిజికల్ యాక్టివిటీ"</string>

@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"आपल्या कॅलेंडरवर प्रवेश"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS मेसेज पाठवणे आणि पाहणे हे"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"फाइल आणि दस्तऐवज"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"तुमच्या डिव्हाइसवर फाइल आणि दस्तऐवज अ‍ॅक्सेस करा"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"संगीत आणि ऑडिओ"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"तुमच्या डिव्हाइसवर संगीत आणि ऑडिओ अ‍ॅक्सेस करा"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"फोटो आणि व्हिडिओ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"तुमच्या डिव्हाइसवर फोटो आणि व्हिडिओ अ‍ॅक्सेस करा"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"मायक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ऑडिओ रेकॉर्ड"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"शारीरिक अ‍ॅक्टिव्हिटी"</string>
@@ -406,7 +401,7 @@
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"अ‍ॅपला पृष्‍ठभाग सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"अ‍ॅप संचयन स्थान मोजा"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"अ‍ॅप ला त्याचा कोड, डेटा आणि कॅशे    आकार पुनर्प्राप्त करण्यासाठी अनुमती देते"</string>
-    <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्टम सेटिंग्ज सुधारित करा"</string>
+    <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्टीम सेटिंग्ज सुधारित करा"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"सिस्टीमचा सेटिंग्ज डेटा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स आपल्या सिस्टीमचे कॉंफिगरेशन दूषित करू शकतात."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"सुरूवातीस चालवा"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"जसे सिस्टम बूट करणे समाप्त करते तसे अ‍ॅप ला स्वतः सुरू करण्यास अनुमती देते. यामुळे टॅबलेट सुरू करण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर टॅबलेटला धीमे करण्यास अ‍ॅप ला अनुमती देते."</string>
@@ -2058,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"व्यत्यय आणू नका बदलले आहे"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"काय ब्लॉक केले आहे हे तपासण्यासाठी टॅप करा."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"सूचना सेटिंग्जचे पुनरावलोकन करा"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 पासून, तुम्ही त्यामध्ये इंस्टॉल केलेल्या अ‍ॅप्सना सूचना पाठवण्यासाठी तुमच्या परवानगीची आवश्यकता आहे. सध्याच्या अ‍ॅप्ससाठी ही परवानगी बदलण्याकरिता टॅप करा."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"मला आठवण करून द्या"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"डिसमिस करा"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"सिस्टम"</string>

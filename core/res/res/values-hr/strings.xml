@@ -306,17 +306,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"pristupati kalendaru"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"slati i pregledavati SMS poruke"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Datoteke i dokumenti"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"pristup datotekama i dokumentima na vašem uređaju"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Glazba i zvuk"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"pristupite glazbi i zvuku na svom uređaju"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotografije i videozapisi"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"pristupite fotografijama i videozapisima na svom uređaju"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"snimati zvuk"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Tjelesna aktivnost"</string>
@@ -355,7 +350,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Omogućuje aplikaciji proširivanje ili sažimanje trake statusa."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"prikazivati obavijesti kao aktivnosti na cijelom zaslonu na zaključanom uređaju"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Omogućuje aplikaciji da na zaključanom uređaju prikazuje obavijesti kao aktivnosti na cijelom zaslonu"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instaliranje prečaca"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instaliranje prečaca"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Aplikaciji omogućuje dodavanje prečaca početnog zaslona bez intervencije korisnika."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"deinstaliranje prečaca"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Aplikaciji omogućuje uklanjanje prečaca početnog zaslona bez intervencije korisnika."</string>
@@ -2059,8 +2054,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Promijenjena je postavka Ne uznemiravaj"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Dodirnite da biste provjerili što je blokirano."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Pregledajte postavke obavijesti"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Od Androida 13 aplikacije koje instalirate trebaju vaše dopuštenje za slanje obavijesti. Dodirnite da biste promijenili to dopuštenje za postojeće aplikacije."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Podsjeti me kasnije"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Odbaci"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sustav"</string>

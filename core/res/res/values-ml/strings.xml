@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കുകയും കാണുകയും ചെയ്യുക"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ഫയലുകളും ഡോക്യുമെന്റുകളും"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"നിങ്ങളുടെ ഉപകരണത്തിലെ ഫയലുകളും ഡോക്യുമെന്റുകളും ആക്സസ് ചെയ്യുക"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"സംഗീതവും ഓഡിയോയും"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"നിങ്ങളുടെ ഉപകരണത്തിൽ സംഗീതവും ഓഡിയോയും ആക്‌സസ് ചെയ്യുക"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ഫോട്ടോകളും വീഡിയോകളും"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഫോട്ടോകളും വീഡിയോകളും ആക്‌സസ് ചെയ്യുക"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"മൈക്രോഫോണ്‍"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ശാരീരിക ആക്റ്റിവിറ്റി"</string>
@@ -644,7 +639,7 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"വളരെ ഇരുണ്ടത്. തിളക്കമേറിയ ലൈറ്റിംഗ് പരീക്ഷിക്കുക."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"ഫോൺ കൂടുതൽ അകലേയ്ക്ക് നീക്കുക."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"ഫോൺ അടുത്തേക്ക് നീക്കുക."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ഫോൺ കൂടുതൽ ഉയരത്തിലേക്ക് നീക്കുക."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"ഫോൺ മുകളിലേക്ക് ഉയർത്തുക"</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"ഫോൺ കൂടുതൽ താഴേക്ക് നീക്കുക."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"ഫോൺ ഇടത്തോട്ട് നീക്കുക."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"ഫോൺ വലത്തോട്ട് നീക്കുക."</string>

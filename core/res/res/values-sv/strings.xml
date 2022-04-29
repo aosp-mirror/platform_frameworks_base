@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"få tillgång till din kalender"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"skicka och visa sms"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Filer och dokument"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"visa filer och dokument på enheten"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musik och ljud"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"få åtkomst till musik och ljud på enheten"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foton och videor"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"få åtkomst till foton och videor på enheten"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"spela in ljud"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysisk aktivitet"</string>
@@ -594,7 +589,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Det gick inte att bearbeta fingeravtrycket. Försök igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Rengör fingeravtryckssensorn och försök igen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Rengör sensorn och försök igen"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tryck på sensorn med ett stadigt tryck"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tryck hårt på sensorn"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du rörde fingret för långsamt. Försök igen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Testa ett annat fingeravtryck"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Det är för ljust"</string>
@@ -2058,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Stör ej har ändrats"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tryck om du vill se vad som blockeras."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Granska aviseringsinställningarna"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"I Android 13 behöver appar som du installerar behörighet att skicka aviseringar. Tryck om du vill ändra denna behörighet för befintliga appar."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Påminn mig senare"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Stäng"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>

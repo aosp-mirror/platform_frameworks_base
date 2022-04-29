@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপোনাৰ কেলেণ্ডাৰ ব্যৱহাৰ কৰিব পাৰে"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"এছএমএছ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"এছএমএছ বার্তা পঠিয়াব আৰু চাব পাৰে"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ফাইল আৰু নথি"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"আপোনাৰ ডিভাইচত থকা ফাইল আৰু নথি এক্সেছ কৰে"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"সংগীত আৰু অডিঅ’"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"আপোনাৰ ডিভাইচত সংগীত আৰু অডিঅ’ এক্সেছ কৰক"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ফট’ আৰু ভিডিঅ’"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"আপোনাৰ ডিভাইচত ফট’ আৰু ভিডিঅ’ এক্সেছ কৰক"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"মাইক্ৰ\'ফ\'ন"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"অডিঅ\' ৰেকর্ড কৰিব পাৰে"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"শাৰীৰিক কাৰ্যকলাপ"</string>

@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপনার ক্যালেন্ডারে অ্যাক্সেস"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"এসএমএসগুলি পাঠাতে এবং দেখতে"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ফাইল এবং ডকুমেন্ট"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"আপনার ডিভাইসে ফাইল ও ডকুমেন্ট অ্যাক্সেস করুন"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"মিউজিক এবং অডিও"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"আপনার ডিভাইসে মিউজিক এবং অডিও অ্যাক্সেস করুন"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ফটো এবং ভিডিও"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"আপনার ডিভাইসে ফটো এবং ভিডিও অ্যাক্সেস করুন"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"মাইক্রোফোন"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"অডিও রেকর্ড"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"শারীরিক অ্যাক্টিভিটি"</string>
@@ -2058,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'বিরক্ত করবে না\' মোডের সেটিং বদলে গেছে"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"কী কী ব্লক করা আছে তা দেখতে ট্যাপ করুন।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"বিজ্ঞপ্তির সেটিংস পর্যালোচনা করুন"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 থেকে শুরু করে, বিজ্ঞপ্তি পাঠানোর জন্য আপনার ইনস্টল করা অ্যাপকে অনুমতি নিতে হবে। বর্তমান অ্যাপের জন্য এই অনুমতি পরিবর্তন করতে ট্যাপ করুন।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"পরে মনে করিয়ে দিও"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"বাতিল করুন"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"সিস্টেম"</string>

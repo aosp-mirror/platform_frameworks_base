@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"存取您的日曆"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"短訊"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"傳送和查看短訊"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"檔案和文件"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"存取裝置上的檔案和文件"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"音樂和音訊"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"在裝置上使用音樂和音訊"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"相片和影片"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"在裝置上使用相片和影片"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"麥克風"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"錄音"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"體能活動"</string>
@@ -2058,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"請勿騷擾已變更"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"輕按即可查看封鎖內容。"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"查看通知設定"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"由 Android 13 開始，您安裝的應用程式須獲得授權才能傳送通知。輕按即可變更現有應用程式的這項權限。"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"稍後提醒我"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"關閉"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"系統"</string>
