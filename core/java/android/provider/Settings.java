@@ -7679,20 +7679,6 @@ public final class Settings {
                 "zen_settings_suggestion_viewed";
 
         /**
-         * State of whether review notification permissions notification needs to
-         * be shown the user, and whether the user has interacted.
-         *
-         * Valid values:
-         *   -1 = UNKNOWN
-         *    0 = SHOULD_SHOW
-         *    1 = USER_INTERACTED
-         *    2 = DISMISSED
-         * @hide
-         */
-        public static final String REVIEW_PERMISSIONS_NOTIFICATION_STATE =
-                "review_permissions_notification_state";
-
-        /**
          * Whether the in call notification is enabled to play sound during calls.  The value is
          * boolean (1 or 0).
          * @hide
@@ -16972,6 +16958,21 @@ public final class Settings {
          */
         public static final String MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER =
                 "managed_provisioning_defer_provisioning_to_role_holder";
+
+        /**
+         * State of whether review notification permissions notification needs to
+         * be shown the user, and whether the user has interacted.
+         *
+         * Valid values:
+         *   -1 = UNKNOWN
+         *    0 = SHOULD_SHOW
+         *    1 = USER_INTERACTED
+         *    2 = DISMISSED
+         *    3 = RESHOWN
+         * @hide
+         */
+        public static final String REVIEW_PERMISSIONS_NOTIFICATION_STATE =
+                "review_permissions_notification_state";
 
         /**
          * Settings migrated from Wear OS settings provider.
