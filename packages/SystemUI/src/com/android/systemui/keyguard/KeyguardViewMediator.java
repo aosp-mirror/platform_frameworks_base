@@ -779,16 +779,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         }
 
         @Override
-        public void onBouncerVisiblityChanged(boolean shown) {
-            synchronized (KeyguardViewMediator.this) {
-                if (shown) {
-                    mPendingPinLock = false;
-                }
-                adjustStatusBarLocked(shown, false);
-            }
-        }
-
-        @Override
         public void playTrustedSound() {
             KeyguardViewMediator.this.playTrustedSound();
         }
@@ -989,6 +979,19 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     private DozeParameters mDozeParameters;
 
     private final KeyguardStateController mKeyguardStateController;
+    private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
+            new KeyguardStateController.Callback() {
+        @Override
+        public void onBouncerShowingChanged() {
+            synchronized (KeyguardViewMediator.this) {
+                if (mKeyguardStateController.isBouncerShowing()) {
+                    mPendingPinLock = false;
+                }
+                adjustStatusBarLocked(mKeyguardStateController.isBouncerShowing(), false);
+            }
+        }
+    };
+
     private final Lazy<KeyguardUnlockAnimationController> mKeyguardUnlockAnimationControllerLazy;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private boolean mWallpaperSupportsAmbientMode;
@@ -1059,6 +1062,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         statusBarStateController.addCallback(this);
 
         mKeyguardStateController = keyguardStateController;
+        keyguardStateController.addCallback(mKeyguardStateControllerCallback);
         mKeyguardUnlockAnimationControllerLazy = keyguardUnlockAnimationControllerLazy;
         mScreenOffAnimationController = screenOffAnimationController;
         mInteractionJankMonitor = interactionJankMonitor;
