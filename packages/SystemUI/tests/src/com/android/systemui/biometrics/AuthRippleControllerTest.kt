@@ -32,7 +32,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.CentralSurfacesInt
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.leak.RotationUtils
@@ -61,7 +61,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     private lateinit var staticMockSession: MockitoSession
 
     private lateinit var controller: AuthRippleController
-    @Mock private lateinit var mCentralSurfaces: CentralSurfacesInt
+    @Mock private lateinit var mCentralSurfaces: CentralSurfaces
     @Mock private lateinit var rippleView: AuthRippleView
     @Mock private lateinit var commandRegistry: CommandRegistry
     @Mock private lateinit var configurationController: ConfigurationController

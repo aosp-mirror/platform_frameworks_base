@@ -114,7 +114,7 @@ public abstract class PanelViewController {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
 
-    protected CentralSurfacesInt mCentralSurfaces;
+    protected CentralSurfaces mCentralSurfaces;
     protected HeadsUpManagerPhone mHeadsUpManager;
     protected final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
 

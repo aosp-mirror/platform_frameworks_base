@@ -26,7 +26,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.ScreenOffAnimation
-import com.android.systemui.statusbar.phone.CentralSurfacesInt
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.unfold.FoldAodAnimationController.FoldAodAnimationStatus
 import com.android.systemui.util.settings.GlobalSettings
@@ -50,7 +50,7 @@ constructor(
     private val globalSettings: GlobalSettings
 ) : CallbackController<FoldAodAnimationStatus>, ScreenOffAnimation, WakefulnessLifecycle.Observer {
 
-    private lateinit var mCentralSurfaces: CentralSurfacesInt
+    private lateinit var mCentralSurfaces: CentralSurfaces
 
     private var isFolded = false
     private var isFoldHandled = true
@@ -72,7 +72,7 @@ constructor(
         }
     }
 
-    override fun initialize(centralSurfaces: CentralSurfacesInt, lightRevealScrim: LightRevealScrim) {
+    override fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {
         this.mCentralSurfaces = centralSurfaces
 
         deviceStateManager.registerCallback(executor, FoldListener())

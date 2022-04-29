@@ -25,7 +25,7 @@ import java.util.concurrent.Executor
 class KeyguardBottomAreaTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var mCentralSurfaces: CentralSurfacesInt
+    private lateinit var mCentralSurfaces: CentralSurfaces
     private lateinit var mKeyguardBottomArea: KeyguardBottomAreaView
 
     @Before
