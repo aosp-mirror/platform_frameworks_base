@@ -287,4 +287,14 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         verify(mView).initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
                 mUserSwitcherController);
     }
+
+    @Test
+    public void addUserSwitchCallback() {
+        mKeyguardSecurityContainerController.onViewAttached();
+        verify(mUserSwitcherController)
+                .addUserSwitchCallback(any(UserSwitcherController.UserSwitchCallback.class));
+        mKeyguardSecurityContainerController.onViewDetached();
+        verify(mUserSwitcherController)
+                .removeUserSwitchCallback(any(UserSwitcherController.UserSwitchCallback.class));
+    }
 }
