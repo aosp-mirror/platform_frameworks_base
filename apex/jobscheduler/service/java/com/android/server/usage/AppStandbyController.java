@@ -1155,6 +1155,12 @@ public class AppStandbyController
 
         final int appId = getAppId(packageName);
         if (appId < 0) return;
+        final int minBucket = getAppMinBucket(packageName, appId, userId);
+        if (idle && minBucket < AppIdleHistory.IDLE_BUCKET_CUTOFF) {
+            Slog.e(TAG, "Tried to force an app to be idle when its min bucket is "
+                    + standbyBucketToString(minBucket));
+            return;
+        }
         final long elapsedRealtime = mInjector.elapsedRealtime();
 
         final boolean previouslyIdle = isAppIdleFiltered(packageName, appId,
@@ -1166,12 +1172,10 @@ public class AppStandbyController
         final boolean stillIdle = isAppIdleFiltered(packageName, appId,
                 userId, elapsedRealtime);
         // Inform listeners if necessary
+        maybeInformListeners(packageName, userId, elapsedRealtime, standbyBucket,
+                REASON_MAIN_FORCED_BY_USER, false);
         if (previouslyIdle != stillIdle) {
-            maybeInformListeners(packageName, userId, elapsedRealtime, standbyBucket,
-                    REASON_MAIN_FORCED_BY_USER, false);
-            if (!stillIdle) {
-                notifyBatteryStats(packageName, userId, idle);
-            }
+            notifyBatteryStats(packageName, userId, stillIdle);
         }
     }
 
@@ -1934,6 +1938,8 @@ public class AppStandbyController
             }
             mAppIdleHistory.setAppStandbyBucket(
                     packageName, userId, elapsedRealtime, newBucket, newReason);
+            maybeInformListeners(packageName, userId, elapsedRealtime, newBucket,
+                    newReason, false);
         }
     }
 
@@ -2490,6 +2496,8 @@ public class AppStandbyController
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_INFORM_LISTENERS:
+                    // TODO(230875908): Properly notify BatteryStats when apps change from active to
+                    // idle, and vice versa
                     StandbyUpdateRecord r = (StandbyUpdateRecord) msg.obj;
                     informListeners(r.packageName, r.userId, r.bucket, r.reason,
                             r.isUserInteraction);
