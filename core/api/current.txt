@@ -53178,6 +53178,7 @@ package android.view.inputmethod {
     method public boolean isActive();
     method public boolean isFullscreenMode();
     method public boolean isInputMethodSuppressingSpellChecker();
+    method public boolean isStylusHandwritingAvailable();
     method @Deprecated public boolean isWatchingCursor(android.view.View);
     method public void restartInput(android.view.View);
     method public void sendAppPrivateCommand(android.view.View, String, android.os.Bundle);

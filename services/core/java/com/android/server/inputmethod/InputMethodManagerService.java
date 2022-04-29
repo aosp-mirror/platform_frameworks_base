@@ -2133,6 +2133,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
+    public boolean isStylusHandwritingAvailable() {
+        synchronized (ImfLock.class) {
+            return mBindingController.supportsStylusHandwriting();
+        }
+    }
+
     @GuardedBy("ImfLock.class")
     private List<InputMethodInfo> getInputMethodListLocked(@UserIdInt int userId,
             @DirectBootAwareness int directBootAwareness) {
@@ -5786,6 +5793,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         public void maybeFinishStylusHandwriting() {
             mHandler.removeMessages(MSG_FINISH_HANDWRITING);
             mHandler.obtainMessage(MSG_FINISH_HANDWRITING).sendToTarget();
+        }
+
+        @Override
+        public boolean isStylusHandwritingAvailable() {
+            return InputMethodManagerService.this.isStylusHandwritingAvailable();
         }
     }
 
