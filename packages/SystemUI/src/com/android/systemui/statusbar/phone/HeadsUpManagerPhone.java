@@ -176,7 +176,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             int minX = tmpArray[0];
             int maxX = tmpArray[0] + topRow.getWidth();
             int height = topRow.getIntrinsicHeight();
-            mTouchableRegion.set(minX, 0, maxX, mHeadsUpInset + height);
+            final boolean stretchToTop = tmpArray[1] <= mHeadsUpInset;
+            mTouchableRegion.set(minX, stretchToTop ? 0 : tmpArray[1], maxX, tmpArray[1] + height);
             return mTouchableRegion;
         }
     }
