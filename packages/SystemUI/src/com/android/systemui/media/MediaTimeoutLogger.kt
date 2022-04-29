@@ -102,6 +102,17 @@ class MediaTimeoutLogger @Inject constructor(
         }
     )
 
+    fun logStateCallback(key: String) = buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = key
+            },
+            {
+                "dispatching state update for $key"
+            }
+    )
+
     fun logScheduleTimeout(key: String, playing: Boolean, resumption: Boolean) = buffer.log(
         TAG,
         LogLevel.DEBUG,
