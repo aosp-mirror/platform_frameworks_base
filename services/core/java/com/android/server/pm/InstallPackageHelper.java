@@ -2545,7 +2545,6 @@ final class InstallPackageHelper {
         ArrayList<String>[] components;
         int size = 0;
         int[] uids;
-        Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
 
         synchronized (mPm.mLock) {
             final SparseArray<ArrayMap<String, ArrayList<String>>> userIdToPackagesToComponents =
@@ -2584,7 +2583,6 @@ final class InstallPackageHelper {
             mPm.sendPackageChangedBroadcast(snapshot, packages[i], true /* dontKillApp */,
                     components[i], uids[i], null /* reason */);
         }
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
     }
 
     void handlePackagePostInstall(PackageInstalledInfo res, InstallArgs installArgs,
@@ -4237,8 +4235,8 @@ final class InstallPackageHelper {
                 assertOverlayIsValid(pkg, parseFlags, scanFlags);
             }
 
-            // If the package is not on a system partition ensure it is signed with at least the
-            // minimum signature scheme version required for its target SDK.
+            // Ensure the package is signed with at least the minimum signature scheme version
+            // required for its target SDK.
             ScanPackageUtils.assertMinSignatureSchemeIsValid(pkg, parseFlags);
         }
     }

@@ -56,7 +56,7 @@
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
-    <string name="ClipMmi" msgid="4110549342447630629">"Nomor Penelepon Masuk"</string>
+    <string name="ClipMmi" msgid="4110549342447630629">"ID Penelepon Masuk"</string>
     <string name="ClirMmi" msgid="6752346475055446417">"Menyembunyikan ID Penelepon untuk Panggilan Keluar"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"ID Saluran yang Terhubung"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Batasan ID Saluran yang Terhubung"</string>
@@ -71,12 +71,12 @@
     <string name="RuacMmi" msgid="1876047385848991110">"Penolakan panggilan yang tidak diinginkan"</string>
     <string name="CndMmi" msgid="185136449405618437">"Pengiriman nomor panggilan"</string>
     <string name="DndMmi" msgid="8797375819689129800">"Jangan ganggu"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Nomor penelepon default \"dibatasi\". Panggilan selanjutnya: Dibatasi"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Nomor pengguna default \"dibatasi\". Panggilan selanjutnya: Tidak dibatasi."</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Nomor penelepon default tidak dibatasi. Panggilan selanjutnya: Dibatasi"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Nomor penelepon default tidak dibatasi. Panggilan selanjutnya: Tidak dibatasi"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ID penelepon diatur default ke \"dibatasi\". Panggilan selanjutnya: Dibatasi"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID penelepon diatur default ke \"dibatasi\". Panggilan selanjutnya: Tidak dibatasi."</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID penelepon diatur default ke tidak dibatasi. Panggilan selanjutnya: Dibatasi"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID penelepon diatur default ke tidak dibatasi. Panggilan selanjutnya: Tidak dibatasi"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Layanan tidak diperlengkapi."</string>
-    <string name="CLIRPermanent" msgid="166443681876381118">"Anda tidak dapat mengubah setelan nomor penelepon."</string>
+    <string name="CLIRPermanent" msgid="166443681876381118">"Anda tidak dapat mengubah setelan ID penelepon."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Tidak ada layanan data seluler"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Panggilan darurat tidak tersedia"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Tidak ada layanan panggilan suara"</string>
@@ -305,12 +305,17 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"mengakses kalender"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"mengirim dan melihat pesan SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"File &amp; dokumen"</string>
+    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
+    <skip />
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"mengakses file dan dokumen di perangkat Anda"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musik &amp; audio lainnya"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"mengakses file audio di perangkat Anda"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto &amp; video"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"mengakses file gambar dan video di perangkat Anda"</string>
+    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
+    <skip />
+    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"merekam audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Aktivitas fisik"</string>

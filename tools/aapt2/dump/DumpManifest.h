@@ -17,6 +17,7 @@
 #ifndef AAPT2_DUMP_MANIFEST_H
 #define AAPT2_DUMP_MANIFEST_H
 
+#include "ApkInfo.pb.h"
 #include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "text/Printer.h"
@@ -33,6 +34,9 @@ struct DumpManifestOptions {
 /** Print information extracted from the manifest of the APK. */
 int DumpManifest(LoadedApk* apk, DumpManifestOptions& options, text::Printer* printer,
                  IDiagnostics* diag);
+
+/** Extracts badging data from the manifest of the APK and stores it in Badging proto. */
+int DumpBadgingProto(LoadedApk* apk, pb::Badging* out_badging, IDiagnostics* diag);
 
 }  // namespace aapt
 

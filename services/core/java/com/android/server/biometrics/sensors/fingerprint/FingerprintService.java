@@ -48,7 +48,6 @@ import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.fingerprint.IFingerprint;
-import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -81,6 +80,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.ServiceThread;
@@ -95,12 +95,16 @@ import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintProvide
 import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21;
 import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21UdfpsMock;
 
+import com.google.android.collect.Lists;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A service to manage multiple clients that want to access the fingerprint HAL API.
@@ -116,10 +120,12 @@ public class FingerprintService extends SystemService {
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     private final LockPatternUtils mLockPatternUtils;
-    private final FingerprintServiceWrapper mServiceWrapper;
     @NonNull private final List<ServiceProvider> mServiceProviders;
     @NonNull private final BiometricStateCallback mBiometricStateCallback;
     @NonNull private final Handler mHandler;
+    @NonNull private final BiometricContext mBiometricContext;
+    @NonNull private final Supplier<IBiometricService> mBiometricServiceSupplier;
+    @NonNull private final Function<String, IFingerprint> mIFingerprintProvider;
 
     @GuardedBy("mLock")
     @NonNull private final RemoteCallbackList<IFingerprintAuthenticatorsRegisteredCallback>
@@ -170,7 +176,7 @@ public class FingerprintService extends SystemService {
     /**
      * Receives the incoming binder calls from FingerprintManager.
      */
-    private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
+    private final IFingerprintService.Stub mServiceWrapper = new IFingerprintService.Stub() {
         @Override
         public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
                 @NonNull String opPackageName) {
@@ -853,54 +859,6 @@ public class FingerprintService extends SystemService {
             mGestureAvailabilityDispatcher.removeCallback(callback);
         }
 
-        private void addHidlProviders(List<FingerprintSensorPropertiesInternal> hidlSensors) {
-            for (FingerprintSensorPropertiesInternal hidlSensor : hidlSensors) {
-                final Fingerprint21 fingerprint21;
-                if ((Build.IS_USERDEBUG || Build.IS_ENG)
-                        && getContext().getResources().getBoolean(R.bool.allow_test_udfps)
-                        && Settings.Secure.getIntForUser(getContext().getContentResolver(),
-                        Fingerprint21UdfpsMock.CONFIG_ENABLE_TEST_UDFPS, 0 /* default */,
-                        UserHandle.USER_CURRENT) != 0) {
-                    fingerprint21 = Fingerprint21UdfpsMock.newInstance(getContext(),
-                            mBiometricStateCallback, hidlSensor,
-                            mLockoutResetDispatcher, mGestureAvailabilityDispatcher,
-                            BiometricContext.getInstance(getContext()));
-                } else {
-                    fingerprint21 = Fingerprint21.newInstance(getContext(),
-                            mBiometricStateCallback, hidlSensor, mHandler,
-                            mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
-                }
-                mServiceProviders.add(fingerprint21);
-            }
-        }
-
-        private void addAidlProviders() {
-            final String[] instances = ServiceManager.getDeclaredInstances(IFingerprint.DESCRIPTOR);
-            if (instances == null || instances.length == 0) {
-                return;
-            }
-            for (String instance : instances) {
-                final String fqName = IFingerprint.DESCRIPTOR + "/" + instance;
-                final IFingerprint fp = IFingerprint.Stub.asInterface(
-                        Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
-                if (fp == null) {
-                    Slog.e(TAG, "Unable to get declared service: " + fqName);
-                    continue;
-                }
-                try {
-                    final SensorProps[] props = fp.getSensorProps();
-                    final FingerprintProvider provider =
-                            new FingerprintProvider(getContext(), mBiometricStateCallback, props,
-                                    instance, mLockoutResetDispatcher,
-                                    mGestureAvailabilityDispatcher,
-                                    BiometricContext.getInstance(getContext()));
-                    mServiceProviders.add(provider);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);
-                }
-            }
-        }
-
         @Override // Binder call
         public void registerAuthenticators(
                 @NonNull List<FingerprintSensorPropertiesInternal> hidlSensors) {
@@ -914,42 +872,16 @@ public class FingerprintService extends SystemService {
                     true /* allowIo */);
             thread.start();
             final Handler handler = new Handler(thread.getLooper());
-
             handler.post(() -> {
-                addHidlProviders(hidlSensors);
-                addAidlProviders();
-
-                final IBiometricService biometricService = IBiometricService.Stub.asInterface(
-                        ServiceManager.getService(Context.BIOMETRIC_SERVICE));
-
-                // Register each sensor individually with BiometricService
-                for (ServiceProvider provider : mServiceProviders) {
-                    final List<FingerprintSensorPropertiesInternal> props =
-                            provider.getSensorProperties();
-                    for (FingerprintSensorPropertiesInternal prop : props) {
-                        final int sensorId = prop.sensorId;
-                        final @BiometricManager.Authenticators.Types int strength =
-                                Utils.propertyStrengthToAuthenticatorStrength(prop.sensorStrength);
-                        final FingerprintAuthenticator authenticator = new FingerprintAuthenticator(
-                                mServiceWrapper, sensorId);
-                        try {
-                            biometricService.registerAuthenticator(sensorId, TYPE_FINGERPRINT,
-                                    strength, authenticator);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Remote exception when registering sensorId: " + sensorId);
-                        }
-                    }
+                List<String> aidlSensors = new ArrayList<>();
+                final String[] instances =
+                        ServiceManager.getDeclaredInstances(IFingerprint.DESCRIPTOR);
+                if (instances != null) {
+                    aidlSensors.addAll(Lists.newArrayList(instances));
                 }
-
-                synchronized (mLock) {
-                    for (ServiceProvider provider : mServiceProviders) {
-                        mSensorProps.addAll(provider.getSensorProperties());
-                    }
-                }
-
-                broadcastCurrentEnrollmentState(null); // broadcasts to all listeners
-                broadcastAllAuthenticatorsRegistered();
+                registerAuthenticatorsForService(aidlSensors, hidlSensors);
             });
+            thread.quitSafely();
         }
 
         @Override
@@ -1033,11 +965,25 @@ public class FingerprintService extends SystemService {
         public void registerBiometricStateListener(@NonNull IBiometricStateListener listener) {
             FingerprintService.this.registerBiometricStateListener(listener);
         }
-    }
+    };
 
     public FingerprintService(Context context) {
+        this(context, BiometricContext.getInstance(context),
+                () -> IBiometricService.Stub.asInterface(
+                        ServiceManager.getService(Context.BIOMETRIC_SERVICE)),
+                (fqName) -> IFingerprint.Stub.asInterface(
+                        Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName))));
+    }
+
+    @VisibleForTesting
+    FingerprintService(Context context,
+            BiometricContext biometricContext,
+            Supplier<IBiometricService> biometricServiceProvider,
+            Function<String, IFingerprint> fingerprintProvider) {
         super(context);
-        mServiceWrapper = new FingerprintServiceWrapper();
+        mBiometricContext = biometricContext;
+        mBiometricServiceSupplier = biometricServiceProvider;
+        mIFingerprintProvider = fingerprintProvider;
         mAppOps = context.getSystemService(AppOpsManager.class);
         mGestureAvailabilityDispatcher = new GestureAvailabilityDispatcher();
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
@@ -1047,6 +993,86 @@ public class FingerprintService extends SystemService {
         mAuthenticatorsRegisteredCallbacks = new RemoteCallbackList<>();
         mSensorProps = new ArrayList<>();
         mHandler = new Handler(Looper.getMainLooper());
+    }
+
+    @VisibleForTesting
+    void registerAuthenticatorsForService(@NonNull List<String> aidlInstanceNames,
+            @NonNull List<FingerprintSensorPropertiesInternal> hidlSensors) {
+        addHidlProviders(hidlSensors);
+        addAidlProviders(Utils.filterAvailableHalInstances(getContext(), aidlInstanceNames));
+
+        final IBiometricService biometricService = mBiometricServiceSupplier.get();
+
+        // Register each sensor individually with BiometricService
+        for (ServiceProvider provider : mServiceProviders) {
+            final List<FingerprintSensorPropertiesInternal> props =
+                    provider.getSensorProperties();
+            for (FingerprintSensorPropertiesInternal prop : props) {
+                final int sensorId = prop.sensorId;
+                @BiometricManager.Authenticators.Types final int strength =
+                        Utils.propertyStrengthToAuthenticatorStrength(prop.sensorStrength);
+                final FingerprintAuthenticator authenticator = new FingerprintAuthenticator(
+                        mServiceWrapper, sensorId);
+                try {
+                    biometricService.registerAuthenticator(sensorId, TYPE_FINGERPRINT,
+                            strength, authenticator);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception when registering sensorId: " + sensorId);
+                }
+            }
+        }
+
+        synchronized (mLock) {
+            for (ServiceProvider provider : mServiceProviders) {
+                mSensorProps.addAll(provider.getSensorProperties());
+            }
+        }
+
+        broadcastCurrentEnrollmentState(null); // broadcasts to all listeners
+        broadcastAllAuthenticatorsRegistered();
+    }
+
+    private void addHidlProviders(List<FingerprintSensorPropertiesInternal> hidlSensors) {
+        for (FingerprintSensorPropertiesInternal hidlSensor : hidlSensors) {
+            final Fingerprint21 fingerprint21;
+            if ((Build.IS_USERDEBUG || Build.IS_ENG)
+                    && getContext().getResources().getBoolean(R.bool.allow_test_udfps)
+                    && Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                    Fingerprint21UdfpsMock.CONFIG_ENABLE_TEST_UDFPS, 0 /* default */,
+                    UserHandle.USER_CURRENT) != 0) {
+                fingerprint21 = Fingerprint21UdfpsMock.newInstance(getContext(),
+                        mBiometricStateCallback, hidlSensor,
+                        mLockoutResetDispatcher, mGestureAvailabilityDispatcher,
+                        BiometricContext.getInstance(getContext()));
+            } else {
+                fingerprint21 = Fingerprint21.newInstance(getContext(),
+                        mBiometricStateCallback, hidlSensor, mHandler,
+                        mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
+            }
+            mServiceProviders.add(fingerprint21);
+        }
+    }
+
+    private void addAidlProviders(List<String> instances) {
+        for (String instance : instances) {
+            final String fqName = IFingerprint.DESCRIPTOR + "/" + instance;
+            final IFingerprint fp = mIFingerprintProvider.apply(fqName);
+
+            if (fp != null) {
+                try {
+                    final FingerprintProvider provider = new FingerprintProvider(getContext(),
+                            mBiometricStateCallback, fp.getSensorProps(), instance,
+                            mLockoutResetDispatcher, mGestureAvailabilityDispatcher,
+                            mBiometricContext);
+                    Slog.i(TAG, "Adding AIDL provider: " + fqName);
+                    mServiceProviders.add(provider);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);
+                }
+            } else {
+                Slog.e(TAG, "Unable to get declared service: " + fqName);
+            }
+        }
     }
 
     // Notifies the callbacks that all of the authenticators have been registered and removes the

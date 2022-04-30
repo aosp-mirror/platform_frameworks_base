@@ -490,7 +490,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
 
         // Commit all going-invisible containers
-        boolean activitiesWentInvisible = false;
         for (int i = 0; i < mParticipants.size(); ++i) {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
             if (ar != null) {
@@ -541,7 +540,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                         }
                         ar.commitVisibility(false /* visible */, false /* performLayout */,
                                 true /* fromTransition */);
-                        activitiesWentInvisible = true;
                     }
                 }
                 if (mChanges.get(ar).mVisible != visibleAtTransitionEnd) {
@@ -568,12 +566,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 mController.dispatchLegacyAppTransitionFinished(ar);
             }
         }
-        if (activitiesWentInvisible) {
-            // Always schedule stop processing when transition finishes because activities don't
-            // stop while they are in a transition thus their stop could still be pending.
-            mController.mAtm.mTaskSupervisor
-                    .scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
-        }
+        // Always schedule stop processing when transition finishes because activities don't
+        // stop while they are in a transition thus their stop could still be pending.
+        mController.mAtm.mTaskSupervisor
+                .scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
 
         sendRemoteCallback(mClientAnimationFinishCallback);
 

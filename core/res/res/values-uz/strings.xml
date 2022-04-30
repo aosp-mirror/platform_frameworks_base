@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"taqvimingizga kirish"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS xabarlarni yuborish va ko‘rish"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fayl va hujjatlar"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fayl va hujjatlar"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"qurilmangizdagi fayl va hujjatlarga kirish"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musiqa va boshqa audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"qurilmangizdagi audio fayllarga kirish"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Suratlar va videolar"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"qurilmangizdagi rasm va video fayllarga kirish"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musiqa va audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"qurilmadagi musiqa va audioga ruxsat"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Video va suratlar"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"qurilmadagi rasm va videolarga ruxsat"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ovoz yozib olish"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Jismoniy harakatlar"</string>

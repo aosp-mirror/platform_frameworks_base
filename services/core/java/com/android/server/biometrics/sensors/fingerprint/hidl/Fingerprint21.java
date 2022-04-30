@@ -801,32 +801,35 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @Override
     public void onPointerDown(long requestId, int sensorId, int x, int y,
             float minor, float major) {
-        final BaseClientMonitor client = mScheduler.getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.w(TAG, "onFingerDown received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onPointerDown(x, y, minor, major);
+        mScheduler.getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.w(TAG, "onFingerDown received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onPointerDown(x, y, minor, major);
+        });
     }
 
     @Override
     public void onPointerUp(long requestId, int sensorId) {
-        final BaseClientMonitor client = mScheduler.getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.w(TAG, "onFingerDown received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onPointerUp();
+        mScheduler.getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.w(TAG, "onFingerDown received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onPointerUp();
+        });
     }
 
     @Override
     public void onUiReady(long requestId, int sensorId) {
-        final BaseClientMonitor client = mScheduler.getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.w(TAG, "onUiReady received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onUiReady();
+        mScheduler.getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.w(TAG, "onUiReady received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onUiReady();
+        });
     }
 
     @Override

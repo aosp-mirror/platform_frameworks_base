@@ -772,8 +772,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
             flagValues &= ~PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
-            // REVIEW_REQUIRED can only be set by non-system apps for POST_NOTIFICATIONS, or by the
-            // shell or root UID.
+            // REVIEW_REQUIRED can be set on any permission by the shell or the root uid, or by
+            // any app for the POST_NOTIFICATIONS permission specifically.
             if (!POST_NOTIFICATIONS.equals(permName) && callingUid != Process.SHELL_UID
                     && callingUid != Process.ROOT_UID) {
                 flagValues &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;

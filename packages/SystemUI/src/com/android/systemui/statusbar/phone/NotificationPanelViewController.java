@@ -885,7 +885,10 @@ public class NotificationPanelViewController extends PanelViewController {
 
                     @Override
                     public void onUnlockAnimationStarted(
-                            boolean playingCannedAnimation, boolean isWakeAndUnlock) {
+                            boolean playingCannedAnimation,
+                            boolean isWakeAndUnlock,
+                            long unlockAnimationStartDelay,
+                            long unlockAnimationDuration) {
                         // Disable blurs while we're unlocking so that panel expansion does not
                         // cause blurring. This will eventually be re-enabled by the panel view on
                         // ACTION_UP, since the user's finger might still be down after a swipe to
@@ -902,7 +905,22 @@ public class NotificationPanelViewController extends PanelViewController {
                                 onTrackingStopped(false);
                                 instantCollapse();
                             } else {
-                                fling(0f, false, 1f, false);
+                                mView.animate()
+                                        .alpha(0f)
+                                        .setStartDelay(0)
+                                        // Translate up by 4%.
+                                        .translationY(mView.getHeight() * -0.04f)
+                                        // This start delay is to give us time to animate out before
+                                        // the launcher icons animation starts, so use that as our
+                                        // duration.
+                                        .setDuration(unlockAnimationStartDelay)
+                                        .setInterpolator(EMPHASIZED_DECELERATE)
+                                        .withEndAction(() -> {
+                                            instantCollapse();
+                                            mView.setAlpha(1f);
+                                            mView.setTranslationY(0f);
+                                        })
+                                        .start();
                             }
                         }
                     }
@@ -3178,12 +3196,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mFalsingCollector.onTrackingStarted(!mKeyguardStateController.canDismissLockScreen());
         super.onTrackingStarted();
         mScrimController.onTrackingStarted();
-        // normally we want to set mQsExpandImmediate for every split shade case (at least when
-        // expanding), but keyguard tracking logic is different - this callback is called when
-        // unlocking with swipe up but not when swiping down to reveal shade
-        if (mShouldUseSplitNotificationShade && !mKeyguardShowing) {
-            mQsExpandImmediate = true;
-        }
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
             setShowShelfOnly(true);
@@ -4930,6 +4942,12 @@ public class NotificationPanelViewController extends PanelViewController {
             mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
         if (state == STATE_OPENING) {
+            // we need to ignore it on keyguard as this is a false alarm - transition from unlocked
+            // to locked will trigger this event and we're not actually in the process of opening
+            // the shade, lockscreen is just always expanded
+            if (mShouldUseSplitNotificationShade && !isOnKeyguard()) {
+                mQsExpandImmediate = true;
+            }
             mCentralSurfaces.makeExpandedVisible(false);
         }
         if (state == STATE_CLOSED) {

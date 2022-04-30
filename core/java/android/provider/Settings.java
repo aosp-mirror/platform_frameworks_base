@@ -16885,22 +16885,6 @@ public final class Settings {
         public static final String SHOW_NEW_NOTIF_DISMISS = "show_new_notif_dismiss";
 
         /**
-         * Block untrusted touches mode.
-         *
-         * Can be one of:
-         * <ul>
-         *      <li>0 = {@link BlockUntrustedTouchesMode#DISABLED}: Feature is off.
-         *      <li>1 = {@link BlockUntrustedTouchesMode#PERMISSIVE}: Untrusted touches are flagged
-         *          but not blocked
-         *      <li>2 = {@link BlockUntrustedTouchesMode#BLOCK}: Untrusted touches are blocked
-         * </ul>
-         *
-         * @hide
-         */
-        @Readable
-        public static final String BLOCK_UNTRUSTED_TOUCHES_MODE = "block_untrusted_touches";
-
-        /**
          * The maximum allowed obscuring opacity by UID to propagate touches.
          *
          * For certain window types (eg. SAWs), the decision of honoring {@link LayoutParams

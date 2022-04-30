@@ -164,6 +164,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         @Override
         public void onVisibilityChanged(boolean isVisible) {
+            mCentralSurfaces
+                    .setBouncerShowingOverDream(
+                            isVisible && mDreamOverlayStateController.isOverlayActive());
+
             if (!isVisible) {
                 mCentralSurfaces.setBouncerHiddenFraction(KeyguardBouncer.EXPANSION_HIDDEN);
             }

@@ -134,6 +134,10 @@ class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements 
             newBoundServiceInfo = null;
         }
 
+        // if the current connection is not connected, always force a rebind, helping with earlier
+        // recovery when something goes wrong with a connection.
+        forceRebind |= !mServiceConnection.isConnected();
+
         if (forceRebind || !Objects.equals(mServiceConnection.getBoundServiceInfo(),
                 newBoundServiceInfo)) {
             Log.i(TAG, "[" + mTag + "] chose new implementation " + newBoundServiceInfo);

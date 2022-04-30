@@ -68,8 +68,6 @@ public interface NativeInputManagerService {
 
     void setMaximumObscuringOpacityForTouch(float opacity);
 
-    void setBlockUntrustedTouchesMode(int mode);
-
     int injectInputEvent(InputEvent event, int pid, int uid, int syncMode,
             int timeoutMillis, int policyFlags);
 
@@ -232,9 +230,6 @@ public interface NativeInputManagerService {
 
         @Override
         public native void setMaximumObscuringOpacityForTouch(float opacity);
-
-        @Override
-        public native void setBlockUntrustedTouchesMode(int mode);
 
         @Override
         public native int injectInputEvent(InputEvent event, int pid, int uid, int syncMode,
