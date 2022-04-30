@@ -881,7 +881,7 @@ public class RippleDrawable extends LayerDrawable {
         mAddRipple = false;
         if (mRunningAnimations.size() > 0 && !addRipple) {
             // update paint when view is invalidated
-            getRipplePaint();
+            updateRipplePaint();
         }
         drawContent(canvas);
         drawPatternedBackground(canvas, cx, cy);
@@ -940,7 +940,7 @@ public class RippleDrawable extends LayerDrawable {
             startBackgroundAnimation();
         }
         if (mBackgroundOpacity == 0) return;
-        Paint p = getRipplePaint();
+        Paint p = updateRipplePaint();
         float newOpacity = mBackgroundOpacity;
         final int origAlpha = p.getAlpha();
         final int alpha = Math.min((int) (origAlpha * newOpacity + 0.5f), 255);
@@ -968,7 +968,7 @@ public class RippleDrawable extends LayerDrawable {
     @NonNull
     private RippleAnimationSession.AnimationProperties<Float, Paint> createAnimationProperties(
             float x, float y, float cx, float cy, float w, float h) {
-        Paint p = new Paint(getRipplePaint());
+        Paint p = new Paint(updateRipplePaint());
         float radius = getComputedRadius();
         RippleAnimationSession.AnimationProperties<Float, Paint> properties;
         RippleShader shader = new RippleShader();
@@ -1108,11 +1108,6 @@ public class RippleDrawable extends LayerDrawable {
             drawContent(mMaskCanvas);
         }
         mMaskCanvas.restoreToCount(saveCount);
-        if (mState.mRippleStyle == STYLE_PATTERNED) {
-            for (int i = 0; i < mRunningAnimations.size(); i++) {
-                mRunningAnimations.get(i).getProperties().getShader().setShader(mMaskShader);
-            }
-        }
     }
 
     private int getMaskType() {
@@ -1169,7 +1164,7 @@ public class RippleDrawable extends LayerDrawable {
         final float y = mHotspotBounds.exactCenterY();
         canvas.translate(x, y);
 
-        final Paint p = getRipplePaint();
+        final Paint p = updateRipplePaint();
 
         if (background != null && background.isVisible()) {
             background.draw(canvas, p);
@@ -1194,7 +1189,7 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     @UnsupportedAppUsage
-    Paint getRipplePaint() {
+    Paint updateRipplePaint() {
         if (mRipplePaint == null) {
             mRipplePaint = new Paint();
             mRipplePaint.setAntiAlias(true);
@@ -1215,6 +1210,12 @@ public class RippleDrawable extends LayerDrawable {
                 mMaskMatrix.setTranslate(bounds.left - x, bounds.top - y);
             }
             mMaskShader.setLocalMatrix(mMaskMatrix);
+
+            if (mState.mRippleStyle == STYLE_PATTERNED) {
+                for (int i = 0; i < mRunningAnimations.size(); i++) {
+                    mRunningAnimations.get(i).getProperties().getShader().setShader(mMaskShader);
+                }
+            }
         }
 
         // Grab the color for the current state and cut the alpha channel in
