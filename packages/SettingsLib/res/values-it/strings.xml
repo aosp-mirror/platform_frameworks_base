@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annulla"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"L\'accoppiamento consente l\'accesso ai tuoi contatti e alla cronologia chiamate quando i dispositivi sono connessi."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. La passkey o il PIN sono errati."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. La password o il PIN sono errati."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Impossibile comunicare con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Accoppiamento rifiutato da <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -529,7 +529,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Sveglie e promemoria"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Consenti l\'impostazione di sveglie e promemoria"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Sveglie e promemoria"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Consenti a questa app di impostare sveglie e programmare azioni per le quali il fattore temporale è decisivo. L\'app potrà essere eseguita in background, comportando un consumo maggiore della batteria.\n\nSe questa autorizzazione viene disattivata, le sveglie esistenti e gli eventi basati sull\'orario programmati da questa app non funzioneranno."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Consenti a questa app di impostare sveglie e programmare azioni per orari specifici. L\'app potrà essere eseguita in background, comportando un consumo maggiore della batteria.\n\nSe questa autorizzazione viene disattivata, le sveglie esistenti e gli eventi basati sull\'orario programmati da questa app non funzioneranno."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programmare, sveglia, promemoria, orologio"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Attiva"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Attiva Non disturbare"</string>
