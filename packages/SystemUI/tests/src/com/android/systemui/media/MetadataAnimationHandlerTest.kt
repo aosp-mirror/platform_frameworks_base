@@ -18,7 +18,6 @@ package com.android.systemui.media
 
 import org.mockito.Mockito.`when` as whenever
 import android.animation.Animator
-import android.animation.AnimatorSet
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -44,7 +43,6 @@ class MetadataAnimationHandlerTest : SysuiTestCase() {
     private interface Callback : () -> Unit
     private lateinit var handler: MetadataAnimationHandler
 
-    @Mock private lateinit var animatorSet: AnimatorSet
     @Mock private lateinit var enterAnimator: Animator
     @Mock private lateinit var exitAnimator: Animator
     @Mock private lateinit var postExitCB: Callback
@@ -54,11 +52,7 @@ class MetadataAnimationHandlerTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        handler = object : MetadataAnimationHandler(exitAnimator, enterAnimator) {
-            override fun buildAnimatorSet(exit: Animator, enter: Animator): AnimatorSet {
-                return animatorSet
-            }
-        }
+        handler = MetadataAnimationHandler(exitAnimator, enterAnimator)
     }
 
     @After
@@ -69,22 +63,31 @@ class MetadataAnimationHandlerTest : SysuiTestCase() {
         val cb = { fail("Unexpected callback") }
         handler.setNext("data-1", cb, cb)
 
-        verify(animatorSet).start()
+        verify(exitAnimator).start()
     }
 
     @Test
     fun executeAnimationEnd_runsCallacks() {
+        // We expect this first call to only start the exit animator
         handler.setNext("data-1", postExitCB, postEnterCB)
-        verify(animatorSet, times(1)).start()
+        verify(exitAnimator, times(1)).start()
+        verify(enterAnimator, never()).start()
         verify(postExitCB, never()).invoke()
+        verify(postEnterCB, never()).invoke()
 
+        // After the exit animator completes,
+        // the exit cb should run, and enter animation should start
         handler.onAnimationEnd(exitAnimator)
-        verify(animatorSet, times(1)).start()
+        verify(exitAnimator, times(1)).start()
+        verify(enterAnimator, times(1)).start()
         verify(postExitCB, times(1)).invoke()
         verify(postEnterCB, never()).invoke()
 
+        // After the exit animator completes,
+        // the enter cb should run without other state changes
         handler.onAnimationEnd(enterAnimator)
-        verify(animatorSet, times(1)).start()
+        verify(exitAnimator, times(1)).start()
+        verify(enterAnimator, times(1)).start()
         verify(postExitCB, times(1)).invoke()
         verify(postEnterCB, times(1)).invoke()
     }
@@ -120,38 +123,58 @@ class MetadataAnimationHandlerTest : SysuiTestCase() {
         val postExitCB2 = mock(Callback::class.java)
         val postEnterCB2 = mock(Callback::class.java)
 
+        // We expect this first call to only start the exit animator
         handler.setNext("data-1", postExitCB, postEnterCB)
-        verify(animatorSet, times(1)).start()
+        verify(exitAnimator, times(1)).start()
+        verify(enterAnimator, never()).start()
         verify(postExitCB, never()).invoke()
         verify(postExitCB2, never()).invoke()
         verify(postEnterCB, never()).invoke()
         verify(postEnterCB2, never()).invoke()
 
-        whenever(animatorSet.isRunning()).thenReturn(true)
+        // After the exit animator completes,
+        // the exit cb should run, and enter animation should start
+        whenever(exitAnimator.isRunning()).thenReturn(true)
+        whenever(enterAnimator.isRunning()).thenReturn(false)
         handler.onAnimationEnd(exitAnimator)
-        verify(animatorSet, times(1)).start()
+        verify(exitAnimator, times(1)).start()
+        verify(enterAnimator, times(1)).start()
         verify(postExitCB, times(1)).invoke()
         verify(postExitCB2, never()).invoke()
         verify(postEnterCB, never()).invoke()
         verify(postEnterCB2, never()).invoke()
 
+        // Setting new data before the enter animator completes should not trigger
+        // the exit animator an additional time (since it's already running)
+        whenever(exitAnimator.isRunning()).thenReturn(false)
+        whenever(enterAnimator.isRunning()).thenReturn(true)
         handler.setNext("data-2", postExitCB2, postEnterCB2)
+        verify(exitAnimator, times(1)).start()
+
+        // Finishing the enterAnimator should cause the exitAnimator to fire again
+        // since the data change and additional time. No enterCB should be executed.
         handler.onAnimationEnd(enterAnimator)
-        verify(animatorSet, times(2)).start()
+        verify(exitAnimator, times(2)).start()
+        verify(enterAnimator, times(1)).start()
         verify(postExitCB, times(1)).invoke()
         verify(postExitCB2, never()).invoke()
         verify(postEnterCB, never()).invoke()
         verify(postEnterCB2, never()).invoke()
 
+        // Continuing the sequence, this triggers the enter animator an additional time
         handler.onAnimationEnd(exitAnimator)
-        verify(animatorSet, times(2)).start()
+        verify(exitAnimator, times(2)).start()
+        verify(enterAnimator, times(2)).start()
         verify(postExitCB, times(1)).invoke()
         verify(postExitCB2, times(1)).invoke()
         verify(postEnterCB, never()).invoke()
         verify(postEnterCB2, never()).invoke()
 
+        // And finally the enter animator completes,
+        // triggering the correct postEnterCallback to fire
         handler.onAnimationEnd(enterAnimator)
-        verify(animatorSet, times(2)).start()
+        verify(exitAnimator, times(2)).start()
+        verify(enterAnimator, times(2)).start()
         verify(postExitCB, times(1)).invoke()
         verify(postExitCB2, times(1)).invoke()
         verify(postEnterCB, never()).invoke()
@@ -172,6 +195,7 @@ class MetadataAnimationHandlerTest : SysuiTestCase() {
     fun enterAnimatorEndsWithoutCallback_noAnimatiorStart() {
         handler.onAnimationEnd(enterAnimator)
 
-        verify(animatorSet, never()).start()
+        verify(exitAnimator, never()).start()
+        verify(enterAnimator, never()).start()
     }
 }
