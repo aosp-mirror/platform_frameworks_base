@@ -38,6 +38,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
+import com.android.systemui.shared.recents.utilities.Utilities
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
@@ -816,6 +817,12 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // dismiss. In this case, the smartspace swiped away with the rest of the keyguard, so don't
         // do the shared element transition.
         if (keyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture) {
+            return false
+        }
+
+        // We don't do the shared element on tablets because they're large and the smartspace has to
+        // fly across large distances, which is distracting.
+        if (Utilities.isTablet(context)) {
             return false
         }
 
