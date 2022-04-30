@@ -168,15 +168,6 @@
       "name": "CtsIncrementalInstallHostTestCases"
     },
     {
-      "name": "CtsInstallHostTestCases"
-    },
-    {
-      "name": "CtsStagedInstallHostTestCases"
-    },
-    {
-      "name": "CtsExtractNativeLibsHostTestCases"
-    },
-    {
       "name": "CtsAppSecurityHostTestCases",
       "options": [
         {
@@ -188,32 +179,10 @@
       ]
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.pm.PackageParserTest"
-        }
-      ]
-    },
-    {
-      "name": "CtsRollbackManagerHostTestCases"
-    },
-    {
       "name": "CtsContentTestCases",
       "options": [
         {
           "include-filter": "android.content.cts.IntentFilterTest"
-        }
-      ]
-    },
-    {
-      "name": "CtsAppEnumerationTestCases"
-    },
-    {
-      "name": "PackageManagerServiceUnitTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.pm.test.verify.domain"
         }
       ]
     }

@@ -6348,7 +6348,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // starting window is drawn, the transition can start earlier. Exclude finishing and bubble
         // because it may be a trampoline.
         if (!wasTaskVisible && mStartingData != null && !finishing && !mLaunchedFromBubble
-                && !mDisplayContent.mAppTransition.isReady()
+                && mVisibleRequested && !mDisplayContent.mAppTransition.isReady()
                 && !mDisplayContent.mAppTransition.isRunning()
                 && mDisplayContent.isNextTransitionForward()) {
             // The pending transition state will be cleared after the transition is started, so
@@ -9658,6 +9658,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     boolean isSyncFinished() {
         if (!super.isSyncFinished()) return false;
+        if (mDisplayContent != null && mDisplayContent.mUnknownAppVisibilityController
+                .isVisibilityUnknown(this)) {
+            return false;
+        }
         if (!isVisibleRequested()) return true;
         // Wait for attach. That is the earliest time where we know if there will be an associated
         // display rotation. If we don't wait, the starting-window can finishDrawing first and
