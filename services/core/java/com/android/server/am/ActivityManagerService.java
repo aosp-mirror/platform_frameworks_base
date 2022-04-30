@@ -7156,6 +7156,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
                     "getUidProcessState");
         }
+        // In case the caller is requesting processState of an app in a different user,
+        // then verify the caller has INTERACT_ACROSS_USERS_FULL permission
+        mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                UserHandle.getUserId(uid), false /* allowAll */, ALLOW_FULL_ONLY,
+                "getUidProcessState", callingPackage); // Ignore return value
 
         synchronized (mProcLock) {
             if (mPendingStartActivityUids.isPendingTopUid(uid)) {
@@ -7171,6 +7176,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
                     "getUidProcessState");
         }
+        // In case the caller is requesting processCapabilities of an app in a different user,
+        // then verify the caller has INTERACT_ACROSS_USERS_FULL permission
+        mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                UserHandle.getUserId(uid), false /* allowAll */, ALLOW_FULL_ONLY,
+                "getUidProcessCapabilities", callingPackage); // Ignore return value
 
         synchronized (mProcLock) {
             return mProcessList.getUidProcessCapabilityLOSP(uid);
