@@ -118,7 +118,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Бас тарту"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Жұптасқан кезде, контактілеріңіз бен қоңыраулар тарихын көру мүмкіндігі беріледі."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> жұпталу орындалмады."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысымен жұптаса алмады, себебі PIN немесе құпия сөз дұрыс емес."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысымен жұптаса алмады, себебі PIN немесе рұқсат кілті дұрыс емес."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысымен қатынаса алмайды"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысы жұпталудан бас тартты."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>
@@ -465,7 +465,7 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Зарядталды"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Әкімші басқарады"</string>
     <string name="disabled" msgid="8017887509554714950">"Өшірілген"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Рұқсат етілген"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Рұқсат берілген"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Рұқсат етілмеген"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Белгісіз қолданбаларды орнату"</string>
     <string name="home" msgid="973834627243661438">"Параметрлер негізгі беті"</string>
@@ -507,7 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Оятқыш және еске салғыш"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Оятқыштар мен еске салғыштарды орнатуға рұқсат беру"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Оятқыштар мен еске салғыштар"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Бұл қолданбаға оятқыштарды орнатуға және уақытқа негізделген әрекеттерді жоспарлауға рұқсат береді. Мұндайда қолданба фондық режимде жұмыс істейді, сондықтан батарея шығыны артуы мүмкін.\n\nБұл рұқсат өшірулі болса, осы қолданбада жоспарланған ағымдағы оятқыштар мен уақытқа негізделген іс-шаралар жұмыс істемейді."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Бұл қолданбаға оятқыштарды орнатуға және уақытқа байланысты әрекеттерді жоспарлауға рұқсат береді. Мұндайда қолданба фондық режимде жұмыс істейді, сондықтан батарея шығыны артуы мүмкін.\n\nБұл рұқсат өшірулі болса, осы қолданбада жоспарланған ағымдағы оятқыштар мен уақытқа байланысты іс-шаралар жұмыс істемейді."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"кесте, оятқыш, еске салғыш, сағат"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Қосу"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Мазаламау режимін қосу"</string>
@@ -547,7 +547,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Шектелген профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңа пайдаланушы қосылсын ба?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Қосымша профильдер жасай отырып, бұл құрылғыны басқалармен ортақ пайдалануға болады. Әр пайдаланушы қолданбаларды, тұсқағаздарды орнатып, профилін өз қалауынша реттей алады. Сондай-ақ барлығы ортақ қолданатын Wi‑Fi сияқты параметрлерді де реттеуге болады.\n\nЖаңа пайдаланушы енгізілгенде, ол өз профилін реттеуі керек болады.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады. Арнайы мүмкіндіктерге қатысты параметрлер мен қызметтер жаңа пайдаланушыға өтпейді."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңа пайдаланушыны қосқанда сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңа пайдаланушыны қосқанда, сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профиль құру керек пе?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Пайдаланушы құрылғыны алып, өз профилін реттеуі керек."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайл қазір жасақталсын ба?"</string>

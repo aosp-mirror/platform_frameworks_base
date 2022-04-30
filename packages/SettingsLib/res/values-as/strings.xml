@@ -372,9 +372,9 @@
     <string name="app_process_limit_title" msgid="8361367869453043007">"নেপথ্যত চলা প্ৰক্ৰিয়াৰ সীমা"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"নেপথ্য এএনআৰবোৰ দেখুৱাওক"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"নেপথ্য এপসমূহৰ বাবে এপে সঁহাৰি দিয়া নাই ডায়ল\'গ প্ৰদৰ্শন কৰক"</string>
-    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"জাননী চ্চেনেলৰ সকীয়নিসমূহ দেখুৱাওক"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"জাননী চেনেলৰ সকীয়নিবোৰ দেখুৱাওক"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"কোনো এপে বৈধ চেনেল নোহোৱাকৈ কোনো জাননী প\'ষ্ট কৰিলে স্ক্ৰীনত সকীয়নি প্ৰদৰ্শন হয়"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"বাহ্যিক সঞ্চয়াগাৰত এপক বলেৰে অনুমতি দিয়ক"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"বাহ্যিক ষ্ট\'ৰেজত এপক বলেৰে অনুমতি দিয়ক"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"মেনিফেষ্টৰ মান যিয়েই নহওক, বাহ্যিক ষ্ট’ৰেজত লিখিবলৈ যিকোনো এপক উপযুক্ত কৰি তোলে"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"বলেৰে কাৰ্যকলাপসমূহৰ আকাৰ সলনি কৰিব পৰা কৰক"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"মেনিফেষ্টৰ মান যিয়েই নহওক, মাল্টি-ৱিণ্ডৰ বাবে আটাইবোৰ কাৰ্যকলাপৰ আকাৰ সলনি কৰিব পৰা কৰক।"</string>
@@ -564,7 +564,7 @@
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"নতুন ব্যৱহাৰকাৰী সৃষ্টি কৰি থকা হৈছে…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"নতুন ব্যৱহাৰকাৰী সৃষ্টি কৰিব পৰা নগ’ল"</string>
     <string name="user_nickname" msgid="262624187455825083">"উপনাম"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"অতিথি যোগ কৰক"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"অতিথি যোগ দিয়ক"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"অতিথি আঁতৰাওক"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"অতিথিৰ ছেশ্বন ৰিছেট কৰক"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"অতিথি"</string>

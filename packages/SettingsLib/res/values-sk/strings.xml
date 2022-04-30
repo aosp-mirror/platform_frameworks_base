@@ -68,7 +68,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Prebieha odpájanie..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Prebieha pripájanie…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Pripojené k zariadeniu <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Párovanie..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Páruje sa..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Pripojené k zariadeniu <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (bez telefónu)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Pripojené k zariadeniu <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (bez médií)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Pripojené k <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (bez prístupu k správam)"</string>
@@ -375,9 +375,9 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Zobraziť hlásenia kanála upozornení"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Zobrazovať na obrazovke varovné hlásenie, keď aplikácia zverejní upozornenie bez platného kanála"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Vynútiť povolenie aplikácií na externom úložisku"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožňuje zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožniť zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Vynútiť možnosť zmeny veľkosti aktivít"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Veľkosti všetkých aktivít bude možné zmeniť na niekoľko okien (bez ohľadu na hodnoty manifestu)."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Umožniť veľkosť všetkých aktivít na niekoľko okien (bez ohľadu na hodnoty manifestu)"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Povoliť okná s voľným tvarom"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Povoliť podporu pre experimentálne okná s voľným tvarom"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Heslo pre zálohy v počítači"</string>
