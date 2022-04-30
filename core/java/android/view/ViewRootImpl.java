@@ -559,7 +559,7 @@ public final class ViewRootImpl implements ViewParent,
     private final Rect mVisRect = new Rect(); // used to retrieve visible rect of focused view.
     private final Rect mTempRect = new Rect();
 
-    private final WindowLayout mWindowLayout = new WindowLayout();
+    private final WindowLayout mWindowLayout;
 
     private ViewRootImpl mParentViewRoot;
 
@@ -854,18 +854,20 @@ public final class ViewRootImpl implements ViewParent,
     private String mTag = TAG;
 
     public ViewRootImpl(Context context, Display display) {
-        this(context, display, WindowManagerGlobal.getWindowSession(),
+        this(context, display, WindowManagerGlobal.getWindowSession(), new WindowLayout(),
                 false /* useSfChoreographer */);
     }
 
-    public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session) {
-        this(context, display, session, false /* useSfChoreographer */);
+    public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session,
+            WindowLayout windowLayout) {
+        this(context, display, session, windowLayout, false /* useSfChoreographer */);
     }
 
     public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session,
-            boolean useSfChoreographer) {
+            WindowLayout windowLayout, boolean useSfChoreographer) {
         mContext = context;
         mWindowSession = session;
+        mWindowLayout = windowLayout;
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
         mThread = Thread.currentThread();

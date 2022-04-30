@@ -35,6 +35,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
@@ -1166,7 +1167,8 @@ public final class PermissionPolicyService extends SystemService {
                             ActivityInterceptorInfo info) {
                         super.onActivityLaunched(taskInfo, activityInfo, info);
                         if (!shouldShowNotificationDialogOrClearFlags(taskInfo,
-                                activityInfo.packageName, info.intent, info.checkedOptions, true)
+                                activityInfo.packageName, info.callingPackage, info.intent,
+                                info.checkedOptions, activityInfo.name, true)
                                 || isNoDisplayActivity(activityInfo)) {
                             return;
                         }
@@ -1237,9 +1239,9 @@ public final class PermissionPolicyService extends SystemService {
 
         @Override
         public boolean shouldShowNotificationDialogForTask(TaskInfo taskInfo, String currPkg,
-                Intent intent) {
-            return shouldShowNotificationDialogOrClearFlags(
-                    taskInfo, currPkg, intent, null, false);
+                String callingPkg, Intent intent, String activityName) {
+            return shouldShowNotificationDialogOrClearFlags(taskInfo, currPkg, callingPkg, intent,
+                    null, activityName, false);
         }
 
         private boolean isNoDisplayActivity(@NonNull ActivityInfo aInfo) {
@@ -1265,23 +1267,61 @@ public final class PermissionPolicyService extends SystemService {
          * 1. The isEligibleForLegacyPermissionPrompt ActivityOption is set, or
          * 2. The intent is a launcher intent (action is ACTION_MAIN, category is LAUNCHER), or
          * 3. The activity belongs to the same package as the one which launched the task
-         * originally, and the task was started with a launcher intent
+         * originally, and the task was started with a launcher intent, or
+         * 4. The activity is the first activity in a new task, and was started by the app the
+         * activity belongs to, and that app has another task that is currently focused, which was
+         * started with a launcher intent. This case seeks to identify cases where an app launches,
+         * then immediately trampolines to a new activity and task.
          * @param taskInfo The task to be checked
          * @param currPkg The package of the current top visible activity
+         * @param callingPkg The package that initiated this dialog action
          * @param intent The intent of the current top visible activity
+         * @param options The ActivityOptions of the newly started activity, if this is called due
+         *                to an activity start
+         * @param startedActivity The ActivityInfo of the newly started activity, if this is called
+         *                        due to an activity start
          */
         private boolean shouldShowNotificationDialogOrClearFlags(TaskInfo taskInfo, String currPkg,
-                Intent intent, ActivityOptions options, boolean activityStart) {
-            if (intent == null || currPkg == null || taskInfo == null
+                String callingPkg, Intent intent, ActivityOptions options,
+                String topActivityName, boolean startedActivity) {
+            if (intent == null || currPkg == null || taskInfo == null || topActivityName == null
                     || (!(taskInfo.isFocused && taskInfo.isVisible && taskInfo.isRunning)
-                    && !activityStart)) {
+                    && !startedActivity)) {
                 return false;
             }
-
             return isLauncherIntent(intent)
                     || (options != null && options.isEligibleForLegacyPermissionPrompt())
-                    || (currPkg.equals(taskInfo.baseActivity.getPackageName())
-                    && isLauncherIntent(taskInfo.baseIntent));
+                    || isTaskStartedFromLauncher(currPkg, taskInfo)
+                    || (isTaskPotentialTrampoline(topActivityName, currPkg, callingPkg, taskInfo,
+                    intent)
+                    && (!startedActivity || pkgHasRunningLauncherTask(currPkg, taskInfo)));
+        }
+
+        private boolean isTaskPotentialTrampoline(String activityName, String currPkg,
+                String callingPkg, TaskInfo taskInfo, Intent intent) {
+            return currPkg.equals(callingPkg) && taskInfo.baseIntent.filterEquals(intent)
+                    && taskInfo.numActivities == 1
+                    && activityName.equals(taskInfo.topActivityInfo.name);
+        }
+
+        private boolean pkgHasRunningLauncherTask(String currPkg, TaskInfo taskInfo) {
+            ActivityTaskManagerInternal m =
+                    LocalServices.getService(ActivityTaskManagerInternal.class);
+            try {
+                // TODO(b/230616478) Investigate alternatives like ActivityMetricsLaunchObserver
+                List<ActivityManager.AppTask> tasks =
+                        m.getAppTasks(currPkg, mPackageManager.getPackageUid(currPkg, 0));
+                for (int i = 0; i < tasks.size(); i++) {
+                    TaskInfo other = tasks.get(i).getTaskInfo();
+                    if (other.taskId != taskInfo.taskId && other.isFocused && other.isRunning
+                            && isTaskStartedFromLauncher(currPkg, other)) {
+                        return true;
+                    }
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // Fall through
+            }
+            return false;
         }
 
         private boolean isLauncherIntent(Intent intent) {
@@ -1290,6 +1330,11 @@ public final class PermissionPolicyService extends SystemService {
                     && (intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)
                     || intent.getCategories().contains(Intent.CATEGORY_LEANBACK_LAUNCHER)
                     || intent.getCategories().contains(Intent.CATEGORY_CAR_LAUNCHER));
+        }
+
+        private boolean isTaskStartedFromLauncher(String currPkg, TaskInfo taskInfo) {
+            return currPkg.equals(taskInfo.baseActivity.getPackageName())
+                    && isLauncherIntent(taskInfo.baseIntent);
         }
 
         private void clearNotificationReviewFlagsIfNeeded(String packageName, UserHandle user) {

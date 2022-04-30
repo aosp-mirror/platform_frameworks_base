@@ -23,6 +23,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
@@ -32,6 +33,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS;
+import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
@@ -70,6 +72,8 @@ class KeyguardController {
 
     static final String KEYGUARD_SLEEP_TOKEN_TAG = "keyguard";
 
+    private static final int DEFER_WAKE_TRANSITION_TIMEOUT_MS = 5000;
+
     private final ActivityTaskSupervisor mTaskSupervisor;
     private WindowManagerService mWindowManager;
 
@@ -77,7 +81,7 @@ class KeyguardController {
     private final ActivityTaskManagerService mService;
     private RootWindowContainer mRootWindowContainer;
     private final ActivityTaskManagerInternal.SleepTokenAcquirer mSleepTokenAcquirer;
-
+    private boolean mWaitingForWakeTransition;
 
     KeyguardController(ActivityTaskManagerService service,
             ActivityTaskSupervisor taskSupervisor) {
@@ -169,6 +173,9 @@ class KeyguardController {
         // Do not reset keyguardChanged status if this is aodChanged.
         final boolean keyguardChanged = (keyguardShowing != state.mKeyguardShowing)
                 || (state.mKeyguardGoingAway && keyguardShowing && !aodChanged);
+        if (aodChanged && !aodShowing) {
+            updateDeferWakeTransition(false /* waiting */);
+        }
         if (!keyguardChanged && !aodChanged) {
             setWakeTransitionReady();
             return;
@@ -197,10 +204,6 @@ class KeyguardController {
 
         state.mKeyguardShowing = keyguardShowing;
         state.mAodShowing = aodShowing;
-        if (aodChanged) {
-            // Ensure the new state takes effect.
-            mWindowManager.mWindowPlacerLocked.performSurfacePlacement();
-        }
 
         if (keyguardChanged) {
             // Irrelevant to AOD.
@@ -218,6 +221,10 @@ class KeyguardController {
         mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         InputMethodManagerInternal.get().updateImeWindowStatus(false /* disableImeIcon */);
         setWakeTransitionReady();
+        if (aodChanged) {
+            // Ensure the new state takes effect.
+            mWindowManager.mWindowPlacerLocked.performSurfacePlacement();
+        }
     }
 
     private void setWakeTransitionReady() {
@@ -308,6 +315,10 @@ class KeyguardController {
         }
         if ((keyguardGoingAwayFlags & KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS) != 0) {
             result |= TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
+        }
+        if ((keyguardGoingAwayFlags
+                & KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT) != 0) {
+            result |= TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT;
         }
         return result;
     }
@@ -519,6 +530,33 @@ class KeyguardController {
             mDisplayStates.remove(displayId);
         }
     }
+
+    private final Runnable mResetWaitTransition = () -> {
+        synchronized (mWindowManager.mGlobalLock) {
+            updateDeferWakeTransition(false /* waiting */);
+        }
+    };
+
+    void updateDeferWakeTransition(boolean waiting) {
+        if (waiting == mWaitingForWakeTransition) {
+            return;
+        }
+        if (!mWindowManager.mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+            return;
+        }
+        // if aod is showing, defer the wake transition until aod state changed.
+        if (waiting && isAodShowing(DEFAULT_DISPLAY)) {
+            mWaitingForWakeTransition = true;
+            mWindowManager.mAtmService.getTransitionController().deferTransitionReady();
+            mWindowManager.mH.postDelayed(mResetWaitTransition, DEFER_WAKE_TRANSITION_TIMEOUT_MS);
+        } else if (!waiting) {
+            // dismiss the deferring if the aod state change or cancel awake.
+            mWaitingForWakeTransition = false;
+            mWindowManager.mAtmService.getTransitionController().continueTransitionReady();
+            mWindowManager.mH.removeCallbacks(mResetWaitTransition);
+        }
+    }
+
 
     /** Represents Keyguard state per individual display. */
     private static class KeyguardDisplayState {

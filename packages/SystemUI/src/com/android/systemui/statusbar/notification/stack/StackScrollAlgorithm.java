@@ -314,7 +314,8 @@ public class StackScrollAlgorithm {
 
             if (ambientState.getShelf() != null) {
                 final float shelfStart = ambientState.getStackEndHeight()
-                        - ambientState.getShelf().getIntrinsicHeight();
+                        - ambientState.getShelf().getIntrinsicHeight()
+                        - mPaddingBetweenElements;
                 if (currentY >= shelfStart
                         && !(view instanceof FooterView)
                         && state.firstViewInShelf == null) {
@@ -507,8 +508,9 @@ public class StackScrollAlgorithm {
                                     || bypassPulseNotExpanding
                                     ? ambientState.getInnerHeight()
                                     : (int) ambientState.getStackHeight();
-                    final int shelfStart =
-                            stackBottom - ambientState.getShelf().getIntrinsicHeight();
+                    final int shelfStart = stackBottom
+                            - ambientState.getShelf().getIntrinsicHeight()
+                            - mPaddingBetweenElements;
                     viewState.yTranslation = Math.min(viewState.yTranslation, shelfStart);
                     if (viewState.yTranslation >= shelfStart) {
                         viewState.hidden = !view.isExpandAnimationRunning()

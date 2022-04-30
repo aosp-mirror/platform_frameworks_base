@@ -64,6 +64,7 @@ import static android.provider.Settings.Global.HIDE_ERROR_DIALOGS;
 import static android.provider.Settings.System.FONT_SCALE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT;
 import static android.view.WindowManager.TRANSIT_WAKE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
@@ -3398,6 +3399,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                // Keyguard asked us to clear the home task snapshot before going away, so do that.
+                if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT) != 0) {
+                    mActivityClientController.invalidateHomeTaskSnapshot(null /* token */);
+                }
+
                 mRootWindowContainer.forAllDisplays(displayContent -> {
                     mKeyguardController.keyguardGoingAway(displayContent.getDisplayId(), flags);
                 });
@@ -6625,15 +6631,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 String callingPackage) {
             return ActivityTaskManagerService.this.hasSystemAlertWindowPermission(callingUid,
                     callingPid, callingPackage);
-        }
-
-        @Override
-        public void notifyWakingUp() {
-            synchronized (mGlobalLock) {
-                // Start a transition for waking. This is needed for showWhenLocked activities.
-                getTransitionController().requestTransitionIfNeeded(TRANSIT_WAKE, 0 /* flags */,
-                        null /* trigger */, mRootWindowContainer.getDefaultDisplay());
-            }
         }
 
         @Override

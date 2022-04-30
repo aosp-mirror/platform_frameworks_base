@@ -999,6 +999,14 @@ public class DreamService extends Service implements Window.Callback {
         return mDreamServiceWrapper;
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        // We must unbind from any overlay connection if we are unbound before finishing.
+        mOverlayConnection.unbind(this);
+
+        return super.onUnbind(intent);
+    }
+
     /**
      * Stops the dream and detaches from the window.
      * <p>
