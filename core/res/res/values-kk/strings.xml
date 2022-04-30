@@ -349,9 +349,9 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"құлыпталған құрылғыда хабарландыруларды толық экрандағы әрекеттер түрінде көрсету"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Қолданбаның құлыпталған құрылғыда хабарландыруларды толық экрандағы әрекеттер түрінде көрсетуіне рұқсат береді."</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"таңбаша орнату"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз қосу мүмкіндігін береді."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Қолданбаға Негізгі экранға таңбашаларды пайдаланушының қатысуынсыз қосу мүмкіндігін береді."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"төте пернелерді алып тастау"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз алып тастау мүмкіндігін береді."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Қолданбаға Негізгі экрандағы таңбашаларды пайдаланушының қатысуынсыз өшіру мүмкіндігін береді."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"шығыс қоңырауларды қайта бағыттау"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Қолданбаға шығыс қоңырау кезінде қоңырауды басқа нөмірге қайта бағыттау немесе қоңырауды мүлде доғару опциясы бар теріліп жатқан нөмірді көруге рұқсат береді."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"телефон қоңырауларына жауап беру"</string>

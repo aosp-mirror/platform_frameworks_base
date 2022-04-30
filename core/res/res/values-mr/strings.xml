@@ -400,7 +400,7 @@
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"अ‍ॅपला पृष्‍ठभाग सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"अ‍ॅप संचयन स्थान मोजा"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"अ‍ॅप ला त्याचा कोड, डेटा आणि कॅशे    आकार पुनर्प्राप्त करण्यासाठी अनुमती देते"</string>
-    <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्टम सेटिंग्ज सुधारित करा"</string>
+    <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्टीम सेटिंग्ज सुधारित करा"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"सिस्टीमचा सेटिंग्ज डेटा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स आपल्या सिस्टीमचे कॉंफिगरेशन दूषित करू शकतात."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"सुरूवातीस चालवा"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"जसे सिस्टम बूट करणे समाप्त करते तसे अ‍ॅप ला स्वतः सुरू करण्यास अनुमती देते. यामुळे टॅबलेट सुरू करण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर टॅबलेटला धीमे करण्यास अ‍ॅप ला अनुमती देते."</string>

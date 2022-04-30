@@ -348,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Mengizinkan apl memperluas atau menciutkan bilah status."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Tampilkan notifikasi sebagai aktivitas layar penuh di perangkat terkunci"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Mengizinkan aplikasi untuk menampilkan notifikasi sebagai aktivitas layar penuh di perangkat terkunci"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"memasang pintasan"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Memasang pintasan"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Mengizinkan aplikasi menambahkan pintasan Layar Utama tanpa tindakan dari pengguna."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"meng-uninstal pintasan"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Mengizinkan aplikasi menghapus pintasan Layar Utama tanpa tindakan dari pengguna."</string>
@@ -627,12 +627,12 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Terlalu gelap. Coba pencahayaan yang lebih cerah."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Gerakkan ponsel menjauh."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Gerakkan ponsel mendekat."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Gerakkan ponsel ke atas."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Gerakkan ponsel ke bawah."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Geser ponsel ke atas."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Geser ponsel ke bawah."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Gerakkan ponsel ke kiri."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Gerakkan ponsel ke kanan."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Lihat langsung ke perangkat."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Posisikan wajah Anda langsung di depan ponsel."</string>
+    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Posisikan wajah Anda tepat di depan ponsel."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Terlalu banyak gerakan. Stabilkan ponsel."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Daftarkan ulang wajah Anda."</string>
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Tidak lagi dapat mengenali wajah. Coba lagi."</string>

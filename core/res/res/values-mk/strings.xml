@@ -2166,7 +2166,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"За работа"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Личен приказ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Работен приказ"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Блокирано од вашиот IT-администратор"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Блокирано од IT-администраторот"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Овие содржини не може да се споделуваат со работни апликации"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Овие содржини не може да се отвораат со работни апликации"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Овие содржини не може да се споделуваат со лични апликации"</string>

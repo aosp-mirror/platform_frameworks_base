@@ -628,7 +628,7 @@
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Απομακρύνετε περισσότερο το τηλέφωνο."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Πλησιάστε περισσότερο το τηλέφωνο."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Μετακινήστε το τηλέφωνο πιο ψηλά."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Μετακινήστε πιο χαμηλά το τηλέφωνο."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Μετακινήστε το τηλέφωνο πιο χαμηλά."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Μετακινήστε το τηλέφωνο στα αριστερά."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Μετακινήστε το τηλέφωνο στα δεξιά."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Κοιτάξτε απευθείας τη συσκευή σας."</string>

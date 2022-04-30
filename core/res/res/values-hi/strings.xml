@@ -2084,7 +2084,7 @@
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"नुकसान पहुंचाने वाले ऐप का पता चला"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाना चाहता है"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"बदलाव करें"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कॉल और सूचनाओं के लिए डिवाइस वाइब्रेट हाेगा"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कॉल और सूचनाओं आने पर डिवाइस वाइब्रेट हाेगा"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"कॉल और सूचनाओं के लिए डिवाइस म्यूट रहेगा"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"सिस्टम में हुए बदलाव"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"परेशान न करें"</string>

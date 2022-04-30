@@ -349,7 +349,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"ਕਿਸੇ ਲਾਕ ਕੀਤੇ ਡੀਵਾਈਸ \'ਤੇ ਪੂਰੀ ਸਕ੍ਰੀਨ ਵਾਲੀਆਂ ਸਰਗਰਮੀਆਂ ਵਜੋਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"ਐਪ ਨੂੰ ਕਿਸੇ ਲਾਕ ਕੀਤੇ ਡੀਵਾਈਸ \'ਤੇ ਪੂਰੀ ਸਕ੍ਰੀਨ ਵਾਲੀਆਂ ਸਰਗਰਮੀਆਂ ਵਜੋਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਉਣ ਦਿੰਦਾ ਹੈ"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"ਸ਼ਾਰਟਕੱਟ ਸਥਾਪਤ ਕਰੋ"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਵਰਤੋਂਕਾਰ ਦੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ਾਰਟਕੱਟ ਸ਼ਾਮਲ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਵਰਤੋਂਕਾਰ ਦੇ ਦਖਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ਾਰਟਕੱਟ ਸ਼ਾਮਲ ਕਰਨ ਦਿੰਦੀਆਂ ਹਨ।"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"ਸ਼ਾਰਟਕੱਟ ਅਣਸਥਾਪਤ ਕਰੋ"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਵਰਤੋਂਕਾਰ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ਾਰਟਕੱਟ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਰੀਰੂਟ ਕਰੋ"</string>
