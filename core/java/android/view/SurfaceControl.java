@@ -785,12 +785,14 @@ public final class SurfaceControl implements Parcelable {
         private final HardwareBuffer mHardwareBuffer;
         private final ColorSpace mColorSpace;
         private final boolean mContainsSecureLayers;
+        private final boolean mContainsHdrLayers;
 
         public ScreenshotHardwareBuffer(HardwareBuffer hardwareBuffer, ColorSpace colorSpace,
-                boolean containsSecureLayers) {
+                boolean containsSecureLayers, boolean containsHdrLayers) {
             mHardwareBuffer = hardwareBuffer;
             mColorSpace = colorSpace;
             mContainsSecureLayers = containsSecureLayers;
+            mContainsHdrLayers = containsHdrLayers;
         }
 
        /**
@@ -798,13 +800,15 @@ public final class SurfaceControl implements Parcelable {
         * @param hardwareBuffer The existing HardwareBuffer object
         * @param namedColorSpace Integer value of a named color space {@link ColorSpace.Named}
         * @param containsSecureLayers Indicates whether this graphic buffer contains captured
-        *                             contents
-        *        of secure layers, in which case the screenshot should not be persisted.
+        *                             contents of secure layers, in which case the screenshot
+        *                             should not be persisted.
+        * @param containsHdrLayers Indicates whether this graphic buffer contains HDR content.
         */
         private static ScreenshotHardwareBuffer createFromNative(HardwareBuffer hardwareBuffer,
-                int namedColorSpace, boolean containsSecureLayers) {
+                int namedColorSpace, boolean containsSecureLayers, boolean containsHdrLayers) {
             ColorSpace colorSpace = ColorSpace.get(ColorSpace.Named.values()[namedColorSpace]);
-            return new ScreenshotHardwareBuffer(hardwareBuffer, colorSpace, containsSecureLayers);
+            return new ScreenshotHardwareBuffer(
+                    hardwareBuffer, colorSpace, containsSecureLayers, containsHdrLayers);
         }
 
         public ColorSpace getColorSpace() {
@@ -817,6 +821,14 @@ public final class SurfaceControl implements Parcelable {
 
         public boolean containsSecureLayers() {
             return mContainsSecureLayers;
+        }
+        /**
+         * Returns whether the screenshot contains at least one HDR layer.
+         * This information may be useful for informing the display whether this screenshot
+         * is allowed to be dimmed to SDR white.
+         */
+        public boolean containsHdrLayers() {
+            return mContainsHdrLayers;
         }
 
         /**
@@ -3871,8 +3883,8 @@ public final class SurfaceControl implements Parcelable {
         @Deprecated
         public Transaction setColorSpace(SurfaceControl sc, ColorSpace colorSpace) {
             checkPreconditions(sc);
-            if (colorSpace.getId() == ColorSpace.Named.DCI_P3.ordinal()) {
-                setDataSpace(sc, DataSpace.DATASPACE_DCI_P3);
+            if (colorSpace.getId() == ColorSpace.Named.DISPLAY_P3.ordinal()) {
+                setDataSpace(sc, DataSpace.DATASPACE_DISPLAY_P3);
             } else {
                 setDataSpace(sc, DataSpace.DATASPACE_SRGB);
             }

@@ -63,6 +63,7 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
     @Mock lateinit var callback: ResumeMediaBrowser.Callback
     @Mock lateinit var listener: MediaResumeListener
     @Mock lateinit var service: MediaBrowserService
+    @Mock lateinit var logger: ResumeMediaBrowserLogger
     @Mock lateinit var browserFactory: MediaBrowserFactory
     @Mock lateinit var browser: MediaBrowser
     @Mock lateinit var token: MediaSession.Token
@@ -81,8 +82,14 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
 
         whenever(mediaController.transportControls).thenReturn(transportControls)
 
-        resumeBrowser = TestableResumeMediaBrowser(context, callback, component, browserFactory,
-                mediaController)
+        resumeBrowser = TestableResumeMediaBrowser(
+            context,
+            callback,
+            component,
+            browserFactory,
+            logger,
+            mediaController
+        )
     }
 
     @Test
@@ -282,8 +289,9 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         callback: Callback,
         componentName: ComponentName,
         browserFactory: MediaBrowserFactory,
+        logger: ResumeMediaBrowserLogger,
         private val fakeController: MediaController
-    ) : ResumeMediaBrowser(context, callback, componentName, browserFactory) {
+    ) : ResumeMediaBrowser(context, callback, componentName, browserFactory, logger) {
 
         override fun createMediaController(token: MediaSession.Token): MediaController {
             return fakeController

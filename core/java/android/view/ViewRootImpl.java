@@ -5035,9 +5035,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void requestPointerCapture(boolean enabled) {
-        if (mPointerCapture == enabled) {
-            return;
-        }
         final IBinder inputToken = getInputToken();
         if (inputToken == null) {
             Log.e(mTag, "No input channel to request Pointer Capture.");

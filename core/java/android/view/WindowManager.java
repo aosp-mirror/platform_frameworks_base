@@ -488,6 +488,13 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION = 0x8;
 
     /**
+     * Transition flag: Keyguard is going away to the launcher, and it needs us to clear the task
+     * snapshot of the launcher because it has changed something in the Launcher window.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT = 0x16;
+
+    /**
      * Transition flag: App is crashed.
      * @hide
      */
@@ -527,6 +534,7 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT,
             TRANSIT_FLAG_APP_CRASHED,
             TRANSIT_FLAG_OPEN_BEHIND,
             TRANSIT_FLAG_KEYGUARD_LOCKED,
@@ -717,8 +725,8 @@ public interface WindowManager extends ViewManager {
 
     /**
      * Returns a set of {@link WindowMetrics} for the given display. Each WindowMetrics instance
-     * is the maximum WindowMetrics for a device state, including rotations. This is not guaranteed
-     * to include all possible device states.
+     * is the maximum WindowMetrics for a device state. This is not guaranteed to include all
+     * possible device states.
      *
      * This API can only be used by Launcher.
      *

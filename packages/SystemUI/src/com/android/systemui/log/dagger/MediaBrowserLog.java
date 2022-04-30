@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.servicestests.aidl;
+package com.android.systemui.log.dagger;
 
-oneway interface INetworkStateObserver {
-    /**
-     * {@param resultData} will be in the format
-     * NetinfoState|NetinfoDetailedState|RealConnectionCheck|RealConnectionCheckDetails|Netinfo.
-     * For detailed info, see
-     * servicestests/test-apps/ConnTestApp/.../ConnTestActivity#checkNetworkStatus
-     */
-    void onNetworkStateChecked(String resultData);
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import com.android.systemui.log.LogBuffer;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
+import javax.inject.Qualifier;
+
+/**
+ * A {@link LogBuffer} for {@link com.android.systemui.media.ResumeMediaBrowser}
+ */
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface MediaBrowserLog {
 }

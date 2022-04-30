@@ -83,7 +83,7 @@ public class DisplayFrames {
         final Rect safe = mDisplayCutoutSafe;
         final DisplayCutout cutout = displayCutout.getDisplayCutout();
         if (mDisplayWidth == info.logicalWidth && mDisplayHeight == info.logicalHeight
-                && mRotation != info.rotation
+                && mRotation == info.rotation
                 && state.getDisplayCutout().equals(cutout)
                 && state.getRoundedCorners().equals(roundedCorners)
                 && state.getPrivacyIndicatorBounds().equals(indicatorBounds)) {

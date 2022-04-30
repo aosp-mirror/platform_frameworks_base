@@ -2464,7 +2464,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             dc.setImeLayeringTarget(null);
             dc.computeImeTarget(true /* updateImeTarget */);
         }
-        if (dc.getImeInputTarget() == this) {
+        if (dc.getImeInputTarget() == this
+                && (mActivityRecord == null || !mActivityRecord.isRelaunching())) {
             dc.updateImeInputAndControlTarget(null);
         }
 
