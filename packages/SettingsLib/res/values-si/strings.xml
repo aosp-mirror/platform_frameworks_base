@@ -491,7 +491,7 @@
     <string name="disabled" msgid="8017887509554714950">"අබල කර ඇත"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ඉඩ දුන්"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"ඉඩ නොදෙන"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"නොදන්නා යෙදුම් ස්ථාප."</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"නොදන්නා යෙදුම් ස්ථාපනය"</string>
     <string name="home" msgid="973834627243661438">"සැකසීම් මුල් පිටුව"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
