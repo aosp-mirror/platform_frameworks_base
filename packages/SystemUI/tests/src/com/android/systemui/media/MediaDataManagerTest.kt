@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
@@ -47,6 +48,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.junit.MockitoJUnit
@@ -936,6 +938,38 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
         verify(logger).logPlaybackLocationChange(anyInt(), eq(SYSTEM_PACKAGE_NAME),
             eq(instanceId), eq(MediaData.PLAYBACK_CAST_REMOTE))
+    }
+
+    @Test
+    fun testPlaybackStateChange_keyExists_callsListener() {
+        // Notification has been added
+        addNotificationAndLoad()
+        val callbackCaptor = argumentCaptor<(String, PlaybackState) -> Unit>()
+        verify(mediaTimeoutListener).stateCallback = capture(callbackCaptor)
+
+        // Callback gets an updated state
+        val state = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PLAYING, 0L, 1f)
+                .build()
+        callbackCaptor.value.invoke(KEY, state)
+
+        // Listener is notified of updated state
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY),
+                capture(mediaDataCaptor), eq(true), eq(0), eq(false))
+        assertThat(mediaDataCaptor.value.isPlaying).isTrue()
+    }
+
+    @Test
+    fun testPlaybackStateChange_keyDoesNotExist_doesNothing() {
+        val state = PlaybackState.Builder().build()
+        val callbackCaptor = argumentCaptor<(String, PlaybackState) -> Unit>()
+        verify(mediaTimeoutListener).stateCallback = capture(callbackCaptor)
+
+        // No media added with this key
+
+        callbackCaptor.value.invoke(KEY, state)
+        verify(listener, never()).onMediaDataLoaded(eq(KEY), any(), any(), anyBoolean(), anyInt(),
+                anyBoolean())
     }
 
     /**

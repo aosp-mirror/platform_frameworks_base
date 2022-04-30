@@ -63,7 +63,6 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
-import com.android.settingslib.media.BluetoothMediaDevice;
 import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
@@ -79,6 +78,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -678,6 +678,56 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);
     }
 
+    String getBroadcastName() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "getBroadcastName: LE Audio Broadcast is null");
+            return "";
+        }
+        return broadcast.getProgramInfo();
+    }
+
+    void setBroadcastName(String broadcastName) {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "setBroadcastName: LE Audio Broadcast is null");
+            return;
+        }
+        broadcast.setProgramInfo(broadcastName);
+    }
+
+    String getBroadcastCode() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "getBroadcastCode: LE Audio Broadcast is null");
+            return "";
+        }
+        return new String(broadcast.getBroadcastCode(), StandardCharsets.UTF_8);
+    }
+
+    void setBroadcastCode(String broadcastCode) {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "setBroadcastCode: LE Audio Broadcast is null");
+            return;
+        }
+        broadcast.setBroadcastCode(broadcastCode.getBytes(StandardCharsets.UTF_8));
+    }
+
+    String getBroadcastMetadata() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "getBroadcastMetadata: LE Audio Broadcast is null");
+            return "";
+        }
+        return broadcast.getLocalBluetoothLeBroadcastMetaData().convertToQrCodeString();
+    }
+
     boolean isActiveRemoteDevice(@NonNull MediaDevice device) {
         final List<String> features = device.getFeatures();
         return (features.contains(MediaRoute2Info.FEATURE_REMOTE_PLAYBACK)
@@ -720,6 +770,17 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             return false;
         }
         broadcast.stopLatestBroadcast();
+        return true;
+    }
+
+    boolean updateBluetoothLeBroadcast() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "The broadcast profile is null");
+            return false;
+        }
+        broadcast.updateBroadcast(getAppSourceName(), /*language*/ null);
         return true;
     }
 

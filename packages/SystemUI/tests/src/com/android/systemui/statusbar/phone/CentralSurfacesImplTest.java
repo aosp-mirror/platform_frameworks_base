@@ -178,12 +178,12 @@ import dagger.Lazy;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
-public class CentralSurfacesTest extends SysuiTestCase {
+public class CentralSurfacesImplTest extends SysuiTestCase {
 
     private static final int FOLD_STATE_FOLDED = 0;
     private static final int FOLD_STATE_UNFOLDED = 1;
 
-    private CentralSurfaces mCentralSurfaces;
+    private CentralSurfacesImpl mCentralSurfaces;
     private FakeMetricsLogger mMetricsLogger;
     private PowerManager mPowerManager;
     private TestableNotificationInterruptStateProviderImpl mNotificationInterruptStateProvider;
@@ -383,7 +383,7 @@ public class CentralSurfacesTest extends SysuiTestCase {
         when(mOperatorNameViewControllerFactory.create(any()))
                 .thenReturn(mOperatorNameViewController);
 
-        mCentralSurfaces = new CentralSurfaces(
+        mCentralSurfaces = new CentralSurfacesImpl(
                 mContext,
                 mNotificationsController,
                 mock(FragmentService.class),
@@ -479,7 +479,7 @@ public class CentralSurfacesTest extends SysuiTestCase {
                 mDreamOverlayStateController,
                 mWiredChargingRippleController);
         when(mKeyguardViewMediator.registerCentralSurfaces(
-                any(CentralSurfaces.class),
+                any(CentralSurfacesImpl.class),
                 any(NotificationPanelViewController.class),
                 any(PanelExpansionStateManager.class),
                 any(BiometricUnlockController.class),

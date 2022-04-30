@@ -16,6 +16,10 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.view.WindowInsets.Type.ime
+import android.view.WindowInsets.Type.navigationBars
+import android.view.WindowInsets.Type.statusBars
+
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
@@ -35,6 +39,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 
 /**
  * Test IME snapshot mechanism won't apply when transitioning from non-IME focused dialog activity.
@@ -56,6 +62,10 @@ class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestPar
                     testApp.launchViaIntent(wmHelper)
                     wmHelper.waitImeShown()
                     testApp.startDialogThemedActivity(wmHelper)
+                    // Verify IME insets isn't visible on dialog since it's non-IME focusable window
+                    assertFalse(testApp.getInsetsVisibleFromDialog(ime()))
+                    assertTrue(testApp.getInsetsVisibleFromDialog(statusBars()))
+                    assertTrue(testApp.getInsetsVisibleFromDialog(navigationBars()))
                 }
             }
             teardown {

@@ -68,12 +68,6 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onUserSwitchComplete(int userId) {
-                    mKeyguardSecurityContainerController.showPrimarySecurityScreen(
-                            false /* turning off */);
-                }
-
-                @Override
                 public void onTrustGrantedWithFlags(int flags, int userId) {
                     if (userId != KeyguardUpdateMonitor.getCurrentUser()) return;
                     boolean bouncerVisible = mView.isVisibleToUser();

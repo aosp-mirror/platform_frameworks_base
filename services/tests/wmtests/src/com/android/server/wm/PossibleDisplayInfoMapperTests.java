@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRESENTATION;
 import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_180;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -90,8 +89,8 @@ public class PossibleDisplayInfoMapperTests extends WindowTestsBase {
         mDisplayInfoMapper.updatePossibleDisplayInfos(DEFAULT_DISPLAY);
 
         Set<DisplayInfo> displayInfos = mDisplayInfoMapper.getPossibleDisplayInfos(DEFAULT_DISPLAY);
-        // An entry for each possible rotation, for a display that can be in a single state.
-        assertThat(displayInfos.size()).isEqualTo(4);
+        // An entry for rotation 0, for a display that can be in a single state.
+        assertThat(displayInfos.size()).isEqualTo(1);
         assertPossibleDisplayInfoEntries(displayInfos, mDefaultDisplayInfo);
     }
 
@@ -100,7 +99,7 @@ public class PossibleDisplayInfoMapperTests extends WindowTestsBase {
         mPossibleDisplayInfo.add(mDefaultDisplayInfo);
         mDisplayInfoMapper.updatePossibleDisplayInfos(DEFAULT_DISPLAY);
 
-        assertThat(mDisplayInfoMapper.getPossibleDisplayInfos(DEFAULT_DISPLAY).size()).isEqualTo(4);
+        assertThat(mDisplayInfoMapper.getPossibleDisplayInfos(DEFAULT_DISPLAY).size()).isEqualTo(1);
 
         // Add another display layout to the set of supported states.
         mPossibleDisplayInfo.add(mSecondDisplayInfo);
@@ -116,12 +115,12 @@ public class PossibleDisplayInfoMapperTests extends WindowTestsBase {
                 defaultDisplayInfos.add(di);
             }
         }
-        // An entry for each possible rotation, for the default display.
-        assertThat(defaultDisplayInfos).hasSize(4);
+        // An entry for rotation 0, for the default display.
+        assertThat(defaultDisplayInfos).hasSize(1);
         assertPossibleDisplayInfoEntries(defaultDisplayInfos, mDefaultDisplayInfo);
 
-        // An entry for each possible rotation, for the second display.
-        assertThat(secondDisplayInfos).hasSize(4);
+        // An entry for rotation 0, for the second display.
+        assertThat(secondDisplayInfos).hasSize(1);
         assertPossibleDisplayInfoEntries(secondDisplayInfos, mSecondDisplayInfo);
     }
 
@@ -130,7 +129,7 @@ public class PossibleDisplayInfoMapperTests extends WindowTestsBase {
         mPossibleDisplayInfo.add(mDefaultDisplayInfo);
         mDisplayInfoMapper.updatePossibleDisplayInfos(DEFAULT_DISPLAY);
 
-        assertThat(mDisplayInfoMapper.getPossibleDisplayInfos(DEFAULT_DISPLAY).size()).isEqualTo(4);
+        assertThat(mDisplayInfoMapper.getPossibleDisplayInfos(DEFAULT_DISPLAY).size()).isEqualTo(1);
 
         // Add another display to a different group.
         mSecondDisplayInfo.displayId = DEFAULT_DISPLAY + 1;
@@ -139,14 +138,14 @@ public class PossibleDisplayInfoMapperTests extends WindowTestsBase {
         mDisplayInfoMapper.updatePossibleDisplayInfos(mSecondDisplayInfo.displayId);
 
         Set<DisplayInfo> displayInfos = mDisplayInfoMapper.getPossibleDisplayInfos(DEFAULT_DISPLAY);
-        // An entry for each possible rotation, for the default display.
-        assertThat(displayInfos).hasSize(4);
+        // An entry for rotation 0, for the default display.
+        assertThat(displayInfos).hasSize(1);
         assertPossibleDisplayInfoEntries(displayInfos, mDefaultDisplayInfo);
 
         Set<DisplayInfo> secondStateEntries =
                 mDisplayInfoMapper.getPossibleDisplayInfos(mSecondDisplayInfo.displayId);
-        // An entry for each possible rotation, for the second display.
-        assertThat(secondStateEntries).hasSize(4);
+        // An entry for rotation 0, for the second display.
+        assertThat(secondStateEntries).hasSize(1);
         assertPossibleDisplayInfoEntries(secondStateEntries, mSecondDisplayInfo);
     }
 
@@ -160,23 +159,10 @@ public class PossibleDisplayInfoMapperTests extends WindowTestsBase {
 
     private static void assertPossibleDisplayInfoEntries(Set<DisplayInfo> displayInfos,
             DisplayInfo expectedDisplayInfo) {
-        boolean[] seenEveryRotation = new boolean[4];
         for (DisplayInfo displayInfo : displayInfos) {
-            final int rotation = displayInfo.rotation;
-            seenEveryRotation[rotation] = true;
             assertThat(displayInfo.displayId).isEqualTo(expectedDisplayInfo.displayId);
-            assertEqualsRotatedDisplayInfo(displayInfo, expectedDisplayInfo);
-        }
-        assertThat(seenEveryRotation).isEqualTo(new boolean[]{true, true, true, true});
-    }
-
-    private static void assertEqualsRotatedDisplayInfo(DisplayInfo actual, DisplayInfo expected) {
-        if (actual.rotation == ROTATION_0 || actual.rotation == ROTATION_180) {
-            assertThat(actual.logicalWidth).isEqualTo(expected.logicalWidth);
-            assertThat(actual.logicalHeight).isEqualTo(expected.logicalHeight);
-        } else {
-            assertThat(actual.logicalWidth).isEqualTo(expected.logicalHeight);
-            assertThat(actual.logicalHeight).isEqualTo(expected.logicalWidth);
+            assertThat(displayInfo.logicalWidth).isEqualTo(expectedDisplayInfo.logicalWidth);
+            assertThat(displayInfo.logicalHeight).isEqualTo(expectedDisplayInfo.logicalHeight);
         }
     }
 }
