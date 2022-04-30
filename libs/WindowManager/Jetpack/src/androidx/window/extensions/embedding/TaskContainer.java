@@ -16,14 +16,9 @@
 
 package androidx.window.extensions.embedding;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.WindowConfiguration;
-import android.app.WindowConfiguration.WindowingMode;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArraySet;
@@ -42,9 +37,9 @@ class TaskContainer {
     /** Available window bounds of this Task. */
     private final Rect mTaskBounds = new Rect();
 
-    /** Windowing mode of this Task. */
-    @WindowingMode
-    private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
+    /** Configuration of the Task. */
+    @Nullable
+    private Configuration mConfiguration;
 
     /** Active TaskFragments in this Task. */
     final List<TaskFragmentContainer> mContainers = new ArrayList<>();
@@ -86,42 +81,13 @@ class TaskContainer {
         return !mTaskBounds.isEmpty();
     }
 
-    void setWindowingMode(int windowingMode) {
-        mWindowingMode = windowingMode;
+    @Nullable
+    Configuration getConfiguration() {
+        return mConfiguration;
     }
 
-    /** Whether the Task windowing mode has been initialized. */
-    boolean isWindowingModeInitialized() {
-        return mWindowingMode != WINDOWING_MODE_UNDEFINED;
-    }
-
-    /**
-     * Returns the windowing mode for the TaskFragments below this Task, which should be split with
-     * other TaskFragments.
-     *
-     * @param taskFragmentBounds    Requested bounds for the TaskFragment. It will be empty when
-     *                              the pair of TaskFragments are stacked due to the limited space.
-     */
-    @WindowingMode
-    int getWindowingModeForSplitTaskFragment(@Nullable Rect taskFragmentBounds) {
-        // Only set to multi-windowing mode if the pair are showing side-by-side. Otherwise, it
-        // will be set to UNDEFINED which will then inherit the Task windowing mode.
-        if (taskFragmentBounds == null || taskFragmentBounds.isEmpty()) {
-            return WINDOWING_MODE_UNDEFINED;
-        }
-        // We use WINDOWING_MODE_MULTI_WINDOW when the Task is fullscreen.
-        // However, when the Task is in other multi windowing mode, such as Freeform, we need to
-        // have the activity windowing mode to match the Task, otherwise things like
-        // DecorCaptionView won't work correctly. As a result, have the TaskFragment to be in the
-        // Task windowing mode if the Task is in multi window.
-        // TODO we won't need this anymore after we migrate Freeform caption to WM Shell.
-        return WindowConfiguration.inMultiWindowMode(mWindowingMode)
-                ? mWindowingMode
-                : WINDOWING_MODE_MULTI_WINDOW;
-    }
-
-    boolean isInPictureInPicture() {
-        return mWindowingMode == WINDOWING_MODE_PINNED;
+    void setConfiguration(@Nullable Configuration configuration) {
+        mConfiguration = configuration;
     }
 
     /** Whether there is any {@link TaskFragmentContainer} below this Task. */
