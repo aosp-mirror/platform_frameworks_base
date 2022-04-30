@@ -500,6 +500,7 @@ public class BinaryTransparencyService extends SystemService {
         // ones appearing out of the blue. Thus, we're going to only go through our cache to check
         // for changes, rather than freshly invoking `getInstalledPackages()` and
         // `getInstalledModules()`
+        byte[] largeFileBuffer = PackageUtils.createLargeFileBuffer();
         for (Map.Entry<String, Long> entry : mBinaryLastUpdateTimes.entrySet()) {
             String packageName = entry.getKey();
             try {
@@ -513,7 +514,7 @@ public class BinaryTransparencyService extends SystemService {
 
                     // compute the digest for the updated package
                     String sha256digest = PackageUtils.computeSha256DigestForLargeFile(
-                            packageInfo.applicationInfo.sourceDir);
+                            packageInfo.applicationInfo.sourceDir, largeFileBuffer);
                     if (sha256digest == null) {
                         Slog.e(TAG, "Failed to compute SHA256sum for file at "
                                 + packageInfo.applicationInfo.sourceDir);
@@ -545,11 +546,13 @@ public class BinaryTransparencyService extends SystemService {
         // In general, we care about all APEXs, *and* all Modules, which may include some APKs.
 
         // First, we deal with all installed APEXs.
+        byte[] largeFileBuffer = PackageUtils.createLargeFileBuffer();
         for (PackageInfo packageInfo : getInstalledApexs()) {
             ApplicationInfo appInfo = packageInfo.applicationInfo;
 
             // compute SHA256 for these APEXs
-            String sha256digest = PackageUtils.computeSha256DigestForLargeFile(appInfo.sourceDir);
+            String sha256digest = PackageUtils.computeSha256DigestForLargeFile(appInfo.sourceDir,
+                    largeFileBuffer);
             if (sha256digest == null) {
                 Slog.e(TAG, String.format("Failed to compute SHA256 digest for %s",
                         packageInfo.packageName));
@@ -585,7 +588,7 @@ public class BinaryTransparencyService extends SystemService {
 
                 // compute SHA256 digest for these modules
                 String sha256digest = PackageUtils.computeSha256DigestForLargeFile(
-                        appInfo.sourceDir);
+                        appInfo.sourceDir, largeFileBuffer);
                 if (sha256digest == null) {
                     Slog.e(TAG, String.format("Failed to compute SHA256 digest for %s",
                             packageName));
