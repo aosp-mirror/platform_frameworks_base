@@ -528,7 +528,7 @@
     <string name="done" msgid="381184316122520313">"Done"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarms and reminders"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Allow setting alarms and reminders"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarms &amp; reminders"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarms and reminders"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Allow this app to set alarms and schedule time-sensitive actions. This lets the app run in the background, which may use more battery.\n\nIf this permission is off, existing alarms and time-based events scheduled by this app won’t work."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"schedule, alarm, reminder, clock"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Turn on"</string>
