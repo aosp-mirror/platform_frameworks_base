@@ -50,7 +50,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -553,30 +552,6 @@ public class MediaControlPanel {
 
                 // refreshState is required here to resize the text views (and prevent ellipsis)
                 mMediaViewController.refreshState();
-
-                // Use OnPreDrawListeners to enforce zero alpha on these views for a frame.
-                // TransitionLayout insists on resetting the alpha of these views to 1 when onLayout
-                // is called which causes the animation to look bad. These suppress that behavior.
-                titleText.getViewTreeObserver().addOnPreDrawListener(
-                        new ViewTreeObserver.OnPreDrawListener() {
-                            @Override
-                            public boolean onPreDraw() {
-                                titleText.setAlpha(0);
-                                titleText.getViewTreeObserver().removeOnPreDrawListener(this);
-                                return true;
-                            }
-                        });
-
-                artistText.getViewTreeObserver().addOnPreDrawListener(
-                        new ViewTreeObserver.OnPreDrawListener() {
-                            @Override
-                            public boolean onPreDraw() {
-                                artistText.setAlpha(0);
-                                artistText.getViewTreeObserver().removeOnPreDrawListener(this);
-                                return true;
-                            }
-                        });
-
                 return Unit.INSTANCE;
             },
             () -> {
