@@ -74,7 +74,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Düzenle"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Ekran görüntüsünü düzenle"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ekranı paylaş"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Daha fazla ekran görüntüsü al"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Alanı genişlet"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekran görüntüsünü kapat"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekran görüntüsü önizlemesi"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Üst sınır yüzde <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
@@ -822,7 +822,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"Derleme numarası panoya kopyalandı."</string>
     <string name="basic_status" msgid="2315371112182658176">"Görüşmeyi aç"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Görüşme widget\'ları"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"Ana ekranınıza eklemek için bir ileti dizisine dokunun"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Ana ekranınıza eklemek için bir görüşmeye dokunun"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Son görüşmeleriniz burada gösterilir"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Öncelikli görüşmeler"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Son görüşmeler"</string>

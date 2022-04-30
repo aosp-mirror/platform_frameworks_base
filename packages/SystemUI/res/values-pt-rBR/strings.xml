@@ -823,7 +823,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Conversa aberta"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversa"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Toque em uma conversa para adicioná-la à tela inicial"</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"Suas conversas recentes serão exibidas aqui"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Suas conversas recentes vão aparecer aqui"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Conversas prioritárias"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversas recentes"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"Há <xliff:g id="DURATION">%1$s</xliff:g> dias"</string>

@@ -74,7 +74,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Tahrirlash"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Skrinshotni tahrirlash"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Skrinshot yuborish"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Yana suratga olish"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Skrinshot sohasini kengaytirish"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Skrinshotni yopish"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Skrinshotga razm solish"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Yuqori chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>

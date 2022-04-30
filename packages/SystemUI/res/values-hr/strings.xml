@@ -851,7 +851,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Slušanje"</string>
     <string name="game_status" msgid="1340694320630973259">"Igranje"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Prijatelji"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Može chat večeras?"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Čujemo se večeras?"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Sadržaj će se uskoro prikazati"</string>
     <string name="missed_call" msgid="4228016077700161689">"Propušteni poziv"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>

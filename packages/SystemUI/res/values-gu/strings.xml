@@ -849,7 +849,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"ટૂંક સમયમાં કન્ટેન્ટ બતાવવામાં આવશે"</string>
     <string name="missed_call" msgid="4228016077700161689">"ચૂકી ગયેલો કૉલ"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"તાજેતરના સંદેશા, ચૂકી ગયેલા કૉલ અને સ્ટેટસ અપડેટ જુઓ"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"તાજેતરના મેસેજ, ચૂકી ગયેલા કૉલ અને સ્ટેટસ અપડેટ જુઓ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"વાતચીત"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"\'ખલેલ પાડશો નહીં\'ની સુવિધા દ્વારા થોભાવેલું"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કોઈ સંદેશ મોકલવામાં આવ્યો: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
