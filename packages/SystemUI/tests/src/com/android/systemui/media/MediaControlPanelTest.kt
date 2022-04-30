@@ -947,7 +947,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // Rebinding should not trigger animation
         player.bindPlayer(mediaData, PACKAGE)
-        verify(mockAnimator, times(1)).start()
+        verify(mockAnimator, times(2)).start()
     }
 
     @Test
@@ -969,7 +969,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // Bind trigges new animation
         player.bindPlayer(data1, PACKAGE)
-        verify(mockAnimator, times(2)).start()
+        verify(mockAnimator, times(3)).start()
         whenever(mockAnimator.isRunning()).thenReturn(true)
 
         // Rebind before animation end binds corrct data
