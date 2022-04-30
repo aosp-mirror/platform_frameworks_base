@@ -256,7 +256,7 @@
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"कनेक्ट गर्न सकिएन"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"यन्त्र उही नेटवर्कमा जोडिएको कुरा सुनिश्चित गर्नुहोस्।"</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR कोड स्क्यान गरेर Wi‑Fi प्रयोग गरी डिभाइस कनेक्ट गर्नुहोस्"</string>
-    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"डिभाइस कनेक्ट गर्दै…"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"डिभाइस कनेक्ट गरिँदै छ…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"यन्त्रसँग जोडा बनाउन सकिएन। कि त QR कोड गलत छ कि यन्त्र उही नेटवर्कमा जोडिएको छैन।"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP एड्रेस र पोर्ट"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR कोड स्क्यान गर्नुहोस्"</string>
@@ -528,7 +528,7 @@
     <string name="done" msgid="381184316122520313">"सम्पन्न भयो"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म र रिमाइन्डरहरू"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म तथा रिमाइन्डर सेट गर्न दिइयोस्"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"घडी तथा रिमाइन्डरहरू"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"अलार्म तथा रिमाइन्डर"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"यो एपलाई अलार्म सेट गर्ने र समयमै पूरा गर्नु पर्ने कारबाहीहरूको रुटिन बनाउने अनुमति दिनुहोस्। यो अनुमति दिइएको छ भने यो एप ब्याकग्राउन्डमा चल्छ र धेरै ब्याट्री खपत हुन्छ।\n\nयो अनुमति दिइएको छैन भने सेट गरिएका अलार्म बज्दैनन् र यो एपले तय गरेका गतिविधि चल्दैनन्।"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"समयतालिका, अलार्म, रिमाइन्डर, घडी"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"अन गर्नुहोस्"</string>

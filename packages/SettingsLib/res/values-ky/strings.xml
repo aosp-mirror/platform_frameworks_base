@@ -599,12 +599,12 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Өчүрүү"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Конок сеансы баштапкы абалга келтирилүүдө…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Конок сеансы баштапкы абалга келтирилсинби?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Бул аракет жаңы конок сеансын баштап, учурдагы сеанстагы бардык колдонмолорду жана дайындарды жок кылат"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Бул аракет жаңы конок сеансын баштап, учурдагы сеанстагы бардык колдонмолорду жана алардагы нерселерди жок кылат"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Конок режиминен чыгасызбы?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Бул учурдагы конок сеансындагы колдонмолорду жана дайындарды жок кылат"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Бул учурдагы конок сеансындагы колдонмолорду жана алардагы нерселерди жок кылат"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Чыгуу"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Коноктун аракеттери сакталсынбы?"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Учурдагы сеанстагы аракеттерди сактап же бардык колдонмолорду жана дайындарды жок кылсаңыз болот"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Учурдагы сеанстагы аракеттерди сактап же бардык колдонмолорду жана алардагы нерселерди жок кылсаңыз болот"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Өчүрүү"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сактоо"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Конок режиминен чыгуу"</string>
