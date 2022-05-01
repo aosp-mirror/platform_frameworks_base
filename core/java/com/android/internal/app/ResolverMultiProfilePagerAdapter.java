@@ -26,7 +26,6 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.UserHandle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -72,24 +71,6 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
                 createProfileDescriptor(workAdapter)
         };
         mShouldShowNoCrossProfileIntentsEmptyState = shouldShowNoCrossProfileIntentsEmptyState;
-    }
-
-    @Override
-    void updateAfterConfigChange() {
-        super.updateAfterConfigChange();
-        for (ResolverProfileDescriptor descriptor : mItems) {
-            View emptyStateCont =
-                    descriptor.rootView.findViewById(R.id.resolver_empty_state_container);
-            Resources resources = getContext().getResources();
-            emptyStateCont.setPadding(
-                    emptyStateCont.getPaddingLeft(),
-                    resources.getDimensionPixelSize(
-                            R.dimen.resolver_empty_state_container_padding_top),
-                    emptyStateCont.getPaddingRight(),
-                    resources.getDimensionPixelSize(
-                            R.dimen.resolver_empty_state_container_padding_bottom));
-
-        }
     }
 
     private ResolverProfileDescriptor createProfileDescriptor(
@@ -203,7 +184,6 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     protected void showWorkProfileOffEmptyState(ResolverListAdapter activeListAdapter,
             View.OnClickListener listener) {
         showEmptyState(activeListAdapter,
-                R.drawable.ic_work_apps_off,
                 getWorkAppPausedTitle(),
                 /* subtitle = */ null,
                 listener);
@@ -212,7 +192,6 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     @Override
     protected void showNoPersonalToWorkIntentsEmptyState(ResolverListAdapter activeListAdapter) {
         showEmptyState(activeListAdapter,
-                R.drawable.ic_sharing_disabled,
                 getCrossProfileBlockedTitle(),
                 getCantAccessWorkMessage());
     }
@@ -220,7 +199,6 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     @Override
     protected void showNoWorkToPersonalIntentsEmptyState(ResolverListAdapter activeListAdapter) {
         showEmptyState(activeListAdapter,
-                R.drawable.ic_sharing_disabled,
                 getCrossProfileBlockedTitle(),
                 getCantAccessPersonalMessage());
     }
@@ -228,7 +206,6 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     @Override
     protected void showNoPersonalAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
         showEmptyState(listAdapter,
-                R.drawable.ic_no_apps,
                 getNoPersonalAppsAvailableMessage(),
                 /* subtitle = */ null);
     }
@@ -236,7 +213,6 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     @Override
     protected void showNoWorkAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
         showEmptyState(listAdapter,
-                R.drawable.ic_no_apps,
                 getNoWorkAppsAvailableMessage(),
                 /* subtitle= */ null);
     }
