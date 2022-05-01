@@ -24,10 +24,12 @@ import static com.android.server.notification.NotificationManagerService.Notific
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
@@ -39,9 +41,10 @@ import android.content.pm.VersionedPackage;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationStats;
+import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.Pair;
-import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
@@ -52,11 +55,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.util.reflection.FieldSetter;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 public class NotificationListenersTest extends UiServiceTestCase {
 
@@ -355,4 +360,65 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 .getDisallowedPackages()).isEmpty();
     }
 
+    @Test
+    public void testNotifyPostedLockedInLockdownMode() {
+        NotificationRecord r = mock(NotificationRecord.class);
+        NotificationRecord old = mock(NotificationRecord.class);
+
+        // before the lockdown mode
+        when(mNm.isInLockDownMode()).thenReturn(false);
+        mListeners.notifyPostedLocked(r, old, true);
+        mListeners.notifyPostedLocked(r, old, false);
+        verify(r, atLeast(2)).getSbn();
+
+        // in the lockdown mode
+        reset(r);
+        reset(old);
+        when(mNm.isInLockDownMode()).thenReturn(true);
+        mListeners.notifyPostedLocked(r, old, true);
+        mListeners.notifyPostedLocked(r, old, false);
+        verify(r, never()).getSbn();
+    }
+
+    @Test
+    public void testnotifyRankingUpdateLockedInLockdownMode() {
+        List chn = mock(List.class);
+
+        // before the lockdown mode
+        when(mNm.isInLockDownMode()).thenReturn(false);
+        mListeners.notifyRankingUpdateLocked(chn);
+        verify(chn, atLeast(1)).size();
+
+        // in the lockdown mode
+        reset(chn);
+        when(mNm.isInLockDownMode()).thenReturn(true);
+        mListeners.notifyRankingUpdateLocked(chn);
+        verify(chn, never()).size();
+    }
+
+    @Test
+    public void testNotifyRemovedLockedInLockdownMode() throws NoSuchFieldException {
+        NotificationRecord r = mock(NotificationRecord.class);
+        NotificationStats rs = mock(NotificationStats.class);
+        StatusBarNotification sbn = mock(StatusBarNotification.class);
+        FieldSetter.setField(mNm,
+                NotificationManagerService.class.getDeclaredField("mHandler"),
+                mock(NotificationManagerService.WorkerHandler.class));
+
+        // before the lockdown mode
+        when(mNm.isInLockDownMode()).thenReturn(false);
+        when(r.getSbn()).thenReturn(sbn);
+        mListeners.notifyRemovedLocked(r, 0, rs);
+        mListeners.notifyRemovedLocked(r, 0, rs);
+        verify(r, atLeast(2)).getSbn();
+
+        // in the lockdown mode
+        reset(r);
+        reset(rs);
+        when(mNm.isInLockDownMode()).thenReturn(true);
+        when(r.getSbn()).thenReturn(sbn);
+        mListeners.notifyRemovedLocked(r, 0, rs);
+        mListeners.notifyRemovedLocked(r, 0, rs);
+        verify(r, never()).getSbn();
+    }
 }
