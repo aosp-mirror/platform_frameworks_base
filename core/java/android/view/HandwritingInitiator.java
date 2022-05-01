@@ -60,18 +60,8 @@ public class HandwritingInitiator {
      */
     private final long mHandwritingTimeoutInMillis;
 
-    private State mState = new State();
+    private final State mState = new State();
     private final HandwritingAreaTracker mHandwritingAreasTracker = new HandwritingAreaTracker();
-
-    /**
-     * Helper method to reset the internal state of this class.
-     * Calling this method will also prevent the following MotionEvents
-     * triggers handwriting until the next stylus ACTION_DOWN/ACTION_POINTER_DOWN
-     * arrives.
-     */
-    private void reset() {
-        mState = new State();
-    }
 
     /** The reference to the View that currently has the input connection. */
     @Nullable
@@ -120,6 +110,8 @@ public class HandwritingInitiator {
                 mState.mStylusDownTimeInMillis = motionEvent.getEventTime();
                 mState.mStylusDownX = motionEvent.getX(actionIndex);
                 mState.mStylusDownY = motionEvent.getY(actionIndex);
+                mState.mStylusDownCandidateView = new WeakReference<>(
+                        findBestCandidateView(mState.mStylusDownX, mState.mStylusDownY));
                 mState.mShouldInitHandwriting = true;
                 mState.mExceedTouchSlop = false;
                 break;
@@ -134,7 +126,7 @@ public class HandwritingInitiator {
             case MotionEvent.ACTION_UP:
                 // If it's ACTION_CANCEL or ACTION_UP, all the pointers go up. There is no need to
                 // check whether the stylus we are tracking goes up.
-                reset();
+                mState.mShouldInitHandwriting = false;
                 break;
             case MotionEvent.ACTION_MOVE:
                 // Either we've already tried to initiate handwriting, or the ongoing MotionEvent
@@ -146,7 +138,7 @@ public class HandwritingInitiator {
                 final long timeElapsed =
                         motionEvent.getEventTime() - mState.mStylusDownTimeInMillis;
                 if (timeElapsed > mHandwritingTimeoutInMillis) {
-                    reset();
+                    mState.mShouldInitHandwriting = false;
                     return;
                 }
 
@@ -155,8 +147,13 @@ public class HandwritingInitiator {
                 final float y = motionEvent.getY(pointerIndex);
                 if (largerThanTouchSlop(x, y, mState.mStylusDownX, mState.mStylusDownY)) {
                     mState.mExceedTouchSlop = true;
-                    View candidateView =
-                            findBestCandidateView(mState.mStylusDownX, mState.mStylusDownY);
+                    View candidateView = mState.mStylusDownCandidateView.get();
+                    if (candidateView == null || !candidateView.isAttachedToWindow()) {
+                        // If there was no candidate view found in the stylus down event, or if that
+                        // candidate view is no longer attached, search again for a candidate view.
+                        candidateView = findBestCandidateView(mState.mStylusDownX,
+                                mState.mStylusDownY);
+                    }
                     if (candidateView != null) {
                         if (candidateView == getConnectedView()) {
                             startHandwriting(candidateView);
@@ -254,7 +251,7 @@ public class HandwritingInitiator {
                 mState.mStylusDownY, connectedView)) {
             startHandwriting(connectedView);
         } else {
-            reset();
+            mState.mShouldInitHandwriting = false;
         }
     }
 
@@ -262,7 +259,7 @@ public class HandwritingInitiator {
     @VisibleForTesting
     public void startHandwriting(@NonNull View view) {
         mImm.startStylusHandwriting(view);
-        reset();
+        mState.mShouldInitHandwriting = false;
     }
 
     /**
@@ -456,6 +453,12 @@ public class HandwritingInitiator {
         /** The initial location where the stylus pointer goes down. */
         private float mStylusDownX = Float.NaN;
         private float mStylusDownY = Float.NaN;
+        /**
+         * The best candidate view to initialize handwriting mode based on the initial location
+         * where the stylus pointer goes down, or null if the location was not within any candidate
+         * view's handwriting area.
+         */
+        private WeakReference<View> mStylusDownCandidateView = new WeakReference<>(null);
     }
 
     /** The helper method to check if the given view is still active for handwriting. */
