@@ -13572,8 +13572,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-
-    /**
      * Returns whether this View should use a default focus highlight when it gets focused but
      * doesn't have {@link android.R.attr#state_focused} defined in its background.
      *
