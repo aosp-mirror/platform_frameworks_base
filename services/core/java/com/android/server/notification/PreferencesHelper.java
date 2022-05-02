@@ -1116,7 +1116,8 @@ public class PreferencesHelper implements RankingConfig {
             }
 
             if (mPermissionHelper.isMigrationEnabled()) {
-                if (mPermissionHelper.isPermissionFixed(r.pkg, UserHandle.getUserId(r.uid))) {
+                if (mPermissionHelper.isPermissionFixed(r.pkg, UserHandle.getUserId(r.uid))
+                        && !(channel.isBlockable() || channel.getImportance() == IMPORTANCE_NONE)) {
                     updatedChannel.setImportance(channel.getImportance());
                 }
             } else {
