@@ -31,8 +31,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedStateListDrawable;
 import android.hardware.biometrics.BiometricSourceType;
-import android.hardware.biometrics.SensorLocationInternal;
-import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Process;
 import android.os.VibrationAttributes;
 import android.util.DisplayMetrics;
@@ -125,6 +123,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private float mHeightPixels;
     private float mWidthPixels;
     private int mBottomPaddingPx;
+    private int mScaledPaddingPx;
 
     private boolean mShowUnlockIcon;
     private boolean mShowLockIcon;
@@ -341,6 +340,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mHeightPixels = bounds.bottom;
         mBottomPaddingPx = getResources().getDimensionPixelSize(R.dimen.lock_icon_margin_bottom);
 
+        final int defaultPaddingPx =
+                getResources().getDimensionPixelSize(R.dimen.lock_icon_padding);
+        mScaledPaddingPx = (int) (defaultPaddingPx * mAuthController.getScaleFactor());
+
         mUnlockedLabel = mView.getContext().getResources().getString(
                 R.string.accessibility_unlock_button);
         mLockedLabel = mView.getContext()
@@ -351,15 +354,13 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     private void updateLockIconLocation() {
         if (mUdfpsSupported) {
-            FingerprintSensorPropertiesInternal props = mAuthController.getUdfpsProps().get(0);
-            final SensorLocationInternal location = props.getLocation();
-            mView.setCenterLocation(new PointF(location.sensorLocationX, location.sensorLocationY),
-                    location.sensorRadius);
+            mView.setCenterLocation(mAuthController.getUdfpsLocation(),
+                    mAuthController.getUdfpsRadius(), mScaledPaddingPx);
         } else {
             mView.setCenterLocation(
                     new PointF(mWidthPixels / 2,
                         mHeightPixels - mBottomPaddingPx - sLockIconRadiusPx),
-                        sLockIconRadiusPx);
+                        sLockIconRadiusPx, mScaledPaddingPx);
         }
 
         mView.getHitRect(mSensorTouchLocation);
