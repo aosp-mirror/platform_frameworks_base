@@ -2084,6 +2084,11 @@
         <attr name="protectionLevel" />
         <attr name="permissionFlags" />
         <attr name="knownCerts" />
+        <!-- Optional: specify the maximum version of the Android OS for which the
+             application wishes to create the permission.  When running on a version
+             of Android higher than the number given here, the permission will not
+             be created.  -->
+        <attr name="maxSdkVersion" />
     </declare-styleable>
 
     <!-- The <code>permission-group</code> tag declares a logical grouping of

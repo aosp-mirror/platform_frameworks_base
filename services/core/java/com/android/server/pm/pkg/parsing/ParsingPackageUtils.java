@@ -1231,7 +1231,11 @@ public class ParsingPackageUtils {
         if (result.isError()) {
             return input.error(result);
         }
-        return input.success(pkg.addPermission(result.getResult()));
+        ParsedPermission permission = result.getResult();
+        if (permission != null) {
+            pkg.addPermission(permission);
+        }
+        return input.success(pkg);
     }
 
     private static ParseResult<ParsingPackage> parsePermissionTree(ParseInput input,
