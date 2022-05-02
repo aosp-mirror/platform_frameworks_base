@@ -81,6 +81,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     private PipBoundsState mPipBoundsState;
     private PipTransitionState mPipTransitionState;
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
+    private PipParamsChangedForwarder mPipParamsChangedForwarder;
 
     private ComponentName mComponent1;
     private ComponentName mComponent2;
@@ -97,11 +98,10 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mMainExecutor = new TestShellExecutor();
         mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mContext,
                 mMockSyncTransactionQueue, mPipTransitionState, mPipBoundsState,
-                mPipBoundsAlgorithm, mMockPhonePipMenuController,
-                mMockPipAnimationController, mMockPipSurfaceTransactionHelper,
-                mMockPipTransitionController, mMockOptionalSplitScreen,
-                mMockDisplayController, mMockPipUiEventLogger,
-                mMockShellTaskOrganizer, mMainExecutor));
+                mPipBoundsAlgorithm, mMockPhonePipMenuController, mMockPipAnimationController,
+                mMockPipSurfaceTransactionHelper, mMockPipTransitionController,
+                mPipParamsChangedForwarder, mMockOptionalSplitScreen, mMockDisplayController,
+                mMockPipUiEventLogger, mMockShellTaskOrganizer, mMainExecutor));
         mMainExecutor.flushAll();
         preparePipTaskOrg();
     }

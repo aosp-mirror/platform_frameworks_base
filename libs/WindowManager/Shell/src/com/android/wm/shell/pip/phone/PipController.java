@@ -40,7 +40,6 @@ import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -80,6 +79,7 @@ import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -88,6 +88,8 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -113,10 +115,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private PipTouchHandler mTouchHandler;
     private PipTransitionController mPipTransitionController;
     private TaskStackListenerImpl mTaskStackListener;
+    private PipParamsChangedForwarder mPipParamsChangedForwarder;
     private Optional<OneHandedController> mOneHandedController;
     protected final PipImpl mImpl;
 
     private final Rect mTmpInsetBounds = new Rect();
+    private final int mEnterAnimationDuration;
 
     private boolean mIsInFixedRotation;
     private PipAnimationListener mPinnedStackAnimationRecentsCallback;
@@ -270,26 +274,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void onActionsChanged(ParceledListSlice<RemoteAction> actions,
-                RemoteAction closeAction) {
-            mMenuController.setAppActions(actions, closeAction);
-        }
-
-        @Override
         public void onActivityHidden(ComponentName componentName) {
             if (componentName.equals(mPipBoundsState.getLastPipComponentName())) {
                 // The activity was removed, we don't want to restore to the reentry state
                 // saved for this component anymore.
                 mPipBoundsState.setLastPipComponentName(null);
             }
-        }
-
-        @Override
-        public void onAspectRatioChanged(float aspectRatio) {
-            // TODO(b/169373982): Remove this callback as it is redundant with PipTaskOrg params
-            // change.
-            mPipBoundsState.setAspectRatio(aspectRatio);
-            mTouchHandler.onAspectRatioChanged();
         }
     }
 
@@ -305,6 +295,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
+            PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
@@ -315,8 +306,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
         return new PipController(context, displayController, pipAppOpsListener, pipBoundsAlgorithm,
                 pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper, pipMediaController,
-                phonePipMenuController, pipTaskOrganizer,  pipTouchHandler, pipTransitionController,
-                windowManagerShellWrapper, taskStackListener, oneHandedController, mainExecutor)
+                phonePipMenuController, pipTaskOrganizer, pipTouchHandler, pipTransitionController,
+                windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
+                oneHandedController, mainExecutor)
                 .mImpl;
     }
 
@@ -334,6 +326,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
+            PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor
     ) {
@@ -360,6 +353,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mOneHandedController = oneHandedController;
         mPipTransitionController = pipTransitionController;
         mTaskStackListener = taskStackListener;
+
+        mEnterAnimationDuration = mContext.getResources()
+                .getInteger(R.integer.config_pipEnterAnimationDuration);
+        mPipParamsChangedForwarder = pipParamsChangedForwarder;
+
         //TODO: move this to ShellInit when PipController can be injected
         mMainExecutor.execute(this::init);
     }
@@ -454,6 +452,34 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         }
                         mTouchHandler.getMotionHelper().expandLeavePip(
                                 clearedTask /* skipAnimation */);
+                    }
+                });
+
+        mPipParamsChangedForwarder.addListener(
+                new PipParamsChangedForwarder.PipParamsChangedCallback() {
+                    @Override
+                    public void onAspectRatioChanged(float ratio) {
+                        mPipBoundsState.setAspectRatio(ratio);
+
+                        final Rect destinationBounds =
+                                mPipBoundsAlgorithm.getAdjustedDestinationBounds(
+                                        mPipBoundsState.getBounds(),
+                                        mPipBoundsState.getAspectRatio());
+                        Objects.requireNonNull(destinationBounds, "Missing destination bounds");
+                        mPipTaskOrganizer.scheduleAnimateResizePip(destinationBounds,
+                                mEnterAnimationDuration,
+                                null /* updateBoundsCallback */);
+
+                        mTouchHandler.onAspectRatioChanged();
+                        updateMovementBounds(null /* toBounds */, false /* fromRotation */,
+                                false /* fromImeAdjustment */, false /* fromShelfAdjustment */,
+                                null /* windowContainerTransaction */);
+                    }
+
+                    @Override
+                    public void onActionsChanged(List<RemoteAction> actions,
+                            RemoteAction closeAction) {
+                        mMenuController.setAppActions(actions, closeAction);
                     }
                 });
 
