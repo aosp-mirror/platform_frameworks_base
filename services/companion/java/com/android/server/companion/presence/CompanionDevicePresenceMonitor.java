@@ -206,6 +206,15 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
     }
 
     /**
+     * Remove the current connected devices by associationId.
+     */
+    public void removeDeviceFromMonitoring(int associationId) {
+        mConnectedBtDevices.remove(associationId);
+        mNearbyBleDevices.remove(associationId);
+        mReportedSelfManagedDevices.remove(associationId);
+    }
+
+    /**
      * Implements
      * {@link AssociationStore.OnChangeListener#onAssociationRemoved(AssociationInfo)}
      */
@@ -217,9 +226,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
             Log.d(TAG, "  > association=" + association);
         }
 
-        mConnectedBtDevices.remove(id);
-        mNearbyBleDevices.remove(id);
-        mReportedSelfManagedDevices.remove(id);
+        removeDeviceFromMonitoring(id);
 
         // Do NOT call mCallback.onDeviceDisappeared()!
         // CompanionDeviceManagerService will know that the association is removed, and will do
