@@ -41,8 +41,10 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
@@ -854,7 +856,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final Rect[] bounds = new Rect[]{zeroRect, new Rect(left, top, right, bottom), zeroRect,
                 zeroRect};
         final DisplayCutout.CutoutPathParserInfo info = new DisplayCutout.CutoutPathParserInfo(
-                displayWidth, displayHeight, density, "", Surface.ROTATION_0, 1f);
+                displayWidth, displayHeight, displayWidth, displayHeight, density, "",
+                Surface.ROTATION_0, 1f, 1f);
         final DisplayCutout cutout = new WmDisplayCutout(
                 DisplayCutout.constructDisplayCutout(bounds, Insets.NONE, info), null)
                         .computeSafeInsets(displayWidth, displayHeight).getDisplayCutout();
@@ -874,7 +877,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final Rect[] bounds90 = new Rect[]{new Rect(top, left, bottom, right), zeroRect, zeroRect,
                 zeroRect};
         final DisplayCutout.CutoutPathParserInfo info90 = new DisplayCutout.CutoutPathParserInfo(
-                displayWidth, displayHeight, density, "", Surface.ROTATION_90, 1f);
+                displayWidth, displayHeight, displayWidth, displayHeight, density, "",
+                Surface.ROTATION_90, 1f, 1f);
         assertEquals(new WmDisplayCutout(
                         DisplayCutout.constructDisplayCutout(bounds90, Insets.NONE, info90), null)
                         .computeSafeInsets(displayHeight, displayWidth).getDisplayCutout(),
@@ -1165,6 +1169,20 @@ public class DisplayContentTests extends WindowTestsBase {
         assertNull(mDisplayContent.computeImeParent());
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @Test
+    public void testComputeImeParent_updateParentWhenTargetNotUseIme() throws Exception {
+        WindowState overlay = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlay");
+        overlay.setBounds(100, 100, 200, 200);
+        overlay.mAttrs.flags = FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM;
+        WindowState app = createWindow(null, TYPE_BASE_APPLICATION, "app");
+        mDisplayContent.setImeLayeringTarget(overlay);
+        mDisplayContent.setImeInputTarget(app);
+        assertFalse(mDisplayContent.shouldImeAttachedToApp());
+        assertEquals(mDisplayContent.getImeContainer().getParentSurfaceControl(),
+                mDisplayContent.computeImeParent());
+    }
+
     @Test
     public void testInputMethodInputTarget_isClearedWhenWindowStateIsRemoved() throws Exception {
         final DisplayContent dc = createNewDisplay();
@@ -1199,6 +1217,20 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.setRemoteInsetsController(createDisplayWindowInsetsController());
         assertNotEquals(dc.getImeInputTarget().getWindowState(),
                 dc.computeImeControlTarget());
+    }
+
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testImeSecureFlagGetUpdatedAfterImeInputTarget() {
+        // Verify IME window can get up-to-date secure flag update when the IME input target
+        // set before setCanScreenshot called.
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        SurfaceControl.Transaction t = mDisplayContent.mInputMethodWindow.getPendingTransaction();
+        spyOn(t);
+        mDisplayContent.setImeInputTarget(app);
+        mDisplayContent.mInputMethodWindow.setCanScreenshot(t, false /* canScreenshot */);
+
+        verify(t).setSecure(eq(mDisplayContent.mInputMethodWindow.mSurfaceControl), eq(true));
     }
 
     @UseTestDisplay(addWindows = W_ACTIVITY)
@@ -2158,7 +2190,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(windowingMode, windowConfig.getWindowingMode());
 
         // test misc display overrides
-        assertEquals(ignoreOrientationRequests, testDisplayContent.mIgnoreOrientationRequest);
+        assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
                 mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);
@@ -2199,7 +2231,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(windowingMode, windowConfig.getWindowingMode());
 
         // test misc display overrides
-        assertEquals(ignoreOrientationRequests, testDisplayContent.mIgnoreOrientationRequest);
+        assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
                 mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);

@@ -84,9 +84,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private static final int INVALID_VALUE = Integer.MIN_VALUE;
 
-    /** Maximum time to wait for a model stop confirmation before giving up. */
-    private static final long STOP_TIMEOUT_MS = 5000;
-
     /** The {@link ModuleProperties} for the system, or null if none exists. */
     final ModuleProperties mModuleProperties;
 
@@ -398,20 +395,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 return STATUS_OK;
             }
 
-            int status = prepareForRecognition(modelData);
-            if (status != STATUS_OK) {
-                Slog.w(TAG, "startRecognition failed to prepare model for recognition");
-                return status;
-            }
-            status = startRecognitionLocked(modelData,
+            return updateRecognitionLocked(modelData,
                     false /* Don't notify for synchronous calls */);
-
-            // Initialize power save, call active state monitoring logic.
-            if (status == STATUS_OK) {
-                initializeDeviceStateListeners();
-            }
-
-            return status;
         }
     }
 
@@ -560,7 +545,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
         }
 
-        if (unloadModel && modelData.isModelLoaded()) {
+        if (unloadModel && (modelData.isModelLoaded() || modelData.isStopPending())) {
             Slog.d(TAG, "Unloading previously loaded stale model.");
             if (mModule == null) {
                 return STATUS_ERROR;
@@ -834,7 +819,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
 
         if (!event.recognitionStillActive) {
-            model.setStoppedLocked();
+            model.setStopped();
         }
 
         try {
@@ -920,8 +905,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         Slog.w(TAG, "Recognition aborted");
         MetricsLogger.count(mContext, "sth_recognition_aborted", 1);
         ModelData modelData = getModelDataForLocked(event.soundModelHandle);
-        if (modelData != null && modelData.isModelStarted()) {
-            modelData.setStoppedLocked();
+        if (modelData != null && (modelData.isModelStarted() || modelData.isStopPending())) {
+            modelData.setStopped();
             try {
                 IRecognitionStatusCallback callback = modelData.getCallback();
                 if (callback != null) {
@@ -932,6 +917,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException in onRecognitionPaused", e);
             }
+            updateRecognitionLocked(modelData, true);
         }
     }
 
@@ -978,7 +964,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
 
         if (!event.recognitionStillActive) {
-            modelData.setStoppedLocked();
+            modelData.setStopped();
         }
 
         try {
@@ -1011,16 +997,22 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private int updateRecognitionLocked(ModelData model, boolean notifyClientOnError) {
         boolean shouldStartModel = model.isRequested() && isRecognitionAllowedByDeviceState(model);
-        if (shouldStartModel == model.isModelStarted()) {
+        if (shouldStartModel == model.isModelStarted() || model.isStopPending()) {
             // No-op.
             return STATUS_OK;
         }
         if (shouldStartModel) {
             int status = prepareForRecognition(model);
             if (status != STATUS_OK) {
+                Slog.w(TAG, "startRecognition failed to prepare model for recognition");
                 return status;
             }
-            return startRecognitionLocked(model, notifyClientOnError);
+            status = startRecognitionLocked(model, notifyClientOnError);
+            // Initialize power save, call active state monitoring logic.
+            if (status == STATUS_OK) {
+                initializeDeviceStateListeners();
+            }
+            return status;
         } else {
             return stopRecognitionLocked(model, notifyClientOnError);
         }
@@ -1203,10 +1195,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         if (mModule == null) {
             return;
         }
-        if (modelData.isModelStarted()) {
+        if (modelData.isStopPending()) {
+            // No need to wait for the stop to be confirmed.
+            modelData.setStopped();
+        } else if (modelData.isModelStarted()) {
             Slog.d(TAG, "Stopping previously started dangling model " + modelData.getHandle());
             if (mModule.stopRecognition(modelData.getHandle()) == STATUS_OK) {
-                modelData.setStoppedLocked();
+                modelData.setStopped();
                 modelData.setRequested(false);
             } else {
                 Slog.e(TAG, "Failed to stop model " + modelData.getHandle());
@@ -1255,7 +1250,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private ModelData getOrCreateGenericModelDataLocked(UUID modelId) {
         ModelData modelData = mModelDataMap.get(modelId);
         if (modelData == null) {
-            modelData = createGenericModelData(modelId);
+            modelData = ModelData.createGenericModelData(modelId);
             mModelDataMap.put(modelId, modelData);
         } else if (!modelData.isGenericModel()) {
             Slog.e(TAG, "UUID already used for non-generic model.");
@@ -1287,7 +1282,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         mKeyphraseUuidMap.remove(keyphraseId);
         mModelDataMap.remove(modelId);
         mKeyphraseUuidMap.put(keyphraseId, modelId);
-        ModelData modelData = createKeyphraseModelData(modelId);
+        ModelData modelData = ModelData.createKeyphraseModelData(modelId);
         mModelDataMap.put(modelId, modelData);
         return modelData;
     }
@@ -1419,26 +1414,18 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                     Slog.w(TAG, "RemoteException in onError", e);
                 }
             }
-            return status;
-        }
-
-        // Wait for model to be stopped.
-        try {
-            modelData.waitStoppedLocked(STOP_TIMEOUT_MS);
-        } catch (InterruptedException e) {
-            Slog.e(TAG, "Didn't receive model stop callback");
-            return SoundTrigger.STATUS_ERROR;
-        }
-
-        MetricsLogger.count(mContext, "sth_stop_recognition_success", 1);
-        // Notify of pause if needed.
-        if (notify) {
-            try {
-                callback.onRecognitionPaused();
-            } catch (DeadObjectException e) {
-                forceStopAndUnloadModelLocked(modelData, e);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "RemoteException in onRecognitionPaused", e);
+        } else {
+            modelData.setStopPending();
+            MetricsLogger.count(mContext, "sth_stop_recognition_success", 1);
+            // Notify of pause if needed.
+            if (notify) {
+                try {
+                    callback.onRecognitionPaused();
+                } catch (DeadObjectException e) {
+                    forceStopAndUnloadModelLocked(modelData, e);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "RemoteException in onRecognitionPaused", e);
+                }
             }
         }
         if (DBG) {
@@ -1473,7 +1460,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     // This class encapsulates the callbacks, state, handles and any other information that
     // represents a model.
-    private class ModelData {
+    private static class ModelData {
         // Model not loaded (and hence not started).
         static final int MODEL_NOTLOADED = 0;
 
@@ -1482,6 +1469,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         // Started implies model was successfully loaded and start was called.
         static final int MODEL_STARTED = 2;
+
+        // Model stop request has been sent. Waiting for an event to signal model being stopped.
+        static final int MODEL_STOP_PENDING = 3;
 
         // One of MODEL_NOTLOADED, MODEL_LOADED, MODEL_STARTED (which implies loaded).
         private int mModelState;
@@ -1530,9 +1520,17 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mModelType = modelType;
         }
 
+        static ModelData createKeyphraseModelData(UUID modelId) {
+            return new ModelData(modelId, SoundModel.TYPE_KEYPHRASE);
+        }
+
+        static ModelData createGenericModelData(UUID modelId) {
+            return new ModelData(modelId, SoundModel.TYPE_GENERIC_SOUND);
+        }
+
         // Note that most of the functionality in this Java class will not work for
         // SoundModel.TYPE_UNKNOWN nevertheless we have it since lower layers support it.
-        ModelData createModelDataOfUnknownType(UUID modelId) {
+        static ModelData createModelDataOfUnknownType(UUID modelId) {
             return new ModelData(modelId, SoundModel.TYPE_UNKNOWN);
         }
 
@@ -1552,24 +1550,20 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return mModelState == MODEL_NOTLOADED;
         }
 
+        synchronized boolean isStopPending() {
+            return mModelState == MODEL_STOP_PENDING;
+        }
+
         synchronized void setStarted() {
             mModelState = MODEL_STARTED;
         }
 
-        synchronized void setStoppedLocked() {
+        synchronized void setStopped() {
             mModelState = MODEL_LOADED;
-            mLock.notifyAll();
         }
 
-        void waitStoppedLocked(long timeoutMs) throws InterruptedException {
-            long deadline = System.currentTimeMillis() + timeoutMs;
-            while (mModelState == MODEL_STARTED) {
-                long waitTime = deadline - System.currentTimeMillis();
-                if (waitTime <= 0) {
-                    throw new InterruptedException();
-                }
-                mLock.wait(waitTime);
-            }
+        synchronized void setStopPending() {
+            mModelState = MODEL_STOP_PENDING;
         }
 
         synchronized void setLoaded() {
@@ -1589,7 +1583,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mRecognitionConfig = null;
             mRequested = false;
             mCallback = null;
-            notifyAll();
         }
 
         synchronized void clearCallback() {
@@ -1693,13 +1686,5 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
             return "Model type: " + type + "\n";
         }
-    }
-
-    ModelData createKeyphraseModelData(UUID modelId) {
-        return new ModelData(modelId, SoundModel.TYPE_KEYPHRASE);
-    }
-
-    ModelData createGenericModelData(UUID modelId) {
-        return new ModelData(modelId, SoundModel.TYPE_GENERIC_SOUND);
     }
 }

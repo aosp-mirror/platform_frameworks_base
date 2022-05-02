@@ -26,9 +26,9 @@ import static org.mockito.Mockito.when;
 
 import android.app.AlertDialog;
 import android.content.pm.PackageManager;
+import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.hardware.fingerprint.FingerprintStateListener;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -61,11 +61,11 @@ import java.util.List;
 public class SideFpsEventHandlerTest {
 
     private static final List<Integer> sAllStates = List.of(
-            FingerprintStateListener.STATE_IDLE,
-            FingerprintStateListener.STATE_ENROLLING,
-            FingerprintStateListener.STATE_KEYGUARD_AUTH,
-            FingerprintStateListener.STATE_BP_AUTH,
-            FingerprintStateListener.STATE_AUTH_OTHER);
+            BiometricStateListener.STATE_IDLE,
+            BiometricStateListener.STATE_ENROLLING,
+            BiometricStateListener.STATE_KEYGUARD_AUTH,
+            BiometricStateListener.STATE_BP_AUTH,
+            BiometricStateListener.STATE_AUTH_OTHER);
 
     @Rule
     public TestableContext mContext =
@@ -83,7 +83,7 @@ public class SideFpsEventHandlerTest {
 
     private TestLooper mLooper = new TestLooper();
     private SideFpsEventHandler mEventHandler;
-    private FingerprintStateListener mFingerprintStateListener;
+    private BiometricStateListener mBiometricStateListener;
 
     @Before
     public void setup() {
@@ -116,7 +116,7 @@ public class SideFpsEventHandlerTest {
         setupWithSensor(false /* hasSfps */, true /* initialized */);
 
         for (int state : sAllStates) {
-            setFingerprintState(state);
+            setBiometricState(state);
             assertThat(mEventHandler.onSinglePressDetected(200L)).isFalse();
 
             mLooper.dispatchAll();
@@ -129,7 +129,7 @@ public class SideFpsEventHandlerTest {
         setupWithSensor(true /* hasSfps */, false /* initialized */);
 
         for (int state : sAllStates) {
-            setFingerprintState(state);
+            setBiometricState(state);
             assertThat(mEventHandler.onSinglePressDetected(400L)).isFalse();
 
             mLooper.dispatchAll();
@@ -141,10 +141,10 @@ public class SideFpsEventHandlerTest {
     public void ignoresWhenIdleOrUnknown() throws Exception {
         setupWithSensor(true /* hasSfps */, true /* initialized */);
 
-        setFingerprintState(FingerprintStateListener.STATE_IDLE);
+        setBiometricState(BiometricStateListener.STATE_IDLE);
         assertThat(mEventHandler.onSinglePressDetected(80000L)).isFalse();
 
-        setFingerprintState(FingerprintStateListener.STATE_AUTH_OTHER);
+        setBiometricState(BiometricStateListener.STATE_AUTH_OTHER);
         assertThat(mEventHandler.onSinglePressDetected(90000L)).isFalse();
 
         mLooper.dispatchAll();
@@ -155,7 +155,7 @@ public class SideFpsEventHandlerTest {
     public void ignoresOnKeyguard() throws Exception {
         setupWithSensor(true /* hasSfps */, true /* initialized */);
 
-        setFingerprintState(FingerprintStateListener.STATE_KEYGUARD_AUTH);
+        setBiometricState(BiometricStateListener.STATE_KEYGUARD_AUTH);
         assertThat(mEventHandler.onSinglePressDetected(80000L)).isFalse();
 
         mLooper.dispatchAll();
@@ -166,7 +166,7 @@ public class SideFpsEventHandlerTest {
     public void promptsWhenBPisActive() throws Exception {
         setupWithSensor(true /* hasSfps */, true /* initialized */);
 
-        setFingerprintState(FingerprintStateListener.STATE_BP_AUTH);
+        setBiometricState(BiometricStateListener.STATE_BP_AUTH);
         assertThat(mEventHandler.onSinglePressDetected(80000L)).isTrue();
 
         mLooper.dispatchAll();
@@ -177,16 +177,16 @@ public class SideFpsEventHandlerTest {
     public void promptsWhenEnrolling() throws Exception {
         setupWithSensor(true /* hasSfps */, true /* initialized */);
 
-        setFingerprintState(FingerprintStateListener.STATE_ENROLLING);
+        setBiometricState(BiometricStateListener.STATE_ENROLLING);
         assertThat(mEventHandler.onSinglePressDetected(80000L)).isTrue();
 
         mLooper.dispatchAll();
         verify(mAlertDialog).show();
     }
 
-    private void setFingerprintState(@FingerprintStateListener.State int newState) {
-        if (mFingerprintStateListener != null) {
-            mFingerprintStateListener.onStateChanged(newState);
+    private void setBiometricState(@BiometricStateListener.State int newState) {
+        if (mBiometricStateListener != null) {
+            mBiometricStateListener.onStateChanged(newState);
             mLooper.dispatchAll();
         }
     }
@@ -204,10 +204,10 @@ public class SideFpsEventHandlerTest {
             fpCallbackCaptor.getValue().onAllAuthenticatorsRegistered(
                     List.of(mock(FingerprintSensorPropertiesInternal.class)));
             if (hasSfps) {
-                ArgumentCaptor<FingerprintStateListener> captor = ArgumentCaptor.forClass(
-                        FingerprintStateListener.class);
-                verify(mFingerprintManager).registerFingerprintStateListener(captor.capture());
-                mFingerprintStateListener = captor.getValue();
+                ArgumentCaptor<BiometricStateListener> captor = ArgumentCaptor.forClass(
+                        BiometricStateListener.class);
+                verify(mFingerprintManager).registerBiometricStateListener(captor.capture());
+                mBiometricStateListener = captor.getValue();
             }
         }
     }

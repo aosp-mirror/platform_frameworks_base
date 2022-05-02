@@ -117,7 +117,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
             mCheckBox.setVisibility(View.GONE);
             mStatusIcon.setVisibility(View.GONE);
+            mEndTouchArea.setVisibility(View.GONE);
+            mEndTouchArea.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
             mContainerLayout.setOnClickListener(null);
+            mContainerLayout.setContentDescription(null);
             mTitleText.setTextColor(mController.getColorItemContent());
             mSubTitleText.setTextColor(mController.getColorItemContent());
             mTwoLineTitleText.setTextColor(mController.getColorItemContent());
@@ -168,12 +171,20 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, false /* showStatus */);
+                    setUpContentDescriptionForView(mContainerLayout, false, device);
+                    mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setVisibility(View.VISIBLE);
                     mCheckBox.setChecked(true);
-                    mSeekBar.setOnClickListener(null);
-                    mSeekBar.setOnClickListener(v -> onGroupActionTriggered(false, device));
+                    mCheckBox.setOnCheckedChangeListener(
+                            (buttonView, isChecked) -> onGroupActionTriggered(false, device));
                     setCheckBoxColor(mCheckBox, mController.getColorItemContent());
                     initSeekbar(device);
+                    mEndTouchArea.setVisibility(View.VISIBLE);
+                    mEndTouchArea.setOnClickListener(null);
+                    mEndTouchArea.setOnClickListener((v) -> mCheckBox.performClick());
+                    mEndTouchArea.setImportantForAccessibility(
+                            View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+                    setUpContentDescriptionForView(mEndTouchArea, true, device);
                 } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_check));
@@ -183,10 +194,15 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             true /* showSeekBar */,
                             false /* showProgressBar */, true /* showStatus */);
                     initSeekbar(device);
+                    setUpContentDescriptionForView(mContainerLayout, false, device);
                     mCurrentActivePosition = position;
                 } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
+                    mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setVisibility(View.VISIBLE);
                     mCheckBox.setChecked(false);
+                    mCheckBox.setOnCheckedChangeListener(
+                            (buttonView, isChecked) -> onGroupActionTriggered(true, device));
+                    mEndTouchArea.setVisibility(View.VISIBLE);
                     mContainerLayout.setOnClickListener(v -> onGroupActionTriggered(true, device));
                     setCheckBoxColor(mCheckBox, mController.getColorItemContent());
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */,
@@ -244,6 +260,16 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             if (!isAnimating()) {
                 notifyDataSetChanged();
             }
+        }
+
+        private void setUpContentDescriptionForView(View view, boolean clickable,
+                MediaDevice device) {
+            view.setClickable(clickable);
+            view.setContentDescription(
+                    mContext.getString(device.getDeviceType()
+                            == MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE
+                            ? R.string.accessibility_bluetooth_name
+                            : R.string.accessibility_cast_name, device.getName()));
         }
     }
 }

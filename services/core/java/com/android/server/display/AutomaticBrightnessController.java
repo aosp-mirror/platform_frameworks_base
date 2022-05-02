@@ -46,6 +46,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
+import com.android.server.display.DisplayPowerController.BrightnessEvent;
 
 import java.io.PrintWriter;
 
@@ -147,12 +148,18 @@ class AutomaticBrightnessController {
     // The currently accepted nominal ambient light level.
     private float mAmbientLux;
 
+    // The last ambient lux value prior to passing the darkening or brightening threshold.
+    private float mPreThresholdLux;
+
     // True if mAmbientLux holds a valid value.
     private boolean mAmbientLuxValid;
 
     // The ambient light level threshold at which to brighten or darken the screen.
     private float mAmbientBrighteningThreshold;
     private float mAmbientDarkeningThreshold;
+
+    // The last brightness value prior to passing the darkening or brightening threshold.
+    private float mPreThresholdBrightness;
 
     // The screen brightness threshold at which to brighten or darken the screen.
     private float mScreenBrighteningThreshold;
@@ -325,6 +332,21 @@ class AutomaticBrightnessController {
     }
 
     public float getAutomaticScreenBrightness() {
+        return getAutomaticScreenBrightness(null);
+    }
+
+    float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent) {
+        if (brightnessEvent != null) {
+            brightnessEvent.lux =
+                    mAmbientLuxValid ? mAmbientLux : PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            brightnessEvent.preThresholdLux = mPreThresholdLux;
+            brightnessEvent.preThresholdBrightness = mPreThresholdBrightness;
+            brightnessEvent.recommendedBrightness = mScreenAutoBrightness;
+            brightnessEvent.flags |= (!mAmbientLuxValid ? BrightnessEvent.FLAG_INVALID_LUX : 0)
+                    | (mDisplayPolicy == DisplayPowerRequest.POLICY_DOZE
+                        ? BrightnessEvent.FLAG_DOZE_SCALE : 0);
+        }
+
         if (!mAmbientLuxValid) {
             return PowerManager.BRIGHTNESS_INVALID_FLOAT;
         }
@@ -506,6 +528,8 @@ class AutomaticBrightnessController {
         pw.println("  mCurrentLightSensorRate=" + mCurrentLightSensorRate);
         pw.println("  mAmbientLux=" + mAmbientLux);
         pw.println("  mAmbientLuxValid=" + mAmbientLuxValid);
+        pw.println("  mPreThesholdLux=" + mPreThresholdLux);
+        pw.println("  mPreThesholdBrightness=" + mPreThresholdBrightness);
         pw.println("  mAmbientBrighteningThreshold=" + mAmbientBrighteningThreshold);
         pw.println("  mAmbientDarkeningThreshold=" + mAmbientDarkeningThreshold);
         pw.println("  mScreenBrighteningThreshold=" + mScreenBrighteningThreshold);
@@ -574,7 +598,11 @@ class AutomaticBrightnessController {
         } else if (mLightSensorEnabled) {
             mLightSensorEnabled = false;
             mAmbientLuxValid = !mResetAmbientLuxAfterWarmUpConfig;
+            if (!mAmbientLuxValid) {
+                mPreThresholdLux = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            }
             mScreenAutoBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            mPreThresholdBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             mRecentLightSamples = 0;
             mAmbientLightRingBuffer.clear();
             mCurrentLightSensorRate = -1;
@@ -790,6 +818,7 @@ class AutomaticBrightnessController {
                 || (slowAmbientLux <= mAmbientDarkeningThreshold
                         && fastAmbientLux <= mAmbientDarkeningThreshold
                         && nextDarkenTransition <= time)) {
+            mPreThresholdLux = mAmbientLux;
             setAmbientLux(fastAmbientLux);
             if (mLoggingEnabled) {
                 Slog.d(TAG, "updateAmbientLux: "
@@ -834,11 +863,11 @@ class AutomaticBrightnessController {
         // If screenAutoBrightness is set, we should have screen{Brightening,Darkening}Threshold,
         // in which case we ignore the new screen brightness if it doesn't differ enough from the
         // previous one.
-        if (!Float.isNaN(mScreenAutoBrightness)
-                && !isManuallySet
+        boolean withinThreshold = !Float.isNaN(mScreenAutoBrightness)
                 && newScreenAutoBrightness > mScreenDarkeningThreshold
-                && newScreenAutoBrightness < mScreenBrighteningThreshold
-                && currentBrightnessWithinAllowedRange) {
+                && newScreenAutoBrightness < mScreenBrighteningThreshold;
+
+        if (withinThreshold && !isManuallySet && currentBrightnessWithinAllowedRange) {
             if (mLoggingEnabled) {
                 Slog.d(TAG, "ignoring newScreenAutoBrightness: "
                         + mScreenDarkeningThreshold + " < " + newScreenAutoBrightness
@@ -852,6 +881,9 @@ class AutomaticBrightnessController {
                 Slog.d(TAG, "updateAutoBrightness: "
                         + "mScreenAutoBrightness=" + mScreenAutoBrightness + ", "
                         + "newScreenAutoBrightness=" + newScreenAutoBrightness);
+            }
+            if (!withinThreshold) {
+                mPreThresholdBrightness = mScreenAutoBrightness;
             }
             mScreenAutoBrightness = newScreenAutoBrightness;
             mScreenBrighteningThreshold = clampScreenBrightness(

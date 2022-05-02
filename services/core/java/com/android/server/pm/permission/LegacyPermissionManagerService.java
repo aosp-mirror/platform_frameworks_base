@@ -18,6 +18,7 @@ package com.android.server.pm.permission;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
@@ -245,6 +246,15 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
             return AppOpsManager.MODE_IGNORED;
         }
         return PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void grantDefaultPermissionsToCarrierServiceApp(@NonNull String packageName,
+            @UserIdInt int userId) {
+        PackageManagerServiceUtils.enforceSystemOrRoot(
+                "grantDefaultPermissionsForCarrierServiceApp");
+        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                .grantDefaultPermissionsToCarrierServiceApp(packageName, userId));
     }
 
     @Override

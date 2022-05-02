@@ -21,7 +21,6 @@ import static android.Manifest.permission.REQUEST_COMPANION_START_FOREGROUND_SER
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
-import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -6527,10 +6526,14 @@ public final class ActiveServices {
                             for (int con = 0; con < crs.size(); con++) {
                                 final ConnectionRecord cr = crs.get(con);
                                 final ProcessRecord clientPr = cr.binding.client;
-                                // Persistent process does not propagate BG-FGS-start capability
-                                // down to service over binding.
-                                if (clientPr.mState.getCurProcState()
-                                        <= PROCESS_STATE_PERSISTENT_UI) {
+                                // If a binding is from a persistent process, we don't automatically
+                                // always allow the bindee to allow FGS BG starts. In this case,
+                                // the binder will have to explicitly make sure the bindee's
+                                // procstate will be BFGS or above. Otherwise, for example, even if
+                                // the system server binds to an app with BIND_NOT_FOREGROUND,
+                                // the binder would have to be able to start FGS, which is not what
+                                // we want. (e.g. job services shouldn't be allowed BG-FGS.)
+                                if (clientPr.isPersistent()) {
                                     continue;
                                 }
                                 final int clientPid = clientPr.mPid;

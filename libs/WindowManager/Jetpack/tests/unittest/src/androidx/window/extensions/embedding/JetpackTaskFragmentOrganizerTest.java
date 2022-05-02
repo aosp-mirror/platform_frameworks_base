@@ -16,13 +16,23 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+
+import android.content.res.Configuration;
+import android.graphics.Point;
+import android.platform.test.annotations.Presubmit;
+import android.window.TaskFragmentInfo;
+import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -33,17 +43,22 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+
 /**
  * Test class for {@link JetpackTaskFragmentOrganizer}.
  *
  * Build/Install/Run:
  *  atest WMJetpackUnitTests:JetpackTaskFragmentOrganizerTest
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class JetpackTaskFragmentOrganizerTest {
     private static final int TASK_ID = 10;
 
+    @Mock
+    private WindowContainerTransaction mTransaction;
     @Mock
     private JetpackTaskFragmentOrganizer.TaskFragmentCallback mCallback;
     private JetpackTaskFragmentOrganizer mOrganizer;
@@ -87,5 +102,25 @@ public class JetpackTaskFragmentOrganizerTest {
         mOrganizer.stopOverrideSplitAnimation(TASK_ID);
 
         verify(mOrganizer).unregisterRemoteAnimations(TASK_ID);
+    }
+
+    @Test
+    public void testExpandTaskFragment() {
+        final TaskFragmentContainer container = new TaskFragmentContainer(null, TASK_ID);
+        final TaskFragmentInfo info = createMockInfo(container);
+        mOrganizer.mFragmentInfos.put(container.getTaskFragmentToken(), info);
+        container.setInfo(info);
+
+        mOrganizer.expandTaskFragment(mTransaction, container.getTaskFragmentToken());
+
+        verify(mTransaction).setWindowingMode(container.getInfo().getToken(),
+                WINDOWING_MODE_UNDEFINED);
+    }
+
+    private TaskFragmentInfo createMockInfo(TaskFragmentContainer container) {
+        return new TaskFragmentInfo(container.getTaskFragmentToken(),
+                mock(WindowContainerToken.class), new Configuration(), 0 /* runningActivityCount */,
+                false /* isVisible */, new ArrayList<>(), new Point(),
+                false /* isTaskClearedForReuse */, false /* isTaskFragmentClearedForPip */);
     }
 }

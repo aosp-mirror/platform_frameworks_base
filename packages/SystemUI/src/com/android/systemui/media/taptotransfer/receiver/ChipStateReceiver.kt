@@ -17,6 +17,7 @@
 package com.android.systemui.media.taptotransfer.receiver
 
 import android.app.StatusBarManager
+import android.util.Log
 import com.android.internal.logging.UiEventLogger
 
 /**
@@ -25,15 +26,15 @@ import com.android.internal.logging.UiEventLogger
  */
 enum class ChipStateReceiver(
     @StatusBarManager.MediaTransferSenderState val stateInt: Int,
-    val uiEvent: UiEventLogger.UiEventEnum,
+    val uiEvent: UiEventLogger.UiEventEnum
 ) {
     CLOSE_TO_SENDER(
         StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
-        MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_CLOSE_TO_SENDER,
+        MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_CLOSE_TO_SENDER
     ),
     FAR_FROM_SENDER(
         StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
-        MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_FAR_FROM_SENDER,
+        MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_FAR_FROM_SENDER
     );
 
     companion object {
@@ -43,8 +44,13 @@ enum class ChipStateReceiver(
          */
         fun getReceiverStateFromId(
             @StatusBarManager.MediaTransferReceiverState displayState: Int
-        ) : ChipStateReceiver = values().first { it.stateInt == displayState }
-
+        ): ChipStateReceiver? =
+        try {
+            values().first { it.stateInt == displayState }
+        } catch (e: NoSuchElementException) {
+            Log.e(TAG, "Could not find requested state $displayState", e)
+            null
+        }
 
         /**
          * Returns the state int from [StatusBarManager] associated with the given sender state
@@ -56,3 +62,5 @@ enum class ChipStateReceiver(
         fun getReceiverStateIdFromName(name: String): Int = valueOf(name).stateInt
     }
 }
+
+private const val TAG = "ChipStateReceiver"

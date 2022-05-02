@@ -15,6 +15,9 @@
  */
 package com.android.server.autofill.ui;
 
+import static android.service.autofill.FillEventHistory.Event.UI_TYPE_DIALOG;
+import static android.service.autofill.FillEventHistory.Event.UI_TYPE_MENU;
+
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 
@@ -31,6 +34,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.autofill.Dataset;
+import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillResponse;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.ValueFinder;
@@ -81,7 +85,8 @@ public final class AutoFillUI {
     public interface AutoFillUiCallback {
         void authenticate(int requestId, int datasetIndex, @NonNull IntentSender intent,
                 @Nullable Bundle extras, boolean authenticateInline);
-        void fill(int requestId, int datasetIndex, @NonNull Dataset dataset);
+        void fill(int requestId, int datasetIndex, @NonNull Dataset dataset,
+                @FillEventHistory.Event.UiType int uiType);
         void save();
         void cancelSave();
         void requestShowFillUi(AutofillId id, int width, int height,
@@ -236,7 +241,8 @@ public final class AutoFillUI {
                     hideFillUiUiThread(callback, true);
                     if (mCallback != null) {
                         final int datasetIndex = response.getDatasets().indexOf(dataset);
-                        mCallback.fill(response.getRequestId(), datasetIndex, dataset);
+                        mCallback.fill(response.getRequestId(), datasetIndex,
+                                dataset, UI_TYPE_MENU);
                     }
                 }
 
@@ -414,7 +420,8 @@ public final class AutoFillUI {
                             hideFillDialogUiThread(callback);
                             if (mCallback != null) {
                                 final int datasetIndex = response.getDatasets().indexOf(dataset);
-                                mCallback.fill(response.getRequestId(), datasetIndex, dataset);
+                                mCallback.fill(response.getRequestId(), datasetIndex, dataset,
+                                        UI_TYPE_DIALOG);
                             }
                         }
 

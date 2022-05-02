@@ -23,6 +23,7 @@ import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
 import android.net.MacAddress;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -80,7 +81,7 @@ class AssociationStoreImpl implements AssociationStore {
 
         synchronized (mLock) {
             if (mIdMap.containsKey(id)) {
-                if (DEBUG) Log.w(TAG, "Association already stored.");
+                Slog.e(TAG, "Association with id " + id + " already exists.");
                 return;
             }
             mIdMap.put(id, association);

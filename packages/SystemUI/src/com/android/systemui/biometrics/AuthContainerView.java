@@ -56,7 +56,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -110,6 +112,8 @@ public class AuthContainerView extends LinearLayout
     @ContainerState private int mContainerState = STATE_UNKNOWN;
     private final Set<Integer> mFailedModalities = new HashSet<Integer>();
 
+    private final @Background DelayableExecutor mBackgroundExecutor;
+
     // Non-null only if the dialog is in the act of dismissing and has not sent the reason yet.
     @Nullable @AuthDialogCallback.DismissedReason private Integer mPendingCallbackReason;
     // HAT received from LockSettingsService when credential is verified.
@@ -126,7 +130,7 @@ public class AuthContainerView extends LinearLayout
         int[] mSensorIds;
         boolean mSkipIntro;
         long mOperationId;
-        long mRequestId;
+        long mRequestId = -1;
         boolean mSkipAnimation = false;
         @BiometricMultiSensorMode int mMultiSensorConfig = BIOMETRIC_MULTI_SENSOR_DEFAULT;
     }
@@ -192,7 +196,7 @@ public class AuthContainerView extends LinearLayout
             return this;
         }
 
-        public AuthContainerView build(int[] sensorIds,
+        public AuthContainerView build(@Background DelayableExecutor bgExecutor, int[] sensorIds,
                 @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
                 @Nullable List<FaceSensorPropertiesInternal> faceProps,
                 @NonNull WakefulnessLifecycle wakefulnessLifecycle,
@@ -200,7 +204,7 @@ public class AuthContainerView extends LinearLayout
                 @NonNull LockPatternUtils lockPatternUtils) {
             mConfig.mSensorIds = sensorIds;
             return new AuthContainerView(mConfig, fpProps, faceProps, wakefulnessLifecycle,
-                    userManager, lockPatternUtils, new Handler(Looper.getMainLooper()));
+                    userManager, lockPatternUtils, new Handler(Looper.getMainLooper()), bgExecutor);
         }
     }
 
@@ -253,7 +257,8 @@ public class AuthContainerView extends LinearLayout
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
-            @NonNull Handler mainHandler) {
+            @NonNull Handler mainHandler,
+            @NonNull @Background DelayableExecutor bgExecutor) {
         super(config.mContext);
 
         mConfig = config;
@@ -277,6 +282,7 @@ public class AuthContainerView extends LinearLayout
         mBackgroundView = mFrameLayout.findViewById(R.id.background);
         mPanelView = mFrameLayout.findViewById(R.id.panel);
         mPanelController = new AuthPanelController(mContext, mPanelView);
+        mBackgroundExecutor = bgExecutor;
 
         // Inflate biometric view only if necessary.
         if (Utils.isBiometricAllowed(mConfig.mPromptInfo)) {
@@ -384,6 +390,7 @@ public class AuthContainerView extends LinearLayout
         mCredentialView.setPromptInfo(mConfig.mPromptInfo);
         mCredentialView.setPanelController(mPanelController, animatePanel);
         mCredentialView.setShouldAnimateContents(animateContents);
+        mCredentialView.setBackgroundExecutor(mBackgroundExecutor);
         mFrameLayout.addView(mCredentialView);
     }
 
@@ -599,6 +606,11 @@ public class AuthContainerView extends LinearLayout
     }
 
     @Override
+    public long getRequestId() {
+        return mConfig.mRequestId;
+    }
+
+    @Override
     public void animateToCredentialUI() {
         mBiometricView.startTransitionToCredentialUI();
     }
@@ -678,13 +690,20 @@ public class AuthContainerView extends LinearLayout
             return;
         }
         mContainerState = STATE_GONE;
-        mWindowManager.removeView(this);
+        if (isAttachedToWindow()) {
+            mWindowManager.removeView(this);
+        }
     }
 
     private void onDialogAnimatedIn() {
         if (mContainerState == STATE_PENDING_DISMISS) {
             Log.d(TAG, "onDialogAnimatedIn(): mPendingDismissDialog=true, dismissing now");
             animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
+            return;
+        }
+        if (mContainerState == STATE_ANIMATING_OUT || mContainerState == STATE_GONE) {
+            Log.d(TAG, "onDialogAnimatedIn(): ignore, already animating out or gone - state: "
+                    + mContainerState);
             return;
         }
         mContainerState = STATE_SHOWING;

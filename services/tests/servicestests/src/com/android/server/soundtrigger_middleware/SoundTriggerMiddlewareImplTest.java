@@ -134,7 +134,7 @@ public class SoundTriggerMiddlewareImplTest {
     public void setUp() throws Exception {
         clearInvocations(mHalDriver);
         clearInvocations(mAudioSessionProvider);
-        when(mHalDriver.getProperties()).thenReturn(TestUtil.createDefaultProperties(false));
+        when(mHalDriver.getProperties()).thenReturn(TestUtil.createDefaultProperties());
         mService = new SoundTriggerMiddlewareImpl(() -> mHalDriver, mAudioSessionProvider);
     }
 
@@ -156,7 +156,7 @@ public class SoundTriggerMiddlewareImplTest {
         assertEquals(1, allDescriptors.length);
 
         Properties properties = allDescriptors[0].properties;
-        assertEquals(TestUtil.createDefaultProperties(false), properties);
+        assertEquals(TestUtil.createDefaultProperties(), properties);
     }
 
     @Test

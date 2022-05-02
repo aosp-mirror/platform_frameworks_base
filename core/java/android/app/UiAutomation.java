@@ -64,13 +64,11 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputBinding;
-import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputMethodSession;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
+import com.android.internal.inputmethod.RemoteAccessibilityInputConnection;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.internal.view.IInputSessionWithIdCallback;
 
 import libcore.io.IoUtils;
 
@@ -1574,26 +1572,14 @@ public final class UiAutomation {
                 }
 
                 @Override
-                public void createImeSession(IInputSessionWithIdCallback callback) {
+                public void createImeSession(IAccessibilityInputMethodSessionCallback callback) {
                     /* do nothing */
                 }
 
                 @Override
-                public void setImeSessionEnabled(InputMethodSession session, boolean enabled) {
-                }
-
-                @Override
-                public void bindInput(InputBinding binding) {
-                }
-
-                @Override
-                public void unbindInput() {
-                }
-
-                @Override
-                public void startInput(@Nullable InputConnection inputConnection,
-                        @NonNull EditorInfo editorInfo, boolean restarting,
-                        @NonNull IBinder startInputToken) {
+                public void startInput(
+                        @Nullable RemoteAccessibilityInputConnection inputConnection,
+                        @NonNull EditorInfo editorInfo, boolean restarting) {
                 }
 
                 @Override

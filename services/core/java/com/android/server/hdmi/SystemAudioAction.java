@@ -153,7 +153,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
                 boolean receivedStatus = HdmiUtils.parseCommandParamSystemAudioStatus(cmd);
                 if (receivedStatus == mTargetAudioStatus) {
                     setSystemAudioMode(receivedStatus);
-                    startAudioStatusAction();
+                    finish();
                     return true;
                 } else {
                     HdmiLogger.debug("Unexpected system audio mode request:" + receivedStatus);
@@ -166,11 +166,6 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
             default:
                 return false;
         }
-    }
-
-    protected void startAudioStatusAction() {
-        addAndStartAction(new SystemAudioStatusAction(tv(), mAvrLogicalAddress, mCallbacks));
-        finish();
     }
 
     protected void removeSystemAudioActionInProgress() {

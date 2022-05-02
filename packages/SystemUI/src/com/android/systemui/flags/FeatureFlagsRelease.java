@@ -29,7 +29,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Map;
 
@@ -119,7 +118,7 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: false");
         Map<Integer, Flag<?>> knownFlags = Flags.collectFlags();
         for (Map.Entry<Integer, Flag<?>> idToFlag : knownFlags.entrySet()) {

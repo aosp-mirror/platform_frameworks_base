@@ -313,6 +313,7 @@ final class InputMethodBindingController {
                             mSupportsStylusHw);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
                     mService.reRequestCurrentClientSessionLocked();
+                    mService.performOnCreateInlineSuggestionsRequestLocked();
                 }
 
                 // reset Handwriting event receiver.

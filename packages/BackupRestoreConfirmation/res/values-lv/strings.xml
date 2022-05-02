@@ -20,7 +20,7 @@
     <string name="restore_confirm_title" msgid="5469365809567486602">"Pilna atjaunošana"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"Ir pieprasīta visu datu pilnīga dublēšana savienotā galda datorā. Vai vēlaties to atļaut?\n\nJa neesat pieprasījis dublēšanu, neatļaujiet turpināt šo darbību."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Dublēt manus datus"</string>
-    <string name="deny_backup_button_label" msgid="6009119115581097708">"Neveidot dublējumu"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"Neveidot dublēšanu"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"Ir pieprasīta visu savienotā galda datora datu pilnīga atjaunošana. Vai vēlaties to atļaut?\n\nJa neesat pieprasījis atjaunošanu, neatļaujiet turpināt šo darbību. Tās rezultātā tiks aizstāti visi pašreiz ierīcē esošie dati!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Atjaunot manus datus"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Neatjaunot"</string>

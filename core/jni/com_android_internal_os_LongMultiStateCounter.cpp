@@ -120,13 +120,13 @@ static void throwWriteRE(JNIEnv *env, binder_status_t status) {
 static void native_writeToParcel(JNIEnv *env, jobject self, jlong nativePtr, jobject jParcel,
                                  jint flags) {
     battery::LongMultiStateCounter *counter = asLongMultiStateCounter(nativePtr);
-    AParcel *parcel = AParcel_fromJavaParcel(env, jParcel);
+    ndk::ScopedAParcel parcel(AParcel_fromJavaParcel(env, jParcel));
 
     uint16_t stateCount = counter->getStateCount();
-    THROW_ON_WRITE_ERROR(AParcel_writeInt32(parcel, stateCount));
+    THROW_ON_WRITE_ERROR(AParcel_writeInt32(parcel.get(), stateCount));
 
     for (battery::state_t state = 0; state < stateCount; state++) {
-        THROW_ON_WRITE_ERROR(AParcel_writeInt64(parcel, counter->getCount(state)));
+        THROW_ON_WRITE_ERROR(AParcel_writeInt64(parcel.get(), counter->getCount(state)));
     }
 }
 
@@ -144,16 +144,16 @@ static void throwReadRE(JNIEnv *env, binder_status_t status) {
     }
 
 static jlong native_initFromParcel(JNIEnv *env, jclass theClass, jobject jParcel) {
-    AParcel *parcel = AParcel_fromJavaParcel(env, jParcel);
+    ndk::ScopedAParcel parcel(AParcel_fromJavaParcel(env, jParcel));
 
     int32_t stateCount;
-    THROW_ON_READ_ERROR(AParcel_readInt32(parcel, &stateCount));
+    THROW_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &stateCount));
 
     battery::LongMultiStateCounter *counter = new battery::LongMultiStateCounter(stateCount, 0);
 
     for (battery::state_t state = 0; state < stateCount; state++) {
         int64_t value;
-        THROW_ON_READ_ERROR(AParcel_readInt64(parcel, &value));
+        THROW_ON_READ_ERROR(AParcel_readInt64(parcel.get(), &value));
         counter->setValue(state, value);
     }
 

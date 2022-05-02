@@ -47,7 +47,6 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
@@ -808,8 +807,7 @@ public class Bubble implements BubbleViewProvider {
     /**
      * Description of current bubble state.
      */
-    public void dump(
-            @NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("key: "); pw.println(mKey);
         pw.print("  showInShade:   "); pw.println(showInShade());
         pw.print("  showDot:       "); pw.println(showDot());
@@ -819,7 +817,7 @@ public class Bubble implements BubbleViewProvider {
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
         if (mExpandedView != null) {
-            mExpandedView.dump(fd, pw, args);
+            mExpandedView.dump(pw, args);
         }
     }
 

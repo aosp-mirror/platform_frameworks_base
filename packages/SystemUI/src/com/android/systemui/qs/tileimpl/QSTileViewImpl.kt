@@ -69,6 +69,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
         internal const val TILE_STATE_RES_PREFIX = "tile_states_"
     }
 
+    private var _position: Int = INVALID
+
+    override fun setPosition(position: Int) {
+        _position = position
+    }
+
     override var heightOverride: Int = HeightOverrideable.NO_OVERRIDE
         set(value) {
             if (field == value) return
@@ -256,7 +262,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
         // Limit how much we affect the height, so we don't have rounding artifacts when the tile
         // is too short.
-        val constrainedSquishiness = 0.1f + squishinessFraction * 0.9f
+        val constrainedSquishiness = constrainSquishiness(squishinessFraction)
         bottom = top + (actualHeight * constrainedSquishiness).toInt()
         scrollY = (actualHeight - height) / 2
     }
@@ -403,6 +409,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
                                             R.string.accessibility_long_click_tile)))
                 }
             }
+        }
+        if (_position != INVALID) {
+            info.collectionItemInfo =
+                AccessibilityNodeInfo.CollectionItemInfo(_position, 1, 0, 1, false)
         }
     }
 
@@ -666,6 +676,10 @@ internal object SubtitleArrayMapping {
     fun getSubtitleId(spec: String?): Int {
         return subtitleIdsMap.getOrDefault(spec, R.array.tile_states_default)
     }
+}
+
+fun constrainSquishiness(squish: Float): Float {
+    return 0.1f + squish * 0.9f
 }
 
 private fun colorValuesHolder(name: String, vararg values: Int): PropertyValuesHolder {

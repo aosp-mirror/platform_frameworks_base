@@ -38,7 +38,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.UserAwareController
 import com.android.systemui.util.settings.SecureSettings
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -249,7 +248,7 @@ class AutoAddTracker @VisibleForTesting constructor(
         return current?.split(",") ?: emptySet()
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Current user: $userId")
         pw.println("Added tiles: $autoAdded")
     }

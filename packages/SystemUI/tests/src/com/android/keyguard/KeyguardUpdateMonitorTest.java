@@ -269,7 +269,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.registerCallback(mTestCallback);
 
         mTestableLooper.processAllMessages();
-        when(mAuthController.areAllAuthenticatorsRegistered()).thenReturn(true);
+        when(mAuthController.areAllFingerprintAuthenticatorsRegistered()).thenReturn(true);
     }
 
     @After
@@ -499,7 +499,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void test_doesNotTryToAuthenticateFingerprint_whenAuthenticatorsNotRegistered() {
-        when(mAuthController.areAllAuthenticatorsRegistered()).thenReturn(false);
+        when(mAuthController.areAllFingerprintAuthenticatorsRegistered()).thenReturn(false);
 
         mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
         mTestableLooper.processAllMessages();

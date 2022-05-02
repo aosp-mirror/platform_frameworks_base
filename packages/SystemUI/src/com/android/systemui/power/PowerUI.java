@@ -49,7 +49,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Optional;
@@ -613,7 +612,7 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.print("mLowBatteryAlertCloseLevel=");
         pw.println(mLowBatteryAlertCloseLevel);
         pw.print("mLowBatteryReminderLevels=");

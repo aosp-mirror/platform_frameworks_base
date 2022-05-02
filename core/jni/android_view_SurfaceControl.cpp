@@ -24,7 +24,9 @@
 
 #include <memory>
 
+#include <aidl/android/hardware/graphics/common/PixelFormat.h>
 #include <android-base/chrono_utils.h>
+#include <android/graphics/properties.h>
 #include <android/graphics/region.h>
 #include <android/gui/BnScreenCaptureListener.h>
 #include <android/hardware/display/IDeviceProductInfoConstants.h>
@@ -320,7 +322,8 @@ public:
                 env->CallStaticObjectMethod(gScreenshotHardwareBufferClassInfo.clazz,
                                             gScreenshotHardwareBufferClassInfo.builder,
                                             jhardwareBuffer, namedColorSpace,
-                                            captureResults.capturedSecureLayers);
+                                            captureResults.capturedSecureLayers,
+                                            captureResults.capturedHdrLayers);
         env->CallVoidMethod(screenCaptureListenerObject,
                             gScreenCaptureListenerClassInfo.onScreenCaptureComplete,
                             screenshotHardwareBuffer);
@@ -1888,6 +1891,11 @@ static jobject nativeGetDisplayDecorationSupport(JNIEnv* env, jclass clazz,
         return nullptr;
     }
 
+    using aidl::android::hardware::graphics::common::PixelFormat;
+    if (support.value().format == PixelFormat::R_8 && !hwui_uses_vulkan()) {
+        return nullptr;
+    }
+
     jobject jDisplayDecorationSupport =
             env->NewObject(gDisplayDecorationSupportInfo.clazz, gDisplayDecorationSupportInfo.ctor);
     if (jDisplayDecorationSupport == nullptr) {
@@ -2392,7 +2400,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             MakeGlobalRefOrDie(env, screenshotGraphicsBufferClazz);
     gScreenshotHardwareBufferClassInfo.builder =
             GetStaticMethodIDOrDie(env, screenshotGraphicsBufferClazz, "createFromNative",
-                                   "(Landroid/hardware/HardwareBuffer;IZ)Landroid/view/"
+                                   "(Landroid/hardware/HardwareBuffer;IZZ)Landroid/view/"
                                    "SurfaceControl$ScreenshotHardwareBuffer;");
 
     jclass displayedContentSampleClazz = FindClassOrDie(env,

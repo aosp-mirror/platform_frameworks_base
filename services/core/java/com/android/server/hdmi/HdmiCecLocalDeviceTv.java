@@ -1166,6 +1166,19 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return Constants.HANDLED;
     }
 
+    @Override
+    @Constants.HandleMessageResult
+    protected int handleSetAudioVolumeLevel(SetAudioVolumeLevelMessage message) {
+        // <Set Audio Volume Level> should only be sent to the System Audio device, so we don't
+        // handle it when System Audio Mode is enabled.
+        if (mService.isSystemAudioActivated()) {
+            return Constants.ABORT_NOT_IN_CORRECT_MODE;
+        } else {
+            mService.setStreamMusicVolume(message.getAudioVolumeLevel(), 0);
+            return Constants.HANDLED;
+        }
+    }
+
     void announceOneTouchRecordResult(int recorderAddress, int result) {
         mService.invokeOneTouchRecordResult(recorderAddress, result);
     }
@@ -1200,6 +1213,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @Nullable
     HdmiDeviceInfo getSafeAvrDeviceInfo() {
         return mService.getHdmiCecNetwork().getSafeCecDeviceInfo(Constants.ADDR_AUDIO_SYSTEM);
+    }
+
+    /**
+     * Returns the audio output device used for System Audio Mode.
+     */
+    AudioDeviceAttributes getSystemAudioOutputDevice() {
+        return HdmiControlService.AUDIO_OUTPUT_DEVICE_HDMI_ARC;
     }
 
 
@@ -1296,6 +1316,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(OneTouchRecordAction.class);
         removeAction(TimerRecordingAction.class);
         removeAction(NewDeviceAction.class);
+        removeAction(AbsoluteVolumeAudioStatusAction.class);
 
         disableSystemAudioIfExist();
         disableArcIfExist();
@@ -1318,7 +1339,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(SystemAudioActionFromAvr.class);
         removeAction(SystemAudioActionFromTv.class);
         removeAction(SystemAudioAutoInitiationAction.class);
-        removeAction(SystemAudioStatusAction.class);
         removeAction(VolumeControlAction.class);
 
         if (!mService.isControlEnabled()) {
@@ -1589,6 +1609,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return DeviceFeatures.NO_FEATURES_SUPPORTED.toBuilder()
                 .setRecordTvScreenSupport(FEATURE_SUPPORTED)
                 .setArcTxSupport(hasArcPort ? FEATURE_SUPPORTED : FEATURE_NOT_SUPPORTED)
+                .setSetAudioVolumeLevelSupport(FEATURE_SUPPORTED)
                 .build();
     }
 

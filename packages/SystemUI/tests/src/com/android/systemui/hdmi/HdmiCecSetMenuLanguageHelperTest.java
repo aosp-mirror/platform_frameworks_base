@@ -22,6 +22,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -53,8 +54,9 @@ public class HdmiCecSetMenuLanguageHelperTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mSecureSettings.getString(
-                Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST)).thenReturn(null);
+        when(mSecureSettings.getStringForUser(
+                Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST,
+                UserHandle.USER_CURRENT)).thenReturn(null);
         mHdmiCecSetMenuLanguageHelper =
                 new HdmiCecSetMenuLanguageHelper(mExecutor, mSecureSettings);
     }
@@ -84,8 +86,9 @@ public class HdmiCecSetMenuLanguageHelperTest extends SysuiTestCase {
         mHdmiCecSetMenuLanguageHelper.setLocale("de");
         mHdmiCecSetMenuLanguageHelper.declineLocale();
         assertThat(mHdmiCecSetMenuLanguageHelper.isLocaleDenylisted()).isEqualTo(true);
-        verify(mSecureSettings).putString(
-                Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST, "de");
+        verify(mSecureSettings).putStringForUser(
+                Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST, "de",
+                UserHandle.USER_CURRENT);
     }
 
     @Test
@@ -93,12 +96,14 @@ public class HdmiCecSetMenuLanguageHelperTest extends SysuiTestCase {
         mHdmiCecSetMenuLanguageHelper.setLocale("de");
         mHdmiCecSetMenuLanguageHelper.declineLocale();
         assertThat(mHdmiCecSetMenuLanguageHelper.isLocaleDenylisted()).isEqualTo(true);
-        verify(mSecureSettings).putString(
-                Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST, "de");
+        verify(mSecureSettings).putStringForUser(
+                Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST, "de",
+                UserHandle.USER_CURRENT);
         mHdmiCecSetMenuLanguageHelper.setLocale("pl");
         mHdmiCecSetMenuLanguageHelper.declineLocale();
         assertThat(mHdmiCecSetMenuLanguageHelper.isLocaleDenylisted()).isEqualTo(true);
-        verify(mSecureSettings).putString(
-                Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST, "de,pl");
+        verify(mSecureSettings).putStringForUser(
+                Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST, "de,pl",
+                UserHandle.USER_CURRENT);
     }
 }

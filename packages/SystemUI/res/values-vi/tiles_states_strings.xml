@@ -157,7 +157,7 @@
     <item msgid="6866424167599381915">"Đang bật"</item>
   </string-array>
   <string-array name="tile_states_qr_code_scanner">
-    <item msgid="7435143266149257618">"Không dùng được"</item>
+    <item msgid="7435143266149257618">"Không hoạt động"</item>
     <item msgid="3301403109049256043">"Đang tắt"</item>
     <item msgid="8878684975184010135">"Đang bật"</item>
   </string-array>

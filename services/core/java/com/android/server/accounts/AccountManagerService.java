@@ -2977,19 +2977,21 @@ public class AccountManagerService
                  * outside of those expected to be injected by the AccountManager, e.g.
                  * ANDORID_PACKAGE_NAME.
                  */
-                String token = readCachedTokenInternal(
+                TokenCache.Value cachedToken = readCachedTokenInternal(
                         accounts,
                         account,
                         authTokenType,
                         callerPkg,
                         callerPkgSigDigest);
-                if (token != null) {
+                if (cachedToken != null) {
                     logGetAuthTokenMetrics(callerPkg, account.type);
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Log.v(TAG, "getAuthToken: cache hit ofr custom token authenticator.");
                     }
                     Bundle result = new Bundle();
-                    result.putString(AccountManager.KEY_AUTHTOKEN, token);
+                    result.putString(AccountManager.KEY_AUTHTOKEN, cachedToken.token);
+                    result.putLong(AbstractAccountAuthenticator.KEY_CUSTOM_TOKEN_EXPIRY,
+                            cachedToken.expiryEpochMillis);
                     result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
                     result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
                     onResult(response, result);
@@ -6121,7 +6123,7 @@ public class AccountManagerService
         }
     }
 
-    protected String readCachedTokenInternal(
+    protected TokenCache.Value readCachedTokenInternal(
             UserAccounts accounts,
             Account account,
             String tokenType,

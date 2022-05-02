@@ -143,9 +143,10 @@ class QSSecurityFooter extends ViewController<View>
 
     @Inject
     QSSecurityFooter(@Named(QS_SECURITY_FOOTER_VIEW) View rootView,
-            UserTracker userTracker, @Main Handler mainHandler, ActivityStarter activityStarter,
-            SecurityController securityController, DialogLaunchAnimator dialogLaunchAnimator,
-            @Background Looper bgLooper, BroadcastDispatcher broadcastDispatcher) {
+            UserTracker userTracker, @Main Handler mainHandler,
+            ActivityStarter activityStarter, SecurityController securityController,
+            DialogLaunchAnimator dialogLaunchAnimator, @Background Looper bgLooper,
+            BroadcastDispatcher broadcastDispatcher) {
         super(rootView);
         mFooterText = mView.findViewById(R.id.footer_text);
         mPrimaryFooterIcon = mView.findViewById(R.id.primary_footer_icon);
@@ -493,21 +494,23 @@ class QSSecurityFooter extends ViewController<View>
 
     private void createDialog() {
         mShouldUseSettingsButton.set(false);
-        final View view = createDialogView();
-        mMainHandler.post(() -> {
-            mDialog = new SystemUIDialog(mContext, 0); // Use mContext theme
-            mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(), this);
-            mDialog.setButton(DialogInterface.BUTTON_NEGATIVE,
-                    mShouldUseSettingsButton.get() ? getSettingsButton() : getNegativeButton(),
-                    this);
+        mHandler.post(() -> {
+            String settingsButtonText = getSettingsButton();
+            final View view = createDialogView();
+            mMainHandler.post(() -> {
+                mDialog = new SystemUIDialog(mContext, 0); // Use mContext theme
+                mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(), this);
+                mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, mShouldUseSettingsButton.get()
+                        ? settingsButtonText : getNegativeButton(), this);
 
-            mDialog.setView(view);
-            if (mView.isAggregatedVisible()) {
-                mDialogLaunchAnimator.showFromView(mDialog, mView);
-            } else {
-                mDialog.show();
-            }
+                mDialog.setView(view);
+                if (mView.isAggregatedVisible()) {
+                    mDialogLaunchAnimator.showFromView(mDialog, mView);
+                } else {
+                    mDialog.show();
+                }
+            });
         });
     }
 
@@ -650,6 +653,7 @@ class QSSecurityFooter extends ViewController<View>
         }
     }
 
+    // This should not be called on the main thread to avoid making an IPC.
     @VisibleForTesting
     String getSettingsButton() {
         return mDpm.getResources().getString(

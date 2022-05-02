@@ -36,9 +36,6 @@ public abstract class DreamOverlayService extends Service {
     private static final String TAG = "DreamOverlayService";
     private static final boolean DEBUG = false;
     private boolean mShowComplications;
-    private boolean mIsPreviewMode;
-    @Nullable
-    private CharSequence mDreamLabel;
 
     private IDreamOverlay mDreamOverlay = new IDreamOverlay.Stub() {
         @Override
@@ -59,8 +56,6 @@ public abstract class DreamOverlayService extends Service {
     public final IBinder onBind(@NonNull Intent intent) {
         mShowComplications = intent.getBooleanExtra(DreamService.EXTRA_SHOW_COMPLICATIONS,
                 DreamService.DEFAULT_SHOW_COMPLICATIONS);
-        mIsPreviewMode = intent.getBooleanExtra(DreamService.EXTRA_IS_PREVIEW, false);
-        mDreamLabel = intent.getCharSequenceExtra(DreamService.EXTRA_DREAM_LABEL);
         return mDreamOverlay.asBinder();
     }
 
@@ -88,20 +83,5 @@ public abstract class DreamOverlayService extends Service {
      */
     public final boolean shouldShowComplications() {
         return mShowComplications;
-    }
-
-    /**
-     * Returns whether the dream is running in preview mode.
-     */
-    public final boolean isPreviewMode() {
-        return mIsPreviewMode;
-    }
-
-    /**
-     * Returns the user-facing label of the currently running dream.
-     */
-    @Nullable
-    public final CharSequence getDreamLabel() {
-        return mDreamLabel;
     }
 }

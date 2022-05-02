@@ -7,7 +7,6 @@ class MediaTestUtils {
         val emptyMediaData = MediaData(
             userId = 0,
             initialized = true,
-            backgroundColor = 0,
             app = null,
             appIcon = null,
             artist = null,

@@ -48,7 +48,6 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -234,9 +233,6 @@ public class KeyguardStatusBarView extends RelativeLayout {
         LinearLayout.LayoutParams lp =
                 (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
 
-        int marginStart = getResources().getDimensionPixelSize(
-                R.dimen.system_icons_super_container_margin_start);
-
         // Use status_bar_padding_end to replace original
         // system_icons_super_container_avatarless_margin_end to prevent different end alignment
         // between PhoneStatusBarView and KeyguardStatusBarView
@@ -249,8 +245,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         // 1. status bar layout: mPadding(consider round_corner + privacy dot)
         // 2. icon container: R.dimen.status_bar_padding_end
 
-        if (marginEnd != lp.getMarginEnd() || marginStart != lp.getMarginStart()) {
-            lp.setMarginStart(marginStart);
+        if (marginEnd != lp.getMarginEnd()) {
             lp.setMarginEnd(marginEnd);
             mSystemIconsContainer.setLayoutParams(lp);
         }
@@ -500,13 +495,13 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     /** Should only be called from {@link KeyguardStatusBarViewController}. */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusBarView:");
         pw.println("  mBatteryCharging: " + mBatteryCharging);
         pw.println("  mLayoutState: " + mLayoutState);
         pw.println("  mKeyguardUserSwitcherEnabled: " + mKeyguardUserSwitcherEnabled);
         if (mBatteryView != null) {
-            mBatteryView.dump(fd, pw, args);
+            mBatteryView.dump(pw, args);
         }
     }
 

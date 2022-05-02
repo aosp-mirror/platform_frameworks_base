@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Адключэнне..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Злучэнне..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Спарванне..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Спалучэнне..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без званкоў)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без аўдыя)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без паведамленняў)"</string>
@@ -448,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Пратанамалія (чырвоны-зялёны)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Трытанамалія (сіні-жоўты)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Карэкцыя колераў"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Карэкцыя колераў можа спатрэбіцца, калі вы захочаце:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;бачыць колеры больш дакладна&lt;/li&gt; &lt;li&gt;&amp;nbsp;выдаліць колеры, каб сканцэнтраваць увагу&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Карэкцыя колераў можа спатрэбіцца, калі вы захочаце:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;бачыць колеры больш дакладна;&lt;/li&gt; &lt;li&gt;&amp;nbsp;выдаліць колеры, каб сканцэнтраваць увагу.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Перавызначаны <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Зараду хопіць прыблізна на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -596,8 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Скінуць гасцявы сеанс?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Выдаліць госця?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Скінуць"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Выдаліць"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Ідзе скід гасцявога сеанса…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зрабіць фота"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбраць відарыс"</string>
@@ -653,10 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Уключэнне экрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дазволіць уключэнне экрана"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дазволіць праграме ўключаць экран. З гэтым дазволам праграма зможа ў любы час уключаць экран без вашага яўнага намеру."</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Сканіраваць QR-код"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Каб пачаць праслухванне, памясціце ў цэнтр QR-код, які знаходзіцца ўнізе"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-код мае несапраўдны фармат"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Спыніць трансляцыю праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Пры пераключэнні на праграму \"<xliff:g id="SWITCHAPP">%1$s</xliff:g>\" ці змяненні вываду бягучая трансляцыя спыняецца"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Трансляцыя праграмы \"<xliff:g id="SWITCHAPP">%1$s</xliff:g>\""</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Змяненне вываду"</string>
 </resources>

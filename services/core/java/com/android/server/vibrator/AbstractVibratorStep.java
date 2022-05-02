@@ -141,8 +141,16 @@ abstract class AbstractVibratorStep extends Step {
      */
     protected List<Step> nextSteps(long nextStartTime, long vibratorOffTimeout,
             int segmentsPlayed) {
+        int nextSegmentIndex = segmentIndex + segmentsPlayed;
+        int effectSize = effect.getSegments().size();
+        int repeatIndex = effect.getRepeatIndex();
+        if (nextSegmentIndex >= effectSize && repeatIndex >= 0) {
+            // Count the loops that were played.
+            int loopSize = effectSize - repeatIndex;
+            nextSegmentIndex = repeatIndex + ((nextSegmentIndex - effectSize) % loopSize);
+        }
         Step nextStep = conductor.nextVibrateStep(nextStartTime, controller, effect,
-                segmentIndex + segmentsPlayed, vibratorOffTimeout);
+                nextSegmentIndex, vibratorOffTimeout);
         return nextStep == null ? VibrationStepConductor.EMPTY_STEP_LIST : Arrays.asList(nextStep);
     }
 }

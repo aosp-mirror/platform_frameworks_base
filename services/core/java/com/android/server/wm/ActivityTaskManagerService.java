@@ -62,9 +62,9 @@ import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIV
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
 import static android.provider.Settings.Global.HIDE_ERROR_DIALOGS;
 import static android.provider.Settings.System.FONT_SCALE;
-import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT;
 import static android.view.WindowManager.TRANSIT_WAKE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
@@ -148,7 +148,6 @@ import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
 import android.app.ProfilerInfo;
-import android.app.RemoteAction;
 import android.app.WaitResult;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
@@ -284,7 +283,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -382,7 +380,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private AppOpsManager mAppOpsManager;
     /** All active uids in the system. */
     final MirrorActiveUids mActiveUids = new MirrorActiveUids();
-    private final SparseArray<String> mPendingTempAllowlist = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
     /** All processes we currently have running mapped by pid and uid */
@@ -2944,7 +2941,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long callingId = Binder.clearCallingIdentity();
         LocalService.ActivityTokens tokens = null;
         try {
-            tokens = mInternal.getTopActivityForTask(taskId);
+            tokens = mInternal.getAttachedNonFinishingActivityForTask(taskId, null);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -3334,7 +3331,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             userId = activity.mUserId;
         }
-        return DevicePolicyCache.getInstance().isScreenCaptureAllowed(userId, false);
+        return DevicePolicyCache.getInstance().isScreenCaptureAllowed(userId);
     }
 
     private void onLocalVoiceInteractionStartedLocked(IBinder activity,
@@ -3401,6 +3398,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                // Keyguard asked us to clear the home task snapshot before going away, so do that.
+                if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT) != 0) {
+                    mActivityClientController.invalidateHomeTaskSnapshot(null /* token */);
+                }
+
                 mRootWindowContainer.forAllDisplays(displayContent -> {
                     mKeyguardController.keyguardGoingAway(displayContent.getDisplayId(), flags);
                 });
@@ -3468,19 +3470,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.e(TAG, "Skip enterPictureInPictureMode, destroyed " + r);
                     return;
                 }
-                // Only update the saved args from the args that are set
                 r.setPictureInPictureParams(params);
-                final float aspectRatio = r.pictureInPictureArgs.getAspectRatioFloat();
-                final float expandedAspectRatio =
-                        r.pictureInPictureArgs.getExpandedAspectRatioFloat();
-                final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
-                final RemoteAction closeAction = r.pictureInPictureArgs.getCloseAction();
                 mRootWindowContainer.moveActivityToPinnedRootTask(r,
                         null /* launchIntoPipHostActivity */, "enterPictureInPictureMode");
                 final Task task = r.getTask();
-                task.setPictureInPictureAspectRatio(aspectRatio, expandedAspectRatio);
-                task.setPictureInPictureActions(actions, closeAction);
-
                 // Continue the pausing process after entering pip.
                 if (task.getPausingActivity() == r) {
                     task.schedulePauseActivity(r, false /* userLeaving */,
@@ -5804,7 +5797,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public ActivityTokens getTopActivityForTask(int taskId) {
+        public ActivityTokens getAttachedNonFinishingActivityForTask(int taskId,
+                IBinder token) {
             synchronized (mGlobalLock) {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
                         MATCH_ATTACHED_TASK_ONLY);
@@ -5813,19 +5807,30 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             + " Requested task not found");
                     return null;
                 }
-                final ActivityRecord activity = task.getTopNonFinishingActivity();
-                if (activity == null) {
-                    Slog.w(TAG, "getApplicationThreadForTopActivity failed:"
-                            + " Requested activity not found");
+                final List<ActivityRecord> list = new ArrayList<>();
+                task.forAllActivities(r -> {
+                    if (!r.finishing) {
+                        list.add(r);
+                    }
+                });
+                if (list.size() <= 0) {
                     return null;
                 }
-                if (!activity.attachedToProcess()) {
-                    Slog.w(TAG, "getApplicationThreadForTopActivity failed: No process for "
-                            + activity);
-                    return null;
+                // pass null, get top Activity
+                if (token == null && list.get(0).attachedToProcess()) {
+                    ActivityRecord topRecord = list.get(0);
+                    return new ActivityTokens(topRecord.token, topRecord.assistToken,
+                            topRecord.app.getThread(), topRecord.shareableActivityToken);
                 }
-                return new ActivityTokens(activity.token, activity.assistToken,
-                        activity.app.getThread(), activity.shareableActivityToken);
+                // find the expected Activity
+                for (int i = 0; i < list.size(); i++) {
+                    ActivityRecord record = list.get(i);
+                    if (record.shareableActivityToken == token && record.attachedToProcess()) {
+                        return new ActivityTokens(record.token, record.assistToken,
+                                record.app.getThread(), record.shareableActivityToken);
+                    }
+                }
+                return null;
             }
         }
 
@@ -6424,20 +6429,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onUidProcStateChanged(int uid, int procState) {
             mActiveUids.onUidProcStateChanged(uid, procState);
-        }
-
-        @Override
-        public void onUidAddedToPendingTempAllowlist(int uid, String tag) {
-            synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempAllowlist.put(uid, tag);
-            }
-        }
-
-        @Override
-        public void onUidRemovedFromPendingTempAllowlist(int uid) {
-            synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempAllowlist.remove(uid);
-            }
         }
 
         @Override

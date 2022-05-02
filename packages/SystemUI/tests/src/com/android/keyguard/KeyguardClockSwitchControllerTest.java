@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
@@ -250,13 +252,14 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
     @Test
     public void testChangeToDoubleLineClockSetsSmallClock() {
-        when(mSecureSettings.getInt(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1))
+        when(mSecureSettings.getIntForUser(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1,
+                UserHandle.USER_CURRENT))
                 .thenReturn(0);
         ArgumentCaptor<ContentObserver> observerCaptor =
                 ArgumentCaptor.forClass(ContentObserver.class);
         mController.init();
-        verify(mSecureSettings).registerContentObserver(any(Uri.class),
-                anyBoolean(), observerCaptor.capture());
+        verify(mSecureSettings).registerContentObserverForUser(any(Uri.class),
+                anyBoolean(), observerCaptor.capture(), eq(UserHandle.USER_ALL));
         ContentObserver observer = observerCaptor.getValue();
         mExecutor.runAllReady();
 

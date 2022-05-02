@@ -1157,18 +1157,26 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * See {@link #getCarConnectionSummary(boolean)}
+     * See {@link #getCarConnectionSummary(boolean, boolean)}
      */
     public String getCarConnectionSummary() {
-        return getCarConnectionSummary(false);
+        return getCarConnectionSummary(false /* shortSummary */);
+    }
+
+    /**
+     * See {@link #getCarConnectionSummary(boolean, boolean)}
+     */
+    public String getCarConnectionSummary(boolean shortSummary) {
+        return getCarConnectionSummary(shortSummary, true /* useDisconnectedString */);
     }
 
     /**
      * Returns android auto string that describes the connection state of this device.
      *
      * @param shortSummary {@code true} if need to return short version summary
+     * @param useDisconnectedString {@code true} if need to return disconnected summary string
      */
-    public String getCarConnectionSummary(boolean shortSummary) {
+    public String getCarConnectionSummary(boolean shortSummary, boolean useDisconnectedString) {
         boolean profileConnected = false;       // at least one profile is connected
         boolean a2dpNotConnected = false;       // A2DP is preferred but not connected
         boolean hfpNotConnected = false;        // HFP is preferred but not connected
@@ -1286,9 +1294,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             }
         }
 
-        return getBondState() == BluetoothDevice.BOND_BONDING ?
-                mContext.getString(R.string.bluetooth_pairing) :
-                mContext.getString(R.string.bluetooth_disconnected);
+        if (getBondState() == BluetoothDevice.BOND_BONDING) {
+            return mContext.getString(R.string.bluetooth_pairing);
+        }
+        return useDisconnectedString ? mContext.getString(R.string.bluetooth_disconnected) : null;
     }
 
     /**

@@ -41,6 +41,7 @@ import com.android.telephony.Rlog;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -351,7 +352,7 @@ public abstract class DataService extends Service {
         public void requestDataCallList(@NonNull DataServiceCallback callback) {
             // The default implementation is to return unsupported.
             callback.onRequestDataCallListComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED,
-                    null);
+                    Collections.EMPTY_LIST);
         }
 
         private void registerForDataCallListChanged(IDataServiceCallback callback) {

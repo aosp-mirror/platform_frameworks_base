@@ -56,6 +56,7 @@ import android.net.LinkProperties;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.ChildSaProposal;
+import android.net.ipsec.ike.IkeSessionConnectionInfo;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
@@ -216,13 +217,22 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     @Test
     public void testMigration() throws Exception {
         triggerChildOpened();
+        mTestLooper.dispatchAll();
+        assertEquals(mIkeConnectionInfo, mGatewayConnection.getIkeConnectionInfo());
 
         mGatewayConnection
                 .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
+
+        final IkeSessionConnectionInfo newIkeConnectionInfo =
+                new IkeSessionConnectionInfo(
+                        TEST_ADDR_V4, TEST_ADDR_V4_2, TEST_UNDERLYING_NETWORK_RECORD_2.network);
+        getIkeSessionCallback().onIkeSessionConnectionInfoChanged(newIkeConnectionInfo);
         getChildSessionCallback()
                 .onIpSecTransformsMigrated(makeDummyIpSecTransform(), makeDummyIpSecTransform());
         mTestLooper.dispatchAll();
+
+        assertEquals(newIkeConnectionInfo, mGatewayConnection.getIkeConnectionInfo());
 
         verify(mIpSecSvc, times(2))
                 .setNetworkForTunnelInterface(
@@ -246,7 +256,8 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                 MtuUtils.getMtu(
                         saProposals,
                         mConfig.getMaxMtu(),
-                        TEST_UNDERLYING_NETWORK_RECORD_2.linkProperties.getMtu());
+                        TEST_UNDERLYING_NETWORK_RECORD_2.linkProperties.getMtu(),
+                        true /* isIpv4 */);
         verify(mNetworkAgent).sendLinkProperties(
                 argThat(lp -> expectedMtu == lp.getMtu()
                         && TEST_TCP_BUFFER_SIZES_2.equals(lp.getTcpBufferSizes())));
@@ -269,6 +280,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                 .when(mMockChildSessionConfig)
                 .getInternalDnsServers();
 
+        getIkeSessionCallback().onOpened(mIkeSessionConfiguration);
         getChildSessionCallback().onOpened(mMockChildSessionConfig);
     }
 
@@ -298,6 +310,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
+        assertEquals(mIkeConnectionInfo, mGatewayConnection.getIkeConnectionInfo());
 
         final ArgumentCaptor<LinkProperties> lpCaptor =
                 ArgumentCaptor.forClass(LinkProperties.class);

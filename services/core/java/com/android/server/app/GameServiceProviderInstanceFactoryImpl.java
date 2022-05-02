@@ -20,9 +20,11 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
+import android.app.IActivityTaskManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.service.games.GameService;
 import android.service.games.GameSessionService;
 import android.service.games.IGameService;
@@ -47,14 +49,17 @@ final class GameServiceProviderInstanceFactoryImpl implements GameServiceProvide
     @Override
     public GameServiceProviderInstance create(
             @NonNull GameServiceComponentConfiguration configuration) {
+        final UserHandle userHandle = configuration.getUserHandle();
+        final IActivityTaskManager activityTaskManager = ActivityTaskManager.getService();
         return new GameServiceProviderInstanceImpl(
-                configuration.getUserHandle(),
+                userHandle,
                 BackgroundThread.getExecutor(),
                 mContext,
-                new GameClassifierImpl(mContext.getPackageManager()),
+                new GameTaskInfoProvider(userHandle, activityTaskManager,
+                        new GameClassifierImpl(mContext.getPackageManager())),
                 ActivityManager.getService(),
                 LocalServices.getService(ActivityManagerInternal.class),
-                ActivityTaskManager.getService(),
+                activityTaskManager,
                 (WindowManagerService) ServiceManager.getService(Context.WINDOW_SERVICE),
                 LocalServices.getService(WindowManagerInternal.class),
                 new GameServiceConnector(mContext, configuration),

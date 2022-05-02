@@ -17,6 +17,8 @@
 package com.android.systemui.keyguard;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
+import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
+import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN;
@@ -135,7 +137,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
@@ -849,7 +850,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
                 @Override
                 public void onLaunchAnimationCancelled() {
-                    setOccluded(true /* occluded */, false /* animate */);
+                    Log.d(TAG, "Occlude launch animation cancelled. "
+                            + "Occluded state is now: " + mOccluded);
                 }
 
                 @NonNull
@@ -894,7 +896,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             };
 
     private IRemoteAnimationRunner mOccludeAnimationRunner =
-            new ActivityLaunchRemoteAnimationRunner(mOccludeAnimationController);
+            new OccludeActivityLaunchRemoteAnimationRunner(mOccludeAnimationController);
 
     /**
      * Animation controller for activities that unocclude the keyguard. This does not use the
@@ -919,12 +921,16 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                         RemoteAnimationTarget[] wallpapers,
                         RemoteAnimationTarget[] nonApps,
                         IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
-                    final RemoteAnimationTarget primary = apps[0];
+                    if (apps == null || apps.length == 0 || apps[0] == null) {
+                        Log.d(TAG, "No apps provided to unocclude runner; "
+                                + "skipping animation and unoccluding.");
 
-                    if (primary == null) {
                         finishedCallback.onAnimationFinished();
+                        setOccluded(false /* isOccluded */, true /* animate */);
                         return;
                     }
+
+                    final RemoteAnimationTarget primary = apps[0];
 
                     final SyncRtSurfaceTransactionApplier applier =
                             new SyncRtSurfaceTransactionApplier(
@@ -965,6 +971,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                             @Override
                             public void onAnimationEnd(Animator animation) {
                                 try {
+                                    setOccluded(false /* isOccluded */, true /* animate */);
                                     finishedCallback.onAnimationFinished();
                                     mUnoccludeAnimator = null;
                                 } catch (RemoteException e) {
@@ -1084,6 +1091,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         final IntentFilter delayedActionFilter = new IntentFilter();
         delayedActionFilter.addAction(DELAYED_KEYGUARD_ACTION);
         delayedActionFilter.addAction(DELAYED_LOCK_PROFILE_ACTION);
+        delayedActionFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiver(mDelayedLockBroadcastReceiver, delayedActionFilter,
                 SYSTEMUI_PERMISSION, null /* scheduler */,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
@@ -1393,6 +1401,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         // Lock in the future
         long when = SystemClock.elapsedRealtime() + timeout;
         Intent intent = new Intent(DELAYED_KEYGUARD_ACTION);
+        intent.setPackage(mContext.getPackageName());
         intent.putExtra("seq", mDelayedShowingSequence);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         PendingIntent sender = PendingIntent.getBroadcast(mContext,
@@ -1413,11 +1422,13 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 } else {
                     long userWhen = SystemClock.elapsedRealtime() + userTimeout;
                     Intent lockIntent = new Intent(DELAYED_LOCK_PROFILE_ACTION);
+                    lockIntent.setPackage(mContext.getPackageName());
                     lockIntent.putExtra("seq", mDelayedProfileShowingSequence);
                     lockIntent.putExtra(Intent.EXTRA_USER_ID, profileId);
                     lockIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                     PendingIntent lockSender = PendingIntent.getBroadcast(
-                            mContext, 0, lockIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                            mContext, 0, lockIntent,
+                            PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                             userWhen, lockSender);
                 }
@@ -2297,8 +2308,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             int flags = 0;
             if (mKeyguardViewControllerLazy.get().shouldDisableWindowAnimationsForUnlock()
                     || mWakeAndUnlocking && !mWallpaperSupportsAmbientMode) {
-                flags |= WindowManagerPolicyConstants
-                        .KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
+                flags |= KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
             }
             if (mKeyguardViewControllerLazy.get().isGoingToNotificationShade()
                     || mWakeAndUnlocking && mWallpaperSupportsAmbientMode) {
@@ -2312,6 +2322,15 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             if (mKeyguardViewControllerLazy.get().shouldSubtleWindowAnimationsForUnlock()) {
                 flags |= WindowManagerPolicyConstants
                         .KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS;
+            }
+
+            // If we are unlocking to the launcher, clear the snapshot so that any changes as part
+            // of the in-window animations are reflected. This is needed even if we're not actually
+            // playing in-window animations for this particular unlock since a previous unlock might
+            // have changed the Launcher state.
+            if (mWakeAndUnlocking
+                    && KeyguardUnlockAnimationController.Companion.isNexusLauncherUnderneath()) {
+                flags |= KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
             }
 
             mUpdateMonitor.setKeyguardGoingAway(true);
@@ -2600,6 +2619,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
             finishSurfaceBehindRemoteAnimation(cancelled);
             mSurfaceBehindRemoteAnimationRequested = false;
+
+            // The remote animation is over, so we're not going away anymore.
+            mKeyguardStateController.notifyKeyguardGoingAway(false);
         });
 
         mKeyguardUnlockAnimationControllerLazy.get().notifyFinishedKeyguardExitAnimation(
@@ -2615,9 +2637,19 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         mSurfaceBehindRemoteAnimationRequested = true;
 
         try {
-            ActivityTaskManager.getService().keyguardGoingAway(
-                    WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS
-                            | WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER);
+            int flags = KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS
+                    | KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
+
+            // If we are unlocking to the launcher, clear the snapshot so that any changes as part
+            // of the in-window animations are reflected. This is needed even if we're not actually
+            // playing in-window animations for this particular unlock since a previous unlock might
+            // have changed the Launcher state.
+            if (KeyguardUnlockAnimationController.Companion.isNexusLauncherUnderneath()) {
+                flags |= KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
+            }
+
+            ActivityTaskManager.getService().keyguardGoingAway(flags);
+            mKeyguardStateController.notifyKeyguardGoingAway(true);
         } catch (RemoteException e) {
             mSurfaceBehindRemoteAnimationRequested = false;
             e.printStackTrace();
@@ -2646,7 +2678,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     }
 
     /** If it's running, finishes the RemoteAnimation on the surface behind the keyguard. */
-    public void finishSurfaceBehindRemoteAnimation(boolean cancelled) {
+    void finishSurfaceBehindRemoteAnimation(boolean cancelled) {
         if (!mSurfaceBehindRemoteAnimationRunning) {
             return;
         }
@@ -2781,6 +2813,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     public void onWakeAndUnlocking() {
         Trace.beginSection("KeyguardViewMediator#onWakeAndUnlocking");
         mWakeAndUnlocking = true;
+
         keyguardDone();
         Trace.endSection();
     }
@@ -2894,7 +2927,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.print("  mSystemReady: "); pw.println(mSystemReady);
         pw.print("  mBootCompleted: "); pw.println(mBootCompleted);
         pw.print("  mBootSendUserPresent: "); pw.println(mBootSendUserPresent);
@@ -3108,6 +3141,38 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 throws RemoteException {
             mRunner = mActivityLaunchAnimator.get().createRunner(mActivityLaunchController);
             mRunner.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
+        }
+    }
+
+    /**
+     * Subclass of {@link ActivityLaunchRemoteAnimationRunner} that calls {@link #setOccluded} when
+     * onAnimationStart is called.
+     */
+    private class OccludeActivityLaunchRemoteAnimationRunner
+            extends ActivityLaunchRemoteAnimationRunner {
+
+        OccludeActivityLaunchRemoteAnimationRunner(
+                ActivityLaunchAnimator.Controller controller) {
+            super(controller);
+        }
+
+        @Override
+        public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
+                IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
+            super.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
+
+            // This is the first signal we have from WM that we're going to be occluded. Set our
+            // internal state to reflect that immediately, vs. waiting for the launch animator to
+            // begin. Otherwise, calls to setShowingLocked, etc. will not know that we're about to
+            // be occluded and might re-show the keyguard.
+            setOccluded(true /* isOccluded */, false /* animate */);
+        }
+
+        @Override
+        public void onAnimationCancelled() throws RemoteException {
+            super.onAnimationCancelled();
+            Log.d(TAG, "Occlude launch animation cancelled. Occluded state is now: " + mOccluded);
         }
     }
 }

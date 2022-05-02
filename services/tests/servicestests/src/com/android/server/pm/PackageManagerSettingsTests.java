@@ -1516,7 +1516,7 @@ public class PackageManagerSettingsTests {
     private Settings makeSettings() {
         return new Settings(InstrumentationRegistry.getContext().getFilesDir(),
                 mRuntimePermissionsPersistence, mPermissionDataProvider,
-                mDomainVerificationManager, new PackageManagerTracedLock());
+                mDomainVerificationManager, null, new PackageManagerTracedLock());
     }
 
     private void verifyKeySetMetaData(Settings settings)

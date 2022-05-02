@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
@@ -28,6 +29,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.view.Display;
 import android.view.SurfaceControlViewHost;
+import android.view.WindowManager;
 
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -117,13 +119,18 @@ public abstract class GameSessionService extends Service {
         }
 
         IBinder hostToken = new Binder();
+
+        // Use a WindowContext so that views attached to the SurfaceControlViewHost will receive
+        // configuration changes (rather than always perceiving the global configuration).
+        final Context windowContext = createWindowContext(display,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, /*options=*/ null);
         SurfaceControlViewHost surfaceControlViewHost =
-                new SurfaceControlViewHost(this, display, hostToken);
+                new SurfaceControlViewHost(windowContext, display, hostToken);
 
         gameSession.attach(
                 gameSessionController,
                 createGameSessionRequest.getTaskId(),
-                this,
+                windowContext,
                 surfaceControlViewHost,
                 gameSessionViewHostConfiguration.mWidthPx,
                 gameSessionViewHostConfiguration.mHeightPx);

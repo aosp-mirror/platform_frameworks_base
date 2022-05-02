@@ -236,6 +236,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     private boolean mCommittedReparentToAnimationLeash;
 
+    private int mSyncTransactionCommitCallbackDepth = 0;
+
     /** Interface for {@link #isAnimating} to check which cases for the container is animating. */
     public interface AnimationFlags {
         /**
@@ -2688,6 +2690,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * {@link #getPendingTransaction()}
      */
     public Transaction getSyncTransaction() {
+        if (mSyncTransactionCommitCallbackDepth > 0) {
+            return mSyncTransaction;
+        }
         if (mSyncState != SYNC_STATE_NONE) {
             return mSyncTransaction;
         }
@@ -2761,7 +2766,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     boolean canStartChangeTransition() {
         return !mWmService.mDisableTransitionAnimation && mDisplayContent != null
                 && getSurfaceControl() != null && !mDisplayContent.inTransition()
-                && isVisible() && isVisibleRequested() && okToAnimate();
+                && isVisible() && isVisibleRequested() && okToAnimate()
+                // Pip animation will be handled by PipTaskOrganizer.
+                && !inPinnedWindowingMode() && getParent() != null
+                && !getParent().inPinnedWindowingMode();
     }
 
     /**
@@ -3181,6 +3189,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mLastLayer = -1;
         mWmService.mSurfaceAnimationRunner.onAnimationLeashLost(mAnimationLeash, t);
         mAnimationLeash = null;
+        mNeedsZBoost = false;
         reassignLayer(t);
         updateSurfacePosition(t);
     }
@@ -3738,13 +3747,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void registerWindowContainerListener(WindowContainerListener listener) {
+        registerWindowContainerListener(listener, true /* shouldPropConfig */);
+    }
+
+    void registerWindowContainerListener(WindowContainerListener listener,
+            boolean shouldDispatchConfig) {
         if (mListeners.contains(listener)) {
             return;
         }
         mListeners.add(listener);
         // Also register to ConfigurationChangeListener to receive configuration changes.
-        registerConfigurationChangeListener(listener);
-        listener.onDisplayChanged(getDisplayContent());
+        registerConfigurationChangeListener(listener, shouldDispatchConfig);
+        if (shouldDispatchConfig) {
+            listener.onDisplayChanged(getDisplayContent());
+        }
     }
 
     void unregisterWindowContainerListener(WindowContainerListener listener) {
@@ -3782,11 +3798,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return INVALID_WINDOW_TYPE;
     }
 
-    boolean setCanScreenshot(boolean canScreenshot) {
+    boolean setCanScreenshot(Transaction t, boolean canScreenshot) {
         if (mSurfaceControl == null) {
             return false;
         }
-        getPendingTransaction().setSecure(mSurfaceControl, !canScreenshot);
+        t.setSecure(mSurfaceControl, !canScreenshot);
         return true;
     }
 
@@ -3859,7 +3875,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 @AnimationType int type, @Nullable AnimationAdapter snapshotAnim);
     }
 
-    void addTrustedOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
+    void addTrustedOverlay(SurfaceControlViewHost.SurfacePackage overlay,
+            @Nullable WindowState initialWindowState) {
         if (mOverlayHost == null) {
             mOverlayHost = new TrustedOverlayHost(mWmService);
         }
@@ -3874,6 +3891,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             ProtoLog.e(WM_DEBUG_ANIM,
                     "Error sending initial configuration change to WindowContainer overlay");
             removeTrustedOverlay(overlay);
+        }
+
+        // Emit an initial WindowState so that proper insets are available to overlay views
+        // shortly after the overlay is added.
+        if (initialWindowState != null) {
+            final InsetsState insetsState = initialWindowState.getInsetsState();
+            final Rect dispBounds = getBounds();
+            try {
+                overlay.getRemoteInterface().onInsetsChanged(insetsState, dispBounds);
+            } catch (Exception e) {
+                ProtoLog.e(WM_DEBUG_ANIM,
+                        "Error sending initial insets change to WindowContainer overlay");
+                removeTrustedOverlay(overlay);
+            }
         }
     }
 
@@ -3890,4 +3921,29 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             p.updateOverlayInsetsState(originalChange);
         }
     }
+
+    void waitForSyncTransactionCommit(ArraySet<WindowContainer> wcAwaitingCommit) {
+        if (wcAwaitingCommit.contains(this)) {
+            return;
+        }
+        mSyncTransactionCommitCallbackDepth++;
+        wcAwaitingCommit.add(this);
+
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            mChildren.get(i).waitForSyncTransactionCommit(wcAwaitingCommit);
+        }
+    }
+
+    void onSyncTransactionCommitted(SurfaceControl.Transaction t) {
+        mSyncTransactionCommitCallbackDepth--;
+        if (mSyncTransactionCommitCallbackDepth > 0) {
+            return;
+        }
+        if (mSyncState != SYNC_STATE_NONE) {
+            return;
+        }
+
+        t.merge(mSyncTransaction);
+    }
+
 }

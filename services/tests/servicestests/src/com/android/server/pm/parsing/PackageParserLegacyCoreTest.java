@@ -84,15 +84,15 @@ import java.util.function.Function;
 @RunWith(AndroidJUnit4.class)
 public class PackageParserLegacyCoreTest {
     private static final String RELEASED = null;
-    private static final String OLDER_PRE_RELEASE = "A";
-    private static final String PRE_RELEASE = "B";
-    private static final String NEWER_PRE_RELEASE = "C";
+    private static final String OLDER_PRE_RELEASE = "Q";
+    private static final String PRE_RELEASE = "R";
+    private static final String NEWER_PRE_RELEASE = "Z";
 
     // Codenames with a fingerprint attached to them. These may only be present in the apps
     // declared min SDK and not as platform codenames.
-    private static final String OLDER_PRE_RELEASE_WITH_FINGERPRINT = "A.fingerprint";
-    private static final String PRE_RELEASE_WITH_FINGERPRINT = "B.fingerprint";
-    private static final String NEWER_PRE_RELEASE_WITH_FINGERPRINT = "C.fingerprint";
+    private static final String OLDER_PRE_RELEASE_WITH_FINGERPRINT = "Q.fingerprint";
+    private static final String PRE_RELEASE_WITH_FINGERPRINT = "R.fingerprint";
+    private static final String NEWER_PRE_RELEASE_WITH_FINGERPRINT = "Z.fingerprint";
 
     private static final String[] CODENAMES_RELEASED = { /* empty */};
     private static final String[] CODENAMES_PRE_RELEASE = {PRE_RELEASE};
@@ -199,13 +199,14 @@ public class PackageParserLegacyCoreTest {
     }
 
     private void verifyComputeTargetSdkVersion(int targetSdkVersion, String targetSdkCodename,
-            boolean isPlatformReleased, int expectedTargetSdk) {
+            boolean isPlatformReleased, boolean allowUnknownCodenames, int expectedTargetSdk) {
         final ParseTypeImpl input = ParseTypeImpl.forParsingWithoutPlatformCompat();
         final ParseResult<Integer> result = FrameworkParsingPackageUtils.computeTargetSdkVersion(
                 targetSdkVersion,
                 targetSdkCodename,
                 isPlatformReleased ? CODENAMES_RELEASED : CODENAMES_PRE_RELEASE,
-                input);
+                input,
+                allowUnknownCodenames);
 
         if (expectedTargetSdk == -1) {
             assertTrue(result.isError());
@@ -220,40 +221,61 @@ public class PackageParserLegacyCoreTest {
         // Do allow older release targetSdkVersion on pre-release platform.
         // APP: Released API 10
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, false, OLDER_VERSION);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, false, false, OLDER_VERSION);
 
         // Do allow same release targetSdkVersion on pre-release platform.
         // APP: Released API 20
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, false, PLATFORM_VERSION);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, false, false, PLATFORM_VERSION);
 
         // Do allow newer release targetSdkVersion on pre-release platform.
         // APP: Released API 30
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, false, NEWER_VERSION);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, false, false, NEWER_VERSION);
 
         // Don't allow older pre-release targetSdkVersion on pre-release platform.
         // APP: Pre-release API 10
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, false, -1);
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, false, -1);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, false, false, -1);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, false,
+                false, -1
+        );
 
+        // Don't allow older pre-release targetSdkVersion on pre-release platform when
+        // allowUnknownCodenames is true.
+        // APP: Pre-release API 10
+        // DEV: Pre-release API 20
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, false,
+                true, -1);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, false,
+                true, -1);
 
         // Do allow same pre-release targetSdkVersion on pre-release platform,
         // but overwrite the specified version with CUR_DEVELOPMENT.
         // APP: Pre-release API 20
         // DEV: Pre-release API 20
         verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE, false,
-                Build.VERSION_CODES.CUR_DEVELOPMENT);
+                false, Build.VERSION_CODES.CUR_DEVELOPMENT);
         verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE_WITH_FINGERPRINT, false,
-                Build.VERSION_CODES.CUR_DEVELOPMENT);
-
+                false, Build.VERSION_CODES.CUR_DEVELOPMENT);
 
         // Don't allow newer pre-release targetSdkVersion on pre-release platform.
         // APP: Pre-release API 30
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, false, -1);
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, false, -1);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, false, false, -1);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, false,
+                false, -1
+        );
+
+        // Do allow newer pre-release targetSdkVersion on pre-release platform when
+        // allowUnknownCodenames is true.
+        // APP: Pre-release API 30
+        // DEV: Pre-release API 20
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, false,
+                true, Build.VERSION_CODES.CUR_DEVELOPMENT);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, false,
+                true, Build.VERSION_CODES.CUR_DEVELOPMENT);
+
     }
 
     @Test
@@ -261,36 +283,58 @@ public class PackageParserLegacyCoreTest {
         // Do allow older release targetSdkVersion on released platform.
         // APP: Released API 10
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, true, OLDER_VERSION);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, true, false, OLDER_VERSION);
 
         // Do allow same release targetSdkVersion on released platform.
         // APP: Released API 20
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, true, PLATFORM_VERSION);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, true, false, PLATFORM_VERSION);
 
         // Do allow newer release targetSdkVersion on released platform.
         // APP: Released API 30
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, true, NEWER_VERSION);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, true, false, NEWER_VERSION);
 
         // Don't allow older pre-release targetSdkVersion on released platform.
         // APP: Pre-release API 10
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, true, -1);
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, true, -1);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, true, false, -1);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, true,
+                false, -1
+        );
 
         // Don't allow same pre-release targetSdkVersion on released platform.
         // APP: Pre-release API 20
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE, true, -1);
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE_WITH_FINGERPRINT, true, -1);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE, true, false, -1);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE_WITH_FINGERPRINT, true, false,
+                -1
+        );
 
+        // Don't allow same pre-release targetSdkVersion on released platform when
+        // allowUnknownCodenames is true.
+        // APP: Pre-release API 20
+        // DEV: Released API 20
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE, true, true,
+                -1);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE_WITH_FINGERPRINT, true, true,
+                -1);
 
         // Don't allow newer pre-release targetSdkVersion on released platform.
         // APP: Pre-release API 30
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, true, -1);
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, true, -1);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, true, false, -1);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, true,
+                false, -1
+        );
+        // Do allow newer pre-release targetSdkVersion on released platform when
+        // allowUnknownCodenames is true.
+        // APP: Pre-release API 30
+        // DEV: Released API 20
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, true, true,
+                Build.VERSION_CODES.CUR_DEVELOPMENT);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, true,
+                true, Build.VERSION_CODES.CUR_DEVELOPMENT);
     }
 
     /**

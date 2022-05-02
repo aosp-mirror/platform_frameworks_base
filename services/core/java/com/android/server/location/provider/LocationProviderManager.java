@@ -699,6 +699,9 @@ public class LocationProviderManager extends
                 } else if (!mLocationSettings.getUserSettings(
                         getIdentity().getUserId()).isAdasGnssLocationEnabled()) {
                     adasGnssBypass = false;
+                } else if (!mSettingsHelper.getAdasAllowlist().contains(
+                        getIdentity().getPackageName(), getIdentity().getAttributionTag())) {
+                    adasGnssBypass = false;
                 }
 
                 builder.setAdasGnssBypass(adasGnssBypass);
@@ -1406,6 +1409,8 @@ public class LocationProviderManager extends
             this::onAppForegroundChanged;
     private final GlobalSettingChangedListener mBackgroundThrottleIntervalChangedListener =
             this::onBackgroundThrottleIntervalChanged;
+    private final GlobalSettingChangedListener mAdasPackageAllowlistChangedListener =
+            this::onAdasAllowlistChanged;
     private final GlobalSettingChangedListener mIgnoreSettingsPackageWhitelistChangedListener =
             this::onIgnoreSettingsWhitelistChanged;
     private final LocationPowerSaveModeChangedListener mLocationPowerSaveModeChangedListener =
@@ -1710,6 +1715,9 @@ public class LocationProviderManager extends
             } else if (!mLocationSettings.getUserSettings(
                     identity.getUserId()).isAdasGnssLocationEnabled()) {
                 adasGnssBypass = false;
+            } else if (!mSettingsHelper.getAdasAllowlist().contains(
+                    identity.getPackageName(), identity.getAttributionTag())) {
+                adasGnssBypass = false;
             }
 
             builder.setAdasGnssBypass(adasGnssBypass);
@@ -1979,6 +1987,8 @@ public class LocationProviderManager extends
                 mBackgroundThrottlePackageWhitelistChangedListener);
         mSettingsHelper.addOnLocationPackageBlacklistChangedListener(
                 mLocationPackageBlacklistChangedListener);
+        mSettingsHelper.addAdasAllowlistChangedListener(
+                mAdasPackageAllowlistChangedListener);
         mSettingsHelper.addIgnoreSettingsAllowlistChangedListener(
                 mIgnoreSettingsPackageWhitelistChangedListener);
         mLocationPermissionsHelper.addListener(mLocationPermissionsListener);
@@ -2000,6 +2010,7 @@ public class LocationProviderManager extends
                 mBackgroundThrottlePackageWhitelistChangedListener);
         mSettingsHelper.removeOnLocationPackageBlacklistChangedListener(
                 mLocationPackageBlacklistChangedListener);
+        mSettingsHelper.removeAdasAllowlistChangedListener(mAdasPackageAllowlistChangedListener);
         mSettingsHelper.removeIgnoreSettingsAllowlistChangedListener(
                 mIgnoreSettingsPackageWhitelistChangedListener);
         mLocationPermissionsHelper.removeListener(mLocationPermissionsListener);
@@ -2419,6 +2430,12 @@ public class LocationProviderManager extends
     private void onAppForegroundChanged(int uid, boolean foreground) {
         synchronized (mLock) {
             updateRegistrations(registration -> registration.onForegroundChanged(uid, foreground));
+        }
+    }
+
+    private void onAdasAllowlistChanged() {
+        synchronized (mLock) {
+            updateRegistrations(Registration::onProviderLocationRequestChanged);
         }
     }
 

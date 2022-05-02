@@ -30,8 +30,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
-import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.LocaleList;
 import android.os.RemoteException;
@@ -78,7 +76,7 @@ class LocaleManagerBackupHelper {
     private static final Duration STAGE_DATA_RETENTION_PERIOD = Duration.ofDays(3);
 
     private final LocaleManagerService mLocaleManagerService;
-    private final PackageManagerInternal mPackageManagerInternal;
+    private final PackageManager mPackageManager;
     private final Clock mClock;
     private final Context mContext;
     private final Object mStagedDataLock = new Object();
@@ -90,18 +88,18 @@ class LocaleManagerBackupHelper {
     private final BroadcastReceiver mUserMonitor;
 
     LocaleManagerBackupHelper(LocaleManagerService localeManagerService,
-            PackageManagerInternal pmInternal, HandlerThread broadcastHandlerThread) {
-        this(localeManagerService.mContext, localeManagerService, pmInternal, Clock.systemUTC(),
+            PackageManager packageManager, HandlerThread broadcastHandlerThread) {
+        this(localeManagerService.mContext, localeManagerService, packageManager, Clock.systemUTC(),
                 new SparseArray<>(), broadcastHandlerThread);
     }
 
     @VisibleForTesting LocaleManagerBackupHelper(Context context,
             LocaleManagerService localeManagerService,
-            PackageManagerInternal pmInternal, Clock clock, SparseArray<StagedData> stagedData,
+            PackageManager packageManager, Clock clock, SparseArray<StagedData> stagedData,
             HandlerThread broadcastHandlerThread) {
         mContext = context;
         mLocaleManagerService = localeManagerService;
-        mPackageManagerInternal = pmInternal;
+        mPackageManager = packageManager;
         mClock = clock;
         mStagedData = stagedData;
 
@@ -130,8 +128,8 @@ class LocaleManagerBackupHelper {
         }
 
         HashMap<String, String> pkgStates = new HashMap<>();
-        for (ApplicationInfo appInfo : mPackageManagerInternal.getInstalledApplications(/*flags*/0,
-                userId, Binder.getCallingUid())) {
+        for (ApplicationInfo appInfo : mPackageManager.getInstalledApplicationsAsUser(
+                PackageManager.ApplicationInfoFlags.of(0), userId)) {
             try {
                 LocaleList appLocales = mLocaleManagerService.getApplicationLocales(
                         appInfo.packageName,

@@ -307,7 +307,7 @@ public final class QuotaController extends StateController {
     private final SparseBooleanArray mTempAllowlistCache = new SparseBooleanArray();
 
     /**
-     * Mapping of UIDs to the when their temp allowlist grace period ends (in the elapsed
+     * Mapping of UIDs to when their temp allowlist grace period ends (in the elapsed
      * realtime timebase).
      */
     private final SparseLongArray mTempAllowlistGraceCache = new SparseLongArray();
@@ -815,6 +815,19 @@ public final class QuotaController extends StateController {
                 jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
     }
 
+    private boolean hasTempAllowlistExemptionLocked(int sourceUid, int standbyBucket,
+            long nowElapsed) {
+        if (standbyBucket == RESTRICTED_INDEX || standbyBucket == NEVER_INDEX) {
+            // Don't let RESTRICTED apps get free quota from the temp allowlist.
+            // TODO: consider granting the exemption to RESTRICTED apps if the temp allowlist allows
+            // them to start FGS
+            return false;
+        }
+        final long tempAllowlistGracePeriodEndElapsed = mTempAllowlistGraceCache.get(sourceUid);
+        return mTempAllowlistCache.get(sourceUid)
+                || nowElapsed < tempAllowlistGracePeriodEndElapsed;
+    }
+
     /** @return true if the job is within expedited job quota. */
     @GuardedBy("mLock")
     public boolean isWithinEJQuotaLocked(@NonNull final JobStatus jobStatus) {
@@ -833,11 +846,8 @@ public final class QuotaController extends StateController {
         }
 
         final long nowElapsed = sElapsedRealtimeClock.millis();
-        final long tempAllowlistGracePeriodEndElapsed =
-                mTempAllowlistGraceCache.get(jobStatus.getSourceUid());
-        final boolean hasTempAllowlistExemption = mTempAllowlistCache.get(jobStatus.getSourceUid())
-                || nowElapsed < tempAllowlistGracePeriodEndElapsed;
-        if (hasTempAllowlistExemption) {
+        if (hasTempAllowlistExemptionLocked(jobStatus.getSourceUid(),
+                jobStatus.getEffectiveStandbyBucket(), nowElapsed)) {
             return true;
         }
 
@@ -2127,10 +2137,8 @@ public final class QuotaController extends StateController {
             final long nowElapsed = sElapsedRealtimeClock.millis();
             final int standbyBucket = JobSchedulerService.standbyBucketForPackage(mPkg.packageName,
                     mPkg.userId, nowElapsed);
-            final long tempAllowlistGracePeriodEndElapsed = mTempAllowlistGraceCache.get(mUid);
             final boolean hasTempAllowlistExemption = !mRegularJobTimer
-                    && (mTempAllowlistCache.get(mUid)
-                    || nowElapsed < tempAllowlistGracePeriodEndElapsed);
+                    && hasTempAllowlistExemptionLocked(mUid, standbyBucket, nowElapsed);
             final long topAppGracePeriodEndElapsed = mTopAppGraceCache.get(mUid);
             final boolean hasTopAppExemption = !mRegularJobTimer
                     && (mTopAppCache.get(mUid) || nowElapsed < topAppGracePeriodEndElapsed);

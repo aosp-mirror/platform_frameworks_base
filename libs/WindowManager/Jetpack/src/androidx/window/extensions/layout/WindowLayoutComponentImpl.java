@@ -37,9 +37,8 @@ import androidx.annotation.NonNull;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
-import androidx.window.common.SettingsDisplayFeatureProducer;
+import androidx.window.common.RawFoldingFeatureProducer;
 import androidx.window.util.DataProducer;
-import androidx.window.util.PriorityDataProducer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,17 +61,14 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private final Map<Activity, Consumer<WindowLayoutInfo>> mWindowLayoutChangeListeners =
             new ArrayMap<>();
 
-    private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
     private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
 
     public WindowLayoutComponentImpl(Context context) {
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
-        mSettingsDisplayFeatureProducer = new SettingsDisplayFeatureProducer(context);
-        mFoldingFeatureProducer = new PriorityDataProducer<>(List.of(
-                mSettingsDisplayFeatureProducer,
-                new DeviceStateManagerFoldingFeatureProducer(context)
-        ));
+        RawFoldingFeatureProducer foldingFeatureProducer = new RawFoldingFeatureProducer(context);
+        mFoldingFeatureProducer = new DeviceStateManagerFoldingFeatureProducer(context,
+                foldingFeatureProducer);
         mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }
 
@@ -85,7 +81,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     public void addWindowLayoutInfoListener(@NonNull Activity activity,
             @NonNull Consumer<WindowLayoutInfo> consumer) {
         mWindowLayoutChangeListeners.put(activity, consumer);
-        updateRegistrations();
+        onDisplayFeaturesChanged();
     }
 
     /**
@@ -96,7 +92,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     public void removeWindowLayoutInfoListener(
             @NonNull Consumer<WindowLayoutInfo> consumer) {
         mWindowLayoutChangeListeners.values().remove(consumer);
-        updateRegistrations();
+        onDisplayFeaturesChanged();
     }
 
     void updateWindowLayout(@NonNull Activity activity,
@@ -204,19 +200,21 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 rotateRectToDisplayRotation(displayId, featureRect);
                 transformToWindowSpaceRect(activity, featureRect);
 
-                features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
+                if (!isRectZero(featureRect)) {
+                    // TODO(b/228641877) Remove guarding if when fixed.
+                    features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
+                }
             }
         }
         return features;
     }
 
-    private void updateRegistrations() {
-        if (hasListeners()) {
-            mSettingsDisplayFeatureProducer.registerObserversIfNeeded();
-        } else {
-            mSettingsDisplayFeatureProducer.unregisterObserversIfNeeded();
-        }
-        onDisplayFeaturesChanged();
+    /**
+     * Returns {@link true} if a {@link Rect} has zero width and zero height,
+     * {@code false} otherwise.
+     */
+    private boolean isRectZero(Rect rect) {
+        return rect.width() == 0 && rect.height() == 0;
     }
 
     private final class NotifyOnConfigurationChanged extends EmptyLifecycleCallbacksAdapter {

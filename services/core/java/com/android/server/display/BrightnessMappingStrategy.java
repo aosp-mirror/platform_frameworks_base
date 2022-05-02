@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
@@ -36,6 +38,7 @@ import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -994,25 +997,25 @@ public abstract class BrightnessMappingStrategy {
                 Arrays.sort(luxes);
             }
 
-            StringBuffer sbLux = null;
-            StringBuffer sbNits = null;
-            StringBuffer sbLong = null;
-            StringBuffer sbShort = null;
-            StringBuffer sbBrightness = null;
-            StringBuffer sbPercent = null;
-            StringBuffer sbPercentHbm = null;
+            StringBuilder sbLux = null;
+            StringBuilder sbNits = null;
+            StringBuilder sbLong = null;
+            StringBuilder sbShort = null;
+            StringBuilder sbBrightness = null;
+            StringBuilder sbPercent = null;
+            StringBuilder sbPercentHbm = null;
             boolean needsHeaders = true;
             String separator = "";
             for (int i = 0; i < luxes.length; i++) {
                 float lux = luxes[i];
                 if (needsHeaders) {
-                    sbLux = new StringBuffer("           lux: ");
-                    sbNits = new StringBuffer("       default: ");
-                    sbLong = new StringBuffer("     long-term: ");
-                    sbShort = new StringBuffer("       current: ");
-                    sbBrightness = new StringBuffer("   current(bl): ");
-                    sbPercent = new StringBuffer("    current(%): ");
-                    sbPercentHbm = new StringBuffer(" current(%hbm): ");
+                    sbLux = new StringBuilder("            lux: ");
+                    sbNits = new StringBuilder("        default: ");
+                    sbLong = new StringBuilder("      long-term: ");
+                    sbShort = new StringBuilder("        current: ");
+                    sbBrightness = new StringBuilder("    current(bl): ");
+                    sbPercent = new StringBuilder("     current(%): ");
+                    sbPercentHbm = new StringBuilder("  current(hbm%): ");
                     needsHeaders = false;
                 }
 
@@ -1042,13 +1045,13 @@ public abstract class BrightnessMappingStrategy {
                 String format = separator + "%" + maxLen + "s";
                 separator = ", ";
 
-                sbLux.append(String.format(format, strLux));
-                sbNits.append(String.format(format, strNits));
-                sbLong.append(String.format(format, strLong));
-                sbShort.append(String.format(format, strShort));
-                sbBrightness.append(String.format(format, strBrightness));
-                sbPercent.append(String.format(format, strPercent));
-                sbPercentHbm.append(String.format(format, strPercentHbm));
+                sbLux.append(formatSimple(format, strLux));
+                sbNits.append(formatSimple(format, strNits));
+                sbLong.append(formatSimple(format, strLong));
+                sbShort.append(formatSimple(format, strShort));
+                sbBrightness.append(formatSimple(format, strBrightness));
+                sbPercent.append(formatSimple(format, strPercent));
+                sbPercentHbm.append(formatSimple(format, strPercentHbm));
 
                 // At 80 chars, start another row
                 if (sbLux.length() > 80 || (i == luxes.length - 1)) {
@@ -1072,13 +1075,13 @@ public abstract class BrightnessMappingStrategy {
             if (value == 0.0f) {
                 return "0";
             } else if (value < 0.1f) {
-                return String.format("%.3f", value);
+                return String.format(Locale.US, "%.3f", value);
             } else if (value < 1) {
-                return String.format("%.2f", value);
+                return String.format(Locale.US, "%.2f", value);
             } else if (value < 10) {
-                return String.format("%.1f", value);
+                return String.format(Locale.US, "%.1f", value);
             } else {
-                return String.format("%d", Math.round(value));
+                return formatSimple("%d", Math.round(value));
             }
         }
 

@@ -71,6 +71,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private final IAudioService mAudioService;
     private final Handler mHandler;
     private final Context mContext;
+    private final UserHandle mUser;
     private final BluetoothRouteProvider mBtRouteProvider;
 
     private static ComponentName sComponentName = new ComponentName(
@@ -85,6 +86,9 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     RoutingSessionInfo mDefaultSessionInfo;
     final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
     int mDeviceVolume;
+
+    private final AudioManagerBroadcastReceiver mAudioReceiver =
+            new AudioManagerBroadcastReceiver();
 
     private final Object mRequestLock = new Object();
     @GuardedBy("mRequestLock")
@@ -108,6 +112,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
         mIsSystemRouteProvider = true;
         mContext = context;
+        mUser = user;
         mHandler = new Handler(Looper.getMainLooper());
 
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -128,19 +133,31 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             }
         });
         updateSessionInfosIfNeeded();
+    }
 
+    public void start() {
         IntentFilter intentFilter = new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION);
         intentFilter.addAction(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
-        mContext.registerReceiverAsUser(new AudioManagerBroadcastReceiver(), user,
+        mContext.registerReceiverAsUser(mAudioReceiver, mUser,
                 intentFilter, null, null);
 
         if (mBtRouteProvider != null) {
             mHandler.post(() -> {
-                mBtRouteProvider.start(user);
+                mBtRouteProvider.start(mUser);
                 notifyProviderState();
             });
         }
         updateVolume();
+    }
+
+    public void stop() {
+        mContext.unregisterReceiver(mAudioReceiver);
+        if (mBtRouteProvider != null) {
+            mHandler.post(() -> {
+                mBtRouteProvider.stop();
+                notifyProviderState();
+            });
+        }
     }
 
     @Override

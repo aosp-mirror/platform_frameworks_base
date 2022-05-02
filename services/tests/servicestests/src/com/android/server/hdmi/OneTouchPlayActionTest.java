@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 import static com.android.server.hdmi.OneTouchPlayAction.STATE_WAITING_FOR_REPORT_POWER_STATUS;
@@ -87,7 +88,8 @@ public class OneTouchPlayActionTest {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         mHdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
 
-        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList()) {
+        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper()) {
             @Override
             AudioManager getAudioManager() {
                 return new AudioManager() {
@@ -120,6 +122,7 @@ public class OneTouchPlayActionTest {
         mHdmiControlService.setCecController(hdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.initService();
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
         mPhysicalAddress = 0x2000;

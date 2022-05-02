@@ -71,7 +71,7 @@ public class SimpleIconFactory {
             new SynchronizedPool<>(Runtime.getRuntime().availableProcessors());
 
     private static final int DEFAULT_WRAPPER_BACKGROUND = Color.WHITE;
-    private static final float BLUR_FACTOR = 0.5f / 48;
+    private static final float BLUR_FACTOR = 1.5f / 48;
 
     private Context mContext;
     private Canvas mCanvas;
@@ -650,8 +650,8 @@ public class SimpleIconFactory {
     /* Shadow generator block */
 
     private static final float KEY_SHADOW_DISTANCE = 1f / 48;
-    private static final int KEY_SHADOW_ALPHA = 61;
-    private static final int AMBIENT_SHADOW_ALPHA = 30;
+    private static final int KEY_SHADOW_ALPHA = 10;
+    private static final int AMBIENT_SHADOW_ALPHA = 7;
 
     private Paint mBlurPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private Paint mDrawPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);

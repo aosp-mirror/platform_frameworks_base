@@ -19,6 +19,8 @@ package com.android.systemui.statusbar
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.content.Context
+import android.content.res.Configuration
 import android.os.SystemClock
 import android.os.Trace
 import android.util.IndentingPrintWriter
@@ -40,10 +42,12 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScrimController
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.WallpaperController
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
@@ -62,7 +66,9 @@ class NotificationShadeDepthController @Inject constructor(
     private val wallpaperController: WallpaperController,
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val dozeParameters: DozeParameters,
-    dumpManager: DumpManager
+    private val context: Context,
+    dumpManager: DumpManager,
+    configurationController: ConfigurationController
 ) : PanelExpansionListener, Dumpable {
     companion object {
         private const val WAKE_UP_ANIMATION_ENABLED = true
@@ -85,6 +91,7 @@ class NotificationShadeDepthController @Inject constructor(
     private var isOpen: Boolean = false
     private var isBlurred: Boolean = false
     private var listeners = mutableListOf<DepthListener>()
+    private var inSplitShade: Boolean = false
 
     private var prevTracking: Boolean = false
     private var prevTimestamp: Long = -1
@@ -209,6 +216,10 @@ class NotificationShadeDepthController @Inject constructor(
         var zoomOut = MathUtils.saturate(blurUtils.ratioOfBlurRadius(shadeRadius))
         var blur = shadeRadius.toInt()
 
+        if (inSplitShade) {
+            zoomOut = 0f
+        }
+
         // Make blur be 0 if it is necessary to stop blur effect.
         if (scrimsVisible) {
             blur = 0
@@ -307,6 +318,16 @@ class NotificationShadeDepthController @Inject constructor(
         }
         shadeAnimation.setStiffness(SpringForce.STIFFNESS_LOW)
         shadeAnimation.setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY)
+        updateResources()
+        configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
+            override fun onConfigChanged(newConfig: Configuration?) {
+                updateResources()
+            }
+        })
+    }
+
+    private fun updateResources() {
+        inSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
     }
 
     fun addListener(listener: DepthListener) {
@@ -320,7 +341,9 @@ class NotificationShadeDepthController @Inject constructor(
     /**
      * Update blurs when pulling down the shade
      */
-    override fun onPanelExpansionChanged(rawFraction: Float, expanded: Boolean, tracking: Boolean) {
+    override fun onPanelExpansionChanged(event: PanelExpansionChangeEvent) {
+        val rawFraction = event.fraction
+        val tracking = event.tracking
         val timestamp = SystemClock.elapsedRealtimeNanos()
         val expansion = MathUtils.saturate(
                 (rawFraction - panelPullDownMinFraction) / (1f - panelPullDownMinFraction))
@@ -435,7 +458,7 @@ class NotificationShadeDepthController @Inject constructor(
                 !keyguardStateController.isKeyguardFadingAway
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         IndentingPrintWriter(pw, "  ").let {
             it.println("StatusBarWindowBlurController:")
             it.increaseIndent()

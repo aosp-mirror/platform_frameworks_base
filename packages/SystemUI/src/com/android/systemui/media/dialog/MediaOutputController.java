@@ -18,10 +18,13 @@ package com.android.systemui.media.dialog;
 
 import static android.provider.Settings.ACTION_BLUETOOTH_PAIRING_SETTINGS;
 
+import android.annotation.CallbackExecutor;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.WallpaperColors;
+import android.bluetooth.BluetoothLeBroadcast;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -58,9 +61,8 @@ import androidx.mediarouter.media.MediaRouterParams;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
-import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
-import com.android.settingslib.media.BluetoothMediaDevice;
 import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
@@ -76,6 +78,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -83,6 +86,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -642,17 +646,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void launchLeBroadcastNotifyDialog(View mediaOutputDialog, BroadcastSender broadcastSender,
-            BroadcastNotifyDialog action) {
+            BroadcastNotifyDialog action, final DialogInterface.OnClickListener listener) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         switch (action) {
             case ACTION_FIRST_LAUNCH:
                 builder.setTitle(R.string.media_output_first_broadcast_title);
                 builder.setMessage(R.string.media_output_first_notify_broadcast_message);
                 builder.setNegativeButton(android.R.string.cancel, null);
-                builder.setPositiveButton(R.string.media_output_broadcast,
-                        (d, w) -> {
-                            launchMediaOutputBroadcastDialog(mediaOutputDialog, broadcastSender);
-                        });
+                builder.setPositiveButton(R.string.media_output_broadcast, listener);
                 break;
             case ACTION_BROADCAST_INFO_ICON:
                 builder.setTitle(R.string.media_output_broadcast);
@@ -677,6 +678,56 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);
     }
 
+    String getBroadcastName() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "getBroadcastName: LE Audio Broadcast is null");
+            return "";
+        }
+        return broadcast.getProgramInfo();
+    }
+
+    void setBroadcastName(String broadcastName) {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "setBroadcastName: LE Audio Broadcast is null");
+            return;
+        }
+        broadcast.setProgramInfo(broadcastName);
+    }
+
+    String getBroadcastCode() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "getBroadcastCode: LE Audio Broadcast is null");
+            return "";
+        }
+        return new String(broadcast.getBroadcastCode(), StandardCharsets.UTF_8);
+    }
+
+    void setBroadcastCode(String broadcastCode) {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "setBroadcastCode: LE Audio Broadcast is null");
+            return;
+        }
+        broadcast.setBroadcastCode(broadcastCode.getBytes(StandardCharsets.UTF_8));
+    }
+
+    String getBroadcastMetadata() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "getBroadcastMetadata: LE Audio Broadcast is null");
+            return "";
+        }
+        return broadcast.getLocalBluetoothLeBroadcastMetaData().convertToQrCodeString();
+    }
+
     boolean isActiveRemoteDevice(@NonNull MediaDevice device) {
         final List<String> features = device.getFeatures();
         return (features.contains(MediaRoute2Info.FEATURE_REMOTE_PLAYBACK)
@@ -685,18 +736,75 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 || features.contains(MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK));
     }
 
-    boolean isBluetoothLeDevice(@NonNull MediaDevice device) {
-        if (device instanceof BluetoothMediaDevice) {
-            final CachedBluetoothDevice cachedDevice =
-                    ((BluetoothMediaDevice) device).getCachedDevice();
-            boolean isConnectedLeAudioDevice =
-                    (cachedDevice != null) ? cachedDevice.isConnectedLeAudioDevice() : false;
-            if (DEBUG) {
-                Log.d(TAG, "isConnectedLeAudioDevice=" + isConnectedLeAudioDevice);
-            }
-            return isConnectedLeAudioDevice;
+    boolean isBroadcastSupported() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        return broadcast != null ? true : false;
+    }
+
+    boolean isBluetoothLeBroadcastEnabled() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            return false;
         }
-        return false;
+        return broadcast.isEnabled(null);
+    }
+
+    boolean startBluetoothLeBroadcast() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "The broadcast profile is null");
+            return false;
+        }
+        broadcast.startBroadcast(getAppSourceName(), /*language*/ null);
+        return true;
+    }
+
+    boolean stopBluetoothLeBroadcast() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "The broadcast profile is null");
+            return false;
+        }
+        broadcast.stopLatestBroadcast();
+        return true;
+    }
+
+    boolean updateBluetoothLeBroadcast() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "The broadcast profile is null");
+            return false;
+        }
+        broadcast.updateBroadcast(getAppSourceName(), /*language*/ null);
+        return true;
+    }
+
+    void registerLeBroadcastServiceCallBack(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BluetoothLeBroadcast.Callback callback) {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "The broadcast profile is null");
+            return;
+        }
+        broadcast.registerServiceCallBack(executor, callback);
+    }
+
+    void unregisterLeBroadcastServiceCallBack(
+            @NonNull BluetoothLeBroadcast.Callback callback) {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "The broadcast profile is null");
+            return;
+        }
+        broadcast.unregisterServiceCallBack(callback);
     }
 
     private boolean isPlayBackInfoLocal() {
@@ -721,7 +829,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
         return isPlayBackInfoLocal()
-                || mLocalMediaManager.isMediaSessionAvailableForVolumeControl();
+                || device.getDeviceType() != MediaDevice.MediaDeviceType.TYPE_CAST_GROUP_DEVICE;
     }
 
     @Override

@@ -213,7 +213,8 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
                         VcnGatewayConnectionConfigTest.buildTestConfig(),
                         tunnelIface,
                         childSessionConfig,
-                        record);
+                        record,
+                        mIkeConnectionInfo);
 
         verify(mDeps).getUnderlyingIfaceMtu(LOOPBACK_IFACE);
 
@@ -226,7 +227,8 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
                         VcnGatewayConnectionConfigTest.buildTestConfig(),
                         tunnelIface,
                         childSessionConfig,
-                        record);
+                        record,
+                        mIkeConnectionInfo);
 
         verify(mDeps, times(2)).getUnderlyingIfaceMtu(LOOPBACK_IFACE);
 

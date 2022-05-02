@@ -63,7 +63,6 @@ public final class Prefs {
             Key.QS_WORK_ADDED,
             Key.QS_NIGHTDISPLAY_ADDED,
             Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
-            Key.SEEN_MULTI_USER,
             Key.SEEN_RINGER_GUIDANCE_COUNT,
             Key.QS_HAS_TURNED_OFF_MOBILE_DATA,
             Key.TOUCHED_RINGER_TOGGLE,
@@ -106,7 +105,6 @@ public final class Prefs {
          * Settings panel.
          */
         String QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT = "QsLongPressTooltipShownCount";
-        String SEEN_MULTI_USER = "HasSeenMultiUser";
         String SEEN_RINGER_GUIDANCE_COUNT = "RingerGuidanceCount";
         String QS_TILE_SPECS_REVEALED = "QsTileSpecsRevealed";
         String QS_HAS_TURNED_OFF_MOBILE_DATA = "QsHasTurnedOffMobileData";

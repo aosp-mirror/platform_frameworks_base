@@ -20,7 +20,6 @@ import static android.os.PowerExemptionManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
-import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.PACKAGE_SCHEME;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.TAG;
@@ -86,11 +85,14 @@ public final class BroadcastHelper {
             } else {
                 resolvedUserIds = userIds;
             }
-            doSendBroadcast(action, pkg, extras, flags, targetPkg, finishedReceiver,
-                    resolvedUserIds, false, broadcastAllowList, bOptions);
-            if (instantUserIds != null && instantUserIds != EMPTY_INT_ARRAY) {
+
+            if (ArrayUtils.isEmpty(instantUserIds)) {
                 doSendBroadcast(action, pkg, extras, flags, targetPkg, finishedReceiver,
-                        instantUserIds, true, null, bOptions);
+                        resolvedUserIds, false /* isInstantApp */, broadcastAllowList, bOptions);
+            } else {
+                // send restricted broadcasts for instant apps
+                doSendBroadcast(action, pkg, extras, flags, targetPkg, finishedReceiver,
+                        instantUserIds, true /* isInstantApp */, null, bOptions);
             }
         } catch (RemoteException ex) {
         }

@@ -50,7 +50,6 @@ public class DreamOverlayStateController implements
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final int STATE_DREAM_OVERLAY_ACTIVE = 1 << 0;
-    public static final int STATE_PREVIEW_MODE = 1 << 1;
 
     private static final int OP_CLEAR_STATE = 1;
     private static final int OP_SET_STATE = 2;
@@ -249,19 +248,5 @@ public class DreamOverlayStateController implements
             mShouldShowComplications = shouldShowComplications;
             mCallbacks.forEach(Callback::onAvailableComplicationTypesChanged);
         });
-    }
-
-    /**
-     * Sets whether the dream is running in preview mode.
-     */
-    public void setPreviewMode(boolean isPreviewMode) {
-        modifyState(isPreviewMode ? OP_SET_STATE : OP_CLEAR_STATE, STATE_PREVIEW_MODE);
-    }
-
-    /**
-     * Returns whether the dream is running in preview mode.
-     */
-    public boolean isPreviewMode() {
-        return containsState(STATE_PREVIEW_MODE);
     }
 }

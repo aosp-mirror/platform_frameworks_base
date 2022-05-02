@@ -16,9 +16,9 @@
 
 package com.android.server.policy;
 
-import static android.hardware.fingerprint.FingerprintStateListener.STATE_BP_AUTH;
-import static android.hardware.fingerprint.FingerprintStateListener.STATE_ENROLLING;
-import static android.hardware.fingerprint.FingerprintStateListener.STATE_IDLE;
+import static android.hardware.biometrics.BiometricStateListener.STATE_BP_AUTH;
+import static android.hardware.biometrics.BiometricStateListener.STATE_ENROLLING;
+import static android.hardware.biometrics.BiometricStateListener.STATE_IDLE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,9 +30,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.hardware.fingerprint.FingerprintStateListener;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -67,7 +67,7 @@ public class SideFpsEventHandler {
         }
     };
 
-    private @FingerprintStateListener.State int mFingerprintState;
+    private @BiometricStateListener.State int mBiometricState;
 
     SideFpsEventHandler(Context context, Handler handler, PowerManager powerManager) {
         this(context, handler, powerManager, () -> new AlertDialog.Builder(context));
@@ -80,7 +80,7 @@ public class SideFpsEventHandler {
         mHandler = handler;
         mPowerManager = powerManager;
         mDialogSupplier = dialogSupplier;
-        mFingerprintState = STATE_IDLE;
+        mBiometricState = STATE_IDLE;
         mSideFpsEventHandlerReady = new AtomicBoolean(false);
 
         // ensure dialog is dismissed if screen goes off for unrelated reasons
@@ -108,7 +108,7 @@ public class SideFpsEventHandler {
             return false;
         }
 
-        switch (mFingerprintState) {
+        switch (mBiometricState) {
             case STATE_ENROLLING:
             case STATE_BP_AUTH:
                 mHandler.post(() -> {
@@ -116,7 +116,7 @@ public class SideFpsEventHandler {
                         mDialog.dismiss();
                     }
                     mDialog = showConfirmDialog(mDialogSupplier.get(),
-                            mPowerManager, eventTime, mFingerprintState, mDialogDismissListener);
+                            mPowerManager, eventTime, mBiometricState, mDialogDismissListener);
                 });
                 return true;
             default:
@@ -127,9 +127,9 @@ public class SideFpsEventHandler {
     @NonNull
     private static Dialog showConfirmDialog(@NonNull AlertDialog.Builder dialogBuilder,
             @NonNull PowerManager powerManager, long eventTime,
-            @FingerprintStateListener.State int fingerprintState,
+            @BiometricStateListener.State int biometricState,
             @NonNull DialogInterface.OnDismissListener dismissListener) {
-        final boolean enrolling = fingerprintState == STATE_ENROLLING;
+        final boolean enrolling = biometricState == STATE_ENROLLING;
         final int title = enrolling ? R.string.fp_power_button_enrollment_title
                 : R.string.fp_power_button_bp_title;
         final int message = enrolling ? R.string.fp_power_button_enrollment_message
@@ -165,8 +165,8 @@ public class SideFpsEventHandler {
     /**
      * Awaits notification from PhoneWindowManager that fingerprint service is ready
      * to send updates about power button fps sensor state. Then configures a
-     * FingerprintStateListener to receive and record updates to fps state, and
-     * registers the FingerprintStateListener in FingerprintManager.
+     * BiometricStateListener to receive and record updates to fps state, and
+     * registers the BiometricStateListener in FingerprintManager.
      */
     public void onFingerprintSensorReady() {
         final PackageManager pm = mContext.getPackageManager();
@@ -182,13 +182,14 @@ public class SideFpsEventHandler {
                     public void onAllAuthenticatorsRegistered(
                             List<FingerprintSensorPropertiesInternal> sensors) {
                         if (fingerprintManager.isPowerbuttonFps()) {
-                            fingerprintManager.registerFingerprintStateListener(
-                                    new FingerprintStateListener() {
-                                        @Nullable private Runnable mStateRunnable = null;
+                            fingerprintManager.registerBiometricStateListener(
+                                    new BiometricStateListener() {
+                                        @Nullable
+                                        private Runnable mStateRunnable = null;
 
                                         @Override
                                         public void onStateChanged(
-                                                @FingerprintStateListener.State int newState) {
+                                                @BiometricStateListener.State int newState) {
                                             if (mStateRunnable != null) {
                                                 mHandler.removeCallbacks(mStateRunnable);
                                                 mStateRunnable = null;
@@ -198,11 +199,11 @@ public class SideFpsEventHandler {
                                             // arrive in any order (success auth & power). Add a
                                             // damper when moving to idle in case auth is first
                                             if (newState == STATE_IDLE) {
-                                                mStateRunnable = () -> mFingerprintState = newState;
+                                                mStateRunnable = () -> mBiometricState = newState;
                                                 mHandler.postDelayed(mStateRunnable,
                                                         DEBOUNCE_DELAY_MILLIS);
                                             } else {
-                                                mFingerprintState = newState;
+                                                mBiometricState = newState;
                                             }
                                         }
                                     });

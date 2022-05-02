@@ -261,8 +261,10 @@ public class KeyguardManager {
             CharSequence title, CharSequence description, int userId,
             boolean disallowBiometricsIfPolicyExists) {
         Intent intent = this.createConfirmDeviceCredentialIntent(title, description, userId);
-        intent.putExtra(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
-                disallowBiometricsIfPolicyExists);
+        if (intent != null) {
+            intent.putExtra(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
+                    disallowBiometricsIfPolicyExists);
+        }
         return intent;
     }
 

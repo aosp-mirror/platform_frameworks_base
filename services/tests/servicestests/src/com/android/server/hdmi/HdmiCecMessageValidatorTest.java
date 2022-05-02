@@ -51,7 +51,8 @@ public class HdmiCecMessageValidatorTest {
     @Before
     public void setUp() throws Exception {
         HdmiControlService mHdmiControlService = new HdmiControlService(
-                InstrumentationRegistry.getTargetContext(), Collections.emptyList());
+                InstrumentationRegistry.getTargetContext(), Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper());
 
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
     }

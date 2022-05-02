@@ -133,6 +133,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
 
 import com.google.common.collect.ImmutableList;
@@ -367,6 +368,7 @@ public class BubblesTest extends SysuiTestCase {
                 mPositioner,
                 mock(DisplayController.class),
                 mOneHandedOptional,
+                mock(DragAndDropController.class),
                 syncExecutor,
                 mock(Handler.class),
                 mTaskViewTransitions,

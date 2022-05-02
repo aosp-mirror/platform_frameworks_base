@@ -63,7 +63,6 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -767,7 +766,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(" BiometricUnlockController:");
         pw.print("   mMode="); pw.println(mMode);
         pw.print("   mWakeLock="); pw.println(mWakeLock);

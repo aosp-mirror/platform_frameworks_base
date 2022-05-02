@@ -37,8 +37,8 @@
             android:src="@drawable/ic_doc_document"
             tools:layout_editor_absoluteX="148dp"
             tools:layout_editor_absoluteY="35dp"
-            android:gravity="center" />
-
+            android:gravity="center"
+            android:tint="?attr/colorAccentPrimaryVariant"/>
 
     <TextView
             android:id="@+id/log_access_dialog_title"
@@ -46,16 +46,18 @@
             android:layout_width="wrap_content"
             android:layout_marginBottom="32dp"
             android:text="@string/log_access_confirmation_title"
-            android:textAppearance="?attr/textAppearanceLarge"
-            android:textColor="@android:color/system_neutral1_900"
+            android:textAppearance="@style/AllowLogAccess"
+            android:textColor="?android:attr/textColorPrimary"
             android:gravity="center" />
 
     <TextView
             android:id="@+id/log_access_dialog_body"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
+            android:layout_marginBottom="40dp"
             android:text="@string/log_access_confirmation_body"
             android:textAppearance="@style/PrimaryAllowLogAccess"
+            android:textColor="?android:attr/textColorPrimary"
             android:gravity="center" />
 
     <Button

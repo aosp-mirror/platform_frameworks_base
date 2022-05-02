@@ -22,7 +22,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -55,8 +54,6 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     @Mock
     DozeParameters mDozeParameters;
     @Mock
-    KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
-    @Mock
     ScreenOffAnimationController mScreenOffAnimationController;
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
@@ -75,7 +72,6 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor,
                 mConfigurationController,
                 mDozeParameters,
-                mKeyguardUnlockAnimationController,
                 mScreenOffAnimationController);
     }
 

@@ -38,7 +38,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +120,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
                 && UserManager.get(mContext).isUserAdmin(ActivityManager.getCurrentUser());
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("HotspotController state:");
         pw.print("  available="); pw.println(isHotspotSupported());
         pw.print("  mHotspotState="); pw.println(stateToString(mHotspotState));

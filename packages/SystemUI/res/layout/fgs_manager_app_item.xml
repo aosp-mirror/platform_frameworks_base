@@ -26,7 +26,7 @@
       android:id="@+id/fgs_manager_app_item_icon"
       android:layout_width="28dp"
       android:layout_height="28dp"
-      android:layout_marginRight="12dp" />
+      android:layout_marginEnd="12dp" />
 
   <LinearLayout
       android:layout_width="0dp"
@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="start"
-        style="@style/TextAppearance.Dialog.Body" />
+        style="@style/FgsManagerAppLabel" />
     <TextView
         android:id="@+id/fgs_manager_app_item_duration"
         android:layout_width="match_parent"
@@ -52,6 +52,6 @@
       android:layout_width="wrap_content"
       android:layout_height="48dp"
       android:text="@string/fgs_manager_app_item_stop_button_label"
-      android:layout_marginLeft="12dp"
+      android:layout_marginStart="12dp"
       style="?android:attr/buttonBarNeutralButtonStyle" />
 </LinearLayout>

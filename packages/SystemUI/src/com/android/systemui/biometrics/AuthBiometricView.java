@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -705,6 +706,12 @@ public class AuthBiometricView extends LinearLayout {
         super.onAttachedToWindow();
 
         mTitleView.setText(mPromptInfo.getTitle());
+
+        //setSelected could make marguee work
+        mTitleView.setSelected(true);
+        mSubtitleView.setSelected(true);
+        //make description view become scrollable
+        mDescriptionView.setMovementMethod(new ScrollingMovementMethod());
 
         if (isDeviceCredentialAllowed()) {
             final CharSequence credentialButtonText;

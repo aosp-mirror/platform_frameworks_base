@@ -24,6 +24,9 @@ import static com.android.server.am.BaseAppStateTracker.ONE_DAY;
 import android.annotation.NonNull;
 import android.app.ActivityManagerInternal.BroadcastEventListener;
 import android.content.Context;
+import android.os.AppBackgroundRestrictionsInfo;
+import android.os.SystemClock;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.server.am.AppBroadcastEventsTracker.AppBroadcastEventsPolicy;
 import com.android.server.am.AppRestrictionController.TrackerType;
@@ -78,6 +81,21 @@ final class AppBroadcastEventsTracker extends BaseAppStateTimeSlotEventsTracker
     @Override
     public SimpleAppStateTimeslotEvents createAppStateEvents(SimpleAppStateTimeslotEvents other) {
         return new SimpleAppStateTimeslotEvents(other);
+    }
+
+    @Override
+    byte[] getTrackerInfoForStatsd(int uid) {
+        final long now = SystemClock.elapsedRealtime();
+        final int numOfBroadcasts = getTotalEventsLocked(uid, now);
+        if (numOfBroadcasts == 0) {
+            // Not interested.
+            return null;
+        }
+        final ProtoOutputStream proto = new ProtoOutputStream();
+        proto.write(AppBackgroundRestrictionsInfo.BroadcastEventsTrackerInfo.BROADCASTS_SENT,
+                numOfBroadcasts);
+        proto.flush();
+        return proto.getBytes();
     }
 
     @Override

@@ -105,6 +105,7 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.IWindowManager;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -455,6 +456,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private final boolean mIsAppSearchEnabled;
 
+    private ComponentName mChooserActivity;
+
     static class InvalidFileFormatException extends Exception {
         public InvalidFileFormatException(String message, Throwable cause) {
             super(message, cause);
@@ -745,7 +748,7 @@ public class ShortcutService extends IShortcutService.Stub {
         getUserShortcutsLocked(userId).cancelAllInFlightTasks();
 
         // Save all dirty information.
-        saveDirtyInfo(false);
+        saveDirtyInfo();
 
         // Unload
         mUsers.delete(userId);
@@ -1200,10 +1203,6 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     void saveDirtyInfo() {
-        saveDirtyInfo(true);
-    }
-
-    private void saveDirtyInfo(boolean saveShortcutsInAppSearch) {
         if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "saveDirtyInfo");
         }
@@ -1218,10 +1217,6 @@ public class ShortcutService extends IShortcutService.Stub {
                     if (userId == UserHandle.USER_NULL) { // USER_NULL for base state.
                         saveBaseStateLocked();
                     } else {
-                        if (saveShortcutsInAppSearch) {
-                            getUserShortcutsLocked(userId).forAllPackages(
-                                    ShortcutPackage::persistsAllShortcutsAsync);
-                        }
                         saveUserLocked(userId);
                     }
                 }
@@ -1646,6 +1641,26 @@ public class ShortcutService extends IShortcutService.Stub {
         return callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
     }
 
+    @VisibleForTesting
+    ComponentName injectChooserActivity() {
+        if (mChooserActivity == null) {
+            mChooserActivity = ComponentName.unflattenFromString(
+                    mContext.getResources().getString(R.string.config_chooserActivity));
+        }
+        return mChooserActivity;
+    }
+
+    private boolean isCallerChooserActivity() {
+        // TODO(b/228975502): Migrate this check to a proper permission or role check
+        final int callingUid = injectBinderCallingUid();
+        ComponentName systemChooser = injectChooserActivity();
+        if (systemChooser == null) {
+            return false;
+        }
+        int uid = injectGetPackageUid(systemChooser.getPackageName(), UserHandle.USER_SYSTEM);
+        return uid == callingUid;
+    }
+
     private void enforceSystemOrShell() {
         if (!(isCallerSystem() || isCallerShell())) {
             throw new SecurityException("Caller must be system or shell");
@@ -1793,7 +1808,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         injectPostToHandlerDebounced(sp, notifyListenerRunnable(packageName, userId));
         notifyShortcutChangeCallbacks(packageName, userId, changedShortcuts, removedShortcuts);
-        scheduleSaveUser(userId);
+        sp.scheduleSave();
     }
 
     private void notifyListeners(@NonNull final String packageName, @UserIdInt final int userId) {
@@ -2525,7 +2540,9 @@ public class ShortcutService extends IShortcutService.Stub {
             IntentFilter filter, @UserIdInt int userId) {
         Preconditions.checkStringNotEmpty(packageName, "packageName");
         Objects.requireNonNull(filter, "intentFilter");
-        verifyCaller(packageName, userId);
+        if (!isCallerChooserActivity()) {
+            verifyCaller(packageName, userId);
+        }
         enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS,
                 "getShareTargets");
         synchronized (mLock) {
@@ -2853,12 +2870,11 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final ShortcutUser user = getUserShortcutsLocked(owningUserId);
         boolean doNotify = false;
-
         // First, remove the package from the package list (if the package is a publisher).
-        if (packageUserId == owningUserId) {
-            if (user.removePackage(packageName) != null) {
-                doNotify = true;
-            }
+        final ShortcutPackage sp = (packageUserId == owningUserId)
+                ? user.removePackage(packageName) : null;
+        if (sp != null) {
+            doNotify = true;
         }
 
         // Also remove from the launcher list (if the package is a launcher).
@@ -2880,6 +2896,10 @@ public class ShortcutService extends IShortcutService.Stub {
             // This will do the notification and save when needed, so do it after the above
             // notifyListeners.
             user.rescanPackageIfNeeded(packageName, /* forceRescan=*/ true);
+        }
+        if (!appStillExists && (packageUserId == owningUserId) && sp != null) {
+            // If the app is removed altogether, we can get rid of the xml as well
+            injectPostToHandler(() -> sp.removeShortcutPackageItem());
         }
 
         if (!wasUserLoaded) {
@@ -3763,7 +3783,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (mHandler.hasCallbacks(mSaveDirtyInfoRunner)) {
                     mHandler.removeCallbacks(mSaveDirtyInfoRunner);
                     forEachLoadedUserLocked(ShortcutUser::cancelAllInFlightTasks);
-                    saveDirtyInfo(false);
+                    saveDirtyInfo();
                 }
                 mShutdown.set(true);
             }
@@ -4432,7 +4452,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Save to the filesystem.
             scheduleSaveUser(userId);
-            saveDirtyInfo(false);
+            saveDirtyInfo();
 
             // Note, in case of backup, we don't have to wait on bitmap saving, because we don't
             // back up bitmaps anyway.
@@ -5327,8 +5347,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    @VisibleForTesting
-    void waitForBitmapSavesForTest() {
+    void waitForBitmapSaves() {
         synchronized (mLock) {
             mShortcutBitmapSaver.waitForAllSavesLocked();
         }

@@ -1,5 +1,5 @@
 <displayConfiguration>
-    <densityMap>
+    <densityMapping>
          <density>
             <height>480</height>
             <width>720</width>
@@ -20,5 +20,5 @@
             <width>3840</width>
             <density>640</density>
          </density>
-    </densityMap>
+    </densityMapping>
 </displayConfiguration>

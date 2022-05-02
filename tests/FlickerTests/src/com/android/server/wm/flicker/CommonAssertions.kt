@@ -102,34 +102,74 @@ fun FlickerTestParameter.statusBarLayerIsVisible() {
     }
 }
 
-fun FlickerTestParameter.navBarLayerRotatesAndScales() {
+/**
+ * Asserts that the [FlickerComponentName.NAV_BAR] layer is at the correct position at the start
+ * of the SF trace
+ */
+fun FlickerTestParameter.navBarLayerPositionStart() {
     assertLayersStart {
         val display = this.entry.displays.minByOrNull { it.id }
-            ?: throw RuntimeException("There is no display!")
-        this.visibleRegion(FlickerComponentName.NAV_BAR)
-                .coversExactly(WindowUtils.getNavigationBarPosition(display))
-    }
-    assertLayersEnd {
-        val display = this.entry.displays.minByOrNull { it.id }
-            ?: throw RuntimeException("There is no display!")
+                ?: throw RuntimeException("There is no display!")
         this.visibleRegion(FlickerComponentName.NAV_BAR)
                 .coversExactly(WindowUtils.getNavigationBarPosition(display))
     }
 }
 
-fun FlickerTestParameter.statusBarLayerRotatesScales() {
+/**
+ * Asserts that the [FlickerComponentName.NAV_BAR] layer is at the correct position at the end
+ * of the SF trace
+ */
+fun FlickerTestParameter.navBarLayerPositionEnd() {
+    assertLayersEnd {
+        val display = this.entry.displays.minByOrNull { it.id }
+                ?: throw RuntimeException("There is no display!")
+        this.visibleRegion(FlickerComponentName.NAV_BAR)
+                .coversExactly(WindowUtils.getNavigationBarPosition(display))
+    }
+}
+
+/**
+ * Asserts that the [FlickerComponentName.NAV_BAR] layer is at the correct position at the start
+ * and end of the SF trace
+ */
+fun FlickerTestParameter.navBarLayerRotatesAndScales() {
+    navBarLayerPositionStart()
+    navBarLayerPositionEnd()
+}
+
+/**
+ * Asserts that the [FlickerComponentName.STATUS_BAR] layer is at the correct position at the start
+ * of the SF trace
+ */
+fun FlickerTestParameter.statusBarLayerPositionStart() {
     assertLayersStart {
         val display = this.entry.displays.minByOrNull { it.id }
             ?: throw RuntimeException("There is no display!")
         this.visibleRegion(FlickerComponentName.STATUS_BAR)
             .coversExactly(WindowUtils.getStatusBarPosition(display))
     }
+}
+
+/**
+ * Asserts that the [FlickerComponentName.STATUS_BAR] layer is at the correct position at the end
+ * of the SF trace
+ */
+fun FlickerTestParameter.statusBarLayerPositionEnd() {
     assertLayersEnd {
         val display = this.entry.displays.minByOrNull { it.id }
             ?: throw RuntimeException("There is no display!")
         this.visibleRegion(FlickerComponentName.STATUS_BAR)
             .coversExactly(WindowUtils.getStatusBarPosition(display))
     }
+}
+
+/**
+ * Asserts that the [FlickerComponentName.STATUS_BAR] layer is at the correct position at the start
+ * and end of the SF trace
+ */
+fun FlickerTestParameter.statusBarLayerRotatesScales() {
+    statusBarLayerPositionStart()
+    statusBarLayerPositionEnd()
 }
 
 /**

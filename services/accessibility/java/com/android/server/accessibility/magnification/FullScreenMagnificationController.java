@@ -356,13 +356,6 @@ public class FullScreenMagnificationController implements
                         mSpecAnimationBridge, spec, animationCallback);
                 mControllerCtx.getHandler().sendMessage(m);
             }
-
-            final boolean lastMagnificationActivated = mMagnificationActivated;
-            mMagnificationActivated = spec.scale > 1.0f;
-            if (mMagnificationActivated != lastMagnificationActivated) {
-                mMagnificationInfoChangedCallback.onFullScreenMagnificationActivationState(
-                        mDisplayId, mMagnificationActivated);
-            }
         }
 
         /**
@@ -376,9 +369,17 @@ public class FullScreenMagnificationController implements
 
         @GuardedBy("mLock")
         void onMagnificationChangedLocked() {
+            final float scale = getScale();
+            final boolean lastMagnificationActivated = mMagnificationActivated;
+            mMagnificationActivated = scale > 1.0f;
+            if (mMagnificationActivated != lastMagnificationActivated) {
+                mMagnificationInfoChangedCallback.onFullScreenMagnificationActivationState(
+                        mDisplayId, mMagnificationActivated);
+            }
+
             final MagnificationConfig config = new MagnificationConfig.Builder()
                     .setMode(MAGNIFICATION_MODE_FULLSCREEN)
-                    .setScale(getScale())
+                    .setScale(scale)
                     .setCenterX(getCenterX())
                     .setCenterY(getCenterY()).build();
             mMagnificationInfoChangedCallback.onFullScreenMagnificationChanged(mDisplayId,

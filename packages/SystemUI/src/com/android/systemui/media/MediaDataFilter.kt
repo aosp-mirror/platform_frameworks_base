@@ -60,7 +60,8 @@ class MediaDataFilter @Inject constructor(
     private val broadcastSender: BroadcastSender,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     @Main private val executor: Executor,
-    private val systemClock: SystemClock
+    private val systemClock: SystemClock,
+    private val logger: MediaUiEventLogger
 ) : MediaDataManager.Listener {
     private val userTracker: CurrentUserTracker
     private val _listeners: MutableSet<MediaDataManager.Listener> = mutableSetOf()
@@ -151,6 +152,8 @@ class MediaDataFilter @Inject constructor(
                 Log.d(TAG, "reactivating $lastActiveKey instead of smartspace")
                 reactivatedKey = lastActiveKey
                 val mediaData = sorted.get(lastActiveKey)!!.copy(active = true)
+                logger.logRecommendationActivated(mediaData.appUid, mediaData.packageName,
+                    mediaData.instanceId)
                 listeners.forEach {
                     it.onMediaDataLoaded(lastActiveKey, lastActiveKey, mediaData,
                             receivedSmartspaceCardLatency =
@@ -163,10 +166,12 @@ class MediaDataFilter @Inject constructor(
             shouldPrioritizeMutable = true
         }
 
-        if (!data.isValid) {
+        if (!data.isValid()) {
             Log.d(TAG, "Invalid recommendation data. Skip showing the rec card")
             return
         }
+        logger.logRecommendationAdded(smartspaceMediaData.packageName,
+            smartspaceMediaData.instanceId)
         listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data, shouldPrioritizeMutable) }
     }
 
@@ -197,7 +202,8 @@ class MediaDataFilter @Inject constructor(
 
         if (smartspaceMediaData.isActive) {
             smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-                targetId = smartspaceMediaData.targetId, isValid = smartspaceMediaData.isValid)
+                targetId = smartspaceMediaData.targetId,
+                instanceId = smartspaceMediaData.instanceId)
         }
         listeners.forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
     }
@@ -252,9 +258,11 @@ class MediaDataFilter @Inject constructor(
                 broadcastSender.sendBroadcast(dismissIntent)
             }
             smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-                targetId = smartspaceMediaData.targetId, isValid = smartspaceMediaData.isValid)
+                targetId = smartspaceMediaData.targetId,
+                instanceId = smartspaceMediaData.instanceId)
+            mediaDataManager.dismissSmartspaceRecommendation(smartspaceMediaData.targetId,
+                delay = 0L)
         }
-        mediaDataManager.dismissSmartspaceRecommendation(smartspaceMediaData.targetId, delay = 0L)
     }
 
     /**
@@ -262,13 +270,13 @@ class MediaDataFilter @Inject constructor(
      */
     fun hasActiveMediaOrRecommendation() =
             userEntries.any { it.value.active } ||
-                    (smartspaceMediaData.isActive && smartspaceMediaData.isValid)
+                    (smartspaceMediaData.isActive && smartspaceMediaData.isValid())
 
     /**
      * Are there any media entries we should display?
      */
     fun hasAnyMediaOrRecommendation() = userEntries.isNotEmpty() ||
-            (smartspaceMediaData.isActive && smartspaceMediaData.isValid)
+            (smartspaceMediaData.isActive && smartspaceMediaData.isValid())
 
     /**
      * Are there any media notifications active (excluding the recommendation)?

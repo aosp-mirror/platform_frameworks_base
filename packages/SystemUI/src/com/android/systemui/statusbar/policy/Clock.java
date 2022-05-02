@@ -31,6 +31,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
@@ -291,7 +292,13 @@ public class Clock extends TextView implements
     final void updateClock() {
         if (mDemoMode) return;
         mCalendar.setTimeInMillis(System.currentTimeMillis());
-        setText(getSmallTime());
+        CharSequence smallTime = getSmallTime();
+        // Setting text actually triggers a layout pass (because the text view is set to
+        // wrap_content width and TextView always relayouts for this). Avoid needless
+        // relayout if the text didn't actually change.
+        if (!TextUtils.equals(smallTime, getText())) {
+            setText(smallTime);
+        }
         setContentDescription(mContentDescriptionFormat.format(mCalendar.getTime()));
     }
 

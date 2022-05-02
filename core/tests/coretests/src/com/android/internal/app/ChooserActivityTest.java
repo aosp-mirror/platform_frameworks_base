@@ -81,7 +81,6 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.service.chooser.ChooserTarget;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.CallSuper;
@@ -623,7 +622,7 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> stableCopy =
                 createResolvedComponentsForTestWithOtherProfile(2, /* userId= */ 10);
         waitForIdle();
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         onView(first(withText(stableCopy.get(1).getResolveInfoAt(0).activityInfo.name)))
                 .perform(click());
@@ -1437,7 +1436,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 3 targets (2 apps, 1 direct)",
                 activity.getAdapter().getCount(), is(3));
@@ -1513,7 +1512,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 3 targets (2 apps, 1 direct)",
                 activity.getAdapter().getCount(), is(3));
@@ -1595,7 +1594,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 3 targets (2 apps, 1 direct)",
                 wrapper.getAdapter().getCount(), is(3));
@@ -1667,7 +1666,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 4 targets (2 apps, 2 direct)",
                 wrapper.getAdapter().getCount(), is(4));
@@ -1754,7 +1753,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat(
                 String.format("Chooser should have %d targets (%d apps, 1 direct, 15 A-Z)",
@@ -1879,12 +1878,13 @@ public class ChooserActivityTest {
             return true;
         };
 
-        mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
+        final IChooserWrapper activity = (IChooserWrapper)
+                mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
         waitForIdle();
         onView(withTextFromRuntimeResource("resolver_work_tab")).perform(click());
         waitForIdle();
         // wait for the share sheet to expand
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         onView(first(allOf(
                 withText(workResolvedComponentInfos.get(0)
@@ -2023,7 +2023,7 @@ public class ChooserActivityTest {
                 .check(matches(isDisplayed()));
     }
 
-    @Test
+    @Test @Ignore("b/222124533")
     public void testAppTargetLogging() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -2041,6 +2041,10 @@ public class ChooserActivityTest {
         final IChooserWrapper activity = (IChooserWrapper)
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
+
+        // TODO(b/222124533): other test cases use a timeout to make sure that the UI is fully
+        // populated; without one, this test flakes. Ideally we should address the need for a
+        // timeout everywhere instead of introducing one to fix this particular test.
 
         assertThat(activity.getAdapter().getCount(), is(2));
         onView(withIdFromRuntimeResource("profile_button")).check(doesNotExist());
@@ -2143,7 +2147,7 @@ public class ChooserActivityTest {
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 3 targets (2 apps, 1 direct)",
                 activity.getAdapter().getCount(), is(3));
@@ -2324,7 +2328,7 @@ public class ChooserActivityTest {
         assertThat(logger.numCalls(), is(6));
     }
 
-    @Test
+    @Test @Ignore("b/222124533")
     public void testSwitchProfileLogging() throws InterruptedException {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
@@ -3069,8 +3073,15 @@ public class ChooserActivityTest {
     // framework code on the device is up-to-date.
     // TODO: is there a better way to do this? (Other than abandoning inheritance-based DI wrapper?)
     private int getRuntimeResourceId(String name, String defType) {
-        int id = mActivityRule.getActivity().getResources().getIdentifier(name, defType, "android");
+        int id = -1;
+        if (ChooserActivityOverrideData.getInstance().resources != null) {
+            id = ChooserActivityOverrideData.getInstance().resources.getIdentifier(
+                  name, defType, "android");
+        } else {
+            id = mActivityRule.getActivity().getResources().getIdentifier(name, defType, "android");
+        }
         assertThat(id, greaterThan(0));
+
         return id;
     }
 }

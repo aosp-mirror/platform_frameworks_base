@@ -169,7 +169,7 @@ oneway interface IStatusBar
     /**
     * Used to hide the authentication dialog, e.g. when the application cancels authentication.
     */
-    void hideAuthenticationDialog();
+    void hideAuthenticationDialog(long requestId);
     /* Used to notify the biometric service of events that occur outside of an operation. */
     void setBiometicContextListener(in IBiometricContextListener listener);
 

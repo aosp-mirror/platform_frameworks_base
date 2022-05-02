@@ -158,6 +158,7 @@ public class AccessibilitySecurityPolicyTest {
 
         mA11ySecurityPolicy = new AccessibilitySecurityPolicy(
                 mPolicyWarningUIController, mContext, mMockA11yUserManager);
+        mA11ySecurityPolicy.setSendingNonA11yToolNotificationLocked(true);
         mA11ySecurityPolicy.setAccessibilityWindowManager(mMockA11yWindowManager);
         mA11ySecurityPolicy.setAppWidgetManager(mMockAppWidgetManager);
         mA11ySecurityPolicy.onSwitchUserLocked(TEST_USER_ID, new HashSet<>());
@@ -653,9 +654,16 @@ public class AccessibilitySecurityPolicyTest {
 
         mA11ySecurityPolicy.onSwitchUserLocked(newUserId, new HashSet<>());
 
-        verify(mPolicyWarningUIController).onSwitchUserLocked(eq(newUserId), eq(new HashSet<>()));
+        verify(mPolicyWarningUIController).onSwitchUser(eq(newUserId), eq(new HashSet<>()));
         verify(mPolicyWarningUIController).onNonA11yCategoryServiceUnbound(eq(TEST_USER_ID),
                 eq(TEST_COMPONENT_NAME));
+    }
+
+    @Test
+    public void enableSendingNonA11yToolNotificationLocked_propagateToPolicyWarningController() {
+        mA11ySecurityPolicy.setSendingNonA11yToolNotificationLocked(true);
+
+        verify(mPolicyWarningUIController).enableSendingNonA11yToolNotification(true);
     }
 
     private void initServiceInfoAndConnection(ComponentName componentName,

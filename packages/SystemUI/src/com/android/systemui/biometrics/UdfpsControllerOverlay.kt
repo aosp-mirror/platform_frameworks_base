@@ -20,17 +20,16 @@ import android.annotation.SuppressLint
 import android.annotation.UiThread
 import android.content.Context
 import android.graphics.PixelFormat
-import android.graphics.Point
+import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
 import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
-import android.hardware.biometrics.SensorLocationInternal
 import android.hardware.fingerprint.FingerprintManager
-import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.os.RemoteException
 import android.util.Log
+import android.util.RotationUtils
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.Surface
@@ -78,7 +77,6 @@ class UdfpsControllerOverlay(
     private val systemClock: SystemClock,
     private val keyguardStateController: KeyguardStateController,
     private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
-    private val sensorProps: FingerprintSensorPropertiesInternal,
     private var hbmProvider: UdfpsHbmProvider,
     val requestId: Long,
     @ShowReason val requestReason: Int,
@@ -89,6 +87,8 @@ class UdfpsControllerOverlay(
     /** The view, when [isShowing], or null. */
     var overlayView: UdfpsView? = null
         private set
+
+    private var overlayParams: UdfpsOverlayParams = UdfpsOverlayParams()
 
     private var overlayTouchListener: TouchExplorationStateChangeListener? = null
 
@@ -101,7 +101,11 @@ class UdfpsControllerOverlay(
         fitInsetsTypes = 0
         gravity = android.view.Gravity.TOP or android.view.Gravity.LEFT
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        flags =
+            (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS or WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
         privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
+        // Avoid announcing window title.
+        accessibilityTitle = " "
     }
 
     /** A helper if the [requestReason] was due to enrollment. */
@@ -125,13 +129,14 @@ class UdfpsControllerOverlay(
 
     /** Show the overlay or return false and do nothing if it is already showing. */
     @SuppressLint("ClickableViewAccessibility")
-    fun show(controller: UdfpsController): Boolean {
+    fun show(controller: UdfpsController, params: UdfpsOverlayParams): Boolean {
         if (overlayView == null) {
+            overlayParams = params
             try {
                 overlayView = (inflater.inflate(
                     R.layout.udfps_view, null, false
                 ) as UdfpsView).apply {
-                    sensorProperties = sensorProps
+                    overlayParams = params
                     setHbmProvider(hbmProvider)
                     val animation = inflateUdfpsAnimation(this, controller)
                     if (animation != null) {
@@ -144,8 +149,7 @@ class UdfpsControllerOverlay(
                         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                     }
 
-                    windowManager.addView(this,
-                        coreLayoutParams.updateForLocation(sensorProps.location, animation))
+                    windowManager.addView(this, coreLayoutParams.updateDimensions(animation))
 
                     overlayTouchListener = TouchExplorationStateChangeListener {
                         if (accessibilityManager.isTouchExplorationEnabled) {
@@ -180,13 +184,14 @@ class UdfpsControllerOverlay(
             REASON_ENROLL_ENROLLING -> {
                 UdfpsEnrollViewController(
                     view.addUdfpsView(R.layout.udfps_enroll_view) {
-                        updateSensorLocation(sensorProps)
+                        updateSensorLocation(overlayParams.sensorBounds)
                     },
                     enrollHelper ?: throw IllegalStateException("no enrollment helper"),
                     statusBarStateController,
                     panelExpansionStateManager,
                     dialogManager,
-                    dumpManager
+                    dumpManager,
+                    overlayParams.scaleFactor
                 )
             }
             BiometricOverlayConstants.REASON_AUTH_KEYGUARD -> {
@@ -280,57 +285,42 @@ class UdfpsControllerOverlay(
     /** Checks if the id is relevant for this overlay. */
     fun matchesRequestId(id: Long): Boolean = requestId == -1L || requestId == id
 
-    private fun WindowManager.LayoutParams.updateForLocation(
-        location: SensorLocationInternal,
+    private fun WindowManager.LayoutParams.updateDimensions(
         animation: UdfpsAnimationViewController<*>?
     ): WindowManager.LayoutParams {
         val paddingX = animation?.paddingX ?: 0
         val paddingY = animation?.paddingY ?: 0
-        flags = (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS
-            or WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
         if (animation != null && animation.listenForTouchesOutsideView()) {
             flags = flags or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         }
 
-        // Default dimensions assume portrait mode.
-        x = location.sensorLocationX - location.sensorRadius - paddingX
-        y = location.sensorLocationY - location.sensorRadius - paddingY
-        height = 2 * location.sensorRadius + 2 * paddingX
-        width = 2 * location.sensorRadius + 2 * paddingY
+        // Original sensorBounds assume portrait mode.
+        val rotatedSensorBounds = Rect(overlayParams.sensorBounds)
 
-        // Gets the size based on the current rotation of the display.
-        val p = Point()
-        context.display!!.getRealSize(p)
-        when (context.display!!.rotation) {
-            Surface.ROTATION_90 -> {
-                if (!shouldRotate(animation)) {
-                    Log.v(TAG, "skip rotating udfps location ROTATION_90" +
+        val rot = overlayParams.rotation
+        if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
+            if (!shouldRotate(animation)) {
+                Log.v(
+                    TAG, "Skip rotating UDFPS bounds " + Surface.rotationToString(rot) +
                             " animation=$animation" +
                             " isGoingToSleep=${keyguardUpdateMonitor.isGoingToSleep}" +
-                            " isOccluded=${keyguardStateController.isOccluded}")
-                } else {
-                    Log.v(TAG, "rotate udfps location ROTATION_90")
-                    x = (location.sensorLocationY - location.sensorRadius - paddingX)
-                    y = (p.y - location.sensorLocationX - location.sensorRadius - paddingY)
-                }
+                            " isOccluded=${keyguardStateController.isOccluded}"
+                )
+            } else {
+                Log.v(TAG, "Rotate UDFPS bounds " + Surface.rotationToString(rot))
+                RotationUtils.rotateBounds(
+                    rotatedSensorBounds,
+                    overlayParams.naturalDisplayWidth,
+                    overlayParams.naturalDisplayHeight,
+                    rot
+                )
             }
-            Surface.ROTATION_270 -> {
-                if (!shouldRotate(animation)) {
-                    Log.v(TAG, "skip rotating udfps location ROTATION_270" +
-                            " animation=$animation" +
-                            " isGoingToSleep=${keyguardUpdateMonitor.isGoingToSleep}" +
-                            " isOccluded=${keyguardStateController.isOccluded}")
-                } else {
-                    Log.v(TAG, "rotate udfps location ROTATION_270")
-                    x = (p.x - location.sensorLocationY - location.sensorRadius - paddingX)
-                    y = (location.sensorLocationX - location.sensorRadius - paddingY)
-                }
-            }
-            else -> {}
         }
 
-        // avoid announcing window title
-        accessibilityTitle = " "
+        x = rotatedSensorBounds.left - paddingX
+        y = rotatedSensorBounds.top - paddingY
+        height = rotatedSensorBounds.height() + 2 * paddingX
+        width = rotatedSensorBounds.width() + 2 * paddingY
 
         return this
     }
@@ -363,5 +353,5 @@ private fun Int.isEnrollmentReason() =
 @ShowReason
 private fun Int.isImportantForAccessibility() =
     this == REASON_ENROLL_FIND_SENSOR ||
-        this == REASON_ENROLL_ENROLLING ||
-        this == BiometricOverlayConstants.REASON_AUTH_BP
+            this == REASON_ENROLL_ENROLLING ||
+            this == BiometricOverlayConstants.REASON_AUTH_BP

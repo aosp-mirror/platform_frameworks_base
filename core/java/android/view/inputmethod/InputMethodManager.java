@@ -33,6 +33,7 @@ import static android.view.inputmethod.InputMethodManagerProto.CUR_ID;
 import static android.view.inputmethod.InputMethodManagerProto.FULLSCREEN_MODE;
 import static android.view.inputmethod.InputMethodManagerProto.SERVED_CONNECTING;
 
+import static com.android.internal.inputmethod.StartInputReason.BOUND_TO_IMMS;
 import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
 import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION;
 
@@ -93,6 +94,7 @@ import android.view.autofill.AutofillManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.DirectBootAwareness;
+import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
@@ -449,6 +451,11 @@ public final class InputMethodManager {
     int mInitialSelEnd;
 
     /**
+     * Handler for {@link RemoteInputConnectionImpl#getInputConnection()}.
+     */
+    private Handler mServedInputConnectionHandler;
+
+    /**
      * The instance that has previously been sent to the input method.
      */
     private CursorAnchorInfo mCursorAnchorInfo = null;
@@ -506,8 +513,8 @@ public final class InputMethodManager {
      */
     @Nullable
     @GuardedBy("mH")
-    private final SparseArray<InputMethodSessionWrapper> mAccessibilityInputMethodSession =
-            new SparseArray<>();
+    private final SparseArray<IAccessibilityInputMethodSessionInvoker>
+            mAccessibilityInputMethodSession = new SparseArray<>();
 
     InputChannel mCurChannel;
     ImeInputEventSender mCurSender;
@@ -542,6 +549,7 @@ public final class InputMethodManager {
     static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
     static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
     static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
+    static final int MSG_ON_SHOW_REQUESTED = 31;
 
     private static boolean isAutofillUIShowing(View servedView) {
         AutofillManager afm = servedView.getContext().getSystemService(AutofillManager.class);
@@ -669,7 +677,8 @@ public final class InputMethodManager {
                 if (mCurrentInputMethodSession != null) {
                     mCurrentInputMethodSession.finishInput();
                 }
-                forAccessibilitySessions(InputMethodSessionWrapper::finishInput);
+                forAccessibilitySessionsLocked(
+                        IAccessibilityInputMethodSessionInvoker::finishInput);
             }
         }
 
@@ -730,7 +739,7 @@ public final class InputMethodManager {
                             focusedView.getWindowToken(), startInputFlags, softInputMode,
                             windowFlags,
                             null,
-                            null,
+                            null, null,
                             mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -963,13 +972,13 @@ public final class InputMethodManager {
                         // we send a notification so that the a11y service knows the session is
                         // registered and update the a11y service with the current cursor positions.
                         if (res.accessibilitySessions != null) {
-                            InputMethodSessionWrapper wrapper =
-                                    InputMethodSessionWrapper.createOrNull(
+                            IAccessibilityInputMethodSessionInvoker invoker =
+                                    IAccessibilityInputMethodSessionInvoker.createOrNull(
                                             res.accessibilitySessions.get(id));
-                            if (wrapper != null) {
-                                mAccessibilityInputMethodSession.put(id, wrapper);
+                            if (invoker != null) {
+                                mAccessibilityInputMethodSession.put(id, invoker);
                                 if (mServedInputConnection != null) {
-                                    wrapper.updateSelection(mInitialSelStart, mInitialSelEnd,
+                                    invoker.updateSelection(mInitialSelStart, mInitialSelEnd,
                                             mCursorSelStart, mCursorSelEnd, mCursorCandStart,
                                             mCursorCandEnd);
                                 } else {
@@ -978,9 +987,7 @@ public final class InputMethodManager {
                                     // binds before or after input starts, it may wonder if it binds
                                     // after input starts, why it doesn't receive a notification of
                                     // the current cursor positions.
-                                    wrapper.updateSelection(-1, -1,
-                                            -1, -1, -1,
-                                            -1);
+                                    invoker.updateSelection(-1, -1, -1, -1, -1, -1);
                                 }
                             }
                         }
@@ -1114,6 +1121,14 @@ public final class InputMethodManager {
                         mCurrentInputMethodSession.updateCursorAnchorInfo(
                                 CursorAnchorInfo.createForAdditionalParentMatrix(
                                         mCursorAnchorInfo, mVirtualDisplayToScreenMatrix));
+                    }
+                    return;
+                }
+                case MSG_ON_SHOW_REQUESTED: {
+                    synchronized (mH) {
+                        if (mImeInsetsConsumer != null) {
+                            mImeInsetsConsumer.onShowRequested();
+                        }
                     }
                     return;
                 }
@@ -1649,6 +1664,7 @@ public final class InputMethodManager {
         if (mServedInputConnection != null) {
             mServedInputConnection.deactivate();
             mServedInputConnection = null;
+            mServedInputConnectionHandler = null;
         }
     }
 
@@ -1834,6 +1850,9 @@ public final class InputMethodManager {
                 return false;
             }
 
+            // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
+            // TODO(b/229426865): call WindowInsetsController#show instead.
+            mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
             try {
                 Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags + " reason="
                         + InputMethodDebug.softInputDisplayReasonToString(reason));
@@ -1869,6 +1888,9 @@ public final class InputMethodManager {
                     Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
                     return;
                 }
+                // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
+                // TODO(b/229426865): call WindowInsetsController#show instead.
+                mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
                 mService.showSoftInput(
                         mClient,
                         mCurRootView.getView().getWindowToken(),
@@ -2148,8 +2170,10 @@ public final class InputMethodManager {
             editorInfo.setInitialSurroundingTextInternal(textSnapshot.getSurroundingText());
             mCurrentInputMethodSession.invalidateInput(editorInfo, mServedInputConnection,
                     sessionId);
-            forAccessibilitySessions(wrapper -> wrapper.invalidateInput(editorInfo,
-                    mServedInputConnection, sessionId));
+            final IRemoteAccessibilityInputConnection accessibilityInputConnection =
+                    mServedInputConnection.asIRemoteAccessibilityInputConnection();
+            forAccessibilitySessionsLocked(wrapper -> wrapper.invalidateInput(editorInfo,
+                    accessibilityInputConnection, sessionId));
             return true;
         }
     }
@@ -2272,6 +2296,13 @@ public final class InputMethodManager {
                         "Starting input: finished by someone else. view=" + dumpViewInfo(view)
                         + " servedView=" + dumpViewInfo(servedView)
                         + " mServedConnecting=" + mServedConnecting);
+                if (mServedInputConnection != null && startInputReason == BOUND_TO_IMMS) {
+                    // This is not an error. Once IME binds (MSG_BIND), InputConnection is fully
+                    // established. So we report this to interested recipients.
+                    reportInputConnectionOpened(
+                            mServedInputConnection.getInputConnection(), mCurrentTextBoxAttribute,
+                            mServedInputConnectionHandler, view);
+                }
                 return false;
             }
 
@@ -2288,6 +2319,7 @@ public final class InputMethodManager {
             if (mServedInputConnection != null) {
                 mServedInputConnection.deactivate();
                 mServedInputConnection = null;
+                mServedInputConnectionHandler = null;
             }
             RemoteInputConnectionImpl servedInputConnection;
             if (ic != null) {
@@ -2306,11 +2338,13 @@ public final class InputMethodManager {
                     // TODO(b/199934664): See if we can remove this by providing a default impl.
                 }
                 icHandler = handler;
+                mServedInputConnectionHandler = icHandler;
                 servedInputConnection = new RemoteInputConnectionImpl(
                         icHandler != null ? icHandler.getLooper() : vh.getLooper(), ic, this, view);
             } else {
                 servedInputConnection = null;
                 icHandler = null;
+                mServedInputConnectionHandler = null;
             }
             mServedInputConnection = servedInputConnection;
 
@@ -2323,6 +2357,8 @@ public final class InputMethodManager {
                 res = mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,
                         softInputMode, windowFlags, tba, servedInputConnection,
+                        servedInputConnection == null ? null
+                                : servedInputConnection.asIRemoteAccessibilityInputConnection(),
                         view.getContext().getApplicationInfo().targetSdkVersion);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -2347,8 +2383,9 @@ public final class InputMethodManager {
                 mAccessibilityInputMethodSession.clear();
                 if (res.accessibilitySessions != null) {
                     for (int i = 0; i < res.accessibilitySessions.size(); i++) {
-                        InputMethodSessionWrapper wrapper = InputMethodSessionWrapper.createOrNull(
-                                res.accessibilitySessions.valueAt(i));
+                        IAccessibilityInputMethodSessionInvoker wrapper =
+                                IAccessibilityInputMethodSessionInvoker.createOrNull(
+                                        res.accessibilitySessions.valueAt(i));
                         if (wrapper != null) {
                             mAccessibilityInputMethodSession.append(
                                     res.accessibilitySessions.keyAt(i), wrapper);
@@ -2377,14 +2414,19 @@ public final class InputMethodManager {
                 Log.v(TAG, "Calling View.onInputConnectionOpened: view= " + view
                         + ", ic=" + ic + ", tba=" + tba + ", handler=" + icHandler);
             }
-            view.onInputConnectionOpenedInternal(ic, tba, icHandler);
-            final ViewRootImpl viewRoot = view.getViewRootImpl();
-            if (viewRoot != null) {
-                viewRoot.getHandwritingInitiator().onInputConnectionCreated(view);
-            }
+            reportInputConnectionOpened(ic, tba, icHandler, view);
         }
 
         return true;
+    }
+
+    private void reportInputConnectionOpened(
+            InputConnection ic, EditorInfo tba, Handler icHandler, View view) {
+        view.onInputConnectionOpenedInternal(ic, tba, icHandler);
+        final ViewRootImpl viewRoot = view.getViewRootImpl();
+        if (viewRoot != null) {
+            viewRoot.getHandwritingInitiator().onInputConnectionCreated(view);
+        }
     }
 
     /**
@@ -2516,7 +2558,7 @@ public final class InputMethodManager {
     }
 
     /**
-     * Notify IME directly that it is no longer visible.
+     * Notify IMMS that IME insets are no longer visible.
      *
      * @param windowToken the window from which this request originates. If this doesn't match the
      *                    currently served view, the request is ignored.
@@ -2528,7 +2570,13 @@ public final class InputMethodManager {
         synchronized (mH) {
             if (mCurrentInputMethodSession != null && mCurRootView != null
                     && mCurRootView.getWindowToken() == windowToken) {
-                mCurrentInputMethodSession.notifyImeHidden();
+                try {
+                    mService.hideSoftInput(mClient, windowToken, 0 /* flags */,
+                            null /* resultReceiver */,
+                            SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
         }
     }
@@ -2598,7 +2646,7 @@ public final class InputMethodManager {
                 mCursorCandEnd = candidatesEnd;
                 mCurrentInputMethodSession.updateSelection(
                         oldSelStart, oldSelEnd, selStart, selEnd, candidatesStart, candidatesEnd);
-                forAccessibilitySessions(wrapper -> wrapper.updateSelection(oldSelStart,
+                forAccessibilitySessionsLocked(wrapper -> wrapper.updateSelection(oldSelStart,
                         oldSelEnd, selStart, selEnd, candidatesStart, candidatesEnd));
             }
         }
@@ -3524,6 +3572,7 @@ public final class InputMethodManager {
             p.println("  mCurrentTextBoxAttribute: null");
         }
         p.println("  mServedInputConnection=" + mServedInputConnection);
+        p.println("  mServedInputConnectionHandler=" + mServedInputConnectionHandler);
         p.println("  mCompletions=" + Arrays.toString(mCompletions));
         p.println("  mCursorRect=" + mCursorRect);
         p.println("  mCursorSelStart=" + mCursorSelStart
@@ -3658,7 +3707,8 @@ public final class InputMethodManager {
         }
     }
 
-    private void forAccessibilitySessions(Consumer<InputMethodSessionWrapper> consumer) {
+    private void forAccessibilitySessionsLocked(
+            Consumer<IAccessibilityInputMethodSessionInvoker> consumer) {
         for (int i = 0; i < mAccessibilityInputMethodSession.size(); i++) {
             consumer.accept(mAccessibilityInputMethodSession.valueAt(i));
         }

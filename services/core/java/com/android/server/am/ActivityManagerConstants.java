@@ -140,6 +140,11 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     static final String KEY_COMPONENT_ALIAS_OVERRIDES = "component_alias_overrides";
 
+    /**
+     * Indicates the maximum time that an app is blocked for the network rules to get updated.
+     */
+    static final String KEY_NETWORK_ACCESS_TIMEOUT_MS = "network_access_timeout_ms";
+
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
@@ -185,6 +190,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final float DEFAULT_FGS_START_ALLOWED_LOG_SAMPLE_RATE = 0.25f; // 25%
     private static final float DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE = 1; // 100%
     private static final long DEFAULT_PROCESS_KILL_TIMEOUT_MS = 10 * 1000;
+    private static final long DEFAULT_NETWORK_ACCESS_TIMEOUT_MS = 200; // 0.2 sec
 
     static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
     static final long DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS = 60 * 1000;
@@ -781,6 +787,11 @@ final class ActivityManagerConstants extends ContentObserver {
     private List<String> mDefaultImperceptibleKillExemptPackages;
     private List<Integer> mDefaultImperceptibleKillExemptProcStates;
 
+    /**
+     * Indicates the maximum time spent waiting for the network rules to get updated.
+     */
+    volatile long mNetworkAccessTimeoutMs = DEFAULT_NETWORK_ACCESS_TIMEOUT_MS;
+
     @SuppressWarnings("unused")
     private static final int OOMADJ_UPDATE_POLICY_SLOW = 0;
     private static final int OOMADJ_UPDATE_POLICY_QUICK = 1;
@@ -975,6 +986,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_MAX_EMPTY_TIME_MILLIS:
                                 updateMaxEmptyTimeMillis();
+                                break;
+                            case KEY_NETWORK_ACCESS_TIMEOUT_MS:
+                                updateNetworkAccessTimeoutMs();
                                 break;
                             default:
                                 break;
@@ -1446,6 +1460,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_MAX_EMPTY_TIME_MILLIS);
     }
 
+    private void updateNetworkAccessTimeoutMs() {
+        mNetworkAccessTimeoutMs = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_NETWORK_ACCESS_TIMEOUT_MS,
+                DEFAULT_NETWORK_ACCESS_TIMEOUT_MS);
+    }
+
     private void updateServiceStartForegroundTimeoutMs() {
         mServiceStartForegroundTimeoutMs = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1756,6 +1777,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mServiceStartForegroundAnrDelayMs);
         pw.print("  "); pw.print(KEY_SERVICE_BIND_ALMOST_PERCEPTIBLE_TIMEOUT_MS);
         pw.print("="); pw.println(mServiceBindAlmostPerceptibleTimeoutMs);
+        pw.print("  "); pw.print(KEY_NETWORK_ACCESS_TIMEOUT_MS);
+        pw.print("="); pw.println(mNetworkAccessTimeoutMs);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

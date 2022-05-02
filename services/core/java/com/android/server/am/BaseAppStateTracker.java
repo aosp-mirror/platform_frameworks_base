@@ -169,6 +169,13 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
     }
 
     /**
+     * Return the relevant info object for the tracker for the given uid, used for statsd.
+     */
+    byte[] getTrackerInfoForStatsd(int uid) {
+        return null;
+    }
+
+    /**
      * Return the policy holder of this tracker.
      */
     T getPolicy() {

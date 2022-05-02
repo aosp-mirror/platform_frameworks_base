@@ -1348,14 +1348,14 @@ public final class NotificationRecord {
     protected void calculateGrantableUris() {
         final Notification notification = getNotification();
         notification.visitUris((uri) -> {
-            visitGrantableUri(uri, false);
+            visitGrantableUri(uri, false, false);
         });
 
         if (notification.getChannelId() != null) {
             NotificationChannel channel = getChannel();
             if (channel != null) {
                 visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
-                        & NotificationChannel.USER_LOCKED_SOUND) != 0);
+                        & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
             }
         }
     }
@@ -1368,7 +1368,7 @@ public final class NotificationRecord {
      * {@link #mGrantableUris}. Otherwise, this will either log or throw
      * {@link SecurityException} depending on target SDK of enqueuing app.
      */
-    private void visitGrantableUri(Uri uri, boolean userOverriddenUri) {
+    private void visitGrantableUri(Uri uri, boolean userOverriddenUri, boolean isSound) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
 
         // We can't grant Uri permissions from system
@@ -1389,10 +1389,16 @@ public final class NotificationRecord {
             mGrantableUris.add(uri);
         } catch (SecurityException e) {
             if (!userOverriddenUri) {
-                if (mTargetSdkVersion >= Build.VERSION_CODES.P) {
-                    throw e;
+                if (isSound) {
+                    mSound = Settings.System.DEFAULT_NOTIFICATION_URI;
+                    Log.w(TAG, "Replacing " + uri + " from " + sourceUid + ": " + e.getMessage());
                 } else {
-                    Log.w(TAG, "Ignoring " + uri + " from " + sourceUid + ": " + e.getMessage());
+                    if (mTargetSdkVersion >= Build.VERSION_CODES.P) {
+                        throw e;
+                    } else {
+                        Log.w(TAG,
+                                "Ignoring " + uri + " from " + sourceUid + ": " + e.getMessage());
+                    }
                 }
             }
         } finally {

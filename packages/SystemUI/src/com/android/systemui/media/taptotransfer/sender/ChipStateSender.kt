@@ -19,6 +19,7 @@ package com.android.systemui.media.taptotransfer.sender
 import android.app.StatusBarManager
 import android.content.Context
 import android.media.MediaRoute2Info
+import android.util.Log
 import android.view.View
 import androidx.annotation.StringRes
 import com.android.internal.logging.UiEventLogger
@@ -221,7 +222,12 @@ enum class ChipStateSender(
          */
         fun getSenderStateFromId(
             @StatusBarManager.MediaTransferSenderState displayState: Int,
-        ): ChipStateSender = values().first { it.stateInt == displayState }
+        ): ChipStateSender? = try {
+            values().first { it.stateInt == displayState }
+        } catch (e: NoSuchElementException) {
+            Log.e(TAG, "Could not find requested state $displayState", e)
+            null
+        }
 
         /**
          * Returns the state int from [StatusBarManager] associated with the given sender state
@@ -238,3 +244,5 @@ enum class ChipStateSender(
 // process and we should keep the user informed about it as long as possible (but don't allow it to
 // continue indefinitely).
 private const val TRANSFER_TRIGGERED_TIMEOUT_MILLIS = 15000L
+
+private const val TAG = "ChipStateSender"

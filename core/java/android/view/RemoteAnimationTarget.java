@@ -33,6 +33,7 @@ import static android.view.RemoteAnimationTargetProto.TASK_ID;
 import static android.view.RemoteAnimationTargetProto.WINDOW_CONFIGURATION;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
@@ -221,6 +222,12 @@ public class RemoteAnimationTarget implements Parcelable {
      */
     public boolean hasAnimatingParent;
 
+    /**
+     * The background color of animation in case the task info is not available if the transition
+     * is activity level.
+     */
+    public @ColorInt int backgroundColor;
+
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
             Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
             Rect localBounds, Rect screenSpaceBounds,
@@ -279,6 +286,7 @@ public class RemoteAnimationTarget implements Parcelable {
         allowEnterPip = in.readBoolean();
         windowType = in.readInt();
         hasAnimatingParent = in.readBoolean();
+        backgroundColor = in.readInt();
     }
 
     @Override
@@ -307,6 +315,7 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeBoolean(allowEnterPip);
         dest.writeInt(windowType);
         dest.writeBoolean(hasAnimatingParent);
+        dest.writeInt(backgroundColor);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -327,6 +336,7 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.print(prefix); pw.print("allowEnterPip="); pw.println(allowEnterPip);
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
         pw.print(prefix); pw.print("hasAnimatingParent="); pw.print(hasAnimatingParent);
+        pw.print(prefix); pw.print("backgroundColor="); pw.print(backgroundColor);
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {

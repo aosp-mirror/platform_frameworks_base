@@ -42,6 +42,7 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -81,6 +82,8 @@ class ActionReceiverTest : SysuiTestCase() {
     @Mock
     private lateinit var unregisterFunction: BroadcastReceiver.() -> Unit
     @Mock
+    private lateinit var isPendingRemovalFunction: (BroadcastReceiver, Int) -> Boolean
+    @Mock
     private lateinit var receiver1: BroadcastReceiver
     @Mock
     private lateinit var receiver2: BroadcastReceiver
@@ -98,13 +101,16 @@ class ActionReceiverTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         executor = FakeExecutor(FakeSystemClock())
 
+        `when`(isPendingRemovalFunction(any(), anyInt())).thenReturn(false)
+
         actionReceiver = ActionReceiver(
                 ACTION1,
                 USER.identifier,
                 registerFunction,
                 unregisterFunction,
                 executor,
-                logger
+                logger,
+                isPendingRemovalFunction
         )
     }
 
@@ -247,6 +253,20 @@ class ActionReceiverTest : SysuiTestCase() {
         executor.runAllReady()
 
         verify(logger).logBroadcastDispatched(anyInt(), eq(ACTION1), sameNotNull(receiver1))
+    }
+
+    @Test
+    fun testBroadcastNotDispatchingOnPendingRemoval() {
+        `when`(isPendingRemovalFunction(receiver1, USER.identifier)).thenReturn(true)
+
+        val receiverData = ReceiverData(receiver1, IntentFilter(ACTION1), directExecutor, USER)
+
+        actionReceiver.addReceiverData(receiverData)
+
+        val intent = Intent(ACTION1)
+        actionReceiver.onReceive(mContext, intent)
+        executor.runAllReady()
+        verify(receiver1, never()).onReceive(any(), eq(intent))
     }
 
     @Test(expected = IllegalStateException::class)

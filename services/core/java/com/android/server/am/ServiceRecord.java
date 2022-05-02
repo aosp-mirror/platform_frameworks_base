@@ -1112,7 +1112,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         foregroundNoti = localForegroundNoti; // save it for amending next time
 
                         signalForegroundServiceNotification(packageName, appInfo.uid,
-                                localForegroundId);
+                                localForegroundId, false /* canceling */);
 
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Error showing notification for service", e);
@@ -1147,17 +1147,18 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 } catch (RuntimeException e) {
                     Slog.w(TAG, "Error canceling notification for service", e);
                 }
-                signalForegroundServiceNotification(packageName, appInfo.uid, -localForegroundId);
+                signalForegroundServiceNotification(packageName, appInfo.uid, localForegroundId,
+                        true /* canceling */);
             }
         });
     }
 
     private void signalForegroundServiceNotification(String packageName, int uid,
-            int foregroundId) {
+            int foregroundId, boolean canceling) {
         synchronized (ams) {
             for (int i = ams.mForegroundServiceStateListeners.size() - 1; i >= 0; i--) {
                 ams.mForegroundServiceStateListeners.get(i).onForegroundServiceNotificationUpdated(
-                        packageName, appInfo.uid, foregroundId);
+                        packageName, appInfo.uid, foregroundId, canceling);
             }
         }
     }

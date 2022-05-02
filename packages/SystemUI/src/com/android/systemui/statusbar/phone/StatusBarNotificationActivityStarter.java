@@ -489,7 +489,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             ExpandableNotificationRow row,
             boolean animate,
             boolean isActivityIntent) {
-        mLogger.logStartNotificationIntent(entry.getKey(), intent);
+        mLogger.logStartNotificationIntent(entry.getKey());
         try {
             Runnable onFinishAnimationCallback = animate
                     ? () -> mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry)
@@ -513,8 +513,10 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                                 mKeyguardStateController.isShowing(),
                                 eventTime)
                                 : getActivityOptions(mCentralSurfaces.getDisplayId(), adapter);
-                        return intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
+                        int result = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
                                 null, null, options);
+                        mLogger.logSendPendingIntent(entry.getKey(), intent, result);
+                        return result;
                     });
         } catch (PendingIntent.CanceledException e) {
             // the stack trace isn't very helpful here.

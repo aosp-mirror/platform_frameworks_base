@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,9 +35,9 @@ import android.view.ViewOutlineProvider;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.TextView;
 
+import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothBroadcastUtils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
-import com.android.settingslib.R;
 import com.android.settingslib.core.lifecycle.ObservableFragment;
 
 import androidx.annotation.NonNull;

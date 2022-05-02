@@ -42,9 +42,8 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.time.SystemClock
-import java.io.FileDescriptor
 import java.io.PrintWriter
-import java.util.*
+import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -64,7 +63,7 @@ class OngoingCallController @Inject constructor(
     private val dumpManager: DumpManager,
     private val statusBarWindowController: Optional<StatusBarWindowController>,
     private val swipeStatusBarAwayGestureHandler: Optional<SwipeStatusBarAwayGestureHandler>,
-    private val statusBarStateController: StatusBarStateController,
+    private val statusBarStateController: StatusBarStateController
 ) : CallbackController<OngoingCallListener>, Dumpable {
     private var isFullscreen: Boolean = false
     /** Non-null if there's an active call notification. */
@@ -242,9 +241,9 @@ class OngoingCallController @Inject constructor(
     }
 
     private fun updateGestureListening() {
-        if (callNotificationInfo == null
-            || callNotificationInfo?.statusBarSwipedAway == true
-            || !isFullscreen) {
+        if (callNotificationInfo == null ||
+            callNotificationInfo?.statusBarSwipedAway == true ||
+            !isFullscreen) {
             swipeStatusBarAwayGestureHandler.ifPresent { it.removeOnGestureDetectedCallback(TAG) }
         } else {
             swipeStatusBarAwayGestureHandler.ifPresent {
@@ -270,7 +269,7 @@ class OngoingCallController @Inject constructor(
         return this.findViewById(R.id.ongoing_call_chip_time)
     }
 
-   /**
+    /**
     * If there's an active ongoing call, then we will force the status bar to always show, even if
     * the user is in immersive mode. However, we also want to give users the ability to swipe away
     * the status bar if they need to access the area under the status bar.
@@ -278,16 +277,16 @@ class OngoingCallController @Inject constructor(
     * This method updates the status bar window appropriately when the swipe away gesture is
     * detected.
     */
-   private fun onSwipeAwayGestureDetected() {
-       if (DEBUG) { Log.d(TAG, "Swipe away gesture detected") }
-       callNotificationInfo = callNotificationInfo?.copy(statusBarSwipedAway = true)
-       statusBarWindowController.ifPresent {
-           it.setOngoingProcessRequiresStatusBarVisible(false)
-       }
-       swipeStatusBarAwayGestureHandler.ifPresent {
-           it.removeOnGestureDetectedCallback(TAG)
-       }
-   }
+    private fun onSwipeAwayGestureDetected() {
+        if (DEBUG) { Log.d(TAG, "Swipe away gesture detected") }
+        callNotificationInfo = callNotificationInfo?.copy(statusBarSwipedAway = true)
+        statusBarWindowController.ifPresent {
+            it.setOngoingProcessRequiresStatusBarVisible(false)
+        }
+        swipeStatusBarAwayGestureHandler.ifPresent {
+            it.removeOnGestureDetectedCallback(TAG)
+        }
+    }
 
     private val statusBarStateListener = object : StatusBarStateController.StateListener {
         override fun onFullscreenStateChanged(isFullscreen: Boolean) {
@@ -314,7 +313,7 @@ class OngoingCallController @Inject constructor(
         fun hasValidStartTime(): Boolean = callStartTime > 0
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Active call notification: $callNotificationInfo")
         pw.println("Call app visible: ${uidObserver.isCallAppVisible}")
     }
@@ -333,7 +332,6 @@ class OngoingCallController @Inject constructor(
          * otherwise.
          */
         private var isRegistered = false
-
 
         /** Register this observer with the activity manager and the given [uid]. */
         fun registerWithUid(uid: Int) {

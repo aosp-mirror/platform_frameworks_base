@@ -42,7 +42,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -110,7 +109,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
                 UserHandle.of(mCurrentUser));
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("BluetoothController state:");
         pw.print("  mLocalBluetoothManager="); pw.println(mLocalBluetoothManager);
         if (mLocalBluetoothManager == null) {

@@ -1170,7 +1170,7 @@ public class Instrumentation {
             }
 
             InputManager.getInstance().injectInputEvent(
-                    event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT);
+                    event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
 
             if (syncAfter) {
                 WindowManagerGlobal.getWindowManagerService()

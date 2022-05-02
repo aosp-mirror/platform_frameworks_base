@@ -133,6 +133,15 @@ abstract class BaseAppStateTimeSlotEventsTracker
         mTmpPkgs.clear();
     }
 
+    @GuardedBy("mLock")
+    int getTotalEventsLocked(int uid, long now) {
+        final U events = getUidEventsLocked(uid);
+        if (events == null) {
+            return 0;
+        }
+        return events.getTotalEvents(now, SimpleAppStateTimeslotEvents.DEFAULT_INDEX);
+    }
+
     private void trimEvents() {
         final long now = SystemClock.elapsedRealtime();
         trim(Math.max(0, now - mInjector.getPolicy().getMaxTrackingDuration()));
@@ -301,6 +310,7 @@ abstract class BaseAppStateTimeSlotEventsTracker
                 @RestrictionLevel int maxLevel) {
             synchronized (mLock) {
                 final int level = mExcessiveEventPkgs.get(packageName, uid) == null
+                        || !mTracker.mAppRestrictionController.isAutoRestrictAbusiveAppEnabled()
                         ? RESTRICTION_LEVEL_ADAPTIVE_BUCKET
                         : RESTRICTION_LEVEL_RESTRICTED_BUCKET;
                 if (maxLevel > RESTRICTION_LEVEL_RESTRICTED_BUCKET) {

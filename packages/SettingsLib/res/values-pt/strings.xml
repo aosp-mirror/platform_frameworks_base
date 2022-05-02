@@ -266,7 +266,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"Atalho para relatório de bugs"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostrar um botão para gerar relatórios de bugs no menu do botão liga/desliga"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Permanecer ativo"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"A tela nunca entrará em suspensão enquanto estiver carregando"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"A tela nunca entra em suspensão enquanto está carregando"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Ativar registro de rastreamento Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturar pacotes de Bluetooth. Ative o Bluetooth depois de alterar essa configuração."</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueio de OEM"</string>
@@ -282,7 +282,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitar busca por Wi-Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Ordem aleatória de MAC não persistente no Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dados móveis sempre ativos"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleração de hardware de tethering"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleração de hardware para tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostrar dispositivos Bluetooth sem nomes"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Desativar volume absoluto"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Ativar Gabeldorsche"</string>
@@ -327,7 +327,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Permitir locais fictícios"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Ativar visualização de inspeção de atributo"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Sempre manter dados móveis ativos, mesmo quando o Wi-Fi estiver ativado (para troca rápida de rede)"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Usar aceleração de hardware de tethering quando disponível"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Usar aceleração de hardware para tethering quando disponível"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Permitir a depuração USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"A depuração USB serve apenas para fins de desenvolvimento. Use-a para copiar dados entre o computador e o dispositivo, instalar apps no seu aparelho sem notificação e ler dados de registro."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Permitir a depuração por Wi-Fi?"</string>
@@ -596,8 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Redefinir visitante?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Remover convidado?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Redefinir"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Remover"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Redefinindo visitante…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Tirar uma foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Escolher uma imagem"</string>
@@ -653,10 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ligar tela"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir que a tela seja ligada"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permitir que um app ligue a tela. Se permitido, o app vai poder ligar a tela a qualquer momento sem uma intent explícita."</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Ler o código QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Para começar a ouvir, centralize o código QR abaixo"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"O código QR não está em um formato válido"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão do app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se você transmitir o app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou mudar a saída, a transmissão atual será interrompida"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmitir <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Mudar saída"</string>
 </resources>

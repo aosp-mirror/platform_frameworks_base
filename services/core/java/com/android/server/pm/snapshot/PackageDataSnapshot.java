@@ -16,5 +16,22 @@
 
 package com.android.server.pm.snapshot;
 
+import android.annotation.NonNull;
+import android.content.pm.UserInfo;
+import android.util.ArrayMap;
+
+import com.android.server.pm.SharedUserSetting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
+
+import java.util.Collection;
+
 public interface PackageDataSnapshot {
+    @NonNull
+    ArrayMap<String, ? extends PackageStateInternal> getPackageStates();
+    @NonNull
+    UserInfo[] getUserInfos();
+    @NonNull
+    Collection<SharedUserSetting> getAllSharedUsers();
+    AndroidPackage getPackage(String packageName);
 }

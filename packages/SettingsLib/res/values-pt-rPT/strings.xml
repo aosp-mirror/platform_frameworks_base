@@ -306,7 +306,7 @@
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Selecionar modo DNS privado"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Desativado"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automático"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nome de anfitrião do fornecedor DNS privado"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nome do anfitrião do fornecedor DNS privado"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Introduza nome - anfitrião do fornecedor DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Não foi possível estabelecer ligação"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opções da certificação de display sem fios"</string>
@@ -335,7 +335,7 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Revogar acesso à depuração USB de todos os computadores anteriormente autorizados?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Permitir definições de programação?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Estas definições destinam-se apenas a programação. Podem fazer com que o seu aparelho e as aplicações nele existentes falhem ou funcionem mal."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verificar aplicações de USB"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verificar apps por USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Verificar as aplicações instaladas via ADB/ADT para detetar comportamento perigoso"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"São apresentados os dispositivos Bluetooth sem nomes (apenas endereços MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Desativa a funcionalidade de volume absoluto do Bluetooth caso existam problemas de volume com dispositivos remotos, como um volume insuportavelmente alto ou a ausência de controlo"</string>
@@ -372,7 +372,7 @@
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Piscar camadas de hardware em verde ao atualizar"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Depurar sobreposição GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Desativar sobreposições HW"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"Utilizar sempre GPU para a composição do ecrã"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"Usar sempre GPU para a composição do ecrã"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simular espaço da cor"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Ativar vestígios OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desativar encaminhamento áudio USB"</string>
@@ -596,8 +596,7 @@
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Pretende repor o convidado?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Remover o convidado?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Repor"</string>
-    <!-- no translation found for guest_remove_guest_confirm_button (7858123434954143879) -->
-    <skip />
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Remover"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"A repor o convidado…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Tirar uma foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Escolher uma imagem"</string>
@@ -653,10 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ative o ecrã"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir a ativação do ecrã"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permita que uma app ative o ecrã. Se a autorização for concedida, a app pode ativar o ecrã em qualquer altura sem a sua intenção explícita."</string>
-    <!-- no translation found for bt_le_audio_scan_qr_code (3521809854780392679) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_scan_qr_code_scanner (4679500020630341107) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_qr_code_is_not_valid_format (6092191081849434734) -->
-    <skip />
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Leia o código QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Para começar a ouvir, centre o código QR abaixo"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"O código QR não é um formato válido"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão da app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se transmitir a app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou alterar a saída, a sua transmissão atual é interrompida"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmita a app <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Altere a saída"</string>
 </resources>

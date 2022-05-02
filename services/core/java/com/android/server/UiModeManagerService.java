@@ -38,6 +38,7 @@ import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.IOnProjectionStateChangedListener;
 import android.app.IUiModeManager;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -149,6 +150,8 @@ final class UiModeManagerService extends SystemService {
     private int mCarModeEnableFlags;
     private boolean mSetupWizardComplete;
 
+    // flag set by resource, whether to start dream immediately upon docking even if unlocked.
+    private boolean mStartDreamImmediatelyOnDock = true;
     // flag set by resource, whether to enable Car dock launch when starting car mode.
     private boolean mEnableCarDockLaunch = true;
     // flag set by resource, whether to lock UI mode to the default one or not.
@@ -173,6 +176,7 @@ final class UiModeManagerService extends SystemService {
     private ActivityTaskManagerInternal mActivityTaskManager;
     private AlarmManager mAlarmManager;
     private PowerManager mPowerManager;
+    private KeyguardManager mKeyguardManager;
 
     // In automatic scheduling, the user is able
     // to override the computed night mode until the two match
@@ -374,6 +378,7 @@ final class UiModeManagerService extends SystemService {
             synchronized (mLock) {
                 final Context context = getContext();
                 mSystemReady = true;
+                mKeyguardManager = context.getSystemService(KeyguardManager.class);
                 mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
                 mWakeLock = mPowerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
                 mWindowManager = LocalServices.getService(WindowManagerInternal.class);
@@ -412,6 +417,8 @@ final class UiModeManagerService extends SystemService {
         verifySetupWizardCompleted();
 
         final Resources res = context.getResources();
+        mStartDreamImmediatelyOnDock = res.getBoolean(
+                com.android.internal.R.bool.config_startDreamImmediatelyOnDock);
         mNightMode = res.getInteger(
                 com.android.internal.R.integer.config_defaultNightMode);
         mDefaultUiModeType = res.getInteger(
@@ -1294,6 +1301,8 @@ final class UiModeManagerService extends SystemService {
             pw.print("  mDockState="); pw.print(mDockState);
             pw.print(" mLastBroadcastState="); pw.println(mLastBroadcastState);
 
+            pw.print(" mStartDreamImmediatelyOnDock="); pw.print(mStartDreamImmediatelyOnDock);
+
             pw.print("  mNightMode="); pw.print(mNightMode); pw.print(" (");
             pw.print(Shell.nightModeToStr(mNightMode, mNightModeCustomType)); pw.print(") ");
             pw.print(" mOverrideOn/Off="); pw.print(mOverrideNightModeOn);
@@ -1803,8 +1812,9 @@ final class UiModeManagerService extends SystemService {
         // Send the new configuration.
         applyConfigurationExternallyLocked();
 
-        // If we did not start a dock app, then start dreaming if supported.
-        if (category != null && !dockAppStarted) {
+        // If we did not start a dock app, then start dreaming if appropriate.
+        if (category != null && !dockAppStarted && (mStartDreamImmediatelyOnDock
+                || mKeyguardManager.isKeyguardLocked())) {
             Sandman.startDreamWhenDockedIfAppropriate(getContext());
         }
     }

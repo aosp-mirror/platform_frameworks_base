@@ -1637,8 +1637,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * Sets whether the keystore requires the screen to be unlocked before allowing decryption
          * using this key. If this is set to {@code true}, any attempt to decrypt or sign using this
          * key while the screen is locked will fail. A locked device requires a PIN, password,
-         * biometric, or other trusted factor to access. While the screen is locked, the key can
-         * still be used for encryption or signature verification.
+         * biometric, or other trusted factor to access. While the screen is locked, any associated
+         * public key can still be used (e.g for signature verification).
          */
         @NonNull
         public Builder setUnlockedDeviceRequired(boolean unlockedDeviceRequired) {

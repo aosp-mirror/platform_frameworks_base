@@ -95,7 +95,7 @@ public class EditTextActivity extends Activity
     private void share() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, mEditText.getText());
+        sendIntent.putExtra(Intent.EXTRA_TEXT, mEditText.getText().toString());
         sendIntent.setType("text/plain");
 
         Intent shareIntent = Intent.createChooser(sendIntent, null);

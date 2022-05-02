@@ -22,6 +22,7 @@ import android.annotation.IntRange
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.text.TextUtils
 import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.util.Log
@@ -125,13 +126,30 @@ class AnimatableClockView @JvmOverloads constructor(
 
     fun refreshTime() {
         time.timeInMillis = System.currentTimeMillis()
-        text = DateFormat.format(format, time)
         contentDescription = DateFormat.format(descFormat, time)
-        Log.d(tag, "refreshTime this=$this" +
-                " currTimeContextDesc=$contentDescription" +
-                " measuredHeight=$measuredHeight" +
-                " lastMeasureCall=$lastMeasureCall" +
-                " isSingleLineInternal=$isSingleLineInternal")
+        val formattedText = DateFormat.format(format, time)
+        // Setting text actually triggers a layout pass (because the text view is set to
+        // wrap_content width and TextView always relayouts for this). Avoid needless
+        // relayout if the text didn't actually change.
+        if (!TextUtils.equals(text, formattedText)) {
+            text = formattedText
+            Log.d(
+                tag, "refreshTime this=$this" +
+                        " currTimeContextDesc=$contentDescription" +
+                        " measuredHeight=$measuredHeight" +
+                        " lastMeasureCall=$lastMeasureCall" +
+                        " isSingleLineInternal=$isSingleLineInternal"
+            )
+        } else {
+            Log.d(
+                tag, "refreshTime (skipped due to unchanged text)" +
+                        " this=$this" +
+                        " currTimeContextDesc=$contentDescription" +
+                        " measuredHeight=$measuredHeight" +
+                        " lastMeasureCall=$lastMeasureCall" +
+                        " isSingleLineInternal=$isSingleLineInternal"
+            )
+        }
     }
 
     fun onTimeZoneChanged(timeZone: TimeZone?) {

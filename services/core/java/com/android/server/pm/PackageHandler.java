@@ -75,7 +75,7 @@ final class PackageHandler extends Handler {
         try {
             doHandleMessage(msg);
         } finally {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
         }
     }
 
@@ -136,19 +136,13 @@ final class PackageHandler extends Handler {
                 }
             } break;
             case WRITE_SETTINGS: {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                 mPm.writeSettings();
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             } break;
             case WRITE_PACKAGE_RESTRICTIONS: {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                 mPm.writePendingRestrictions();
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             } break;
             case WRITE_PACKAGE_LIST: {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                 mPm.writePackageList(msg.arg1);
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             } break;
             case CHECK_PENDING_VERIFICATION: {
                 final int verificationId = msg.arg1;

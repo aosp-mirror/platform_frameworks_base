@@ -21,6 +21,7 @@ import static android.os.Process.FIRST_APPLICATION_UID;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.SearchManager;
@@ -207,6 +208,9 @@ final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
     }
 
     private static final Set<String> NEARBY_DEVICES_PERMISSIONS = new ArraySet<>();
@@ -610,6 +614,10 @@ final class DefaultPermissionGrantPolicy {
                     pm, setupWizardPackage, userId, NEARBY_DEVICES_PERMISSIONS);
         }
 
+        // SearchSelector
+        grantPermissionsToSystemPackage(pm, getDefaultSearchSelectorPackage(), userId,
+                NOTIFICATION_PERMISSIONS);
+
         // Camera
         grantPermissionsToSystemPackage(pm,
                 getDefaultSystemHandlerActivityPackage(pm, MediaStore.ACTION_IMAGE_CAPTURE, userId),
@@ -896,23 +904,6 @@ final class DefaultPermissionGrantPolicy {
                     COARSE_BACKGROUND_LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
         }
 
-        // Content capture
-        String contentCapturePackageName =
-                mContext.getPackageManager().getContentCaptureServicePackageName();
-        if (!TextUtils.isEmpty(contentCapturePackageName)) {
-            grantPermissionsToSystemPackage(pm, contentCapturePackageName, userId,
-                    PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
-                    CONTACTS_PERMISSIONS, STORAGE_PERMISSIONS);
-        }
-
-        // Attention Service
-        String attentionServicePackageName =
-                mContext.getPackageManager().getAttentionServicePackageName();
-        if (!TextUtils.isEmpty(attentionServicePackageName)) {
-            grantPermissionsToSystemPackage(pm, attentionServicePackageName, userId,
-                    CAMERA_PERMISSIONS);
-        }
-
         // There is no real "marker" interface to identify the shared storage backup, it is
         // hardcoded in BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE.
         grantSystemFixedPermissionsToSystemPackage(pm, "com.android.sharedstoragebackup", userId,
@@ -936,6 +927,10 @@ final class DefaultPermissionGrantPolicy {
             String category, int userId) {
         return getDefaultSystemHandlerActivityPackage(pm,
                 new Intent(Intent.ACTION_MAIN).addCategory(category), userId);
+    }
+
+    private String getDefaultSearchSelectorPackage() {
+        return mContext.getString(R.string.config_defaultSearchSelectorPackageName);
     }
 
     @SafeVarargs
@@ -1022,7 +1017,8 @@ final class DefaultPermissionGrantPolicy {
         }
         for (String packageName : packageNames) {
             grantPermissionsToSystemPackage(NO_PM_CACHE, packageName, userId,
-                    PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, SMS_PERMISSIONS,
+                    PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, SMS_PERMISSIONS);
+            grantPermissionsToPackage(NO_PM_CACHE, packageName, userId, false, false,
                     NOTIFICATION_PERMISSIONS);
         }
     }
@@ -1088,6 +1084,14 @@ final class DefaultPermissionGrantPolicy {
                         userId);
             }
         }
+    }
+
+    public void grantDefaultPermissionsToCarrierServiceApp(@NonNull String packageName,
+            @UserIdInt int userId) {
+        Log.i(TAG, "Grant permissions to Carrier Service app " + packageName + " for user:"
+                + userId);
+        grantPermissionsToPackage(NO_PM_CACHE, packageName, userId, /* ignoreSystemPackage */ false,
+               /* whitelistRestricted */ true, NOTIFICATION_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackage(PackageManagerWrapper pm,

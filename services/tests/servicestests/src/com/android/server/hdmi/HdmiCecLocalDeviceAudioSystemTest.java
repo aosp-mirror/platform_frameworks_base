@@ -88,7 +88,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
         mHdmiControlService =
             new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                    Collections.emptyList()) {
+                    Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
                 @Override
                 AudioManager getAudioManager() {
                     return new AudioManager() {

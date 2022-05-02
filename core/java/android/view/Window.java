@@ -67,9 +67,7 @@ import java.util.List;
  * window manager. It provides standard UI policies such as a background, title
  * area, default key processing, etc.
  *
- * <p>The only existing implementation of this abstract class is
- * android.view.PhoneWindow, which you should instantiate when needing a
- * Window.
+ * <p>The framework will instantiate an implementation of this class on behalf of the application.
  */
 public abstract class Window {
     /** Flag for the "options panel" feature.  This is enabled by default. */

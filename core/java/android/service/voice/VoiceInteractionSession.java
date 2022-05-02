@@ -1095,7 +1095,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             if (!mWindowVisible) {
                 mWindowVisible = true;
                 if (mUiEnabled) {
-                    mWindow.show();
+                    showWindow();
                 }
             }
             if (showCallback != null) {
@@ -1284,9 +1284,25 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
     }
 
+    void showWindow() {
+        if (mWindow != null) {
+            mWindow.show();
+            try {
+                mSystemService.setSessionWindowVisible(mToken, true);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to notify session window shown", e);
+            }
+        }
+    }
+
     void ensureWindowHidden() {
         if (mWindow != null) {
             mWindow.hide();
+            try {
+                mSystemService.setSessionWindowVisible(mToken, false);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to notify session window hidden", e);
+            }
         }
     }
 
@@ -1377,7 +1393,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             if (mWindowVisible) {
                 if (enabled) {
                     ensureWindowAdded();
-                    mWindow.show();
+                    showWindow();
                 } else {
                     ensureWindowHidden();
                 }

@@ -25,6 +25,8 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+
 import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -48,6 +50,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -368,6 +371,19 @@ public class LockSettingsShellCommandTest {
                 LockscreenCredential.createPattern(stringToPattern("4321")),
                 LockscreenCredential.createPattern(stringToPattern("1234")),
                 mUserId);
+    }
+
+    @Test
+    public void testRequireStrongAuth_STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
+
+        assertEquals(0, mCommand.exec(new Binder(), in, out, err,
+                new String[] { "require-strong-auth", "STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN"},
+                mShellCallback, mResultReceiver));
+
+        verify(mLockPatternUtils).requireStrongAuth(
+                STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
+                UserHandle.USER_ALL);
     }
 
     private List<LockPatternView.Cell> stringToPattern(String str) {

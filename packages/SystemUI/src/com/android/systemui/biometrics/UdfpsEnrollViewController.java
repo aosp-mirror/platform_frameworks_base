@@ -56,11 +56,12 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
             @NonNull StatusBarStateController statusBarStateController,
             @NonNull PanelExpansionStateManager panelExpansionStateManager,
             @NonNull SystemUIDialogManager systemUIDialogManager,
-            @NonNull DumpManager dumpManager) {
+            @NonNull DumpManager dumpManager,
+            float scaleFactor) {
         super(view, statusBarStateController, panelExpansionStateManager, systemUIDialogManager,
                 dumpManager);
-        mEnrollProgressBarRadius = getContext().getResources()
-                .getInteger(R.integer.config_udfpsEnrollProgressBar);
+        mEnrollProgressBarRadius = (int) (scaleFactor * getContext().getResources().getInteger(
+                R.integer.config_udfpsEnrollProgressBar));
         mEnrollHelper = enrollHelper;
         mView.setEnrollHelper(mEnrollHelper);
     }

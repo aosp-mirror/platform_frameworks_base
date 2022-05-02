@@ -57,9 +57,11 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
     @NonNull private final Set<Integer> mAllowedSpecificCarrierIds;
 
     private static final String ROAMING_MATCH_KEY = "mRoamingMatchCriteria";
+    private static final int DEFAULT_ROAMING_MATCH_CRITERIA = MATCH_ANY;
     private final int mRoamingMatchCriteria;
 
     private static final String OPPORTUNISTIC_MATCH_KEY = "mOpportunisticMatchCriteria";
+    private static final int DEFAULT_OPPORTUNISTIC_MATCH_CRITERIA = MATCH_ANY;
     private final int mOpportunisticMatchCriteria;
 
     private VcnCellUnderlyingNetworkTemplate(
@@ -253,23 +255,31 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
     /** @hide */
     @Override
     void dumpTransportSpecificFields(IndentingPrintWriter pw) {
-        pw.println("mAllowedNetworkPlmnIds: " + mAllowedNetworkPlmnIds.toString());
-        pw.println("mAllowedSpecificCarrierIds: " + mAllowedSpecificCarrierIds.toString());
-        pw.println("mRoamingMatchCriteria: " + getMatchCriteriaString(mRoamingMatchCriteria));
-        pw.println(
-                "mOpportunisticMatchCriteria: "
-                        + getMatchCriteriaString(mOpportunisticMatchCriteria));
+        if (!mAllowedNetworkPlmnIds.isEmpty()) {
+            pw.println("mAllowedNetworkPlmnIds: " + mAllowedNetworkPlmnIds);
+        }
+        if (!mAllowedNetworkPlmnIds.isEmpty()) {
+            pw.println("mAllowedSpecificCarrierIds: " + mAllowedSpecificCarrierIds);
+        }
+        if (mRoamingMatchCriteria != DEFAULT_ROAMING_MATCH_CRITERIA) {
+            pw.println("mRoamingMatchCriteria: " + getMatchCriteriaString(mRoamingMatchCriteria));
+        }
+        if (mOpportunisticMatchCriteria != DEFAULT_OPPORTUNISTIC_MATCH_CRITERIA) {
+            pw.println(
+                    "mOpportunisticMatchCriteria: "
+                            + getMatchCriteriaString(mOpportunisticMatchCriteria));
+        }
     }
 
     /** This class is used to incrementally build VcnCellUnderlyingNetworkTemplate objects. */
     public static final class Builder {
-        private int mMeteredMatchCriteria = MATCH_ANY;
+        private int mMeteredMatchCriteria = DEFAULT_METERED_MATCH_CRITERIA;
 
         @NonNull private final Set<String> mAllowedNetworkPlmnIds = new ArraySet<>();
         @NonNull private final Set<Integer> mAllowedSpecificCarrierIds = new ArraySet<>();
 
-        private int mRoamingMatchCriteria = MATCH_ANY;
-        private int mOpportunisticMatchCriteria = MATCH_ANY;
+        private int mRoamingMatchCriteria = DEFAULT_ROAMING_MATCH_CRITERIA;
+        private int mOpportunisticMatchCriteria = DEFAULT_OPPORTUNISTIC_MATCH_CRITERIA;
 
         private int mMinEntryUpstreamBandwidthKbps = DEFAULT_MIN_BANDWIDTH_KBPS;
         private int mMinExitUpstreamBandwidthKbps = DEFAULT_MIN_BANDWIDTH_KBPS;

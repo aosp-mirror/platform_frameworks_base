@@ -48,6 +48,12 @@ public class MediaOutputConstants {
             "com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG";
 
     /**
+     * An intent action to launch media output broadcast dialog.
+     */
+    public static final String ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG =
+            "com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG";
+
+    /**
      * Settings package name.
      */
     public static final String SETTINGS_PACKAGE_NAME = "com.android.settings";

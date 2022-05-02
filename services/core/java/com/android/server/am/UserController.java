@@ -173,7 +173,7 @@ class UserController implements Handler.Callback {
     // Message constant to clear {@link UserJourneySession} from {@link mUserIdToUserJourneyMap} if
     // the user journey, defined in the UserLifecycleJourneyReported atom for statsd, is not
     // complete within {@link USER_JOURNEY_TIMEOUT}.
-    private static final int CLEAR_USER_JOURNEY_SESSION_MSG = 200;
+    static final int CLEAR_USER_JOURNEY_SESSION_MSG = 200;
     // Wait time for completing the user journey. If a user journey is not complete within this
     // time, the remaining lifecycle events for the journey would not be logged in statsd.
     // Timeout set for 90 seconds.
@@ -209,12 +209,15 @@ class UserController implements Handler.Callback {
             FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_START;
     private static final int USER_JOURNEY_USER_CREATE =
             FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE;
+    private static final int USER_JOURNEY_USER_STOP =
+            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_STOP;
     @IntDef(prefix = { "USER_JOURNEY" }, value = {
             USER_JOURNEY_UNKNOWN,
             USER_JOURNEY_USER_SWITCH_FG,
             USER_JOURNEY_USER_SWITCH_UI,
             USER_JOURNEY_USER_START,
             USER_JOURNEY_USER_CREATE,
+            USER_JOURNEY_USER_STOP
     })
     @interface UserJourney {}
 
@@ -233,6 +236,8 @@ class UserController implements Handler.Callback {
             FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__UNLOCKING_USER;
     private static final int USER_LIFECYCLE_EVENT_UNLOCKED_USER =
             FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__UNLOCKED_USER;
+    private static final int USER_LIFECYCLE_EVENT_STOP_USER =
+            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__STOP_USER;
     @IntDef(prefix = { "USER_LIFECYCLE_EVENT" }, value = {
             USER_LIFECYCLE_EVENT_UNKNOWN,
             USER_LIFECYCLE_EVENT_SWITCH_USER,
@@ -241,6 +246,7 @@ class UserController implements Handler.Callback {
             USER_LIFECYCLE_EVENT_USER_RUNNING_LOCKED,
             USER_LIFECYCLE_EVENT_UNLOCKING_USER,
             USER_LIFECYCLE_EVENT_UNLOCKED_USER,
+            USER_LIFECYCLE_EVENT_STOP_USER
     })
     @interface UserLifecycleEvent {}
 
@@ -1008,6 +1014,10 @@ class UserController implements Handler.Callback {
             return;
         }
 
+        logUserJourneyInfo(null, getUserInfo(userId), USER_JOURNEY_USER_STOP);
+        logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_STOP_USER,
+                USER_LIFECYCLE_EVENT_STATE_BEGIN);
+
         if (stopUserCallback != null) {
             uss.mStopCallbacks.add(stopUserCallback);
         }
@@ -1066,6 +1076,9 @@ class UserController implements Handler.Callback {
         synchronized (mLock) {
             if (uss.state != UserState.STATE_STOPPING) {
                 // Whoops, we are being started back up.  Abort, abort!
+                logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_STOP_USER,
+                        USER_LIFECYCLE_EVENT_STATE_NONE);
+                clearSessionId(userId);
                 return;
             }
             uss.setState(UserState.STATE_SHUTDOWN);
@@ -1165,10 +1178,18 @@ class UserController implements Handler.Callback {
                 mInjector.getUserManager().removeUserEvenWhenDisallowed(userId);
             }
 
+            logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_STOP_USER,
+                    USER_LIFECYCLE_EVENT_STATE_FINISH);
+            clearSessionId(userId);
+
             if (!lockUser) {
                 return;
             }
             dispatchUserLocking(userIdToLock, keyEvictedCallbacks);
+        } else {
+            logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_STOP_USER,
+                    USER_LIFECYCLE_EVENT_STATE_NONE);
+            clearSessionId(userId);
         }
     }
 
@@ -2962,13 +2983,13 @@ class UserController implements Handler.Callback {
             if (userJourneySession != null) {
                 // TODO(b/157007231): Move this logic to a separate class/file.
                 if ((userJourneySession.mJourney == USER_JOURNEY_USER_SWITCH_UI
-                        && journey == USER_JOURNEY_USER_START)
-                        || (userJourneySession.mJourney == USER_JOURNEY_USER_SWITCH_FG
-                                && journey == USER_JOURNEY_USER_START)) {
+                        || userJourneySession.mJourney == USER_JOURNEY_USER_SWITCH_FG)
+                        && (journey == USER_JOURNEY_USER_START
+                                || journey == USER_JOURNEY_USER_STOP)) {
                     /*
-                     * There is already a user switch journey, and a user start journey for the same
-                     * target user received. User start journey is most likely a part of user switch
-                     * journey so no need to create a new journey for user start.
+                     * There is already a user switch journey, and a user start or stop journey for
+                     * the same target user received. New journey is most likely a part of user
+                     * switch journey so no need to create a new journey.
                      */
                     if (DEBUG_MU) {
                         Slogf.d(TAG, journey + " not logged as it is expected to be part of "

@@ -247,6 +247,42 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveWithOrganizerRemovesTask() throws RemoteException {
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final Task rootTask = createRootTask();
+        final Task task = createTask(rootTask);
+        rootTask.mRemoveWithTaskOrganizer = true;
+
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
+        assertTrue(rootTask.isOrganized());
+
+        spyOn(mWm.mAtmService);
+        rootTask.setTaskOrganizer(null);
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+
+        verify(mWm.mAtmService).removeTask(eq(rootTask.mTaskId));
+    }
+
+    @Test
+    public void testNoRemoveWithOrganizerNoRemoveTask() throws RemoteException {
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final Task rootTask = createRootTask();
+        final Task task = createTask(rootTask);
+        rootTask.mRemoveWithTaskOrganizer = false;
+
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
+        assertTrue(rootTask.isOrganized());
+
+        spyOn(mWm.mAtmService);
+        rootTask.setTaskOrganizer(null);
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+
+        verify(mWm.mAtmService, never()).removeTask(eq(rootTask.mTaskId));
+    }
+
+    @Test
     public void testUnregisterOrganizer() throws RemoteException {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
@@ -334,13 +370,16 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         assertContainsTasks(existingTasks2, rootTask);
-        verify(organizer2, times(1)).onTaskAppeared(any(RunningTaskInfo.class),
+        verify(organizer2, never()).onTaskAppeared(any(RunningTaskInfo.class),
                 any(SurfaceControl.class));
         verify(organizer2, times(0)).onTaskVanished(any());
-        // Removed tasks from the original organizer
-        assertTaskVanished(organizer, true /* expectVanished */, rootTask, rootTask2);
-        assertTrue(rootTask2.isOrganized());
+        // The non-CreatedByOrganizer task is removed from the original organizer.
+        assertTaskVanished(organizer, true /* expectVanished */, rootTask);
+        assertEquals(organizer2, rootTask.mTaskOrganizer);
+        // The CreatedByOrganizer task should be still organized by the original organizer.
+        assertEquals(organizer, rootTask2.mTaskOrganizer);
 
+        clearInvocations(organizer);
         // Now we unregister the second one, the first one should automatically be reregistered
         // so we verify that it's now seeing changes.
         mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer2);
@@ -349,9 +388,13 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
         verify(organizer, times(2))
                 .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
-        assertFalse(rootTask2.isOrganized());
-        assertTaskVanished(organizer2, true /* expectVanished */, rootTask,
-                rootTask2);
+
+        // Unregister the first one. The CreatedByOrganizer task created by it must be removed.
+        mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer);
+        assertFalse(rootTask2.isAttached());
+        assertFalse(task2.isAttached());
+        // Normal task should keep.
+        assertTrue(task.isAttached());
     }
 
     @Test

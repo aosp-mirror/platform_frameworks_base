@@ -5898,14 +5898,8 @@ public class AudioManager {
      */
     @UnsupportedAppUsage
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void setWiredDeviceConnectionState(int device, int state, String address,
-            String name) {
-        final IAudioService service = getService();
-        int role = isOutputDevice(device)
-                ? AudioDeviceAttributes.ROLE_OUTPUT : AudioDeviceAttributes.ROLE_INPUT;
-        AudioDeviceAttributes attributes = new AudioDeviceAttributes(
-                role, AudioDeviceInfo.convertInternalDeviceToDeviceType(device), address,
-                name, new ArrayList<>()/*mAudioProfiles*/, new ArrayList<>()/*mAudioDescriptors*/);
+    public void setWiredDeviceConnectionState(int device, int state, String address, String name) {
+        AudioDeviceAttributes attributes = new AudioDeviceAttributes(device, address, name);
         setWiredDeviceConnectionState(attributes, state);
     }
 

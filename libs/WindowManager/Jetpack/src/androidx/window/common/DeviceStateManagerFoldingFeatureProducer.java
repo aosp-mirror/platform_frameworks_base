@@ -31,11 +31,13 @@ import android.util.Log;
 import android.util.SparseIntArray;
 
 import androidx.window.util.BaseDataProducer;
+import androidx.window.util.DataProducer;
 
 import com.android.internal.R;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * An implementation of {@link androidx.window.util.DataProducer} that returns the device's posture
@@ -48,7 +50,6 @@ public final class DeviceStateManagerFoldingFeatureProducer extends
             DeviceStateManagerFoldingFeatureProducer.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    private final Context mContext;
     private final SparseIntArray mDeviceStateToPostureMap = new SparseIntArray();
 
     private int mCurrentDeviceState = INVALID_DEVICE_STATE;
@@ -57,9 +58,12 @@ public final class DeviceStateManagerFoldingFeatureProducer extends
         mCurrentDeviceState = state;
         notifyDataChanged();
     };
+    @NonNull
+    private final DataProducer<String> mRawFoldSupplier;
 
-    public DeviceStateManagerFoldingFeatureProducer(@NonNull Context context) {
-        mContext = context;
+    public DeviceStateManagerFoldingFeatureProducer(@NonNull Context context,
+            @NonNull DataProducer<String> rawFoldSupplier) {
+        mRawFoldSupplier = rawFoldSupplier;
         String[] deviceStatePosturePairs = context.getResources()
                 .getStringArray(R.array.config_device_state_postures);
         for (String deviceStatePosturePair : deviceStatePosturePairs) {
@@ -97,12 +101,21 @@ public final class DeviceStateManagerFoldingFeatureProducer extends
     @Nullable
     public Optional<List<CommonFoldingFeature>> getData() {
         final int globalHingeState = globalHingeState();
-        String displayFeaturesString = mContext.getResources().getString(
-                R.string.config_display_features);
-        if (TextUtils.isEmpty(displayFeaturesString)) {
+        Optional<String> displayFeaturesString = mRawFoldSupplier.getData();
+        if (displayFeaturesString.isEmpty() || TextUtils.isEmpty(displayFeaturesString.get())) {
             return Optional.empty();
         }
-        return Optional.of(parseListFromString(displayFeaturesString, globalHingeState));
+        return Optional.of(parseListFromString(displayFeaturesString.get(), globalHingeState));
+    }
+
+    @Override
+    protected void onListenersChanged(Set<Runnable> callbacks) {
+        super.onListenersChanged(callbacks);
+        if (callbacks.isEmpty()) {
+            mRawFoldSupplier.removeDataChangedCallback(this::notifyDataChanged);
+        } else {
+            mRawFoldSupplier.addDataChangedCallback(this::notifyDataChanged);
+        }
     }
 
     private int globalHingeState() {

@@ -75,7 +75,6 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.wmshell.BubblesManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Optional;
 
@@ -704,7 +703,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("NotificationGutsManager state:");
         pw.print("  mKeyToRemoveOnGutsClosed (legacy): ");
         pw.println(mKeyToRemoveOnGutsClosed);

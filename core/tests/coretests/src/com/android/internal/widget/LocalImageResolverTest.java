@@ -195,6 +195,17 @@ public class LocalImageResolverTest {
     }
 
     @Test
+    public void resolveImage_smallBitmapIcon_passedSmallerSize_dontResize() {
+        Icon icon = Icon.createWithResource(mContext.getResources(), R.drawable.test32x24);
+        Drawable d = LocalImageResolver.resolveImage(icon, mContext, 600, 450);
+
+        assertThat(d).isInstanceOf(BitmapDrawable.class);
+        BitmapDrawable bd = (BitmapDrawable) d;
+        assertThat(bd.getBitmap().getWidth()).isEqualTo(32);
+        assertThat(bd.getBitmap().getHeight()).isEqualTo(24);
+    }
+
+    @Test
     public void resolveImage_largeBitmapIcon_passedSize_resizeToDefinedSize() {
         Icon icon = Icon.createWithBitmap(
                 BitmapFactory.decodeResource(mContext.getResources(), R.drawable.big_a));

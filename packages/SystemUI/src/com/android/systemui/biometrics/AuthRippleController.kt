@@ -145,6 +145,7 @@ class AuthRippleController @Inject constructor(
         val lightRevealScrim = centralSurfaces.lightRevealScrim
         if (statusBarStateController.isDozing || biometricUnlockController.isWakeAndUnlock) {
             circleReveal?.let {
+                lightRevealScrim?.revealAmount = 0f
                 lightRevealScrim?.revealEffect = it
                 startLightRevealScrimOnKeyguardFadingAway = true
             }
@@ -168,7 +169,8 @@ class AuthRippleController @Inject constructor(
                     startDelay = keyguardStateController.keyguardFadingAwayDelay
                     addUpdateListener { animator ->
                         if (lightRevealScrim.revealEffect != circleReveal) {
-                            // if something else took over the reveal, let's do nothing.
+                            // if something else took over the reveal, let's cancel ourselves
+                            cancel()
                             return@addUpdateListener
                         }
                         lightRevealScrim.revealAmount = animator.animatedValue as Float

@@ -16,6 +16,7 @@
 package com.android.systemui.unfold.util
 
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
@@ -31,10 +32,10 @@ class TestFoldStateProvider : FoldStateProvider {
         listeners.clear()
     }
 
-    private var _isFullyOpened: Boolean = false
+    private var _isFinishedOpening: Boolean = false
 
-    override val isFullyOpened: Boolean
-        get() = _isFullyOpened
+    override val isFinishedOpening: Boolean
+        get() = _isFinishedOpening
 
     override fun addCallback(listener: FoldUpdatesListener) {
         listeners += listener
@@ -45,8 +46,8 @@ class TestFoldStateProvider : FoldStateProvider {
     }
 
     fun sendFoldUpdate(@FoldUpdate update: Int) {
-        if (update == FOLD_UPDATE_FINISH_FULL_OPEN) {
-            _isFullyOpened = true
+        if (update == FOLD_UPDATE_FINISH_FULL_OPEN || update == FOLD_UPDATE_FINISH_HALF_OPEN) {
+            _isFinishedOpening = true
         }
         listeners.forEach { it.onFoldUpdate(update) }
     }
