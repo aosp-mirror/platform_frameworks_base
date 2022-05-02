@@ -291,6 +291,7 @@ public class UserManagerService extends IUserManager.Stub {
     private final Handler mHandler;
 
     private final File mUsersDir;
+    @GuardedBy("mPackagesLock")
     private final File mUserListFile;
 
     private static final IBinder mUserRestriconToken = new Binder();
@@ -3016,7 +3017,7 @@ public class UserManagerService extends IUserManager.Stub {
         mUpdatingSystemUserMode = true;
     }
 
-    @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
+    @GuardedBy({"mPackagesLock"})
     private void readUserListLP() {
         if (!mUserListFile.exists()) {
             fallbackToSingleUserLP();
@@ -3084,8 +3085,10 @@ public class UserManagerService extends IUserManager.Stub {
                     } else if (name.equals(TAG_DEVICE_OWNER_USER_ID)
                             // Legacy name, should only be encountered when upgrading from pre-O.
                             || name.equals(TAG_GLOBAL_RESTRICTION_OWNER_ID)) {
-                        mDeviceOwnerUserId =
-                                parser.getAttributeInt(null, ATTR_ID, mDeviceOwnerUserId);
+                        synchronized (mRestrictionsLock) {
+                            mDeviceOwnerUserId =
+                                    parser.getAttributeInt(null, ATTR_ID, mDeviceOwnerUserId);
+                        }
                     } else if (name.equals(TAG_DEVICE_POLICY_RESTRICTIONS)) {
                         // Should only happen when upgrading from pre-O (version < 7).
                         oldDevicePolicyGlobalUserRestrictions =
@@ -3107,7 +3110,7 @@ public class UserManagerService extends IUserManager.Stub {
      * Upgrade steps between versions, either for fixing bugs or changing the data format.
      * @param oldGlobalUserRestrictions Pre-O global device policy restrictions.
      */
-    @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
+    @GuardedBy({"mPackagesLock"})
     private void upgradeIfNecessaryLP(Bundle oldGlobalUserRestrictions) {
         upgradeIfNecessaryLP(oldGlobalUserRestrictions, mUserVersion, mUserTypeVersion);
     }
@@ -3116,7 +3119,7 @@ public class UserManagerService extends IUserManager.Stub {
      * Version of {@link #upgradeIfNecessaryLP(Bundle)} that takes in the userVersion for testing
      * purposes. For non-tests, use {@link #upgradeIfNecessaryLP(Bundle)}.
      */
-    @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
+    @GuardedBy({"mPackagesLock"})
     @VisibleForTesting
     void upgradeIfNecessaryLP(Bundle oldGlobalUserRestrictions, int userVersion,
             int userTypeVersion) {
@@ -3377,7 +3380,7 @@ public class UserManagerService extends IUserManager.Stub {
         userInfo.profileBadge = getFreeProfileBadgeLU(userInfo.profileGroupId, userInfo.userType);
     }
 
-    @GuardedBy({"mPackagesLock", "mRestrictionsLock"})
+    @GuardedBy({"mPackagesLock"})
     private void fallbackToSingleUserLP() {
         int flags = UserInfo.FLAG_SYSTEM | UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN
                 | UserInfo.FLAG_PRIMARY;
@@ -3582,7 +3585,7 @@ public class UserManagerService extends IUserManager.Stub {
      *   <user id="2"></user>
      * </users>
      */
-    @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
+    @GuardedBy({"mPackagesLock"})
     private void writeUserListLP() {
         if (DBG) {
             debug("writeUserList");
@@ -3607,7 +3610,9 @@ public class UserManagerService extends IUserManager.Stub {
             }
             serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
             serializer.startTag(null, TAG_DEVICE_OWNER_USER_ID);
-            serializer.attributeInt(null, ATTR_ID, mDeviceOwnerUserId);
+            synchronized (mRestrictionsLock) {
+                serializer.attributeInt(null, ATTR_ID, mDeviceOwnerUserId);
+            }
             serializer.endTag(null, TAG_DEVICE_OWNER_USER_ID);
             int[] userIdsToWrite;
             synchronized (mUsersLock) {
@@ -5935,7 +5940,9 @@ public class UserManagerService extends IUserManager.Stub {
 
             pw.println();
             pw.println("Device properties:");
-            pw.println("  Device owner id:" + mDeviceOwnerUserId);
+            synchronized (mRestrictionsLock) {
+                pw.println("  Device owner id:" + mDeviceOwnerUserId);
+            }
             pw.println();
             pw.println("  Guest restrictions:");
             synchronized (mGuestRestrictions) {
