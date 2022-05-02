@@ -444,6 +444,27 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     /**
+     * @return the radius of UDFPS on the screen in pixels
+     */
+    public int getUdfpsRadius() {
+        if (mUdfpsController == null || mUdfpsBounds == null) {
+            return -1;
+        }
+        return mUdfpsBounds.height() / 2;
+    }
+
+    /**
+     * @return the scale factor representing the user's current resolution / the stable
+     * (default) resolution
+     */
+    public float getScaleFactor() {
+        if (mUdfpsController == null || mUdfpsController.mOverlayParams == null) {
+            return 1f;
+        }
+        return mUdfpsController.mOverlayParams.getScaleFactor();
+    }
+
+    /**
      * @return where the fingerprint sensor exists in pixels in portrait mode. devices without an
      * overridden value will use the default value even if they don't have a fingerprint sensor
      */
