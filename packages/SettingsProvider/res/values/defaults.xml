@@ -275,9 +275,6 @@
     <!-- Whether to enable mute when off body by default. -->
     <bool name="def_wearable_muteWhenOffBodyEnabled">true</bool>
 
-    <!-- If a square screen, how rounded the corners are. Same as CSS border-radius property. -->
-    <integer name="def_wearable_squareScreenCornerRoundness">0</integer>
-
     <!-- Side button present -->
     <bool name="def_wearable_sideButtonPresent">true</bool>
 
