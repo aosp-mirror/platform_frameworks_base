@@ -2134,6 +2134,7 @@ public class UserManagerService extends IUserManager.Stub {
      * exist in device policy local restrictions, remove the restrictions bundle for that target
      * user originating from the specified originating user.
      */
+    @GuardedBy("mRestrictionsLock")
     private boolean updateLocalRestrictionsForTargetUsersLR(int originatingUserId,
             RestrictionsSet local, List<Integer> updatedTargetUserIds) {
         boolean changed = false;
@@ -2156,6 +2157,7 @@ public class UserManagerService extends IUserManager.Stub {
      *
      * @return restrictions set for a given target user.
      */
+    @GuardedBy("mRestrictionsLock")
     private @NonNull RestrictionsSet getDevicePolicyLocalRestrictionsForTargetUserLR(
             int targetUserId) {
         RestrictionsSet result = mDevicePolicyLocalUserRestrictions.get(targetUserId);
@@ -2406,6 +2408,7 @@ public class UserManagerService extends IUserManager.Stub {
         mAppliedUserRestrictions.updateRestrictions(userId, new Bundle(effective));
     }
 
+    @GuardedBy("mRestrictionsLock")
     private void propagateUserRestrictionsLR(final int userId,
             Bundle newRestrictions, Bundle prevRestrictions) {
         // Note this method doesn't touch any state, meaning it doesn't require mRestrictionsLock
@@ -2879,6 +2882,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy({"mPackagesLock"})
     private void writeBitmapLP(UserInfo info, Bitmap bitmap) {
         try {
             File dir = new File(mUsersDir, Integer.toString(info.id));
@@ -3448,6 +3452,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy({"mPackagesLock"})
     private void writeAllTargetUsersLP(int originatingUserId) {
         for (int i = 0; i < mDevicePolicyLocalUserRestrictions.size(); i++) {
             int targetUserId = mDevicePolicyLocalUserRestrictions.keyAt(i);
@@ -3458,6 +3463,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy({"mPackagesLock"})
     private void writeUserLP(UserData userData) {
         if (DBG) {
             debug("writeUserLP " + userData);
@@ -3481,6 +3487,7 @@ public class UserManagerService extends IUserManager.Stub {
      *   <name>Primary</name>
      * </user>
      */
+    @GuardedBy({"mPackagesLock"})
     @VisibleForTesting
     void writeUserLP(UserData userData, OutputStream os)
             throws IOException, XmlPullParserException {
@@ -3633,6 +3640,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy({"mPackagesLock"})
     private UserData readUserLP(int id) {
         FileInputStream fis = null;
         try {
@@ -3650,6 +3658,7 @@ public class UserManagerService extends IUserManager.Stub {
         return null;
     }
 
+    @GuardedBy({"mPackagesLock"})
     @VisibleForTesting
     UserData readUserLP(int id, InputStream is) throws IOException,
             XmlPullParserException {
@@ -3822,6 +3831,7 @@ public class UserManagerService extends IUserManager.Stub {
      *
      * @return whether there were any restrictions.
      */
+    @GuardedBy({"mAppRestrictionsLock"})
     private static boolean cleanAppRestrictionsForPackageLAr(String pkg, @UserIdInt int userId) {
         final File dir = Environment.getUserSystemDirectory(userId);
         final File resFile = new File(dir, packageToRestrictionsFileName(pkg));
