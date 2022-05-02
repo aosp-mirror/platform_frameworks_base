@@ -30,6 +30,7 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
@@ -41,6 +42,7 @@ import com.android.wm.shell.pip.tv.TvPipBoundsState;
 import com.android.wm.shell.pip.tv.TvPipController;
 import com.android.wm.shell.pip.tv.TvPipMenuController;
 import com.android.wm.shell.pip.tv.TvPipNotificationController;
+import com.android.wm.shell.pip.tv.TvPipTaskOrganizer;
 import com.android.wm.shell.pip.tv.TvPipTransition;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
@@ -67,6 +69,7 @@ public abstract class TvPipModule {
             PipTransitionController pipTransitionController,
             TvPipNotificationController tvPipNotificationController,
             TaskStackListenerImpl taskStackListener,
+            PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayController displayController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             @ShellMainThread ShellExecutor mainExecutor,
@@ -82,6 +85,7 @@ public abstract class TvPipModule {
                         pipMediaController,
                         tvPipNotificationController,
                         taskStackListener,
+                        pipParamsChangedForwarder,
                         displayController,
                         windowManagerShellWrapper,
                         mainExecutor,
@@ -163,15 +167,22 @@ public abstract class TvPipModule {
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
             PipTransitionController pipTransitionController,
+            PipParamsChangedForwarder pipParamsChangedForwarder,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreenController> splitScreenControllerOptional,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new PipTaskOrganizer(context,
+        return new TvPipTaskOrganizer(context,
                 syncTransactionQueue, pipTransitionState, tvPipBoundsState, tvPipBoundsAlgorithm,
                 tvPipMenuController, pipAnimationController, pipSurfaceTransactionHelper,
-                pipTransitionController, splitScreenControllerOptional,
+                pipTransitionController, pipParamsChangedForwarder, splitScreenControllerOptional,
                 displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipParamsChangedForwarder providePipParamsChangedForwarder() {
+        return new PipParamsChangedForwarder();
     }
 }
