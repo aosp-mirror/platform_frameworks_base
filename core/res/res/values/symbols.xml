@@ -2723,6 +2723,7 @@
   <java-symbol type="attr" name="touchscreenBlocksFocus" />
   <java-symbol type="layout" name="resolver_list_with_default" />
   <java-symbol type="layout" name="miniresolver" />
+  <java-symbol type="layout" name="resolver_profile_tab_button" />
   <java-symbol type="string" name="activity_resolver_use_always" />
   <java-symbol type="string" name="whichApplicationNamed" />
   <java-symbol type="string" name="whichApplicationLabel" />
@@ -4289,7 +4290,6 @@
   <java-symbol type="id" name="resolver_empty_state_subtitle" />
   <java-symbol type="id" name="resolver_empty_state_button" />
   <java-symbol type="id" name="resolver_empty_state_progress" />
-  <java-symbol type="id" name="resolver_tab_divider" />
   <java-symbol type="id" name="resolver_button_bar_divider" />
   <java-symbol type="id" name="resolver_empty_state_container" />
   <java-symbol type="id" name="button_bar_container" />
