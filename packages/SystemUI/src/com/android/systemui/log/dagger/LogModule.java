@@ -218,6 +218,18 @@ public class LogModule {
         return factory.create("MediaTimeout", 100);
     }
 
+    /**
+     * Provides a buffer for our connections and disconnections to MediaBrowserService.
+     *
+     * See {@link com.android.systemui.media.ResumeMediaBrowser}.
+     */
+    @Provides
+    @SysUISingleton
+    @MediaBrowserLog
+    public static LogBuffer provideMediaBrowserBuffer(LogBufferFactory factory) {
+        return factory.create("MediaBrowser", 100);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
