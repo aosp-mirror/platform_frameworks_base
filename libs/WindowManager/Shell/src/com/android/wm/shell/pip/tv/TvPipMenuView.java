@@ -53,12 +53,12 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
+import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * A View that represents Pip Menu on TV. It's responsible for displaying 3 ever-present Pip Menu
@@ -398,24 +398,12 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
             final TvPipMenuActionButton button = mAdditionalButtons.get(index);
 
             // Remove action if it matches the custom close action.
-            if (actionsMatch(action, closeAction)) {
+            if (PipUtils.remoteActionsMatch(action, closeAction)) {
                 button.setVisibility(GONE);
                 continue;
             }
             setActionForButton(action, button, mainHandler);
         }
-    }
-
-    /**
-     * Checks whether title, description and intent match.
-     * Comparing icons would be good, but using equals causes false negatives
-     */
-    private boolean actionsMatch(RemoteAction action1, RemoteAction action2) {
-        if (action1 == action2) return true;
-        if (action1 == null || action2 == null) return false;
-        return Objects.equals(action1.getTitle(), action2.getTitle())
-                && Objects.equals(action1.getContentDescription(), action2.getContentDescription())
-                && Objects.equals(action1.getActionIntent(), action2.getActionIntent());
     }
 
     private void setActionForButton(RemoteAction action, TvPipMenuActionButton button,
