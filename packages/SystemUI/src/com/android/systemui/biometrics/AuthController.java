@@ -65,7 +65,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.assist.ui.DisplayUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -600,8 +599,14 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
     }
 
+    private int getDisplayWidth() {
+        DisplayInfo displayInfo = new DisplayInfo();
+        mContext.getDisplay().getDisplayInfo(displayInfo);
+        return displayInfo.getNaturalWidth();
+    }
+
     private void updateFingerprintLocation() {
-        int xLocation = DisplayUtils.getWidth(mContext) / 2;
+        int xLocation = getDisplayWidth() / 2;
         try {
             xLocation = mContext.getResources().getDimensionPixelSize(
                     com.android.systemui.R.dimen
