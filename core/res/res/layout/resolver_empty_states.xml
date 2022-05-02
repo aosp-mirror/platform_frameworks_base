@@ -30,36 +30,30 @@
         android:paddingTop="@dimen/resolver_empty_state_container_padding_top"
         android:paddingBottom="@dimen/resolver_empty_state_container_padding_bottom"
         android:gravity="center_horizontal">
-        <ImageView
-            android:id="@+id/resolver_empty_state_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerHorizontal="true" />
         <TextView
             android:id="@+id/resolver_empty_state_title"
             android:layout_below="@+id/resolver_empty_state_icon"
-            android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@string/config_headlineFontFamilyMedium"
             android:textColor="@color/resolver_empty_state_text"
-            android:textSize="14sp"
+            android:textSize="18sp"
             android:gravity="center_horizontal"
             android:layout_centerHorizontal="true" />
         <TextView
             android:id="@+id/resolver_empty_state_subtitle"
             android:layout_below="@+id/resolver_empty_state_title"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/resolver_empty_state_text"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:gravity="center_horizontal"
             android:layout_centerHorizontal="true" />
         <Button
             android:id="@+id/resolver_empty_state_button"
             android:layout_below="@+id/resolver_empty_state_subtitle"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:text="@string/resolver_switch_on_work"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
