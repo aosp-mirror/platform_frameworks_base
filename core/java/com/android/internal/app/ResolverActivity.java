@@ -69,7 +69,6 @@ import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -1711,23 +1710,32 @@ public class ResolverActivity extends Activity implements
         tabHost.setup();
         ViewPager viewPager = findViewById(R.id.profile_pager);
         viewPager.setSaveEnabled(false);
+
+        Button personalButton = (Button) getLayoutInflater().inflate(
+                R.layout.resolver_profile_tab_button, tabHost.getTabWidget(), false);
+        personalButton.setText(getPersonalTabLabel());
+        personalButton.setContentDescription(getPersonalTabAccessibilityLabel());
+
         TabHost.TabSpec tabSpec = tabHost.newTabSpec(TAB_TAG_PERSONAL)
                 .setContent(R.id.profile_pager)
-                .setIndicator(getPersonalTabLabel());
+                .setIndicator(personalButton);
         tabHost.addTab(tabSpec);
+
+        Button workButton = (Button) getLayoutInflater().inflate(
+                R.layout.resolver_profile_tab_button, tabHost.getTabWidget(), false);
+        workButton.setText(getWorkTabLabel());
+        workButton.setContentDescription(getWorkTabAccessibilityLabel());
 
         tabSpec = tabHost.newTabSpec(TAB_TAG_WORK)
                 .setContent(R.id.profile_pager)
-                .setIndicator(getWorkTabLabel());
+                .setIndicator(workButton);
         tabHost.addTab(tabSpec);
 
         TabWidget tabWidget = tabHost.getTabWidget();
         tabWidget.setVisibility(View.VISIBLE);
-        resetTabsHeaderStyle(tabWidget);
         updateActiveTabStyle(tabHost);
 
         tabHost.setOnTabChangedListener(tabId -> {
-            resetTabsHeaderStyle(tabWidget);
             updateActiveTabStyle(tabHost);
             if (TAB_TAG_PERSONAL.equals(tabId)) {
                 viewPager.setCurrentItem(0);
@@ -1767,7 +1775,6 @@ public class ResolverActivity extends Activity implements
                     workTab.setFocusableInTouchMode(true);
                     workTab.requestFocus();
                 });
-        findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
     }
 
     private String getPersonalTabLabel() {
@@ -1810,22 +1817,6 @@ public class ResolverActivity extends Activity implements
         }
     }
 
-    private void resetTabsHeaderStyle(TabWidget tabWidget) {
-        for (int i = 0; i < tabWidget.getChildCount(); i++) {
-            View tabView = tabWidget.getChildAt(i);
-            TextView title = tabView.findViewById(android.R.id.title);
-            title.setTextAppearance(android.R.style.TextAppearance_DeviceDefault_DialogWindowTitle);
-            title.setTextColor(getAttrColor(this, android.R.attr.textColorTertiary));
-            title.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                    getResources().getDimension(R.dimen.resolver_tab_text_size));
-            if (title.getText().equals(getPersonalTabLabel())) {
-                tabView.setContentDescription(getPersonalTabAccessibilityLabel());
-            } else if (title.getText().equals(getWorkTabLabel())) {
-                tabView.setContentDescription(getWorkTabAccessibilityLabel());
-            }
-        }
-    }
-
     private String getPersonalTabAccessibilityLabel() {
         return getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_PERSONAL_TAB_ACCESSIBILITY,
@@ -1846,9 +1837,11 @@ public class ResolverActivity extends Activity implements
     }
 
     private void updateActiveTabStyle(TabHost tabHost) {
-        TextView title = tabHost.getTabWidget().getChildAt(tabHost.getCurrentTab())
-                .findViewById(android.R.id.title);
-        title.setTextColor(getAttrColor(this, android.R.attr.colorAccent));
+        int currentTab = tabHost.getCurrentTab();
+        TextView selected = (TextView) tabHost.getTabWidget().getChildAt(currentTab);
+        TextView unselected = (TextView) tabHost.getTabWidget().getChildAt(1 - currentTab);
+        selected.setSelected(true);
+        unselected.setSelected(false);
     }
 
     private void setupViewVisibilities() {
