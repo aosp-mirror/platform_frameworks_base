@@ -64,6 +64,13 @@
             android:layout_height="wrap_content"
             android:text="Via code behind"
             android:onClick="onAutoPipSelected"/>
+
+        <RadioButton
+            android:id="@+id/enter_pip_on_leave_autoenter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Auto-enter PiP"
+            android:onClick="onAutoPipSelected"/>
     </RadioGroup>
 
     <RadioGroup

@@ -236,6 +236,10 @@ public class PipActivity extends Activity {
                 mPipParamsBuilder.setAutoEnterEnabled(false);
                 setPictureInPictureParams(mPipParamsBuilder.build());
                 break;
+            case R.id.enter_pip_on_leave_autoenter:
+                mPipParamsBuilder.setAutoEnterEnabled(true);
+                setPictureInPictureParams(mPipParamsBuilder.build());
+                break;
         }
     }
 
