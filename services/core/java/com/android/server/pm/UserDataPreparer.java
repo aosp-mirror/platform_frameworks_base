@@ -153,14 +153,18 @@ class UserDataPreparer {
             if (Objects.equals(volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)) {
                 if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
                     FileUtils.deleteContentsAndDir(getUserSystemDirectory(userId));
-                    FileUtils.deleteContentsAndDir(getDataSystemDeDirectory(userId));
+                    // Delete the contents of /data/system_de/$userId, but not the directory itself
+                    // since vold is responsible for that and system_server isn't allowed to do it.
+                    FileUtils.deleteContents(getDataSystemDeDirectory(userId));
                 }
                 if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
-                    FileUtils.deleteContentsAndDir(getDataSystemCeDirectory(userId));
+                    // Likewise, delete the contents of /data/system_ce/$userId but not the
+                    // directory itself.
+                    FileUtils.deleteContents(getDataSystemCeDirectory(userId));
                 }
             }
 
-            // Data with special labels is now gone, so finish the job
+            // All the user's data directories should be empty now, so finish the job.
             storage.destroyUserStorage(volumeUuid, userId, flags);
 
         } catch (Exception e) {
