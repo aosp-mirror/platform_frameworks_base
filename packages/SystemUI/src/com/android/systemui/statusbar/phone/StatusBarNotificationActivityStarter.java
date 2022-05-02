@@ -229,14 +229,13 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     /**
      * Called when a notification is clicked.
      *
-     * @param sbn notification that was clicked
+     * @param entry notification that was clicked
      * @param row row for that notification
      */
     @Override
-    public void onNotificationClicked(StatusBarNotification sbn, ExpandableNotificationRow row) {
-        mLogger.logStartingActivityFromClick(sbn.getKey());
+    public void onNotificationClicked(NotificationEntry entry, ExpandableNotificationRow row) {
+        mLogger.logStartingActivityFromClick(entry);
 
-        final NotificationEntry entry = row.getEntry();
         if (mRemoteInputManager.isRemoteInputActive(entry)
                 && !TextUtils.isEmpty(row.getActiveRemoteInputText())) {
             // We have an active remote input typed and the user clicked on the notification.
@@ -244,7 +243,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             mRemoteInputManager.closeRemoteInputs();
             return;
         }
-        Notification notification = sbn.getNotification();
+        Notification notification = entry.getSbn().getNotification();
         final PendingIntent intent = notification.contentIntent != null
                 ? notification.contentIntent
                 : notification.fullScreenIntent;
@@ -254,7 +253,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         // The only valid case is Bubble notifications. Guard against other cases
         // entering here.
         if (intent == null && !isBubble) {
-            mLogger.logNonClickableNotification(sbn.getKey());
+            mLogger.logNonClickableNotification(entry);
             return;
         }
 
@@ -299,7 +298,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             boolean isActivityIntent,
             boolean animate,
             boolean showOverLockscreen) {
-        mLogger.logHandleClickAfterKeyguardDismissed(entry.getKey());
+        mLogger.logHandleClickAfterKeyguardDismissed(entry);
 
         final Runnable runnable = () -> handleNotificationClickAfterPanelCollapsed(
                 entry, row, intent, isActivityIntent, animate);
@@ -326,7 +325,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             boolean isActivityIntent,
             boolean animate) {
         String notificationKey = entry.getKey();
-        mLogger.logHandleClickAfterPanelCollapsed(notificationKey);
+        mLogger.logHandleClickAfterPanelCollapsed(entry);
 
         try {
             // The intent we are sending is for the application, which
@@ -367,7 +366,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         }
         final boolean canBubble = entry.canBubble();
         if (canBubble) {
-            mLogger.logExpandingBubble(notificationKey);
+            mLogger.logExpandingBubble(entry);
             removeHunAfterClick(row);
             expandBubbleStackOnMainThread(entry);
             mMainThreadHandler.post(
@@ -489,7 +488,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             ExpandableNotificationRow row,
             boolean animate,
             boolean isActivityIntent) {
-        mLogger.logStartNotificationIntent(entry.getKey());
+        mLogger.logStartNotificationIntent(entry);
         try {
             Runnable onFinishAnimationCallback = animate
                     ? () -> mLaunchEventsEmitter.notifyFinishLaunchNotifActivity(entry)
@@ -515,7 +514,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                                 : getActivityOptions(mCentralSurfaces.getDisplayId(), adapter);
                         int result = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
                                 null, null, options);
-                        mLogger.logSendPendingIntent(entry.getKey(), intent, result);
+                        mLogger.logSendPendingIntent(entry, intent, result);
                         return result;
                     });
         } catch (PendingIntent.CanceledException e) {
@@ -622,9 +621,9 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     void handleFullScreenIntent(NotificationEntry entry) {
         if (mNotificationInterruptStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry)) {
             if (shouldSuppressFullScreenIntent(entry)) {
-                mLogger.logFullScreenIntentSuppressedByDnD(entry.getKey());
+                mLogger.logFullScreenIntentSuppressedByDnD(entry);
             } else if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
-                mLogger.logFullScreenIntentNotImportantEnough(entry.getKey());
+                mLogger.logFullScreenIntentNotImportantEnough(entry);
             } else {
                 // Stop screensaver if the notification has a fullscreen intent.
                 // (like an incoming phone call)
@@ -639,7 +638,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                 // not immersive & a fullscreen alert should be shown
                 final PendingIntent fullscreenIntent =
                         entry.getSbn().getNotification().fullScreenIntent;
-                mLogger.logSendingFullScreenIntent(entry.getKey(), fullscreenIntent);
+                mLogger.logSendingFullScreenIntent(entry, fullscreenIntent);
                 try {
                     EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
                             entry.getKey());
