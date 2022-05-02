@@ -4016,6 +4016,45 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testUpdateNotificationChannel_fixedPermission_butUserPreviouslyBlockedIt() {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_NONE);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, false, false);
+
+        NotificationChannel update = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        update.setAllowBubbles(false);
+
+        mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
+
+        assertEquals(IMPORTANCE_HIGH,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
+        assertEquals(false,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).canBubble());
+    }
+
+    @Test
+    public void testUpdateNotificationChannel_fixedPermission_butAppAllowsIt() {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        a.setBlockable(true);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+
+        NotificationChannel update = new NotificationChannel("a", "a", IMPORTANCE_NONE);
+        update.setAllowBubbles(false);
+
+        mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
+
+        assertEquals(IMPORTANCE_NONE,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
+        assertEquals(false,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).canBubble());
+    }
+
+    @Test
     public void testUpdateNotificationChannel_notFixedPermission() {
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(false);
