@@ -9148,6 +9148,66 @@ public final class Settings {
         public static final String SCREENSAVER_ENABLED_COMPLICATIONS =
                 "screensaver_enabled_complications";
 
+
+        /**
+         * Default, indicates that the user has not yet started the dock setup flow.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_NOT_STARTED = 0;
+
+        /**
+         * Indicates that the user has started but not yet completed dock setup.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_STARTED = 1;
+
+        /**
+         * Indicates that the user has snoozed dock setup and will complete it later.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_PAUSED = 2;
+
+        /**
+         * Indicates that the dock setup has resumed snoozing but the user hasn't started it yet.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_RESUMED = 3;
+
+        /**
+         * Indicates that the user has completed dock setup.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_COMPLETED = 10;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                DOCK_SETUP_NOT_STARTED,
+                DOCK_SETUP_STARTED,
+                DOCK_SETUP_PAUSED,
+                DOCK_SETUP_RESUMED,
+                DOCK_SETUP_COMPLETED
+        })
+        public @interface DockSetupState {
+        }
+
+        /**
+         * Defines the user's current state of dock setup.
+         * The possible states are defined in {@link DockSetupState}.
+         *
+         * @hide
+         */
+        public static final String DOCK_SETUP_STATE = "dock_setup_state";
+
         /**
          * The default NFC payment component
          * @hide
