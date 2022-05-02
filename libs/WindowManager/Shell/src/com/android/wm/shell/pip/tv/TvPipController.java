@@ -384,6 +384,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 animationDuration, rect -> {
                     mTvPipMenuController.updateExpansionState();
                 });
+        mTvPipMenuController.onPipTransitionStarted(bounds);
     }
 
     /**
@@ -573,6 +574,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                             "%s: onExpandedAspectRatioChanged: %f", TAG, ratio);
 
                 mTvPipBoundsState.setDesiredTvExpandedAspectRatio(ratio, false);
+                mTvPipMenuController.updateExpansionState();
 
                 // 1) PiP is expanded and only aspect ratio changed, but wasn't disabled
                 // --> update bounds, but don't toggle
