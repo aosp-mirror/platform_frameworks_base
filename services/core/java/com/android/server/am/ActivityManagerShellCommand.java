@@ -1200,8 +1200,19 @@ final class ActivityManagerShellCommand extends ShellCommand {
         } catch (NumberFormatException e) {
             packageName = arg;
         }
-        mInterface.crashApplicationWithType(-1, pid, packageName, userId, "shell-induced crash",
-                false, CrashedByAdbException.TYPE_ID);
+
+        int[] userIds = (userId == UserHandle.USER_ALL) ? mInternal.mUserController.getUserIds()
+                : new int[]{userId};
+        for (int id : userIds) {
+            if (mInternal.mUserController.hasUserRestriction(
+                    UserManager.DISALLOW_DEBUGGING_FEATURES, id)) {
+                getOutPrintWriter().println(
+                        "Shell does not have permission to crash packages for user " + id);
+                continue;
+            }
+            mInterface.crashApplicationWithType(-1, pid, packageName, id, "shell-induced crash",
+                    false, CrashedByAdbException.TYPE_ID);
+        }
         return 0;
     }
 
