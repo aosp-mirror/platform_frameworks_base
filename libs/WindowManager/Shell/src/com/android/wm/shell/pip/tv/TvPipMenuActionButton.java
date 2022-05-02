@@ -33,6 +33,7 @@ import com.android.wm.shell.R;
  */
 public class TvPipMenuActionButton extends RelativeLayout implements View.OnClickListener {
     private final ImageView mIconImageView;
+    private final View mButtonBackgroundView;
     private final View mButtonView;
     private OnClickListener mOnClickListener;
 
@@ -57,6 +58,7 @@ public class TvPipMenuActionButton extends RelativeLayout implements View.OnClic
 
         mIconImageView = findViewById(R.id.icon);
         mButtonView = findViewById(R.id.button);
+        mButtonBackgroundView = findViewById(R.id.background);
 
         final int[] values = new int[]{android.R.attr.src, android.R.attr.text};
         final TypedArray typedArray = context.obtainStyledAttributes(attrs, values, defStyleAttr,
@@ -132,9 +134,17 @@ public class TvPipMenuActionButton extends RelativeLayout implements View.OnClic
                 getResources().getColorStateList(
                         isCustomCloseAction ? R.color.tv_pip_menu_close_icon
                                 : R.color.tv_pip_menu_icon));
-        mButtonView.setBackgroundTintList(getResources()
+        mButtonBackgroundView.setBackgroundTintList(getResources()
                 .getColorStateList(isCustomCloseAction ? R.color.tv_pip_menu_close_icon_bg
                         : R.color.tv_pip_menu_icon_bg));
+    }
+
+    @Override
+    public String toString() {
+        if (mButtonView.getContentDescription() == null) {
+            return TvPipMenuActionButton.class.getSimpleName();
+        }
+        return mButtonView.getContentDescription().toString();
     }
 
 }
