@@ -65,6 +65,9 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public void onWindowFocusGained(boolean hasViewFocus) {
         super.onWindowFocusGained(hasViewFocus);
         getImm().registerImeConsumer(this);
+        if (isRequestedVisible() && getControl() == null) {
+            mIsRequestedVisibleAwaitingControl = true;
+        }
     }
 
     @Override
@@ -149,14 +152,11 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     @Override
-    public void setControl(@Nullable InsetsSourceControl control, int[] showTypes,
+    public boolean setControl(@Nullable InsetsSourceControl control, int[] showTypes,
             int[] hideTypes) {
-        super.setControl(control, showTypes, hideTypes);
-        // TODO(b/204524304): clean-up how to deal with the timing issues of hiding IME:
-        //  1) Already requested show IME, in the meantime of WM callback the control but got null
-        //  control when relayout comes first
-        //  2) Make sure no regression on some implicit request IME visibility calls (e.g.
-        //  toggleSoftInput)
+        if (!super.setControl(control, showTypes, hideTypes)) {
+            return false;
+        }
         if (control == null && !mIsRequestedVisibleAwaitingControl) {
             hide();
             removeSurface();
@@ -164,6 +164,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         if (control != null) {
             mIsRequestedVisibleAwaitingControl = false;
         }
+        return true;
     }
 
     @Override
