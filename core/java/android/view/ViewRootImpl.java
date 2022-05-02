@@ -90,6 +90,7 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
 import android.Manifest;
+import android.animation.AnimationHandler;
 import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
@@ -1363,6 +1364,8 @@ public final class ViewRootImpl implements ViewParent,
                 mFirstInputStage = nativePreImeStage;
                 mFirstPostImeInputStage = earlyPostImeStage;
                 mPendingInputEventQueueLengthCounterName = "aq:pending:" + counterSuffix;
+
+                AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
             }
         }
     }
@@ -1708,6 +1711,7 @@ public final class ViewRootImpl implements ViewParent,
             if (!mAppVisible) {
                 WindowManagerGlobal.trimForeground();
             }
+            AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
         }
     }
 
@@ -8477,6 +8481,7 @@ public final class ViewRootImpl implements ViewParent,
             mInsetsController.onControlsChanged(null);
 
             mAdded = false;
+            AnimationHandler.removeRequestor(this);
         }
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
