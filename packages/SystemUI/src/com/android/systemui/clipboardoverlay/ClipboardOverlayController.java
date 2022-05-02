@@ -122,7 +122,6 @@ public class ClipboardOverlayController {
     private final AccessibilityManager mAccessibilityManager;
     private final TextClassifier mTextClassifier;
 
-    private final FrameLayout mContainer;
     private final DraggableConstraintLayout mView;
     private final View mClipboardPreview;
     private final ImageView mImagePreview;
@@ -177,9 +176,8 @@ public class ClipboardOverlayController {
 
         setWindowFocusable(false);
 
-        mContainer = (FrameLayout)
+        mView = (DraggableConstraintLayout)
                 LayoutInflater.from(mContext).inflate(R.layout.clipboard_overlay, null);
-        mView = requireNonNull(mContainer.findViewById(R.id.clipboard_ui));
         mActionContainerBackground =
                 requireNonNull(mView.findViewById(R.id.actions_container_background));
         mActionContainer = requireNonNull(mView.findViewById(R.id.actions));
@@ -201,13 +199,6 @@ public class ClipboardOverlayController {
             public void onSwipeDismissInitiated(Animator animator) {
                 mUiEventLogger.log(CLIPBOARD_OVERLAY_SWIPE_DISMISSED);
                 mExitAnimator = animator;
-                animator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        super.onAnimationStart(animation);
-                        mContainer.animate().alpha(0).setDuration(animation.getDuration()).start();
-                    }
-                });
             }
 
             @Override
@@ -231,7 +222,7 @@ public class ClipboardOverlayController {
 
         attachWindow();
         withWindowAttached(() -> {
-            mWindow.setContentView(mContainer);
+            mWindow.setContentView(mView);
             updateInsets(mWindowManager.getCurrentWindowMetrics().getWindowInsets());
             mView.requestLayout();
         });
@@ -308,7 +299,7 @@ public class ClipboardOverlayController {
         } else {
             mRemoteCopyChip.setVisibility(View.GONE);
         }
-        withWindowAttached(() -> mContainer.post(this::animateIn));
+        withWindowAttached(() -> mView.post(this::animateIn));
         mTimeoutHandler.resetTimeout();
     }
 
@@ -508,7 +499,7 @@ public class ClipboardOverlayController {
         rootAnim.setInterpolator(linearInterpolator);
         rootAnim.setDuration(66);
         rootAnim.addUpdateListener(animation -> {
-            mContainer.setAlpha(animation.getAnimatedFraction());
+            mView.setAlpha(animation.getAnimatedFraction());
         });
 
         ValueAnimator scaleAnim = ValueAnimator.ofFloat(0, 1);
@@ -553,7 +544,7 @@ public class ClipboardOverlayController {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                mContainer.setAlpha(1);
+                mView.setAlpha(1);
                 mTimeoutHandler.resetTimeout();
             }
         });
@@ -568,9 +559,7 @@ public class ClipboardOverlayController {
         ValueAnimator rootAnim = ValueAnimator.ofFloat(0, 1);
         rootAnim.setInterpolator(linearInterpolator);
         rootAnim.setDuration(100);
-        rootAnim.addUpdateListener(animation -> {
-            mContainer.setAlpha(1 - animation.getAnimatedFraction());
-        });
+        rootAnim.addUpdateListener(anim -> mView.setAlpha(1 - anim.getAnimatedFraction()));
 
         ValueAnimator scaleAnim = ValueAnimator.ofFloat(0, 1);
         scaleAnim.setInterpolator(scaleInterpolator);
@@ -647,7 +636,7 @@ public class ClipboardOverlayController {
 
     private void reset() {
         mView.setTranslationX(0);
-        mContainer.setAlpha(0);
+        mView.setAlpha(0);
         mActionContainerBackground.setVisibility(View.GONE);
         resetActionChips();
         mTimeoutHandler.cancelTimeout();
@@ -706,8 +695,9 @@ public class ClipboardOverlayController {
         }
         DisplayCutout cutout = insets.getDisplayCutout();
         Insets navBarInsets = insets.getInsets(WindowInsets.Type.navigationBars());
+        Insets imeInsets = insets.getInsets(WindowInsets.Type.ime());
         if (cutout == null) {
-            p.setMargins(0, 0, 0, navBarInsets.bottom);
+            p.setMargins(0, 0, 0, Math.max(imeInsets.bottom, navBarInsets.bottom));
         } else {
             Insets waterfall = cutout.getWaterfallInsets();
             if (orientation == ORIENTATION_PORTRAIT) {
@@ -715,14 +705,16 @@ public class ClipboardOverlayController {
                         waterfall.left,
                         Math.max(cutout.getSafeInsetTop(), waterfall.top),
                         waterfall.right,
-                        Math.max(cutout.getSafeInsetBottom(),
-                                Math.max(navBarInsets.bottom, waterfall.bottom)));
+                        Math.max(imeInsets.bottom,
+                                Math.max(cutout.getSafeInsetBottom(),
+                                        Math.max(navBarInsets.bottom, waterfall.bottom))));
             } else {
                 p.setMargins(
-                        Math.max(cutout.getSafeInsetLeft(), waterfall.left),
+                        waterfall.left,
                         waterfall.top,
-                        Math.max(cutout.getSafeInsetRight(), waterfall.right),
-                        Math.max(navBarInsets.bottom, waterfall.bottom));
+                        waterfall.right,
+                        Math.max(imeInsets.bottom,
+                                Math.max(navBarInsets.bottom, waterfall.bottom)));
             }
         }
         mView.setLayoutParams(p);
