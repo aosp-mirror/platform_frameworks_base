@@ -55,6 +55,13 @@ class MediaTimeoutListener @Inject constructor(
      */
     lateinit var timeoutCallback: (String, Boolean) -> Unit
 
+    /**
+     * Callback representing that a media object [PlaybackState] has changed.
+     * @param key Media control unique identifier
+     * @param state The new [PlaybackState]
+     */
+    lateinit var stateCallback: (String, PlaybackState) -> Unit
+
     override fun onMediaDataLoaded(
         key: String,
         oldKey: String?,
@@ -85,17 +92,17 @@ class MediaTimeoutListener @Inject constructor(
         }
 
         reusedListener?.let {
-            val wasPlaying = it.playing ?: false
+            val wasPlaying = it.isPlaying()
             logger.logUpdateListener(key, wasPlaying)
             it.mediaData = data
             it.key = key
             mediaListeners[key] = it
-            if (wasPlaying != it.playing) {
+            if (wasPlaying != it.isPlaying()) {
                 // If a player becomes active because of a migration, we'll need to broadcast
                 // its state. Doing it now would lead to reentrant callbacks, so let's wait
                 // until we're done.
                 mainExecutor.execute {
-                    if (mediaListeners[key]?.playing == true) {
+                    if (mediaListeners[key]?.isPlaying() == true) {
                         logger.logDelayedUpdate(key)
                         timeoutCallback.invoke(key, false /* timedOut */)
                     }
@@ -121,7 +128,7 @@ class MediaTimeoutListener @Inject constructor(
     ) : MediaController.Callback() {
 
         var timedOut = false
-        var playing: Boolean? = null
+        var lastState: PlaybackState? = null
         var resumption: Boolean? = null
         var destroyed = false
 
@@ -144,6 +151,9 @@ class MediaTimeoutListener @Inject constructor(
         // Resume controls may have null token
         private var mediaController: MediaController? = null
         private var cancellation: Runnable? = null
+
+        fun Int.isPlaying() = isPlayingState(this)
+        fun isPlaying() = lastState?.state?.isPlaying() ?: false
 
         init {
             mediaData = data
@@ -175,16 +185,26 @@ class MediaTimeoutListener @Inject constructor(
         private fun processState(state: PlaybackState?, dispatchEvents: Boolean) {
             logger.logPlaybackState(key, state)
 
-            val isPlaying = state != null && isPlayingState(state.state)
+            val playingStateSame = (state?.state?.isPlaying() == isPlaying())
+            val actionsSame = (lastState?.actions == state?.actions) &&
+                    areCustomActionListsEqual(lastState?.customActions, state?.customActions)
             val resumptionChanged = resumption != mediaData.resumption
-            if (playing == isPlaying && playing != null && !resumptionChanged) {
+
+            lastState = state
+
+            if ((!actionsSame || !playingStateSame) && state != null && dispatchEvents) {
+                logger.logStateCallback(key)
+                stateCallback.invoke(key, state)
+            }
+
+            if (playingStateSame && !resumptionChanged) {
                 return
             }
-            playing = isPlaying
             resumption = mediaData.resumption
 
-            if (!isPlaying) {
-                logger.logScheduleTimeout(key, isPlaying, resumption!!)
+            val playing = isPlaying()
+            if (!playing) {
+                logger.logScheduleTimeout(key, playing, resumption!!)
                 if (cancellation != null && !resumptionChanged) {
                     // if the media changed resume state, we'll need to adjust the timeout length
                     logger.logCancelIgnored(key)
@@ -219,5 +239,51 @@ class MediaTimeoutListener @Inject constructor(
             }
             cancellation = null
         }
+    }
+
+    private fun areCustomActionListsEqual(
+        first: List<PlaybackState.CustomAction>?,
+        second: List<PlaybackState.CustomAction>?
+    ): Boolean {
+        // Same object, or both null
+        if (first === second) {
+            return true
+        }
+
+        // Only one null, or different number of actions
+        if ((first == null || second == null) || (first.size != second.size)) {
+            return false
+        }
+
+        // Compare individual actions
+        first.asSequence().zip(second.asSequence()).forEach { (firstAction, secondAction) ->
+            if (!areCustomActionsEqual(firstAction, secondAction)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun areCustomActionsEqual(
+        firstAction: PlaybackState.CustomAction,
+        secondAction: PlaybackState.CustomAction
+    ): Boolean {
+        if (firstAction.action != secondAction.action ||
+                firstAction.name != secondAction.name ||
+                firstAction.icon != secondAction.icon) {
+            return false
+        }
+
+        if ((firstAction.extras == null) != (secondAction.extras == null)) {
+            return false
+        }
+        if (firstAction.extras != null) {
+            firstAction.extras.keySet().forEach { key ->
+                if (firstAction.extras.get(key) != secondAction.extras.get(key)) {
+                    return false
+                }
+            }
+        }
+        return true
     }
 }
