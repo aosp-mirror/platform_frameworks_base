@@ -4473,6 +4473,13 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     updateDozingState();
                     mDozeServiceHost.updateDozing();
                     updateScrimController();
+
+                    if (mBiometricUnlockController.isWakeAndUnlock()) {
+                        // Usually doze changes are to/from lockscreen/AOD, but if we're wake and
+                        // unlocking we should hide the keyguard ASAP if necessary.
+                        updateIsKeyguard();
+                    }
+
                     updateReportRejectedTouchVisibility();
                     Trace.endSection();
                 }
