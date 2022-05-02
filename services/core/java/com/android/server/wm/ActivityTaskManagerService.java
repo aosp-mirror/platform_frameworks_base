@@ -148,7 +148,6 @@ import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
 import android.app.ProfilerInfo;
-import android.app.RemoteAction;
 import android.app.WaitResult;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
@@ -3471,19 +3470,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.e(TAG, "Skip enterPictureInPictureMode, destroyed " + r);
                     return;
                 }
-                // Only update the saved args from the args that are set
                 r.setPictureInPictureParams(params);
-                final float aspectRatio = r.pictureInPictureArgs.getAspectRatioFloat();
-                final float expandedAspectRatio =
-                        r.pictureInPictureArgs.getExpandedAspectRatioFloat();
-                final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
-                final RemoteAction closeAction = r.pictureInPictureArgs.getCloseAction();
                 mRootWindowContainer.moveActivityToPinnedRootTask(r,
                         null /* launchIntoPipHostActivity */, "enterPictureInPictureMode");
                 final Task task = r.getTask();
-                task.setPictureInPictureAspectRatio(aspectRatio, expandedAspectRatio);
-                task.setPictureInPictureActions(actions, closeAction);
-
                 // Continue the pausing process after entering pip.
                 if (task.getPausingActivity() == r) {
                     task.schedulePauseActivity(r, false /* userLeaving */,

@@ -149,7 +149,6 @@ import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.PictureInPictureParams;
-import android.app.RemoteAction;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -218,7 +217,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -6074,58 +6072,6 @@ class Task extends TaskFragment {
         if (!isLeafTask()) {
             Slog.w(TAG, func + " on non-leaf task " + this);
         }
-    }
-
-    /**
-     * Sets the current picture-in-picture aspect ratios.
-     */
-    void setPictureInPictureAspectRatio(float aspectRatio, float expandedAspectRatio) {
-        if (!mWmService.mAtmService.mSupportsPictureInPicture) {
-            return;
-        }
-
-        final DisplayContent displayContent = getDisplayContent();
-        if (displayContent == null) {
-            return;
-        }
-
-        if (!inPinnedWindowingMode()) {
-            return;
-        }
-
-        final PinnedTaskController pinnedTaskController =
-                getDisplayContent().getPinnedTaskController();
-
-        // Notify the pinned stack controller about aspect ratio change.
-        // This would result a callback delivered from SystemUI to WM to start animation,
-        // if the bounds are ought to be altered due to aspect ratio change.
-        if (Float.compare(aspectRatio, pinnedTaskController.getAspectRatio()) != 0) {
-            pinnedTaskController.setAspectRatio(
-                    pinnedTaskController.isValidPictureInPictureAspectRatio(aspectRatio)
-                            ? aspectRatio : -1f);
-        }
-
-        if (mWmService.mAtmService.mSupportsExpandedPictureInPicture && Float.compare(
-                expandedAspectRatio, pinnedTaskController.getExpandedAspectRatio()) != 0) {
-            pinnedTaskController.setExpandedAspectRatio(pinnedTaskController
-                    .isValidExpandedPictureInPictureAspectRatio(expandedAspectRatio)
-                    ? expandedAspectRatio : 0f);
-        }
-    }
-
-    /**
-     * Sets the current picture-in-picture actions.
-     */
-    void setPictureInPictureActions(List<RemoteAction> actions, RemoteAction closeAction) {
-        if (!mWmService.mAtmService.mSupportsPictureInPicture) {
-            return;
-        }
-
-        if (!inPinnedWindowingMode()) {
-            return;
-        }
-
-        getDisplayContent().getPinnedTaskController().setActions(actions, closeAction);
     }
 
     public DisplayInfo getDisplayInfo() {
