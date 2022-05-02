@@ -219,6 +219,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runStopService(pw);
                 case "broadcast":
                     return runSendBroadcast(pw);
+                case "compact":
+                    return runCompact(pw);
                 case "instrument":
                     getOutPrintWriter().println("Error: must be invoked through 'am instrument'.");
                     return -1;
@@ -963,6 +965,36 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 //removeWallOption();
             }
         }
+        return 0;
+    }
+
+    @NeverCompile
+    int runCompact(PrintWriter pw) {
+        String processName = getNextArgRequired();
+        String uid = getNextArgRequired();
+        String op = getNextArgRequired();
+        ProcessRecord app;
+        synchronized (mInternal.mProcLock) {
+            app = mInternal.getProcessRecordLocked(processName, Integer.parseInt(uid));
+        }
+        pw.println("Process record found pid: " + app.mPid);
+        if (op.equals("full")) {
+            pw.println("Executing full compaction for " + app.mPid);
+            synchronized (mInternal.mProcLock) {
+                mInternal.mOomAdjuster.mCachedAppOptimizer.compactAppFull(app, true);
+            }
+            pw.println("Finished full compaction for " + app.mPid);
+        } else if (op.equals("some")) {
+            pw.println("Executing some compaction for " + app.mPid);
+            synchronized (mInternal.mProcLock) {
+                mInternal.mOomAdjuster.mCachedAppOptimizer.compactAppSome(app, true);
+            }
+            pw.println("Finished some compaction for " + app.mPid);
+        } else {
+            getErrPrintWriter().println("Error: unknown compact command '" + op + "'");
+            return -1;
+        }
+
         return 0;
     }
 
@@ -3446,6 +3478,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --allow-background-activity-starts: The receiver may start activities");
             pw.println("          even if in the background.");
             pw.println("      --async: Send without waiting for the completion of the receiver.");
+            pw.println("  compact <process_name> <Package UID> [some|full]");
+            pw.println("      Force process compaction.");
+            pw.println("      some: execute file compaction.");
+            pw.println("      full: execute anon + file compaction.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current]");
             pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");
