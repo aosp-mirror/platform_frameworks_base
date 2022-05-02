@@ -199,6 +199,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     void notifyPipAnimating(boolean animating) {
         mPipMenuView.setEduTextActive(!animating);
+        if (!animating) {
+            mPipMenuView.onPipTransitionFinished();
+        }
     }
 
     void showMovementMenuOnly() {
@@ -234,6 +237,13 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             mPipMenuView.showMoveMenu(mDelegate.getPipGravity());
         } else {
             mPipMenuView.showButtonsMenu();
+        }
+        mPipMenuView.updateBounds(mTvPipBoundsState.getBounds());
+    }
+
+    void onPipTransitionStarted(Rect finishBounds) {
+        if (mPipMenuView != null) {
+            mPipMenuView.onPipTransitionStarted(finishBounds);
         }
     }
 
@@ -559,7 +569,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                         menuBounds.height()));
 
         if (mPipMenuView != null) {
-            mPipMenuView.updateLayout(destinationBounds);
+            mPipMenuView.updateBounds(destinationBounds);
         }
     }
 
