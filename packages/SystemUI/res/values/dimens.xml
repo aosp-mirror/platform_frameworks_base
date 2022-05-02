@@ -388,6 +388,8 @@
 
     <dimen name="split_shade_notifications_scrim_margin_bottom">0dp</dimen>
 
+    <dimen name="shelf_and_lock_icon_overlap">5dp</dimen>
+
     <dimen name="notification_panel_margin_horizontal">0dp</dimen>
 
     <dimen name="brightness_mirror_height">48dp</dimen>
