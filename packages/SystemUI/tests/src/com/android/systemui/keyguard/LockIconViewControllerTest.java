@@ -20,8 +20,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
 
-import static junit.framework.Assert.assertEquals;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
@@ -87,6 +85,7 @@ import java.util.List;
 @TestableLooper.RunWithLooper
 public class LockIconViewControllerTest extends SysuiTestCase {
     private static final String UNLOCKED_LABEL = "unlocked";
+    private static final int PADDING = 10;
 
     private MockitoSession mStaticMockSession;
 
@@ -149,6 +148,8 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         when(mWindowManager.getCurrentWindowMetrics().getBounds()).thenReturn(windowBounds);
         when(mResources.getString(R.string.accessibility_unlock_button)).thenReturn(UNLOCKED_LABEL);
         when(mResources.getDrawable(anyInt(), any())).thenReturn(mIconDrawable);
+        when(mResources.getDimensionPixelSize(R.dimen.lock_icon_padding)).thenReturn(PADDING);
+        when(mAuthController.getScaleFactor()).thenReturn(1f);
 
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(false);
@@ -181,16 +182,32 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     @Test
     public void testUpdateFingerprintLocationOnInit() {
         // GIVEN fp sensor location is available pre-attached
-        Pair<Integer, PointF> udfps = setupUdfps();
+        Pair<Integer, PointF> udfps = setupUdfps(); // first = radius, second = udfps location
 
         // WHEN lock icon view controller is initialized and attached
         mLockIconViewController.init();
         captureAttachListener();
         mAttachListener.onViewAttachedToWindow(mLockIconView);
 
-        // THEN lock icon view location is updated with the same coordinates as fpProps
-        verify(mLockIconView).setCenterLocation(mPointCaptor.capture(), eq(udfps.first));
-        assertEquals(udfps.second, mPointCaptor.getValue());
+        // THEN lock icon view location is updated to the udfps location with UDFPS radius
+        verify(mLockIconView).setCenterLocation(eq(udfps.second), eq(udfps.first),
+                eq(PADDING));
+    }
+
+    @Test
+    public void testUpdatePaddingBasedOnResolutionScale() {
+        // GIVEN fp sensor location is available pre-attached & scaled resolution factor is 5
+        Pair<Integer, PointF> udfps = setupUdfps(); // first = radius, second = udfps location
+        when(mAuthController.getScaleFactor()).thenReturn(5f);
+
+        // WHEN lock icon view controller is initialized and attached
+        mLockIconViewController.init();
+        captureAttachListener();
+        mAttachListener.onViewAttachedToWindow(mLockIconView);
+
+        // THEN lock icon view location is updated with the scaled radius
+        verify(mLockIconView).setCenterLocation(eq(udfps.second), eq(udfps.first),
+                eq(PADDING * 5));
     }
 
     @Test
@@ -212,8 +229,8 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         mDelayableExecutor.runAllReady();
 
         // THEN lock icon view location is updated with the same coordinates as fpProps
-        verify(mLockIconView).setCenterLocation(mPointCaptor.capture(), eq(udfps.first));
-        assertEquals(udfps.second, mPointCaptor.getValue());
+        verify(mLockIconView).setCenterLocation(eq(udfps.second), eq(udfps.first),
+                eq(PADDING));
     }
 
     @Test
@@ -400,7 +417,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
                         List.of(new SensorLocationInternal("" /* displayId */,
                                 (int) udfpsLocation.x, (int) udfpsLocation.y, radius)));
         when(mAuthController.getUdfpsLocation()).thenReturn(udfpsLocation);
-        when(mAuthController.getUdfpsProps()).thenReturn(List.of(fpProps));
+        when(mAuthController.getUdfpsRadius()).thenReturn(radius);
 
         return new Pair(radius, udfpsLocation);
     }
