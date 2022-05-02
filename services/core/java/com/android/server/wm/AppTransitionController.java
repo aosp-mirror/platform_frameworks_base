@@ -912,6 +912,15 @@ public class AppTransitionController {
                     canPromote = false;
                 }
 
+                // If the current window container is task and it have adjacent task, it means
+                // both tasks will open or close app toghther but we want get their opening or
+                // closing animation target independently so do not promote.
+                if (current.asTask() != null
+                        && current.asTask().getAdjacentTaskFragment() != null
+                        && current.asTask().getAdjacentTaskFragment().asTask() != null) {
+                    canPromote = false;
+                }
+
                 // Find all siblings of the current WindowContainer in "candidates", move them into
                 // a separate list "siblings", and checks if an animation target can be promoted
                 // to its parent.
