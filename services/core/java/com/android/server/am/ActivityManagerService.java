@@ -4513,8 +4513,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // We're going to cleanup the successor process record, which wasn't started at all.
                 app = successor;
             } else {
-                Slog.w(TAG, "Process " + app + " failed to attach");
+                final String msg = "Process " + app + " failed to attach";
+                Slog.w(TAG, msg);
                 EventLogTags.writeAmProcessStartTimeout(app.userId, pid, app.uid, app.processName);
+                if (app.getActiveInstrumentation() != null) {
+                    final Bundle info = new Bundle();
+                    info.putString("shortMsg", "failed to attach");
+                    info.putString("longMsg", msg);
+                    finishInstrumentationLocked(app, Activity.RESULT_CANCELED, info);
+                }
             }
             synchronized (mProcLock) {
                 mProcessList.removeProcessNameLocked(app.processName, app.uid);
