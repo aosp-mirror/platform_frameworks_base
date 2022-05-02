@@ -61,6 +61,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
     private AnimatorSet mBackgroundInAnimator = new AnimatorSet();
     private int mAlpha; // 0-255
+    private float mScaleFactor = 1;
 
     // AOD anti-burn-in offsets
     private final int mMaxBurnInOffsetX;
@@ -172,6 +173,22 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         mLockScreenFp.invalidate(); // updated with a valueCallback
     }
 
+    void setScaleFactor(float scale) {
+        mScaleFactor = scale;
+    }
+
+    void updatePadding() {
+        if (mLockScreenFp == null || mAodFp == null) {
+            return;
+        }
+
+        final int defaultPaddingPx =
+                getResources().getDimensionPixelSize(R.dimen.lock_icon_padding);
+        final int padding = (int) (defaultPaddingPx * mScaleFactor);
+        mLockScreenFp.setPadding(padding, padding, padding, padding);
+        mAodFp.setPadding(padding, padding, padding, padding);
+    }
+
     /**
      * @param alpha between 0 and 255
      */
@@ -257,6 +274,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             mLockScreenFp = view.findViewById(R.id.udfps_lockscreen_fp);
             mBgProtection = view.findViewById(R.id.udfps_keyguard_fp_bg);
 
+            updatePadding();
             updateColor();
             updateAlpha();
             parent.addView(view);
