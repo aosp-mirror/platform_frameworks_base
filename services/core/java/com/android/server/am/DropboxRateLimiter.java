@@ -64,9 +64,10 @@ public class DropboxRateLimiter {
             }
 
             if (now - errRecord.getStartTime() > RATE_LIMIT_BUFFER_DURATION) {
+                final int errCount = recentlyDroppedCount(errRecord);
                 errRecord.setStartTime(now);
                 errRecord.setCount(1);
-                return new RateLimitResult(false, recentlyDroppedCount(errRecord));
+                return new RateLimitResult(false, errCount);
             }
 
             errRecord.incrementCount();
