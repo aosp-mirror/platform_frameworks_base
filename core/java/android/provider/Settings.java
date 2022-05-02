@@ -9742,6 +9742,26 @@ public final class Settings {
         public static final String BIOMETRIC_APP_ENABLED = "biometric_app_enabled";
 
         /**
+         * Whether or not active unlock triggers on wake.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_WAKE = "active_unlock_on_wake";
+
+        /**
+         * Whether or not active unlock triggers on unlock intent.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_UNLOCK_INTENT =
+                "active_unlock_on_unlock_intent";
+
+        /**
+         * Whether or not active unlock triggers on biometric failure.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL =
+                "active_unlock_on_biometric_fail";
+
+        /**
          * Whether the assist gesture should be enabled.
          *
          * @hide
