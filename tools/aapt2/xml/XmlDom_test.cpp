@@ -139,19 +139,6 @@ TEST(XmlDomTest, XmlEscapeSequencesAreParsed) {
   EXPECT_THAT(attr->value, Eq("\""));
 }
 
-TEST(XmlDomTest, XmlEscapeSingleQuotes) {
-  std::unique_ptr<XmlResource> doc = test::BuildXmlDom(R"(
-    <foo><![CDATA[oh no' (line=1001)
-E: this-is-not-an-element (line=88)
-    T: 'blah]]></foo>)");
-
-  Element* el = doc->root.get();
-  Text* text = xml::NodeCast<xml::Text>(el->children[0].get());
-  ASSERT_THAT(text, NotNull());
-  EXPECT_THAT(text->text,
-              Eq("oh no' (line=1001)\nE: this-is-not-an-element (line=88)\n    T: 'blah"));
-}
-
 class TestVisitor : public PackageAwareVisitor {
  public:
   using PackageAwareVisitor::Visit;
