@@ -107,6 +107,8 @@ public class ClipboardOverlayController {
     public static final String SELF_PERMISSION = "com.android.systemui.permission.SELF";
     public static final String COPY_OVERLAY_ACTION = "com.android.systemui.COPY";
 
+    private static final String EXTRA_EDIT_SOURCE_CLIPBOARD = "edit_source_clipboard";
+
     private static final int CLIPBOARD_DEFAULT_TIMEOUT_MILLIS = 6000;
     private static final int SWIPE_PADDING_DP = 12; // extra padding around views to allow swipe
 
@@ -391,6 +393,7 @@ public class ClipboardOverlayController {
         editIntent.setDataAndType(uri, "image/*");
         editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        editIntent.putExtra(EXTRA_EDIT_SOURCE_CLIPBOARD, true);
         mContext.startActivity(editIntent);
         animateOut();
     }
