@@ -19533,6 +19533,8 @@ package android.location {
     method @Nullable public android.os.Bundle getExtras();
     method @FloatRange(from=-90.0, to=90.0) public double getLatitude();
     method @FloatRange(from=-180.0, to=180.0) public double getLongitude();
+    method @FloatRange(from=0.0) public float getMslAltitudeAccuracyMeters();
+    method @FloatRange public double getMslAltitudeMeters();
     method @Nullable public String getProvider();
     method @FloatRange(from=0.0) public float getSpeed();
     method @FloatRange(from=0.0) public float getSpeedAccuracyMetersPerSecond();
@@ -19543,6 +19545,8 @@ package android.location {
     method public boolean hasBearing();
     method public boolean hasBearingAccuracy();
     method public boolean hasElapsedRealtimeUncertaintyNanos();
+    method public boolean hasMslAltitude();
+    method public boolean hasMslAltitudeAccuracy();
     method public boolean hasSpeed();
     method public boolean hasSpeedAccuracy();
     method public boolean hasVerticalAccuracy();
@@ -19554,6 +19558,8 @@ package android.location {
     method public void removeBearing();
     method public void removeBearingAccuracy();
     method public void removeElapsedRealtimeUncertaintyNanos();
+    method public void removeMslAltitude();
+    method public void removeMslAltitudeAccuracy();
     method public void removeSpeed();
     method public void removeSpeedAccuracy();
     method public void removeVerticalAccuracy();
@@ -19569,6 +19575,8 @@ package android.location {
     method public void setLatitude(@FloatRange(from=-90.0, to=90.0) double);
     method public void setLongitude(@FloatRange(from=-180.0, to=180.0) double);
     method public void setMock(boolean);
+    method public void setMslAltitudeAccuracyMeters(@FloatRange(from=0.0) float);
+    method public void setMslAltitudeMeters(@FloatRange double);
     method public void setProvider(@Nullable String);
     method public void setSpeed(@FloatRange(from=0.0) float);
     method public void setSpeedAccuracyMetersPerSecond(@FloatRange(from=0.0) float);
