@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"åpne kalenderen din"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sende og lese SMS-meldinger"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Filer og dokumenter"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Filer og dokumenter"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"åpne filer og dokumenter på enheten din"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musikk og annen lyd"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"få tilgang til lydfiler på enheten"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Bilder og videoer"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"få tilgang til bilder og videofiler på enheten"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musikk og lyd"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"bruke musikk og lyd på enheten"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Bilder og videoer"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"bruke bilder og videoer på enheten"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ta opp lyd"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysisk aktivitet"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Opplåsing med fingeravtrykk"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Kan ikke bruke fingeravtrykkssensoren"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Gå til en reparasjonsleverandør."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Kunne ikke ta opp nøyaktige ansiktsdata Prøv på nytt"</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kan ikke opprette ansiktsmodellen. Prøv på nytt."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"For lyst. Prøv svakere belysning."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"For mørkt. Prøv sterkere belysning."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Flytt telefonen lengre unna"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Flytt telefonen nærmere."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Flytt telefonen høyere."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Flytt telefonen lavere."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Flytt telefonen til venstre."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Flytt telefonen til høyre."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Prøv sterkere belysning"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Flytt telefonen lengre unna"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Flytt telefonen nærmere"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Flytt telefonen høyere"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Flytt telefonen lavere"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Flytt telefonen til venstre"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Flytt telefonen til høyre"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Se mer direkte på enheten din."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Hold ansiktet ditt rett foran telefonen."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Kan ikke se ansiktet ditt. Hold telefonen i øyehøyde."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"For mye bevegelse. Hold telefonen stødig."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registrer ansiktet ditt på nytt."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Kan ikke gjenkjenne ansiktet lenger. Prøv på nytt."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"For likt – endre posituren din."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Vri hodet ditt litt mindre."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Vri hodet litt mindre."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Vri hodet ditt litt mindre."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Ansiktet gjenkjennes ikke. Prøv på nytt."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Endre hodeposisjonen litt"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Se mer direkte på telefonen"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Se mer direkte på telefonen"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Se mer direkte på telefonen"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Fjern alt som skjuler ansiktet ditt."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Rengjør den øverste delen av skjermen, inkludert den svarte linjen"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Ansiktet må være helt synlig"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Ansiktet må være helt synlig"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan ikke opprette ansiktsmodellen. Prøv på nytt."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Mørke briller er registrert. Ansiktet må være helt synlig."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ansiktsdekke er registrert. Ansiktet må være helt synlig."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan ikke bekrefte ansikt. Utilgjengelig maskinvare."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ikke forstyrr er endret"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Trykk for å sjekke hva som er blokkert."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Gjennomgå varslingsinnstillingene"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Fra og med Android 13 må apper du installerer, få tillatelse til å sende varsler. Trykk for å endre denne tillatelsen for eksisterende apper."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Påminn meg senere"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Lukk"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>

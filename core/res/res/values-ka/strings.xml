@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"თქვენს კალენდარზე წვდომა"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS შეტყობინებების გაგზავნა და ნახვა"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ფაილები და დოკუმენტები"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ფაილები და დოკუმენტები"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"თქვენს მოწყობილობაზე ფაილებსა და დოკუმენტებზე წვდომა"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"მუსიკა და სხვა აუდიო ფაილები"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"თქვენს მოწყობილობაზე აუდიო ფაილებზე წვდომა"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ფოტოები და ვიდეოები"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"თქვენს მოწყობილობაზე სურათის ფაილებსა და ვიდეო ფაილებზე წვდომა"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"მუსიკა და აუდიო"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"იქონიეთ წვდომა მუსიკასა და აუდიოზე თქვენს მოწყობილობაზე"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ფოტოები და ვიდეოები"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"იქონიეთ წვდომა ფოტოებსა და ვიდეოებზე თქვენს მოწყობილობაზე"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"მიკროფონი"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"აუდიოს ჩაწერა"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ფიზიკური აქტივობა"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"თითის ანაბეჭდით განბლოკვა"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"თითის ანაბეჭდის სენსორის გამოყენება ვერ ხერხდება"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ეწვიეთ შეკეთების სერვისის პროვაიდერს."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"სახის ზუსტი მონაცემები არ აღიბეჭდა. ცადეთ ხელახლა."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"თქვენი სახის მოდელი ვერ იქმნება. ცადეთ ხელახლა."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"მეტისმეტად ნათელია. ცადეთ უფრო სუსტი განათება."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"მეტისმეტად ბნელია. ცადეთ უფრო ძლიერი განათება."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"გადაანაცვლეთ ტელეფონი უფრო შორს."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"მიიტანეთ ტელეფონი უფრო ახლოს."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"გადაანაცვლეთ ტელეფონი ზემოთ."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"გადაანაცვლეთ ტელეფონი ქვემოთ."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"გადაანაცვლეთ ტელეფონი მარცხნივ."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"გადაანაცვლეთ ტელეფონი მარჯვნივ."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ცადეთ უფრო ძლიერი განათება"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"გაწიეთ ტელეფონი უფრო შორს"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"მიიტანეთ ტელეფონი უფრო ახლოს"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"აწიეთ ტელეფონი ზემოთ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ჩაწიეთ ტელეფონი ქვემოთ"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"გაწიეთ ტელეფონი თქვენგან მარცხნივ"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"გაწიეთ ტელეფონი თქვენგან მარჯვნივ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"გთხოვთ, უფრო პირდაპირ შეხედოთ თქვენს მოწყობილობას."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"დაიჭირეთ სახე უშუალოდ ტელეფონის წინ."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"თქვენი სახე არ ჩანს. დაიჭირეთ ტელეფონი თვალის დონეზე."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"მეტისმეტად მოძრაობთ. მყარად დაიჭირეთ ტელეფონი."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"გთხოვთ, ხელახლა დაარეგისტრიროთ თქვენი სახე."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"სახის ამოცნობა ვეღარ ხერხდება. ცადეთ ხელახლა."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"მეტისმეტად მსგავსია. გთხოვთ, შეცვალოთ პოზა."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"თავი ცოტა ნაკლებად მიაბრუნეთ."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"თავი ცოტა ნაკლებად გადახარეთ."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"თავი ცოტა ნაკლებად მიაბრუნეთ."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"სახის ამოცნობა ვერ ხერხდება. ცადეთ ხელახლა."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"ოდნავ შეცვალეთ თავის პოზიცია"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"პირდაპირ უყურეთ ტელეფონს"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"პირდაპირ უყურეთ ტელეფონს"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"პირდაპირ უყურეთ ტელეფონს"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"მოაშორეთ ყველაფერი, რაც სახეს გიფარავთ."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"გაწმინდეთ ეკრანის ზედა ნაწილი, შავი ზოლის ჩათვლით."</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"თქვენი სახე მთლიანად უნდა ჩანდეს"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"თქვენი სახე მთლიანად უნდა ჩანდეს"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"თქვენი სახის მოდელი ვერ იქმნება. ცადეთ ხელახლა."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"აღმოჩენილია მუქი სათვალე. თქვენი სახე მთლიანად უნდა ჩანდეს."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"აღმოჩენილია სახის დაფარვა. თქვენი სახე მთლიანად უნდა ჩანდეს."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"სახე ვერ დასტურდება. აპარატი მიუწვდომელია."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„არ შემაწუხოთ“ რეჟიმი შეცვლილია"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"შეეხეთ იმის სანახავად, თუ რა არის დაბლოკილი."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"შეტყობინების პარამეტრების შემოწმება"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13-ზე შეტყობინებების გასაგზავნად საჭიროა თქვენ მიერ დაინსტალირებული აპებისთვის ნებართვის მინიჭება. არსებული აპებისთვის ამ ნებართვის შესაცვლელად შეეხეთ."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"შემახსენე მოგვიან."</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"უარყოფა"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"სისტემა"</string>

@@ -307,12 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"přístup ke kalendáři"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"odesílání a zobrazování zpráv SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Soubory a dokumenty"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Soubory a dokumenty"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"přístup k souborům a dokumentům v zařízení"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Hudba a ostatní zvuk"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"přístup ke zvukovým souborům v zařízení"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotky a videa"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"přístup k obrázkům a videosouborům v zařízení"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Hudba a zvuk"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"přístup k hudbě a zvuku v zařízení"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotky a videa"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"přísutp k fotkám a videím v zařízení"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nahrávání zvuku"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fyzická aktivita"</string>
@@ -591,7 +591,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Zpracování otisku prstu se nezdařilo. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistěte snímač otisků prstů a zkuste to znovu"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistěte senzor a zkuste to znovu"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevně zatlačte na senzor"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Zatlačte silně na senzor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohyb prstem byl příliš pomalý. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Zkuste jiný otisk prstu"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Je příliš světlo"</string>
@@ -636,26 +636,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odemknutí otiskem prstu"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Snímač otisků prstů nelze použít"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Navštivte servis"</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Obličej se nepodařilo zachytit. Zkuste to znovu."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Model se nepodařilo vytvořit. Zkuste to znovu."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Je příliš světlo. Zmírněte osvětlení."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Je moc velká tma. Přejděte na světlo."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Umístěte telefon dál."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Umístěte telefon blíž."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Umístěte telefon výš."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Umístěte telefon níž."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Přesuňte telefon vlevo."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Přesuňte telefon vpravo."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Přejděte na světlo"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Umístěte telefon dál"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Umístěte telefon blíž"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Umístěte telefon výš"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Umístěte telefon níž"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Umístěte telefon víc doleva"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Umístěte telefon víc doprava"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Dívejte se přímo na zařízení."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Umístěte obličej přímo před telefon."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Obličej není vidět. Držte telefon na úrovni očí."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Příliš mnoho pohybu. Držte telefon nehybně."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Zaznamenejte obličej znovu."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Obličej už nelze rozpoznat. Zkuste to znovu."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Příliš podobné, změňte výraz."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Natočte hlavu o něco méně."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Nakloňte hlavu trochu méně."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Natočte hlavu o něco méně."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Obličej se nepodařilo rozpoznat. Zkuste to znovu."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Trochu změňte polohu hlavy"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Dívejte se přímo na telefon"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Dívejte se přímo na telefon"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Dívejte se přímo na telefon"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Odstraňte vše, co vám zakrývá obličej."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Očistěte horní část obrazovky včetně černé části"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Obličej musí být plně viditelný"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Obličej musí být plně viditelný"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Model se nepodařilo vytvořit. Zkuste to znovu."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Byly zjištěny tmavé brýle. Obličej musí být plně viditelný."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Byl zjištěn zakrytý obličej. Obličej musí být plně viditelný."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Obličej nelze ověřit. Hardware není dostupný."</string>
@@ -1846,7 +1851,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Před uvolněním požádat o PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Před uvolněním požádat o bezpečnostní gesto"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Před uvolněním požádat o heslo"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Před odepnutím požádat o heslo"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Nainstalováno administrátorem"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Smazáno administrátorem"</string>
@@ -2055,8 +2060,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Nastavení režimu Nerušit se změnilo"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Klepnutím zkontrolujete, co je blokováno."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Zkontrolujte nastavení oznámení"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Počínaje systémem Android 13 od vás nainstalované aplikace potřebují oprávnění k odesílání oznámení. Klepnutím toto oprávnění změníte pro stávající aplikace."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Připomenout později"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Zavřít"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systém"</string>

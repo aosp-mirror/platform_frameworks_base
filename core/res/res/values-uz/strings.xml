@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"taqvimingizga kirish"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS xabarlarni yuborish va ko‘rish"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fayl va hujjatlar"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fayl va hujjatlar"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"qurilmangizdagi fayl va hujjatlarga kirish"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musiqa va boshqa audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"qurilmangizdagi audio fayllarga kirish"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Suratlar va videolar"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"qurilmangizdagi rasm va video fayllarga kirish"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musiqa va audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"qurilmadagi musiqa va audioga ruxsat"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Video va suratlar"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"qurilmadagi rasm va videolarga ruxsat"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ovoz yozib olish"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Jismoniy harakatlar"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Barmoq izi bilan ochish"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Barmoq izi skaneridan foydalanish imkonsiz"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Xizmat koʻrsatish markaziga murojaat qiling."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Yuz ravshan suratga olinmadi. Qaytadan urining."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Yuzingiz modeli yaratilmadi. Qayta urining."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Juda yorqin. Biroz soyaroq joy tanlang."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Juda qorongʻi. Atrofingizni yoriting."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Telefonni biroz uzoqroq tuting."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Telefonni yaqinroq tuting."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Telefonni teparoq tuting."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Telefonni pastroq tushiring."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Telefonni chapga suring."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Telefonni oʻngga suring."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Atrofingizni yoriting"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Telefonni biroz uzoqroq tuting"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Telefonni yaqinroq tuting"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefonni teparoq tuting"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Telefonni pastroq tuting"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Telefonni chaproq tuting"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Telefonni oʻngroq tuting"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Qurilmaga tik qarang."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Telefonni yuzingizga tik qarating."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Yuzingiz koʻrinmayapti. Telefonni koʻz balandligida tuting."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Ortiqcha harakatlanmoqda. Qimirlatmasdan ushlang."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Yuzingizni qaytadan qayd qildiring."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Yuz tanilmadi. Qaytadan urining."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Yuz ifodasi oldingiday. Holatingizni oʻzgartiring."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Boshingizni asta buring."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Boshingizni asta qiyalang."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Boshingizni asta buring."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Yuz aniqlanmadi. Qayta urining."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Boshingiz holatini biroz oʻzgartiring"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Telefonga tik qarab turing"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Telefonga tik qarab turing"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Telefonga tik qarab turing"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Yuzingizni berkitayotgan narsalarni olib tashlang."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Ekranning yuqori qismini, shuningdek, qora panelni ham tozalang"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Yuzingiz toʻliq koʻrinishi kerak"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Yuzingiz toʻliq koʻrinishi kerak"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Yuzingiz modeli yaratilmadi. Qayta urining."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Qora koʻzoynak aniqlandi. Yuzingiz toʻliq koʻrinishi kerak."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yuzning bir qismi yopilib qolgan. Yuzingiz toʻliq koʻrinishi kerak."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Yuzingiz tasdiqlanmadi. Qurilma ishlamayapti."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Bezovta qilinmasin rejimi sozlamalari o‘zgartirildi"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nimalar bloklanganini tekshirish uchun bosing"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Bildirishnoma sozlamalarini tekshiring"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 versiyasidan boshlab, oʻrnatiladigan ilovalar bildirishnoma yuborish uchun sizdan ruxsat oladi. Mavjud ilovalarda ushbu ruxsatni oʻzgartirish uchun bosing."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Keyinroq eslatilsin"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Yopish"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Tizim"</string>
