@@ -17,6 +17,7 @@
 package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishSecondaryWithPrimaryBehavior;
@@ -179,6 +180,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // Enter PIP.
             // All overrides will be cleanup.
             container.setLastRequestedBounds(null /* bounds */);
+            container.setLastRequestedWindowingMode(WINDOWING_MODE_UNDEFINED);
             cleanupForEnterPip(wct, container);
         } else if (wasInPip) {
             // Exit PIP.
