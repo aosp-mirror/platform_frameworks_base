@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -168,7 +169,8 @@ public class RemoteTransitionCompat implements Parcelable {
                 }
                 t.apply();
                 mRecentsSession.setup(controller, info, finishedCallback, pausingTasks, pipTask,
-                        recentsTask, leashMap, mToken);
+                        recentsTask, leashMap, mToken,
+                        (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0);
                 recents.onAnimationStart(mRecentsSession, apps, wallpapers, new Rect(0, 0, 0, 0),
                         new Rect());
             }
@@ -223,12 +225,13 @@ public class RemoteTransitionCompat implements Parcelable {
         private ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = null;
         private PictureInPictureSurfaceTransaction mPipTransaction = null;
         private IBinder mTransition = null;
+        private boolean mKeyguardLocked = false;
 
         void setup(RecentsAnimationControllerCompat wrapped, TransitionInfo info,
                 IRemoteTransitionFinishedCallback finishCB,
                 ArrayList<WindowContainerToken> pausingTasks, WindowContainerToken pipTask,
                 WindowContainerToken recentsTask, ArrayMap<SurfaceControl, SurfaceControl> leashMap,
-                IBinder transition) {
+                IBinder transition, boolean keyguardLocked) {
             if (mInfo != null) {
                 throw new IllegalStateException("Trying to run a new recents animation while"
                         + " recents is already active.");
@@ -241,6 +244,7 @@ public class RemoteTransitionCompat implements Parcelable {
             mRecentsTask = recentsTask;
             mLeashMap = leashMap;
             mTransition = transition;
+            mKeyguardLocked = keyguardLocked;
         }
 
         @SuppressLint("NewApi")
@@ -375,6 +379,10 @@ public class RemoteTransitionCompat implements Parcelable {
             final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
             final WindowContainerTransaction wct = new WindowContainerTransaction();
 
+            if (mKeyguardLocked && mRecentsTask != null) {
+                if (toHome) wct.reorder(mRecentsTask, true /* toTop */);
+                else wct.restoreTransientOrder(mRecentsTask);
+            }
             if (!toHome && mPausingTasks != null && mOpeningLeashes == null) {
                 // The gesture went back to opening the app rather than continuing with
                 // recents, so end the transition by moving the app back to the top (and also
@@ -384,7 +392,7 @@ public class RemoteTransitionCompat implements Parcelable {
                     wct.reorder(mPausingTasks.get(i), true /* onTop */);
                     t.show(mInfo.getChange(mPausingTasks.get(i)).getLeash());
                 }
-                if (mRecentsTask != null) {
+                if (!mKeyguardLocked && mRecentsTask != null) {
                     wct.restoreTransientOrder(mRecentsTask);
                 }
             } else {

@@ -211,6 +211,7 @@ class ActivityStarter {
     // The task which was above the targetTask before starting this activity. null if the targetTask
     // was already on top or if the activity is in a new task.
     private Task mPriorAboveTask;
+    private boolean mDisplayLockAndOccluded;
 
     // We must track when we deliver the new intent since multiple code paths invoke
     // {@link #deliverNewIntent}. This is due to early returns in the code path. This flag is used
@@ -1734,19 +1735,38 @@ class ActivityStarter {
         // Transition housekeeping.
         final TransitionController transitionController = started.mTransitionController;
         final boolean isStarted = result == START_SUCCESS || result == START_TASK_TO_FRONT;
+        final boolean isTransientLaunch = options != null && options.getTransientLaunch();
+        // Start transient launch while keyguard locked and occluded by other app, for this
+        // condition we would like to play the remote transition without modify any visible state
+        // for the hierarchy in core, so here will force execute this transition.
+        final boolean forceTransientTransition = isTransientLaunch && mPriorAboveTask != null
+                && mDisplayLockAndOccluded;
         if (isStarted) {
             // The activity is started new rather than just brought forward, so record it as an
             // existence change.
             transitionController.collectExistenceChange(started);
         } else if (result == START_DELIVERED_TO_TOP && newTransition != null) {
             // We just delivered to top, so there isn't an actual transition here.
-            newTransition.abort();
-            newTransition = null;
+            if (!forceTransientTransition) {
+                newTransition.abort();
+                newTransition = null;
+            }
         }
-        if (options != null && options.getTransientLaunch()) {
+        if (isTransientLaunch) {
+            if (forceTransientTransition && newTransition != null) {
+                newTransition.collect(mLastStartActivityRecord);
+                newTransition.collect(mPriorAboveTask);
+            }
             // `started` isn't guaranteed to be the actual relevant activity, so we must wait
             // until after we launched to identify the relevant activity.
             transitionController.setTransientLaunch(mLastStartActivityRecord, mPriorAboveTask);
+            if (forceTransientTransition && newTransition != null) {
+                final DisplayContent dc = mLastStartActivityRecord.getDisplayContent();
+                // update wallpaper target to TransientHide
+                dc.mWallpaperController.adjustWallpaperWindows();
+                // execute transition because there is no change
+                newTransition.setReady(dc, true /* ready */);
+            }
         }
         if (!userLeaving) {
             // no-user-leaving implies not entering PiP.
@@ -2384,6 +2404,7 @@ class ActivityStarter {
         mAvoidMoveToFront = false;
         mFrozeTaskList = false;
         mTransientLaunch = false;
+        mDisplayLockAndOccluded = false;
 
         mVoiceSession = null;
         mVoiceInteractor = null;
@@ -2492,6 +2513,16 @@ class ActivityStarter {
                 mAvoidMoveToFront = true;
             }
             mTransientLaunch = mOptions.getTransientLaunch();
+            final KeyguardController kc = mSupervisor.getKeyguardController();
+            final int displayId = mPreferredTaskDisplayArea.getDisplayId();
+            mDisplayLockAndOccluded = kc.isKeyguardLocked(displayId)
+                    && kc.isDisplayOccluded(displayId);
+            // Recents animation on lock screen, do not resume & move launcher to top.
+            if (mTransientLaunch && mDisplayLockAndOccluded
+                    && mService.getTransitionController().isShellTransitionsEnabled()) {
+                mDoResume = false;
+                mAvoidMoveToFront = true;
+            }
             mTargetRootTask = Task.fromWindowContainerToken(mOptions.getLaunchRootTask());
 
             if (inTaskFragment == null) {
