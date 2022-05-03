@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарь руу хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файл, документ"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"таны төхөөрөмж дээрх файл болон документод хандах"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Хөгжим, аудио"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"төхөөрөмж дээрээ хөгжим болон аудионд хандах"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Зураг, видео"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"төхөөрөмж дээрээ зураг болон видеонд хандах"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"дуу хураах"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Дасгал хөдөлгөөн"</string>

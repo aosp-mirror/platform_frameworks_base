@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"пристапува до календарот"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"испраќа и прикажува SMS-пораки"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Датотеки и документи"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"да пристапува до датотеки и документи на уредот"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музика и аудио"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"пристапувајте до музика и аудио на вашиот уред"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Фотографии и видеа"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"пристапувајте до фотографии и видеа на вашиот уред"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"снима аудио"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Физичка активност"</string>
@@ -2058,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Поставките за „Не вознемирувај“ се изменија"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Допрете за да проверите што е блокирано."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Прегледајте ги поставките за известувања"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Почнувајќи од Android 13, на апликациите што ги инсталирате им е потребна ваша дозвола за испраќање известувања. Допрете за да ја промените оваа дозвола за постојни апликации."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Потсети ме подоцна"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Отфрли"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Систем"</string>
@@ -2139,7 +2133,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"За работа"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Личен приказ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Работен приказ"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Блокирано од вашиот IT-администратор"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Блокирано од IT-администраторот"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Овие содржини не може да се споделуваат со работни апликации"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Овие содржини не може да се отвораат со работни апликации"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Овие содржини не може да се споделуваат со лични апликации"</string>

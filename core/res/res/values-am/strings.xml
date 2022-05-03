@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"የእርስዎን ቀን መቁጠሪያ ይድረሱበት"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"ኤስኤምኤስ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ፋይሎች እና ሰነዶች"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"ፋይሎች እና ሰነዶች ዘንድ በመሳሪያዎ ላይ ይድረሱ"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ሙዚቃ እና ኦዲዮ"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"በመሣሪያዎ ላይ ሙዚቃን እና ኦዲዮን መድረስ"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ፎቶዎች እና ቪዲዮዎች"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"በመሣሪያዎ ላይ ፎቶዎችን እና ቪዲዮዎችን መድረስ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ማይክሮፎን"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ኦዲዮ ይቅዱ"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"አካላዊ እንቅስቃሴ"</string>
@@ -2058,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"አትረብሽ ተቀይሯል"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ምን እንደታገደ ለመፈተሽ መታ ያድርጉ።"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"የማሳወቂያ ቅንብሮችን ይገምግሙ"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"ከAndroid 13 ጀምረው የሚጭኗቸው መተግበሪያዎች ማሳወቂያዎችን ለመላክ የእርስዎ ፈቃድ ያስፈልጋቸዋል። ይህን ፈቃድ ለነባር መተግበሪያዎች ለመቀየር መታ ያድርጉ።"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"በኋላ አስታውሰኝ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"አሰናብት"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ሥርዓት"</string>
