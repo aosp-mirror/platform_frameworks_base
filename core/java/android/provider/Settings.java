@@ -15108,6 +15108,14 @@ public final class Settings {
          */
         public static final String DEVICE_CONFIG_SYNC_DISABLED = "device_config_sync_disabled";
 
+
+        /**
+         * Whether back preview animations are played when user does a back gesture or presses
+         * the back button.
+         * @hide
+         */
+        public static final String ENABLE_BACK_ANIMATION = "enable_back_animation";
+
         /** @hide */ public static String zenModeToString(int mode) {
             if (mode == ZEN_MODE_IMPORTANT_INTERRUPTIONS) return "ZEN_MODE_IMPORTANT_INTERRUPTIONS";
             if (mode == ZEN_MODE_ALARMS) return "ZEN_MODE_ALARMS";
