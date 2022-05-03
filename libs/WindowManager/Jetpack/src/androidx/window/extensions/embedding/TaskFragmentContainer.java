@@ -17,11 +17,13 @@
 package androidx.window.extensions.embedding;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
+import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
@@ -71,6 +73,12 @@ class TaskFragmentContainer {
      * Bounds that were requested last via {@link android.window.WindowContainerTransaction}.
      */
     private final Rect mLastRequestedBounds = new Rect();
+
+    /**
+     * Windowing mode that was requested last via {@link android.window.WindowContainerTransaction}.
+     */
+    @WindowingMode
+    private int mLastRequestedWindowingMode = WINDOWING_MODE_UNDEFINED;
 
     /**
      * Creates a container with an existing activity that will be re-parented to it in a window
@@ -298,6 +306,20 @@ class TaskFragmentContainer {
         } else {
             mLastRequestedBounds.set(bounds);
         }
+    }
+
+    /**
+     * Checks if last requested windowing mode is equal to the provided value.
+     */
+    boolean isLastRequestedWindowingModeEqual(@WindowingMode int windowingMode) {
+        return mLastRequestedWindowingMode == windowingMode;
+    }
+
+    /**
+     * Updates the last requested windowing mode.
+     */
+    void setLastRequestedWindowingMode(@WindowingMode int windowingModes) {
+        mLastRequestedWindowingMode = windowingModes;
     }
 
     /** Gets the parent leaf Task id. */
