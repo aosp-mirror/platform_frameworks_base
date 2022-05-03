@@ -50,14 +50,12 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
     private lateinit var colorSchemeTransition: ColorSchemeTransition
 
     @Mock private lateinit var mockAnimatingTransition: AnimatingColorTransition
-    @Mock private lateinit var mockGenericTransition: GenericColorTransition
     @Mock private lateinit var valueAnimator: ValueAnimator
     @Mock private lateinit var colorScheme: ColorScheme
     @Mock private lateinit var extractColor: ExtractCB
     @Mock private lateinit var applyColor: ApplyCB
 
     private lateinit var animatingColorTransitionFactory: AnimatingColorTransitionFactory
-    private lateinit var genericColorTransitionFactory: GenericColorTransitionFactory
     @Mock private lateinit var mediaViewHolder: MediaViewHolder
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
@@ -65,11 +63,10 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
     @Before
     fun setUp() {
         animatingColorTransitionFactory = { _, _, _ -> mockAnimatingTransition }
-        genericColorTransitionFactory = { _ -> mockGenericTransition }
         whenever(extractColor.invoke(colorScheme)).thenReturn(TARGET_COLOR)
 
         colorSchemeTransition = ColorSchemeTransition(
-            context, mediaViewHolder, animatingColorTransitionFactory, genericColorTransitionFactory
+            context, mediaViewHolder, animatingColorTransitionFactory
         )
 
         colorTransition = object : AnimatingColorTransition(
@@ -148,8 +145,7 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
 
     @Test
     fun testColorSchemeTransition_update() {
-        colorSchemeTransition.updateColorScheme(colorScheme)
-        verify(mockAnimatingTransition, times(7)).updateColorScheme(colorScheme)
-        verify(mockGenericTransition).updateColorScheme(colorScheme)
+        colorSchemeTransition.updateColorScheme(colorScheme, true)
+        verify(mockAnimatingTransition, times(9)).updateColorScheme(colorScheme)
     }
 }
