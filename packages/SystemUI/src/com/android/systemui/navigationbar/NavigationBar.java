@@ -200,7 +200,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final NavigationBarTransitions mNavigationBarTransitions;
     private final Optional<BackAnimation> mBackAnimation;
     private final Handler mHandler;
-    private final NavigationBarOverlayController mNavbarOverlayController;
     private final UiEventLogger mUiEventLogger;
     private final NavBarHelper mNavBarHelper;
     private final NotificationShadeDepthController mNotificationShadeDepthController;
@@ -504,7 +503,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationShadeDepthController notificationShadeDepthController,
             @Main Handler mainHandler,
-            NavigationBarOverlayController navbarOverlayController,
             UiEventLogger uiEventLogger,
             NavBarHelper navBarHelper,
             LightBarController mainLightBarController,
@@ -543,7 +541,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mNavigationBarTransitions = navigationBarTransitions;
         mBackAnimation = backAnimation;
         mHandler = mainHandler;
-        mNavbarOverlayController = navbarOverlayController;
         mUiEventLogger = uiEventLogger;
         mNavBarHelper = navBarHelper;
         mNotificationShadeDepthController = notificationShadeDepthController;
@@ -967,9 +964,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     @Override
     public void onRecentsAnimationStateChanged(boolean running) {
-        if (running) {
-            mNavbarOverlayController.setButtonState(/* visible */false, /* force */true);
-        }
         mView.getRotationButtonController().setRecentsAnimationRunning(running);
     }
 
