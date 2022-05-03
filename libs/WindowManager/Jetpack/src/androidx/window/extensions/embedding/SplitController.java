@@ -81,9 +81,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @NonNull
     private Consumer<List<SplitInfo>> mEmbeddingCallback;
     private final List<SplitInfo> mLastReportedSplitStates = new ArrayList<>();
+    private final Handler mHandler;
 
     public SplitController() {
-        mPresenter = new SplitPresenter(new MainThreadExecutor(), this);
+        final MainThreadExecutor executor = new MainThreadExecutor();
+        mHandler = executor.mHandler;
+        mPresenter = new SplitPresenter(executor, this);
         ActivityThread activityThread = ActivityThread.currentActivityThread();
         // Register a callback to be notified about activities being created.
         activityThread.getApplication().registerActivityLifecycleCallbacks(
@@ -167,11 +170,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 // to fullscreen.
                 cleanupForEnterPip(wct, container);
                 mPresenter.cleanupContainer(container, false /* shouldFinishDependent */, wct);
-            } else {
+            } else if (taskFragmentInfo.isTaskClearedForReuse()) {
                 // Do not finish the dependents if this TaskFragment was cleared due to launching
                 // activity in the Task.
-                final boolean shouldFinishDependent = !taskFragmentInfo.isTaskClearedForReuse();
-                mPresenter.cleanupContainer(container, shouldFinishDependent, wct);
+                mPresenter.cleanupContainer(container, false /* shouldFinishDependent */, wct);
+            } else if (!container.isWaitingActivityAppear()) {
+                // Do not finish the container before the expected activity appear until timeout.
+                mPresenter.cleanupContainer(container, true /* shouldFinishDependent */, wct);
             }
         } else if (wasInPip && isInPip) {
             // No update until exit PIP.
@@ -418,6 +423,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
+     * Called when we have been waiting too long for the TaskFragment to become non-empty after
+     * creation.
+     */
+    void onTaskFragmentAppearEmptyTimeout(@NonNull TaskFragmentContainer container) {
+        mPresenter.cleanupContainer(container, false /* shouldFinishDependent */);
+    }
+
+    /**
      * Returns a container that this activity is registered with. An activity can only belong to one
      * container, or no container at all.
      */
@@ -452,7 +465,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (activityInTask == null) {
             throw new IllegalArgumentException("activityInTask must not be null,");
         }
-        final TaskFragmentContainer container = new TaskFragmentContainer(activity, taskId);
+        final TaskFragmentContainer container = new TaskFragmentContainer(activity, taskId, this);
         if (!mTaskContainers.contains(taskId)) {
             mTaskContainers.put(taskId, new TaskContainer(taskId));
         }
@@ -590,7 +603,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
         for (int i = taskContainer.mContainers.size() - 1; i >= 0; i--) {
             final TaskFragmentContainer container = taskContainer.mContainers.get(i);
-            if (!container.isFinished() && container.getRunningActivityCount() > 0) {
+            if (!container.isFinished() && (container.getRunningActivityCount() > 0
+                    // We may be waiting for the top TaskFragment to become non-empty after
+                    // creation. In that case, we don't want to treat the TaskFragment below it as
+                    // top active, otherwise it may incorrectly launch placeholder on top of the
+                    // pending TaskFragment.
+                    || container.isWaitingActivityAppear())) {
                 return container;
             }
         }
@@ -918,6 +936,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @Nullable
     TaskContainer getTaskContainer(int taskId) {
         return mTaskContainers.get(taskId);
+    }
+
+    Handler getHandler() {
+        return mHandler;
     }
 
     /**
