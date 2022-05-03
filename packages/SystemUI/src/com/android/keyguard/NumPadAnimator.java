@@ -30,8 +30,8 @@ import android.widget.TextView;
 
 import androidx.annotation.StyleRes;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.util.Utils;
 
 /**
  * Provides background color and radius animations for key pad buttons.
@@ -45,6 +45,7 @@ class NumPadAnimator {
     private int mNormalColor;
     private int mHighlightColor;
     private int mStyle;
+    private TextView mDigitTextView;
     private static final int EXPAND_ANIMATION_MS = 100;
     private static final int EXPAND_COLOR_ANIMATION_MS = 50;
     private static final int CONTRACT_ANIMATION_DELAY_MS = 33;
@@ -58,71 +59,9 @@ class NumPadAnimator {
             @Nullable TextView digitTextView) {
         mStyle = style;
         mBackground = (GradientDrawable) drawable;
+        mDigitTextView = digitTextView;
 
         reloadColors(context);
-        int textColorPrimary = com.android.settingslib.Utils
-                .getColorAttrDefaultColor(context, android.R.attr.textColorPrimary);
-        int textColorPrimaryInverse = com.android.settingslib.Utils
-                .getColorAttrDefaultColor(context, android.R.attr.textColorPrimaryInverse);
-
-        // Actual values will be updated later, usually during an onLayout() call
-        mExpandAnimator = ValueAnimator.ofFloat(0f, 1f);
-        mExpandAnimator.setDuration(EXPAND_ANIMATION_MS);
-        mExpandAnimator.setInterpolator(Interpolators.LINEAR);
-        mExpandAnimator.addUpdateListener(
-                anim -> mBackground.setCornerRadius((float) anim.getAnimatedValue()));
-
-        ValueAnimator expandBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(),
-                mNormalColor, mHighlightColor);
-        expandBackgroundColorAnimator.setDuration(EXPAND_COLOR_ANIMATION_MS);
-        expandBackgroundColorAnimator.setInterpolator(Interpolators.LINEAR);
-        expandBackgroundColorAnimator.addUpdateListener(
-                animator -> mBackground.setColor((int) animator.getAnimatedValue()));
-
-        ValueAnimator expandTextColorAnimator =
-                ValueAnimator.ofObject(new ArgbEvaluator(),
-                textColorPrimary, textColorPrimaryInverse);
-        expandTextColorAnimator.setInterpolator(Interpolators.LINEAR);
-        expandTextColorAnimator.setDuration(EXPAND_COLOR_ANIMATION_MS);
-        expandTextColorAnimator.addUpdateListener(valueAnimator -> {
-            if (digitTextView != null) {
-                digitTextView.setTextColor((int) valueAnimator.getAnimatedValue());
-            }
-        });
-
-        mExpandAnimatorSet = new AnimatorSet();
-        mExpandAnimatorSet.playTogether(mExpandAnimator,
-                expandBackgroundColorAnimator, expandTextColorAnimator);
-
-        mContractAnimator = ValueAnimator.ofFloat(1f, 0f);
-        mContractAnimator.setStartDelay(CONTRACT_ANIMATION_DELAY_MS);
-        mContractAnimator.setDuration(CONTRACT_ANIMATION_MS);
-        mContractAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
-        mContractAnimator.addUpdateListener(
-                anim -> mBackground.setCornerRadius((float) anim.getAnimatedValue()));
-        ValueAnimator contractBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(),
-                mHighlightColor, mNormalColor);
-        contractBackgroundColorAnimator.setInterpolator(Interpolators.LINEAR);
-        contractBackgroundColorAnimator.setStartDelay(CONTRACT_ANIMATION_DELAY_MS);
-        contractBackgroundColorAnimator.setDuration(CONTRACT_ANIMATION_MS);
-        contractBackgroundColorAnimator.addUpdateListener(
-                animator -> mBackground.setColor((int) animator.getAnimatedValue()));
-
-        ValueAnimator contractTextColorAnimator =
-                ValueAnimator.ofObject(new ArgbEvaluator(), textColorPrimaryInverse,
-                textColorPrimary);
-        contractTextColorAnimator.setInterpolator(Interpolators.LINEAR);
-        contractTextColorAnimator.setStartDelay(CONTRACT_ANIMATION_DELAY_MS);
-        contractTextColorAnimator.setDuration(CONTRACT_ANIMATION_MS);
-        contractTextColorAnimator.addUpdateListener(valueAnimator -> {
-            if (digitTextView != null) {
-                digitTextView.setTextColor((int) valueAnimator.getAnimatedValue());
-            }
-        });
-
-        mContractAnimatorSet = new AnimatorSet();
-        mContractAnimatorSet.playTogether(mContractAnimator,
-                contractBackgroundColorAnimator, contractTextColorAnimator);
     }
 
     public void expand() {
@@ -160,6 +99,73 @@ class NumPadAnimator {
         a.recycle();
 
         mBackground.setColor(mNormalColor);
+        createAnimators(context);
+    }
+
+    private void createAnimators(Context context) {
+        int textColorPrimary = Utils.getColorAttrDefaultColor(context,
+                android.R.attr.textColorPrimary);
+        int textColorPrimaryInverse = Utils.getColorAttrDefaultColor(context,
+                android.R.attr.textColorPrimaryInverse);
+
+        // Actual values will be updated later, usually during an onLayout() call
+        mExpandAnimator = ValueAnimator.ofFloat(0f, 1f);
+        mExpandAnimator.setDuration(EXPAND_ANIMATION_MS);
+        mExpandAnimator.setInterpolator(Interpolators.LINEAR);
+        mExpandAnimator.addUpdateListener(
+                anim -> mBackground.setCornerRadius((float) anim.getAnimatedValue()));
+
+        ValueAnimator expandBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(),
+                mNormalColor, mHighlightColor);
+        expandBackgroundColorAnimator.setDuration(EXPAND_COLOR_ANIMATION_MS);
+        expandBackgroundColorAnimator.setInterpolator(Interpolators.LINEAR);
+        expandBackgroundColorAnimator.addUpdateListener(
+                animator -> mBackground.setColor((int) animator.getAnimatedValue()));
+
+        ValueAnimator expandTextColorAnimator =
+                ValueAnimator.ofObject(new ArgbEvaluator(),
+                textColorPrimary, textColorPrimaryInverse);
+        expandTextColorAnimator.setInterpolator(Interpolators.LINEAR);
+        expandTextColorAnimator.setDuration(EXPAND_COLOR_ANIMATION_MS);
+        expandTextColorAnimator.addUpdateListener(valueAnimator -> {
+            if (mDigitTextView != null) {
+                mDigitTextView.setTextColor((int) valueAnimator.getAnimatedValue());
+            }
+        });
+
+        mExpandAnimatorSet = new AnimatorSet();
+        mExpandAnimatorSet.playTogether(mExpandAnimator,
+                expandBackgroundColorAnimator, expandTextColorAnimator);
+
+        mContractAnimator = ValueAnimator.ofFloat(1f, 0f);
+        mContractAnimator.setStartDelay(CONTRACT_ANIMATION_DELAY_MS);
+        mContractAnimator.setDuration(CONTRACT_ANIMATION_MS);
+        mContractAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mContractAnimator.addUpdateListener(
+                anim -> mBackground.setCornerRadius((float) anim.getAnimatedValue()));
+        ValueAnimator contractBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(),
+                mHighlightColor, mNormalColor);
+        contractBackgroundColorAnimator.setInterpolator(Interpolators.LINEAR);
+        contractBackgroundColorAnimator.setStartDelay(CONTRACT_ANIMATION_DELAY_MS);
+        contractBackgroundColorAnimator.setDuration(CONTRACT_ANIMATION_MS);
+        contractBackgroundColorAnimator.addUpdateListener(
+                animator -> mBackground.setColor((int) animator.getAnimatedValue()));
+
+        ValueAnimator contractTextColorAnimator =
+                ValueAnimator.ofObject(new ArgbEvaluator(), textColorPrimaryInverse,
+                textColorPrimary);
+        contractTextColorAnimator.setInterpolator(Interpolators.LINEAR);
+        contractTextColorAnimator.setStartDelay(CONTRACT_ANIMATION_DELAY_MS);
+        contractTextColorAnimator.setDuration(CONTRACT_ANIMATION_MS);
+        contractTextColorAnimator.addUpdateListener(valueAnimator -> {
+            if (mDigitTextView != null) {
+                mDigitTextView.setTextColor((int) valueAnimator.getAnimatedValue());
+            }
+        });
+
+        mContractAnimatorSet = new AnimatorSet();
+        mContractAnimatorSet.playTogether(mContractAnimator,
+                contractBackgroundColorAnimator, contractTextColorAnimator);
     }
 }
 
