@@ -36,8 +36,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@string/config_headlineFontFamilyMedium"
-            android:textColor="@color/resolver_empty_state_text"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="18sp"
+            android:lineHeight="24sp"
             android:gravity="center_horizontal"
             android:layout_centerHorizontal="true" />
         <TextView
@@ -46,8 +47,9 @@
             android:layout_marginTop="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/resolver_empty_state_text"
+            android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
+            android:lineHeight="20sp"
             android:gravity="center_horizontal"
             android:layout_centerHorizontal="true" />
         <Button
@@ -57,11 +59,13 @@
             android:text="@string/resolver_switch_on_work"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="12dp"
             android:fontFamily="@string/config_headlineFontFamilyMedium"
             android:textSize="14sp"
-            android:textColor="?attr/colorAccent"
+            android:textColor="?android:attr/textColorPrimary"
             android:layout_centerHorizontal="true"
-            android:background="@drawable/resolver_turn_on_work_button_ripple_background"/>
+            android:background="@drawable/chooser_action_button_bg"
+            />
         <ProgressBar
             android:id="@+id/resolver_empty_state_progress"
             style="@style/Widget.Material.Light.ProgressBar"
