@@ -35,6 +35,7 @@ import android.app.Activity;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
@@ -48,6 +49,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -71,6 +73,9 @@ public class SplitControllerTest {
     private TaskFragmentInfo mInfo;
     @Mock
     private WindowContainerTransaction mTransaction;
+    @Mock
+    private Handler mHandler;
+
     private SplitController mSplitController;
     private SplitPresenter mSplitPresenter;
 
@@ -86,6 +91,7 @@ public class SplitControllerTest {
         activityConfig.windowConfiguration.setMaxBounds(TASK_BOUNDS);
         doReturn(mActivityResources).when(mActivity).getResources();
         doReturn(activityConfig).when(mActivityResources).getConfiguration();
+        doReturn(mHandler).when(mSplitController).getHandler();
     }
 
     @Test
@@ -94,28 +100,45 @@ public class SplitControllerTest {
         // tf3 is finished so is not active.
         TaskFragmentContainer tf3 = mock(TaskFragmentContainer.class);
         doReturn(true).when(tf3).isFinished();
+        doReturn(false).when(tf3).isWaitingActivityAppear();
         // tf2 has running activity so is active.
         TaskFragmentContainer tf2 = mock(TaskFragmentContainer.class);
         doReturn(1).when(tf2).getRunningActivityCount();
         // tf1 has no running activity so is not active.
-        TaskFragmentContainer tf1 = new TaskFragmentContainer(null, TASK_ID);
+        TaskFragmentContainer tf1 = new TaskFragmentContainer(null /* activity */, TASK_ID,
+                mSplitController);
 
-        taskContainer.mContainers.add(tf3);
-        taskContainer.mContainers.add(tf2);
         taskContainer.mContainers.add(tf1);
+        taskContainer.mContainers.add(tf2);
+        taskContainer.mContainers.add(tf3);
         mSplitController.mTaskContainers.put(TASK_ID, taskContainer);
 
         assertWithMessage("Must return tf2 because tf3 is not active.")
                 .that(mSplitController.getTopActiveContainer(TASK_ID)).isEqualTo(tf2);
 
-        taskContainer.mContainers.remove(tf1);
+        taskContainer.mContainers.remove(tf3);
 
         assertWithMessage("Must return tf2 because tf2 has running activity.")
                 .that(mSplitController.getTopActiveContainer(TASK_ID)).isEqualTo(tf2);
 
         taskContainer.mContainers.remove(tf2);
 
-        assertWithMessage("Must return null because tf1 has no running activity.")
+        assertWithMessage("Must return tf because we are waiting for tf1 to appear.")
+                .that(mSplitController.getTopActiveContainer(TASK_ID)).isEqualTo(tf1);
+
+        final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
+        doReturn(new ArrayList<>()).when(info).getActivities();
+        doReturn(true).when(info).isEmpty();
+        tf1.setInfo(info);
+
+        assertWithMessage("Must return tf because we are waiting for tf1 to become non-empty after"
+                + " creation.")
+                .that(mSplitController.getTopActiveContainer(TASK_ID)).isEqualTo(tf1);
+
+        doReturn(false).when(info).isEmpty();
+        tf1.setInfo(info);
+
+        assertWithMessage("Must return null because tf1 becomes empty.")
                 .that(mSplitController.getTopActiveContainer(TASK_ID)).isNull();
     }
 
@@ -130,6 +153,14 @@ public class SplitControllerTest {
         verify(mSplitPresenter, never()).deleteTaskFragment(any(), any());
         verify(mSplitController).removeContainer(tf);
         verify(mActivity, never()).finish();
+    }
+
+    @Test
+    public void testOnTaskFragmentAppearEmptyTimeout() {
+        final TaskFragmentContainer tf = mSplitController.newContainer(mActivity, TASK_ID);
+        mSplitController.onTaskFragmentAppearEmptyTimeout(tf);
+
+        verify(mSplitPresenter).cleanupContainer(tf, false /* shouldFinishDependent */);
     }
 
     @Test
