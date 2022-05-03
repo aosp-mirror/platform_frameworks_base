@@ -31,6 +31,7 @@ import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.AdditionalAnswers.returnsFirstArg
 import org.mockito.Mock
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.Mockito.any
@@ -92,6 +93,8 @@ class TvPipBoundsControllerTest {
 
         whenever(context.resources).thenReturn(resources)
         whenever(resources.getInteger(R.integer.config_pipStashDuration)).thenReturn(STASH_DURATION)
+        whenever(tvPipBoundsAlgorithm.adjustBoundsForTemporaryDecor(any()))
+                .then(returnsFirstArg<Rect>())
 
         boundsController = TvPipBoundsController(
                 context,

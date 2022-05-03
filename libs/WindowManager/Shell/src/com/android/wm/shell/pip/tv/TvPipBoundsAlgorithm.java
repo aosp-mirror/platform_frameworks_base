@@ -102,7 +102,7 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             updateGravityOnExpandToggled(Gravity.NO_GRAVITY, true);
         }
         mTvPipBoundsState.setTvPipExpanded(isPipExpanded);
-        return getTvPipPlacement().getBounds();
+        return adjustBoundsForTemporaryDecor(getTvPipPlacement().getBounds());
     }
 
     /** Returns the current bounds adjusted to the new aspect ratio, if valid. */
@@ -112,7 +112,20 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: getAdjustedDestinationBounds: %f", TAG, newAspectRatio);
         }
-        return getTvPipPlacement().getBounds();
+        return adjustBoundsForTemporaryDecor(getTvPipPlacement().getBounds());
+    }
+
+    Rect adjustBoundsForTemporaryDecor(Rect bounds) {
+        Rect boundsWithDecor = new Rect(bounds);
+        Insets decorInset = mTvPipBoundsState.getPipMenuTemporaryDecorInsets();
+        Insets pipDecorReverseInsets = Insets.subtract(Insets.NONE, decorInset);
+        boundsWithDecor.inset(decorInset);
+        Gravity.apply(mTvPipBoundsState.getTvPipGravity(),
+                boundsWithDecor.width(), boundsWithDecor.height(), bounds, boundsWithDecor);
+
+        // remove temporary decoration again
+        boundsWithDecor.inset(pipDecorReverseInsets);
+        return boundsWithDecor;
     }
 
     /**
@@ -152,8 +165,6 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
         mKeepClearAlgorithm.setStashOffset(mTvPipBoundsState.getStashOffset());
         mKeepClearAlgorithm.setPipPermanentDecorInsets(
                 mTvPipBoundsState.getPipMenuPermanentDecorInsets());
-        mKeepClearAlgorithm.setPipTemporaryDecorInsets(
-                mTvPipBoundsState.getPipMenuTemporaryDecorInsets());
 
         final Placement placement = mKeepClearAlgorithm.calculatePipPosition(
                 pipSize,

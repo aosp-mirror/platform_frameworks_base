@@ -62,6 +62,7 @@ public class TvPipBoundsController {
 
     private int mResizeAnimationDuration;
     private int mStashDurationMs;
+    private Rect mCurrentPlacementBounds;
     private Rect mPipTargetBounds;
 
     private final Runnable mApplyPendingPlacementRunnable = this::applyPendingPlacement;
@@ -96,15 +97,16 @@ public class TvPipBoundsController {
     }
 
     /**
-     * Update the PiP bounds based on the state of the PiP and keep clear areas.
-     * Unless {@code immediate} is {@code true}, the PiP does not move immediately to its new
-     * position, but waits for a new position to stay uncontested for
+     * Update the PiP bounds based on the state of the PiP, decors, and keep clear areas.
+     * Unless {@code immediate} is {@code true}, the PiP does not move immediately to avoid
+     * keep clear areas, but waits for a new position to stay uncontested for
      * {@link #POSITION_DEBOUNCE_TIMEOUT_MILLIS} before moving to it.
+     * Temporary decor changes are applied immediately.
      *
      * @param stayAtAnchorPosition If true, PiP will be placed at the anchor position
      * @param disallowStashing     If true, PiP will not be placed off-screen in a stashed position
      * @param animationDuration    Duration of the animation to the new position
-     * @param immediate            If true, PiP will move immediately
+     * @param immediate            If true, PiP will move immediately to avoid keep clear areas
      */
     @VisibleForTesting
     void recalculatePipBounds(boolean stayAtAnchorPosition, boolean disallowStashing,
@@ -115,15 +117,16 @@ public class TvPipBoundsController {
         mTvPipBoundsState.setStashed(stashType);
         if (stayAtAnchorPosition) {
             cancelScheduledPlacement();
-            movePipTo(placement.getAnchorBounds(), animationDuration);
+            applyPlacementBounds(placement.getAnchorBounds(), animationDuration);
         } else if (disallowStashing) {
             cancelScheduledPlacement();
-            movePipTo(placement.getUnstashedBounds(), animationDuration);
+            applyPlacementBounds(placement.getUnstashedBounds(), animationDuration);
         } else if (immediate) {
             cancelScheduledPlacement();
-            movePipTo(placement.getBounds(), animationDuration);
+            applyPlacementBounds(placement.getBounds(), animationDuration);
             scheduleUnstashIfNeeded(placement);
         } else {
+            applyPlacementBounds(mCurrentPlacementBounds, animationDuration);
             schedulePinnedStackPlacement(placement, animationDuration);
         }
     }
@@ -159,7 +162,7 @@ public class TvPipBoundsController {
         }
         if (placement.getUnstashDestinationBounds() != null) {
             mUnstashRunnable = () -> {
-                movePipTo(placement.getUnstashDestinationBounds(),
+                applyPlacementBounds(placement.getUnstashDestinationBounds(),
                         mResizeAnimationDuration);
                 mUnstashRunnable = null;
             };
@@ -180,10 +183,10 @@ public class TvPipBoundsController {
 
             if (mUnstashRunnable != null) {
                 // currently stashed, use stashed pos
-                movePipTo(mPendingPlacement.getBounds(),
+                applyPlacementBounds(mPendingPlacement.getBounds(),
                         mPendingPlacementAnimationDuration);
             } else {
-                movePipTo(mPendingPlacement.getUnstashedBounds(),
+                applyPlacementBounds(mPendingPlacement.getUnstashedBounds(),
                         mPendingPlacementAnimationDuration);
             }
         }
@@ -192,6 +195,7 @@ public class TvPipBoundsController {
     }
 
     void onPipDismissed() {
+        mCurrentPlacementBounds = null;
         mPipTargetBounds = null;
         cancelScheduledPlacement();
     }
@@ -204,6 +208,16 @@ public class TvPipBoundsController {
             mMainHandler.removeCallbacks(mUnstashRunnable);
             mUnstashRunnable = null;
         }
+    }
+
+    private void applyPlacementBounds(Rect bounds, int animationDuration) {
+        if (bounds == null) {
+            return;
+        }
+
+        mCurrentPlacementBounds = bounds;
+        Rect adjustedBounds = mTvPipBoundsAlgorithm.adjustBoundsForTemporaryDecor(bounds);
+        movePipTo(adjustedBounds, animationDuration);
     }
 
     /** Animates the PiP to the given bounds with the given animation duration. */

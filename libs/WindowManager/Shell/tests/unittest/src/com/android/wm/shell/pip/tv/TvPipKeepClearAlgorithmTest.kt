@@ -453,21 +453,9 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_PipInsets() {
-        val permInsets = Insets.of(-1, -2, -3, -4)
-        algorithm.setPipPermanentDecorInsets(permInsets)
-        testInsetsForAllPositions(permInsets)
+        val insets = Insets.of(-1, -2, -3, -4)
+        algorithm.setPipPermanentDecorInsets(insets)
 
-        val tempInsets = Insets.of(-4, -3, -2, -1)
-        algorithm.setPipPermanentDecorInsets(Insets.NONE)
-        algorithm.setPipTemporaryDecorInsets(tempInsets)
-        testInsetsForAllPositions(tempInsets)
-
-        algorithm.setPipPermanentDecorInsets(permInsets)
-        algorithm.setPipTemporaryDecorInsets(tempInsets)
-        testInsetsForAllPositions(Insets.add(permInsets, tempInsets))
-    }
-
-    private fun testInsetsForAllPositions(insets: Insets) {
         gravity = Gravity.BOTTOM or Gravity.RIGHT
         testAnchorPositionWithInsets(insets)
 
