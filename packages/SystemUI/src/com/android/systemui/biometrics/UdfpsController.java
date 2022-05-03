@@ -813,7 +813,11 @@ public class UdfpsController implements DozeReceiver {
         final UdfpsView view = mOverlay.getOverlayView();
         if (view != null) {
             view.startIllumination(() -> {
-                mFingerprintManager.onUiReady(requestId, mSensorId);
+                if (mAlternateTouchProvider != null) {
+                    mAlternateTouchProvider.onUiReady();
+                } else {
+                    mFingerprintManager.onUiReady(requestId, mSensorId);
+                }
                 mLatencyTracker.onActionEnd(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
             });
         }
