@@ -348,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Lehetővé teszi az alkalmazás számára, hogy váltson az állapotsor részletes és listanézete között."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Értesítések megjelenítése teljes képernyős tevékenységként zárolt eszközön"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Lehetővé teszi az alkalmazás számára, hogy értesítéseket jelenítsen meg teljes képernyős tevékenységként zárolt eszközön."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"parancsikonok telepítése"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Parancsikonok telepítése"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Lehetővé teszi egy alkalmazás számára, hogy felhasználói beavatkozás nélkül adjon hozzá parancsikonokat a kezdőképernyőhöz."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"parancsikonok eltávolítása"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Lehetővé teszi egy alkalmazás számára, hogy felhasználói beavatkozás nélkül távolítson el parancsikonokat a kezdőképernyőről."</string>

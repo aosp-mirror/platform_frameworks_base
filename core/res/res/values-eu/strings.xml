@@ -627,8 +627,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Ilunegi dago. Erabili argi gehiago."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Urrundu telefonoa."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Hurbildu telefonoa."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Goratu telefonoa."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Beheratu telefonoa."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Igo telefonoa."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Jaitsi telefonoa."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Mugitu telefonoa ezkerretara."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Mugitu telefonoa eskuinetara."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Begiratu zuzenago gailuari."</string>
@@ -1937,9 +1937,9 @@
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"USSD eskaera ohiko deira aldatu da"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"USSD eskaera SS eskaerara aldatu da"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="8343001461299302472">"USSD eskaera berrira aldatu da"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"USSD eskaera bideo-deira aldatu da"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"USSD eskaera bideodeira aldatu da"</string>
     <string name="stk_cc_ss_to_dial" msgid="4087396658768717077">"SS eskaera ohiko deira aldatu da"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS eskaera bideo-deira aldatu da"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS eskaera bideodeira aldatu da"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS eskaera USSD eskaerara aldatu da"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"SS eskaera berrira aldatu da"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Phishing-alerta"</string>

@@ -584,7 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Essayez une autre empreinte"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Trop de lumière"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Essayez de repositionner le doigt"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Changez légèrement de position chaque fois"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Changez légèrement de position à chaque fois"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
@@ -627,7 +627,7 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Trop sombre. Essayez une éclairage plus lumineux."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Éloignez le téléphone."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Rapprochez le téléphone."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Déplacez le téléphone vers le haut."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Montez le téléphone."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Baissez le téléphone."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Déplacez le téléphone vers la gauche."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Déplacez le téléphone vers la droite."</string>
@@ -1738,7 +1738,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour changer de fonctionnalité, balayez l\'écran vers le haut avec trois doigts et appuyez de manière prolongée."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Agrandissement"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g>..."</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Passage à <xliff:g id="NAME">%1$s</xliff:g>..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Déconnexion de <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Propriétaire"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Erreur"</string>
@@ -2084,8 +2084,8 @@
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Application dangereuse détectée"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> souhaite afficher des éléments de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifier"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibreur pour les appels et les notifications"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Sons désactivés pour les appels et les notifications"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Les appels et les notifications vibreront"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Les appels et les notifications seront silencieux"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modifications du système"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne pas déranger"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nouveau : Le mode Ne pas déranger masque les notifications"</string>

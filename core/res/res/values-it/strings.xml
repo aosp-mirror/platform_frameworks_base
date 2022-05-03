@@ -349,7 +349,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Visualizzazione di notifiche sotto forma di attività in modalità a schermo intero su un dispositivo bloccato"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Consente all\'app di visualizzare le notifiche sotto forma di attività in modalità a schermo intero su un dispositivo bloccato"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Aggiunta di scorciatoie"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Consente a un\'applicazione di aggiungere scorciatoie alla schermata Home automaticamente"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"consentire a un\'applicazione di aggiungere scorciatoie alla schermata Home automaticamente"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"eliminazione di scorciatoie"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Consente all\'applicazione di rimuovere le scorciatoie della schermata Home automaticamente."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"reindirizzamento chiamate in uscita"</string>
@@ -1464,7 +1464,7 @@
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"Consente a un\'applicazione di indirizzare l\'uscita di media verso altri dispositivi esterni."</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"lettura delle sessioni di installazione"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"Consente a un\'applicazione di leggere le sessioni di installazione. L\'app può conoscere i dettagli sulle installazioni di pacchetti attive."</string>
-    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"richiesta di pacchetti di installazione"</string>
+    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"richiesta di installazione di pacchetti"</string>
     <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"Consente a un\'applicazione di richiedere l\'installazione di pacchetti."</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"richiesta di eliminazione dei pacchetti"</string>
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Consente a un\'applicazione di richiedere l\'eliminazione di pacchetti."</string>

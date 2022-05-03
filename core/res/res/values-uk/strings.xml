@@ -1538,7 +1538,7 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Спеціальні можливості"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Фоновий мал."</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Змінити фоновий малюнок"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Служба читання сповіщень"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Сервіс читання сповіщень"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR-режим"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Постачальник умов"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Служба встановлення пріоритетності сповіщень"</string>
@@ -2208,7 +2208,7 @@
       <item quantity="many"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файлів</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файлу</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Немає рекомендацій щодо людей, з якими можна поділитися"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Немає рекомендацій про те, з ким поділитися"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Список додатків"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Цей додаток не має дозволу на запис, але він може фіксувати звук через цей USB-пристрій."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"На головний екран"</string>

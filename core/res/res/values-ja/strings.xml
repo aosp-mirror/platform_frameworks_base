@@ -627,8 +627,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"暗すぎます。もっと明るい場所でお試しください。"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"スマートフォンをもっと離してください。"</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"スマートフォンをもっと近づけてください。"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"スマートフォンをもっと高い位置に上げてください。"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"スマートフォンをもっと低い位置に下げてください。"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"スマートフォンを上に動かしてください。"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"スマートフォンを下に動かしてください。"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"スマートフォンを左に動かしてください。"</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"スマートフォンを右に動かしてください。"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"もっとまっすぐデバイスに顔を向けてください。"</string>
