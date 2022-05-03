@@ -580,6 +580,7 @@ void FileDescriptorTable::RestatInternal(std::set<int>& open_fds, fail_fn_t fail
       // TODO(narayan): This will be an error in a future android release.
       // error = true;
       // ALOGW("Zygote closed file descriptor %d.", it->first);
+      delete it->second;
       it = open_fd_map_.erase(it);
     } else {
       // The entry from the file descriptor table is still open. Restat
