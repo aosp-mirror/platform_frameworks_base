@@ -26,9 +26,6 @@
     <color name="chooser_gradient_background">@color/loading_gradient_background_color_dark</color>
     <color name="chooser_gradient_highlight">@color/loading_gradient_highlight_color_dark</color>
 
-    <color name="resolver_empty_state_text">#FFFFFF</color>
-    <color name="resolver_empty_state_icon">#FFFFFF</color>
-
     <color name="call_notification_decline_color">#E66A5E</color>
     <color name="call_notification_answer_color">#5DBA80</color>
 
