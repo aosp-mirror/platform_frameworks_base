@@ -166,6 +166,14 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             true /* showSubtitle */, true /* showStatus */);
                     mSubTitleText.setText(R.string.media_output_dialog_connect_failed);
                     mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
+                } else if (device.getState() == MediaDeviceState.STATE_GROUPING) {
+                    mProgressBar.getIndeterminateDrawable().setColorFilter(
+                            new PorterDuffColorFilter(
+                                    mController.getColorItemContent(),
+                                    PorterDuff.Mode.SRC_IN));
+                    setSingleLineLayout(getItemTitle(device), true /* bFocused */,
+                            false /* showSeekBar*/,
+                            true /* showProgressBar */, false /* showStatus */);
                 } else if (mController.getSelectedMediaDevice().size() > 1
                         && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
                     mTitleText.setTextColor(mController.getColorItemContent());
