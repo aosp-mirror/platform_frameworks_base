@@ -22,9 +22,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.PictureInPictureParams;
-import android.app.RemoteAction;
 import android.content.ComponentName;
-import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Matrix;
@@ -40,8 +38,6 @@ import android.view.SurfaceControl;
 import android.window.PictureInPictureSurfaceTransaction;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Holds the common state of the pinned task between the system and SystemUI. If SystemUI ever
@@ -89,12 +85,6 @@ class PinnedTaskController {
 
     private boolean mIsImeShowing;
     private int mImeHeight;
-
-    // The set of actions and aspect-ratio for the that are currently allowed on the PiP activity
-    private ArrayList<RemoteAction> mActions = new ArrayList<>();
-    private RemoteAction mCloseAction;
-    private float mAspectRatio = -1f;
-    private float mExpandedAspectRatio = 0f;
 
     // The aspect ratio bounds of the PIP.
     private float mMinAspectRatio;
@@ -155,7 +145,6 @@ class PinnedTaskController {
             mPinnedTaskListener = listener;
             notifyImeVisibilityChanged(mIsImeShowing, mImeHeight);
             notifyMovementBoundsChanged(false /* fromImeAdjustment */);
-            notifyActionsChanged(mActions, mCloseAction);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned task listener", e);
         }
@@ -370,55 +359,6 @@ class PinnedTaskController {
     }
 
     /**
-     * Sets the current aspect ratio.
-     */
-    void setAspectRatio(float aspectRatio) {
-        if (Float.compare(mAspectRatio, aspectRatio) != 0) {
-            mAspectRatio = aspectRatio;
-            notifyAspectRatioChanged(aspectRatio);
-            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
-        }
-    }
-
-    /**
-     * @return the current aspect ratio.
-     */
-    float getAspectRatio() {
-        return mAspectRatio;
-    }
-
-    /**
-     * Sets the current aspect ratio.
-     */
-    void setExpandedAspectRatio(float aspectRatio) {
-        if (Float.compare(mExpandedAspectRatio, aspectRatio) != 0) {
-            mExpandedAspectRatio = aspectRatio;
-            notifyExpandedAspectRatioChanged(aspectRatio);
-            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
-        }
-    }
-
-    /**
-     * @return the current aspect ratio.
-     */
-    float getExpandedAspectRatio() {
-        return mExpandedAspectRatio;
-    }
-
-
-    /**
-     * Sets the current set of actions.
-     */
-    void setActions(List<RemoteAction> actions, RemoteAction closeAction) {
-        mActions.clear();
-        if (actions != null) {
-            mActions.addAll(actions);
-        }
-        mCloseAction = closeAction;
-        notifyActionsChanged(mActions, closeAction);
-    }
-
-    /**
      * Notifies listeners that the PIP needs to be adjusted for the IME.
      */
     private void notifyImeVisibilityChanged(boolean imeVisible, int imeHeight) {
@@ -427,37 +367,6 @@ class PinnedTaskController {
                 mPinnedTaskListener.onImeVisibilityChanged(imeVisible, imeHeight);
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering bounds changed event.", e);
-            }
-        }
-    }
-
-    private void notifyAspectRatioChanged(float aspectRatio) {
-        if (mPinnedTaskListener == null) return;
-        try {
-            mPinnedTaskListener.onAspectRatioChanged(aspectRatio);
-        } catch (RemoteException e) {
-            Slog.e(TAG_WM, "Error delivering aspect ratio changed event.", e);
-        }
-    }
-
-    private void notifyExpandedAspectRatioChanged(float aspectRatio) {
-        if (mPinnedTaskListener == null) return;
-        try {
-            mPinnedTaskListener.onExpandedAspectRatioChanged(aspectRatio);
-        } catch (RemoteException e) {
-            Slog.e(TAG_WM, "Error delivering aspect ratio changed event.", e);
-        }
-    }
-
-    /**
-     * Notifies listeners that the PIP actions have changed.
-     */
-    private void notifyActionsChanged(List<RemoteAction> actions, RemoteAction closeAction) {
-        if (mPinnedTaskListener != null) {
-            try {
-                mPinnedTaskListener.onActionsChanged(new ParceledListSlice(actions), closeAction);
-            } catch (RemoteException e) {
-                Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }
         }
     }
@@ -490,19 +399,7 @@ class PinnedTaskController {
         }
         pw.println(prefix + "  mIsImeShowing=" + mIsImeShowing);
         pw.println(prefix + "  mImeHeight=" + mImeHeight);
-        pw.println(prefix + "  mAspectRatio=" + mAspectRatio);
         pw.println(prefix + "  mMinAspectRatio=" + mMinAspectRatio);
         pw.println(prefix + "  mMaxAspectRatio=" + mMaxAspectRatio);
-        if (mActions.isEmpty()) {
-            pw.println(prefix + "  mActions=[]");
-        } else {
-            pw.println(prefix + "  mActions=[");
-            for (int i = 0; i < mActions.size(); i++) {
-                RemoteAction action = mActions.get(i);
-                pw.print(prefix + "    Action[" + i + "]: ");
-                action.dump("", pw);
-            }
-            pw.println(prefix + "  ]");
-        }
     }
 }

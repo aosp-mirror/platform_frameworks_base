@@ -97,6 +97,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
+    private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
+            () -> showPrimarySecurityScreen(false);
 
     @VisibleForTesting
     final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
@@ -295,6 +297,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mView.setSwipeListener(mSwipeListener);
         mView.addMotionEventListener(mGlobalTouchListener);
         mConfigurationController.addCallback(mConfigurationListener);
+        mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
     }
 
     @Override
@@ -302,6 +305,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mConfigurationController.removeCallback(mConfigurationListener);
         mView.removeMotionEventListener(mGlobalTouchListener);
+        mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
     }
 
     /** */

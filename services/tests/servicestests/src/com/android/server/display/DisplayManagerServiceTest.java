@@ -27,6 +27,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -38,6 +39,7 @@ import android.compat.testing.PlatformCompatChangeRule;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.display.BrightnessConfiguration;
@@ -72,6 +74,7 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
@@ -93,6 +96,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.time.Duration;
@@ -203,6 +207,10 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testCreateVirtualDisplay_sentToInputManager() {
+        // This is to update the display device config such that DisplayManagerService can ignore
+        // the usage of SensorManager, which is available only after the PowerManagerService
+        // is ready.
+        resetConfigToIgnoreSensorManager(mContext);
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -275,6 +283,10 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testPhysicalViewports() {
+        // This is to update the display device config such that DisplayManagerService can ignore
+        // the usage of SensorManager, which is available only after the PowerManagerService
+        // is ready.
+        resetConfigToIgnoreSensorManager(mContext);
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -1341,6 +1353,20 @@ public class DisplayManagerServiceTest {
         } catch (InterruptedException e) {
             fail("Interrupted unexpectedly: " + e);
         }
+    }
+
+    private void resetConfigToIgnoreSensorManager(Context context) {
+        final Resources res = Mockito.spy(context.getResources());
+        doReturn(new int[]{-1}).when(res).getIntArray(R.array
+                .config_ambientThresholdsOfPeakRefreshRate);
+        doReturn(new int[]{-1}).when(res).getIntArray(R.array
+                .config_brightnessThresholdsOfPeakRefreshRate);
+        doReturn(new int[]{-1}).when(res).getIntArray(R.array
+                .config_highDisplayBrightnessThresholdsOfFixedRefreshRate);
+        doReturn(new int[]{-1}).when(res).getIntArray(R.array
+                .config_highAmbientBrightnessThresholdsOfFixedRefreshRate);
+
+        when(context.getResources()).thenReturn(res);
     }
 
     private class FakeDisplayManagerCallback extends IDisplayManagerCallback.Stub {

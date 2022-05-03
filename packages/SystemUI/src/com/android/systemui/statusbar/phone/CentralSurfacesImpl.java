@@ -2971,8 +2971,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
     @Override
     public void showKeyguardImpl() {
         Trace.beginSection("CentralSurfaces#showKeyguard");
-        // In case we're locking while a smartspace transition is in progress, reset it.
-        mKeyguardUnlockAnimationController.resetSmartspaceTransition();
         if (mKeyguardStateController.isLaunchTransitionFadingAway()) {
             mNotificationPanelViewController.cancelAnimation();
             onLaunchTransitionFadingEnded();
@@ -4475,6 +4473,13 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     updateDozingState();
                     mDozeServiceHost.updateDozing();
                     updateScrimController();
+
+                    if (mBiometricUnlockController.isWakeAndUnlock()) {
+                        // Usually doze changes are to/from lockscreen/AOD, but if we're wake and
+                        // unlocking we should hide the keyguard ASAP if necessary.
+                        updateIsKeyguard();
+                    }
+
                     updateReportRejectedTouchVisibility();
                     Trace.endSection();
                 }
