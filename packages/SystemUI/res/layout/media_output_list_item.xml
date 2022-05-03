@@ -39,6 +39,7 @@
                 android:visibility="gone"
                 android:paddingStart="0dp"
                 android:paddingEnd="0dp"
+                android:background="@null"
                 android:progressDrawable="@drawable/media_output_dialog_seekbar_background"
                 android:thumb="@null"
                 android:layout_width="match_parent"
