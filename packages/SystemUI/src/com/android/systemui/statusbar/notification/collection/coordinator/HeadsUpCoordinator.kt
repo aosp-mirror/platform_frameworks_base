@@ -503,6 +503,7 @@ class HeadsUpCoordinator @Inject constructor(
     private val mOnHeadsUpChangedListener = object : OnHeadsUpChangedListener {
         override fun onHeadsUpStateChanged(entry: NotificationEntry, isHeadsUp: Boolean) {
             if (!isHeadsUp) {
+                mNotifPromoter.invalidateList()
                 mHeadsUpViewBinder.unbindHeadsUpView(entry)
                 endNotifLifetimeExtensionIfExtended(entry)
             }
