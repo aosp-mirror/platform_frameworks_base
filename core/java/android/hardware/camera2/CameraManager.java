@@ -2200,6 +2200,14 @@ public final class CameraManager {
                 return;
             }
 
+            // Setup vendor tag on status change in case it was not set correctly
+            // during connect due to issues in HAL
+            try {
+                CameraMetadataNative.setupGlobalVendorTagDescriptor();
+            } catch (ServiceSpecificException e) {
+                handleRecoverableSetupErrors(e);
+            }
+
             Integer oldStatus;
             if (status == ICameraServiceListener.STATUS_NOT_PRESENT) {
                 oldStatus = mDeviceStatus.remove(id);
