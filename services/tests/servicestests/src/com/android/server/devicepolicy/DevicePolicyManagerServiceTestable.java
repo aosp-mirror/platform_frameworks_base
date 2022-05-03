@@ -55,8 +55,8 @@ import com.android.server.LocalServices;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -64,45 +64,16 @@ import java.util.Map;
  * Overrides {@link #DevicePolicyManagerService} for dependency injection.
  */
 public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerService {
-    /**
-     * Overrides {@link #Owners} for dependency injection.
-     */
-    public static class OwnersTestable extends Owners {
-
-        public OwnersTestable(MockSystemServices services) {
-            super(services.userManager, services.userManagerInternal,
-                    services.packageManagerInternal, services.activityTaskManagerInternal,
-                    services.activityManagerInternal, new MockInjector(services));
-        }
-
-        static class MockInjector extends Injector {
-            private final MockSystemServices mServices;
-
-            private MockInjector(MockSystemServices services) {
-                mServices = services;
-            }
-
-            @Override
-            File environmentGetDataSystemDirectory() {
-                return mServices.dataDir;
-            }
-
-            @Override
-            File environmentGetUserSystemDirectory(int userId) {
-                return mServices.environment.getUserSystemDirectory(userId);
-            }
-        }
-    }
-
     public final DpmMockContext context;
-    protected final MockInjector mMockInjector;
+    public final MockInjector mMockInjector;
 
     public DevicePolicyManagerServiceTestable(MockSystemServices services, DpmMockContext context) {
-        this(new MockInjector(services, context));
+        this(new MockInjector(services, context), services.pathProvider);
     }
 
-    private DevicePolicyManagerServiceTestable(MockInjector injector) {
-        super(unregisterLocalServices(injector));
+    private DevicePolicyManagerServiceTestable(
+            MockInjector injector, PolicyPathProvider pathProvider) {
+        super(unregisterLocalServices(injector), pathProvider);
         mMockInjector = injector;
         this.context = injector.context;
     }
@@ -148,11 +119,6 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
             super(context);
             this.services = services;
             this.context = context;
-        }
-
-        @Override
-        Owners newOwners() {
-            return new OwnersTestable(services);
         }
 
         @Override
@@ -216,6 +182,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        ActivityTaskManagerInternal getActivityTaskManagerInternal() {
+            return services.activityTaskManagerInternal;
+        }
+
+        @Override
         IPackageManager getIPackageManager() {
             return services.ipackageManager;
         }
@@ -269,11 +240,6 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
-        String getDevicePolicyFilePathForSystemUser() {
-            return services.systemUserDataDir.getAbsolutePath() + "/";
-        }
-
-        @Override
         long binderClearCallingIdentity() {
             return context.binder.clearCallingIdentity();
         }
@@ -306,11 +272,6 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         boolean binderIsCallingUidMyUid() {
             return context.binder.isCallerUidMyUid();
-        }
-
-        @Override
-        File environmentGetUserSystemDirectory(int userId) {
-            return services.environment.getUserSystemDirectory(userId);
         }
 
         @Override
