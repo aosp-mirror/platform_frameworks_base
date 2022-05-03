@@ -238,13 +238,18 @@ public abstract class RemoteDisplayProvider {
      * Adds the specified remote display and notifies the system.
      *
      * @param display The remote display that was added.
-     * @throws IllegalStateException if there is already a display with the same id.
+     * @throws IllegalStateException if the argument is null, or if there is already a display with
+     *         the same id.
      */
     public void addDisplay(RemoteDisplay display) {
-        if (display == null || mDisplays.containsKey(display.getId())) {
-            throw new IllegalArgumentException("display");
+        if (display == null) {
+            throw new IllegalArgumentException("display cannot be null");
         }
-        mDisplays.put(display.getId(), display);
+        String displayId = display.getId();
+        if (mDisplays.containsKey(displayId)) {
+            throw new IllegalArgumentException("display already exists with id: " + displayId);
+        }
+        mDisplays.put(displayId, display);
         publishState();
     }
 
@@ -252,11 +257,16 @@ public abstract class RemoteDisplayProvider {
      * Updates information about the specified remote display and notifies the system.
      *
      * @param display The remote display that was added.
-     * @throws IllegalStateException if the display was n
+     * @throws IllegalStateException if the argument is null, or if the provider is not aware of the
+     *         display.
      */
     public void updateDisplay(RemoteDisplay display) {
-        if (display == null || mDisplays.get(display.getId()) != display) {
-            throw new IllegalArgumentException("display");
+        if (display == null) {
+            throw new IllegalArgumentException("display cannot be null");
+        }
+        String displayId = display.getId();
+        if (mDisplays.get(displayId) != display) {
+            throw new IllegalArgumentException("unexpected display with id: " + displayId);
         }
         publishState();
     }
@@ -265,12 +275,18 @@ public abstract class RemoteDisplayProvider {
      * Removes the specified remote display and tells the system about it.
      *
      * @param display The remote display that was removed.
+     * @throws IllegalStateException if the argument is null, or if the provider is not aware of the
+     *         display.
      */
     public void removeDisplay(RemoteDisplay display) {
-        if (display == null || mDisplays.get(display.getId()) != display) {
-            throw new IllegalArgumentException("display");
+        if (display == null) {
+            throw new IllegalArgumentException("display cannot be null");
         }
-        mDisplays.remove(display.getId());
+        String displayId = display.getId();
+        if (mDisplays.get(displayId) != display) {
+            throw new IllegalArgumentException("unexpected display with id: " + displayId);
+        }
+        mDisplays.remove(displayId);
         publishState();
     }
 
