@@ -118,6 +118,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private final UiEventLogger mUiEventLogger;
     private NotificationEntry mEntry;
     private boolean mRemoved;
+    private boolean mSending;
     private NotificationViewWrapper mWrapper;
 
     // TODO(b/193539698): remove this; views shouldn't have access to their controller, and places
@@ -251,6 +252,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         contentView.setBackground(mContentBackground);
         mEditText = findViewById(R.id.remote_input_text);
         mEditText.setInnerFocusable(false);
+        // TextView initializes the spell checked when the view is attached to a window.
+        // This causes a couple of IPCs that can jank, especially during animations.
+        // By default the text view should be disabled, to avoid the unnecessary initialization.
+        mEditText.setEnabled(false);
         mEditText.setWindowInsetsAnimationCallback(
                 new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
             @NonNull
@@ -336,6 +341,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     /** Show the "sending in-progress" UI. */
     public void startSending() {
         mEditText.setEnabled(false);
+        mSending = true;
         mSendButton.setVisibility(INVISIBLE);
         mProgressBar.setVisibility(VISIBLE);
         mEditText.mShowImeOnInputConnection = false;
@@ -444,6 +450,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mController.removeSpinning(mEntry.getKey(), mToken);
     }
 
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+        mEditText.setEnabled(isVisible && !mSending);
+    }
+
     public void setHintText(CharSequence hintText) {
         mEditText.setHint(hintText);
     }
@@ -508,10 +520,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     private void reset() {
         mResetting = true;
+        mSending = false;
         mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
 
         mEditText.getText().clear();
-        mEditText.setEnabled(true);
+        mEditText.setEnabled(isAggregatedVisible());
         mSendButton.setVisibility(VISIBLE);
         mProgressBar.setVisibility(INVISIBLE);
         mController.removeSpinning(mEntry.getKey(), mToken);
