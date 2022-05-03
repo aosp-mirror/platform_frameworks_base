@@ -16,11 +16,12 @@
 
 package android.view;
 
-import android.view.IDisplayWindowRotationCallback;
+import android.view.IDisplayChangeWindowCallback;
+import android.window.DisplayAreaInfo;
 
 /**
- * Singular controller of a "remote" display rotation. When a display rotation is started, WM
- * freezes the screen. It will then call into this controller and wait for a response via the
+ * Singular controller of a "remote" display change. When a display rotation or change is started,
+ * WM freezes the screen. It will then call into this controller and wait for a response via the
  * callback.
  *
  * This needs to provide configuration changes because those changes need to be applied in sync
@@ -36,17 +37,18 @@ import android.view.IDisplayWindowRotationCallback;
  *
  * @hide
  */
-oneway interface IDisplayWindowRotationController {
+oneway interface IDisplayChangeWindowController {
 
     /**
-     * Called when WM needs to know how to update tasks in response to a display rotation.
-     * If this isn't called, a timeout will continue the rotation in WM.
+     * Called when WM needs to know how to update tasks in response to a display change.
+     * If this isn't called, a timeout will continue the change in WM.
      *
-     * @param displayId the display that is rotating.
-     * @param fromRotation the rotation the display is rotating from.
-     * @param toRotation the rotation the display is rotating to.
+     * @param fromRotation the old rotation
+     * @param newRotation the new rotation
+     * @param newDisplayAreaInfo the new display area info after the change
      * @param callback A callback to be called when this has calculated updated configs.
      */
-    void onRotateDisplay(int displayId, int fromRotation, int toRotation,
-            in IDisplayWindowRotationCallback callback);
+    void onDisplayChange(int displayId, int fromRotation, int toRotation,
+            in DisplayAreaInfo newDisplayAreaInfo, in IDisplayChangeWindowCallback callback);
+
 }

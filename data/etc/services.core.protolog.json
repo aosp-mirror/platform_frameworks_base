@@ -469,6 +469,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ResetTargetTaskHelper.java"
     },
+    "-1635750891": {
+      "message": "Received remote change for Display[%d], applied: [%dx%d, rot = %d]",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/RemoteDisplayChangeController.java"
+    },
     "-1633115609": {
       "message": "Key dispatch not paused for screen off",
       "level": "VERBOSE",
@@ -3391,12 +3397,6 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "1246035185": {
-      "message": "stopFreezingDisplayLocked: Returning waitingForConfig=%b, waitingForRemoteRotation=%b, mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, mClientFreezingScreen=%b, mOpeningApps.size()=%d",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "1252594551": {
       "message": "Window types in WindowContext and LayoutParams.type should match! Type from LayoutParams is %d, but type from WindowContext is %d",
       "level": "WARN",
@@ -3493,6 +3493,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
     },
+    "1360176455": {
+      "message": "stopFreezingDisplayLocked: Returning waitingForConfig=%b, waitingForRemoteDisplayChange=%b, mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, mClientFreezingScreen=%b, mOpeningApps.size()=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "1364126018": {
       "message": "Resumed activity; dropping state of: %s",
       "level": "INFO",
@@ -3516,6 +3522,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
+    },
+    "1393721079": {
+      "message": "Starting remote display change: from [rot = %d], to [%dx%d, rot = %d]",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/RemoteDisplayChangeController.java"
     },
     "1396893178": {
       "message": "createRootTask unknown displayId=%d",
@@ -3858,6 +3870,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
+    },
+    "1764619787": {
+      "message": "Remote change for Display[%d]: timeout reached",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/RemoteDisplayChangeController.java"
     },
     "1774661765": {
       "message": "Devices still not ready after waiting %d milliseconds before attempting to detect safe mode.",
