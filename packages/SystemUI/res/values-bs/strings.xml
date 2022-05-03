@@ -74,7 +74,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Uredite"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Uredite snimak ekrana"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Dijeljenje snimka ekrana"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Snimite više"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Snimi više"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Odbacite snimak ekrana"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pregled snimka ekrana"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Gornja granica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
@@ -827,7 +827,7 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Broj verzije"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Broj verzije je kopiran u međumemoriju."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvoreni razgovor"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"Vidžeti za razgovor"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Vidžeti razgovora"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Dodirnite razgovor da ga dodate na početni ekran"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Vaši nedavni razgovori će se pojaviti ovdje"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritetni razgovori"</string>
