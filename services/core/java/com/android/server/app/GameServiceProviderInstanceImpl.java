@@ -29,7 +29,6 @@ import android.app.IProcessObserver;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -60,6 +59,7 @@ import com.android.internal.infra.ServiceConnector;
 import com.android.internal.infra.ServiceConnector.ServiceLifecycleCallbacks;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.TaskSystemBarsListener;
 import com.android.server.wm.WindowManagerService;
@@ -93,6 +93,9 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 public void onBinderDied() {
                     mBackgroundExecutor.execute(() -> {
                         synchronized (mLock) {
+                            if (DEBUG) {
+                                Slog.d(TAG, "GameSessionService died. Destroying all sessions");
+                            }
                             destroyAndClearAllGameSessionsLocked();
                         }
                     });
@@ -223,6 +226,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IActivityTaskManager mActivityTaskManager;
     private final WindowManagerService mWindowManagerService;
     private final WindowManagerInternal mWindowManagerInternal;
+    private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
     private final ScreenshotHelper mScreenshotHelper;
     private final ServiceConnector<IGameService> mGameServiceConnector;
     private final ServiceConnector<IGameSessionService> mGameSessionServiceConnector;
@@ -249,6 +253,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
             @NonNull IActivityTaskManager activityTaskManager,
             @NonNull WindowManagerService windowManagerService,
             @NonNull WindowManagerInternal windowManagerInternal,
+            @NonNull ActivityTaskManagerInternal activityTaskManagerInternal,
             @NonNull ServiceConnector<IGameService> gameServiceConnector,
             @NonNull ServiceConnector<IGameSessionService> gameSessionServiceConnector,
             @NonNull ScreenshotHelper screenshotHelper) {
@@ -261,6 +266,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         mActivityTaskManager = activityTaskManager;
         mWindowManagerService = windowManagerService;
         mWindowManagerInternal = windowManagerInternal;
+        mActivityTaskManagerInternal = activityTaskManagerInternal;
         mGameServiceConnector = gameServiceConnector;
         mGameSessionServiceConnector = gameSessionServiceConnector;
         mScreenshotHelper = screenshotHelper;
@@ -441,6 +447,11 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
             boolean isTaskAssociatedWithGameSession = mGameSessions.containsKey(taskId);
             if (!isTaskAssociatedWithGameSession) {
                 return;
+            }
+
+
+            if (DEBUG) {
+                Slog.i(TAG, "onTaskRemoved() id: " + taskId);
             }
 
             removeAndDestroyGameSessionIfNecessaryLocked(taskId);
@@ -775,9 +786,19 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
             if (gameSessionRecord.getGameSession() != null && packageName.equals(
                     gameSessionRecord.getComponentName().getPackageName())) {
                 if (DEBUG) {
-                    Slog.d(TAG, "endGameSessionsForPackageLocked(): No more processes for "
+                    Slog.i(TAG, "endGameSessionsForPackageLocked(): No more processes for "
                             + packageName + ", ending game session with taskId: "
                             + gameSessionRecord.getTaskId());
+                }
+
+                RunningTaskInfo runningTaskInfo =
+                        mGameTaskInfoProvider.getRunningTaskInfo(gameSessionRecord.getTaskId());
+                if (runningTaskInfo != null && (runningTaskInfo.isVisible)) {
+                    if (DEBUG) {
+                        Slog.i(TAG, "Found visible task. Ignoring end game session. taskId:"
+                                + gameSessionRecord.getTaskId());
+                    }
+                    continue;
                 }
                 mGameSessions.put(gameSessionRecord.getTaskId(),
                         gameSessionRecord.withGameSessionEndedOnProcessDeath());
@@ -867,24 +888,18 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
 
     private void restartGame(int taskId) {
         String packageName;
-
         synchronized (mLock) {
-            boolean isTaskAssociatedWithGameSession = mGameSessions.containsKey(taskId);
-            if (!isTaskAssociatedWithGameSession) {
+            GameSessionRecord gameSessionRecord = mGameSessions.get(taskId);
+            if (gameSessionRecord == null) {
                 return;
             }
-
-            packageName = mGameSessions.get(taskId).getComponentName().getPackageName();
+            packageName = gameSessionRecord.getComponentName().getPackageName();
         }
 
-        try {
-            mActivityManager.forceStopPackage(packageName, UserHandle.USER_CURRENT);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+        if (packageName == null) {
+            return;
         }
 
-        Intent launchIntent =
-                mContext.getPackageManager().getLaunchIntentForPackage(packageName);
-        mContext.startActivity(launchIntent);
+        mActivityTaskManagerInternal.restartTaskActivityProcessIfVisible(taskId, packageName);
     }
 }
