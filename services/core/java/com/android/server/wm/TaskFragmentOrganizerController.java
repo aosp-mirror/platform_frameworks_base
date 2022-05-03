@@ -197,7 +197,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             final Task parent = tf.getParent().asTask();
             final Configuration parentConfig = parent.getConfiguration();
             final Configuration lastParentConfig = mLastSentTaskFragmentParentConfigs.get(tf);
-            if (configurationsAreEqualForOrganizer(parentConfig, lastParentConfig)) {
+            if (configurationsAreEqualForOrganizer(parentConfig, lastParentConfig)
+                    && parentConfig.windowConfiguration.getWindowingMode()
+                    == lastParentConfig.windowConfiguration.getWindowingMode()) {
                 return;
             }
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
