@@ -190,9 +190,8 @@ public final class DistractingPackageHelper {
         for (int i = 0; i < lists.size(); i++) {
             final Bundle extras = new Bundle(3);
             final BroadcastParams list = lists.get(i);
-            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
-                    list.getPackageNames().toArray(new String[0]));
-            extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, list.getUids().toArray());
+            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, list.getPackageNames());
+            extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, list.getUids());
             extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, distractionFlags);
             final SparseArray<int[]> allowList = list.getAllowList().size() == 0
                     ? null : list.getAllowList();
