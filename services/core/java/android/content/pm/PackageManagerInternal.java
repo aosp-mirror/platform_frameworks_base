@@ -499,9 +499,9 @@ public abstract class PackageManagerInternal {
 
     /**
      * Prunes the cache of the APKs in the given APEXes.
-     * @param apexPackages The list of APEX packages that may contain APK-in-APEX.
+     * @param apexPackageNames The list of APEX package names that may contain APK-in-APEX.
      */
-    public abstract void pruneCachedApksInApex(@NonNull List<PackageInfo> apexPackages);
+    public abstract void pruneCachedApksInApex(@NonNull List<String> apexPackageNames);
 
     /**
      * @return The SetupWizard package name.
