@@ -98,6 +98,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.util.LatencyTracker;
+import com.android.keyguard.ActiveUnlockConfig;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUnfoldTransition;
@@ -3383,11 +3384,10 @@ public class NotificationPanelViewController extends PanelViewController {
                             .log(LockscreenUiEvent.LOCKSCREEN_LOCK_SHOW_HINT);
                         startUnlockHintAnimation();
                     }
-                    if (mUpdateMonitor.isFaceEnrolled()
-                            && mUpdateMonitor.mRequestActiveUnlockOnUnlockIntent
-                            && mKeyguardBypassController.canBypass()) {
-                        mUpdateMonitor.requestActiveUnlock("unlock-intent,"
-                                + " extra=lockScreenEmptySpaceTap", true);
+                    if (mUpdateMonitor.isFaceEnrolled()) {
+                        mUpdateMonitor.requestActiveUnlock(
+                                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.UNLOCK_INTENT,
+                                "lockScreenEmptySpaceTap");
                     }
                 }
                 return true;
