@@ -529,7 +529,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ ਸੈੱਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ਇਸ ਐਪ ਨੂੰ ਅਲਾਰਮ ਸੈੱਟ ਕਰਨ ਜਾਂ ਹੋਰ ਸਮਾਂ-ਸੰਵੇਦਨਸ਼ੀਲ ਕਾਰਵਾਈਆਂ ਨੂੰ ਨਿਯਤ ਕਰਨ ਦਿਓ। ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚਲਾਉਣ ਦੀ ਇਜਾਜ਼ਤ ਮਿਲਦੀ ਹੈ, ਜਿਸ ਨਾਲ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਵੱਧ ਸਕਦੀ ਹੈ।\n\nਜੇ ਇਹ ਇਜਾਜ਼ਤ ਬੰਦ ਹੈ, ਤਾਂ ਮੌਜੂਦਾ ਅਲਾਰਮ ਅਤੇ ਇਸ ਐਪ ਰਾਹੀਂ ਨਿਯਤ ਕੀਤੇ ਸਮਾਂ-ਆਧਾਰਿਤ ਇਵੈਂਟ ਕੰਮ ਨਹੀਂ ਕਰਨਗੇ।"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ਇਸ ਐਪ ਨੂੰ ਅਲਾਰਮ ਸੈੱਟ ਕਰਨ ਜਾਂ ਹੋਰ ਸਮਾਂ-ਸੰਵੇਦਨਸ਼ੀਲ ਕਾਰਵਾਈਆਂ ਨੂੰ ਨਿਯਤ ਕਰਨ ਦਿਓ। ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਣ ਦੀ ਇਜਾਜ਼ਤ ਮਿਲਦੀ ਹੈ, ਜਿਸ ਨਾਲ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਵੱਧ ਸਕਦੀ ਹੈ।\n\nਜੇ ਇਹ ਇਜਾਜ਼ਤ ਬੰਦ ਹੈ, ਤਾਂ ਮੌਜੂਦਾ ਅਲਾਰਮ ਅਤੇ ਇਸ ਐਪ ਰਾਹੀਂ ਨਿਯਤ ਕੀਤੇ ਸਮਾਂ-ਆਧਾਰਿਤ ਇਵੈਂਟ ਕੰਮ ਨਹੀਂ ਕਰਨਗੇ।"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ਸਮਾਂ-ਸੂਚੀ, ਅਲਾਰਮ, ਰਿਮਾਈਂਡਰ, ਘੜੀ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ਚਾਲੂ ਕਰੋ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
