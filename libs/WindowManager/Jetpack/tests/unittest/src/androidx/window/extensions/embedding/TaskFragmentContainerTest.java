@@ -18,12 +18,18 @@ package androidx.window.extensions.embedding;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
 import android.app.Activity;
+import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
@@ -59,15 +65,19 @@ public class TaskFragmentContainerTest {
     private Activity mActivity;
     @Mock
     private TaskFragmentInfo mInfo;
+    @Mock
+    private Handler mHandler;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        doReturn(mHandler).when(mController).getHandler();
     }
 
     @Test
     public void testFinish() {
-        final TaskFragmentContainer container = new TaskFragmentContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container = new TaskFragmentContainer(mActivity, TASK_ID,
+                mController);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         // Only remove the activity, but not clear the reference until appeared.
@@ -93,5 +103,63 @@ public class TaskFragmentContainerTest {
         verify(mActivity, never()).finish();
         verify(mPresenter).deleteTaskFragment(wct, container.getTaskFragmentToken());
         verify(mController).removeContainer(container);
+    }
+
+    @Test
+    public void testIsWaitingActivityAppear() {
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                TASK_ID, mController);
+
+        assertTrue(container.isWaitingActivityAppear());
+
+        final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
+        doReturn(new ArrayList<>()).when(info).getActivities();
+        doReturn(true).when(info).isEmpty();
+        container.setInfo(info);
+
+        assertTrue(container.isWaitingActivityAppear());
+
+        doReturn(false).when(info).isEmpty();
+        container.setInfo(info);
+
+        assertFalse(container.isWaitingActivityAppear());
+    }
+
+    @Test
+    public void testAppearEmptyTimeout() {
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                TASK_ID, mController);
+
+        assertNull(container.mAppearEmptyTimeout);
+
+        // Not set if it is not appeared empty.
+        final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
+        doReturn(new ArrayList<>()).when(info).getActivities();
+        doReturn(false).when(info).isEmpty();
+        container.setInfo(info);
+
+        assertNull(container.mAppearEmptyTimeout);
+
+        // Set timeout if the first info set is empty.
+        container.mInfo = null;
+        doReturn(true).when(info).isEmpty();
+        container.setInfo(info);
+
+        assertNotNull(container.mAppearEmptyTimeout);
+
+        // Remove timeout after the container becomes non-empty.
+        doReturn(false).when(info).isEmpty();
+        container.setInfo(info);
+
+        assertNull(container.mAppearEmptyTimeout);
+
+        // Running the timeout will call into SplitController.onTaskFragmentAppearEmptyTimeout.
+        container.mInfo = null;
+        doReturn(true).when(info).isEmpty();
+        container.setInfo(info);
+        container.mAppearEmptyTimeout.run();
+
+        assertNull(container.mAppearEmptyTimeout);
+        verify(mController).onTaskFragmentAppearEmptyTimeout(container);
     }
 }
