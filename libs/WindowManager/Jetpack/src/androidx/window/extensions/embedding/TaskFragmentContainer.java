@@ -17,16 +17,20 @@
 package androidx.window.extensions.embedding;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
+import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,6 +41,11 @@ import java.util.List;
  * on the server side.
  */
 class TaskFragmentContainer {
+    private static final int APPEAR_EMPTY_TIMEOUT_MS = 3000;
+
+    @NonNull
+    private final SplitController mController;
+
     /**
      * Client-created token that uniquely identifies the task fragment container instance.
      */
@@ -49,7 +58,8 @@ class TaskFragmentContainer {
     /**
      * Server-provided task fragment information.
      */
-    private TaskFragmentInfo mInfo;
+    @VisibleForTesting
+    TaskFragmentInfo mInfo;
 
     /**
      * Activities that are being reparented or being started to this container, but haven't been
@@ -73,10 +83,26 @@ class TaskFragmentContainer {
     private final Rect mLastRequestedBounds = new Rect();
 
     /**
+     * Windowing mode that was requested last via {@link android.window.WindowContainerTransaction}.
+     */
+    @WindowingMode
+    private int mLastRequestedWindowingMode = WINDOWING_MODE_UNDEFINED;
+
+    /**
+     * When the TaskFragment has appeared in server, but is empty, we should remove the TaskFragment
+     * if it is still empty after the timeout.
+     */
+    @VisibleForTesting
+    @Nullable
+    Runnable mAppearEmptyTimeout;
+
+    /**
      * Creates a container with an existing activity that will be re-parented to it in a window
      * container transaction.
      */
-    TaskFragmentContainer(@Nullable Activity activity, int taskId) {
+    TaskFragmentContainer(@Nullable Activity activity, int taskId,
+            @NonNull SplitController controller) {
+        mController = controller;
         mToken = new Binder("TaskFragmentContainer");
         if (taskId == INVALID_TASK_ID) {
             throw new IllegalArgumentException("Invalid Task id");
@@ -147,12 +173,30 @@ class TaskFragmentContainer {
         return count;
     }
 
+    /** Whether we are waiting for the TaskFragment to appear and become non-empty. */
+    boolean isWaitingActivityAppear() {
+        return !mIsFinished && (mInfo == null || mAppearEmptyTimeout != null);
+    }
+
     @Nullable
     TaskFragmentInfo getInfo() {
         return mInfo;
     }
 
     void setInfo(@NonNull TaskFragmentInfo info) {
+        if (!mIsFinished && mInfo == null && info.isEmpty()) {
+            // onTaskFragmentAppeared with empty info. We will remove the TaskFragment if it is
+            // still empty after timeout.
+            mAppearEmptyTimeout = () -> {
+                mAppearEmptyTimeout = null;
+                mController.onTaskFragmentAppearEmptyTimeout(this);
+            };
+            mController.getHandler().postDelayed(mAppearEmptyTimeout, APPEAR_EMPTY_TIMEOUT_MS);
+        } else if (mAppearEmptyTimeout != null && !info.isEmpty()) {
+            mController.getHandler().removeCallbacks(mAppearEmptyTimeout);
+            mAppearEmptyTimeout = null;
+        }
+
         mInfo = info;
         if (mInfo == null || mPendingAppearedActivities.isEmpty()) {
             return;
@@ -226,6 +270,10 @@ class TaskFragmentContainer {
             @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
         if (!mIsFinished) {
             mIsFinished = true;
+            if (mAppearEmptyTimeout != null) {
+                mController.getHandler().removeCallbacks(mAppearEmptyTimeout);
+                mAppearEmptyTimeout = null;
+            }
             finishActivities(shouldFinishDependent, presenter, wct, controller);
         }
 
@@ -300,6 +348,20 @@ class TaskFragmentContainer {
         }
     }
 
+    /**
+     * Checks if last requested windowing mode is equal to the provided value.
+     */
+    boolean isLastRequestedWindowingModeEqual(@WindowingMode int windowingMode) {
+        return mLastRequestedWindowingMode == windowingMode;
+    }
+
+    /**
+     * Updates the last requested windowing mode.
+     */
+    void setLastRequestedWindowingMode(@WindowingMode int windowingModes) {
+        mLastRequestedWindowingMode = windowingModes;
+    }
+
     /** Gets the parent leaf Task id. */
     int getTaskId() {
         return mTaskId;
@@ -319,14 +381,15 @@ class TaskFragmentContainer {
     private String toString(boolean includeContainersToFinishOnExit) {
         return "TaskFragmentContainer{"
                 + " token=" + mToken
-                + " info=" + mInfo
                 + " topNonFinishingActivity=" + getTopNonFinishingActivity()
+                + " runningActivityCount=" + getRunningActivityCount()
+                + " isFinished=" + mIsFinished
+                + " lastRequestedBounds=" + mLastRequestedBounds
                 + " pendingAppearedActivities=" + mPendingAppearedActivities
                 + (includeContainersToFinishOnExit ? " containersToFinishOnExit="
                 + containersToFinishOnExitToString() : "")
                 + " activitiesToFinishOnExit=" + mActivitiesToFinishOnExit
-                + " isFinished=" + mIsFinished
-                + " lastRequestedBounds=" + mLastRequestedBounds
+                + " info=" + mInfo
                 + "}";
     }
 

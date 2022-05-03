@@ -56,7 +56,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.IDisplayWindowRotationCallback;
@@ -1024,13 +1023,7 @@ public class DisplayRotation {
                 disable = false;
                 // Enable listener if not already enabled.
                 if (!mOrientationListener.mEnabled) {
-                    // Don't clear the current sensor orientation if the keyguard is going away in
-                    // dismiss mode. This allows window manager to use the last sensor reading to
-                    // determine the orientation vs. falling back to the last known orientation if
-                    // the sensor reading was cleared which can cause it to relaunch the app that
-                    // will show in the wrong orientation first before correcting leading to app
-                    // launch delays.
-                    mOrientationListener.enable(true /* clearCurrentRotation */);
+                    mOrientationListener.enable();
                 }
             }
         }
@@ -1570,33 +1563,11 @@ public class DisplayRotation {
         proto.end(token);
     }
 
-    private class OrientationListener extends WindowOrientationListener {
-        final SparseArray<Runnable> mRunnableCache = new SparseArray<>(5);
-        boolean mEnabled;
+    private class OrientationListener extends WindowOrientationListener implements Runnable {
+        transient boolean mEnabled;
 
         OrientationListener(Context context, Handler handler) {
             super(context, handler);
-        }
-
-        private class UpdateRunnable implements Runnable {
-            final int mRotation;
-
-            UpdateRunnable(int rotation) {
-                mRotation = rotation;
-            }
-
-            @Override
-            public void run() {
-                // Send interaction power boost to improve redraw performance.
-                mService.mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
-                if (isRotationChoicePossible(mCurrentAppOrientation)) {
-                    final boolean isValid = isValidRotationChoice(mRotation);
-                    sendProposedRotationChangeToStatusBarInternal(mRotation, isValid);
-                } else {
-                    mService.updateRotation(false /* alwaysSendConfiguration */,
-                            false /* forceRelayout */);
-                }
-            }
         }
 
         @Override
@@ -1615,26 +1586,38 @@ public class DisplayRotation {
         @Override
         public void onProposedRotationChanged(int rotation) {
             ProtoLog.v(WM_DEBUG_ORIENTATION, "onProposedRotationChanged, rotation=%d", rotation);
-            Runnable r = mRunnableCache.get(rotation, null);
-            if (r == null) {
-                r = new UpdateRunnable(rotation);
-                mRunnableCache.put(rotation, r);
+            // Send interaction power boost to improve redraw performance.
+            mService.mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
+            if (isRotationChoicePossible(mCurrentAppOrientation)) {
+                final boolean isValid = isValidRotationChoice(rotation);
+                sendProposedRotationChangeToStatusBarInternal(rotation, isValid);
+            } else {
+                mService.updateRotation(false /* alwaysSendConfiguration */,
+                        false /* forceRelayout */);
             }
-            getHandler().post(r);
         }
 
         @Override
-        public void enable(boolean clearCurrentRotation) {
-            super.enable(clearCurrentRotation);
+        public void enable() {
             mEnabled = true;
+            getHandler().post(this);
             ProtoLog.v(WM_DEBUG_ORIENTATION, "Enabling listeners");
         }
 
         @Override
         public void disable() {
-            super.disable();
             mEnabled = false;
+            getHandler().post(this);
             ProtoLog.v(WM_DEBUG_ORIENTATION, "Disabling listeners");
+        }
+
+        @Override
+        public void run() {
+            if (mEnabled) {
+                super.enable();
+            } else {
+                super.disable();
+            }
         }
     }
 

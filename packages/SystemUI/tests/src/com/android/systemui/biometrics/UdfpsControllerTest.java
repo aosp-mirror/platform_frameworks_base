@@ -150,6 +150,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsHapticsSimulator mUdfpsHapticsSimulator;
     @Mock
+    private UdfpsShell mUdfpsShell;
+    @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private DisplayManager mDisplayManager;
@@ -210,6 +212,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 .thenReturn(mFpmOtherView);
         when(mEnrollView.getContext()).thenReturn(mContext);
         when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
 
         final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
@@ -247,6 +250,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mScreenLifecycle,
                 mVibrator,
                 mUdfpsHapticsSimulator,
+                mUdfpsShell,
                 Optional.of(mHbmProvider),
                 mKeyguardStateController,
                 mDisplayManager,
