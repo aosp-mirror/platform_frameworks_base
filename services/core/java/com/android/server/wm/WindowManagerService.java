@@ -8817,16 +8817,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState newFocusTarget =  displayContent == null
                         ? null : displayContent.findFocusedWindow();
                 if (newFocusTarget == null) {
-                    ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus remove request for "
-                                    + "win=%s dropped since no candidate was found",
+                    t.setFocusedWindow(null, null, displayId).apply();
+                    ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s"
+                                    + " dropped focus so setting focus to null since no candidate"
+                                    + " was found",
                             embeddedWindow);
                     return;
                 }
-                t.requestFocusTransfer(newFocusTarget.mInputChannelToken, newFocusTarget.getName(),
-                        inputToken, embeddedWindow.toString(),
+                t.setFocusedWindow(newFocusTarget.mInputChannelToken, newFocusTarget.getName(),
                         displayId).apply();
+
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
-                        "Transfer focus request " + newFocusTarget,
+                        "Focus request " + newFocusTarget,
                         "reason=grantEmbeddedWindowFocus(false)");
             }
             ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s grantFocus=%s",
