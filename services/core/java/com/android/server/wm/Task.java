@@ -119,7 +119,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -227,11 +226,6 @@ class Task extends WindowContainer<WindowContainer> {
     static final int REPARENT_KEEP_STACK_AT_FRONT = 1;
     // Do not move the stack as a part of reparenting
     static final int REPARENT_LEAVE_STACK_IN_PLACE = 2;
-
-    /**
-     * Used to identify if the activity that is installed from device's system image.
-     */
-    boolean mIsEffectivelySystemApp;
 
     String affinity;        // The affinity name for this task, or null; may change identity.
     String rootAffinity;    // Initial base affinity, or null; does not change from initial root.
@@ -483,24 +477,11 @@ class Task extends WindowContainer<WindowContainer> {
 
             if (r.finishing) return false;
 
-            if (mRoot == null || mRoot.finishing) {
-                // Set this as the candidate root since it isn't finishing.
-                mRoot = r;
-            }
-
-            final int uid = mRoot == r ? effectiveUid : r.info.applicationInfo.uid;
-            if (ignoreRelinquishIdentity
-                    || (mRoot.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0
-                    || (mRoot.info.applicationInfo.uid != Process.SYSTEM_UID
-                    && !mRoot.info.applicationInfo.isSystemApp()
-                    && mRoot.info.applicationInfo.uid != uid)) {
-                // No need to relinquish identity, end search.
-                return true;
-            }
-
-            // Relinquish to next activity
+            // Set this as the candidate root since it isn't finishing.
             mRoot = r;
-            return false;
+
+            // Only end search if we are ignore relinquishing identity or we are not relinquishing.
+            return ignoreRelinquishIdentity || (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
         }
     }
 
@@ -948,20 +929,10 @@ class Task extends WindowContainer<WindowContainer> {
      * @param info The activity info which could be different from {@code r.info} if set.
      */
     void setIntent(ActivityRecord r, @Nullable Intent intent, @Nullable ActivityInfo info) {
-        boolean updateIdentity = false;
-        if (this.intent == null) {
-            updateIdentity = true;
-        } else if (!mNeverRelinquishIdentity) {
-            final ActivityInfo activityInfo = info != null ? info : r.info;
-            updateIdentity = (effectiveUid == Process.SYSTEM_UID || mIsEffectivelySystemApp
-                    || effectiveUid == activityInfo.applicationInfo.uid);
-        }
-        if (updateIdentity) {
-            mCallingUid = r.launchedFromUid;
-            mCallingPackage = r.launchedFromPackage;
-            mCallingFeatureId = r.launchedFromFeatureId;
-            setIntent(intent != null ? intent : r.intent, info != null ? info : r.info);
-        }
+        mCallingUid = r.launchedFromUid;
+        mCallingPackage = r.launchedFromPackage;
+        mCallingFeatureId = r.launchedFromFeatureId;
+        setIntent(intent != null ? intent : r.intent, info != null ? info : r.info);
         setLockTaskAuth(r);
 
         final WindowContainer parent = getParent();
@@ -977,7 +948,8 @@ class Task extends WindowContainer<WindowContainer> {
     private void setIntent(Intent _intent, ActivityInfo info) {
         final boolean isLeaf = isLeafTask();
         if (intent == null) {
-            mNeverRelinquishIdentity = (info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
+            mNeverRelinquishIdentity =
+                    (info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
         } else if (mNeverRelinquishIdentity && isLeaf) {
             return;
         }
@@ -990,7 +962,6 @@ class Task extends WindowContainer<WindowContainer> {
             rootAffinity = affinity;
         }
         effectiveUid = info.applicationInfo.uid;
-        mIsEffectivelySystemApp = info.applicationInfo.isSystemApp();
         stringName = null;
 
         if (info.targetActivity == null) {
