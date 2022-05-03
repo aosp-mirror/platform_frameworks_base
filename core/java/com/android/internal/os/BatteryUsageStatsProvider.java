@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.content.Context;
 import android.hardware.SensorManager;
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
@@ -26,6 +27,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -230,7 +232,52 @@ public class BatteryUsageStatsProvider {
             batteryUsageStatsBuilder.setBatteryHistory(batteryStatsHistory);
         }
 
-        return batteryUsageStatsBuilder.build();
+        BatteryUsageStats stats = batteryUsageStatsBuilder.build();
+        if (includeProcessStateData) {
+            verify(stats);
+        }
+        return stats;
+    }
+
+    // STOPSHIP(b/229906525): remove verification before shipping
+    private static boolean sErrorReported;
+    private void verify(BatteryUsageStats stats) {
+        if (sErrorReported) {
+            return;
+        }
+
+        final double precision = 2.0;   // Allow rounding errors up to 2 mAh
+        final int[] components =
+                {BatteryConsumer.POWER_COMPONENT_CPU,
+                        BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                        BatteryConsumer.POWER_COMPONENT_WIFI,
+                        BatteryConsumer.POWER_COMPONENT_BLUETOOTH};
+        final int[] states =
+                {BatteryConsumer.PROCESS_STATE_FOREGROUND,
+                        BatteryConsumer.PROCESS_STATE_BACKGROUND,
+                        BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE,
+                        BatteryConsumer.PROCESS_STATE_CACHED};
+        for (UidBatteryConsumer ubc : stats.getUidBatteryConsumers()) {
+            for (int component : components) {
+                double consumedPower = ubc.getConsumedPower(ubc.getKey(component));
+                double sumStates = 0;
+                for (int state : states) {
+                    sumStates += ubc.getConsumedPower(ubc.getKey(component, state));
+                }
+                if (sumStates > consumedPower + precision) {
+                    String error = "Sum of states exceeds total. UID = " + ubc.getUid() + " "
+                            + BatteryConsumer.powerComponentIdToString(component)
+                            + " total = " + consumedPower + " states = " + sumStates;
+                    if (!sErrorReported) {
+                        Slog.wtf(TAG, error);
+                        sErrorReported = true;
+                    } else {
+                        Slog.e(TAG, error);
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     private long getProcessForegroundTimeMs(BatteryStats.Uid uid, long realtimeUs) {
