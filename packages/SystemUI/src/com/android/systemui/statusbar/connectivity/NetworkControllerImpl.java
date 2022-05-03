@@ -33,7 +33,6 @@ import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkScoreManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -225,10 +224,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
             TelephonyManager telephonyManager,
             TelephonyListenerManager telephonyListenerManager,
             @Nullable WifiManager wifiManager,
-            NetworkScoreManager networkScoreManager,
             AccessPointControllerImpl accessPointController,
             DemoModeController demoModeController,
             CarrierConfigTracker carrierConfigTracker,
+            WifiStatusTrackerFactory trackerFactory,
             @Main Handler handler,
             InternetDialogFactory internetDialogFactory,
             FeatureFlags featureFlags,
@@ -237,7 +236,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 telephonyManager,
                 telephonyListenerManager,
                 wifiManager,
-                networkScoreManager,
                 subscriptionManager,
                 Config.readConfig(context),
                 bgLooper,
@@ -250,6 +248,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 broadcastDispatcher,
                 demoModeController,
                 carrierConfigTracker,
+                trackerFactory,
                 handler,
                 featureFlags,
                 dumpManager);
@@ -262,8 +261,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
             TelephonyManager telephonyManager,
             TelephonyListenerManager telephonyListenerManager,
             WifiManager wifiManager,
-            NetworkScoreManager networkScoreManager,
-            SubscriptionManager subManager, Config config, Looper bgLooper,
+            SubscriptionManager subManager,
+            Config config,
+            Looper bgLooper,
             Executor bgExecutor,
             CallbackHandler callbackHandler,
             AccessPointControllerImpl accessPointController,
@@ -273,6 +273,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             BroadcastDispatcher broadcastDispatcher,
             DemoModeController demoModeController,
             CarrierConfigTracker carrierConfigTracker,
+            WifiStatusTrackerFactory trackerFactory,
             @Main Handler handler,
             FeatureFlags featureFlags,
             DumpManager dumpManager
@@ -315,9 +316,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 notifyControllersMobileDataChanged();
             }
         });
+
         mWifiSignalController = new WifiSignalController(mContext, mHasMobileDataFeature,
-                mCallbackHandler, this, mWifiManager, mConnectivityManager, networkScoreManager,
-                mMainHandler, mReceiverHandler);
+                mCallbackHandler, this, mWifiManager, trackerFactory,
+                mReceiverHandler);
 
         mEthernetSignalController = new EthernetSignalController(mContext, mCallbackHandler, this);
 

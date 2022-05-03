@@ -118,6 +118,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mCheckBox.setVisibility(View.GONE);
             mStatusIcon.setVisibility(View.GONE);
             mEndTouchArea.setVisibility(View.GONE);
+            mEndTouchArea.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
             mContainerLayout.setOnClickListener(null);
             mContainerLayout.setContentDescription(null);
             mTitleText.setTextColor(mController.getColorItemContent());
@@ -170,7 +171,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, false /* showStatus */);
-                    setUpContentDescriptionForActiveDevice(device);
+                    setUpContentDescriptionForView(mContainerLayout, false, device);
                     mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setVisibility(View.VISIBLE);
                     mCheckBox.setChecked(true);
@@ -181,6 +182,9 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mEndTouchArea.setVisibility(View.VISIBLE);
                     mEndTouchArea.setOnClickListener(null);
                     mEndTouchArea.setOnClickListener((v) -> mCheckBox.performClick());
+                    mEndTouchArea.setImportantForAccessibility(
+                            View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+                    setUpContentDescriptionForView(mEndTouchArea, true, device);
                 } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_check));
@@ -190,7 +194,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             true /* showSeekBar */,
                             false /* showProgressBar */, true /* showStatus */);
                     initSeekbar(device);
-                    setUpContentDescriptionForActiveDevice(device);
+                    setUpContentDescriptionForView(mContainerLayout, false, device);
                     mCurrentActivePosition = position;
                 } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
                     mCheckBox.setOnCheckedChangeListener(null);
@@ -258,9 +262,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
         }
 
-        private void setUpContentDescriptionForActiveDevice(MediaDevice device) {
-            mContainerLayout.setClickable(false);
-            mContainerLayout.setContentDescription(
+        private void setUpContentDescriptionForView(View view, boolean clickable,
+                MediaDevice device) {
+            view.setClickable(clickable);
+            view.setContentDescription(
                     mContext.getString(device.getDeviceType()
                             == MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE
                             ? R.string.accessibility_bluetooth_name

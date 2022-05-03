@@ -128,6 +128,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
+import com.android.systemui.statusbar.phone.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -337,6 +338,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock
+    private ShadeTransitionController mShadeTransitionController;
+    @Mock
     private QS mQs;
     @Mock
     private View mQsHeader;
@@ -529,7 +532,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNotificationListContainer,
                 mPanelEventsEmitter,
                 mNotificationStackSizeCalculator,
-                mUnlockedScreenOffAnimationController);
+                mUnlockedScreenOffAnimationController,
+                mShadeTransitionController);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},
@@ -588,6 +592,27 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         // computeMaxKeyguardNotifications sets maxAllowed to 0 at minimum if it updates the value
         assertThat(mNotificationPanelViewController.computeMaxKeyguardNotifications())
                 .isNotEqualTo(-1);
+    }
+
+    @Test
+    public void getLockscreenSpaceForNotifications_includesOverlapWithLockIcon() {
+        when(mResources.getDimensionPixelSize(R.dimen.keyguard_indication_bottom_padding))
+                .thenReturn(0);
+        mNotificationPanelViewController.setAmbientIndicationTop(
+                /* ambientIndicationTop= */ 0, /* ambientTextVisible */ false);
+
+        // Use lock icon padding (100 - 80 - 5 = 15) as bottom padding
+        when(mNotificationStackScrollLayoutController.getBottom()).thenReturn(100);
+        when(mLockIconViewController.getTop()).thenReturn(80f);
+        when(mResources.getDimensionPixelSize(R.dimen.shelf_and_lock_icon_overlap)).thenReturn(5);
+
+        // Available space (100 - 10 - 15 = 75)
+        when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(100);
+        when(mNotificationStackScrollLayoutController.getTopPadding()).thenReturn(10);
+        mNotificationPanelViewController.updateResources();
+
+        assertThat(mNotificationPanelViewController.getSpaceForLockscreenNotifications())
+                .isEqualTo(75);
     }
 
     @Test
