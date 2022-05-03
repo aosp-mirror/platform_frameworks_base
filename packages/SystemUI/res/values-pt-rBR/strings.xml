@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Tente fazer a captura de tela novamente"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Não foi possível salvar a captura de tela"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"O app ou a organização não permitem capturas de tela"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editar"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editar captura de tela"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Compartilhar captura de tela"</string>
@@ -365,28 +367,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Sua organização é dona deste dispositivo e pode monitorar o tráfego de rede"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"A organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> é dona deste dispositivo e pode monitorar o tráfego de rede"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Este dispositivo é fornecido pela <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_disclosure_management_named_vpn (4137564460025113168) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (2169227918166358741) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Este dispositivo pertence à sua organização e está conectado à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Este dispositivo pertence à organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado à Internet usando o <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Este dispositivo pertence à sua organização"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Este dispositivo pertence à organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_disclosure_management_vpns (929181757984262902) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_vpns (3312645578322079185) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Este dispositivo pertence à sua organização e está conectado à Internet usando VPNs"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Este dispositivo pertence à organização <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado à Internet usando VPNs"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Sua organização pode monitorar o tráfego de rede no seu perfil de trabalho"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> pode monitorar o tráfego de rede no seu perfil de trabalho"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"A atividade de rede do perfil de trabalho fica visível para o administrador de TI"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"A rede pode ser monitorada"</string>
-    <!-- no translation found for quick_settings_disclosure_vpns (3586175303518266301) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (153393105176944100) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (451254750289172191) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_vpn (6191822916936028208) -->
-    <skip />
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Este dispositivo está conectado à Internet usando VPNs"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Seus apps de trabalho estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Seus apps pessoais estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Este dispositivo está conectado à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Este dispositivo é fornecido pela <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gerenciamento de dispositivos"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -402,14 +396,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Uma autoridade de certificação foi instalada neste dispositivo. É possível monitorar ou modificar seu tráfego de rede seguro."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"O administrador ativou o registro de rede, que monitora o tráfego no seu dispositivo."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"O administrador ativou o registro de rede, que monitora o tráfego no seu perfil de trabalho, mas não no perfil pessoal."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7502657784155456414) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (6726394451199620634) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_profile_named_vpn (7254359257263069766) -->
-    <skip />
-    <!-- no translation found for monitoring_description_personal_profile_named_vpn (5083909710727365452) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Este dispositivo está conectado à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>. Suas atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o administrador de TI."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Seu dispositivo está conectado à Internet usando o <xliff:g id="VPN_APP_0">%1$s</xliff:g> e <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Suas atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o administrador de TI."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Seus apps de trabalho estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>. Suas atividades de rede em apps de trabalho, incluindo e-mails e dados de navegação, estão visíveis para o administrador de TI e o provedor de VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Seus apps pessoais estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>. Suas atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o provedor de VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir configurações de VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Este dispositivo é gerenciado pelo seu pai/mãe, que pode ver e gerenciar informações como os apps que você usa, sua localização e seu tempo de uso."</string>
@@ -730,6 +720,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Ativada quando há possibilidade de a bateria acabar"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Não"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Despejar heap SysUI"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplicativos estão usando <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" e "</string>
@@ -855,16 +847,14 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nome da transmissão"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Senha"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Salvar"</string>
-    <!-- no translation found for media_output_broadcast_starting (8130153654166235557) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_start_failed (3670835946856129775) -->
-    <skip />
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Iniciando…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Não foi possível fazer a transmissão"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número da versão"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Número da versão copiado para a área de transferência."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversa aberta"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversa"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Toque em uma conversa para adicioná-la à tela inicial"</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"Suas conversas recentes serão exibidas aqui"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Suas conversas recentes vão aparecer aqui"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Conversas prioritárias"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversas recentes"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"Há <xliff:g id="DURATION">%1$s</xliff:g> dias"</string>

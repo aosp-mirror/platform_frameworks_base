@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"אפשר לצלם שוב את המסך"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"לא ניתן לשמור את צילום המסך"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"האפליקציה או הארגון שלך אינם מתירים ליצור צילומי מסך"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"עריכה"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"עריכת צילום מסך"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"שיתוף של צילום מסך"</string>
@@ -371,28 +373,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"הארגון שלך הוא הבעלים של המכשיר הזה והוא עשוי לנטר את התנועה ברשת"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"הארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> הוא הבעלים של המכשיר הזה והוא עשוי לנטר את התנועה ברשת"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"המכשיר הזה התקבל מ-<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_disclosure_management_named_vpn (4137564460025113168) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (2169227918166358741) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"המכשיר הזה שייך לארגון שלך, והוא מחובר לאינטרנט דרך <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"המכשיר הזה שייך לארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, והוא מחובר לאינטרנט דרך <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"המכשיר הזה שייך לארגון שלך"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"המכשיר הזה שייך לארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_disclosure_management_vpns (929181757984262902) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_vpns (3312645578322079185) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"‏המכשיר הזה שייך לארגון שלך, והוא מחובר לאינטרנט דרך רשתות VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"‏המכשיר הזה שייך לארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, והוא מחובר לאינטרנט דרך רשתות VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"הארגון שלך יכול לנטר את התנועה ברשת בפרופיל העבודה שלך"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"הארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> עשוי לנטר את התנועה ברשת בפרופיל העבודה שלך"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"‏מנהל ה-IT יכול לראות את הפעילות ברשת"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ייתכן שהרשת מנוטרת"</string>
-    <!-- no translation found for quick_settings_disclosure_vpns (3586175303518266301) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (153393105176944100) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (451254750289172191) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_vpn (6191822916936028208) -->
-    <skip />
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"‏המכשיר הזה מחובר לאינטרנט דרך רשתות VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"האפליקציות לעבודה מחוברות לאינטרנט דרך <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"האפליקציות האישיות שלך מחוברות לאינטרנט דרך <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"המכשיר הזה מחובר לאינטרנט דרך <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"המכשיר הזה התקבל מ-<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ניהול מכשירים"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -408,14 +402,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"במכשיר זה מותקנת רשות אישורים. ניתן לעקוב אחר התנועה ברשת המאובטחת או לשנות אותה."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"מנהל המערכת הפעיל את התכונה \'רישום התנועה ברשת\', שמנטרת את תנועת הנתונים במכשיר."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"מנהל המערכת הפעיל את תכונת רישום התנועה ברשת, שמנטרת את תנועת הנתונים בפרופיל העבודה, אבל לא בפרופיל האישי."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7502657784155456414) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (6726394451199620634) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_profile_named_vpn (7254359257263069766) -->
-    <skip />
-    <!-- no translation found for monitoring_description_personal_profile_named_vpn (5083909710727365452) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"‏המכשיר הזה מחובר לאינטרנט דרך <xliff:g id="VPN_APP">%1$s</xliff:g>. הפעילויות שלך ברשת, כולל האימיילים ונתוני הגלישה, גלויות למנהל ה-IT."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"‏המכשיר הזה מחובר לאינטרנט דרך <xliff:g id="VPN_APP_0">%1$s</xliff:g> ו-<xliff:g id="VPN_APP_1">%2$s</xliff:g>. הפעילויות שלך ברשת, כולל האימיילים ונתוני הגלישה, גלויות למנהל ה-IT."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏האפליקציות לעבודה מחוברות לאינטרנט דרך <xliff:g id="VPN_APP">%1$s</xliff:g>. הפעילויות שלך ברשת באפליקציות לעבודה, כולל האימיילים ונתוני הגלישה, גלויות למנהל ה-IT ולספק ה-VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"‏האפליקציות האישיות שלך מחוברות לאינטרנט דרך <xliff:g id="VPN_APP">%1$s</xliff:g>. הפעילויות שלך ברשת, כולל האימיילים ונתוני הגלישה, גלויות לספק ה-VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏להגדרות ה-VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"מכשיר זה מנוהל על ידי ההורה שלך. להורה שלך יש אפשרות לצפות בפרטים כמו האפליקציות שבשימוש, המיקום וזמן המסך שלך, ולנהל אותם."</string>
@@ -589,7 +579,7 @@
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"מערכת"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"דף הבית"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"מהזמן האחרון"</string>
-    <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"הקודם"</string>
+    <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"חזרה"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"התראות"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"מקשי קיצור במקלדת"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"החלפה של פריסת מקלדת"</string>
@@ -740,6 +730,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"מומלץ להפעיל את התכונה כשיש סבירות גבוהה שהסוללה תתרוקן"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"לא תודה"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"אפליקציות משתמשות ב<xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" וגם "</string>
@@ -867,10 +859,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"שם השידור"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"סיסמה"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"שמירה"</string>
-    <!-- no translation found for media_output_broadcast_starting (8130153654166235557) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_start_failed (3670835946856129775) -->
-    <skip />
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"בתהליך הפעלה…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"לא ניתן לשדר"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"‏מספר Build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"‏מספר ה-Build הועתק ללוח."</string>
     <string name="basic_status" msgid="2315371112182658176">"פתיחת שיחה"</string>
