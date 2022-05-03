@@ -279,7 +279,6 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -679,6 +678,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     final Context mContext;
     final Injector mInjector;
+    final PolicyPathProvider mPathProvider;
     final IPackageManager mIPackageManager;
     final IPermissionManager mIPermissionManager;
     final UserManager mUserManager;
@@ -890,7 +890,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @GuardedBy("getLockObject()")
-    final SparseArray<DevicePolicyData> mUserData = new SparseArray<>();
+    final SparseArray<DevicePolicyData> mUserData;
 
     @GuardedBy("getLockObject()")
 
@@ -1365,7 +1365,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         public final Context mContext;
 
-        private @Nullable DevicePolicySafetyChecker mSafetyChecker;
+        @Nullable private DevicePolicySafetyChecker mSafetyChecker;
 
         Injector(Context context) {
             mContext = context;
@@ -1382,12 +1382,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         Resources getResources() {
             return mContext.getResources();
-        }
-
-        Owners newOwners() {
-            return new Owners(getUserManager(), getUserManagerInternal(),
-                    getPackageManagerInternal(), getActivityTaskManagerInternal(),
-                    getActivityManagerInternal());
         }
 
         UserManager getUserManager() {
@@ -1595,10 +1589,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return UserHandle.getUserId(binderGetCallingUid());
         }
 
-        File environmentGetUserSystemDirectory(int userId) {
-            return Environment.getUserSystemDirectory(userId);
-        }
-
         void powerManagerGoToSleep(long time, int reason, int flags) {
             mContext.getSystemService(PowerManager.class).goToSleep(time, reason, flags);
         }
@@ -1639,10 +1629,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         boolean userManagerIsHeadlessSystemUserMode() {
             return UserManager.isHeadlessSystemUserMode();
-        }
-
-        String getDevicePolicyFilePathForSystemUser() {
-            return "/data/system/";
         }
 
         @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
@@ -1777,22 +1763,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Instantiates the service.
      */
     public DevicePolicyManagerService(Context context) {
-        this(new Injector(context.createAttributionContext(ATTRIBUTION_TAG)));
+        this(new Injector(
+                context.createAttributionContext(ATTRIBUTION_TAG)), new PolicyPathProvider() {});
     }
 
     @VisibleForTesting
-    DevicePolicyManagerService(Injector injector) {
+    DevicePolicyManagerService(Injector injector, PolicyPathProvider pathProvider) {
         DevicePolicyManager.disableLocalCaches();
 
         mInjector = injector;
+        mPathProvider = pathProvider;
         mContext = Objects.requireNonNull(injector.mContext);
         mHandler = new Handler(Objects.requireNonNull(injector.getMyLooper()));
 
         mConstantsObserver = new DevicePolicyConstantsObserver(mHandler);
         mConstantsObserver.register();
         mConstants = loadConstants();
-
-        mOwners = Objects.requireNonNull(injector.newOwners());
 
         mUserManager = Objects.requireNonNull(injector.getUserManager());
         mUserManagerInternal = Objects.requireNonNull(injector.getUserManagerInternal());
@@ -1831,11 +1817,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         // "Lite" interface is available even when the device doesn't have the feature
         LocalServices.addService(DevicePolicyManagerLiteInternal.class, mLocalService);
+
+        // Policy version upgrade must not depend on either mOwners or mUserData, so they are
+        // initialized only after performing the upgrade.
+        if (mHasFeature) {
+            performPolicyVersionUpgrade();
+        }
+        mUserData = new SparseArray<>();
+        mOwners = makeOwners(injector, pathProvider);
+
         if (!mHasFeature) {
             // Skip the rest of the initialization
             mSetupContentObserver = null;
             return;
         }
+
+        loadOwners();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
@@ -1872,14 +1869,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 new RestrictionsListener(mContext, mUserManagerInternal, this));
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
 
-        loadOwners();
-
-        performPolicyVersionUpgrade();
-
         mDeviceManagementResourcesProvider.load();
 
         // The binder caches are not enabled until the first invalidation.
         invalidateBinderCaches();
+    }
+
+    private Owners makeOwners(Injector injector, PolicyPathProvider pathProvider) {
+        return new Owners(injector.getUserManager(), injector.getUserManagerInternal(),
+                injector.getPackageManagerInternal(),
+                injector.getActivityTaskManagerInternal(),
+                injector.getActivityManagerInternal(), pathProvider);
     }
 
     /**
@@ -1975,8 +1975,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mUserData.remove(userHandle);
             }
 
-            File policyFile = new File(mInjector.environmentGetUserSystemDirectory(userHandle),
-                    DEVICE_POLICIES_XML);
+            File policyFile =
+                    new File(mPathProvider.getUserSystemDirectory(userHandle), DEVICE_POLICIES_XML);
             policyFile.delete();
             Slogf.i(LOG_TAG, "Removed device policy file " + policyFile.getAbsolutePath());
         }
@@ -2877,8 +2877,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private File getPolicyFileDirectory(@UserIdInt int userId) {
         return userId == UserHandle.USER_SYSTEM
-                ? new File(mInjector.getDevicePolicyFilePathForSystemUser())
-                : mInjector.environmentGetUserSystemDirectory(userId);
+                ? mPathProvider.getDataSystemDirectory()
+                : mPathProvider.getUserSystemDirectory(userId);
     }
 
     private JournaledFile makeJournaledFile(@UserIdInt int userId, String fileName) {
@@ -3085,13 +3085,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updateUsbDataSignal();
     }
 
+    // TODO(b/230841522) Make it static.
     private class DpmsUpgradeDataProvider implements PolicyUpgraderDataProvider {
-        @Override
-        public boolean isDeviceOwner(int userId, ComponentName who) {
-            return mOwners.isDeviceOwnerUserId(userId)
-                    && mOwners.getDeviceOwnerComponent().equals(who);
-        }
-
         @Override
         public boolean storageManagerIsFileBasedEncryptionEnabled() {
             return mInjector.storageManagerIsFileBasedEncryptionEnabled();
@@ -3108,14 +3103,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         @Override
-        public ComponentName getOwnerComponent(int userId) {
-            return DevicePolicyManagerService.this.getOwnerComponent(userId);
-        }
-
-        @Override
         public Function<ComponentName, DeviceAdminInfo> getAdminInfoSupplier(int userId) {
-            return component -> findAdmin(component, userId, /* throwForMissingPermission= */
-                    false);
+            return component ->
+                    findAdmin(component, userId, /* throwForMissingPermission= */ false);
         }
 
         @Override
@@ -3126,7 +3116,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void performPolicyVersionUpgrade() {
-        PolicyVersionUpgrader upgrader = new PolicyVersionUpgrader(new DpmsUpgradeDataProvider());
+        PolicyVersionUpgrader upgrader = new PolicyVersionUpgrader(
+                new DpmsUpgradeDataProvider(), mPathProvider);
         upgrader.upgradePolicy(DPMS_VERSION);
     }
 
@@ -16279,7 +16270,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final int callingUserId = caller.getUserId();
             final File bundleFile = new File(
-                    mInjector.environmentGetUserSystemDirectory(callingUserId),
+                    mPathProvider.getUserSystemDirectory(callingUserId),
                     TRANSFER_OWNERSHIP_PARAMETERS_XML);
             if (!bundleFile.exists()) {
                 return null;
@@ -16473,7 +16464,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @VisibleForTesting
     void saveTransferOwnershipBundleLocked(PersistableBundle bundle, int userId) {
         final File parametersFile = new File(
-                mInjector.environmentGetUserSystemDirectory(userId),
+                mPathProvider.getUserSystemDirectory(userId),
                 TRANSFER_OWNERSHIP_PARAMETERS_XML);
         final AtomicFile atomicFile = new AtomicFile(parametersFile);
         FileOutputStream stream = null;
@@ -16495,7 +16486,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     void deleteTransferOwnershipBundleLocked(int userId) {
-        final File parametersFile = new File(mInjector.environmentGetUserSystemDirectory(userId),
+        final File parametersFile = new File(mPathProvider.getUserSystemDirectory(userId),
                 TRANSFER_OWNERSHIP_PARAMETERS_XML);
         parametersFile.delete();
     }
