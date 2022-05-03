@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"toegang krijgen tot je agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sms\'jes verzenden en bekijken"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Bestanden en documenten"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Bestanden en documenten"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"bestanden en documenten op je apparaat openen"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muziek en andere audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"toegang krijgen tot audiobestanden op je apparaat"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto\'s en video\'s"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"toegang krijgen tot afbeeldingen en videobestanden op je apparaat"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muziek en audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"muziek en audio op je apparaat openen"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto\'s en video\'s"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"foto\'s en video\'s op je apparaat openen"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfoon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"audio opnemen"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysieke activiteit"</string>
@@ -1224,7 +1224,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Altijd tonen"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> is gemaakt voor een niet-geschikte versie van het Android-besturingssysteem en kan onverwacht gedrag vertonen. Mogelijk is er een geüpdatete versie van de app beschikbaar."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Altijd tonen"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Controleren op update"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Checken op updates"</string>
     <string name="smv_application" msgid="3775183542777792638">"De app <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) heeft het zelf afgedwongen StrictMode-beleid geschonden."</string>
     <string name="smv_process" msgid="1398801497130695446">"Het proces <xliff:g id="PROCESS">%1$s</xliff:g> heeft het zelf afgedwongen StrictMode-beleid geschonden."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefoon wordt geüpdatet…"</string>
@@ -1949,7 +1949,7 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Deze app vraagt om aanvullende beveiliging. Probeer het in plaats daarvan op je tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Deze app vraagt om aanvullende beveiliging. Probeer het in plaats daarvan op je telefoon."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Deze app is ontwikkeld voor een oudere versie van Android en werkt mogelijk niet op de juiste manier. Controleer op updates of neem contact op met de ontwikkelaar."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Controleren op update"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Checken op updates"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Je hebt nieuwe berichten"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Open je sms-app om ze te bekijken"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Functionaliteit kan beperkt zijn"</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'Niet storen\' is gewijzigd"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tik om te controleren wat er is geblokkeerd."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Instellingen voor meldingen bekijken"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Vanaf Android 13 hebben de apps die je installeert je toestemming nodig om meldingen te sturen. Tik om deze toestemming voor bestaande apps te wijzigen."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Later herinneren"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Sluiten"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systeem"</string>
