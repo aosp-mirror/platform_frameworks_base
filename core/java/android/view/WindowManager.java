@@ -725,8 +725,8 @@ public interface WindowManager extends ViewManager {
 
     /**
      * Returns a set of {@link WindowMetrics} for the given display. Each WindowMetrics instance
-     * is the maximum WindowMetrics for a device state, including rotations. This is not guaranteed
-     * to include all possible device states.
+     * is the maximum WindowMetrics for a device state. This is not guaranteed to include all
+     * possible device states.
      *
      * This API can only be used by Launcher.
      *

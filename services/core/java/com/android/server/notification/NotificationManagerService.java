@@ -7372,6 +7372,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void run() {
             boolean appBanned = !areNotificationsEnabledForPackageInt(pkg, uid);
+            boolean isCallNotification = isCallNotification(pkg, uid);
             synchronized (mNotificationLock) {
                 try {
                     NotificationRecord r = null;
@@ -7390,8 +7391,10 @@ public class NotificationManagerService extends SystemService {
 
                     final StatusBarNotification n = r.getSbn();
                     final Notification notification = n.getNotification();
+                    boolean isCallNotificationAndCorrectStyle = isCallNotification
+                            && notification.isStyle(Notification.CallStyle.class);
 
-                    if (!notification.isMediaNotification()
+                    if (!(notification.isMediaNotification() || isCallNotificationAndCorrectStyle)
                             && (appBanned || isRecordBlockedLocked(r))) {
                         mUsageStats.registerBlocked(r);
                         if (DBG) {

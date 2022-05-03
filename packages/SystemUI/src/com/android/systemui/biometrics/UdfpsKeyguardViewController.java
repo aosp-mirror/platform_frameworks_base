@@ -154,6 +154,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         updateGenericBouncerVisibility();
         mConfigurationController.addCallback(mConfigurationListener);
         getPanelExpansionStateManager().addExpansionListener(mPanelExpansionListener);
+        updateScaleFactor();
+        mView.updatePadding();
         updateAlpha();
         updatePauseAuth();
 
@@ -367,6 +369,15 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         }
     }
 
+    /**
+     * Update the scale factor based on the device's resolution.
+     */
+    private void updateScaleFactor() {
+        if (mUdfpsController != null && mUdfpsController.mOverlayParams != null) {
+            mView.setScaleFactor(mUdfpsController.mOverlayParams.getScaleFactor());
+        }
+    }
+
     private final StatusBarStateController.StateListener mStateListener =
             new StatusBarStateController.StateListener() {
         @Override
@@ -486,6 +497,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
                 @Override
                 public void onConfigChanged(Configuration newConfig) {
+                    updateScaleFactor();
+                    mView.updatePadding();
                     mView.updateColor();
                 }
             };

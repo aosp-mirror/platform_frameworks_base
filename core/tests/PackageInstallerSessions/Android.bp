@@ -51,6 +51,5 @@ android_test {
     ],
 
     platform_apis: true,
-    sdk_version: "core_platform",
     test_suites: ["device-tests"],
 }

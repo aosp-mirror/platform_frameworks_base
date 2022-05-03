@@ -7679,20 +7679,6 @@ public final class Settings {
                 "zen_settings_suggestion_viewed";
 
         /**
-         * State of whether review notification permissions notification needs to
-         * be shown the user, and whether the user has interacted.
-         *
-         * Valid values:
-         *   -1 = UNKNOWN
-         *    0 = SHOULD_SHOW
-         *    1 = USER_INTERACTED
-         *    2 = DISMISSED
-         * @hide
-         */
-        public static final String REVIEW_PERMISSIONS_NOTIFICATION_STATE =
-                "review_permissions_notification_state";
-
-        /**
          * Whether the in call notification is enabled to play sound during calls.  The value is
          * boolean (1 or 0).
          * @hide
@@ -9701,6 +9687,26 @@ public final class Settings {
          */
         @Readable
         public static final String BIOMETRIC_APP_ENABLED = "biometric_app_enabled";
+
+        /**
+         * Whether or not active unlock triggers on wake.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_WAKE = "active_unlock_on_wake";
+
+        /**
+         * Whether or not active unlock triggers on unlock intent.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_UNLOCK_INTENT =
+                "active_unlock_on_unlock_intent";
+
+        /**
+         * Whether or not active unlock triggers on biometric failure.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL =
+                "active_unlock_on_biometric_fail";
 
         /**
          * Whether the assist gesture should be enabled.
@@ -16965,6 +16971,21 @@ public final class Settings {
                 "managed_provisioning_defer_provisioning_to_role_holder";
 
         /**
+         * State of whether review notification permissions notification needs to
+         * be shown the user, and whether the user has interacted.
+         *
+         * Valid values:
+         *   -1 = UNKNOWN
+         *    0 = SHOULD_SHOW
+         *    1 = USER_INTERACTED
+         *    2 = DISMISSED
+         *    3 = RESHOWN
+         * @hide
+         */
+        public static final String REVIEW_PERMISSIONS_NOTIFICATION_STATE =
+                "review_permissions_notification_state";
+
+        /**
          * Settings migrated from Wear OS settings provider.
          * @hide
          */
@@ -17183,12 +17204,6 @@ public final class Settings {
              * @hide
              */
             public static final String WEAR_OS_VERSION_STRING = "wear_os_version_string";
-
-            /**
-             * How round the corners of square screens are.
-             * @hide
-             */
-            public static final String CORNER_ROUNDNESS = "corner_roundness";
 
             /**
              * Whether the physical button has been set.

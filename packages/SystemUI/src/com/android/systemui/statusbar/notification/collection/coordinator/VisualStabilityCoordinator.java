@@ -27,6 +27,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -136,6 +137,13 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
                             mReorderingAllowed || mHeadsUpManager.isAlerting(entry.getKey());
                     mIsSuppressingGroupChange |= !isGroupChangeAllowedForEntry;
                     return isGroupChangeAllowedForEntry;
+                }
+
+                @Override
+                public boolean isGroupPruneAllowed(@NonNull GroupEntry entry) {
+                    final boolean isGroupPruneAllowedForEntry = mReorderingAllowed;
+                    mIsSuppressingGroupChange |= !isGroupPruneAllowedForEntry;
+                    return isGroupPruneAllowedForEntry;
                 }
 
                 @Override

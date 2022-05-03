@@ -59,7 +59,7 @@ import java.util.Set;
 /**
  * Contains the Biometric views (title, subtitle, icon, buttons, etc.) and its controllers.
  */
-public class AuthBiometricView extends LinearLayout {
+public abstract class AuthBiometricView extends LinearLayout {
 
     private static final String TAG = "AuthBiometricView";
 
@@ -116,7 +116,7 @@ public class AuthBiometricView extends LinearLayout {
         void onAction(int action);
     }
 
-    protected final Handler mHandler;
+    private final Handler mHandler;
     private final AccessibilityManager mAccessibilityManager;
     private final LockPatternUtils mLockPatternUtils;
     protected final int mTextColorError;
@@ -155,8 +155,8 @@ public class AuthBiometricView extends LinearLayout {
     // Measurements when biometric view is showing text, buttons, etc.
     @Nullable @VisibleForTesting AuthDialog.LayoutParams mLayoutParams;
 
-    protected Callback mCallback;
-    protected @BiometricState int mState;
+    private Callback mCallback;
+    @BiometricState private int mState;
 
     private float mIconOriginalY;
 
@@ -250,18 +250,9 @@ public class AuthBiometricView extends LinearLayout {
         return false;
     }
 
-    /**
-     * Create the controller for managing the icons transitions during the prompt.
-     *
-     * Subclass should override.
-     */
+    /** Create the controller for managing the icons transitions during the prompt.*/
     @NonNull
-    protected AuthIconController createIconController() {
-        return new AuthIconController(mContext, mIconView) {
-            @Override
-            public void updateIcon(int lastState, int newState) {}
-        };
-    }
+    protected abstract AuthIconController createIconController();
 
     void setPanelController(AuthPanelController panelController) {
         mPanelController = panelController;
@@ -880,5 +871,15 @@ public class AuthBiometricView extends LinearLayout {
 
     @AuthDialog.DialogSize int getSize() {
         return mSize;
+    }
+
+    /** If authentication has successfully occurred and the view is done. */
+    boolean isAuthenticated() {
+        return mState == STATE_AUTHENTICATED;
+    }
+
+    /** If authentication is currently in progress. */
+    boolean isAuthenticating() {
+        return mState == STATE_AUTHENTICATING;
     }
 }

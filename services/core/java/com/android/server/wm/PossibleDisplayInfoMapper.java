@@ -16,15 +16,11 @@
 
 package com.android.server.wm;
 
-import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_270;
-
 import android.hardware.display.DisplayManagerInternal;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
-import android.view.Surface;
 
 import java.util.Set;
 
@@ -44,8 +40,7 @@ public class PossibleDisplayInfoMapper {
 
     /**
      * Map of all logical displays, indexed by logical display id.
-     * Each logical display has multiple entries, one for each possible rotation and device
-     * state.
+     * Each logical display has multiple entries, one for each device state.
      *
      * Emptied and re-calculated when a display is added, removed, or changed.
      */
@@ -57,8 +52,8 @@ public class PossibleDisplayInfoMapper {
 
 
     /**
-     * Returns, for the given displayId, a set of display infos. Set contains the possible rotations
-     * for each supported device state.
+     * Returns, for the given displayId, a set of display infos. Set contains each supported device
+     * state.
      */
     public Set<DisplayInfo> getPossibleDisplayInfos(int displayId) {
         // Update display infos before returning, since any cached values would have been removed
@@ -73,13 +68,13 @@ public class PossibleDisplayInfoMapper {
     }
 
     /**
-     * Updates the possible {@link DisplayInfo}s for the given display, by calculating the
-     * DisplayInfo for each rotation across supported device states.
+     * Updates the possible {@link DisplayInfo}s for the given display, by saving the DisplayInfo
+     * across supported device states.
      */
     public void updatePossibleDisplayInfos(int displayId) {
         Set<DisplayInfo> displayInfos = mDisplayManagerInternal.getPossibleDisplayInfo(displayId);
         if (DEBUG) {
-            Slog.v(TAG, "updatePossibleDisplayInfos, calculate rotations for given DisplayInfo "
+            Slog.v(TAG, "updatePossibleDisplayInfos, given DisplayInfo "
                     + displayInfos.size() + " on display " + displayId);
         }
         updateDisplayInfos(displayInfos);
@@ -99,40 +94,12 @@ public class PossibleDisplayInfoMapper {
     private void updateDisplayInfos(Set<DisplayInfo> displayInfos) {
         // Empty out cache before re-computing.
         mDisplayInfos.clear();
-        DisplayInfo[] originalDisplayInfos = new DisplayInfo[displayInfos.size()];
-        displayInfos.toArray(originalDisplayInfos);
         // Iterate over each logical display layout for the current state.
-        Set<DisplayInfo> rotatedDisplayInfos;
-        for (DisplayInfo di : originalDisplayInfos) {
-            rotatedDisplayInfos = new ArraySet<>();
-            // Calculate all possible rotations for each logical display.
-            for (int rotation = ROTATION_0; rotation <= ROTATION_270; rotation++) {
-                rotatedDisplayInfos.add(applyRotation(di, rotation));
-            }
+        for (DisplayInfo di : displayInfos) {
             // Combine all results under the logical display id.
             Set<DisplayInfo> priorDisplayInfos = mDisplayInfos.get(di.displayId, new ArraySet<>());
-            priorDisplayInfos.addAll(rotatedDisplayInfos);
+            priorDisplayInfos.add(di);
             mDisplayInfos.put(di.displayId, priorDisplayInfos);
         }
-    }
-
-    private static DisplayInfo applyRotation(DisplayInfo displayInfo,
-            @Surface.Rotation int rotation) {
-        DisplayInfo updatedDisplayInfo = new DisplayInfo();
-        updatedDisplayInfo.copyFrom(displayInfo);
-        // Apply rotations before updating width and height
-        updatedDisplayInfo.roundedCorners = updatedDisplayInfo.roundedCorners.rotate(rotation,
-                updatedDisplayInfo.logicalWidth, updatedDisplayInfo.logicalHeight);
-        updatedDisplayInfo.displayCutout =
-                DisplayContent.calculateDisplayCutoutForRotationAndDisplaySizeUncached(
-                        updatedDisplayInfo.displayCutout, rotation, updatedDisplayInfo.logicalWidth,
-                        updatedDisplayInfo.logicalHeight).getDisplayCutout();
-
-        updatedDisplayInfo.rotation = rotation;
-        final int naturalWidth = updatedDisplayInfo.getNaturalWidth();
-        final int naturalHeight = updatedDisplayInfo.getNaturalHeight();
-        updatedDisplayInfo.logicalWidth = naturalWidth;
-        updatedDisplayInfo.logicalHeight = naturalHeight;
-        return updatedDisplayInfo;
     }
 }

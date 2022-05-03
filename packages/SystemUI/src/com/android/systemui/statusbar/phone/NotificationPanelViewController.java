@@ -179,6 +179,7 @@ import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.phone.panelstate.PanelState;
+import com.android.systemui.statusbar.phone.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -310,6 +311,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final NotificationRemoteInputManager mRemoteInputManager;
 
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    private final ShadeTransitionController mShadeTransitionController;
     private final TapAgainViewController mTapAgainViewController;
     private final LargeScreenShadeHeaderController mLargeScreenShadeHeaderController;
     private final RecordingController mRecordingController;
@@ -388,6 +390,12 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mDisplayRightInset = 0; // in pixels
     private int mLargeScreenShadeHeaderHeight;
     private int mSplitShadeNotificationsScrimMarginBottom;
+
+    /**
+     * Vertical overlap allowed between the bottom of the notification shelf and
+     * the top of the lock icon or the under-display fingerprint sensor background.
+     */
+    private int mShelfAndLockIconOverlap;
 
     private final KeyguardClockPositionAlgorithm
             mClockPositionAlgorithm =
@@ -745,7 +753,8 @@ public class NotificationPanelViewController extends PanelViewController {
             NotificationListContainer notificationListContainer,
             PanelEventsEmitter panelEventsEmitter,
             NotificationStackSizeCalculator notificationStackSizeCalculator,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            ShadeTransitionController shadeTransitionController) {
         super(view,
                 falsingManager,
                 dozeLog,
@@ -826,7 +835,9 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBypassController = bypassController;
         mUpdateMonitor = keyguardUpdateMonitor;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
+        mShadeTransitionController = shadeTransitionController;
         lockscreenShadeTransitionController.setNotificationPanelController(this);
+        shadeTransitionController.setNotificationPanelViewController(this);
         DynamicPrivacyControlListener
                 dynamicPrivacyControlListener =
                 new DynamicPrivacyControlListener();
@@ -1098,6 +1109,9 @@ public class NotificationPanelViewController extends PanelViewController {
         mSplitShadeNotificationsScrimMarginBottom =
                 mResources.getDimensionPixelSize(
                         R.dimen.split_shade_notifications_scrim_margin_bottom);
+
+        mShelfAndLockIconOverlap =
+                mResources.getDimensionPixelSize(R.dimen.shelf_and_lock_icon_overlap);
 
         final boolean newShouldUseSplitNotificationShade =
                 LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
@@ -1484,27 +1498,18 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     /**
-     * @return the maximum keyguard notifications that can fit on the screen
+     * @return Space available to show notifications on lockscreen.
      */
     @VisibleForTesting
-    int computeMaxKeyguardNotifications() {
-        if (mAmbientState.getFractionToShade() > 0 || mAmbientState.getDozeAmount() > 0) {
-            return mMaxAllowedKeyguardNotifications;
-        }
+    float getSpaceForLockscreenNotifications() {
         float topPadding = mNotificationStackScrollLayoutController.getTopPadding();
-        float shelfIntrinsicHeight =
-                mNotificationShelfController.getVisibility() == View.GONE
-                        ? 0
-                        : mNotificationShelfController.getIntrinsicHeight();
 
-        // Padding to add to the bottom of the stack to keep a minimum distance from the top of
-        // the lock icon.
-        float lockIconPadding = 0;
+        // Space between bottom of notifications and top of lock icon or udfps background.
+        float lockIconPadding = mLockIconViewController.getTop();
         if (mLockIconViewController.getTop() != 0) {
-            final float lockIconTopWithPadding = mLockIconViewController.getTop()
-                    - mResources.getDimensionPixelSize(R.dimen.min_lock_icon_padding);
             lockIconPadding = mNotificationStackScrollLayoutController.getBottom()
-                    - lockIconTopWithPadding;
+                    - mLockIconViewController.getTop()
+                    - mShelfAndLockIconOverlap;
         }
 
         float bottomPadding = Math.max(lockIconPadding,
@@ -1515,9 +1520,26 @@ public class NotificationPanelViewController extends PanelViewController {
                 mNotificationStackScrollLayoutController.getHeight()
                         - topPadding
                         - bottomPadding;
+        return availableSpace;
+    }
+
+    /**
+     * @return Maximum number of notifications that can fit on keyguard.
+     */
+    @VisibleForTesting
+    int computeMaxKeyguardNotifications() {
+        if (mAmbientState.getFractionToShade() > 0 || mAmbientState.getDozeAmount() > 0) {
+            return mMaxAllowedKeyguardNotifications;
+        }
+
+        final float shelfIntrinsicHeight =
+                mNotificationShelfController.getVisibility() == View.GONE
+                        ? 0
+                        : mNotificationShelfController.getIntrinsicHeight();
 
         return mNotificationStackSizeCalculator.computeMaxKeyguardNotifications(
-                mNotificationStackScrollLayoutController.getView(), availableSpace,
+                mNotificationStackScrollLayoutController.getView(),
+                getSpaceForLockscreenNotifications(),
                 shelfIntrinsicHeight);
     }
 
@@ -3625,6 +3647,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 }
             });
             mLockscreenShadeTransitionController.setQS(mQs);
+            mShadeTransitionController.setQs(mQs);
             mNotificationStackScrollLayoutController.setQsHeader((ViewGroup) mQs.getHeader());
             mQs.setScrollListener(mScrollListener);
             updateQsExpansion();

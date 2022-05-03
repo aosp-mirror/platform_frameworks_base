@@ -322,7 +322,8 @@ public:
                 env->CallStaticObjectMethod(gScreenshotHardwareBufferClassInfo.clazz,
                                             gScreenshotHardwareBufferClassInfo.builder,
                                             jhardwareBuffer, namedColorSpace,
-                                            captureResults.capturedSecureLayers);
+                                            captureResults.capturedSecureLayers,
+                                            captureResults.capturedHdrLayers);
         env->CallVoidMethod(screenCaptureListenerObject,
                             gScreenCaptureListenerClassInfo.onScreenCaptureComplete,
                             screenshotHardwareBuffer);
@@ -2401,7 +2402,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             MakeGlobalRefOrDie(env, screenshotGraphicsBufferClazz);
     gScreenshotHardwareBufferClassInfo.builder =
             GetStaticMethodIDOrDie(env, screenshotGraphicsBufferClazz, "createFromNative",
-                                   "(Landroid/hardware/HardwareBuffer;IZ)Landroid/view/"
+                                   "(Landroid/hardware/HardwareBuffer;IZZ)Landroid/view/"
                                    "SurfaceControl$ScreenshotHardwareBuffer;");
 
     jclass displayedContentSampleClazz = FindClassOrDie(env,

@@ -35,6 +35,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.collection.GroupEntry;
+import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -83,6 +85,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     private NotifPanelEvents.Listener mNotifPanelEventsCallback;
     private NotifStabilityManager mNotifStabilityManager;
     private NotificationEntry mEntry;
+    private GroupEntry mGroupEntry;
 
     @Before
     public void setUp() {
@@ -117,6 +120,10 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 .setPkg("testPkg1")
                 .build();
 
+        mGroupEntry = new GroupEntryBuilder()
+                .setSummary(mEntry)
+                .build();
+
         when(mHeadsUpManager.isAlerting(mEntry.getKey())).thenReturn(false);
 
         // Whenever we invalidate, the pipeline runs again, so we invalidate the state
@@ -135,6 +142,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN group changes are allowed
         assertTrue(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertTrue(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
 
         // THEN section changes are allowed
         assertTrue(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
@@ -149,6 +157,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN group changes are allowed
         assertTrue(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertTrue(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
 
         // THEN section changes are allowed
         assertTrue(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
@@ -163,6 +172,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN group changes are NOT allowed
         assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
 
         // THEN section changes are NOT allowed
         assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
@@ -176,6 +186,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN group changes are NOT allowed
         assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
 
         // THEN section changes are NOT allowed
         assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
@@ -190,6 +201,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN group changes are NOT allowed
         assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
 
         // THEN section changes are NOT allowed
         assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
@@ -208,6 +220,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN group changes aren't allowed
         assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
 
         // THEN section changes are allowed for this notification but not other notifications
         assertTrue(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
@@ -321,6 +334,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelExpanded(true);
 
         assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
 
         // WHEN the panel isn't expanded anymore
         setPanelExpanded(false);
@@ -422,6 +436,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelExpanded(true);
         setPulsing(true);
         assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
         assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
 
         // GIVEN mEntry is a HUN
@@ -431,6 +446,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         assertTrue(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
         assertTrue(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
 
+        // BUT pruning the group for which this is the summary would still NOT be allowed.
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
     }
 
     private void setActivityLaunching(boolean activityLaunching) {

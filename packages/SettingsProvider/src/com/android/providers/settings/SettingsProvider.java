@@ -818,9 +818,6 @@ public class SettingsProvider extends ContentProvider {
             getContext().enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS,
                     "Access files from the settings of another user");
         }
-        if (mode.contains("w")) {
-            enforceWritePermission(Manifest.permission.WRITE_SETTINGS);
-        }
         uri = ContentProvider.getUriWithoutUserId(uri);
 
         final String cacheRingtoneSetting;
@@ -5276,12 +5273,6 @@ public class SettingsProvider extends ContentProvider {
                                     .getBoolean(R.bool.def_wearable_muteWhenOffBodyEnabled));
                     initGlobalSettingsDefaultValForWearLocked(
                             Global.Wearable.WEAR_OS_VERSION_STRING, "");
-                    initGlobalSettingsDefaultValForWearLocked(
-                            Global.Wearable.CORNER_ROUNDNESS,
-                            getContext()
-                                    .getResources()
-                                    .getInteger(
-                                            R.integer.def_wearable_squareScreenCornerRoundness));
                     initGlobalSettingsDefaultValForWearLocked(Global.Wearable.BUTTON_SET, false);
                     initGlobalSettingsDefaultValForWearLocked(
                             Global.Wearable.SIDE_BUTTON,

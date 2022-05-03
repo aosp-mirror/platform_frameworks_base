@@ -2315,6 +2315,11 @@
     <string name="media_output_broadcast_starting">Starting&#8230;</string>
     <!-- The button text when Broadcast start failed [CHAR LIMIT=60] -->
     <string name="media_output_broadcast_start_failed">Can\u2019t broadcast</string>
+    <!-- The error message when Broadcast name/code update failed [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_update_error">Can\u2019t save. Try again.</string>
+    <!-- The error message when Broadcast name/code update failed and can't change again[CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_last_update_error">Can\u2019t save.</string>
+
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>
