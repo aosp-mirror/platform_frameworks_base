@@ -51,6 +51,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
+import com.android.keyguard.ActiveUnlockConfig;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
@@ -658,9 +659,15 @@ public class UdfpsController implements DozeReceiver {
         mExecution.assertIsMainThread();
 
         mOverlay = overlay;
+        final int requestReason = overlay.getRequestReason();
+        if (requestReason == REASON_AUTH_KEYGUARD
+                && !mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
+            Log.d(TAG, "Attempting to showUdfpsOverlay when fingerprint detection"
+                    + " isn't running on keyguard. Skip show.");
+            return;
+        }
         if (overlay.show(this, mOverlayParams)) {
-            Log.v(TAG, "showUdfpsOverlay | adding window reason="
-                    + overlay.getRequestReason());
+            Log.v(TAG, "showUdfpsOverlay | adding window reason=" + requestReason);
             mOnFingerDown = false;
             mAttemptedToDismissKeyguard = false;
             mOrientationListener.enable();
@@ -791,10 +798,9 @@ public class UdfpsController implements DozeReceiver {
                 mKeyguardUpdateMonitor.requestFaceAuth(/* userInitiatedRequest */ false);
             }
 
-            if (mKeyguardUpdateMonitor.mRequestActiveUnlockOnUnlockIntent) {
-                mKeyguardUpdateMonitor.requestActiveUnlock("unlock-intent extra=udfpsFingerDown",
-                        true);
-            }
+            mKeyguardUpdateMonitor.requestActiveUnlock(
+                    ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.UNLOCK_INTENT,
+                    "udfpsFingerDown");
         }
         mOnFingerDown = true;
         if (mAlternateTouchProvider != null) {
