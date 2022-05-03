@@ -30,6 +30,8 @@ import android.os.IBinder;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +41,11 @@ import java.util.List;
  * on the server side.
  */
 class TaskFragmentContainer {
+    private static final int APPEAR_EMPTY_TIMEOUT_MS = 3000;
+
+    @NonNull
+    private final SplitController mController;
+
     /**
      * Client-created token that uniquely identifies the task fragment container instance.
      */
@@ -51,7 +58,8 @@ class TaskFragmentContainer {
     /**
      * Server-provided task fragment information.
      */
-    private TaskFragmentInfo mInfo;
+    @VisibleForTesting
+    TaskFragmentInfo mInfo;
 
     /**
      * Activities that are being reparented or being started to this container, but haven't been
@@ -81,10 +89,20 @@ class TaskFragmentContainer {
     private int mLastRequestedWindowingMode = WINDOWING_MODE_UNDEFINED;
 
     /**
+     * When the TaskFragment has appeared in server, but is empty, we should remove the TaskFragment
+     * if it is still empty after the timeout.
+     */
+    @VisibleForTesting
+    @Nullable
+    Runnable mAppearEmptyTimeout;
+
+    /**
      * Creates a container with an existing activity that will be re-parented to it in a window
      * container transaction.
      */
-    TaskFragmentContainer(@Nullable Activity activity, int taskId) {
+    TaskFragmentContainer(@Nullable Activity activity, int taskId,
+            @NonNull SplitController controller) {
+        mController = controller;
         mToken = new Binder("TaskFragmentContainer");
         if (taskId == INVALID_TASK_ID) {
             throw new IllegalArgumentException("Invalid Task id");
@@ -155,12 +173,30 @@ class TaskFragmentContainer {
         return count;
     }
 
+    /** Whether we are waiting for the TaskFragment to appear and become non-empty. */
+    boolean isWaitingActivityAppear() {
+        return !mIsFinished && (mInfo == null || mAppearEmptyTimeout != null);
+    }
+
     @Nullable
     TaskFragmentInfo getInfo() {
         return mInfo;
     }
 
     void setInfo(@NonNull TaskFragmentInfo info) {
+        if (!mIsFinished && mInfo == null && info.isEmpty()) {
+            // onTaskFragmentAppeared with empty info. We will remove the TaskFragment if it is
+            // still empty after timeout.
+            mAppearEmptyTimeout = () -> {
+                mAppearEmptyTimeout = null;
+                mController.onTaskFragmentAppearEmptyTimeout(this);
+            };
+            mController.getHandler().postDelayed(mAppearEmptyTimeout, APPEAR_EMPTY_TIMEOUT_MS);
+        } else if (mAppearEmptyTimeout != null && !info.isEmpty()) {
+            mController.getHandler().removeCallbacks(mAppearEmptyTimeout);
+            mAppearEmptyTimeout = null;
+        }
+
         mInfo = info;
         if (mInfo == null || mPendingAppearedActivities.isEmpty()) {
             return;
@@ -234,6 +270,10 @@ class TaskFragmentContainer {
             @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
         if (!mIsFinished) {
             mIsFinished = true;
+            if (mAppearEmptyTimeout != null) {
+                mController.getHandler().removeCallbacks(mAppearEmptyTimeout);
+                mAppearEmptyTimeout = null;
+            }
             finishActivities(shouldFinishDependent, presenter, wct, controller);
         }
 
