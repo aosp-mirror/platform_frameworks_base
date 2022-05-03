@@ -127,6 +127,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private int mColorItemBackground;
     private int mColorConnectedItemBackground;
     private int mColorPositiveButtonText;
+    private float mInactiveRadius;
+    private float mActiveRadius;
 
     public enum BroadcastNotifyDialog {
         ACTION_FIRST_LAUNCH,
@@ -163,6 +165,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 R.color.media_dialog_connected_item_background);
         mColorPositiveButtonText = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_solid_button_text);
+        mInactiveRadius = mContext.getResources().getDimension(
+                R.dimen.media_output_dialog_background_radius);
+        mActiveRadius = mContext.getResources().getDimension(
+                R.dimen.media_output_dialog_active_background_radius);
     }
 
     void start(@NonNull Callback cb) {
@@ -415,6 +421,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     public int getColorItemBackground() {
         return mColorItemBackground;
+    }
+
+    public float getInactiveRadius() {
+        return mInactiveRadius;
+    }
+
+    public float getActiveRadius() {
+        return mActiveRadius;
     }
 
     private void buildMediaDevices(List<MediaDevice> devices) {

@@ -112,6 +112,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             super.onBind(device, topMargin, bottomMargin, position);
             final boolean currentlyConnected = !mIncludeDynamicGroup
                     && isCurrentlyConnected(device);
+            boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
             if (currentlyConnected) {
                 mConnectedItem = mContainerLayout;
             }
@@ -178,7 +179,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mCheckBox.setOnCheckedChangeListener(
                             (buttonView, isChecked) -> onGroupActionTriggered(false, device));
                     setCheckBoxColor(mCheckBox, mController.getColorItemContent());
-                    initSeekbar(device);
+                    initSeekbar(device, isCurrentSeekbarInvisible);
                     mEndTouchArea.setVisibility(View.VISIBLE);
                     mEndTouchArea.setOnClickListener(null);
                     mEndTouchArea.setOnClickListener((v) -> mCheckBox.performClick());
@@ -193,7 +194,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, true /* showStatus */);
-                    initSeekbar(device);
+                    initSeekbar(device, isCurrentSeekbarInvisible);
                     setUpContentDescriptionForView(mContainerLayout, false, device);
                     mCurrentActivePosition = position;
                 } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
@@ -257,9 +258,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mCurrentActivePosition = -1;
             mController.connectDevice(device);
             device.setState(MediaDeviceState.STATE_CONNECTING);
-            if (!isAnimating()) {
-                notifyDataSetChanged();
-            }
+            notifyDataSetChanged();
         }
 
         private void setUpContentDescriptionForView(View view, boolean clickable,
