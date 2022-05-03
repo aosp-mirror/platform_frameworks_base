@@ -139,6 +139,7 @@ import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -357,10 +358,12 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private Handler mMainHandler;
     private final PanelExpansionStateManager mPanelExpansionStateManager =
             new PanelExpansionStateManager();
+    private SystemClock mSystemClock;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mSystemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager,
                 mInteractionJankMonitor);
 
@@ -533,7 +536,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mPanelEventsEmitter,
                 mNotificationStackSizeCalculator,
                 mUnlockedScreenOffAnimationController,
-                mShadeTransitionController);
+                mShadeTransitionController,
+                mSystemClock);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},
