@@ -6621,8 +6621,8 @@ public final class ActiveServices {
             final Integer allowedType = mAm.mProcessList.searchEachLruProcessesLOSP(false, app -> {
                 if (app.uid == callingUid) {
                     final ProcessStateRecord state = app.mState;
-                    if (state.isAllowedStartFgsState()) {
-                        return getReasonCodeFromProcState(state.getAllowStartFgsState());
+                    if (state.isAllowedStartFgs()) {
+                        return getReasonCodeFromProcState(state.getCurProcState());
                     } else {
                         final ActiveInstrumentation instr = app.getActiveInstrumentation();
                         if (instr != null
