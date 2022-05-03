@@ -1005,6 +1005,17 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testExpandWithQsMethodIsUsingLockscreenTransitionController() {
+        enableSplitShade(/* enabled= */ true);
+        mStatusBarStateController.setState(KEYGUARD);
+
+        mNotificationPanelViewController.expandWithQs();
+
+        verify(mLockscreenShadeTransitionController).goToLockedShade(
+                /* expandedView= */null, /* needsQSAnimation= */false);
+    }
+
+    @Test
     public void testUnlockAnimationDoesNotAffectScrim() {
         mNotificationPanelViewController.onUnlockHintStarted();
         verify(mScrimController).setExpansionAffectsAlpha(false);

@@ -1666,7 +1666,15 @@ public class NotificationPanelViewController extends PanelViewController {
             mQsExpandImmediate = true;
             setShowShelfOnly(true);
         }
-        if (isFullyCollapsed()) {
+        if (mShouldUseSplitNotificationShade && isOnKeyguard()) {
+            // It's a special case as this method is likely to not be initiated by finger movement
+            // but rather called from adb shell or accessibility service.
+            // In the future method below could be used for non-split shade as well but currently
+            // motion in that case looks worse than using flingSettings.
+            // TODO: make below function transitioning smoothly also in portrait with empty target
+            mLockscreenShadeTransitionController.goToLockedShade(
+                    /* expandedView= */null, /* needsQSAnimation= */false);
+        } else if (isFullyCollapsed()) {
             expand(true /* animate */);
         } else {
             traceQsJank(true /* startTracing */, false /* wasCancelled */);
