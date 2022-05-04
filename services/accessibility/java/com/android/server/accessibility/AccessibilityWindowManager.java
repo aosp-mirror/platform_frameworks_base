@@ -1673,7 +1673,7 @@ public class AccessibilityWindowManager {
         if (traceWMEnabled()) {
             logTraceWM("getFocusedWindowToken", "");
         }
-        final IBinder token = mWindowManagerInternal.getFocusedWindowToken();
+        final IBinder token = mWindowManagerInternal.getFocusedWindowTokenFromWindowStates();
         synchronized (mLock) {
             return findWindowIdLocked(userId, token);
         }
