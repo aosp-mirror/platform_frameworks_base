@@ -34,6 +34,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.Icon
 import android.graphics.drawable.RippleDrawable
+import android.graphics.drawable.TransitionDrawable
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -74,6 +75,7 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
+import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -535,6 +537,13 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
+    fun bindAlbumView_testHardwareAfterAttach() {
+        player.attachPlayer(viewHolder)
+
+        verify(albumView).setLayerType(View.LAYER_TYPE_HARDWARE, null)
+    }
+
+    @Test
     fun bindAlbumView_setAfterExecutors() {
         val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
@@ -579,9 +588,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state1, PACKAGE)
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
-        verify(albumView, times(2)).setImageDrawable(any(Drawable::class.java))
+        val drawableCaptor = argumentCaptor<Drawable>()
+        verify(albumView, times(2)).setImageDrawable(drawableCaptor.capture())
+        assertTrue(drawableCaptor.allValues[1] is TransitionDrawable)
 
-        // Third binding does run transition or update background
+        // Third binding doesn't run transition or update background
         player.bindPlayer(state2, PACKAGE)
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
