@@ -542,6 +542,22 @@ class JobConcurrencyManager {
         return mRunningJobs.contains(job);
     }
 
+    /**
+     * Returns true if a job that is "similar" to the provided job is currently running.
+     * "Similar" in this context means any job that the {@link JobStore} would consider equivalent
+     * and replace one with the other.
+     */
+    @GuardedBy("mLock")
+    private boolean isSimilarJobRunningLocked(JobStatus job) {
+        for (int i = mRunningJobs.size() - 1; i >= 0; --i) {
+            JobStatus js = mRunningJobs.valueAt(i);
+            if (job.getUid() == js.getUid() && job.getJobId() == js.getJobId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Return {@code true} if the state was updated. */
     @GuardedBy("mLock")
     private boolean refreshSystemStateLocked() {
@@ -699,6 +715,21 @@ class JobConcurrencyManager {
                 continue;
             }
 
+            final boolean isTopEj = nextPending.shouldTreatAsExpeditedJob()
+                    && nextPending.lastEvaluatedBias == JobInfo.BIAS_TOP_APP;
+            // Avoid overlapping job execution as much as possible.
+            if (!isTopEj && isSimilarJobRunningLocked(nextPending)) {
+                if (DEBUG) {
+                    Slog.w(TAG, "Delaying execution of job because of similarly running one: "
+                            + nextPending);
+                }
+                // It would be nice to let the JobService running the other similar job know about
+                // this new job so that it doesn't unbind from the JobService and we can call
+                // onStartJob as soon as the older job finishes.
+                // TODO: optimize the job reschedule flow to reduce service binding churn
+                continue;
+            }
+
             // Find an available slot for nextPending. The context should be one of the following:
             // 1. Unused
             // 2. Its job should have used up its minimum execution guarantee so it
@@ -707,8 +738,6 @@ class JobConcurrencyManager {
             ContextAssignment selectedContext = null;
             final int allWorkTypes = getJobWorkTypes(nextPending);
             final boolean pkgConcurrencyOkay = !isPkgConcurrencyLimitedLocked(nextPending);
-            final boolean isTopEj = nextPending.shouldTreatAsExpeditedJob()
-                    && nextPending.lastEvaluatedBias == JobInfo.BIAS_TOP_APP;
             final boolean isInOverage = projectedRunningCount > STANDARD_CONCURRENCY_LIMIT;
             boolean startingJob = false;
             if (idle.size() > 0) {
@@ -1177,6 +1206,15 @@ class JobConcurrencyManager {
                     continue;
                 }
 
+                // Avoid overlapping job execution as much as possible.
+                if (isSimilarJobRunningLocked(nextPending)) {
+                    if (DEBUG) {
+                        Slog.w(TAG, "Avoiding execution of job because of similarly running one: "
+                                + nextPending);
+                    }
+                    continue;
+                }
+
                 if (worker.getPreferredUid() != nextPending.getUid()) {
                     if (backupJob == null && !isPkgConcurrencyLimitedLocked(nextPending)) {
                         int allWorkTypes = getJobWorkTypes(nextPending);
@@ -1257,6 +1295,15 @@ class JobConcurrencyManager {
                         Slog.e(TAG, "Pending+running job: " + nextPending);
                     }
                     pendingJobQueue.remove(nextPending);
+                    continue;
+                }
+
+                // Avoid overlapping job execution as much as possible.
+                if (isSimilarJobRunningLocked(nextPending)) {
+                    if (DEBUG) {
+                        Slog.w(TAG, "Avoiding execution of job because of similarly running one: "
+                                + nextPending);
+                    }
                     continue;
                 }
 
