@@ -30,6 +30,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
@@ -103,6 +104,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
 
         mNotificationShadeWindowController.attach();
+        verify(mWindowManager).addView(eq(mNotificationShadeWindowView), any());
     }
 
     @Test
@@ -174,6 +176,14 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void setScrimsVisibility_earlyReturn() {
+        clearInvocations(mWindowManager);
+        mNotificationShadeWindowController.setScrimsVisibility(ScrimController.TRANSPARENT);
+        // Abort early if value didn't change
+        verify(mWindowManager, never()).updateViewLayout(any(), mLayoutParameters.capture());
+    }
+
+    @Test
     public void attach_animatingKeyguardAndSurface_wallpaperVisible() {
         clearInvocations(mWindowManager);
         when(mKeyguardViewMediator.isShowingAndNotOccluded()).thenReturn(true);
@@ -221,6 +231,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     public void setPanelExpanded_notFocusable_altFocusable_whenPanelIsOpen() {
         mNotificationShadeWindowController.setPanelExpanded(true);
         clearInvocations(mWindowManager);
+        mNotificationShadeWindowController.setPanelExpanded(true);
+        verifyNoMoreInteractions(mWindowManager);
         mNotificationShadeWindowController.setNotificationShadeFocusable(true);
 
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
@@ -287,6 +299,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     public void batchApplyWindowLayoutParams_doesNotDispatchEvents() {
         mNotificationShadeWindowController.setForceDozeBrightness(true);
         verify(mWindowManager).updateViewLayout(any(), any());
+        mNotificationShadeWindowController.setForceDozeBrightness(true);
+        verifyNoMoreInteractions(mWindowManager);
 
         clearInvocations(mWindowManager);
         mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
