@@ -1379,11 +1379,8 @@ public final class InputManager {
             }
 
             mInputDevices = new SparseArray<InputDevice>();
-            // TODO(b/223905476): remove when the rootcause is fixed.
-            if (ids != null) {
-                for (int i = 0; i < ids.length; i++) {
-                    mInputDevices.put(ids[i], null);
-                }
+            for (int i = 0; i < ids.length; i++) {
+                mInputDevices.put(ids[i], null);
             }
         }
     }
