@@ -27,6 +27,7 @@ import static com.android.systemui.util.mockito.KotlinMockitoHelpersKt.argThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -228,6 +229,41 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     }
 
     @Test
+    public void hideSilentNotificationsPerUserSettingWithHighPriorityParent() {
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
+        GroupEntry parent = new GroupEntryBuilder()
+                .setKey("parent")
+                .addChild(mEntry)
+                .setSummary(new NotificationEntryBuilder()
+                        .setUser(new UserHandle(NOTIF_USER_ID))
+                        .setImportance(IMPORTANCE_LOW)
+                        .build())
+                .build();
+        mEntry = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID))
+                .setImportance(IMPORTANCE_LOW)
+                .setParent(parent)
+                .build();
+        when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+        assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void hideSilentNotificationsPerUserSetting() {
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
+        mEntry = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID))
+                .setImportance(IMPORTANCE_LOW)
+                .build();
+        when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+        assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
     public void notifyListeners_onSettingChange_zenMode() {
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         Consumer<String> listener = mock(Consumer.class);
@@ -384,8 +420,8 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
         when(mHighPriorityProvider.isHighPriority(parent)).thenReturn(true);
 
-        // THEN don't filter out the entry
-        assertFalse(
+        // THEN filter out the entry regardless of parent
+        assertTrue(
                 mKeyguardNotificationVisibilityProvider.shouldHideNotification(entryWithParent));
 
         // WHEN its parent doesn't exceed threshold to show on lockscreen
