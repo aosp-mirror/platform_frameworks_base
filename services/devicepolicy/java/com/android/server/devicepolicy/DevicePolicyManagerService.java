@@ -9861,18 +9861,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private String getEncryptionStatusName(int encryptionStatus) {
         switch (encryptionStatus) {
-            case DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE:
-                return "inactive";
-            case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY:
-                return "block default key";
-            case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE:
-                return "block";
             case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER:
                 return "per-user";
             case DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED:
                 return "unsupported";
-            case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVATING:
-                return "activating";
             default:
                 return "unknown";
         }
