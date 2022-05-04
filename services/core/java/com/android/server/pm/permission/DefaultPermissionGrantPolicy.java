@@ -850,7 +850,8 @@ final class DefaultPermissionGrantPolicy {
                     Intent.CATEGORY_HOME_MAIN, userId);
             grantPermissionsToSystemPackage(pm, wearPackage, userId,
                     CONTACTS_PERMISSIONS, MICROPHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
-            grantSystemFixedPermissionsToSystemPackage(pm, wearPackage, userId, PHONE_PERMISSIONS);
+            grantSystemFixedPermissionsToSystemPackage(pm, wearPackage, userId, PHONE_PERMISSIONS,
+                                                       ACTIVITY_RECOGNITION_PERMISSIONS);
 
             // Fitness tracking on watches
             if (mContext.getResources().getBoolean(R.bool.config_trackerAppNeedsPermissions)) {
