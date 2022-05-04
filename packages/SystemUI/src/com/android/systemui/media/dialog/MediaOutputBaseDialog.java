@@ -449,7 +449,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     abstract int getStopButtonVisibility();
 
     public CharSequence getStopButtonText() {
-        return mContext.getText(R.string.keyboard_key_media_stop);
+        return mContext.getText(R.string.media_output_dialog_button_stop_casting);
     }
 
     public void onStopButtonClick() {
