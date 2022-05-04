@@ -592,7 +592,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private InlineSuggestionSessionController mInlineSuggestionSessionController;
 
-    private boolean mAutomotiveHideNavBarForKeyboard;
+    private boolean mHideNavBarForKeyboard;
     private boolean mIsAutomotive;
     private @NonNull OptionalInt mHandwritingRequestId = OptionalInt.empty();
     private InputEventReceiver mHandwritingEventReceiver;
@@ -1498,9 +1498,8 @@ public class InputMethodService extends AbstractInputMethodService {
         // shown the first time (cold start).
         mSettingsObserver.shouldShowImeWithHardKeyboard();
 
-        mIsAutomotive = isAutomotive();
-        mAutomotiveHideNavBarForKeyboard = getApplicationContext().getResources().getBoolean(
-                com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard);
+        mHideNavBarForKeyboard = getApplicationContext().getResources().getBoolean(
+                com.android.internal.R.bool.config_hideNavBarForKeyboard);
 
         // TODO(b/111364446) Need to address context lifecycle issue if need to re-create
         // for update resources & configuration correctly when show soft input
@@ -1539,11 +1538,11 @@ public class InputMethodService extends AbstractInputMethodService {
             window.setFlags(windowFlags, windowFlagsMask);
 
             // Automotive devices may request the navigation bar to be hidden when the IME shows up
-            // (controlled via config_automotiveHideNavBarForKeyboard) in order to maximize the
-            // visible screen real estate. When this happens, the IME window should animate from the
+            // (controlled via config_hideNavBarForKeyboard) in order to maximize the visible
+            // screen real estate. When this happens, the IME window should animate from the
             // bottom of the screen to reduce the jank that happens from the lack of synchronization
             // between the bottom system window and the IME window.
-            if (mIsAutomotive && mAutomotiveHideNavBarForKeyboard) {
+            if (mHideNavBarForKeyboard) {
                 window.setDecorFitsSystemWindows(false);
             }
         }
