@@ -926,17 +926,16 @@ internal object MediaPlayerData {
         val isSsReactivated: Boolean = false
     )
 
-    private val comparator =
-            compareByDescending<MediaSortKey> { it.data.isPlaying == true &&
-                        it.data.playbackLocation == MediaData.PLAYBACK_LOCAL }
-                    .thenByDescending { it.data.isPlaying == true &&
-                        it.data.playbackLocation == MediaData.PLAYBACK_CAST_LOCAL
-                    }
-                    .thenByDescending { if (shouldPrioritizeSs) it.isSsMediaRec else !it.isSsMediaRec }
-                    .thenByDescending { !it.data.resumption }
-                    .thenByDescending { it.data.playbackLocation != MediaData.PLAYBACK_CAST_REMOTE }
-                    .thenByDescending { it.updateTime }
-                    .thenByDescending { it.data.notificationKey }
+    private val comparator = compareByDescending<MediaSortKey> {
+            it.data.isPlaying == true && it.data.playbackLocation == MediaData.PLAYBACK_LOCAL }
+        .thenByDescending {
+            it.data.isPlaying == true && it.data.playbackLocation == MediaData.PLAYBACK_CAST_LOCAL }
+        .thenByDescending { it.data.active }
+        .thenByDescending { shouldPrioritizeSs == it.isSsMediaRec }
+        .thenByDescending { !it.data.resumption }
+        .thenByDescending { it.data.playbackLocation != MediaData.PLAYBACK_CAST_REMOTE }
+        .thenByDescending { it.updateTime }
+        .thenByDescending { it.data.notificationKey }
 
     private val mediaPlayers = TreeMap<MediaSortKey, MediaControlPanel>(comparator)
     private val mediaData: MutableMap<String, MediaSortKey> = mutableMapOf()

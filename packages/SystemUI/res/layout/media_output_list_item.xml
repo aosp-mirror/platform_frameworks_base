@@ -33,12 +33,13 @@
             android:layout_height="match_parent"
             android:background="@drawable/media_output_item_background"
             android:layout_gravity="center_vertical|start">
-            <SeekBar
+            <com.android.systemui.media.dialog.MediaOutputSeekbar
                 android:id="@+id/volume_seekbar"
                 android:splitTrack="false"
                 android:visibility="gone"
                 android:paddingStart="0dp"
                 android:paddingEnd="0dp"
+                android:background="@null"
                 android:progressDrawable="@drawable/media_output_dialog_seekbar_background"
                 android:thumb="@null"
                 android:layout_width="match_parent"

@@ -46,11 +46,9 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPH
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED_FROM_RESTART;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECT_UNEXPECTED_CALLBACK;
-import static com.android.server.voiceinteraction.SoundTriggerSessionPermissionsDecorator.enforcePermissionForPreflight;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -1111,11 +1109,12 @@ final class HotwordDetectionConnection {
     // TODO: Share this code with SoundTriggerMiddlewarePermission.
     private void enforcePermissionsForDataDelivery() {
         Binder.withCleanCallingIdentity(() -> {
-            enforcePermissionForPreflight(mContext, mVoiceInteractorIdentity, RECORD_AUDIO);
-            int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
-            mContext.getSystemService(AppOpsManager.class).noteOpNoThrow(hotwordOp,
-                    mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                    mVoiceInteractorIdentity.attributionTag, OP_MESSAGE);
+            // Hack to make sure we show the mic privacy-indicator since the Trusted Hotword
+            // requirement isn't being enforced for now. Normally, we would note the HOTWORD op here
+            // instead.
+            enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
+                    RECORD_AUDIO, OP_MESSAGE);
+
             enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
                     CAPTURE_AUDIO_HOTWORD, OP_MESSAGE);
         });

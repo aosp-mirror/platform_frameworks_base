@@ -243,166 +243,10 @@ public class PreferencesHelper implements RankingConfig {
                         mHideSilentStatusBarIcons = parser.getAttributeBoolean(null,
                                 ATT_HIDE_SILENT, DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS);
                     } else if (TAG_PACKAGE.equals(tag)) {
-                        int uid = parser.getAttributeInt(null, ATT_UID, UNKNOWN_UID);
                         String name = parser.getAttributeValue(null, ATT_NAME);
                         if (!TextUtils.isEmpty(name)) {
-                            if (forRestore) {
-                                try {
-                                    uid = mPm.getPackageUidAsUser(name, userId);
-                                } catch (PackageManager.NameNotFoundException e) {
-                                    // noop
-                                }
-                            }
-                            boolean skipWarningLogged = false;
-                            boolean skipGroupWarningLogged = false;
-                            boolean hasSAWPermission = false;
-                            if (upgradeForBubbles && uid != UNKNOWN_UID) {
-                                hasSAWPermission = mAppOps.noteOpNoThrow(
-                                        OP_SYSTEM_ALERT_WINDOW, uid, name, null,
-                                        "check-notif-bubble") == AppOpsManager.MODE_ALLOWED;
-                            }
-                            int bubblePref = hasSAWPermission
-                                    ? BUBBLE_PREFERENCE_ALL
-                                    : parser.getAttributeInt(
-                                            null, ATT_ALLOW_BUBBLE, DEFAULT_BUBBLE_PREFERENCE);
-                            int appImportance = parser.getAttributeInt(
-                                    null, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
-
-                            PackagePreferences r = getOrCreatePackagePreferencesLocked(
-                                    name, userId, uid,
-                                    appImportance,
-                                    parser.getAttributeInt(
-                                            null, ATT_PRIORITY, DEFAULT_PRIORITY),
-                                    parser.getAttributeInt(
-                                            null, ATT_VISIBILITY, DEFAULT_VISIBILITY),
-                                    parser.getAttributeBoolean(
-                                            null, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE),
-                                    bubblePref);
-                            r.priority = parser.getAttributeInt(
-                                    null, ATT_PRIORITY, DEFAULT_PRIORITY);
-                            r.visibility = parser.getAttributeInt(
-                                    null, ATT_VISIBILITY, DEFAULT_VISIBILITY);
-                            r.showBadge = parser.getAttributeBoolean(
-                                    null, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
-                            r.lockedAppFields = parser.getAttributeInt(
-                                    null, ATT_APP_USER_LOCKED_FIELDS, DEFAULT_LOCKED_APP_FIELDS);
-                            r.hasSentInvalidMessage = parser.getAttributeBoolean(
-                                    null, ATT_SENT_INVALID_MESSAGE, false);
-                            r.hasSentValidMessage = parser.getAttributeBoolean(
-                                    null, ATT_SENT_VALID_MESSAGE, false);
-                            r.userDemotedMsgApp = parser.getAttributeBoolean(
-                                    null, ATT_USER_DEMOTED_INVALID_MSG_APP, false);
-
-                            final int innerDepth = parser.getDepth();
-                            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                                    && (type != XmlPullParser.END_TAG
-                                    || parser.getDepth() > innerDepth)) {
-                                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                                    continue;
-                                }
-
-                                String tagName = parser.getName();
-                                // Channel groups
-                                if (TAG_GROUP.equals(tagName)) {
-                                    if (r.groups.size() >= NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT) {
-                                        if (!skipGroupWarningLogged) {
-                                            Slog.w(TAG, "Skipping further groups for " + r.pkg
-                                                    + "; app has too many");
-                                            skipGroupWarningLogged = true;
-                                        }
-                                        continue;
-                                    }
-                                    String id = parser.getAttributeValue(null, ATT_ID);
-                                    CharSequence groupName = parser.getAttributeValue(null,
-                                            ATT_NAME);
-                                    if (!TextUtils.isEmpty(id)) {
-                                        NotificationChannelGroup group
-                                                = new NotificationChannelGroup(id, groupName);
-                                        group.populateFromXml(parser);
-                                        r.groups.put(id, group);
-                                    }
-                                }
-                                // Channels
-                                if (TAG_CHANNEL.equals(tagName)) {
-                                    if (r.channels.size() >= NOTIFICATION_CHANNEL_COUNT_LIMIT) {
-                                        if (!skipWarningLogged) {
-                                            Slog.w(TAG, "Skipping further channels for " + r.pkg
-                                                    + "; app has too many");
-                                            skipWarningLogged = true;
-                                        }
-                                        continue;
-                                    }
-                                    String id = parser.getAttributeValue(null, ATT_ID);
-                                    String channelName = parser.getAttributeValue(null, ATT_NAME);
-                                    int channelImportance = parser.getAttributeInt(
-                                            null, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
-                                    if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
-                                        NotificationChannel channel = new NotificationChannel(id,
-                                                channelName, channelImportance);
-                                        if (forRestore) {
-                                            channel.populateFromXmlForRestore(parser, mContext);
-                                        } else {
-                                            channel.populateFromXml(parser);
-                                        }
-                                        if (!mPermissionHelper.isMigrationEnabled()) {
-                                            channel.setImportanceLockedByCriticalDeviceFunction(
-                                                    r.defaultAppLockedImportance);
-                                            channel.setImportanceLockedByOEM(r.oemLockedImportance);
-                                            if (!channel.isImportanceLockedByOEM()) {
-                                                if (r.oemLockedChannels.contains(channel.getId())) {
-                                                    channel.setImportanceLockedByOEM(true);
-                                                }
-                                            }
-                                        }
-
-                                        if (isShortcutOk(channel) && isDeletionOk(channel)) {
-                                            r.channels.put(id, channel);
-                                        }
-                                    }
-                                }
-
-                                // Delegate
-                                if (TAG_DELEGATE.equals(tagName)) {
-                                    int delegateId =
-                                            parser.getAttributeInt(null, ATT_UID, UNKNOWN_UID);
-                                    String delegateName =
-                                            XmlUtils.readStringAttribute(parser, ATT_NAME);
-                                    boolean delegateEnabled = parser.getAttributeBoolean(
-                                            null, ATT_ENABLED, Delegate.DEFAULT_ENABLED);
-                                    boolean userAllowed = parser.getAttributeBoolean(
-                                            null, ATT_USER_ALLOWED, Delegate.DEFAULT_USER_ALLOWED);
-                                    Delegate d = null;
-                                    if (delegateId != UNKNOWN_UID && !TextUtils.isEmpty(
-                                            delegateName)) {
-                                        d = new Delegate(
-                                                delegateName, delegateId, delegateEnabled,
-                                                userAllowed);
-                                    }
-                                    r.delegate = d;
-                                }
-
-                            }
-
-                            try {
-                                deleteDefaultChannelIfNeededLocked(r);
-                            } catch (PackageManager.NameNotFoundException e) {
-                                Slog.e(TAG, "deleteDefaultChannelIfNeededLocked - Exception: " + e);
-                            }
-
-                            if (migrateToPermission) {
-                                r.importance = appImportance;
-                                r.migrateToPm = true;
-                                if (r.uid != UNKNOWN_UID) {
-                                    // Don't call into permission system until we have a valid uid
-                                    PackagePermission pkgPerm = new PackagePermission(
-                                            r.pkg, UserHandle.getUserId(r.uid),
-                                            r.importance != IMPORTANCE_NONE,
-                                            hasUserConfiguredSettings(r));
-                                    pkgPerms.add(pkgPerm);
-                                }
-                            } else if (!mPermissionHelper.isMigrationEnabled()) {
-                                r.importance = appImportance;
-                            }
+                            restorePackage(parser, forRestore, userId, name, upgradeForBubbles,
+                                    migrateToPermission, pkgPerms);
                         }
                     }
                 }
@@ -416,6 +260,168 @@ public class PreferencesHelper implements RankingConfig {
                     Slog.e(TAG, "could not migrate setting for " + p.packageName, e);
                 }
             }
+        }
+    }
+
+    @GuardedBy("mPackagePreferences")
+    private void restorePackage(TypedXmlPullParser parser, boolean forRestore,
+            @UserIdInt int userId, String name, boolean upgradeForBubbles,
+            boolean migrateToPermission, ArrayList<PermissionHelper.PackagePermission> pkgPerms) {
+        try {
+            int uid = parser.getAttributeInt(null, ATT_UID, UNKNOWN_UID);
+            if (forRestore) {
+                try {
+                    uid = mPm.getPackageUidAsUser(name, userId);
+                } catch (PackageManager.NameNotFoundException e) {
+                    // noop
+                }
+            }
+            boolean skipWarningLogged = false;
+            boolean skipGroupWarningLogged = false;
+            boolean hasSAWPermission = false;
+            if (upgradeForBubbles && uid != UNKNOWN_UID) {
+                hasSAWPermission = mAppOps.noteOpNoThrow(
+                        OP_SYSTEM_ALERT_WINDOW, uid, name, null,
+                        "check-notif-bubble") == AppOpsManager.MODE_ALLOWED;
+            }
+            int bubblePref = hasSAWPermission
+                    ? BUBBLE_PREFERENCE_ALL
+                    : parser.getAttributeInt(null, ATT_ALLOW_BUBBLE, DEFAULT_BUBBLE_PREFERENCE);
+            int appImportance = parser.getAttributeInt(null, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
+
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(
+                    name, userId, uid,
+                    appImportance,
+                    parser.getAttributeInt(null, ATT_PRIORITY, DEFAULT_PRIORITY),
+                    parser.getAttributeInt(null, ATT_VISIBILITY, DEFAULT_VISIBILITY),
+                    parser.getAttributeBoolean(null, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE),
+                    bubblePref);
+            r.priority = parser.getAttributeInt(null, ATT_PRIORITY, DEFAULT_PRIORITY);
+            r.visibility = parser.getAttributeInt(null, ATT_VISIBILITY, DEFAULT_VISIBILITY);
+            r.showBadge = parser.getAttributeBoolean(null, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
+            r.lockedAppFields = parser.getAttributeInt(null,
+                    ATT_APP_USER_LOCKED_FIELDS, DEFAULT_LOCKED_APP_FIELDS);
+            r.hasSentInvalidMessage = parser.getAttributeBoolean(null, ATT_SENT_INVALID_MESSAGE,
+                    false);
+            r.hasSentValidMessage = parser.getAttributeBoolean(null, ATT_SENT_VALID_MESSAGE, false);
+            r.userDemotedMsgApp = parser.getAttributeBoolean(
+                    null, ATT_USER_DEMOTED_INVALID_MSG_APP, false);
+
+            final int innerDepth = parser.getDepth();
+            int type;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                    && (type != XmlPullParser.END_TAG
+                    || parser.getDepth() > innerDepth)) {
+                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                    continue;
+                }
+
+                String tagName = parser.getName();
+                // Channel groups
+                if (TAG_GROUP.equals(tagName)) {
+                    if (r.groups.size() >= NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT) {
+                        if (!skipGroupWarningLogged) {
+                            Slog.w(TAG, "Skipping further groups for " + r.pkg);
+                            skipGroupWarningLogged = true;
+                        }
+                        continue;
+                    }
+                    String id = parser.getAttributeValue(null, ATT_ID);
+                    CharSequence groupName = parser.getAttributeValue(null, ATT_NAME);
+                    if (!TextUtils.isEmpty(id)) {
+                        NotificationChannelGroup group =
+                                new NotificationChannelGroup(id, groupName);
+                        group.populateFromXml(parser);
+                        r.groups.put(id, group);
+                    }
+                }
+                // Channels
+                if (TAG_CHANNEL.equals(tagName)) {
+                    if (r.channels.size() >= NOTIFICATION_CHANNEL_COUNT_LIMIT) {
+                        if (!skipWarningLogged) {
+                            Slog.w(TAG, "Skipping further channels for " + r.pkg);
+                            skipWarningLogged = true;
+                        }
+                        continue;
+                    }
+                    restoreChannel(parser, forRestore, r);
+                }
+
+                // Delegate
+                if (TAG_DELEGATE.equals(tagName)) {
+                    int delegateId = parser.getAttributeInt(null, ATT_UID, UNKNOWN_UID);
+                    String delegateName = XmlUtils.readStringAttribute(parser, ATT_NAME);
+                    boolean delegateEnabled = parser.getAttributeBoolean(
+                            null, ATT_ENABLED, Delegate.DEFAULT_ENABLED);
+                    boolean userAllowed = parser.getAttributeBoolean(
+                            null, ATT_USER_ALLOWED, Delegate.DEFAULT_USER_ALLOWED);
+                    Delegate d = null;
+                    if (delegateId != UNKNOWN_UID && !TextUtils.isEmpty(delegateName)) {
+                        d = new Delegate(delegateName, delegateId, delegateEnabled, userAllowed);
+                    }
+                    r.delegate = d;
+                }
+
+            }
+
+            try {
+                deleteDefaultChannelIfNeededLocked(r);
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.e(TAG, "deleteDefaultChannelIfNeededLocked - Exception: " + e);
+            }
+
+            if (migrateToPermission) {
+                r.importance = appImportance;
+                r.migrateToPm = true;
+                if (r.uid != UNKNOWN_UID) {
+                    // Don't call into permission system until we have a valid uid
+                    PackagePermission pkgPerm = new PackagePermission(
+                            r.pkg, UserHandle.getUserId(r.uid),
+                            r.importance != IMPORTANCE_NONE,
+                            hasUserConfiguredSettings(r));
+                    pkgPerms.add(pkgPerm);
+                }
+            } else if (!mPermissionHelper.isMigrationEnabled()) {
+                r.importance = appImportance;
+            }
+        } catch (Exception e) {
+            Slog.w(TAG, "Failed to restore pkg", e);
+        }
+    }
+
+    @GuardedBy("mPackagePreferences")
+    private void restoreChannel(TypedXmlPullParser parser, boolean forRestore,
+            PackagePreferences r) {
+        try {
+            String id = parser.getAttributeValue(null, ATT_ID);
+            String channelName = parser.getAttributeValue(null, ATT_NAME);
+            int channelImportance = parser.getAttributeInt(
+                    null, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
+            if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
+                NotificationChannel channel = new NotificationChannel(
+                        id, channelName, channelImportance);
+                if (forRestore) {
+                    channel.populateFromXmlForRestore(parser, mContext);
+                } else {
+                    channel.populateFromXml(parser);
+                }
+                if (!mPermissionHelper.isMigrationEnabled()) {
+                    channel.setImportanceLockedByCriticalDeviceFunction(
+                            r.defaultAppLockedImportance);
+                    channel.setImportanceLockedByOEM(r.oemLockedImportance);
+                    if (!channel.isImportanceLockedByOEM()) {
+                        if (r.oemLockedChannels.contains(channel.getId())) {
+                            channel.setImportanceLockedByOEM(true);
+                        }
+                    }
+                }
+
+                if (isShortcutOk(channel) && isDeletionOk(channel)) {
+                    r.channels.put(id, channel);
+                }
+            }
+        } catch (Exception e) {
+            Slog.w(TAG, "could not restore channel for " + r.pkg, e);
         }
     }
 
@@ -2591,8 +2597,8 @@ public class PreferencesHelper implements RankingConfig {
                             }
                         }
                         updated = true;
-                    } catch (PackageManager.NameNotFoundException e) {
-                        // noop
+                    } catch (Exception e) {
+                        Slog.e(TAG, "could not restore " + r.pkg, e);
                     }
                 }
                 // Package upgrade

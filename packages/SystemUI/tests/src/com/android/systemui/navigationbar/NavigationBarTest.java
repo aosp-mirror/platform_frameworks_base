@@ -447,7 +447,6 @@ public class NavigationBarTest extends SysuiTestCase {
                 mock(NotificationRemoteInputManager.class),
                 mock(NotificationShadeDepthController.class),
                 mHandler,
-                mock(NavigationBarOverlayController.class),
                 mUiEventLogger,
                 mNavBarHelper,
                 mLightBarController,
