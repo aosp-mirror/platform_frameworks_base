@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.Activity.RESULT_CANCELED;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CANCELED;
@@ -1295,6 +1296,22 @@ public class ActivityStarterTests extends WindowTestsBase {
         // Verify the ActivityRecord#getLaunchIntoPipHostActivity points to sourceRecord.
         assertThat(targetRecord.getLaunchIntoPipHostActivity()).isNotNull();
         assertEquals(targetRecord.getLaunchIntoPipHostActivity(), sourceRecord);
+    }
+
+    @Test
+    public void testResultCanceledWhenNotAllowedStartingActivity() {
+        final ActivityStarter starter = prepareStarter(0, false);
+        final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).build();
+        targetRecord.resultTo = sourceRecord;
+
+        // Abort the activity start and ensure the sourceRecord gets the result (RESULT_CANCELED).
+        spyOn(starter);
+        doReturn(START_ABORTED).when(starter).isAllowedToStart(any(), anyBoolean(), any());
+        startActivityInner(starter, targetRecord, sourceRecord, null /* options */,
+                null /* inTask */, null /* inTaskFragment */);
+        verify(sourceRecord).sendResult(anyInt(), any(), anyInt(), eq(RESULT_CANCELED), any(),
+                any());
     }
 
     private static void startActivityInner(ActivityStarter starter, ActivityRecord target,
