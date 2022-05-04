@@ -321,6 +321,11 @@ public final class ViewRootImpl implements ViewParent,
 
     private static final int UNSET_SYNC_ID = -1;
 
+    /**
+     * Minimum time to wait before reporting changes to keep clear areas.
+     */
+    private static final int KEEP_CLEAR_AREA_REPORT_RATE_MILLIS = 100;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 
@@ -796,6 +801,8 @@ public final class ViewRootImpl implements ViewParent,
             new ViewRootRectTracker(v -> v.collectPreferKeepClearRects());
     private final ViewRootRectTracker mUnrestrictedKeepClearRectsTracker =
             new ViewRootRectTracker(v -> v.collectUnrestrictedPreferKeepClearRects());
+    private List<Rect> mPendingKeepClearAreas;
+    private List<Rect> mPendingUnrestrictedKeepClearAreas;
 
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
@@ -2896,6 +2903,14 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mFirst || windowShouldResize || viewVisibilityChanged || params != null
                 || mForceNextWindowRelayout) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                        TextUtils.formatSimple("relayoutWindow#"
+                                        + "first=%b/resize=%b/vis=%b/params=%b/force=%b",
+                                mFirst, windowShouldResize, viewVisibilityChanged, params != null,
+                                mForceNextWindowRelayout));
+            }
+
             mForceNextWindowRelayout = false;
 
             // If this window is giving internal insets to the window manager, then we want to first
@@ -3085,6 +3100,10 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
             } catch (RemoteException e) {
+            } finally {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                }
             }
 
             if (DEBUG_ORIENTATION) Log.v(
@@ -4824,12 +4843,39 @@ public final class ViewRootImpl implements ViewParent,
                 unrestrictedKeepClearRects = Collections.emptyList();
             }
 
-            try {
-                mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
-                        unrestrictedKeepClearRects);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+            if (mHandler.hasMessages(MSG_REPORT_KEEP_CLEAR_RECTS)) {
+                // Keep clear areas have been reported recently, wait before reporting new set
+                // of keep clear areas
+                mPendingKeepClearAreas = restrictedKeepClearRects;
+                mPendingUnrestrictedKeepClearAreas = unrestrictedKeepClearRects;
+            } else {
+                mHandler.sendEmptyMessageDelayed(MSG_REPORT_KEEP_CLEAR_RECTS,
+                        KEEP_CLEAR_AREA_REPORT_RATE_MILLIS);
+                try {
+                    mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
+                            unrestrictedKeepClearRects);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
+        }
+    }
+
+    void reportKeepClearAreasChanged() {
+        final List<Rect> restrictedKeepClearRects = mPendingKeepClearAreas;
+        final List<Rect> unrestrictedKeepClearRects = mPendingUnrestrictedKeepClearAreas;
+        if (restrictedKeepClearRects == null && unrestrictedKeepClearRects == null) {
+            return;
+        }
+
+        mPendingKeepClearAreas = null;
+        mPendingUnrestrictedKeepClearAreas = null;
+
+        try {
+            mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
+                    unrestrictedKeepClearRects);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -5035,9 +5081,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void requestPointerCapture(boolean enabled) {
-        if (mPointerCapture == enabled) {
-            return;
-        }
         final IBinder inputToken = getInputToken();
         if (inputToken == null) {
             Log.e(mTag, "No input channel to request Pointer Capture.");
@@ -5325,6 +5368,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_REQUEST_SCROLL_CAPTURE = 33;
     private static final int MSG_WINDOW_TOUCH_MODE_CHANGED = 34;
     private static final int MSG_KEEP_CLEAR_RECTS_CHANGED = 35;
+    private static final int MSG_REPORT_KEEP_CLEAR_RECTS = 36;
 
 
     final class ViewRootHandler extends Handler {
@@ -5600,6 +5644,9 @@ public final class ViewRootImpl implements ViewParent,
                 }   break;
                 case MSG_KEEP_CLEAR_RECTS_CHANGED: {
                     keepClearRectsChanged();
+                }   break;
+                case MSG_REPORT_KEEP_CLEAR_RECTS: {
+                    reportKeepClearAreasChanged();
                 }   break;
                 case MSG_REQUEST_SCROLL_CAPTURE:
                     handleScrollCaptureRequest((IScrollCaptureResponseListener) msg.obj);

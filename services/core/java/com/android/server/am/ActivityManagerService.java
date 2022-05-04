@@ -1024,29 +1024,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     private final ActivityMetricsLaunchObserver mActivityLaunchObserver =
             new ActivityMetricsLaunchObserver() {
         @Override
-        public void onActivityLaunched(byte[] activity, int temperature) {
+        public void onActivityLaunched(long id, ComponentName name, int temperature) {
             mAppProfiler.onActivityLaunched();
-        }
-
-        // The other observer methods are unused
-        @Override
-        public void onIntentStarted(Intent intent, long timestampNs) {
-        }
-
-        @Override
-        public void onIntentFailed() {
-        }
-
-        @Override
-        public void onActivityLaunchCancelled(byte[] abortingActivity) {
-        }
-
-        @Override
-        public void onActivityLaunchFinished(byte[] finalActivity, long timestampNs) {
-        }
-
-        @Override
-        public void onReportFullyDrawn(byte[] finalActivity, long timestampNs) {
         }
     };
 
@@ -4524,8 +4503,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // We're going to cleanup the successor process record, which wasn't started at all.
                 app = successor;
             } else {
-                Slog.w(TAG, "Process " + app + " failed to attach");
+                final String msg = "Process " + app + " failed to attach";
+                Slog.w(TAG, msg);
                 EventLogTags.writeAmProcessStartTimeout(app.userId, pid, app.uid, app.processName);
+                if (app.getActiveInstrumentation() != null) {
+                    final Bundle info = new Bundle();
+                    info.putString("shortMsg", "failed to attach");
+                    info.putString("longMsg", msg);
+                    finishInstrumentationLocked(app, Activity.RESULT_CANCELED, info);
+                }
             }
             synchronized (mProcLock) {
                 mProcessList.removeProcessNameLocked(app.processName, app.uid);
@@ -7177,6 +7163,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
                     "getUidProcessState");
         }
+        // In case the caller is requesting processState of an app in a different user,
+        // then verify the caller has INTERACT_ACROSS_USERS_FULL permission
+        mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                UserHandle.getUserId(uid), false /* allowAll */, ALLOW_FULL_ONLY,
+                "getUidProcessState", callingPackage); // Ignore return value
 
         synchronized (mProcLock) {
             if (mPendingStartActivityUids.isPendingTopUid(uid)) {
@@ -7192,6 +7183,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
                     "getUidProcessState");
         }
+        // In case the caller is requesting processCapabilities of an app in a different user,
+        // then verify the caller has INTERACT_ACROSS_USERS_FULL permission
+        mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                UserHandle.getUserId(uid), false /* allowAll */, ALLOW_FULL_ONLY,
+                "getUidProcessCapabilities", callingPackage); // Ignore return value
 
         synchronized (mProcLock) {
             return mProcessList.getUidProcessCapabilityLOSP(uid);

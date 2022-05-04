@@ -48,6 +48,7 @@ import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -86,6 +87,7 @@ public class PipControllerTest extends ShellTestCase {
     @Mock private TaskStackListenerImpl mMockTaskStackListener;
     @Mock private ShellExecutor mMockExecutor;
     @Mock private Optional<OneHandedController> mMockOneHandedController;
+    @Mock private PipParamsChangedForwarder mPipParamsChangedForwarder;
 
     @Mock private DisplayLayout mMockDisplayLayout1;
     @Mock private DisplayLayout mMockDisplayLayout2;
@@ -102,7 +104,8 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipBoundsState, mMockPipMotionHelper, mMockPipMediaController,
                 mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTouchHandler,
                 mMockPipTransitionController, mMockWindowManagerShellWrapper,
-                mMockTaskStackListener, mMockOneHandedController, mMockExecutor);
+                mMockTaskStackListener, mPipParamsChangedForwarder, mMockOneHandedController,
+                mMockExecutor);
         when(mMockPipBoundsAlgorithm.getSnapAlgorithm()).thenReturn(mMockPipSnapAlgorithm);
         when(mMockPipTouchHandler.getMotionHelper()).thenReturn(mMockPipMotionHelper);
     }
@@ -134,7 +137,8 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipBoundsState, mMockPipMotionHelper, mMockPipMediaController,
                 mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTouchHandler,
                 mMockPipTransitionController, mMockWindowManagerShellWrapper,
-                mMockTaskStackListener, mMockOneHandedController, mMockExecutor));
+                mMockTaskStackListener, mPipParamsChangedForwarder, mMockOneHandedController,
+                mMockExecutor));
     }
 
     @Test

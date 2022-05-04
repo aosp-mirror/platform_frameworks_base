@@ -127,7 +127,7 @@ class MediaCarouselController @Inject constructor(
     private val visualStabilityCallback: OnReorderingAllowedListener
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
-    protected var shouldScrollToActivePlayer: Boolean = false
+    var shouldScrollToActivePlayer: Boolean = false
     private var isRtl: Boolean = false
         set(value) {
             if (value != field) {
@@ -413,9 +413,7 @@ class MediaCarouselController @Inject constructor(
                             .indexOfFirst { key -> it == key }
                     mediaCarouselScrollHandler
                             .scrollToPlayer(previousVisibleIndex, activeMediaIndex)
-                } ?: {
-                    mediaCarouselScrollHandler.scrollToPlayer(destIndex = activeMediaIndex)
-                }
+                } ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = activeMediaIndex)
             }
         }
     }
@@ -432,7 +430,7 @@ class MediaCarouselController @Inject constructor(
         val curVisibleMediaKey = MediaPlayerData.playerKeys()
                 .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
         if (existingPlayer == null) {
-            var newPlayer = mediaControlPanelFactory.get()
+            val newPlayer = mediaControlPanelFactory.get()
             newPlayer.attachPlayer(MediaViewHolder.create(
                     LayoutInflater.from(context), mediaContent))
             newPlayer.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
@@ -480,7 +478,7 @@ class MediaCarouselController @Inject constructor(
             MediaPlayerData.removeMediaPlayer(existingSmartspaceMediaKey)
         }
 
-        var newRecs = mediaControlPanelFactory.get()
+        val newRecs = mediaControlPanelFactory.get()
         newRecs.attachRecommendation(
                 RecommendationViewHolder.create(LayoutInflater.from(context), mediaContent))
         newRecs.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
@@ -928,17 +926,16 @@ internal object MediaPlayerData {
         val isSsReactivated: Boolean = false
     )
 
-    private val comparator =
-            compareByDescending<MediaSortKey> { it.data.isPlaying == true &&
-                        it.data.playbackLocation == MediaData.PLAYBACK_LOCAL }
-                    .thenByDescending { it.data.isPlaying == true &&
-                        it.data.playbackLocation == MediaData.PLAYBACK_CAST_LOCAL
-                    }
-                    .thenByDescending { if (shouldPrioritizeSs) it.isSsMediaRec else !it.isSsMediaRec }
-                    .thenByDescending { !it.data.resumption }
-                    .thenByDescending { it.data.playbackLocation != MediaData.PLAYBACK_CAST_REMOTE }
-                    .thenByDescending { it.updateTime }
-                    .thenByDescending { it.data.notificationKey }
+    private val comparator = compareByDescending<MediaSortKey> {
+            it.data.isPlaying == true && it.data.playbackLocation == MediaData.PLAYBACK_LOCAL }
+        .thenByDescending {
+            it.data.isPlaying == true && it.data.playbackLocation == MediaData.PLAYBACK_CAST_LOCAL }
+        .thenByDescending { it.data.active }
+        .thenByDescending { shouldPrioritizeSs == it.isSsMediaRec }
+        .thenByDescending { !it.data.resumption }
+        .thenByDescending { it.data.playbackLocation != MediaData.PLAYBACK_CAST_REMOTE }
+        .thenByDescending { it.updateTime }
+        .thenByDescending { it.data.notificationKey }
 
     private val mediaPlayers = TreeMap<MediaSortKey, MediaControlPanel>(comparator)
     private val mediaData: MutableMap<String, MediaSortKey> = mutableMapOf()
@@ -1048,7 +1045,5 @@ internal object MediaPlayerData {
         return false
     }
 
-    fun isSsReactivated(key: String): Boolean = mediaData.get(key)?.let {
-        it.isSsReactivated
-    } ?: false
+    fun isSsReactivated(key: String): Boolean = mediaData.get(key)?.isSsReactivated ?: false
 }

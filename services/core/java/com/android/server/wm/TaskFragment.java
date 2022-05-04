@@ -1850,19 +1850,19 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (!mAtmService.mSupportsMultiWindow) {
             return false;
         }
+        if (tda == null) {
+            return false;
+        }
         final Task task = getTask();
         if (task == null) {
             return false;
         }
-        if (tda == null) {
-            return false;
-        }
-        if (!getTask().isResizeable() && !tda.supportsNonResizableMultiWindow()) {
+        if (!task.isResizeable() && !tda.supportsNonResizableMultiWindow()) {
             // Not support non-resizable in multi window.
             return false;
         }
 
-        final ActivityRecord rootActivity = getTask().getRootActivity();
+        final ActivityRecord rootActivity = task.getRootActivity();
         return tda.supportsActivityMinWidthHeightMultiWindow(mMinWidth, mMinHeight,
                 rootActivity != null ? rootActivity.info : null);
     }

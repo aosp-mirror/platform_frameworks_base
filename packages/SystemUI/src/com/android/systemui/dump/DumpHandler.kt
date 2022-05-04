@@ -25,6 +25,7 @@ import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_CRITICAL
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_HIGH
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_NORMAL
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Provider
@@ -82,8 +83,20 @@ class DumpHandler @Inject constructor(
     private val context: Context,
     private val dumpManager: DumpManager,
     private val logBufferEulogizer: LogBufferEulogizer,
-    private val startables: MutableMap<Class<*>, Provider<CoreStartable>>
+    private val startables: MutableMap<Class<*>, Provider<CoreStartable>>,
+    private val uncaughtExceptionPreHandlerManager: UncaughtExceptionPreHandlerManager
 ) {
+    /**
+     * Registers an uncaught exception handler
+     */
+    fun init() {
+        uncaughtExceptionPreHandlerManager.registerHandler { _, e ->
+            if (e is Exception) {
+                logBufferEulogizer.record(e)
+            }
+        }
+    }
+
     /**
      * Dump the diagnostics! Behavior can be controlled via [args].
      */
