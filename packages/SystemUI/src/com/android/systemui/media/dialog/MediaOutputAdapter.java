@@ -112,6 +112,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             super.onBind(device, topMargin, bottomMargin, position);
             final boolean currentlyConnected = !mIncludeDynamicGroup
                     && isCurrentlyConnected(device);
+            boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
             if (currentlyConnected) {
                 mConnectedItem = mContainerLayout;
             }
@@ -165,6 +166,14 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             true /* showSubtitle */, true /* showStatus */);
                     mSubTitleText.setText(R.string.media_output_dialog_connect_failed);
                     mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
+                } else if (device.getState() == MediaDeviceState.STATE_GROUPING) {
+                    mProgressBar.getIndeterminateDrawable().setColorFilter(
+                            new PorterDuffColorFilter(
+                                    mController.getColorItemContent(),
+                                    PorterDuff.Mode.SRC_IN));
+                    setSingleLineLayout(getItemTitle(device), true /* bFocused */,
+                            false /* showSeekBar*/,
+                            true /* showProgressBar */, false /* showStatus */);
                 } else if (mController.getSelectedMediaDevice().size() > 1
                         && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
                     mTitleText.setTextColor(mController.getColorItemContent());
@@ -178,7 +187,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mCheckBox.setOnCheckedChangeListener(
                             (buttonView, isChecked) -> onGroupActionTriggered(false, device));
                     setCheckBoxColor(mCheckBox, mController.getColorItemContent());
-                    initSeekbar(device);
+                    initSeekbar(device, isCurrentSeekbarInvisible);
                     mEndTouchArea.setVisibility(View.VISIBLE);
                     mEndTouchArea.setOnClickListener(null);
                     mEndTouchArea.setOnClickListener((v) -> mCheckBox.performClick());
@@ -193,7 +202,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, true /* showStatus */);
-                    initSeekbar(device);
+                    initSeekbar(device, isCurrentSeekbarInvisible);
                     setUpContentDescriptionForView(mContainerLayout, false, device);
                     mCurrentActivePosition = position;
                 } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
@@ -257,9 +266,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mCurrentActivePosition = -1;
             mController.connectDevice(device);
             device.setState(MediaDeviceState.STATE_CONNECTING);
-            if (!isAnimating()) {
-                notifyDataSetChanged();
-            }
+            notifyDataSetChanged();
         }
 
         private void setUpContentDescriptionForView(View view, boolean clickable,

@@ -320,6 +320,7 @@ public class DisplayRotationTests {
     private void verifyOrientationListenerRegistration(int numOfInvocation) {
         final ArgumentCaptor<SensorEventListener> listenerCaptor = ArgumentCaptor.forClass(
                 SensorEventListener.class);
+        waitForUiHandler();
         verify(mMockSensorManager, times(numOfInvocation)).registerListener(
                 listenerCaptor.capture(),
                 same(mFakeSensor),
@@ -480,10 +481,14 @@ public class DisplayRotationTests {
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
     }
 
-    private boolean waitForUiHandler() throws Exception {
+    private boolean waitForUiHandler() {
         final CountDownLatch latch = new CountDownLatch(1);
         UiThread.getHandler().post(latch::countDown);
-        return latch.await(UI_HANDLER_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        try {
+            return latch.await(UI_HANDLER_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignored) {
+        }
+        throw new AssertionError("Failed to wait for ui handler");
     }
 
     @Test
