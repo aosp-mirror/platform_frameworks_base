@@ -341,6 +341,18 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_OLD_TASK_FRAGMENT_CHANGE = 30;
 
     /**
+     * A dream activity is being opened.
+     * @hide
+     */
+    int TRANSIT_OLD_DREAM_ACTIVITY_OPEN = 31;
+
+    /**
+     * A dream activity is being closed.
+     * @hide
+     */
+    int TRANSIT_OLD_DREAM_ACTIVITY_CLOSE = 32;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_OLD_" }, value = {
@@ -368,7 +380,9 @@ public interface WindowManager extends ViewManager {
             TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE,
             TRANSIT_OLD_TASK_FRAGMENT_OPEN,
             TRANSIT_OLD_TASK_FRAGMENT_CLOSE,
-            TRANSIT_OLD_TASK_FRAGMENT_CHANGE
+            TRANSIT_OLD_TASK_FRAGMENT_CHANGE,
+            TRANSIT_OLD_DREAM_ACTIVITY_OPEN,
+            TRANSIT_OLD_DREAM_ACTIVITY_CLOSE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionOldType {}

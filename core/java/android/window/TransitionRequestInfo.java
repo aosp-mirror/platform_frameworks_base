@@ -16,6 +16,8 @@
 
 package android.window;
 
+import static android.view.WindowManager.transitTypeToString;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
@@ -366,7 +368,7 @@ public final class TransitionRequestInfo implements Parcelable {
         // String fieldNameToString() { ... }
 
         return "TransitionRequestInfo { " +
-                "type = " + mType + ", " +
+                "type = " + transitTypeToString(mType) + ", " +
                 "triggerTask = " + mTriggerTask + ", " +
                 "remoteTransition = " + mRemoteTransition + ", " +
                 "displayChange = " + mDisplayChange +
