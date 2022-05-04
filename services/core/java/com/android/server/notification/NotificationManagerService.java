@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
 import static android.app.Notification.FLAG_AUTOGROUP_SUMMARY;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
@@ -1430,8 +1431,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onBubbleNotificationSuppressionChanged(String key, boolean isNotifSuppressed,
-                boolean isBubbleSuppressed) {
+        public void onBubbleMetadataFlagChanged(String key, int flags) {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
@@ -1441,17 +1441,12 @@ public class NotificationManagerService extends SystemService {
                         return;
                     }
 
-                    boolean flagChanged = false;
-                    if (data.isNotificationSuppressed() != isNotifSuppressed) {
-                        flagChanged = true;
-                        data.setSuppressNotification(isNotifSuppressed);
-                    }
-                    if (data.isBubbleSuppressed() != isBubbleSuppressed) {
-                        flagChanged = true;
-                        data.setSuppressBubble(isBubbleSuppressed);
-                    }
-                    if (flagChanged) {
+                    if (flags != data.getFlags()) {
+                        data.setFlags(flags);
+                        // Shouldn't alert again just because of a flag change.
                         r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
+                        // Force isAppForeground true here, because for sysui's purposes we
+                        // want to be able to adjust the flag behaviour.
                         mHandler.post(
                                 new EnqueueNotificationRunnable(r.getUser().getIdentifier(), r,
                                         true /* isAppForeground */, SystemClock.elapsedRealtime()));
@@ -7183,10 +7178,12 @@ public class NotificationManagerService extends SystemService {
                             && r.getNotification().isBubbleNotification())
                             || (mReason == REASON_CLICK && r.canBubble()
                             && r.isFlagBubbleRemoved())) {
-                        boolean isBubbleSuppressed = r.getNotification().getBubbleMetadata() != null
-                                && r.getNotification().getBubbleMetadata().isBubbleSuppressed();
-                        mNotificationDelegate.onBubbleNotificationSuppressionChanged(
-                                r.getKey(), true /* notifSuppressed */, isBubbleSuppressed);
+                        int flags = 0;
+                        if (r.getNotification().getBubbleMetadata() != null) {
+                            flags = r.getNotification().getBubbleMetadata().getFlags();
+                        }
+                        flags |= FLAG_SUPPRESS_NOTIFICATION;
+                        mNotificationDelegate.onBubbleMetadataFlagChanged(r.getKey(), flags);
                         return;
                     }
                     if ((r.getNotification().flags & mMustHaveFlags) != mMustHaveFlags) {

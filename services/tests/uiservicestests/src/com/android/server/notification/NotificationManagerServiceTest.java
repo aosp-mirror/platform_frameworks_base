@@ -7520,46 +7520,53 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testOnBubbleNotificationSuppressionChanged() throws Exception {
+    public void testOnBubbleMetadataFlagChanged() throws Exception {
         setUpPrefsForBubbles(PKG, mUid,
                 true /* global */,
                 BUBBLE_PREFERENCE_ALL /* app */,
                 true /* channel */);
 
-        // Bubble notification
+        // Post a bubble notification
         NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel, "tag");
-
+        // Set this so that the bubble can be suppressed
+        nr.getNotification().getBubbleMetadata().setFlags(
+                Notification.BubbleMetadata.FLAG_SUPPRESSABLE_BUBBLE);
         mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
         waitForIdle();
 
-        // NOT suppressed
+        // Check the flags
         Notification n =  mBinderService.getActiveNotifications(PKG)[0].getNotification();
         assertFalse(n.getBubbleMetadata().isNotificationSuppressed());
+        assertFalse(n.getBubbleMetadata().getAutoExpandBubble());
+        assertFalse(n.getBubbleMetadata().isBubbleSuppressed());
+        assertTrue(n.getBubbleMetadata().isBubbleSuppressable());
 
         // Reset as this is called when the notif is first sent
         reset(mListeners);
 
-        // Test: update suppression to true
-        mService.mNotificationDelegate.onBubbleNotificationSuppressionChanged(nr.getKey(), true,
-                false);
+        // Test: change the flags
+        int flags = Notification.BubbleMetadata.FLAG_SUPPRESSABLE_BUBBLE;
+        flags |= Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
+        flags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+        flags |= Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
+        mService.mNotificationDelegate.onBubbleMetadataFlagChanged(nr.getKey(), flags);
         waitForIdle();
 
         // Check
         n =  mBinderService.getActiveNotifications(PKG)[0].getNotification();
-        assertTrue(n.getBubbleMetadata().isNotificationSuppressed());
+        assertEquals(flags, n.getBubbleMetadata().getFlags());
 
         // Reset to check again
         reset(mListeners);
 
-        // Test: update suppression to false
-        mService.mNotificationDelegate.onBubbleNotificationSuppressionChanged(nr.getKey(), false,
-                false);
+        // Test: clear flags
+        mService.mNotificationDelegate.onBubbleMetadataFlagChanged(nr.getKey(), 0);
         waitForIdle();
 
         // Check
         n = mBinderService.getActiveNotifications(PKG)[0].getNotification();
-        assertFalse(n.getBubbleMetadata().isNotificationSuppressed());
+        assertEquals(0, n.getBubbleMetadata().getFlags());
     }
 
     @Test
