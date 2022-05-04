@@ -4980,6 +4980,20 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "use_sip_uri_for_presence_subscribe_bool";
 
         /**
+         * Flag indicating whether or not to use TEL URI when setting the entity uri field and
+         * contact element of each tuple.
+         * When {@code true}, the device sets the entity uri field and contact element to be
+         * TEL URI.
+         * If the TEL URI does not exist, the first URI provided in p-associated-uri header is
+         * converted into a TEL URI.
+         * If {@code false}, if false, the first URI provided in the p-associated-uri header
+         * is used.
+         * @hide
+         */
+        public static final String KEY_USE_TEL_URI_FOR_PIDF_XML_BOOL =
+                KEY_PREFIX + "use_tel_uri_for_pidf_xml";
+
+        /**
          * An integer key associated with the period of time in seconds the non-rcs capability
          * information of each contact is cached on the device.
          * <p>
