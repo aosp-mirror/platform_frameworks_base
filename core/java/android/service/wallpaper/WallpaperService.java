@@ -904,7 +904,6 @@ public abstract class WallpaperService extends Service {
             // based on its default wallpaper color hints.
             mShouldDim = dimAmount != 0f || mShouldDimByDefault;
             updateSurfaceDimming();
-            updateSurface(false, false, true);
         }
 
         private void updateSurfaceDimming() {
@@ -941,6 +940,7 @@ public abstract class WallpaperService extends Service {
             } else {
                 Log.v(TAG, "Setting wallpaper dimming: " + 0);
                 surfaceControlTransaction.setAlpha(mBbqSurfaceControl, 1.0f).apply();
+                updateSurface(false, false, true);
             }
 
             mPreviousWallpaperDimAmount = mWallpaperDimAmount;

@@ -2816,14 +2816,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             }
 
                             // Remove review flag as it is not necessary anymore
-                            // TODO(b/227186603) re-enable check for notification permission once
-                            // droidfood state has been cleared
-                            //if (!NOTIFICATION_PERMISSIONS.contains(perm)) {
+                            if (!NOTIFICATION_PERMISSIONS.contains(perm)) {
                                 if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
                                     flags &= ~FLAG_PERMISSION_REVIEW_REQUIRED;
                                     wasChanged = true;
                                 }
-                            //}
+                            }
 
                             if ((flags & FLAG_PERMISSION_REVOKED_COMPAT) != 0
                                     && !isPermissionSplitFromNonRuntime(permName,

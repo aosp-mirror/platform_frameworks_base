@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ifikie kalenda yako"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"itume na iangalie SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Faili na hati"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Faili na hati"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"fikia faili na hati kwenye kifaa chako"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muziki na sauti nyingine"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"fikia faili za sauti kwenye kifaa chako"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Picha na video"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"fikia faili za picha na video kwenye kifaa chako"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muziki na sauti"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"fikia muziki na sauti kwenye kifaa chako"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Picha na video"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"fikia picha na video kwenye kifaa chako"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Maikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"irekodi sauti"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Mazoezi ya mwili"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Kufungua kwa Alama ya Kidole"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Imeshindwa kutumia kitambua alama ya kidole"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Tembelea mtoa huduma za urekebishaji."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Imeshindwa kunasa data sahihi ya uso. Jaribu tena."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Imeshindwa kuunda muundo wa uso wako. Jaribu tena."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Inang\'aa mno. Jaribu mwangaza hafifu"</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Hakuna mwangaza wa kutosha. Jaribu kuongeza mwangaza."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Sogeza simu mbali kiasi."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Sogeza simu karibu."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Sogeza simu juu zaidi."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Sogeza simu chini."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Sogeza simu upande wa kushoto."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Sogeza simu upande wa kulia."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Jaribu kuongeza mwangaza"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Sogeza simu mbali kiasi"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Sogeza simu karibu"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Sogeza simu juu zaidi"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Sogeza simu chini"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Sogeza simu upande wako wa kushoto"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Sogeza simu upande wako wa kulia"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Tafadhali angalia kifaa chako moja kwa moja."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Weka uso wako moja kwa moja mbele ya simu."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Imeshindwa kuona uso wako. Shikilia simu yako katika usawa wa macho."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Inatikisika sana. Ishike simu iwe thabiti."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Tafadhali sajili uso wako tena."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Haiwezi tena kutambua uso. Jaribu tena."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Inafanana sana, tafadhali badilisha mkao wako."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Geuza kichwa chako kidogo."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Inamisha kichwa chako kiasi."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Geuza kichwa chako kidogo."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Imeshindwa kutambua uso. Jaribu tena."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Badilisha nafasi ya kichwa chako kidogo"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Angalia simu yako moja kwa moja"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Angalia simu yako moja kwa moja"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Angalia simu yako moja kwa moja"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Ondoa kitu chochote kinachoficha uso wako."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Safisha sehemu ya juu ya skrini yako, ikiwa ni pamoja na upau mweusi"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Ni lazima uso wako wote uonekane"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Ni lazima uso wako wote uonekane"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Imeshindwa kuunda muundo wa uso wako. Jaribu tena."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Vioo vyeusi vimetambuliwa. Ni lazima uso wako wote uonekane."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Kifuniko cha uso kimetambuliwa. Ni lazima uso wako wote uonekane."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imeshindwa kuthibitisha uso. Maunzi hayapatikani."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Kipengele cha Usinisumbue kimebadilishwa"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Gusa ili uangalie kipengee ambacho kimezuiwa."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Kagua mipangilio ya arifa"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Kuanzia Android toleo la 13, programu unazosakinisha zitahitaji ruhusa yako ili zitume arifa. Gusa ili ubadilishe ruhusa hii kwa programu zilizopo."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Nikumbushe baadaye"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Ondoa"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Mfumo"</string>

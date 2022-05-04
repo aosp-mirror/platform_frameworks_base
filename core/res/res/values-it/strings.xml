@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Possono accedere al calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"Possono inviare e visualizzare SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"File e documenti"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"File e documenti"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"Consente di accedere a file e documenti sul tuo dispositivo"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musica e altro audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"Accesso ai file audio sul tuo dispositivo"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto e video"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"Accesso ai file immagine e video sul tuo dispositivo"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musica e audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accesso a musica e audio sul tuo dispositivo"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto e video"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accesso a foto e video sul tuo dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"Possono registrare audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Attività fisica"</string>
@@ -349,8 +349,8 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Consente all\'applicazione di espandere o comprimere la barra di stato."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Visualizzazione di notifiche sotto forma di attività in modalità a schermo intero su un dispositivo bloccato"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Consente all\'app di visualizzare le notifiche sotto forma di attività in modalità a schermo intero su un dispositivo bloccato"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"aggiunta di scorciatoie"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Consente a un\'applicazione di aggiungere scorciatoie alla schermata Home automaticamente."</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Aggiunta di scorciatoie"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"consentire a un\'applicazione di aggiungere scorciatoie alla schermata Home automaticamente"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"eliminazione di scorciatoie"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Consente all\'applicazione di rimuovere le scorciatoie della schermata Home automaticamente."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"reindirizzamento chiamate in uscita"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sblocco con l\'impronta"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Impossibile utilizzare il sensore di impronte digitali"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Contatta un fornitore di servizi di riparazione."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Impossibile acquisire dati viso accurati. Riprova."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Impossibile creare il modello del volto. Riprova."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Troppa luce. Prova con una luce più soft."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Troppo buio. Prova con più luce."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Sposta il telefono più lontano."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Avvicina il telefono."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Sposta il telefono più in alto."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Sposta il telefono più in basso."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Sposta il telefono verso sinistra."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Sposta il telefono verso destra."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Prova con più luce"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Allontana il telefono"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Avvicina il telefono"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Sposta il telefono più in alto"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Sposta il telefono più in basso"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Sposta il telefono alla tua sinistra"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Sposta il telefono alla tua destra"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Guarda più direttamente verso il dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Posiziona il viso davanti al telefono."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Impossibile vedere il volto. Tieni il telefono all\'altezza degli occhi."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Troppo movimento. Tieni fermo il telefono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Ripeti l\'acquisizione del volto."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Non è più possibile riconoscere il volto. Riprova."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Troppo simile; cambia posa."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Gira un po\' meno la testa."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Inclina un po\' meno la testa."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Gira un po\' meno la testa."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Impossibile riconoscere il volto. Riprova."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Cambia leggermente la posizione della testa"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Guarda più direttamente verso il telefono"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Guarda più direttamente verso il telefono"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Guarda più direttamente verso il telefono"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Rimuovi tutto ciò che ti nasconde il viso."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Pulisci la parte superiore dello schermo, inclusa la barra nera"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Il tuo volto deve essere visibile per intero"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Il tuo volto deve essere visibile per intero"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Impossibile creare il modello del volto. Riprova."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Sono stati rilevati occhiali scuri. Il tuo volto deve essere visibile per intero."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"È stata rilevata una mascherina. Il tuo volto deve essere visibile per intero."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. verificare volto. Hardware non disponibile."</string>
@@ -1443,7 +1448,7 @@
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"Consente a un\'applicazione di indirizzare l\'uscita di media verso altri dispositivi esterni."</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"lettura delle sessioni di installazione"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"Consente a un\'applicazione di leggere le sessioni di installazione. L\'app può conoscere i dettagli sulle installazioni di pacchetti attive."</string>
-    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"richiesta di pacchetti di installazione"</string>
+    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"richiesta di installazione di pacchetti"</string>
     <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"Consente a un\'applicazione di richiedere l\'installazione di pacchetti."</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"richiesta di eliminazione dei pacchetti"</string>
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Consente a un\'applicazione di richiedere l\'eliminazione di pacchetti."</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"L\'impostazione Non disturbare è cambiata"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tocca per controllare le notifiche bloccate."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Controlla le impostazioni di notifica"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"A partire da Android 13, le app che installi devono avere la tua autorizzazione per poter inviare notifiche. Tocca per cambiare questa autorizzazione per le app esistenti."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ricordamelo dopo"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Ignora"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
