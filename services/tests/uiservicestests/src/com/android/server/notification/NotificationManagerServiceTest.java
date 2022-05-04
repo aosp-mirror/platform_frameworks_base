@@ -52,6 +52,7 @@ import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.PackageManager.FEATURE_TELECOM;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -447,6 +448,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(INVALID_TASK_ID);
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
         when(mUm.getProfileIds(0, false)).thenReturn(new int[]{0});
+
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)).thenReturn(true);
 
         ActivityManager.AppTask task = mock(ActivityManager.AppTask.class);
         List<ActivityManager.AppTask> taskList = new ArrayList<>();
@@ -9194,6 +9197,118 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 r.getSbn().getPackageName(), r.getUser())).thenReturn(true);
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
                 r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+
+        // set telecom manager to null - blocked
+        mService.setTelecomManager(null);
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                           r.getSbn().getId(), r.getSbn().getTag(), r, false))
+                .isFalse();
+
+        // set telecom feature to false - blocked
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)).thenReturn(false);
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                           r.getSbn().getId(), r.getSbn().getTag(), r, false))
+                .isFalse();
+    }
+
+    @Test
+    public void testCallNotificationsBypassBlock_atPost() throws Exception {
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+
+        Notification.Builder nb =
+                new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                        .setContentTitle("foo")
+                        .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                        .addAction(new Notification.Action.Builder(null, "test", null).build());
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.setNotificationsEnabledForPackage(
+                r.getSbn().getPackageName(), r.getUid(), false);
+
+        // normal blocked notifications - blocked
+        mService.addEnqueuedNotification(r);
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
+                        r.getUid(), SystemClock.elapsedRealtime());
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats).registerBlocked(any());
+        verify(mUsageStats, never()).registerPostedByApp(any());
+
+        // just using the style - blocked
+        mService.clearNotifications();
+        reset(mUsageStats);
+        Person person = new Person.Builder().setName("caller").build();
+        nb.setStyle(Notification.CallStyle.forOngoingCall(person, mock(PendingIntent.class)));
+        nb.setFullScreenIntent(mock(PendingIntent.class), true);
+        sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0, nb.build(),
+                UserHandle.getUserHandleForUid(mUid), null, 0);
+        r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addEnqueuedNotification(r);
+        runnable = mService.new PostNotificationRunnable(
+                r.getKey(), r.getSbn().getPackageName(), r.getUid(), SystemClock.elapsedRealtime());
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats).registerBlocked(any());
+        verify(mUsageStats, never()).registerPostedByApp(any());
+
+        // style + managed call - bypasses block
+        mService.clearNotifications();
+        reset(mUsageStats);
+        when(mTelecomManager.isInManagedCall()).thenReturn(true);
+
+        mService.addEnqueuedNotification(r);
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats, never()).registerBlocked(any());
+        verify(mUsageStats).registerPostedByApp(any());
+
+        // style + self managed call - bypasses block
+        mService.clearNotifications();
+        reset(mUsageStats);
+        when(mTelecomManager.isInSelfManagedCall(r.getSbn().getPackageName(), r.getUser()))
+                .thenReturn(true);
+
+        mService.addEnqueuedNotification(r);
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats, never()).registerBlocked(any());
+        verify(mUsageStats).registerPostedByApp(any());
+
+        // set telecom manager to null - notifications should be blocked
+        // but post notifications runnable should not crash
+        mService.clearNotifications();
+        reset(mUsageStats);
+        mService.setTelecomManager(null);
+
+        mService.addEnqueuedNotification(r);
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats).registerBlocked(any());
+        verify(mUsageStats, never()).registerPostedByApp(any());
+
+        // set FEATURE_TELECOM to false - notifications should be blocked
+        // but post notifications runnable should not crash
+        mService.setTelecomManager(mTelecomManager);
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)).thenReturn(false);
+        reset(mUsageStats);
+        mService.setTelecomManager(null);
+
+        mService.addEnqueuedNotification(r);
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats).registerBlocked(any());
+        verify(mUsageStats, never()).registerPostedByApp(any());
     }
 
     @Test
