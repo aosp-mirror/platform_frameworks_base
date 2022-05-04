@@ -32,7 +32,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -197,7 +196,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
 
     /** Specific override for Boolean flags that checks against the teamfood list.*/
     private boolean readFlagValue(int id, boolean defaultValue) {
-        Boolean result = readFlagValueInternal(id, BooleanFlagSerializer.INSTANCE);
+        Boolean result = readBooleanFlagOverride(id);
         // Only check for teamfood if the default is false.
         if (!defaultValue && result == null && id != Flags.TEAMFOOD.getId()) {
             if (mAllFlags.containsKey(id) && mAllFlags.get(id).getTeamfood()) {
@@ -206,6 +205,10 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         }
 
         return result == null ? defaultValue : result;
+    }
+
+    private Boolean readBooleanFlagOverride(int id) {
+        return readFlagValueInternal(id, BooleanFlagSerializer.INSTANCE);
     }
 
     @NonNull
@@ -407,11 +410,18 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         @Nullable
         private ParcelableFlag<?> toParcelableFlag(Flag<?> f) {
             if (f instanceof BooleanFlag) {
-                return new BooleanFlag(f.getId(), isEnabled((BooleanFlag) f), f.getTeamfood());
+                return new BooleanFlag(
+                        f.getId(),
+                        isEnabled((BooleanFlag) f),
+                        f.getTeamfood(),
+                        readBooleanFlagOverride(f.getId()) != null);
             }
             if (f instanceof ResourceBooleanFlag) {
                 return new BooleanFlag(
-                        f.getId(), isEnabled((ResourceBooleanFlag) f), f.getTeamfood());
+                        f.getId(),
+                        isEnabled((ResourceBooleanFlag) f),
+                        f.getTeamfood(),
+                        readBooleanFlagOverride(f.getId()) != null);
             }
             if (f instanceof DeviceConfigBooleanFlag) {
                 return new BooleanFlag(
@@ -420,7 +430,10 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             if (f instanceof SysPropBooleanFlag) {
                 // TODO(b/223379190): Teamfood not supported for sysprop flags yet.
                 return new BooleanFlag(
-                        f.getId(), isEnabled((SysPropBooleanFlag) f), false);
+                        f.getId(),
+                        ((SysPropBooleanFlag) f).getDefault(),
+                        false,
+                        !mSystemProperties.get(((SysPropBooleanFlag) f).getName()).isEmpty());
             }
 
             // TODO: add support for other flag types.
