@@ -933,9 +933,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // so we need to be conservative and assume it isn't.
             Slog.w(TAG, "Activity pause timeout for " + ActivityRecord.this);
             synchronized (mAtmService.mGlobalLock) {
-                if (hasProcess()) {
-                    mAtmService.logAppTooSlow(app, pauseTime, "pausing " + ActivityRecord.this);
+                if (!hasProcess()) {
+                    return;
                 }
+                mAtmService.logAppTooSlow(app, pauseTime, "pausing " + ActivityRecord.this);
                 activityPaused(true);
             }
         }
