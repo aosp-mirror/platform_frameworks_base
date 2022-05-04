@@ -318,15 +318,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetIsNonblockable_oemLocked() throws Exception {
-        ExpandableNotificationRow row =
-                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        row.getEntry().getChannel().setImportanceLockedByOEM(true);
-
-        assertTrue(row.getIsNonblockable());
-    }
-
-    @Test
     public void testGetIsNonblockable_criticalDeviceFunction() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());

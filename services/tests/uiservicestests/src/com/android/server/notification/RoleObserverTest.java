@@ -168,7 +168,8 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(StatsManager.class), mock(TelephonyManager.class),
                     mock(ActivityManagerInternal.class),
                     mock(MultiRateLimiter.class), mock(PermissionHelper.class),
-                    mock(UsageStatsManagerInternal.class), mock (TelecomManager.class));
+                    mock(UsageStatsManagerInternal.class), mock (TelecomManager.class),
+                    mock(NotificationChannelLogger.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;

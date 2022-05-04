@@ -278,6 +278,14 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mAppOpsManager.noteOpNoThrow(anyInt(), anyInt(),
                 anyString(), eq(null), anyString())).thenReturn(MODE_DEFAULT);
 
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(UID_P, PKG_P), new Pair(true, false));
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(true, false));
+        appPermissions.put(new Pair(UID_N_MR1, PKG_N_MR1), new Pair(true, false));
+
+        when(mPermissionHelper.getNotificationPermissionValues(USER_SYSTEM))
+                .thenReturn(appPermissions);
+
         mStatsEventBuilderFactory = new WrappedSysUiStatsEvent.WrappedBuilderFactory();
 
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
@@ -408,6 +416,13 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         NotificationChannel channel10 = new NotificationChannel("id10", "name10", IMPORTANCE_HIGH);
         assertTrue(mHelper.createNotificationChannel(package10, uid10, channel10, true, false));
 
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(uid0, package0), new Pair(false, false));
+        appPermissions.put(new Pair(uid10, package10), new Pair(true, false));
+
+        when(mPermissionHelper.getNotificationPermissionValues(10))
+                .thenReturn(appPermissions);
+
         ByteArrayOutputStream baos = writeXmlAndPurge(package10, uid10, true, 10);
 
         // Reset state.
@@ -432,6 +447,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         setUpPackageWithUid(package0, uid0);
         NotificationChannel channel0 = new NotificationChannel("id0", "name0", IMPORTANCE_HIGH);
         assertTrue(mHelper.createNotificationChannel(package0, uid0, channel0, true, false));
+
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(uid0, package0), new Pair(true, false));
+
+        when(mPermissionHelper.getNotificationPermissionValues(USER_SYSTEM))
+                .thenReturn(appPermissions);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(package0, uid0, true, 0);
 
@@ -478,7 +499,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue(mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2, false, false));
 
         mHelper.setShowBadge(PKG_N_MR1, UID_N_MR1, true);
-        mHelper.setAppImportanceLocked(PKG_N_MR1, UID_N_MR1);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_N_MR1, UID_N_MR1, false,
                 UserHandle.USER_ALL, channel1.getId(), channel2.getId(),
@@ -489,7 +509,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertTrue(mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
-        assertTrue(mHelper.getIsAppImportanceLocked(PKG_N_MR1, UID_N_MR1));
         assertEquals(channel1,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1.getId(), false));
         compareChannels(channel2,
@@ -550,8 +569,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.setInvalidMsgAppDemoted(PKG_P, UID_P, true);
         mHelper.setValidBubbleSent(PKG_P, UID_P);
 
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_NONE);
-
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_N_MR1, UID_N_MR1, true,
                 USER_SYSTEM, channel1.getId(), channel2.getId(), channel3.getId(),
                 NotificationChannel.DEFAULT_CHANNEL_ID);
@@ -562,7 +579,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         loadStreamXml(baos, true, USER_SYSTEM);
 
-        assertEquals(IMPORTANCE_NONE, mHelper.getImportance(PKG_O, UID_O));
         assertTrue(mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
         assertTrue(mHelper.hasSentInvalidMsg(PKG_P, UID_P));
         assertFalse(mHelper.hasSentInvalidMsg(PKG_N_MR1, UID_N_MR1));
@@ -601,7 +617,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testReadXml_oldXml_migrates() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
@@ -672,7 +687,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testReadXml_oldXml_backup_migratesWhenPkgInstalled() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
@@ -751,7 +765,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testReadXml_newXml_noMigration_showPermissionNotification() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
@@ -809,7 +822,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testReadXml_newXml_noMigration_noPermissionNotification() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
@@ -866,7 +878,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testReadXml_oldXml_migration_NoUid() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
@@ -900,7 +911,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testReadXml_newXml_noMigration_NoUid() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
@@ -933,7 +943,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testChannelXmlForNonBackup_postMigration() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
@@ -1014,7 +1023,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testChannelXmlForBackup_postMigration() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
@@ -1101,7 +1109,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testChannelXmlForBackup_postMigration_noExternal() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
@@ -1181,7 +1188,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testChannelXmlForBackup_postMigration_noLocalSettings() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
 
@@ -1303,6 +1309,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testBackupRestoreXml_withNullSoundUri() throws Exception {
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair(UID_N_MR1, PKG_N_MR1), new Pair(true, false));
+
+        when(mPermissionHelper.getNotificationPermissionValues(USER_SYSTEM))
+                .thenReturn(appPermissions);
+
         NotificationChannel channel =
                 new NotificationChannel("id", "name", IMPORTANCE_LOW);
         channel.setSound(null, mAudioAttributes);
@@ -1472,14 +1484,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testCreateChannel_blocked() throws Exception {
-        mHelper.setImportance(PKG_N_MR1, UID_N_MR1, IMPORTANCE_NONE);
-
-        assertTrue(mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1,
-                new NotificationChannel("bananas", "bananas", IMPORTANCE_LOW), true, false));
-    }
-
-    @Test
     public void testCreateChannel_badImportance() throws Exception {
         try {
             mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1,
@@ -1543,12 +1547,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testUpdate_preUpgrade_updatesAppFields() throws Exception {
-        mHelper.setImportance(PKG_N_MR1, UID_N_MR1, IMPORTANCE_UNSPECIFIED);
         assertTrue(mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
         assertEquals(Notification.PRIORITY_DEFAULT, mHelper.getPackagePriority(PKG_N_MR1, UID_N_MR1));
         assertEquals(NotificationManager.VISIBILITY_NO_OVERRIDE,
                 mHelper.getPackageVisibility(PKG_N_MR1, UID_N_MR1));
-        assertFalse(mHelper.getIsAppImportanceLocked(PKG_N_MR1, UID_N_MR1));
 
         NotificationChannel defaultChannel = mHelper.getNotificationChannel(
                 PKG_N_MR1, UID_N_MR1, NotificationChannel.DEFAULT_CHANNEL_ID, false);
@@ -1566,8 +1568,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(Notification.PRIORITY_MAX, mHelper.getPackagePriority(PKG_N_MR1, UID_N_MR1));
         assertEquals(Notification.VISIBILITY_SECRET, mHelper.getPackageVisibility(PKG_N_MR1,
                 UID_N_MR1));
-        assertEquals(IMPORTANCE_NONE, mHelper.getImportance(PKG_N_MR1, UID_N_MR1));
-        assertTrue(mHelper.getIsAppImportanceLocked(PKG_N_MR1, UID_N_MR1));
     }
 
     @Test
@@ -1592,9 +1592,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(Notification.PRIORITY_DEFAULT, mHelper.getPackagePriority(PKG_O, UID_O));
         assertEquals(NotificationManager.VISIBILITY_NO_OVERRIDE,
                 mHelper.getPackageVisibility(PKG_O, UID_O));
-        assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, mHelper.getImportance(PKG_O,
-                UID_O));
-        assertFalse(mHelper.getIsAppImportanceLocked(PKG_O, UID_O));
     }
 
     @Test
@@ -1629,8 +1626,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(Notification.PRIORITY_DEFAULT, mHelper.getPackagePriority(PKG_N_MR1, UID_N_MR1));
         assertEquals(NotificationManager.VISIBILITY_NO_OVERRIDE,
                 mHelper.getPackageVisibility(PKG_N_MR1, UID_N_MR1));
-        assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, mHelper.getImportance(PKG_N_MR1,
-                UID_N_MR1));
     }
 
     @Test
@@ -2015,8 +2010,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testCreateAndDeleteCanChannelsBypassDnd_localSettings() throws Exception {
+    public void testCreateAndDeleteCanChannelsBypassDnd_localSettings() {
         int uid = UserManager.isHeadlessSystemUserMode() ? UID_HEADLESS : UID_N_MR1;
+        when(mPermissionHelper.hasPermission(uid)).thenReturn(true);
 
         // create notification channel that can't bypass dnd
         // expected result: areChannelsBypassingDnd = false
@@ -2029,7 +2025,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         // create notification channel that can bypass dnd
         // expected result: areChannelsBypassingDnd = true
-        assertTrue(mHelper.getImportance(PKG_N_MR1, uid) != IMPORTANCE_NONE);
         NotificationChannel channel2 = new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
         channel2.setBypassDnd(true);
         mHelper.createNotificationChannel(PKG_N_MR1, uid, channel2, true, true);
@@ -2052,8 +2047,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testCreateAndUpdateChannelsBypassingDnd_permissionHelper() {
         int uid = UserManager.isHeadlessSystemUserMode() ? UID_HEADLESS : UID_N_MR1;
-
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         when(mPermissionHelper.hasPermission(uid)).thenReturn(true);
 
         // create notification channel that can't bypass dnd
@@ -2076,10 +2069,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testCreateAndDeleteCanChannelsBypassDnd_permissionHelper() throws Exception {
+    public void testCreateAndDeleteCanChannelsBypassDnd_permissionHelper() {
         int uid = UserManager.isHeadlessSystemUserMode() ? UID_HEADLESS : UID_N_MR1;
-
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         when(mPermissionHelper.hasPermission(uid)).thenReturn(true);
 
         // create notification channel that can't bypass dnd
@@ -2113,8 +2104,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testBlockedGroupDoesNotBypassDnd() throws Exception {
+    public void testBlockedGroupDoesNotBypassDnd() {
         int uid = UserManager.isHeadlessSystemUserMode() ? UID_HEADLESS : UID_N_MR1;
+        when(mPermissionHelper.hasPermission(uid)).thenReturn(true);
 
         // start in a 'allowed to bypass dnd state'
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
@@ -2140,33 +2132,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testBlockedAppsDoNotBypassDnd_localSettings() throws Exception {
+    public void testBlockedAppsDoNotBypassDnd_localSettings() {
         int uid = UserManager.isHeadlessSystemUserMode() ? UID_HEADLESS : UID_N_MR1;
-
-        // start in a 'allowed to bypass dnd state'
-        mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
-                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
-        when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
-                mPermissionHelper, mLogger,
-                mAppOpsManager, mStatsEventBuilderFactory);
-
-        mHelper.setImportance(PKG_N_MR1, uid, IMPORTANCE_NONE);
-        // create notification channel that can bypass dnd, but app is blocked
-        // expected result: areChannelsBypassingDnd = false
-        NotificationChannel channel2 = new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
-        channel2.setBypassDnd(true);
-        mHelper.createNotificationChannel(PKG_N_MR1, uid, channel2, true, true);
-        assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
-        resetZenModeHelper();
-    }
-
-    @Test
-    public void testBlockedAppsDoNotBypassDnd_permissionHelper() throws Exception {
-        int uid = UserManager.isHeadlessSystemUserMode() ? UID_HEADLESS : UID_N_MR1;
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         when(mPermissionHelper.hasPermission(uid)).thenReturn(false);
+
         // start in a 'allowed to bypass dnd state'
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
                 NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
@@ -2186,8 +2155,32 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testUpdateCanChannelsBypassDnd() throws Exception {
+    public void testBlockedAppsDoNotBypassDnd_permissionHelper() {
         int uid = UserManager.isHeadlessSystemUserMode() ? UID_HEADLESS : UID_N_MR1;
+        when(mPermissionHelper.hasPermission(uid)).thenReturn(false);
+
+        // start in a 'allowed to bypass dnd state'
+        mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
+                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
+        when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger,
+                mAppOpsManager, mStatsEventBuilderFactory);
+
+        // create notification channel that can bypass dnd, but app is blocked
+        // expected result: areChannelsBypassingDnd = false
+        NotificationChannel channel2 = new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+        channel2.setBypassDnd(true);
+        mHelper.createNotificationChannel(PKG_N_MR1, uid, channel2, true, true);
+        assertFalse(mHelper.areChannelsBypassingDnd());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
+        resetZenModeHelper();
+    }
+
+    @Test
+    public void testUpdateCanChannelsBypassDnd() {
+        int uid = UserManager.isHeadlessSystemUserMode() ? UID_HEADLESS : UID_N_MR1;
+        when(mPermissionHelper.hasPermission(uid)).thenReturn(true);
 
         // create notification channel that can't bypass dnd
         // expected result: areChannelsBypassingDnd = false
@@ -2405,8 +2398,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
             when(mPm.getApplicationInfoAsUser(eq(PKG_N_MR1), anyInt(), anyInt())).thenReturn(legacy);
 
             // create records with the default channel for all user 0 and user 1 uids
-            mHelper.getImportance(PKG_N_MR1, user0Uids[i]);
-            mHelper.getImportance(PKG_N_MR1, user1Uids[i]);
+            mHelper.canShowBadge(PKG_N_MR1, user0Uids[i]);
+            mHelper.canShowBadge(PKG_N_MR1, user1Uids[i]);
         }
 
         mHelper.onUserRemoved(1);
@@ -2442,17 +2435,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertFalse(mHelper.onPackagesChanged(false, USER_SYSTEM,
                 new String[]{PKG_N_MR1}, new int[]{UID_N_MR1}));
         assertEquals(2, mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false).getList().size());
-    }
-
-    @Test
-    public void testOnPackageChanged_packageRemoval_importance() throws Exception {
-        mHelper.setImportance(PKG_N_MR1, UID_N_MR1, NotificationManager.IMPORTANCE_HIGH);
-
-        mHelper.onPackagesChanged(true, USER_SYSTEM, new String[]{PKG_N_MR1}, new int[]{
-                UID_N_MR1});
-
-        assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, mHelper.getImportance(PKG_N_MR1,
-                UID_N_MR1));
     }
 
     @Test
@@ -2496,17 +2478,14 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
         mHelper.createNotificationChannelGroup(
                 PKG_O, UID_O, new NotificationChannelGroup("1", "bye"), true);
-        mHelper.lockChannelsForOEM(pkg.toArray(new String[]{}));
         mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, pkgPair);
         mHelper.setNotificationDelegate(PKG_O, UID_O, "", 1);
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_NONE);
         mHelper.setBubblesAllowed(PKG_O, UID_O, DEFAULT_BUBBLE_PREFERENCE);
         mHelper.setShowBadge(PKG_O, UID_O, false);
         mHelper.setAppImportanceLocked(PKG_O, UID_O);
 
         mHelper.clearData(PKG_O, UID_O);
 
-        assertEquals(IMPORTANCE_UNSPECIFIED, mHelper.getImportance(PKG_O, UID_O));
         assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), DEFAULT_BUBBLE_PREFERENCE);
         assertTrue(mHelper.canShowBadge(PKG_O, UID_O));
         assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
@@ -2518,13 +2497,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
 
         assertTrue(channel.isImportanceLockedByCriticalDeviceFunction());
-        assertTrue(channel.isImportanceLockedByOEM());
     }
 
     @Test
     public void testRecordDefaults() throws Exception {
-        assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, mHelper.getImportance(PKG_N_MR1,
-                UID_N_MR1));
         assertEquals(true, mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
         assertEquals(1, mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false).getList().size());
     }
@@ -2760,69 +2736,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testDumpJson_prePermissionMigration() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
-        // before the migration is active, we want to verify that:
-        //   - all notification importance info should come from package preferences
-        //   - if there are permissions granted or denied from packages PreferencesHelper doesn't
-        //     know about, those are ignored if migration is not enabled
-
-        // package permissions map to be passed in
-        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
-        appPermissions.put(new Pair(UID_P, PKG_P), new Pair(true, false));  // in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
-
-        NotificationChannel channel1 =
-                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
-        NotificationChannel channel3 = new NotificationChannel("id3", "name3", IMPORTANCE_HIGH);
-
-        mHelper.createNotificationChannel(PKG_P, UID_P, channel1, true, false);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_LOW);
-        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3, false, false);
-        mHelper.setImportance(PKG_N_MR1, UID_N_MR1, IMPORTANCE_NONE);
-        mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-
-        // in the json array, all of the individual package preferences are simply elements in the
-        // values array. this set is to collect expected outputs for each of our packages.
-        // the key/value pairs are: (userId, package name) -> expected importance
-        ArrayMap<Pair<Integer, String>, String> expected = new ArrayMap<>();
-        expected.put(new Pair(UserHandle.getUserId(UID_P), PKG_P), "LOW");
-        expected.put(new Pair(UserHandle.getUserId(UID_O), PKG_O), "HIGH");
-        expected.put(new Pair(UserHandle.getUserId(UID_N_MR1), PKG_N_MR1), "NONE");
-
-        JSONArray actual = (JSONArray) mHelper.dumpJson(
-                new NotificationManagerService.DumpFilter(), appPermissions)
-                .get("PackagePreferencess");
-        assertThat(actual.length()).isEqualTo(expected.size());
-        for (int i = 0; i < actual.length(); i++) {
-            JSONObject pkgInfo = actual.getJSONObject(i);
-            Pair<Integer, String> pkgKey =
-                    new Pair(pkgInfo.getInt("userId"), pkgInfo.getString("packageName"));
-            assertTrue(expected.containsKey(pkgKey));
-            assertThat(pkgInfo.getString("importance")).isEqualTo(expected.get(pkgKey));
-        }
-
-        // also make sure that (more likely to actually happen) if we don't provide an array of
-        // app preferences (and do null instead), the same thing happens, so do the same checks
-        JSONArray actualWithNullInput = (JSONArray) mHelper.dumpJson(
-                new NotificationManagerService.DumpFilter(), null)
-                .get("PackagePreferencess");
-        assertThat(actualWithNullInput.length()).isEqualTo(expected.size());
-        for (int i = 0; i < actualWithNullInput.length(); i++) {
-            JSONObject pkgInfo = actualWithNullInput.getJSONObject(i);
-            Pair<Integer, String> pkgKey =
-                    new Pair(pkgInfo.getInt("userId"), pkgInfo.getString("packageName"));
-            assertTrue(expected.containsKey(pkgKey));
-            assertThat(pkgInfo.getString("importance")).isEqualTo(expected.get(pkgKey));
-        }
-    }
-
-    @Test
     public void testDumpJson_postPermissionMigration() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         // when getting a json dump, we want to verify that:
         //   - all notification importance info should come from the permission, even if the data
         //     isn't there yet but is present in package preferences
@@ -2844,11 +2758,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         mHelper.createNotificationChannel(PKG_P, UID_P, channel1, true, false);
         mHelper.createNotificationChannel(PKG_P, UID_P, channel2, false, false);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_LOW);
         mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel3, false, false);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
         mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
 
         // in the json array, all of the individual package preferences are simply elements in the
         // values array. this set is to collect expected outputs for each of our packages.
@@ -2887,11 +2798,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testDumpJson_givenNullInput_postMigration() throws Exception {
         // simple test just to make sure nothing dies if we pass in null input even post migration
         // for some reason, even though in practice this should not be how one calls this method
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
 
-        // some packages exist, with some importance info that won't be looked at
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+        // some packages exist
+        mHelper.canShowBadge(PKG_O, UID_O);
+        mHelper.canShowBadge(PKG_P, UID_P);
 
         JSONArray actual = (JSONArray) mHelper.dumpJson(
                 new NotificationManagerService.DumpFilter(), null)
@@ -2908,44 +2818,16 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testDumpBansJson_prePermissionMigration() throws Exception {
-        // confirm that the package bans that are in json are only from package preferences, and
-        // not from the passed-in permissions map
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
-
-        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
-
-        // package preferences: only PKG_P is banned
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
-
-        // make sure that's the only thing in the package ban output
-        JSONArray actual = mHelper.dumpBansJson(
-                new NotificationManagerService.DumpFilter(), appPermissions);
-        assertThat(actual.length()).isEqualTo(1);
-
-        JSONObject ban = actual.getJSONObject(0);
-        assertThat(ban.getInt("userId")).isEqualTo(UserHandle.getUserId(UID_P));
-        assertThat(ban.getString("packageName")).isEqualTo(PKG_P);
-    }
-
-    @Test
     public void testDumpBansJson_postPermissionMigration() throws Exception {
         // confirm that the package bans that are in the output include all packages that
         // have their permission set to false, and not based on PackagePreferences importance
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
 
         ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
         appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
         appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
         appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
-        // package preferences: PKG_O not banned based on local importance, and PKG_P is
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+        mHelper.canShowBadge(PKG_O, UID_O);
 
         // expected output
         ArraySet<Pair<Integer, String>> expected = new ArraySet<>();
@@ -2967,10 +2849,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testDumpBansJson_givenNullInput() throws Exception {
         // no one should do this, but...
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
-
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
 
         JSONArray actual = mHelper.dumpBansJson(
                 new NotificationManagerService.DumpFilter(), null);
@@ -2978,59 +2856,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testDumpString_prePermissionMigration() {
-        // confirm that the string resulting from dumpImpl contains only info from package prefs
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
-
-        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), new Pair(false, true));    // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
-
-        // local package preferences: PKG_O is not banned even though the permissions would
-        // indicate so
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
-
-        // get dump output as a string so we can inspect the contents later
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        mHelper.dump(pw, "", new NotificationManagerService.DumpFilter(), appPermissions);
-        pw.flush();
-        String actual = sw.toString();
-
-        // expected (substring) output for each preference
-        ArrayList<String> expected = new ArrayList<>();
-        expected.add(PKG_O + " (" + UID_O + ") importance=HIGH");
-        expected.add(PKG_P + " (" + UID_P + ") importance=NONE");
-
-        // make sure the things in app permissions do NOT show up
-        ArrayList<String> notExpected = new ArrayList<>();
-        notExpected.add("first (1) importance=DEFAULT");
-        notExpected.add("third (3) importance=NONE");
-        notExpected.add("userSet=");  // no user-set information pre migration
-
-        for (String exp : expected) {
-            assertTrue(actual.contains(exp));
-        }
-
-        for (String notExp : notExpected) {
-            assertFalse(actual.contains(notExp));
-        }
-
-        // also make sure it works the same if we pass in a null input
-        StringWriter sw2 = new StringWriter();
-        PrintWriter pw2 = new PrintWriter(sw2);
-        mHelper.dump(pw2, "", new NotificationManagerService.DumpFilter(), null);
-        pw.flush();
-        String actualWithNullInput = sw2.toString();
-        assertThat(actualWithNullInput).isEqualTo(actual);
-    }
-
-    @Test
     public void testDumpString_postPermissionMigration() {
         // confirm that the string resulting from dumpImpl contains only importances from permission
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
 
         ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
         appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
@@ -3038,8 +2865,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         // local package preferences
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+        mHelper.canShowBadge(PKG_O, UID_O);
+        mHelper.canShowBadge(PKG_P, UID_P);
 
         // get dump output as a string so we can inspect the contents later
         StringWriter sw = new StringWriter();
@@ -3072,11 +2899,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testDumpString_givenNullInput() {
         // test that this doesn't choke on null input
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
 
         // local package preferences
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+        mHelper.canShowBadge(PKG_O, UID_O);
+        mHelper.canShowBadge(PKG_P, UID_P);
 
         // get dump output
         StringWriter sw = new StringWriter();
@@ -3090,48 +2916,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testDumpProto_prePermissionMigration() throws Exception {
-        // test that dumping to proto gets the importances from the right place
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
-
-        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
-
-        // local package preferences
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
-
-        // expected output: only the local preferences
-        // map format: (uid, package name) -> importance (int)
-        ArrayMap<Pair<Integer, String>, Integer> expected = new ArrayMap<>();
-        expected.put(new Pair(UID_O, PKG_O), IMPORTANCE_HIGH);
-        expected.put(new Pair(UID_P, PKG_P), IMPORTANCE_NONE);
-
-        // get the proto output and inspect its contents
-        ProtoOutputStream proto = new ProtoOutputStream();
-        mHelper.dump(proto, new NotificationManagerService.DumpFilter(), appPermissions);
-
-        RankingHelperProto actual = RankingHelperProto.parseFrom(proto.getBytes());
-        assertThat(actual.records.length).isEqualTo(expected.size());
-        for (int i = 0; i < actual.records.length; i++) {
-            RankingHelperProto.RecordProto record = actual.records[i];
-            Pair<Integer, String> pkgKey = new Pair(record.uid, record.package_);
-            assertTrue(expected.containsKey(pkgKey));
-            assertThat(record.importance).isEqualTo(expected.get(pkgKey));
-        }
-
-        // also check that it's the same as passing in null input
-        ProtoOutputStream proto2 = new ProtoOutputStream();
-        mHelper.dump(proto2, new NotificationManagerService.DumpFilter(), null);
-        assertThat(proto.getBytes()).isEqualTo(proto2.getBytes());
-    }
-
-    @Test
     public void testDumpProto_postPermissionMigration() throws Exception {
         // test that dumping to proto gets the importances from the right place
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
 
         // permissions -- these should take precedence
         ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
@@ -3140,8 +2926,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
 
         // local package preferences
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_LOW);
+        mHelper.canShowBadge(PKG_O, UID_O);
+        mHelper.canShowBadge(PKG_P, UID_P);
 
         // expected output: all the packages, but only the ones provided via appPermissions
         // should have importance set (aka not PKG_P)
@@ -3429,14 +3215,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAppBlockedLogging() {
-        mHelper.setEnabled(PKG_N_MR1, 1020, false);
-        assertEquals(1, mLogger.getCalls().size());
-        assertEquals(
-                NotificationChannelLogger.NotificationChannelEvent.APP_NOTIFICATIONS_BLOCKED,
-                mLogger.get(0).event);
-    }
-    @Test
     public void testXml_statusBarIcons_default() throws Exception {
         String preQXml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
@@ -3517,7 +3295,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testIsDelegateAllowed_noDelegate() {
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_UNSPECIFIED);
+        mHelper.canShowBadge(PKG_O, UID_O);
 
         assertFalse(mHelper.isDelegateAllowed(PKG_O, UID_O, "whatever", 0));
     }
@@ -3555,7 +3333,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testDelegateXml_noDelegate() throws Exception {
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_UNSPECIFIED);
+        mHelper.canShowBadge(PKG_O, UID_O);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
@@ -3744,337 +3522,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testLockChannelsForOEM_emptyList() {
-        mHelper.lockChannelsForOEM(null);
-        mHelper.lockChannelsForOEM(new String[0]);
-        // no exception
-    }
-
-    @Test
-    public void testLockChannelsForOEM_appWide() {
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
-        NotificationChannel c = new NotificationChannel("c", "c", IMPORTANCE_DEFAULT);
-        // different uids, same package
-        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
-        mHelper.createNotificationChannel(PKG_O, 3, b, false, false);
-        mHelper.createNotificationChannel(PKG_O, 30, c, true, true);
-
-        mHelper.lockChannelsForOEM(new String[] {PKG_O});
-
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
-                .isImportanceLockedByOEM());
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, b.getId(), false)
-                .isImportanceLockedByOEM());
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 30, c.getId(), false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_onlyGivenPkg() {
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
-        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
-        mHelper.createNotificationChannel(PKG_N_MR1, 30, b, false, false);
-
-        mHelper.lockChannelsForOEM(new String[] {PKG_O});
-
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
-                .isImportanceLockedByOEM());
-        assertFalse(mHelper.getNotificationChannel(PKG_N_MR1, 30, b.getId(), false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_channelSpecific() {
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
-        NotificationChannel c = new NotificationChannel("c", "c", IMPORTANCE_DEFAULT);
-        // different uids, same package
-        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
-        mHelper.createNotificationChannel(PKG_O, 3, b, false, false);
-        mHelper.createNotificationChannel(PKG_O, 30, c, true, true);
-
-        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":b", PKG_O + ":c"});
-
-        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
-                .isImportanceLockedByOEM());
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, b.getId(), false)
-                .isImportanceLockedByOEM());
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 30, c.getId(), false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_onlyGivenPkg_appDoesNotExistYet() {
-        mHelper.lockChannelsForOEM(new String[] {PKG_O});
-
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
-        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
-        mHelper.createNotificationChannel(PKG_N_MR1, 30, b, false, false);
-
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
-                .isImportanceLockedByOEM());
-        assertFalse(mHelper.getNotificationChannel(PKG_N_MR1, 30, b.getId(), false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_channelSpecific_appDoesNotExistYet() {
-        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":b", PKG_O + ":c"});
-
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
-        NotificationChannel c = new NotificationChannel("c", "c", IMPORTANCE_DEFAULT);
-        // different uids, same package
-        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
-        mHelper.createNotificationChannel(PKG_O, 3, b, false, false);
-        mHelper.createNotificationChannel(PKG_O, 30, c, true, true);
-
-        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
-                .isImportanceLockedByOEM());
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, b.getId(), false)
-                .isImportanceLockedByOEM());
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 30, c.getId(), false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_onlyGivenPkg_appDoesNotExistYet_restoreData()
-            throws Exception {
-        mHelper.lockChannelsForOEM(new String[] {PKG_O});
-
-        final String xml = "<ranking version=\"1\">\n"
-                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
-                + "<channel id=\"a\" name=\"a\" importance=\"3\"/>"
-                + "<channel id=\"b\" name=\"b\" importance=\"3\"/>"
-                + "</package>"
-                + "<package name=\"" + PKG_N_MR1 + "\" uid=\"" + UID_N_MR1 + "\" >\n"
-                + "<channel id=\"a\" name=\"a\" importance=\"3\"/>"
-                + "<channel id=\"b\" name=\"b\" importance=\"3\"/>"
-                + "</package>"
-                + "</ranking>";
-        TypedXmlPullParser parser = Xml.newFastPullParser();
-        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
-                null);
-        parser.nextTag();
-        mHelper.readXml(parser, false, UserHandle.USER_ALL);
-
-        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, "a", false)
-                .isImportanceLockedByOEM());
-        assertFalse(mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, "b", false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_onlyGivenPkg_appDoesNotExistYet_restoreData_postMigration()
-            throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
-        mHelper.lockChannelsForOEM(new String[] {PKG_O});
-
-        final String xml = "<ranking version=\"1\">\n"
-                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
-                + "<channel id=\"a\" name=\"a\" importance=\"3\"/>"
-                + "<channel id=\"b\" name=\"b\" importance=\"3\"/>"
-                + "</package>"
-                + "</ranking>";
-        TypedXmlPullParser parser = Xml.newFastPullParser();
-        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
-                null);
-        parser.nextTag();
-        mHelper.readXml(parser, false, UserHandle.USER_ALL);
-
-        assertFalse(mHelper.getNotificationChannel(PKG_O, UID_O, "a", false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_channelSpecific_appDoesNotExistYet_restoreData()
-            throws Exception {
-        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":b", PKG_O + ":c"});
-
-        final String xml = "<ranking version=\"1\">\n"
-                + "<package name=\"" + PKG_O + "\" uid=\"" + 3 + "\" >\n"
-                + "<channel id=\"a\" name=\"a\" importance=\"3\"/>"
-                + "<channel id=\"b\" name=\"b\" importance=\"3\"/>"
-                + "</package>"
-                + "<package name=\"" + PKG_O + "\" uid=\"" + 30 + "\" >\n"
-                + "<channel id=\"c\" name=\"c\" importance=\"3\"/>"
-                + "</package>"
-                + "</ranking>";
-        TypedXmlPullParser parser = Xml.newFastPullParser();
-        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
-                null);
-        parser.nextTag();
-        mHelper.readXml(parser, false, UserHandle.USER_ALL);
-
-        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, "a", false)
-                .isImportanceLockedByOEM());
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, "b", false)
-                .isImportanceLockedByOEM());
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 30, "c", false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_channelSpecific_appDoesNotExistYet_restoreData_postMigration()
-            throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
-        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":b", PKG_O + ":c"});
-
-        final String xml = "<ranking version=\"1\">\n"
-                + "<package name=\"" + PKG_O + "\" uid=\"" + 3 + "\" >\n"
-                + "<channel id=\"a\" name=\"a\" importance=\"3\"/>"
-                + "<channel id=\"b\" name=\"b\" importance=\"3\"/>"
-                + "</package>"
-                + "<package name=\"" + PKG_O + "\" uid=\"" + 30 + "\" >\n"
-                + "<channel id=\"c\" name=\"c\" importance=\"3\"/>"
-                + "</package>"
-                + "</ranking>";
-        TypedXmlPullParser parser = Xml.newFastPullParser();
-        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
-                null);
-        parser.nextTag();
-        mHelper.readXml(parser, false, UserHandle.USER_ALL);
-
-        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, "a", false)
-                .isImportanceLockedByOEM());
-        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, "b", false)
-                .isImportanceLockedByOEM());
-        assertFalse(mHelper.getNotificationChannel(PKG_O, 30, "c", false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_channelSpecific_clearData() {
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        mHelper.getImportance(PKG_O, UID_O);
-        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":" + a.getId()});
-        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
-        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
-                .isImportanceLockedByOEM());
-
-        mHelper.clearData(PKG_O, UID_O);
-
-        // it's back!
-        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
-        // and still locked
-        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_channelDoesNotExistYet_appWide() {
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
-        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
-
-        mHelper.lockChannelsForOEM(new String[] {PKG_O});
-
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
-                .isImportanceLockedByOEM());
-
-        mHelper.createNotificationChannel(PKG_O, 3, b, true, false);
-        assertTrue(mHelper.getNotificationChannel(PKG_O, 3, b.getId(), false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_channelDoesNotExistYet_channelSpecific() {
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
-        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
-
-        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":a", PKG_O + ":b"});
-
-        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
-                .isImportanceLockedByOEM());
-
-        mHelper.createNotificationChannel(PKG_O, UID_O, b, true, false);
-        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, b.getId(), false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_channelSpecific_clearData_postMigration() {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        mHelper.getImportance(PKG_O, UID_O);
-        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":" + a.getId()});
-        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
-        assertFalse(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
-                .isImportanceLockedByOEM());
-
-        mHelper.clearData(PKG_O, UID_O);
-
-        // it's back!
-        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
-        // and never locked
-        assertFalse(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_channelDoesNotExistYet_appWide_postMigration() {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
-        mHelper.createNotificationChannel(PKG_O, 3, a, true, false);
-
-        mHelper.lockChannelsForOEM(new String[] {PKG_O});
-
-        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, a.getId(), false)
-                .isImportanceLockedByOEM());
-
-        mHelper.createNotificationChannel(PKG_O, 3, b, true, false);
-        assertFalse(mHelper.getNotificationChannel(PKG_O, 3, b.getId(), false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testLockChannelsForOEM_channelDoesNotExistYet_channelSpecific_postMigration() {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
-        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
-
-        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":a", PKG_O + ":b"});
-
-        assertFalse(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
-                .isImportanceLockedByOEM());
-
-        mHelper.createNotificationChannel(PKG_O, UID_O, b, true, false);
-        assertFalse(mHelper.getNotificationChannel(PKG_O, UID_O, b.getId(), false)
-                .isImportanceLockedByOEM());
-    }
-
-    @Test
-    public void testUpdateNotificationChannel_oemLockedImportance() {
-        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
-        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
-
-        mHelper.lockChannelsForOEM(new String[] {PKG_O});
-
-        NotificationChannel update = new NotificationChannel("a", "a", IMPORTANCE_NONE);
-        update.setAllowBubbles(false);
-
-        mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
-
-        assertEquals(IMPORTANCE_HIGH,
-                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
-        assertEquals(false,
-                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).canBubble());
-
-        mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
-
-        assertEquals(IMPORTANCE_HIGH,
-                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
-    }
-
-    @Test
     public void testUpdateNotificationChannel_fixedPermission() {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
 
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
@@ -4093,7 +3541,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testUpdateNotificationChannel_fixedPermission_butUserPreviouslyBlockedIt() {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
 
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_NONE);
@@ -4112,7 +3559,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testUpdateNotificationChannel_fixedPermission_butAppAllowsIt() {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
 
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
@@ -4132,7 +3578,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testUpdateNotificationChannel_notFixedPermission() {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(false);
 
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
@@ -5312,56 +4757,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testPullPackagePreferencesStats_prePermissionMigration() {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(false);
-
-        // build a collection of app permissions that should be passed in but ignored
-        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
-
-        // package preferences: PKG_O not banned based on local importance, and PKG_P is
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
-
-        // expected output. format: uid -> importance, as only uid (and not package name)
-        // is in PackageNotificationPreferences
-        ArrayMap<Integer, Integer> expected = new ArrayMap<>();
-        expected.put(UID_O, IMPORTANCE_HIGH);
-        expected.put(UID_P, IMPORTANCE_NONE);
-
-        // unexpected output. these UIDs should not show up in the output at all
-        ArraySet<Integer> unexpected = new ArraySet<>();
-        unexpected.add(1);
-        unexpected.add(3);
-
-        ArrayList<StatsEvent> events = new ArrayList<>();
-        mHelper.pullPackagePreferencesStats(events, appPermissions);
-
-        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
-            if (builder.getAtomId() == PACKAGE_NOTIFICATION_PREFERENCES) {
-                int uid = builder.getInt(PackageNotificationPreferences.UID_FIELD_NUMBER);
-
-                // this shouldn't be any of the forbidden uids
-                assertFalse(unexpected.contains(uid));
-
-                // if it's one of the expected ids, then make sure the importance matches
-                assertTrue(expected.containsKey(uid));
-                assertThat(expected.get(uid)).isEqualTo(
-                            builder.getInt(PackageNotificationPreferences.IMPORTANCE_FIELD_NUMBER));
-
-                // pre-migration, the userSet field will always default to false
-                boolean userSet = builder.getBoolean(
-                        PackageNotificationPreferences.USER_SET_IMPORTANCE_FIELD_NUMBER);
-                assertFalse(userSet);
-            }
-        }
-    }
-
-    @Test
     public void testPullPackagePreferencesStats_postPermissionMigration() {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
 
         // build a collection of app permissions that should be passed in but ignored
         ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
@@ -5369,9 +4765,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         appPermissions.put(new Pair(3, "third"), new Pair(false, true));   // not in local prefs
         appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, true)); // in local prefs
 
-        // package preferences: PKG_O not banned based on local importance, and PKG_P is
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
-        mHelper.setImportance(PKG_P, UID_P, IMPORTANCE_NONE);
+        // local preferences
+        mHelper.canShowBadge(PKG_O, UID_O);
+        mHelper.canShowBadge(PKG_P, UID_P);
 
         // expected output. format: uid -> importance, as only uid (and not package name)
         // is in PackageNotificationPreferences
@@ -5432,28 +4828,5 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue((channelA.getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0);
         assertTrue((channelB.getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0);
         assertTrue((channelC.getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0);
-    }
-
-    @Test
-    public void testDefaultChannelUpdatesApp_preMigrationToPermissions() throws Exception {
-        final NotificationChannel defaultChannel = mHelper.getNotificationChannel(PKG_N_MR1,
-                UID_N_MR1,
-                NotificationChannel.DEFAULT_CHANNEL_ID, false);
-        defaultChannel.setImportance(IMPORTANCE_NONE);
-        mHelper.updateNotificationChannel(PKG_N_MR1, UID_N_MR1, defaultChannel, true);
-
-        assertEquals(IMPORTANCE_NONE, mHelper.getImportance(PKG_N_MR1, UID_N_MR1));
-    }
-
-    @Test
-    public void testDefaultChannelDoesNotUpdateApp_postMigrationToPermissions() throws Exception {
-        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
-        final NotificationChannel defaultChannel = mHelper.getNotificationChannel(PKG_N_MR1,
-                UID_N_MR1,
-                NotificationChannel.DEFAULT_CHANNEL_ID, false);
-        defaultChannel.setImportance(IMPORTANCE_NONE);
-        mHelper.updateNotificationChannel(PKG_N_MR1, UID_N_MR1, defaultChannel, true);
-
-        assertEquals(IMPORTANCE_UNSPECIFIED, mHelper.getImportance(PKG_N_MR1, UID_N_MR1));
     }
 }
