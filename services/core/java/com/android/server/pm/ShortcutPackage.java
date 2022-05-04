@@ -349,7 +349,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private ShortcutInfo forceDeleteShortcutInner(@NonNull String id) {
         final ShortcutInfo shortcut = mShortcuts.remove(id);
         if (shortcut != null) {
-            mShortcutUser.mService.removeIconLocked(shortcut);
+            removeIcon(shortcut);
             shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED
                     | ShortcutInfo.FLAG_MANIFEST | ShortcutInfo.FLAG_CACHED_ALL);
         }
@@ -366,7 +366,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         forceDeleteShortcutInner(newShortcut.getId());
 
         // Extract Icon and update the icon res ID and the bitmap path.
-        s.saveIconAndFixUpShortcutLocked(newShortcut);
+        s.saveIconAndFixUpShortcutLocked(this, newShortcut);
         s.fixUpShortcutResourceNamesAndValues(newShortcut);
         saveShortcut(newShortcut);
     }
@@ -972,7 +972,8 @@ class ShortcutPackage extends ShortcutPackageItem {
     /**
      * Return the filenames (excluding path names) of icon bitmap files from this package.
      */
-    public ArraySet<String> getUsedBitmapFiles() {
+    @GuardedBy("mLock")
+    private ArraySet<String> getUsedBitmapFilesLocked() {
         final ArraySet<String> usedFiles = new ArraySet<>(1);
         forEachShortcut(si -> {
             if (si.getBitmapPath() != null) {
@@ -980,6 +981,26 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
         });
         return usedFiles;
+    }
+
+    public void cleanupDanglingBitmapFiles(@NonNull File path) {
+        synchronized (mLock) {
+            mShortcutBitmapSaver.waitForAllSavesLocked();
+            final ArraySet<String> usedFiles = getUsedBitmapFilesLocked();
+
+            for (File child : path.listFiles()) {
+                if (!child.isFile()) {
+                    continue;
+                }
+                final String name = child.getName();
+                if (!usedFiles.contains(name)) {
+                    if (ShortcutService.DEBUG) {
+                        Slog.d(TAG, "Removing dangling bitmap file: " + child.getAbsolutePath());
+                    }
+                    child.delete();
+                }
+            }
+        }
     }
 
     private static String getFileName(@NonNull String path) {
@@ -1608,6 +1629,11 @@ class ShortcutPackage extends ShortcutPackageItem {
         pw.print(" (");
         pw.print(Formatter.formatFileSize(mShortcutUser.mService.mContext, totalBitmapSize[0]));
         pw.println(")");
+
+        pw.println();
+        synchronized (mLock) {
+            mShortcutBitmapSaver.dumpLocked(pw, "  ");
+        }
     }
 
     public void dumpShortcuts(@NonNull PrintWriter pw, int matchFlags) {
@@ -1729,7 +1755,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         // Note: at this point no shortcuts should have bitmaps pending save, but if they do,
         // just remove the bitmap.
         if (si.isIconPendingSave()) {
-            s.removeIconLocked(si);
+            removeIcon(si);
         }
         out.startTag(null, TAG_SHORTCUT);
         ShortcutService.writeAttr(out, ATTR_ID, si.getId());
