@@ -245,7 +245,7 @@ public class ChooserActivity extends ResolverActivity implements
                     SystemUiDeviceConfigFlags.IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP,
                     DEFAULT_IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP);
 
-    private static final int DEFAULT_LIST_VIEW_UPDATE_DELAY_MS = 250;
+    private static final int DEFAULT_LIST_VIEW_UPDATE_DELAY_MS = 125;
 
     @VisibleForTesting
     int mListViewUpdateDelayMs = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
