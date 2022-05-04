@@ -1977,16 +1977,21 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     void moveActivityToPinnedRootTask(@NonNull ActivityRecord r,
             @Nullable ActivityRecord launchIntoPipHostActivity, String reason) {
+        moveActivityToPinnedRootTask(r, launchIntoPipHostActivity, reason, null /* transition */);
+    }
 
+    void moveActivityToPinnedRootTask(@NonNull ActivityRecord r,
+            @Nullable ActivityRecord launchIntoPipHostActivity, String reason,
+            @Nullable Transition transition) {
         final TaskDisplayArea taskDisplayArea = r.getDisplayArea();
         final Task task = r.getTask();
         final Task rootTask;
 
-        Transition newTransition = null;
-        // Create a transition now to collect the current pinned Task dismiss. Only do the
-        // create here as the Task (trigger) to enter PIP is not ready yet.
+        Transition newTransition = transition;
+        // Create a transition now (if not provided) to collect the current pinned Task dismiss.
+        // Only do the create here as the Task (trigger) to enter PIP is not ready yet.
         final TransitionController transitionController = task.mTransitionController;
-        if (!transitionController.isCollecting()
+        if (newTransition == null && !transitionController.isCollecting()
                 && transitionController.getTransitionPlayer() != null) {
             newTransition = transitionController.createTransition(TRANSIT_PIP);
         }
