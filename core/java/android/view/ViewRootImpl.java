@@ -4197,26 +4197,6 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    @Nullable
-    private void registerFrameDrawingCallbackForBlur() {
-        if (!isHardwareEnabled()) {
-            return;
-        }
-        final boolean hasBlurUpdates = mBlurRegionAggregator.hasUpdates();
-        final boolean needsCallbackForBlur = hasBlurUpdates || mBlurRegionAggregator.hasRegions();
-
-        if (!needsCallbackForBlur) {
-            return;
-        }
-
-        final BackgroundBlurDrawable.BlurRegion[] blurRegionsForFrame =
-                mBlurRegionAggregator.getBlurRegionsCopyForRT();
-
-        // The callback will run on the render thread.
-        registerRtFrameCallback((frame) -> mBlurRegionAggregator
-                .dispatchBlurTransactionIfNeeded(frame, blurRegionsForFrame, hasBlurUpdates));
-    }
-
     private void registerCallbackForPendingTransactions() {
         registerRtFrameCallback(new FrameDrawingCallback() {
             @Override
@@ -4254,7 +4234,6 @@ public final class ViewRootImpl implements ViewParent,
         mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
 
-        registerFrameDrawingCallbackForBlur();
         addFrameCommitCallbackIfNeeded();
 
         boolean usingAsyncReport = isHardwareEnabled() && mSyncBufferCallback != null;
