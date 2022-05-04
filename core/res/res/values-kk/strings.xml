@@ -314,8 +314,8 @@
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"құрылғыдағы фотосуреттерге, мультимедиаға және файлдарға қол жеткізу"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"аудио жазу"</string>
-    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Іс-қимыл"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"іс-қимыл дерегін алу"</string>
+    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Қимыл-қозғалыс"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"қимыл-қозғалыс дерегін алу"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"суретке түсіріп, бейне жазу"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Маңайдағы құрылғылар"</string>
@@ -349,9 +349,9 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"құлыпталған құрылғыда хабарландыруларды толық экрандағы әрекеттер түрінде көрсету"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Қолданбаның құлыпталған құрылғыда хабарландыруларды толық экрандағы әрекеттер түрінде көрсетуіне рұқсат береді."</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"таңбаша орнату"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз қосу мүмкіндігін береді."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Қолданбаға Негізгі экранға таңбашаларды пайдаланушының қатысуынсыз қосу мүмкіндігін береді."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"төте пернелерді алып тастау"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз алып тастау мүмкіндігін береді."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Қолданбаға Негізгі экрандағы таңбашаларды пайдаланушының қатысуынсыз өшіру мүмкіндігін береді."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"шығыс қоңырауларды қайта бағыттау"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Қолданбаға шығыс қоңырау кезінде қоңырауды басқа нөмірге қайта бағыттау немесе қоңырауды мүлде доғару опциясы бар теріліп жатқан нөмірді көруге рұқсат береді."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"телефон қоңырауларына жауап беру"</string>
