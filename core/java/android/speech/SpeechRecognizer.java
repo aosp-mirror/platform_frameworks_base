@@ -735,12 +735,12 @@ public class SpeechRecognizer {
             return true;
         }
 
-        mManagerService = IRecognitionServiceManager.Stub.asInterface(
-                ServiceManager.getService(Context.SPEECH_RECOGNITION_SERVICE));
-
-        if (DBG) {
-            Log.i(TAG, "#maybeInitializeManagerService instantiated =" + mManagerService);
+        IBinder service = ServiceManager.getService(Context.SPEECH_RECOGNITION_SERVICE);
+        if (service == null && mOnDevice) {
+            service = (IBinder) mContext.getSystemService(Context.SPEECH_RECOGNITION_SERVICE);
         }
+        mManagerService = IRecognitionServiceManager.Stub.asInterface(service);
+
         if (mManagerService == null) {
             if (mListener != null) {
                 mListener.onError(ERROR_CLIENT);

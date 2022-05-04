@@ -26,6 +26,7 @@ import android.os.PersistableBundle;
 import android.os.SharedMemory;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.view.contentcapture.IContentCaptureManager;
+import android.speech.IRecognitionServiceManager;
 
 /**
  * Provide the interface to communicate with hotword detection service.
@@ -56,6 +57,9 @@ oneway interface IHotwordDetectionService {
     void updateContentCaptureManager(
         in IContentCaptureManager contentCaptureManager,
         in ContentCaptureOptions options);
+
+    void updateRecognitionServiceManager(
+        in IRecognitionServiceManager recognitionServiceManager);
 
     /**
      * Simply requests the service to trigger the callback, so that the system can check its
