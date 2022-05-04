@@ -85,6 +85,8 @@ final class RolesUtils {
         final int userId = associationInfo.getUserId();
         final UserHandle userHandle = UserHandle.of(userId);
 
+        Slog.i(TAG, "Removing CDM role holder, role=" + deviceProfile
+                + ", package=u" + userId + "\\" + packageName);
         roleManager.removeRoleHolderAsUser(deviceProfile, packageName,
                 MANAGE_HOLDERS_FLAG_DONT_KILL_APP, userHandle, context.getMainExecutor(),
                 success -> {
