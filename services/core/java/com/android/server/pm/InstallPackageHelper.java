@@ -826,19 +826,24 @@ final class InstallPackageHelper {
             }
             return;
         }
+
+        processApkInstallRequests(success, installRequests);
+    }
+
+    private void processApkInstallRequests(boolean success, List<InstallRequest> installRequests) {
         if (success) {
-            for (InstallRequest request : apkInstallRequests) {
+            for (InstallRequest request : installRequests) {
                 request.mArgs.doPreInstall(request.mInstallResult.mReturnCode);
             }
             synchronized (mPm.mInstallLock) {
-                installPackagesTracedLI(apkInstallRequests);
+                installPackagesTracedLI(installRequests);
             }
-            for (InstallRequest request : apkInstallRequests) {
+            for (InstallRequest request : installRequests) {
                 request.mArgs.doPostInstall(
                         request.mInstallResult.mReturnCode, request.mInstallResult.mUid);
             }
         }
-        for (InstallRequest request : apkInstallRequests) {
+        for (InstallRequest request : installRequests) {
             restoreAndPostInstall(request.mArgs.mUser.getIdentifier(),
                     request.mInstallResult,
                     new PostInstallData(request.mArgs,
@@ -880,11 +885,15 @@ final class InstallPackageHelper {
             try (PackageParser2 packageParser = mPm.mInjector.getScanningPackageParser()) {
                 ApexInfo apexInfo = mApexManager.installPackage(apexes[0]);
                 if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
-                    ParsedPackage parsedPackage = packageParser.parsePackage(
-                            new File(apexInfo.modulePath), 0, /* useCaches= */ false);
-                    scanSystemPackageLI(parsedPackage, 0, SCAN_AS_APEX, null);
-                    mPm.mApexPackageInfo.notifyPackageInstalled(
-                            apexInfo, parsedPackage.hideAsFinal());
+                    // APEX has been handled successfully by apexd. Let's continue the install flow
+                    // so it will be scanned and registered with the system.
+                    // TODO(b/225756739): Improve atomicity of rebootless APEX install.
+                    // The newly installed APEX will not be reverted even if
+                    // processApkInstallRequests() fails. Need a way to keep info stored in apexd
+                    // and PMS in sync in the face of install failures.
+                    request.mInstallResult.mApexInfo = apexInfo;
+                    mPm.mHandler.post(() -> processApkInstallRequests(true, requests));
+                    return;
                 } else {
                     mPm.mApexPackageInfo.notifyPackageInstalled(apexInfo, packageParser);
                 }
@@ -985,7 +994,12 @@ final class InstallPackageHelper {
                                         + PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
                         return;
                     }
-                    createdAppId.put(packageName, optimisticallyRegisterAppId(result));
+                    final boolean isApex = (result.mRequest.mScanFlags & SCAN_AS_APEX) != 0;
+                    if (!isApex) {
+                        createdAppId.put(packageName, optimisticallyRegisterAppId(result));
+                    } else {
+                        result.mPkgSetting.setAppId(Process.INVALID_UID);
+                    }
                     versionInfos.put(result.mPkgSetting.getPkg().getPackageName(),
                             mPm.getSettingsVersionForPackage(result.mPkgSetting.getPkg()));
                 } catch (PackageManagerException e) {
@@ -1088,12 +1102,12 @@ final class InstallPackageHelper {
     private PrepareResult preparePackageLI(InstallArgs args, PackageInstalledInfo res)
             throws PrepareFailure {
         final int installFlags = args.mInstallFlags;
-        final File tmpPackageFile = new File(args.getCodePath());
         final boolean onExternal = args.mVolumeUuid != null;
         final boolean instantApp = ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0);
         final boolean fullApp = ((installFlags & PackageManager.INSTALL_FULL_APP) != 0);
         final boolean virtualPreload =
                 ((installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0);
+        final boolean isApex = ((installFlags & PackageManager.INSTALL_APEX) != 0);
         final boolean isRollback = args.mInstallReason == PackageManager.INSTALL_REASON_ROLLBACK;
         @PackageManagerService.ScanFlags int scanFlags = SCAN_NEW_INSTALL | SCAN_UPDATE_SIGNATURE;
         if (args.mMoveInfo != null) {
@@ -1112,7 +1126,12 @@ final class InstallPackageHelper {
         if (virtualPreload) {
             scanFlags |= SCAN_AS_VIRTUAL_PRELOAD;
         }
+        if (isApex) {
+            scanFlags |= SCAN_AS_APEX;
+        }
 
+        final File tmpPackageFile = new File(
+                isApex ? res.mApexInfo.modulePath : args.getCodePath());
         if (DEBUG_INSTALL) Slog.d(TAG, "installPackageLI: path=" + tmpPackageFile);
 
         // Validity check
@@ -1518,16 +1537,22 @@ final class InstallPackageHelper {
             }
         }
 
-        if (!args.doRename(res.mReturnCode, parsedPackage)) {
-            throw new PrepareFailure(INSTALL_FAILED_INSUFFICIENT_STORAGE, "Failed rename");
-        }
+        if (!isApex) {
+            if (!args.doRename(res.mReturnCode, parsedPackage)) {
+                throw new PrepareFailure(INSTALL_FAILED_INSUFFICIENT_STORAGE, "Failed rename");
+            }
 
-        try {
-            setUpFsVerityIfPossible(parsedPackage);
-        } catch (Installer.InstallerException | IOException | DigestException
-                | NoSuchAlgorithmException e) {
-            throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
-                    "Failed to set up verity: " + e);
+            try {
+                setUpFsVerityIfPossible(parsedPackage);
+            } catch (Installer.InstallerException | IOException | DigestException
+                    | NoSuchAlgorithmException e) {
+                throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Failed to set up verity: " + e);
+            }
+        } else {
+            // Use the path returned by apexd
+            parsedPackage.setPath(res.mApexInfo.modulePath);
+            parsedPackage.setBaseApkPath(res.mApexInfo.modulePath);
         }
 
         final PackageFreezer freezer =
@@ -1934,6 +1959,8 @@ final class InstallPackageHelper {
                 // Set the update and install times
                 PackageStateInternal deletedPkgSetting = mPm.snapshotComputer()
                         .getPackageStateInternal(oldPackage.getPackageName());
+                // TODO(b/225756739): For rebootless APEX, consider using lastUpdateMillis provided
+                //  by apexd to be more accurate.
                 reconciledPkg.mPkgSetting
                         .setFirstInstallTimeFromReplaced(deletedPkgSetting, request.mAllUsers)
                         .setLastUpdateTime(System.currentTimeMillis());
@@ -2236,6 +2263,8 @@ final class InstallPackageHelper {
         for (ReconciledPackage reconciledPkg : commitRequest.mReconciledPackages.values()) {
             final boolean instantApp = ((reconciledPkg.mScanResult.mRequest.mScanFlags
                     & SCAN_AS_INSTANT_APP) != 0);
+            final boolean isApex = ((reconciledPkg.mScanResult.mRequest.mScanFlags
+                    & SCAN_AS_APEX) != 0);
             final AndroidPackage pkg = reconciledPkg.mPkgSetting.getPkg();
             final String packageName = pkg.getPackageName();
             final String codePath = pkg.getPath();
@@ -2323,7 +2352,8 @@ final class InstallPackageHelper {
                             android.provider.Settings.Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
                             && !pkg.isDebuggable()
                             && (!onIncremental)
-                            && dexoptOptions.isCompilationEnabled();
+                            && dexoptOptions.isCompilationEnabled()
+                            && !isApex;
 
             if (performDexopt) {
                 // Compile the layout resources.
@@ -3292,6 +3322,10 @@ final class InstallPackageHelper {
             final PackageSetting disabledPs =
                     mPm.mSettings.getDisabledSystemPkgLPr(packageName);
             if (scannedPkg != null) {
+                if (scannedPkg.isApex()) {
+                    // APEX on /data has been scanned. No need to expect better.
+                    continue;
+                }
                 /*
                  * If the system app is both scanned and in the
                  * disabled packages list, then it must have been
@@ -3391,6 +3425,18 @@ final class InstallPackageHelper {
         }
     }
 
+    /**
+     * Scans APEX packages and registers them with the system.
+     *
+     * apexd has its own policy to decide which APEX to activate and which not. The policy might
+     * conflicts that of PMS. The APEX package info stored in PMS is a mirror of that managed by
+     * apexd. To keep things simple and keep activation status in sync for both apexd and PMS, we
+     * don't persist APEX in settings and always scan APEX from scratch during boot. However, some
+     * data like lastUpdateTime will be lost if PackageSetting is not persisted for APEX.
+     *
+     * TODO(b/225756739): Read lastUpdateTime from ApexInfoList to populate PackageSetting correctly
+     */
+    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     public List<ApexManager.ScanResult> scanApexPackages(ApexInfo[] allPackages, int parseFlags,
             int scanFlags, PackageParser2 packageParser, ExecutorService executorService) {
         if (allPackages == null) {
@@ -3408,18 +3454,39 @@ final class InstallPackageHelper {
             parsingApexInfo.put(apexFile, ai);
         }
 
-        // Process results one by one
-        List<ApexManager.ScanResult> results = new ArrayList<>(parsingApexInfo.size());
+        List<ParallelPackageParser.ParseResult> parseResults =
+                new ArrayList<>(parsingApexInfo.size());
         for (int i = 0; i < parsingApexInfo.size(); i++) {
             ParallelPackageParser.ParseResult parseResult = parallelPackageParser.take();
+            parseResults.add(parseResult);
+        }
+        // Sort the list to ensure we always process factory packages first
+        Collections.sort(parseResults, (a, b) -> {
+            ApexInfo ai = parsingApexInfo.get(a.scanFile);
+            return ai.isFactory ? -1 : 1;
+        });
+
+
+        // Process results one by one
+        List<ApexManager.ScanResult> results = new ArrayList<>(parsingApexInfo.size());
+        for (int i = 0; i < parseResults.size(); i++) {
+            ParallelPackageParser.ParseResult parseResult = parseResults.get(i);
             Throwable throwable = parseResult.throwable;
             ApexInfo ai = parsingApexInfo.get(parseResult.scanFile);
+            int newParseFlags = parseFlags;
             int newScanFlags = scanFlags | SCAN_AS_APEX;
+            if (!ai.isFactory) {
+                newParseFlags &= ~ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
+                newScanFlags |= SCAN_NEW_INSTALL;
+            }
 
             if (throwable == null) {
                 try {
-                    scanSystemPackageLI(parseResult.parsedPackage, parseFlags, newScanFlags, null);
-                    AndroidPackage pkg = parseResult.parsedPackage.hideAsFinal();
+                    AndroidPackage pkg = addForInitLI(
+                            parseResult.parsedPackage, newParseFlags, newScanFlags, null);
+                    if (ai.isFactory && !ai.isActive) {
+                        disableSystemPackageLPw(pkg);
+                    }
                     results.add(new ApexManager.ScanResult(ai, pkg, pkg.getPackageName()));
                 } catch (PackageManagerException e) {
                     throw new IllegalStateException("Failed to scan: " + ai.modulePath, e);
@@ -3638,7 +3705,11 @@ final class InstallPackageHelper {
                             ReconcilePackageUtils.reconcilePackages(reconcileRequest,
                                     mSharedLibraries, mPm.mSettings.getKeySetManagerService(),
                                     mPm.mSettings);
-                    appIdCreated = optimisticallyRegisterAppId(scanResult);
+                    if ((scanFlags & SCAN_AS_APEX) == 0) {
+                        appIdCreated = optimisticallyRegisterAppId(scanResult);
+                    } else {
+                        scanResult.mPkgSetting.setAppId(Process.INVALID_UID);
+                    }
                     commitReconciledScanResultLocked(reconcileResult.get(pkgName),
                             mPm.mUserManager.getUserIds());
                 } catch (PackageManagerException e) {

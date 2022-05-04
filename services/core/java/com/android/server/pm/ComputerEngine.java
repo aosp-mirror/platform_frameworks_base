@@ -984,9 +984,15 @@ public class ComputerEngine implements Computer {
                     TAG, "getApplicationInfo " + packageName
                             + ": " + p);
         }
+        final boolean matchApex = (flags & MATCH_APEX) != 0;
         if (p != null) {
             PackageStateInternal ps = mSettings.getPackage(packageName);
             if (ps == null) return null;
+            if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+                if (!matchApex && p.isApex()) {
+                    return null;
+                }
+            }
             if (filterSharedLibPackage(ps, filterCallingUid, userId, flags)) {
                 return null;
             }
@@ -1001,20 +1007,22 @@ public class ComputerEngine implements Computer {
             }
             return ai;
         }
-        if ((flags & PackageManager.MATCH_APEX) != 0) {
-            // For APKs, PackageInfo.applicationInfo is not exactly the same as ApplicationInfo
-            // returned from getApplicationInfo, but for APEX packages difference shouldn't be
-            // very big.
-            // TODO(b/155328545): generate proper application info for APEXes as well.
-            int apexFlags = ApexManager.MATCH_ACTIVE_PACKAGE;
-            if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
-                apexFlags = ApexManager.MATCH_FACTORY_PACKAGE;
+        if (!ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+            if (matchApex) {
+                // For APKs, PackageInfo.applicationInfo is not exactly the same as ApplicationInfo
+                // returned from getApplicationInfo, but for APEX packages difference shouldn't be
+                // very big.
+                // TODO(b/155328545): generate proper application info for APEXes as well.
+                int apexFlags = ApexManager.MATCH_ACTIVE_PACKAGE;
+                if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
+                    apexFlags = ApexManager.MATCH_FACTORY_PACKAGE;
+                }
+                final PackageInfo pi = mApexPackageInfo.getPackageInfo(packageName, apexFlags);
+                if (pi == null) {
+                    return null;
+                }
+                return pi.applicationInfo;
             }
-            final PackageInfo pi = mApexPackageInfo.getPackageInfo(packageName, apexFlags);
-            if (pi == null) {
-                return null;
-            }
-            return pi.applicationInfo;
         }
         if ("android".equals(packageName) || "system".equals(packageName)) {
             return androidApplication();
@@ -1704,14 +1712,22 @@ public class ComputerEngine implements Computer {
         packageName = resolveInternalPackageName(packageName, versionCode);
 
         final boolean matchFactoryOnly = (flags & MATCH_FACTORY_ONLY) != 0;
+        final boolean matchApex = (flags & MATCH_APEX) != 0;
         if (matchFactoryOnly) {
             // Instant app filtering for APEX modules is ignored
-            if ((flags & MATCH_APEX) != 0) {
-                return mApexPackageInfo.getPackageInfo(packageName,
-                        ApexManager.MATCH_FACTORY_PACKAGE);
+            if (!ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+                if (matchApex) {
+                    return mApexPackageInfo.getPackageInfo(packageName,
+                            ApexManager.MATCH_FACTORY_PACKAGE);
+                }
             }
             final PackageStateInternal ps = mSettings.getDisabledSystemPkg(packageName);
             if (ps != null) {
+                if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+                    if (!matchApex && ps.getPkg() != null && ps.getPkg().isApex()) {
+                        return null;
+                    }
+                }
                 if (filterSharedLibPackage(ps, filterCallingUid, userId, flags)) {
                     return null;
                 }
@@ -1731,6 +1747,11 @@ public class ComputerEngine implements Computer {
         }
         if (p != null) {
             final PackageStateInternal ps = getPackageStateInternal(p.getPackageName());
+            if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+                if (!matchApex && p.isApex()) {
+                    return null;
+                }
+            }
             if (filterSharedLibPackage(ps, filterCallingUid, userId, flags)) {
                 return null;
             }
@@ -1751,8 +1772,11 @@ public class ComputerEngine implements Computer {
             }
             return generatePackageInfo(ps, flags, userId);
         }
-        if ((flags & MATCH_APEX) != 0) {
-            return mApexPackageInfo.getPackageInfo(packageName, ApexManager.MATCH_ACTIVE_PACKAGE);
+        if (!ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+            if (matchApex) {
+                return mApexPackageInfo.getPackageInfo(packageName,
+                        ApexManager.MATCH_ACTIVE_PACKAGE);
+            }
         }
         return null;
     }
@@ -1809,6 +1833,11 @@ public class ComputerEngine implements Computer {
                         ps = psDisabled;
                     }
                 }
+                if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+                    if (!listApex && ps.getPkg() != null && ps.getPkg().isApex()) {
+                        continue;
+                    }
+                }
                 if (filterSharedLibPackage(ps, callingUid, userId, flags)) {
                     continue;
                 }
@@ -1834,6 +1863,11 @@ public class ComputerEngine implements Computer {
                         ps = psDisabled;
                     }
                 }
+                if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+                    if (!listApex && p.isApex()) {
+                        continue;
+                    }
+                }
                 if (filterSharedLibPackage(ps, callingUid, userId, flags)) {
                     continue;
                 }
@@ -1846,11 +1880,13 @@ public class ComputerEngine implements Computer {
                 }
             }
         }
-        if (listApex) {
-            if (listFactory) {
-                list.addAll(mApexPackageInfo.getFactoryPackages());
-            } else {
-                list.addAll(mApexPackageInfo.getActivePackages());
+        if (!ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+            if (listApex) {
+                if (listFactory) {
+                    list.addAll(mApexPackageInfo.getFactoryPackages());
+                } else {
+                    list.addAll(mApexPackageInfo.getActivePackages());
+                }
             }
         }
         return new ParceledListSlice<>(list);
@@ -3338,11 +3374,56 @@ public class ComputerEngine implements Computer {
             case DumpState.DUMP_APEX: {
                 if (packageName == null || isApexPackage(packageName)) {
                     mApexManager.dump(pw);
-                    mApexPackageInfo.dump(pw, packageName);
+                    dumpApex(pw, packageName);
                 }
                 break;
             }
         } // switch
+    }
+
+    private void generateApexPackageInfo(List<PackageInfo> activePackages,
+            List<PackageInfo> inactivePackages, List<PackageInfo> factoryPackages) {
+        for (AndroidPackage p : mPackages.values()) {
+            final String packageName = p.getPackageName();
+            PackageStateInternal ps = mSettings.getPackage(packageName);
+            if (!p.isApex() || ps == null) {
+                continue;
+            }
+            PackageInfo pi = generatePackageInfo(ps, 0, 0);
+            if (pi == null) {
+                continue;
+            }
+            pi.isActiveApex = true;
+            activePackages.add(pi);
+            if (!ps.isUpdatedSystemApp()) {
+                factoryPackages.add(pi);
+            } else {
+                PackageStateInternal psDisabled = mSettings.getDisabledSystemPkg(packageName);
+                pi = generatePackageInfo(psDisabled, 0, 0);
+                if (pi != null) {
+                    factoryPackages.add(pi);
+                    inactivePackages.add(pi);
+                }
+            }
+        }
+    }
+
+    private void dumpApex(PrintWriter pw, String packageName) {
+        if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+            final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+            List<PackageInfo> activePackages = new ArrayList<>();
+            List<PackageInfo> inactivePackages = new ArrayList<>();
+            List<PackageInfo> factoryPackages = new ArrayList<>();
+            generateApexPackageInfo(activePackages, inactivePackages, factoryPackages);
+            ipw.println("Active APEX packages:");
+            ApexPackageInfo.dumpPackages(activePackages, packageName, ipw);
+            ipw.println("Inactive APEX packages:");
+            ApexPackageInfo.dumpPackages(inactivePackages, packageName, ipw);
+            ipw.println("Factory APEX packages:");
+            ApexPackageInfo.dumpPackages(factoryPackages, packageName, ipw);
+        } else {
+            mApexPackageInfo.dump(pw, packageName);
+        }
     }
 
     // The body of findPreferredActivity.
@@ -3721,7 +3802,12 @@ public class ComputerEngine implements Computer {
 
     @Override
     public boolean isApexPackage(String packageName) {
-        return mApexPackageInfo.isApexPackage(packageName);
+        if (!ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+            return mApexPackageInfo.isApexPackage(packageName);
+        } else {
+            final AndroidPackage pkg = mPackages.get(packageName);
+            return pkg != null && pkg.isApex();
+        }
     }
 
     @Override
@@ -4707,6 +4793,7 @@ public class ComputerEngine implements Computer {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         flags = updateFlagsForApplication(flags, userId);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
+        final boolean listApex = (flags & MATCH_APEX) != 0;
 
         enforceCrossUserPermission(
                 callingUid,
@@ -4727,6 +4814,11 @@ public class ComputerEngine implements Computer {
                     effectiveFlags |= PackageManager.MATCH_ANY_USER;
                 }
                 if (ps.getPkg() != null) {
+                    if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+                        if (!listApex && ps.getPkg().isApex()) {
+                            continue;
+                        }
+                    }
                     if (filterSharedLibPackage(ps, callingUid, userId, flags)) {
                         continue;
                     }
@@ -4754,6 +4846,11 @@ public class ComputerEngine implements Computer {
                 final AndroidPackage pkg = packageState.getPkg();
                 if (pkg == null) {
                     continue;
+                }
+                if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
+                    if (!listApex && pkg.isApex()) {
+                        continue;
+                    }
                 }
                 if (filterSharedLibPackage(packageState, Binder.getCallingUid(), userId, flags)) {
                     continue;
@@ -5105,7 +5202,7 @@ public class ComputerEngine implements Computer {
         final PackageStateInternal ps = mSettings.getPackage(packageName);
 
         // Installer info for Apex is not stored in PackageManager
-        if (ps == null && mApexPackageInfo.isApexPackage(packageName)) {
+        if (isApexPackage(packageName)) {
             return InstallSource.EMPTY;
         }
 
