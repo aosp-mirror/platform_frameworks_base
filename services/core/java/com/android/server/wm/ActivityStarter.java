@@ -1747,6 +1747,10 @@ class ActivityStarter {
             // until after we launched to identify the relevant activity.
             transitionController.setTransientLaunch(mLastStartActivityRecord, mPriorAboveTask);
         }
+        if (!mSupervisor.mUserLeaving) {
+            // no-user-leaving implies not entering PiP.
+            transitionController.setCanPipOnFinish(false /* canPipOnFinish */);
+        }
         if (newTransition != null) {
             transitionController.requestStartTransition(newTransition,
                     mTargetTask == null ? started.getTask() : mTargetTask,

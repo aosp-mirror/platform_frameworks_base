@@ -544,6 +544,12 @@ class TransitionController {
         }
     }
 
+    /** @see Transition#setCanPipOnFinish */
+    void setCanPipOnFinish(boolean canPipOnFinish) {
+        if (mCollectingTransition == null) return;
+        mCollectingTransition.setCanPipOnFinish(canPipOnFinish);
+    }
+
     void legacyDetachNavigationBarFromApp(@NonNull IBinder token) {
         final Transition transition = Transition.fromBinder(token);
         if (transition == null || !mPlayingTransitions.contains(transition)) {
