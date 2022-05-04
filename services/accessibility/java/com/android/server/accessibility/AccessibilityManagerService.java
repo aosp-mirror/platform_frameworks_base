@@ -187,6 +187,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     //       their capabilities are ready.
     private static final int WAIT_MOTION_INJECTOR_TIMEOUT_MILLIS = 1000;
 
+
+    // This postpones state changes events when a window doesn't exist with the expectation that
+    // a race condition will resolve. It is determined by observing elapsed time of the
+    // corresponding window added.
+    //TODO(b/230810909) : Fix it with a better idea.
+    private static final int POSTPONE_WINDOW_STATE_CHANGED_EVENT_TIMEOUT_MILLIS = 500;
+
     private static final String FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE =
         "registerUiTestAutomationService";
 
@@ -271,6 +278,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private final UiAutomationManager mUiAutomationManager = new UiAutomationManager(mLock);
     private final AccessibilityTraceManager mTraceManager;
     private final CaptioningManagerImpl mCaptioningManagerImpl;
+
+    private final List<SendWindowStateChangedEventRunnable> mSendWindowStateChangedEventRunnables =
+            new ArrayList<>();
 
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
 
@@ -930,17 +940,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 final WindowManagerInternal wm = LocalServices.getService(
                         WindowManagerInternal.class);
                 wm.computeWindowsForAccessibility(displayId);
+                // The App side sends a event to notify that the window visible or focused,
+                // but the window information in framework is not updated yet, so we postpone it.
+                if (postponeWindowStateEvent(event)) {
+                    return;
+                }
             }
+
             synchronized (mLock) {
-                notifyAccessibilityServicesDelayedLocked(event, false);
-                notifyAccessibilityServicesDelayedLocked(event, true);
-                mUiAutomationManager.sendAccessibilityEventLocked(event);
+                dispatchAccessibilityEventLocked(event);
             }
         }
 
         if (OWN_PROCESS_ID != Binder.getCallingPid()) {
             event.recycle();
         }
+    }
+
+    private void dispatchAccessibilityEventLocked(AccessibilityEvent event) {
+        notifyAccessibilityServicesDelayedLocked(event, false);
+        notifyAccessibilityServicesDelayedLocked(event, true);
+        mUiAutomationManager.sendAccessibilityEventLocked(event);
     }
 
     private void sendAccessibilityEventToInputFilter(AccessibilityEvent event) {
@@ -3339,6 +3359,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void sendAccessibilityEventForCurrentUserLocked(AccessibilityEvent event) {
+        if (event.getWindowChanges() == AccessibilityEvent.WINDOWS_CHANGE_ADDED) {
+            // We need to ensure the window is available before sending pending
+            // window_state_changed events.
+            sendPendingWindowStateChangedEventsForAvailableWindowLocked(event.getWindowId());
+        }
         sendAccessibilityEventLocked(event, mCurrentUserId);
     }
 
@@ -4503,6 +4528,69 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     service.setImeSessionEnabledLocked(sessions.get(service.mId), enabled);
                 }
             }
+        }
+    }
+
+    private final class SendWindowStateChangedEventRunnable implements Runnable {
+
+        private final AccessibilityEvent mPendingEvent;
+        private final int mWindowId;
+
+        SendWindowStateChangedEventRunnable(@NonNull AccessibilityEvent event) {
+            mPendingEvent = event;
+            mWindowId = event.getWindowId();
+        }
+
+        @Override
+        public void run() {
+            synchronized (mLock) {
+                Slog.w(LOG_TAG, " wait for adding window timeout: " + mWindowId);
+                sendPendingEventLocked();
+            }
+        }
+
+        private void sendPendingEventLocked() {
+            mSendWindowStateChangedEventRunnables.remove(this);
+            dispatchAccessibilityEventLocked(mPendingEvent);
+        }
+
+        private int getWindowId() {
+            return mWindowId;
+        }
+    }
+
+    void sendPendingWindowStateChangedEventsForAvailableWindowLocked(int windowId) {
+        final int eventSize =  mSendWindowStateChangedEventRunnables.size();
+        for (int i = eventSize - 1; i >= 0; i--) {
+            final SendWindowStateChangedEventRunnable runnable =
+                    mSendWindowStateChangedEventRunnables.get(i);
+            if (runnable.getWindowId() == windowId) {
+                mMainHandler.removeCallbacks(runnable);
+                runnable.sendPendingEventLocked();
+            }
+        }
+    }
+
+    /**
+     * Postpones the {@link AccessibilityEvent} with
+     * {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED}
+     * which doesn't have the corresponding window until the window is added or timeout.
+     *
+     * @return {@code true} if the event is postponed.
+     */
+    private boolean postponeWindowStateEvent(AccessibilityEvent event) {
+        synchronized (mLock) {
+            final int resolvedWindowId = mA11yWindowManager.resolveParentWindowIdLocked(
+                    event.getWindowId());
+            if (mA11yWindowManager.findWindowInfoByIdLocked(resolvedWindowId) != null) {
+                return false;
+            }
+            final SendWindowStateChangedEventRunnable pendingRunnable =
+                    new SendWindowStateChangedEventRunnable(new AccessibilityEvent(event));
+            mMainHandler.postDelayed(pendingRunnable,
+                    POSTPONE_WINDOW_STATE_CHANGED_EVENT_TIMEOUT_MILLIS);
+            mSendWindowStateChangedEventRunnables.add(pendingRunnable);
+            return true;
         }
     }
 }
