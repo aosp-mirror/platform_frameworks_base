@@ -9123,6 +9123,8 @@ public class AudioService extends IAudioService.Stub
         if (timeOutMs <= 0 || usages.length == 0) {
             throw new IllegalArgumentException("Invalid timeOutMs/usagesToMute");
         }
+        Log.i(TAG, "muteAwaitConnection dev:" + device + " timeOutMs:" + timeOutMs
+                + " usages:" + usages);
 
         if (mDeviceBroker.isDeviceConnected(device)) {
             // not throwing an exception as there could be a race between a connection (server-side,
@@ -9166,7 +9168,7 @@ public class AudioService extends IAudioService.Stub
                 Log.i(TAG, "cancelMuteAwaitConnection ignored, no expected device");
                 return;
             }
-            if (!device.equals(mMutingExpectedDevice)) {
+            if (!device.equalTypeAddress(mMutingExpectedDevice)) {
                 Log.e(TAG, "cancelMuteAwaitConnection ignored, got " + device
                         + "] but expected device is" + mMutingExpectedDevice);
                 throw new IllegalStateException("cancelMuteAwaitConnection for wrong device");
