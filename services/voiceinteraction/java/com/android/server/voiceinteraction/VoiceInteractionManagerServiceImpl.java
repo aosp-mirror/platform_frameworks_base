@@ -29,6 +29,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
+import android.app.ApplicationExitInfo;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
@@ -38,6 +39,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
@@ -147,6 +149,32 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             synchronized (mServiceStub) {
                 mService = null;
                 resetHotwordDetectionConnectionLocked();
+            }
+        }
+
+        @Override
+        public void onBindingDied(ComponentName name) {
+            Slog.d(TAG, "onBindingDied to " + name);
+            String packageName = name.getPackageName();
+            ParceledListSlice<ApplicationExitInfo> plistSlice = null;
+            try {
+                plistSlice = mAm.getHistoricalProcessExitReasons(packageName, 0, 1, mUser);
+            } catch (RemoteException e) {
+                // do nothing. The local binder so it can not throw it.
+            }
+            if (plistSlice == null) {
+                return;
+            }
+            List<ApplicationExitInfo> list = plistSlice.getList();
+            if (list.isEmpty()) {
+                return;
+            }
+            // TODO(b/229956310): Refactor the logic of PackageMonitor and onBindingDied
+            ApplicationExitInfo info = list.get(0);
+            if (info.getReason() == ApplicationExitInfo.REASON_USER_REQUESTED
+                    && info.getSubReason() == ApplicationExitInfo.SUBREASON_STOP_APP) {
+                // only handle user stopped the application from the task manager
+                mServiceStub.handleUserStop(packageName, mUser);
             }
         }
     };
