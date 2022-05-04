@@ -89,6 +89,9 @@ public class SystemSettings {
         Settings.System.DISPLAY_COLOR_MODE,
         Settings.System.ALARM_ALERT,
         Settings.System.NOTIFICATION_LIGHT_PULSE,
-        Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED
+        Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED,
+        Settings.System.CLOCKWORK_BLUETOOTH_SETTINGS_PREF,
+        Settings.System.UNREAD_NOTIFICATION_DOT_INDICATOR,
+        Settings.System.AUTO_LAUNCH_MEDIA_CONTROLS
     };
 }
