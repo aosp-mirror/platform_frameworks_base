@@ -1204,6 +1204,31 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testComputeImeParent_remoteControlTarget() throws Exception {
+        final DisplayContent dc = mDisplayContent;
+        WindowState app1 = createWindow(null, TYPE_BASE_APPLICATION, "app1");
+        WindowState app2 = createWindow(null, TYPE_BASE_APPLICATION, "app2");
+
+        dc.setImeLayeringTarget(app1);
+        dc.setImeInputTarget(app2);
+        dc.setRemoteInsetsController(createDisplayWindowInsetsController());
+        dc.getImeTarget(IME_TARGET_LAYERING).getWindow().setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+        dc.getImeInputTarget().getWindowState().setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+
+        // Expect ImeParent is null since ImeLayeringTarget and ImeInputTarget are different.
+        assertNull(dc.computeImeParent());
+
+        // ImeLayeringTarget and ImeInputTarget are updated to the same.
+        dc.setImeInputTarget(app1);
+        assertEquals(dc.getImeTarget(IME_TARGET_LAYERING), dc.getImeInputTarget());
+
+        // The ImeParent should be the display.
+        assertEquals(dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
+    }
+
+    @Test
     public void testInputMethodInputTarget_isClearedWhenWindowStateIsRemoved() throws Exception {
         final DisplayContent dc = createNewDisplay();
 
