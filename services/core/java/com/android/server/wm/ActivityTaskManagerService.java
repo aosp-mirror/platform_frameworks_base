@@ -65,7 +65,6 @@ import static android.provider.Settings.System.FONT_SCALE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT;
-import static android.view.WindowManager.TRANSIT_WAKE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -6624,15 +6623,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void notifyWakingUp() {
-            synchronized (mGlobalLock) {
-                // Start a transition for waking. This is needed for showWhenLocked activities.
-                getTransitionController().requestTransitionIfNeeded(TRANSIT_WAKE, 0 /* flags */,
-                        null /* trigger */, mRootWindowContainer.getDefaultDisplay());
-            }
-        }
-
-        @Override
         public void registerActivityStartInterceptor(
                 @ActivityInterceptorCallback.OrderedId int id,
                 ActivityInterceptorCallback callback) {
@@ -6693,6 +6683,32 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (ActivityTaskManagerService.this.mGlobalLock) {
                 return ActivityTaskManagerService.this.mRootWindowContainer
                         .getTaskToShowPermissionDialogOn(pkgName, uid);
+            }
+        }
+
+        @Override
+        public void restartTaskActivityProcessIfVisible(int taskId, String packageName) {
+            synchronized (ActivityTaskManagerService.this.mGlobalLock) {
+                final Task task =
+                        ActivityTaskManagerService.this.mRootWindowContainer
+                                .anyTaskForId(taskId, MATCH_ATTACHED_TASK_ONLY);
+                if (task == null) {
+                    Slog.w(TAG, "Failed to restart Activity. No task found for id: " + taskId);
+                    return;
+                }
+
+                final ActivityRecord activity = task.getActivity(activityRecord -> {
+                    return packageName.equals(activityRecord.packageName)
+                            && !activityRecord.finishing;
+                });
+
+                if (activity == null) {
+                    Slog.w(TAG, "Failed to restart Activity. No Activity found for package name: "
+                            + packageName + " in task: " + taskId);
+                    return;
+                }
+
+                activity.restartProcessIfVisible();
             }
         }
     }

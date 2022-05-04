@@ -11895,6 +11895,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * @see #setPreferKeepClear
      * @see #getPreferKeepClearRects
+     *
+     * @param rects A list of rects in this view's local coordinate system
      */
     public final void setPreferKeepClearRects(@NonNull List<Rect> rects) {
         final ListenerInfo info = getListenerInfo();
@@ -11934,6 +11936,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * @see #setPreferKeepClear
      * @see #getPreferKeepClearRects
+     *
+     * @param rects A list of rects in this view's local coordinate system
      *
      * @hide
      */

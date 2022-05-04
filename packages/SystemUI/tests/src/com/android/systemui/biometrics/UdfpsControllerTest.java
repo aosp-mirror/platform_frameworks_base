@@ -212,6 +212,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 .thenReturn(mFpmOtherView);
         when(mEnrollView.getContext()).thenReturn(mContext);
         when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
 
         final List<ComponentInfoInternal> componentInfo = new ArrayList<>();

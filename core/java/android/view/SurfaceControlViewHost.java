@@ -29,8 +29,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import android.window.WindowTokenClient;
-import android.view.InsetsState;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
 
 import java.util.Objects;
@@ -280,7 +278,7 @@ public class SurfaceControlViewHost {
     public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
             @NonNull WindowlessWindowManager wwm, boolean useSfChoreographer) {
         mWm = wwm;
-        mViewRoot = new ViewRootImpl(c, d, mWm, useSfChoreographer);
+        mViewRoot = new ViewRootImpl(c, d, mWm, new WindowlessWindowLayout(), useSfChoreographer);
         addConfigCallback(c, d);
 
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
@@ -310,7 +308,7 @@ public class SurfaceControlViewHost {
         mWm = new WindowlessWindowManager(context.getResources().getConfiguration(),
                 mSurfaceControl, hostToken);
 
-        mViewRoot = new ViewRootImpl(context, display, mWm);
+        mViewRoot = new ViewRootImpl(context, display, mWm, new WindowlessWindowLayout());
         addConfigCallback(context, display);
 
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);

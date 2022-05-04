@@ -174,6 +174,9 @@ public interface NativeInputManagerService {
 
     void cancelCurrentTouch();
 
+    /** Set the displayId on which the mouse cursor should be shown. */
+    void setPointerDisplayId(int displayId);
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -383,5 +386,8 @@ public interface NativeInputManagerService {
 
         @Override
         public native void cancelCurrentTouch();
+
+        @Override
+        public native void setPointerDisplayId(int displayId);
     }
 }

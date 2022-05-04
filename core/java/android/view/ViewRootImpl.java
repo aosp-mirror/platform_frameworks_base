@@ -564,7 +564,7 @@ public final class ViewRootImpl implements ViewParent,
     private final Rect mVisRect = new Rect(); // used to retrieve visible rect of focused view.
     private final Rect mTempRect = new Rect();
 
-    private final WindowLayout mWindowLayout = new WindowLayout();
+    private final WindowLayout mWindowLayout;
 
     private ViewRootImpl mParentViewRoot;
 
@@ -861,18 +861,20 @@ public final class ViewRootImpl implements ViewParent,
     private String mTag = TAG;
 
     public ViewRootImpl(Context context, Display display) {
-        this(context, display, WindowManagerGlobal.getWindowSession(),
+        this(context, display, WindowManagerGlobal.getWindowSession(), new WindowLayout(),
                 false /* useSfChoreographer */);
     }
 
-    public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session) {
-        this(context, display, session, false /* useSfChoreographer */);
+    public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session,
+            WindowLayout windowLayout) {
+        this(context, display, session, windowLayout, false /* useSfChoreographer */);
     }
 
     public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session,
-            boolean useSfChoreographer) {
+            WindowLayout windowLayout, boolean useSfChoreographer) {
         mContext = context;
         mWindowSession = session;
+        mWindowLayout = windowLayout;
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
         mThread = Thread.currentThread();
@@ -2902,6 +2904,14 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mFirst || windowShouldResize || viewVisibilityChanged || params != null
                 || mForceNextWindowRelayout) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                        TextUtils.formatSimple("relayoutWindow#"
+                                        + "first=%b/resize=%b/vis=%b/params=%b/force=%b",
+                                mFirst, windowShouldResize, viewVisibilityChanged, params != null,
+                                mForceNextWindowRelayout));
+            }
+
             mForceNextWindowRelayout = false;
 
             // If this window is giving internal insets to the window manager, then we want to first
@@ -3091,6 +3101,10 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
             } catch (RemoteException e) {
+            } finally {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                }
             }
 
             if (DEBUG_ORIENTATION) Log.v(
