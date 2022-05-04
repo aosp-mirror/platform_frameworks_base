@@ -804,14 +804,9 @@ public class CompanionDeviceManagerService extends SystemService {
                 return;
             }
 
-            // TODO(b/218615185): mAssociationStore.dump() instead
-            out.append("Companion Device Associations:").append('\n');
-            for (AssociationInfo a : mAssociationStore.getAssociations()) {
-                out.append("  ").append(a.toString()).append('\n');
-            }
-
-            // TODO(b/218615185): mDevicePresenceMonitor.dump()
-            // TODO(b/218615185): mCompanionAppController.dump()
+            mAssociationStore.dump(out);
+            mDevicePresenceMonitor.dump(out);
+            mCompanionAppController.dump(out);
         }
     }
 
