@@ -1158,6 +1158,8 @@ public final class PlaybackActivityMonitor
     //==========================================================================================
     void muteAwaitConnection(@NonNull int[] usagesToMute,
             @NonNull AudioDeviceAttributes dev, long timeOutMs) {
+        sEventLogger.loglogi(
+                "muteAwaitConnection() dev:" + dev + " timeOutMs:" + timeOutMs, TAG);
         synchronized (mPlayerLock) {
             mutePlayersExpectingDevice(usagesToMute);
             // schedule timeout (remove previously scheduled first)
@@ -1169,6 +1171,7 @@ public final class PlaybackActivityMonitor
     }
 
     void cancelMuteAwaitConnection() {
+        sEventLogger.loglogi("cancelMuteAwaitConnection()", TAG);
         synchronized (mPlayerLock) {
             // cancel scheduled timeout, ignore device, only one expected device at a time
             mEventHandler.removeMessages(MSG_L_TIMEOUT_MUTE_AWAIT_CONNECTION);
