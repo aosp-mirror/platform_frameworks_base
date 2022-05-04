@@ -1208,12 +1208,22 @@ public class JobSchedulerService extends com.android.server.SystemService
             // This may throw a SecurityException.
             jobStatus.prepareLocked();
 
+            final boolean canExecuteImmediately;
             if (toCancel != null) {
                 // Implicitly replaces the existing job record with the new instance
-                cancelJobImplLocked(toCancel, jobStatus, JobParameters.STOP_REASON_CANCELLED_BY_APP,
-                        JobParameters.INTERNAL_STOP_REASON_CANCELED, "job rescheduled by app");
+                final boolean wasJobExecuting = cancelJobImplLocked(toCancel, jobStatus,
+                        JobParameters.STOP_REASON_CANCELLED_BY_APP,
+                        JobParameters.INTERNAL_STOP_REASON_CANCELED,
+                        "job rescheduled by app");
+                // Avoid overlapping job executions. Don't push for immediate execution if an old
+                // job with the same ID was running, but let TOP EJs start immediately.
+                canExecuteImmediately = !wasJobExecuting
+                        || (jobStatus.isRequestedExpeditedJob()
+                        && mUidBiasOverride.get(jobStatus.getSourceUid(), JobInfo.BIAS_DEFAULT)
+                        == JobInfo.BIAS_TOP_APP);
             } else {
                 startTrackingJobLocked(jobStatus, null);
+                canExecuteImmediately = true;
             }
 
             if (work != null) {
@@ -1256,7 +1266,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // list and try to run it.
                 mJobPackageTracker.notePending(jobStatus);
                 mPendingJobQueue.add(jobStatus);
-                maybeRunPendingJobsLocked();
+                if (canExecuteImmediately) {
+                    // Don't ask the JobConcurrencyManager to try to run the job immediately. The
+                    // JobServiceContext will ask the JobConcurrencyManager for another job once
+                    // it finishes cleaning up the old job.
+                    maybeRunPendingJobsLocked();
+                }
             } else {
                 evaluateControllerStatesLocked(jobStatus);
             }
@@ -1377,8 +1392,10 @@ public class JobSchedulerService extends com.android.server.SystemService
      * is null, the cancelled job is removed outright from the system.  If
      * {@code incomingJob} is non-null, it replaces {@code cancelled} in the store of
      * currently scheduled jobs.
+     *
+     * @return true if the cancelled job was running
      */
-    private void cancelJobImplLocked(JobStatus cancelled, JobStatus incomingJob,
+    private boolean cancelJobImplLocked(JobStatus cancelled, JobStatus incomingJob,
             @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
         cancelled.unprepareLocked();
@@ -1389,7 +1406,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         mChangedJobList.remove(cancelled);
         // Cancel if running.
-        mConcurrencyManager.stopJobOnServiceContextLocked(
+        boolean wasRunning = mConcurrencyManager.stopJobOnServiceContextLocked(
                 cancelled, reason, internalReasonCode, debugReason);
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
@@ -1397,6 +1414,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             startTrackingJobLocked(incomingJob, cancelled);
         }
         reportActiveLocked();
+        return wasRunning;
     }
 
     void updateUidState(int uid, int procState) {
@@ -1755,7 +1773,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             // same job ID), we remove it from the JobStore and tell the JobServiceContext to stop
             // running the job. Once the job stops running, we then call this method again.
             // TODO: rework code so we don't intentionally call this method twice for the same job
-            Slog.w(TAG, "Job didn't exist in JobStore");
+            Slog.w(TAG, "Job didn't exist in JobStore: " + jobStatus.toShortString());
         }
         if (mReadyToRock) {
             for (int i = 0; i < mControllers.size(); i++) {
@@ -3813,6 +3831,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // Double indent for readability
                     pw.increaseIndent();
                     pw.increaseIndent();
+                    pw.println(job.toShortString());
                     job.dump(pw, true, nowElapsed);
                     pw.decreaseIndent();
                     pw.decreaseIndent();
