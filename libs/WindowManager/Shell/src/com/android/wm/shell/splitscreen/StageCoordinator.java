@@ -54,6 +54,9 @@ import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_P
 import static com.android.wm.shell.transition.Transitions.isClosingType;
 import static com.android.wm.shell.transition.Transitions.isOpeningType;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -68,6 +71,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -147,7 +151,9 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private final int mDisplayId;
     private SplitLayout mSplitLayout;
+    private ValueAnimator mDividerFadeInAnimator;
     private boolean mDividerVisible;
+    private boolean mKeyguardShowing;
     private final SyncTransactionQueue mSyncQueue;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Context mContext;
@@ -404,6 +410,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSplitLayout.init();
         // Set false to avoid record new bounds with old task still on top;
         mShouldUpdateRecents = false;
+        mIsDividerRemoteAnimating = true;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         prepareEvictChildTasks(SPLIT_POSITION_TOP_OR_LEFT, evictWct);
@@ -417,7 +424,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     RemoteAnimationTarget[] wallpapers,
                     RemoteAnimationTarget[] nonApps,
                     final IRemoteAnimationFinishedCallback finishedCallback) {
-                mIsDividerRemoteAnimating = true;
                 RemoteAnimationTarget[] augmentedNonApps =
                         new RemoteAnimationTarget[nonApps.length + 1];
                 for (int i = 0; i < nonApps.length; ++i) {
@@ -494,8 +500,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         // Using legacy transitions, so we can't use blast sync since it conflicts.
         mTaskOrganizer.applyTransaction(wct);
-        mSyncQueue.runInSync(t ->
-                updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */));
+        mSyncQueue.runInSync(t -> {
+            setDividerVisibility(true, t);
+            updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
+        });
     }
 
     private void onRemoteAnimationFinishedOrCancelled(WindowContainerTransaction evictWct) {
@@ -510,10 +518,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
         } else {
             mSyncQueue.queue(evictWct);
-            mSyncQueue.runInSync(t -> {
-                setDividerVisibility(true, t);
-                updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
-            });
         }
     }
 
@@ -623,16 +627,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void onKeyguardVisibilityChanged(boolean showing) {
+        mKeyguardShowing = showing;
         if (!mMainStage.isActive()) {
             return;
         }
 
-        if (ENABLE_SHELL_TRANSITIONS) {
-            // Update divider visibility so it won't float on top of keyguard.
-            setDividerVisibility(!showing, null /* transaction */);
-        }
-
-        if (!showing && mTopStageAfterFoldDismiss != STAGE_TYPE_UNDEFINED) {
+        if (!mKeyguardShowing && mTopStageAfterFoldDismiss != STAGE_TYPE_UNDEFINED) {
             if (ENABLE_SHELL_TRANSITIONS) {
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 prepareExitSplitScreen(mTopStageAfterFoldDismiss, wct);
@@ -643,7 +643,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         mTopStageAfterFoldDismiss == STAGE_TYPE_MAIN ? mMainStage : mSideStage,
                         EXIT_REASON_DEVICE_FOLDED);
             }
+            return;
         }
+
+        setDividerVisibility(!mKeyguardShowing, null);
     }
 
     void onFinishedWakingUp() {
@@ -727,6 +730,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             setResizingSplits(false /* resizing */);
             t.setWindowCrop(mMainStage.mRootLeash, null)
                     .setWindowCrop(mSideStage.mRootLeash, null);
+            setDividerVisibility(false, t);
         });
 
         // Hide divider and reset its position.
@@ -1055,8 +1059,31 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private void setDividerVisibility(boolean visible, @Nullable SurfaceControl.Transaction t) {
+        if (visible == mDividerVisible) {
+            return;
+        }
+
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                "%s: Request to %s divider bar from %s.", TAG,
+                (visible ? "show" : "hide"), Debug.getCaller());
+
+        // Defer showing divider bar after keyguard dismissed, so it won't interfere with keyguard
+        // dismissing animation.
+        if (visible && mKeyguardShowing) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                    "%s:   Defer showing divider bar due to keyguard showing.", TAG);
+            return;
+        }
+
         mDividerVisible = visible;
         sendSplitVisibilityChanged();
+
+        if (mIsDividerRemoteAnimating) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                    "%s:   Skip animating divider bar due to it's remote animating.", TAG);
+            return;
+        }
+
         if (t != null) {
             applyDividerVisibility(t);
         } else {
@@ -1066,15 +1093,56 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void applyDividerVisibility(SurfaceControl.Transaction t) {
         final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
-        if (mIsDividerRemoteAnimating || dividerLeash == null) return;
+        if (dividerLeash == null) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                    "%s:   Skip animating divider bar due to divider leash not ready.", TAG);
+            return;
+        }
+        if (mIsDividerRemoteAnimating) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                    "%s:   Skip animating divider bar due to it's remote animating.", TAG);
+            return;
+        }
+
+        if (mDividerFadeInAnimator != null && mDividerFadeInAnimator.isRunning()) {
+            mDividerFadeInAnimator.cancel();
+        }
 
         if (mDividerVisible) {
-            t.show(dividerLeash);
-            t.setAlpha(dividerLeash, 1);
-            t.setLayer(dividerLeash, Integer.MAX_VALUE);
-            t.setPosition(dividerLeash,
-                    mSplitLayout.getRefDividerBounds().left,
-                    mSplitLayout.getRefDividerBounds().top);
+            final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
+            mDividerFadeInAnimator = ValueAnimator.ofFloat(0f, 1f);
+            mDividerFadeInAnimator.addUpdateListener(animation -> {
+                if (dividerLeash == null) {
+                    mDividerFadeInAnimator.cancel();
+                    return;
+                }
+                transaction.setAlpha(dividerLeash, (float) animation.getAnimatedValue());
+                transaction.apply();
+            });
+            mDividerFadeInAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    if (dividerLeash == null) {
+                        mDividerFadeInAnimator.cancel();
+                        return;
+                    }
+                    transaction.show(dividerLeash);
+                    transaction.setAlpha(dividerLeash, 0);
+                    transaction.setLayer(dividerLeash, Integer.MAX_VALUE);
+                    transaction.setPosition(dividerLeash,
+                                    mSplitLayout.getRefDividerBounds().left,
+                                    mSplitLayout.getRefDividerBounds().top);
+                    transaction.apply();
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mTransactionPool.release(transaction);
+                    mDividerFadeInAnimator = null;
+                }
+            });
+
+            mDividerFadeInAnimator.start();
         } else {
             t.hide(dividerLeash);
         }
@@ -1096,10 +1164,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout.init();
             prepareEnterSplitScreen(wct);
             mSyncQueue.queue(wct);
-            mSyncQueue.runInSync(t -> {
-                updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
-                setDividerVisibility(true, t);
-            });
+            mSyncQueue.runInSync(t ->
+                    updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */));
         }
         if (mMainStageListener.mHasChildren && mSideStageListener.mHasChildren) {
             mShouldUpdateRecents = true;
