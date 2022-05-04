@@ -474,7 +474,7 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
             mThemeStyle = fetchThemeStyleFromSetting();
             mSecondaryOverlay = getOverlay(mMainWallpaperColor, ACCENT, mThemeStyle);
             mNeutralOverlay = getOverlay(mMainWallpaperColor, NEUTRAL, mThemeStyle);
-            if (colorSchemeIsApplied() && !forceReload) {
+            if (colorSchemeIsApplied()) {
                 Log.d(TAG, "Skipping overlay creation. Theme was already: " + mColorScheme);
                 return;
             }
