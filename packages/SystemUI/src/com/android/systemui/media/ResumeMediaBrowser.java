@@ -49,9 +49,11 @@ public class ResumeMediaBrowser {
     private static final String TAG = "ResumeMediaBrowser";
     private final Context mContext;
     @Nullable private final Callback mCallback;
-    private MediaBrowserFactory mBrowserFactory;
+    private final MediaBrowserFactory mBrowserFactory;
+    private final ResumeMediaBrowserLogger mLogger;
+    private final ComponentName mComponentName;
+
     private MediaBrowser mMediaBrowser;
-    private ComponentName mComponentName;
 
     /**
      * Initialize a new media browser
@@ -59,12 +61,17 @@ public class ResumeMediaBrowser {
      * @param callback used to report media items found
      * @param componentName Component name of the MediaBrowserService this browser will connect to
      */
-    public ResumeMediaBrowser(Context context, @Nullable Callback callback,
-            ComponentName componentName, MediaBrowserFactory browserFactory) {
+    public ResumeMediaBrowser(
+            Context context,
+            @Nullable Callback callback,
+            ComponentName componentName,
+            MediaBrowserFactory browserFactory,
+            ResumeMediaBrowserLogger logger) {
         mContext = context;
         mCallback = callback;
         mComponentName = componentName;
         mBrowserFactory = browserFactory;
+        mLogger = logger;
     }
 
     /**
@@ -76,7 +83,6 @@ public class ResumeMediaBrowser {
      * ResumeMediaBrowser#disconnect will be called automatically with this function.
      */
     public void findRecentMedia() {
-        Log.d(TAG, "Connecting to " + mComponentName);
         disconnect();
         Bundle rootHints = new Bundle();
         rootHints.putBoolean(MediaBrowserService.BrowserRoot.EXTRA_RECENT, true);
@@ -84,6 +90,7 @@ public class ResumeMediaBrowser {
                 mComponentName,
                 mConnectionCallback,
                 rootHints);
+        mLogger.logConnection(mComponentName, "findRecentMedia");
         mMediaBrowser.connect();
     }
 
@@ -196,6 +203,7 @@ public class ResumeMediaBrowser {
      */
     protected void disconnect() {
         if (mMediaBrowser != null) {
+            mLogger.logDisconnect(mComponentName);
             mMediaBrowser.disconnect();
         }
         mMediaBrowser = null;
@@ -251,6 +259,7 @@ public class ResumeMediaBrowser {
                         disconnect();
                     }
                 }, rootHints);
+        mLogger.logConnection(mComponentName, "restart");
         mMediaBrowser.connect();
     }
 
@@ -296,6 +305,7 @@ public class ResumeMediaBrowser {
                 mComponentName,
                 mConnectionCallback,
                 rootHints);
+        mLogger.logConnection(mComponentName, "testConnection");
         mMediaBrowser.connect();
     }
 

@@ -87,7 +87,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private static final String TAG = TaskbarDelegate.class.getSimpleName();
 
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
-    private final NavigationBarOverlayController mNavBarOverlayController;
     private final LightBarTransitionsController.Factory mLightBarTransitionsControllerFactory;
     private boolean mInitialized;
     private CommandQueue mCommandQueue;
@@ -158,16 +157,11 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     public TaskbarDelegate(
             Context context,
             EdgeBackGestureHandler.Factory edgeBackGestureHandlerFactory,
-            NavigationBarOverlayController navigationBarOverlayController,
             LightBarTransitionsController.Factory lightBarTransitionsControllerFactory
     ) {
         mLightBarTransitionsControllerFactory = lightBarTransitionsControllerFactory;
         mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
-        mNavBarOverlayController = navigationBarOverlayController;
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.init(mNavbarOverlayVisibilityChangeCallback,
-                    mEdgeBackGestureHandler::updateNavigationBarOverlayExcludeRegion);
-        }
+
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mPipListener = mEdgeBackGestureHandler::setPipStashExclusionBounds;
@@ -227,9 +221,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 mNavigationModeController.addListener(this));
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mNavBarHelper.init();
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.registerListeners();
-        }
         mEdgeBackGestureHandler.onNavBarAttached();
         // Initialize component callback
         Display display = mDisplayManager.getDisplay(displayId);
@@ -254,9 +245,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mNavigationModeController.removeListener(this);
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mNavBarHelper.destroy();
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.unregisterListeners();
-        }
         mEdgeBackGestureHandler.onNavBarDetached();
         mScreenPinningNotify = null;
         if (mWindowContext != null) {
@@ -425,19 +413,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private void onTransientStateChanged() {
         mEdgeBackGestureHandler.onNavBarTransientStateChanged(mTaskbarTransientShowing);
-
-        // The visibility of the navigation bar buttons is dependent on the transient state of
-        // the navigation bar.
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.setButtonState(mTaskbarTransientShowing, /* force */ false);
-        }
     }
 
     @Override
     public void onRecentsAnimationStateChanged(boolean running) {
-        if (running) {
-            mNavBarOverlayController.setButtonState(/* visible */false, /* force */true);
-        }
     }
 
     @Override

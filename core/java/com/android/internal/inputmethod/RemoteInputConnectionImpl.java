@@ -191,7 +191,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
      * @return {@link InputConnection} to which incoming IPCs will be dispatched.
      */
     @Nullable
-    private InputConnection getInputConnection() {
+    public InputConnection getInputConnection() {
         synchronized (mLock) {
             return mInputConnection;
         }

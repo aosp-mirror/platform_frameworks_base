@@ -34,6 +34,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.Icon
 import android.graphics.drawable.RippleDrawable
+import android.graphics.drawable.TransitionDrawable
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -74,6 +75,7 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
+import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -124,7 +126,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var collapsedSet: ConstraintSet
     @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
-    @Mock private lateinit var mediaCarouselScrollHandler: MediaCarouselScrollHandler
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var transitionParent: ViewGroup
     private lateinit var appIcon: ImageView
@@ -270,7 +271,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         smartspaceData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
             packageName = PACKAGE,
             instanceId = instanceId,
-            recommendations = listOf(smartspaceAction),
+            recommendations = listOf(smartspaceAction, smartspaceAction, smartspaceAction),
             cardAction = smartspaceAction
         )
     }
@@ -294,9 +295,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
      */
     private fun initMediaViewHolderMocks() {
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
-        whenever(mediaCarouselController.mediaCarouselScrollHandler)
-            .thenReturn(mediaCarouselScrollHandler)
-        whenever(mediaCarouselScrollHandler.qsExpanded).thenReturn(false)
 
         // Set up mock views for the players
         appIcon = ImageView(context)
@@ -539,6 +537,13 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
+    fun bindAlbumView_testHardwareAfterAttach() {
+        player.attachPlayer(viewHolder)
+
+        verify(albumView).setLayerType(View.LAYER_TYPE_HARDWARE, null)
+    }
+
+    @Test
     fun bindAlbumView_setAfterExecutors() {
         val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
@@ -583,9 +588,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state1, PACKAGE)
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
-        verify(albumView, times(2)).setImageDrawable(any(Drawable::class.java))
+        val drawableCaptor = argumentCaptor<Drawable>()
+        verify(albumView, times(2)).setImageDrawable(drawableCaptor.capture())
+        assertTrue(drawableCaptor.allValues[1] is TransitionDrawable)
 
-        // Third binding does run transition or update background
+        // Third binding doesn't run transition or update background
         player.bindPlayer(state2, PACKAGE)
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
@@ -951,7 +958,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // Rebinding should not trigger animation
         player.bindPlayer(mediaData, PACKAGE)
-        verify(mockAnimator, times(1)).start()
+        verify(mockAnimator, times(2)).start()
     }
 
     @Test
@@ -973,7 +980,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // Bind trigges new animation
         player.bindPlayer(data1, PACKAGE)
-        verify(mockAnimator, times(2)).start()
+        verify(mockAnimator, times(3)).start()
         whenever(mockAnimator.isRunning()).thenReturn(true)
 
         // Rebind before animation end binds corrct data
@@ -1445,6 +1452,66 @@ public class MediaControlPanelTest : SysuiTestCase() {
         captor.value.onClick(recommendationViewHolder.recommendations)
 
         verify(logger).logRecommendationItemTap(eq(PACKAGE), eq(instanceId), eq(0))
+    }
+
+    @Test
+    fun bindRecommendation_listHasTooFewRecs_notDisplayed() {
+        player.attachRecommendation(recommendationViewHolder)
+        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", "title1")
+                    .setSubtitle("subtitle1")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "title2")
+                    .setSubtitle("subtitle2")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+            )
+        )
+
+        player.bindRecommendation(data)
+
+        assertThat(recTitle1.text).isEqualTo("")
+        verify(mediaViewController, never()).refreshState()
+    }
+
+    @Test
+    fun bindRecommendation_listHasTooFewRecsWithIcons_notDisplayed() {
+        player.attachRecommendation(recommendationViewHolder)
+        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", "title1")
+                    .setSubtitle("subtitle1")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "title2")
+                    .setSubtitle("subtitle2")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "empty icon 1")
+                    .setSubtitle("subtitle2")
+                    .setIcon(null)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "empty icon 2")
+                    .setSubtitle("subtitle2")
+                    .setIcon(null)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+            )
+        )
+
+        player.bindRecommendation(data)
+
+        assertThat(recTitle1.text).isEqualTo("")
+        verify(mediaViewController, never()).refreshState()
     }
 
     @Test

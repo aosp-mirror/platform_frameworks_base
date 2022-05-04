@@ -2230,7 +2230,9 @@
     <!-- Text informing the user that their media is now playing on a different device (deviceName). [CHAR LIMIT=50] -->
     <string name="media_transfer_playing_different_device">Playing on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
     <!-- Text informing the user that their media is now playing on this device. [CHAR LIMIT=50] -->
-    <string name="media_transfer_playing_this_device">Playing on this phone</string>
+    <string name="media_transfer_playing_this_device" product="default">Playing on this phone</string>
+    <!-- Text informing the user that their media is now playing on this tablet device. [CHAR LIMIT=50] -->
+    <string name="media_transfer_playing_this_device" product="tablet">Playing on this tablet</string>
     <!-- Text informing the user that the media transfer has failed because something went wrong. [CHAR LIMIT=50] -->
     <string name="media_transfer_failed">Something went wrong. Try again.</string>
 
@@ -2293,6 +2295,11 @@
     <string name="media_output_broadcast_starting">Starting&#8230;</string>
     <!-- The button text when Broadcast start failed [CHAR LIMIT=60] -->
     <string name="media_output_broadcast_start_failed">Can\u2019t broadcast</string>
+    <!-- The error message when Broadcast name/code update failed [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_update_error">Can\u2019t save. Try again.</string>
+    <!-- The error message when Broadcast name/code update failed and can't change again[CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_last_update_error">Can\u2019t save.</string>
+
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>

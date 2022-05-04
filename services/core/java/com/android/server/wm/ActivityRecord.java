@@ -933,9 +933,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // so we need to be conservative and assume it isn't.
             Slog.w(TAG, "Activity pause timeout for " + ActivityRecord.this);
             synchronized (mAtmService.mGlobalLock) {
-                if (hasProcess()) {
-                    mAtmService.logAppTooSlow(app, pauseTime, "pausing " + ActivityRecord.this);
+                if (!hasProcess()) {
+                    return;
                 }
+                mAtmService.logAppTooSlow(app, pauseTime, "pausing " + ActivityRecord.this);
                 activityPaused(true);
             }
         }
@@ -2447,6 +2448,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated, boolean activityAllDrawn,
             TaskSnapshot snapshot) {
+        // A special case that a new activity is launching to an existing task which is moving to
+        // front. If the launching activity is the one that started the task, it could be a
+        // trampoline that will be always created and finished immediately. Then give a chance to
+        // see if the snapshot is usable for the current running activity so the transition will
+        // look smoother, instead of showing a splash screen on the second launch.
+        if (!newTask && taskSwitch && processRunning && !activityCreated && task.intent != null
+                && mActivityComponent.equals(task.intent.getComponent())) {
+            final ActivityRecord topAttached = task.getActivity(ActivityRecord::attachedToProcess);
+            if (topAttached != null && topAttached.isSnapshotCompatible(snapshot)) {
+                return STARTING_WINDOW_TYPE_SNAPSHOT;
+            }
+        }
         final boolean isActivityHome = isActivityTypeHome();
         if ((newTask || !processRunning || (taskSwitch && !activityCreated))
                 && !isActivityHome) {
@@ -5083,7 +5096,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean recentsAnimating = isAnimating(PARENTS, ANIMATION_TYPE_RECENTS);
         if (okToAnimate(true /* ignoreFrozen */, canTurnScreenOn())
                 && (appTransition.isTransitionSet()
-                || (recentsAnimating && !isActivityTypeHome()))) {
+                || (recentsAnimating && !isActivityTypeHome()))
+                // If the visibility change during enter PIP, we don't want to include it in app
+                // transition to affect the animation theme, because the Pip organizer will animate
+                // the entering PIP instead.
+                && !mWaitForEnteringPinnedMode) {
             if (visible) {
                 displayContent.mOpeningApps.add(this);
                 mEnteringAnimation = true;

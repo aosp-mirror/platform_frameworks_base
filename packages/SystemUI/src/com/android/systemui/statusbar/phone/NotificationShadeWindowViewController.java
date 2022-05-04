@@ -252,7 +252,7 @@ public class NotificationShadeWindowViewController {
                 }
 
                 if (mStatusBarStateController.isDozing()) {
-                    mService.mDozeScrimController.extendPulse();
+                    mService.extendDozePulse();
                 }
                 mLockIconViewController.onTouchEvent(
                         ev,

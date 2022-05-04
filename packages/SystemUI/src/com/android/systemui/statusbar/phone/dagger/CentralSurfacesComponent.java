@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutListContainerModule;
 import com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks;
+import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
 import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
@@ -51,7 +52,7 @@ import dagger.Subcomponent;
 
 /**
  * Dagger subcomponent for classes (semi-)related to the status bar. The component is created once
- * inside {@link com.android.systemui.statusbar.phone.CentralSurfaces} and never re-created.
+ * inside {@link CentralSurfacesImpl} and never re-created.
  *
  * TODO(b/197137564): This should likely be re-factored a bit. It includes classes that aren't
  * directly related to status bar functionality, like multiple notification classes. And, the fact

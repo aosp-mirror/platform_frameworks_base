@@ -59,10 +59,13 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     private ImageView mBroadcastCodeEye;
     private Boolean mIsPasswordHide = true;
     private ImageView mBroadcastCodeEdit;
-    private Button mStopButton;
+    private AlertDialog mAlertDialog;
+    private TextView mBroadcastErrorMessage;
 
     static final int METADATA_BROADCAST_NAME = 0;
     static final int METADATA_BROADCAST_CODE = 1;
+
+    private static final int MAX_BROADCAST_INFO_UPDATE = 3;
 
     MediaOutputBroadcastDialog(Context context, boolean aboveStatusbar,
             BroadcastSender broadcastSender, MediaOutputController mediaOutputController) {
@@ -118,14 +121,18 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         return View.VISIBLE;
     }
 
-    // TODO(b/222674827): To get the information from BluetoothLeBroadcastMetadata(Broadcast code)
-    // and BluetoothLeAudioContentMetadata(Program info) when start Broadcast is successful.
-    private String getBroadcastMetaDataInfo(int metaData) {
-        switch (metaData) {
+    @Override
+    public void onStopButtonClick() {
+        mMediaOutputController.stopBluetoothLeBroadcast();
+        dismiss();
+    }
+
+    private String getBroadcastMetadataInfo(int metadata) {
+        switch (metadata) {
             case METADATA_BROADCAST_NAME:
-                return "";
+                return mMediaOutputController.getBroadcastName();
             case METADATA_BROADCAST_CODE:
-                return "";
+                return mMediaOutputController.getBroadcastCode();
             default:
                 return "";
         }
@@ -164,13 +171,8 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
             launchBroadcastUpdatedDialog(true, mBroadcastCode.getText().toString());
         });
 
-        mBroadcastName.setText(getBroadcastMetaDataInfo(METADATA_BROADCAST_NAME));
-        mBroadcastCode.setText(getBroadcastMetaDataInfo(METADATA_BROADCAST_CODE));
-
-        mStopButton = getDialogView().requireViewById(R.id.stop);
-        mStopButton.setOnClickListener(v -> {
-            stopBroadcast();
-        });
+        mBroadcastName.setText(getBroadcastMetadataInfo(METADATA_BROADCAST_NAME));
+        mBroadcastCode.setText(getBroadcastMetadataInfo(METADATA_BROADCAST_CODE));
     }
 
     private void inflateBroadcastInfoArea() {
@@ -179,16 +181,16 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     }
 
     private void setQrCodeView() {
-        //get the MetaData, and convert to BT QR code format.
-        String broadcastMetaData = getBroadcastMetaData();
-        if (broadcastMetaData.isEmpty()) {
+        //get the Metadata, and convert to BT QR code format.
+        String broadcastMetadata = getBroadcastMetadata();
+        if (broadcastMetadata.isEmpty()) {
             //TDOD(b/226708424) Error handling for unable to generate the QR code bitmap
             return;
         }
         try {
             final int qrcodeSize = getContext().getResources().getDimensionPixelSize(
                     R.dimen.media_output_qrcode_size);
-            final Bitmap bmp = QrCodeGenerator.encodeQrCode(broadcastMetaData, qrcodeSize);
+            final Bitmap bmp = QrCodeGenerator.encodeQrCode(broadcastMetadata, qrcodeSize);
             mBroadcastQrCodeView.setImageBitmap(bmp);
         } catch (WriterException e) {
             //TDOD(b/226708424) Error handling for unable to generate the QR code bitmap
@@ -203,50 +205,87 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         mIsPasswordHide = !mIsPasswordHide;
     }
 
-    private void launchBroadcastUpdatedDialog(boolean isPassword, String editString) {
+    private void launchBroadcastUpdatedDialog(boolean isBroadcastCode, String editString) {
         final View layout = LayoutInflater.from(mContext).inflate(
                 R.layout.media_output_broadcast_update_dialog, null);
         final EditText editText = layout.requireViewById(R.id.broadcast_edit_text);
         editText.setText(editString);
-        final AlertDialog alertDialog = new Builder(mContext)
-                .setTitle(isPassword ? R.string.media_output_broadcast_code
+        mBroadcastErrorMessage = layout.requireViewById(R.id.broadcast_error_message);
+        mAlertDialog = new Builder(mContext)
+                .setTitle(isBroadcastCode ? R.string.media_output_broadcast_code
                     : R.string.media_output_broadcast_name)
                 .setView(layout)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.media_output_broadcast_dialog_save,
                         (d, w) -> {
-                            updateBroadcast(isPassword, editText.getText().toString());
+                            updateBroadcastInfo(isBroadcastCode, editText.getText().toString());
                         })
                 .create();
 
-        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-        SystemUIDialog.setShowForAllUsers(alertDialog, true);
-        SystemUIDialog.registerDismissListener(alertDialog);
-        alertDialog.show();
+        mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+        SystemUIDialog.setShowForAllUsers(mAlertDialog, true);
+        SystemUIDialog.registerDismissListener(mAlertDialog);
+        mAlertDialog.show();
     }
 
-    /**
-     * TODO(b/222674827): The method should be get the BluetoothLeBroadcastMetadata after
-     * starting the Broadcast session successfully. Then we will follow the BT QR code format
-     * that convert BluetoothLeBroadcastMetadata object to String format.
-     */
-    private String getBroadcastMetaData() {
-        return "TEST";
+    private String getBroadcastMetadata() {
+        return mMediaOutputController.getBroadcastMetadata();
     }
 
-    /**
-     * TODO(b/222676140): These method are about the LE Audio Broadcast API. The framework APIS
-     * will be wrapped in SettingsLib. And the UI will be executed through it.
-     */
-    private void updateBroadcast(boolean isPassword, String updatedString) {
+    private void updateBroadcastInfo(boolean isBroadcastCode, String updatedString) {
+        Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positiveBtn != null) {
+            positiveBtn.setEnabled(false);
+        }
 
+        if (isBroadcastCode) {
+            handleBroadcastCodeUpdated(updatedString);
+        } else {
+            handleBroadcastNameUpdated(updatedString);
+        }
     }
 
-    /**
-     * TODO(b/222676140): These method are about the LE Audio Broadcast API. The framework APIS
-     * will be wrapped in SettingsLib. And the UI will be executed through it.
-     */
-    private void stopBroadcast() {
-        dismiss();
+    private void handleBroadcastNameUpdated(String name) {
+        // TODO(b/230473995) Add the retry mechanism and error handling when update fails
+        String currentName = mMediaOutputController.getBroadcastName();
+        int retryCount = MAX_BROADCAST_INFO_UPDATE;
+        mMediaOutputController.setBroadcastName(name);
+        if (!mMediaOutputController.updateBluetoothLeBroadcast()) {
+            mMediaOutputController.setBroadcastName(currentName);
+            handleLeUpdateBroadcastFailed(retryCount);
+        }
+    }
+
+    private void handleBroadcastCodeUpdated(String newPassword) {
+        // TODO(b/230473995) Add the retry mechanism and error handling when update fails
+        String currentPassword = mMediaOutputController.getBroadcastCode();
+        int retryCount = MAX_BROADCAST_INFO_UPDATE;
+        if (!mMediaOutputController.stopBluetoothLeBroadcast()) {
+            mMediaOutputController.setBroadcastCode(currentPassword);
+            handleLeUpdateBroadcastFailed(retryCount);
+            return;
+        }
+
+        mMediaOutputController.setBroadcastCode(newPassword);
+        if (!mMediaOutputController.startBluetoothLeBroadcast()) {
+            mMediaOutputController.setBroadcastCode(currentPassword);
+            handleLeUpdateBroadcastFailed(retryCount);
+            return;
+        }
+
+        mAlertDialog.dismiss();
+    }
+
+    private void handleLeUpdateBroadcastFailed(int retryCount) {
+        final Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        mBroadcastErrorMessage.setVisibility(View.VISIBLE);
+        if (retryCount < MAX_BROADCAST_INFO_UPDATE) {
+            if (positiveBtn != null) {
+                positiveBtn.setEnabled(true);
+            }
+            mBroadcastErrorMessage.setText(R.string.media_output_broadcast_update_error);
+        } else {
+            mBroadcastErrorMessage.setText(R.string.media_output_broadcast_last_update_error);
+        }
     }
 }

@@ -110,7 +110,7 @@ class MediaDataFilterTest : SysuiTestCase() {
 
         `when`(smartspaceData.targetId).thenReturn(SMARTSPACE_KEY)
         `when`(smartspaceData.isActive).thenReturn(true)
-        `when`(smartspaceData.isValid).thenReturn(true)
+        `when`(smartspaceData.isValid()).thenReturn(true)
         `when`(smartspaceData.packageName).thenReturn(SMARTSPACE_PACKAGE)
         `when`(smartspaceData.recommendations).thenReturn(listOf(smartspaceMediaRecommendationItem))
         `when`(smartspaceData.headphoneConnectionTimeMillis).thenReturn(
@@ -196,22 +196,108 @@ class MediaDataFilterTest : SysuiTestCase() {
     }
 
     @Test
-    fun testHasAnyMediaOrRecommendation() {
-        assertThat(mediaDataFilter.hasAnyMediaOrRecommendation()).isFalse()
+    fun hasAnyMedia_noMediaSet_returnsFalse() {
+        assertThat(mediaDataFilter.hasAnyMedia()).isFalse()
+    }
 
+    @Test
+    fun hasAnyMedia_mediaSet_returnsTrue() {
         mediaDataFilter.onMediaDataLoaded(KEY, oldKey = null, data = dataMain)
-        assertThat(mediaDataFilter.hasAnyMediaOrRecommendation()).isTrue()
+
         assertThat(mediaDataFilter.hasAnyMedia()).isTrue()
     }
 
     @Test
-    fun testHasActiveMediaOrRecommendation() {
-        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
-        val data = dataMain.copy(active = true)
+    fun hasAnyMedia_recommendationSet_returnsFalse() {
+        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
+        assertThat(mediaDataFilter.hasAnyMedia()).isFalse()
+    }
+
+    @Test
+    fun hasAnyMediaOrRecommendation_noMediaSet_returnsFalse() {
+        assertThat(mediaDataFilter.hasAnyMediaOrRecommendation()).isFalse()
+    }
+
+    @Test
+    fun hasAnyMediaOrRecommendation_mediaSet_returnsTrue() {
+        mediaDataFilter.onMediaDataLoaded(KEY, oldKey = null, data = dataMain)
+
+        assertThat(mediaDataFilter.hasAnyMediaOrRecommendation()).isTrue()
+    }
+
+    @Test
+    fun hasAnyMediaOrRecommendation_recommendationSet_returnsTrue() {
+        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+
+        assertThat(mediaDataFilter.hasAnyMediaOrRecommendation()).isTrue()
+    }
+
+    @Test
+    fun hasActiveMedia_noMediaSet_returnsFalse() {
+        assertThat(mediaDataFilter.hasActiveMedia()).isFalse()
+    }
+
+    @Test
+    fun hasActiveMedia_inactiveMediaSet_returnsFalse() {
+        val data = dataMain.copy(active = false)
         mediaDataFilter.onMediaDataLoaded(KEY, oldKey = null, data = data)
-        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isTrue()
+
+        assertThat(mediaDataFilter.hasActiveMedia()).isFalse()
+    }
+
+    @Test
+    fun hasActiveMedia_activeMediaSet_returnsTrue() {
+        val data = dataMain.copy(active = true)
+        mediaDataFilter.onMediaDataLoaded(KEY, oldKey = null, data = data)
+
         assertThat(mediaDataFilter.hasActiveMedia()).isTrue()
+    }
+
+    @Test
+    fun hasActiveMediaOrRecommendation_nothingSet_returnsFalse() {
+        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
+    }
+
+    @Test
+    fun hasActiveMediaOrRecommendation_inactiveMediaSet_returnsFalse() {
+        val data = dataMain.copy(active = false)
+        mediaDataFilter.onMediaDataLoaded(KEY, oldKey = null, data = data)
+
+        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
+    }
+
+    @Test
+    fun hasActiveMediaOrRecommendation_activeMediaSet_returnsTrue() {
+        val data = dataMain.copy(active = true)
+        mediaDataFilter.onMediaDataLoaded(KEY, oldKey = null, data = data)
+
+        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isTrue()
+    }
+
+    @Test
+    fun hasActiveMediaOrRecommendation_inactiveRecommendationSet_returnsFalse() {
+        `when`(smartspaceData.isActive).thenReturn(false)
+        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+
+        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
+    }
+
+    @Test
+    fun hasActiveMediaOrRecommendation_invalidRecommendationSet_returnsFalse() {
+        `when`(smartspaceData.isValid()).thenReturn(false)
+        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+
+        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
+    }
+
+    @Test
+    fun hasActiveMediaOrRecommendation_activeAndValidRecommendationSet_returnsTrue() {
+        `when`(smartspaceData.isActive).thenReturn(true)
+        `when`(smartspaceData.isValid()).thenReturn(true)
+        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+
+        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isTrue()
     }
 
     @Test
@@ -332,7 +418,7 @@ class MediaDataFilterTest : SysuiTestCase() {
 
     @Test
     fun testOnSmartspaceMediaDataLoaded_hasRecentMedia_activeInvalidRec_usesMedia() {
-        `when`(smartspaceData.isValid).thenReturn(false)
+        `when`(smartspaceData.isValid()).thenReturn(false)
 
         // WHEN we have media that was recently played, but not currently active
         val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())

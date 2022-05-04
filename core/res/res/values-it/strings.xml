@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Possono accedere al calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"Possono inviare e visualizzare SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"File e documenti"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"File e documenti"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"Consente di accedere a file e documenti sul tuo dispositivo"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musica e altro audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"Accesso ai file audio sul tuo dispositivo"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto e video"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"Accesso ai file immagine e video sul tuo dispositivo"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musica e audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accesso a musica e audio sul tuo dispositivo"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto e video"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accesso a foto e video sul tuo dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"Possono registrare audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Attività fisica"</string>
@@ -349,8 +349,8 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Consente all\'applicazione di espandere o comprimere la barra di stato."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Visualizzazione di notifiche sotto forma di attività in modalità a schermo intero su un dispositivo bloccato"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Consente all\'app di visualizzare le notifiche sotto forma di attività in modalità a schermo intero su un dispositivo bloccato"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"aggiunta di scorciatoie"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Consente a un\'applicazione di aggiungere scorciatoie alla schermata Home automaticamente."</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Aggiunta di scorciatoie"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"consentire a un\'applicazione di aggiungere scorciatoie alla schermata Home automaticamente"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"eliminazione di scorciatoie"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Consente all\'applicazione di rimuovere le scorciatoie della schermata Home automaticamente."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"reindirizzamento chiamate in uscita"</string>
@@ -1443,7 +1443,7 @@
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"Consente a un\'applicazione di indirizzare l\'uscita di media verso altri dispositivi esterni."</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"lettura delle sessioni di installazione"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"Consente a un\'applicazione di leggere le sessioni di installazione. L\'app può conoscere i dettagli sulle installazioni di pacchetti attive."</string>
-    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"richiesta di pacchetti di installazione"</string>
+    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"richiesta di installazione di pacchetti"</string>
     <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"Consente a un\'applicazione di richiedere l\'installazione di pacchetti."</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"richiesta di eliminazione dei pacchetti"</string>
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Consente a un\'applicazione di richiedere l\'eliminazione di pacchetti."</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"L\'impostazione Non disturbare è cambiata"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tocca per controllare le notifiche bloccate."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Controlla le impostazioni di notifica"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"A partire da Android 13, le app che installi devono avere la tua autorizzazione per poter inviare notifiche. Tocca per cambiare questa autorizzazione per le app esistenti."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ricordamelo dopo"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Ignora"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>

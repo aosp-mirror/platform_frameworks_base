@@ -127,11 +127,13 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mConfig.show4gForLte = true;
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
                 mTelephonyListenerManager, mMockWm,
-                mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
+                mMockSm, mConfig, Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class),
                 mock(DataUsageController.class), mMockSubDefaults,
                 mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
-                mock(CarrierConfigTracker.class), new Handler(TestableLooper.get(this).getLooper()),
+                mock(CarrierConfigTracker.class),
+                mWifiStatusTrackerFactory,
+                new Handler(TestableLooper.get(this).getLooper()),
                 mFeatureFlags, mock(DumpManager.class));
         setupNetworkController();
 

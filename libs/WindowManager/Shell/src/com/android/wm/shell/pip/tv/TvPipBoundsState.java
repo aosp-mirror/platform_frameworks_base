@@ -77,6 +77,9 @@ public class TvPipBoundsState extends PipBoundsState {
     public void setBoundsStateForEntry(ComponentName componentName, ActivityInfo activityInfo,
             PictureInPictureParams params, PipBoundsAlgorithm pipBoundsAlgorithm) {
         super.setBoundsStateForEntry(componentName, activityInfo, params, pipBoundsAlgorithm);
+        if (params == null) {
+            return;
+        }
         setDesiredTvExpandedAspectRatio(params.getExpandedAspectRatioFloat(), true);
     }
 
