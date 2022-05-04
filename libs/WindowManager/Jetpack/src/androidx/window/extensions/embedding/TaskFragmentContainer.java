@@ -145,6 +145,18 @@ class TaskFragmentContainer {
         return allActivities;
     }
 
+    /**
+     * Checks if the count of activities from the same process in task fragment info corresponds to
+     * the ones created and available on the client side.
+     */
+    boolean taskInfoActivityCountMatchesCreated() {
+        if (mInfo == null) {
+            return false;
+        }
+        return mPendingAppearedActivities.isEmpty()
+                && mInfo.getActivities().size() == collectActivities().size();
+    }
+
     ActivityStack toActivityStack() {
         return new ActivityStack(collectActivities(), isEmpty());
     }
