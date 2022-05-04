@@ -89,7 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Uygulama veya kuruluşunuz, ekran görüntüsü alınmasına izin vermiyor."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Düzenle"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Ekran görüntüsünü düzenle"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Daha fazla ekran görüntüsü al"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Alanı genişlet"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekran görüntüsünü kapat"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekran görüntüsü önizlemesi"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Üst sınır yüzde <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
@@ -604,14 +604,14 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"etkinleştir"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"devre dışı bırak"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Çıkış cihazını değiştir"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"Uygulama sabitlenmiştir"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Uygulama sabitlendi"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Geri\'ye ve Genel Bakış\'a dokunup basılı tutun."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Geri\'ye ve Ana sayfaya dokunup basılı tutun."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Bu, sabitleme kaldırılana kadar öğenin görünmesini sağlar. Sabitlemeyi kaldırmak için yukarı kaydırıp basılı tutun."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Genel bakış\'a dokunup basılı tutun."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Ana sayfaya dokunup basılı tutun."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Kişisel verilere erişilebilir (ör. kişiler ve e-posta içerikleri)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Sabitlenmiş uygulama diğer uygulamaları açabilir."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Sabitlenen uygulama diğer uygulamaları açabilir."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Bu uygulamanın sabitlemesini kaldırmak için Geri ve Genel Bakış düğmelerine dokunup basılı tutun"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Bu uygulamanın sabitlemesini kaldırmak için Geri ve Ana sayfa düğmelerine dokunup basılı tutun"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Bu uygulamanın sabitlemesini kaldırmak için yukarı kaydırıp tutun"</string>
@@ -1116,7 +1116,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"Derleme numarası panoya kopyalandı."</string>
     <string name="basic_status" msgid="2315371112182658176">"Görüşmeyi aç"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Görüşme widget\'ları"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"Ana ekranınıza eklemek için bir ileti dizisine dokunun"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Ana ekranınıza eklemek için bir görüşmeye dokunun"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Son görüşmeleriniz burada gösterilir"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Öncelikli görüşmeler"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Son görüşmeler"</string>

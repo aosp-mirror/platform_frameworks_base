@@ -89,7 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ilova yoki tashkilotingiz skrinshot olishni taqiqlagan"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Tahrirlash"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Skrinshotni tahrirlash"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Yana suratga olish"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Skrinshot sohasini kengaytirish"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Skrinshotni yopish"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Skrinshotga razm solish"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Yuqori chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
@@ -478,7 +478,7 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Foydalanuvchini o‘zgartirish. Joriy foydalanuvchi – <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Joriy foydalanuvchi <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Profilni ko‘rsatish"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Foydalanuvchi"</string>
+    <string name="user_add_user" msgid="4336657383006913022">"Foydalanuvchi kiritish"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Yangi foydalanuvchi"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Mehmon olib tashlansinmi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
@@ -717,7 +717,7 @@
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Bu bildirishnomalar sizni ogohlantiradi"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"Odatda bunday bildirishnomalarni yopasiz. \nUlar ochiq tursinmi?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Tayyor"</string>
-    <string name="inline_ok_button" msgid="603075490581280343">"Joriy qilish"</string>
+    <string name="inline_ok_button" msgid="603075490581280343">"Tatbiq etish"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"Mazkur bildirishnomalar chiqaversinmi?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"Chiqmasin"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"Ovozsiz"</string>
@@ -1111,7 +1111,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> ta qurilma tanlandi"</string>
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (uzilgan)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Ulanmadi. Qayta urining."</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Yangi qurilmani ulash"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Yangi qurilmani juftlash"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nashr raqami"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nashr raqami vaqtinchalik xotiraga nusxalandi."</string>
     <string name="basic_status" msgid="2315371112182658176">"Suhbatni ochish"</string>

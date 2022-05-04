@@ -48,10 +48,10 @@
     <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"Fizička tastatura"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Dozvoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup uređaju: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Dozvoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nOvoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
-    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Dozvoliti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup dodatku: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje uređajem: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Dozvoliti da <xliff:g id="APPLICATION">%1$s</xliff:g> pristupa uređaju <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> da upravlja uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Želite li upravljati uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g> putem aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g>?\nOvoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> za upravljanje uređajem: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> da upravlja uređajem <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Nema instaliranih aplikacija za ovaj USB uređaj. Saznajte više o uređaju na <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB periferni uređaj"</string>
     <string name="label_view" msgid="6815442985276363364">"Prikaži"</string>
@@ -89,7 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ova aplikacija ili vaša organizacija ne dozvoljavaju snimanje ekrana"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Uredite"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Uredite snimak ekrana"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Snimite više"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Snimi više"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Odbacite snimak ekrana"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pregled snimka ekrana"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Gornja granica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
@@ -738,8 +738,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatski"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Bez zvuka ili vibracije"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Bez zvuka ili vibracije i pojavljuje se pri dnu odjeljka razgovora"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Može zvoniti ili vibrirati na osnovu postavki vašeg telefona"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Može zvoniti ili vibrirati na osnovu postavki vašeg telefona. Razgovori iz oblačića u aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> kao zadana opcija."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Može zvoniti ili vibrirati na osnovu postavki telefona"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Može zvoniti ili vibrirati na osnovu postavki telefona. Razgovori iz oblačića u aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> kao zadana opcija."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Privlači vašu pažnju pomoću plutajuće prečice do ovog sadržaja."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Neka sistem odluči treba li se ovo obavještenje oglasiti zvukom ili vibracijom"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; je unaprijeđen u Zadano"</string>
@@ -1121,7 +1121,7 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Broj verzije"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Broj verzije je kopiran u međumemoriju."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvoreni razgovor"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"Vidžeti za razgovor"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Vidžeti razgovora"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Dodirnite razgovor da ga dodate na početni ekran"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Vaši nedavni razgovori će se pojaviti ovdje"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritetni razgovori"</string>
