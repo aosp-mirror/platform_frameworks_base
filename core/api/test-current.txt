@@ -919,7 +919,7 @@ package android.content.pm {
     field public int id;
     field public String lastLoggedInFingerprint;
     field public long lastLoggedInTime;
-    field public String name;
+    field @Nullable public String name;
     field public boolean partial;
     field public boolean preCreated;
     field public int profileBadge;
