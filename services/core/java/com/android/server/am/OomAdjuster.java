@@ -2556,20 +2556,21 @@ public class OomAdjuster {
             // reminder: here, setAdj is previous state, curAdj is upcoming state
             if (state.getCurAdj() != state.getSetAdj()) {
                 mCachedAppOptimizer.onOomAdjustChanged(state.getSetAdj(), state.getCurAdj(), app);
-            } else if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE
-                    && state.getSetAdj() < ProcessList.FOREGROUND_APP_ADJ
-                    && !state.isRunningRemoteAnimation()
-                    // Because these can fire independent of oom_adj/procstate changes, we need
-                    // to throttle the actual dispatch of these requests in addition to the
-                    // processing of the requests. As a result, there is throttling both here
-                    // and in CachedAppOptimizer.
-                    && mCachedAppOptimizer.shouldCompactPersistent(app, now)) {
-                mCachedAppOptimizer.compactAppPersistent(app);
-            } else if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE
-                    && state.getCurProcState()
-                        == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-                    && mCachedAppOptimizer.shouldCompactBFGS(app, now)) {
-                mCachedAppOptimizer.compactAppBfgs(app);
+            } else if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE) {
+                // See if we can compact persistent and bfgs services now that screen is off
+                if (state.getSetAdj() < ProcessList.FOREGROUND_APP_ADJ
+                        && !state.isRunningRemoteAnimation()
+                        // Because these can fire independent of oom_adj/procstate changes, we need
+                        // to throttle the actual dispatch of these requests in addition to the
+                        // processing of the requests. As a result, there is throttling both here
+                        // and in CachedAppOptimizer.
+                        && mCachedAppOptimizer.shouldCompactPersistent(app, now)) {
+                    mCachedAppOptimizer.compactAppPersistent(app);
+                } else if (state.getCurProcState()
+                                == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
+                        && mCachedAppOptimizer.shouldCompactBFGS(app, now)) {
+                    mCachedAppOptimizer.compactAppBfgs(app);
+                }
             }
         }
 
