@@ -5096,7 +5096,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean recentsAnimating = isAnimating(PARENTS, ANIMATION_TYPE_RECENTS);
         if (okToAnimate(true /* ignoreFrozen */, canTurnScreenOn())
                 && (appTransition.isTransitionSet()
-                || (recentsAnimating && !isActivityTypeHome()))) {
+                || (recentsAnimating && !isActivityTypeHome()))
+                // If the visibility change during enter PIP, we don't want to include it in app
+                // transition to affect the animation theme, because the Pip organizer will animate
+                // the entering PIP instead.
+                && !mWaitForEnteringPinnedMode) {
             if (visible) {
                 displayContent.mOpeningApps.add(this);
                 mEnteringAnimation = true;
