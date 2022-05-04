@@ -413,6 +413,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
                         /* max enrollments per user */ 5,
                         /* component info */ new ArrayList<>(),
                         /* sensorType */ 3,
+                        /* halControlsIllumination */ true,
                         /* resetLockoutRequiresHwToken */ false,
                         List.of(new SensorLocationInternal("" /* displayId */,
                                 (int) udfpsLocation.x, (int) udfpsLocation.y, radius)));
