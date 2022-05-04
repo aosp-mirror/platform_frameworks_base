@@ -33,6 +33,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.PerUser;
 import com.android.internal.util.CollectionUtils;
 
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -234,6 +235,28 @@ class CompanionApplicationController {
         primaryServiceConnector.postOnDeviceDisappeared(association);
     }
 
+    void dump(@NonNull PrintWriter out) {
+        out.append("Companion Device Application Controller: \n");
+
+        synchronized (mBoundCompanionApplications) {
+            out.append("  Bound Companion Applications: ");
+            if (mBoundCompanionApplications.size() == 0) {
+                out.append("<empty>\n");
+            } else {
+                out.append("\n");
+                mBoundCompanionApplications.dump(out);
+            }
+        }
+
+        out.append("  Companion Applications Scheduled For Rebinding: ");
+        if (mScheduledForRebindingCompanionApplications.size() == 0) {
+            out.append("<empty>\n");
+        } else {
+            out.append("\n");
+            mScheduledForRebindingCompanionApplications.dump(out);
+        }
+    }
+
     private void onPrimaryServiceBindingDied(@UserIdInt int userId, @NonNull String packageName) {
         if (DEBUG) Log.i(TAG, "onPrimaryServiceBindingDied() u" + userId + "/" + packageName);
 
@@ -330,6 +353,24 @@ class CompanionApplicationController {
                     final String packageName = packageValue.getKey();
                     final T value = packageValue.getValue();
                     Log.d(TAG, "u" + userId + "\\" + packageName + " -> " + value);
+                }
+            }
+        }
+
+        private void dump(@NonNull PrintWriter out) {
+            for (int i = 0; i < size(); i++) {
+                final int userId = keyAt(i);
+                final Map<String, T> forUser = get(userId);
+                if (forUser.isEmpty()) {
+                    out.append("    u").append(String.valueOf(userId)).append(": <empty>\n");
+                }
+
+                for (Map.Entry<String, T> packageValue : forUser.entrySet()) {
+                    final String packageName = packageValue.getKey();
+                    final T value = packageValue.getValue();
+                    out.append("    u").append(String.valueOf(userId)).append("\\")
+                            .append(packageName).append(" -> ")
+                            .append(value.toString()).append('\n');
                 }
             }
         }
