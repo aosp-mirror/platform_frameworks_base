@@ -416,8 +416,22 @@ final class InputMonitor {
 
         final IBinder focusToken = focus != null ? focus.mInputChannelToken : null;
         if (focusToken == null) {
+            if (recentsAnimationInputConsumer != null
+                    && recentsAnimationInputConsumer.mWindowHandle != null
+                    && mInputFocus == recentsAnimationInputConsumer.mWindowHandle.token) {
+                // Avoid removing input focus from recentsAnimationInputConsumer.
+                // When the recents animation input consumer has the input focus,
+                // mInputFocus does not match to mDisplayContent.mCurrentFocus. Making it to be
+                // a special case, that do not remove the input focus from it when
+                // mDisplayContent.mCurrentFocus is null. This special case should be removed
+                // once recentAnimationInputConsumer is removed.
+                return;
+            }
             // When an app is focused, but its window is not showing yet, remove the input focus
-            // from the current window.
+            // from the current window. This enforces the input focus to match
+            // mDisplayContent.mCurrentFocus. However, if more special cases are discovered that
+            // the input focus and mDisplayContent.mCurrentFocus are expected to mismatch,
+            // the whole logic of how and when to revoke focus needs to be checked.
             if (mDisplayContent.mFocusedApp != null && mInputFocus != null) {
                 ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "App %s is focused,"
                         + " but the window is not ready. Start a transaction to remove focus from"
