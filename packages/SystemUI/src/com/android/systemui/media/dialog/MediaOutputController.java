@@ -55,8 +55,6 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.graphics.drawable.IconCompat;
-import androidx.mediarouter.media.MediaRouter;
-import androidx.mediarouter.media.MediaRouterParams;
 
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
@@ -197,9 +195,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     boolean shouldShowLaunchSection() {
-        MediaRouterParams routerParams = MediaRouter.getInstance(mContext).getRouterParams();
-        Log.d(TAG, "try to get routerParams: " + routerParams);
-        return routerParams != null && !routerParams.isMediaTransferReceiverEnabled();
+        // TODO(b/231398073): Implements this when available.
+        return false;
     }
 
     void stop() {
