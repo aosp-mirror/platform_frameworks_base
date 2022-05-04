@@ -28,6 +28,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dreams.smartspace.DreamSmartspaceController
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
+import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.smartspace.dagger.SmartspaceViewComponent
 import com.android.systemui.util.concurrency.Execution
@@ -39,6 +40,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Spy
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
@@ -74,14 +76,16 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var precondition: SmartspacePrecondition
 
-    @Mock
-    private lateinit var smartspaceView: BcSmartspaceDataPlugin.SmartspaceView
+    @Spy
+    private var smartspaceView: SmartspaceView = TestView(context)
 
     @Mock
     private lateinit var listener: BcSmartspaceDataPlugin.SmartspaceTargetListener
 
     @Mock
     private lateinit var session: SmartspaceSession
+
+    private lateinit var controller: DreamSmartspaceController
 
     @Before
     fun setup() {
@@ -90,6 +94,9 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
                 .thenReturn(viewComponent)
         `when`(viewComponent.getView()).thenReturn(smartspaceView)
         `when`(smartspaceManager.createSmartspaceSession(any())).thenReturn(session)
+
+        controller = DreamSmartspaceController(context, smartspaceManager, execution, uiExecutor,
+                viewComponentFactory, precondition, Optional.of(targetFilter), Optional.of(plugin))
     }
 
     /**
@@ -97,10 +104,6 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
      */
     @Test
     fun testConnectOnListen() {
-        val controller = DreamSmartspaceController(context,
-        smartspaceManager, execution, uiExecutor, viewComponentFactory, precondition,
-                Optional.of(targetFilter), Optional.of(plugin))
-
         `when`(precondition.conditionsMet()).thenReturn(true)
         controller.addListener(listener)
 
@@ -130,8 +133,7 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
      * A class which implements SmartspaceView and extends View. This is mocked to provide the right
      * object inheritance and interface implementation used in DreamSmartspaceController
      */
-    private class TestView(context: Context?) : View(context),
-            BcSmartspaceDataPlugin.SmartspaceView {
+    private class TestView(context: Context?) : View(context), SmartspaceView {
         override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {}
 
         override fun setPrimaryTextColor(color: Int) {}
@@ -158,11 +160,6 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
      */
     @Test
     fun testConnectOnViewCreate() {
-        val controller = DreamSmartspaceController(context,
-                smartspaceManager, execution, uiExecutor, viewComponentFactory, precondition,
-                Optional.of(targetFilter),
-                Optional.of(plugin))
-
         `when`(precondition.conditionsMet()).thenReturn(true)
         controller.buildAndConnectView(Mockito.mock(ViewGroup::class.java))
 
@@ -180,5 +177,17 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
         stateChangeListener.onViewDetachedFromWindow(mockView)
 
         verify(session).close()
+    }
+
+    /**
+     * Ensures setIsDreaming(true) is called when the view is built.
+     */
+    @Test
+    fun testSetIsDreamingTrueOnViewCreate() {
+        `when`(precondition.conditionsMet()).thenReturn(true)
+
+        controller.buildAndConnectView(Mockito.mock(ViewGroup::class.java))
+
+        verify(smartspaceView).setIsDreaming(true)
     }
 }
