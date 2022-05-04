@@ -1007,6 +1007,23 @@ public class CentralSurfacesImpl extends CoreStartable implements
             public void onUnlockedChanged() {
                 logStateToEventlog();
             }
+
+            @Override
+            public void onKeyguardGoingAwayChanged() {
+                // The light reveal scrim should always be fully revealed by the time the keyguard
+                // is done going away. Double check that this is true.
+                if (!mKeyguardStateController.isKeyguardGoingAway()) {
+                    if (mLightRevealScrim.getRevealAmount() != 1f) {
+                        Log.e(TAG, "Keyguard is done going away, but someone left the light reveal "
+                                + "scrim at reveal amount: " + mLightRevealScrim.getRevealAmount());
+                    }
+
+                    // If the auth ripple is still playing, let it finish.
+                    if (!mAuthRippleController.isAnimatingLightRevealScrim()) {
+                        mLightRevealScrim.setRevealAmount(1f);
+                    }
+                }
+            }
         });
         startKeyguard();
 
