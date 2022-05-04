@@ -22,6 +22,8 @@ package com.android.systemui.biometrics
 interface AlternateUdfpsTouchProvider {
 
     /**
+     * onPointerDown:
+     *
      * This operation is used to notify the Fingerprint HAL that
      * a fingerprint has been detected on the device's screen.
      *
@@ -39,4 +41,14 @@ interface AlternateUdfpsTouchProvider {
      * See fingerprint/ISession#onPointerUp for more details.
      */
     fun onPointerUp(pointerId: Long)
+
+    /**
+     * onUiReady:
+     *
+     * This operation is used by the callee to notify the Fingerprint HAL that SystemUI is
+     * correctly configured for the fingerprint capture.
+     *
+     * See fingerprint/ISession#onUiReady for more details.
+     */
+    fun onUiReady()
 }
