@@ -323,7 +323,7 @@ public class BubbleController {
 
     public void initialize() {
         mBubbleData.setListener(mBubbleDataListener);
-        mBubbleData.setSuppressionChangedListener(this::onBubbleNotificationSuppressionChanged);
+        mBubbleData.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
 
         mBubbleData.setPendingIntentCancelledListener(bubble -> {
             if (bubble.getBubbleIntent() == null) {
@@ -554,11 +554,10 @@ public class BubbleController {
     }
 
     @VisibleForTesting
-    public void onBubbleNotificationSuppressionChanged(Bubble bubble) {
+    public void onBubbleMetadataFlagChanged(Bubble bubble) {
         // Make sure NoMan knows suppression state so that anyone querying it can tell.
         try {
-            mBarService.onBubbleNotificationSuppressionChanged(bubble.getKey(),
-                    !bubble.showInShade(), bubble.isSuppressed());
+            mBarService.onBubbleMetadataFlagChanged(bubble.getKey(), bubble.getFlags());
         } catch (RemoteException e) {
             // Bad things have happened
         }
@@ -1038,7 +1037,15 @@ public class BubbleController {
             }
         } else {
             Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
-            inflateAndAdd(bubble, suppressFlyout, showInShade);
+            if (notif.shouldSuppressNotificationList()) {
+                // If we're suppressing notifs for DND, we don't want the bubbles to randomly
+                // expand when DND turns off so flip the flag.
+                if (bubble.shouldAutoExpand()) {
+                    bubble.setShouldAutoExpand(false);
+                }
+            } else {
+                inflateAndAdd(bubble, suppressFlyout, showInShade);
+            }
         }
     }
 
@@ -1070,7 +1077,8 @@ public class BubbleController {
         }
     }
 
-    private void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
+    @VisibleForTesting
+    public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
         // shouldBubbleUp checks canBubble & for bubble metadata
         boolean shouldBubble = shouldBubbleUp && canLaunchInTaskView(mContext, entry);
         if (!shouldBubble && mBubbleData.hasAnyBubbleWithKey(entry.getKey())) {
@@ -1096,7 +1104,8 @@ public class BubbleController {
         }
     }
 
-    private void onRankingUpdated(RankingMap rankingMap,
+    @VisibleForTesting
+    public void onRankingUpdated(RankingMap rankingMap,
             HashMap<String, Pair<BubbleEntry, Boolean>> entryDataByKey) {
         if (mTmpRanking == null) {
             mTmpRanking = new NotificationListenerService.Ranking();
@@ -1107,19 +1116,22 @@ public class BubbleController {
             Pair<BubbleEntry, Boolean> entryData = entryDataByKey.get(key);
             BubbleEntry entry = entryData.first;
             boolean shouldBubbleUp = entryData.second;
-
             if (entry != null && !isCurrentProfile(
                     entry.getStatusBarNotification().getUser().getIdentifier())) {
                 return;
             }
-
+            if (entry != null && (entry.shouldSuppressNotificationList()
+                    || entry.getRanking().isSuspended())) {
+                shouldBubbleUp = false;
+            }
             rankingMap.getRanking(key, mTmpRanking);
-            boolean isActiveBubble = mBubbleData.hasAnyBubbleWithKey(key);
-            if (isActiveBubble && !mTmpRanking.canBubble()) {
+            boolean isActiveOrInOverflow = mBubbleData.hasAnyBubbleWithKey(key);
+            boolean isActive = mBubbleData.hasBubbleInStackWithKey(key);
+            if (isActiveOrInOverflow && !mTmpRanking.canBubble()) {
                 // If this entry is no longer allowed to bubble, dismiss with the BLOCKED reason.
                 // This means that the app or channel's ability to bubble has been revoked.
                 mBubbleData.dismissBubbleWithKey(key, DISMISS_BLOCKED);
-            } else if (isActiveBubble && (!shouldBubbleUp || entry.getRanking().isSuspended())) {
+            } else if (isActiveOrInOverflow && !shouldBubbleUp) {
                 // If this entry is allowed to bubble, but cannot currently bubble up or is
                 // suspended, dismiss it. This happens when DND is enabled and configured to hide
                 // bubbles, or focus mode is enabled and the app is designated as distracting.
@@ -1127,9 +1139,9 @@ public class BubbleController {
                 // notification, so that the bubble will be re-created if shouldBubbleUp returns
                 // true.
                 mBubbleData.dismissBubbleWithKey(key, DISMISS_NO_BUBBLE_UP);
-            } else if (entry != null && mTmpRanking.isBubble() && !isActiveBubble) {
+            } else if (entry != null && mTmpRanking.isBubble() && !isActive) {
                 entry.setFlagBubble(true);
-                onEntryUpdated(entry, shouldBubbleUp && !entry.getRanking().isSuspended());
+                onEntryUpdated(entry, shouldBubbleUp);
             }
         }
     }
