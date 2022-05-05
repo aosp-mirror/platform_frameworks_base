@@ -189,5 +189,14 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
                             .setHotwordDetectedResult(hotwordDetectedResult)
                             .build()));
         }
+
+        /** Called when the detection fails due to an error. */
+        @Override
+        public void onError() {
+            Slog.v(TAG, "BinderCallback#onError");
+            mHandler.sendMessage(obtainMessage(
+                    HotwordDetector.Callback::onError,
+                    mCallback));
+        }
     }
 }
