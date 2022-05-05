@@ -597,9 +597,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         verify(mKeyguardUpdateMonitor).onUdfpsPointerDown(eq((int) TEST_REQUEST_ID));
         // AND onIlluminatedRunnable notifies FingerprintManager about onUiReady
         mOnIlluminatedRunnableCaptor.getValue().run();
-        InOrder inOrder = inOrder(mFingerprintManager, mLatencyTracker);
-        inOrder.verify(mFingerprintManager).onUiReady(
-                eq(TEST_REQUEST_ID), eq(mUdfpsController.mSensorId));
+        InOrder inOrder = inOrder(mAlternateTouchProvider, mLatencyTracker);
+        inOrder.verify(mAlternateTouchProvider).onUiReady();
         inOrder.verify(mLatencyTracker).onActionEnd(eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
     }
 

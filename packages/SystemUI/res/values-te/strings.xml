@@ -36,7 +36,7 @@
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ను అనుమతించాలా?\nఈ యాప్‌నకు రికార్డ్ చేసే అనుమతి మంజూరు చేయబడలేదు, కానీ ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>‌ను యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను అనుమతించాలా?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>‌ను హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను తెరవాలా?"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"ఈ యాప్‌నకు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు. ఈ పరికరంలో <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను ఉపయోగించడం వలన కాల్స్, నోటిఫికేషన్‌లు, అలారంలను వినబడనీయకుండా నివారించవచ్చు."</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"ఈ యాప్‌నకు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు. ఈ పరికరంలో <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను ఉపయోగించడం వలన కాల్స్, నోటిఫికేషన్‌లు, అలారాలను వినబడనీయకుండా నివారించవచ్చు."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"ఈ పరికరంలో <xliff:g id="APPLICATION">%1$s</xliff:g>‌ను ఉపయోగించడం వలన కాల్స్, నోటిఫికేషన్‌లు, అలారంలను వినబడనీయకుండా నివారించవచ్చు."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ని యాక్సెస్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని అనుమతించాలా?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"స్క్రీన్‌షాట్ తీయడానికి మళ్లీ ప్రయత్నించండి"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"స్క్రీన్‌షాట్‌ను సేవ్ చేయడం సాధ్యపడలేదు"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"స్క్రీన్‌షాట్‌లు తీయడానికి యాప్ లేదా మీ సంస్థ అనుమతించలేదు"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ఎడిట్ చేయండి"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"స్క్రీన్‌షాట్‌ను ఎడిట్ చేయండి"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"స్క్రీన్‌షాట్‌ను షేర్ చేయండి"</string>
@@ -346,8 +348,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించు"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"గెస్ట్ మోడ్"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"మీరు గెస్ట్ మోడ్‌లో ఉన్నారు"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"కొత్త యూజర్‌ను జోడించాలా?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"ఒక కొత్త యూజర్‌ను మీరు జోడించినప్పుడు, ఆ వ్యక్తి తన స్పేస్‌ను సెటప్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగతా అందరు యూజర్‌ల కోసం యాప్‌లను అప్‌డేట్ చేయగలరు."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"కొత్త యూజర్‌ను జోడించడం వలన గెస్ట్ మోడ్ నుండి నిష్క్రమించబడుతుంది, ప్రస్తుత గెస్ట్ సెషన్ నుండి అన్ని యాప్‌లు, డేటా తొలగించండి."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"వినియోగదారు పరిమితిని చేరుకున్నారు"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -376,20 +376,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ఈ పరికరం మీ సంస్థకు చెందినది, కాబట్టి అది నెట్‌వర్క్ ట్రాఫిక్‌ను పర్యవేక్షించవచ్చు"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"మీ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది, కాబట్టి అది నెట్‌వర్క్ ట్రాఫిక్‌ను పర్యవేక్షించవచ్చు"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ద్వారా అందించబడింది"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ఈ పరికరం మీ సంస్థకు చెందినది, ఇది <xliff:g id="VPN_APP">%1$s</xliff:g>కు కనెక్ట్ అయి ఉంది"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది, ఇది <xliff:g id="VPN_APP">%2$s</xliff:g>కు కనెక్ట్ అయి ఉంది"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"ఈ పరికరం మీ సంస్థకు చెందినది, <xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడింది"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>‌కు చెందినది, <xliff:g id="VPN_APP">%2$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడింది"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"ఈ పరికరం మీ సంస్థకు చెందినది, ఇది VPNలకు కనెక్ట్ అయి ఉంది"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది, ఇది VPNలకు కనెక్ట్ అయి ఉంది"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"ఈ పరికరం మీ సంస్థకు చెందినది, VPNల ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడింది"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>‌కు చెందినది, VPNల ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడింది"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"మీ కార్యాలయ ప్రొఫైల్‌లోని నెట్‌వర్క్ ట్రాఫిక్‌ని మీ సంస్థ పర్యవేక్షించవచ్చు"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"మీ కార్యాలయ ప్రొఫైల్‌లోని నెట్‌వర్క్ ట్రాఫిక్‌ని <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> పర్యవేక్షించవచ్చు"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"వర్క్ ప్రొఫైల్ నెట్‌వర్క్ యాక్టివిటీ మీ IT అడ్మిన్‌కు కనిపిస్తుంది"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"నెట్‌వర్క్ పర్యవేక్షించబడవచ్చు"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ఈ పరికరం VPNలకు కనెక్ట్ అయి ఉంది"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"మీ వర్క్ ప్రొఫైల్ <xliff:g id="VPN_APP">%1$s</xliff:g>కు కనెక్ట్ చేయబడింది"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"<xliff:g id="VPN_APP">%1$s</xliff:g>కు మీ వ్యక్తిగత ప్రొఫైల్ కనెక్ట్ చేయబడింది"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ఈ పరికరం <xliff:g id="VPN_APP">%1$s</xliff:g>కు కనెక్ట్ అయి ఉంది"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"ఈ పరికరం VPNల ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడింది"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"మీ వర్క్ యాప్‌లు <xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడ్డాయి"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"మీ వ్యక్తిగత యాప్‌లు <xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడ్డాయి"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"ఈ పరికరం <xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడింది"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ద్వారా అందించబడింది"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"పరికర నిర్వహణ"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -405,10 +405,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ఈ పరికరంలో ప్రమాణపత్ర అధికారం ఇన్‌స్టాల్ చేయబడింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"మీ నిర్వాహకులు మీ పరికరంలోని ట్రాఫిక్‌ని పర్యవేక్షించగల నెట్‌వర్క్ లాగింగ్‌ని ఆన్ చేశారు."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"మీ అడ్మిన్ నెట్‌వర్క్ లాగింగ్‌ను ఆన్ చేశారు, ఇది మీ వర్క్ ప్రొఫైల్‌లోని ట్రాఫిక్‌ను పర్యవేక్షిస్తుంది కానీ మీ వ్యక్తిగత ప్రొఫైల్‌లో కాదు."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"మీరు <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఈమెయిళ్లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"మీరు ఈమెయిళ్లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="VPN_APP_0">%1$s</xliff:g> మరియు <xliff:g id="VPN_APP_1">%2$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"మీ కార్యాలయ ప్రొఫైల్ ఈమెయిళ్లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"మీ వ్యక్తిగత ప్రొఫైల్ ఈమెయిళ్లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"ఈ పరికరం <xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడింది. ఈమెయిళ్లు, బ్రౌజింగ్ డేటాతో సహా మీ నెట్‌వర్క్ యాక్టివిటీ మీ IT అడ్మిన్‌కు కనిపిస్తుంది."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"ఈ పరికరం <xliff:g id="VPN_APP_0">%1$s</xliff:g>, <xliff:g id="VPN_APP_1">%2$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడింది. ఈమెయిళ్లు, బ్రౌజింగ్ డేటాతో సహా మీ నెట్‌వర్క్ యాక్టివిటీ మీ IT అడ్మిన్‌కు కనిపిస్తుంది."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"మీ వర్క్ యాప్‌లు <xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడ్డాయి. ఈమెయిళ్లు, బ్రౌజింగ్ డేటాతో సహా వర్క్ యాప్‌లలో మీ నెట్‌వర్క్ యాక్టివిటీ మీ IT అడ్మిన్‌కు, VPN ప్రొవైడర్‌కు కనిపిస్తుంది."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"మీ వ్యక్తిగత యాప్‌లు <xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడ్డాయి. ఈమెయిళ్లు, బ్రౌజింగ్ డేటాతో సహా మీ నెట్‌వర్క్ యాక్టివిటీ మీ VPN ప్రొవైడర్‌కు కనిపిస్తుంది."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN సెట్టింగ్‌లను తెరవండి"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ఈ పరికరాన్ని మీ తల్లి/తండ్రి మేనేజ్ చేస్తున్నారు. మీ తల్లి/తండ్రి, మీరు ఉపయోగించే యాప్‌లు, మీ లొకేషన్, అలాగే మీ పరికర వినియోగ వ్యవధి వంటి సమాచారాన్ని చూడగలరు, మేనేజ్ చేయగలరు."</string>
@@ -627,7 +627,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"కుడివైపు ఉన్న కీకోడ్"</string>
     <string name="left_icon" msgid="5036278531966897006">"ఎడమ వైపు చిహ్నం"</string>
     <string name="right_icon" msgid="1103955040645237425">"కుడివైపు ఉన్న చిహ్నం"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"టైల్‌లను జోడించడం కోసం పట్టుకుని, లాగండి"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"టైల్స్‌ను జోడించడానికి పట్టుకుని, లాగండి"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"టైల్‌ల క్రమం మార్చడానికి వాటిని పట్టుకుని, లాగండి"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"తీసివేయడానికి ఇక్కడికి లాగండి"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"మీ వద్ద కనీసం <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> టైల్‌లు ఉండాలి"</string>
@@ -729,6 +729,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"బ్యాటరీ ఛార్జింగ్ పూర్తిగా అయిపోతున్న తరుణంలో ఆన్ చేస్తుంది"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"వద్దు, ధన్యవాదాలు"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"డంప్ SysUI హీప్"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"అప్లికేషన్‌లు మీ <xliff:g id="TYPES_LIST">%s</xliff:g>ని ఉపయోగిస్తున్నాయి."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" మరియు "</string>
@@ -854,6 +856,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"ప్రసారం పేరు"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"పాస్‌‌వర్డ్"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"సేవ్ చేయండి"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"ప్రారంభించబడుతోంది…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ప్రసారం చేయడం సాధ్యపడలేదు"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"బిల్డ్ నంబర్"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"బిల్డ్ నంబర్, క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది."</string>
     <string name="basic_status" msgid="2315371112182658176">"సంభాషణను తెరవండి"</string>
@@ -885,7 +889,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"కంటెంట్ త్వరలో కనిపిస్తుంది"</string>
     <string name="missed_call" msgid="4228016077700161689">"మిస్డ్ కాల్"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"ఇటీవలి మెసేజ్‌లు, మిస్స్‌డ్‌ కాల్స్‌, అలాగే స్టేటస్ అప్‌డేట్‌లను చూడండి"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"ఇటీవలి మెసేజ్‌లు, మిస్డ్ కాల్స్‌, అలాగే స్టేటస్ అప్‌డేట్‌లను చూడండి"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"సంభాషణ"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"అంతరాయం కలిగించవద్దు ద్వారా పాజ్ చేయబడింది"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> మెసేజ్‌ను పంపారు: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>

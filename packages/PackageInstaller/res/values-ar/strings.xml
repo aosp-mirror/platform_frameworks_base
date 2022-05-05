@@ -65,7 +65,7 @@
     <string name="uninstalling" msgid="8709566347688966845">"جارٍ إلغاء التثبيت…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"جارٍ إلغاء تثبيت <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"تمّ إلغاء تثبيت التطبيق."</string>
-    <string name="uninstall_done_app" msgid="4588850984473605768">"تم إلغاء تثبيت <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"تم إلغاء تثبيت <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"تعذّر إلغاء تثبيت التطبيق."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"لم يتم إلغاء تثبيت <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> بنجاح."</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"تعذر إلغاء تثبيت تطبيق مشرف الأجهزة النشطة"</string>

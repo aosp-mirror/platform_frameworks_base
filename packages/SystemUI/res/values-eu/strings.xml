@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Saiatu berriro pantaila-argazkia ateratzen"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Ezin da gorde pantaila-argazkia"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Aplikazioak edo erakundeak ez du onartzen pantaila-argazkiak ateratzea"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editatu"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editatu pantaila-argazkia"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Partekatu pantaila-argazkia"</string>
@@ -346,8 +348,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Bai, jarraitu"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Gonbidatu modua"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Gonbidatu moduan zaude"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Beste erabiltzaile bat gehitu?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Erabiltzaile bat gehitzen duzunean, erabiltzaile horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Beste erabiltzaile bat gehituz gero, gonbidatu modua itxiko da eta oraingo gonbidatuentzako saioko aplikazio eta datu guztiak ezabatuko dira."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Erabiltzaile-mugara iritsi zara"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -376,20 +376,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Gailu hau zure erakundearena da, eta baliteke hark sareko trafikoa gainbegiratzea"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Gailu hau <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> erakundearena da, eta baliteke sareko trafikoa gainbegiratzea"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> erakundeak eman du gailu hau"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Gailu hau zure erakundearena da, eta <xliff:g id="VPN_APP">%1$s</xliff:g> sarera dago konektatuta"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Gailu hau <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> erakundearena da, eta <xliff:g id="VPN_APP">%2$s</xliff:g> sarera dago konektatuta"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Gailua erakundearena da eta <xliff:g id="VPN_APP">%1$s</xliff:g> bidez dago konektatuta Internetera"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Gailua <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> erakundearena da eta <xliff:g id="VPN_APP">%2$s</xliff:g> bidez dago konektatuta Internetera"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Gailu hau zure erakundearena da"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Gailu hau <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> erakundearena da"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Gailu hau zure erakundearena da, eta VPN sareetara dago konektatuta"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Gailu hau <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> erakundearena da, eta VPN sareetara dago konektatuta"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Gailua erakundearena da eta VPNen bidez dago konektatuta Internetera"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Gailua <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> erakundearena da eta VPNen bidez dago konektatuta Internetera"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Baliteke erakundeak laneko profileko sareko trafikoa gainbegiratzea"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Baliteke <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> erakundeak laneko profilaren sareko trafikoa gainbegiratzea"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"IKT saileko administratzaileak laneko profilaren sareko jarduera ikus dezake"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Baliteke sarea gainbegiratuta egotea"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Gailu hau VPN sareetara dago konektatuta"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"<xliff:g id="VPN_APP">%1$s</xliff:g> sarera konektatuta daukazu laneko profila"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"<xliff:g id="VPN_APP">%1$s</xliff:g> sarera konektatuta daukazu profil pertsonala"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Gailu hau <xliff:g id="VPN_APP">%1$s</xliff:g> sarera dago konektatuta"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Gailua VPNen bidez dago konektatuta Internetera"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Laneko aplikazioak <xliff:g id="VPN_APP">%1$s</xliff:g> bidez daude konektatuta Internetera"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Aplikazio pertsonalak <xliff:g id="VPN_APP">%1$s</xliff:g> bidez daude konektatuta Internetera"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Gailua <xliff:g id="VPN_APP">%1$s</xliff:g> bidez dago konektatuta Internetera"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> erakundeak eman du gailu hau"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gailuaren kudeaketa"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPNa"</string>
@@ -405,10 +405,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Ziurtagiri-emaile bat dago instalatuta gailuan. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure laneko profileko trafikoa gainbegira dezake, baina ez zure profil pertsonalekoa."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"<xliff:g id="VPN_APP">%1$s</xliff:g> aplikaziora konektatuta zaude eta hark sareko jarduerak gainbegira ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> eta <xliff:g id="VPN_APP_1">%2$s</xliff:g> aplikazioetara konektatuta zaude, eta haiek sareko jarduerak gainbegira ditzakete, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"<xliff:g id="VPN_APP">%1$s</xliff:g> aplikaziora dago konektatuta laneko profila, eta aplikazio horrek sareko jarduerak gainbegira ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"<xliff:g id="VPN_APP">%1$s</xliff:g> aplikaziora konektatuta daukazu profil pertsonala, eta aplikazio horrek sareko jarduerak gainbegira ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Gailua <xliff:g id="VPN_APP">%1$s</xliff:g> bidez dago konektatuta Internetera. IKT saileko administratzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Gailua <xliff:g id="VPN_APP_0">%1$s</xliff:g> eta <xliff:g id="VPN_APP_1">%2$s</xliff:g> bidez dago konektatuta Internetera. IKT saileko administratzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Laneko aplikazioak <xliff:g id="VPN_APP">%1$s</xliff:g> bidez daude konektatuta Internetera. IKT saileko administratzaileak eta VPNaren hornitzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko dituzte."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Aplikazio pertsonalak <xliff:g id="VPN_APP">%1$s</xliff:g> bidez daude konektatuta Internetera. IKT saileko administratzaileak sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Ireki VPN ezarpenak"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Zure gurasoak kudeatzen du gailua. Zure gurasoak gailuko informazioa ikusi eta kudea dezake; besteak beste, zer aplikazio erabiltzen dituzun, zure kokapena zein den eta pantaila aurrean zenbat eta noiz egoten zaren."</string>
@@ -729,6 +729,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Aktibatu aurrezlea bateria agortzeko arriskua dagoenean"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Ez, eskerrik asko"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikazio batzuk <xliff:g id="TYPES_LIST">%s</xliff:g> erabiltzen ari dira."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" eta "</string>
@@ -854,6 +856,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Iragarpenaren izena"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Pasahitza"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Gorde"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Abiarazten…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Ezin da iragarri"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Konpilazio-zenbakia"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Kopiatu da konpilazio-zenbakia arbelean."</string>
     <string name="basic_status" msgid="2315371112182658176">"Elkarrizketa irekia"</string>
@@ -922,11 +926,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Gehitu lauza"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ez gehitu lauza"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Hautatu erabiltzaile bat"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplikazio aktibo daude</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplikazio aktibo dago</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Informazio berria"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktibo dauden aplikazioak"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Aplikazio horiek erabiltzen ari ez bazara ere, aktibo daude eta bateria kontsumitzen jarraitzen dute"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Gelditu"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Geldituta"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Eginda"</string>

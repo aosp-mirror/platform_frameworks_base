@@ -113,7 +113,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      * will be filtered to only include these.
      */
     static final int CONTROLLABLE_CONFIGS = ActivityInfo.CONFIG_WINDOW_CONFIGURATION
-            | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_SCREEN_SIZE;
+            | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_SCREEN_SIZE
+            | ActivityInfo.CONFIG_LAYOUT_DIRECTION;
     static final int CONTROLLABLE_WINDOW_CONFIGS = WindowConfiguration.WINDOW_CONFIG_BOUNDS
             | WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 

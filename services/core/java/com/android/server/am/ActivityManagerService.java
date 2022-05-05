@@ -89,7 +89,6 @@ import static android.os.Process.killProcessQuiet;
 import static android.os.Process.myPid;
 import static android.os.Process.myUid;
 import static android.os.Process.readProcFile;
-import static android.os.Process.removeAllProcessGroups;
 import static android.os.Process.sendSignal;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
@@ -2430,8 +2429,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void start() {
-        removeAllProcessGroups();
-
         mBatteryStatsService.publish();
         mAppOpsService.publish();
         mProcessStats.publish();

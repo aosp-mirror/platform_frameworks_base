@@ -307,12 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"גישה אל היומן"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏שליחה והצגה של הודעות SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"קבצים ומסמכים"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"קבצים ומסמכים"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"גישה לקבצים ולמסמכים במכשיר"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"מוזיקה וסוגי אודיו אחרים"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"גישה לקובצי אודיו במכשיר"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"תמונות וסרטונים"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"גישה לקובצי וידאו ותמונה במכשיר"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"מוזיקה ואודיו"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"גישה למוזיקה ולאודיו במכשיר"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"תמונות וסרטונים"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"גישה לתמונות ולסרטונים במכשיר"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"מיקרופון"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"הקלטת אודיו"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"פעילות גופנית"</string>
@@ -352,7 +352,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"הצגת התראות כפעילויות במסך מלא במכשיר נעול"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"מאפשרת לאפליקציה להציג התראות כפעילויות במסך מלא במכשיר נעול"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"התקנה של קיצורי דרך"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"מאפשרת לאפליקציה להוסיף קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"מאפשרת לאפליקציה להוסיף קיצורי דרך במסך הבית ללא התערבות המשתמש."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"הסרת התקנה של קיצורי דרך"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"מאפשרת לאפליקציה להסיר קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"ניתוב מחדש של שיחות יוצאות"</string>
@@ -587,11 +587,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"שגיאה באימות"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"שימוש בנעילת מסך"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"יש לבטל את נעילת המסך כדי להמשיך"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"צריך ללחוץ חזק על החיישן"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"לוחצים לחיצה חזקה על החיישן"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"לא ניתן היה לעבד את טביעת האצבע. אפשר לנסות שוב."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"עליך לנקות את חיישן טביעות האצבע ולנסות שוב"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"עליך לנקות את החיישן ולנסות שוב"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"צריך ללחוץ חזק על החיישן"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"לוחצים לחיצה חזקה על החיישן"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"הזזת את האצבע לאט מדי. יש לנסות שוב."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"יש להשתמש בטביעת אצבע אחרת"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"בהיר מדי"</string>
@@ -636,26 +636,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ביטול הנעילה בטביעת אצבע"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"לא ניתן להשתמש בחיישן טביעות האצבע"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"צריך ליצור קשר עם ספק תיקונים."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"לא ניתן היה לקלוט את הפנים במדויק. יש לנסות שוב."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"לא ניתן ליצור את התבנית לזיהוי הפנים. יש לנסות שוב."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"בהירה מדי. צריך תאורה עדינה יותר."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"התמונה חשוכה מדי. צריך תאורה חזקה יותר."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"יש להרחיק את הטלפון."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"צריך לקרב את הטלפון."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"צריך להרים את הטלפון גבוה יותר."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"צריך להוריד את הטלפון."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"צריך להזיז את הטלפון שמאלה."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"צריך להזיז את הטלפון ימינה."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"כדאי לנסות בתאורה חזקה יותר"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"צריך להרחיק את הטלפון"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"צריך לקרב את הטלפון"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"צריך להגביה את הטלפון"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"צריך להוריד את הטלפון"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"צריך להזיז את הטלפון שמאלה"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"צריך להזיז את הטלפון ימינה"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"יש להביט ישירות אל המכשיר."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"עליך למקם את הפנים ישירות מול הטלפון."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"אי אפשר לראות את הפנים שלך. צריך להחזיק את הטלפון בגובה העיניים."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"יותר מדי תנועה. יש להחזיק את הטלפון בצורה יציבה."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"יש לסרוק שוב את הפנים."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"כבר לא ניתן לזהות פנים. יש לנסות שוב."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"דומה מדי, יש לשנות תנוחה."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"עליך ליישר קצת את הראש."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"יש ליישר קצת את הראש."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"צריך ליישר קצת את הראש."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"לא ניתן לזהות את הפנים. יש לנסות שוב."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"צריך לשנות מעט את תנוחת הראש"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"צריך להביט ישירות בטלפון"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"צריך להביט ישירות בטלפון"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"צריך להביט ישירות בטלפון"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"יש להסיר כל דבר שמסתיר את הפנים."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"צריך לנקות את החלק העליון של המסך, כולל הסרגל השחור"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"הפנים שלך חייבות להיות גלויות לגמרי"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"הפנים שלך חייבות להיות גלויות לגמרי"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"לא ניתן ליצור את התבנית לזיהוי הפנים. יש לנסות שוב."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"זוהו משקפיים כהים. הפנים שלך חייבות להיות גלויות לגמרי."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"זוהה כיסוי על הפנים. הפנים שלך חייבות להיות גלויות לגמרי."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"לא ניתן לאמת את הפנים. החומרה לא זמינה."</string>
@@ -2055,8 +2060,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ההגדרה \'נא לא להפריע\' השתנתה"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"יש להקיש כדי לבדוק מה חסום."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"בדיקת הגדרת ההתראות"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"‏החל מגרסת Android 13, אפליקציות שיותקנו יוכלו לשלוח התראות רק אם יקבלו ממך הרשאה. אפשר להקיש כדי לשנות את ההרשאה הזו באפליקציות קיימות."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"תזכירו לי מאוחר יותר"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"סגירה"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"מערכת"</string>

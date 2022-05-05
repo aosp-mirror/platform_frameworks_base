@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Cuba ambil tangkapan skrin sekali lagi"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Tidak dapat menyimpan tangkapan skrin"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Pengambilan tangkapan skrin tidak dibenarkan oleh apl atau organisasi anda"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Edit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Edit tangkapan skrin"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Kongsi tangkapan skrin"</string>
@@ -346,8 +348,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ya, teruskan"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Mod tetamu"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Anda dalam mod tetamu"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Tambah pengguna baharu?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Apabila anda menambah pengguna baharu, orang itu perlu menyediakan ruang mereka.\n\nMana-mana pengguna boleh mengemas kini apl untuk semua pengguna lain."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Tindakan menambahkan pengguna baharu akan menyebabkan anda keluar daripada mod tetamu dan memadamkan semua apl dan data daripada sesi tetamu semasa."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Had pengguna dicapai"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -376,20 +376,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisasi anda memiliki peranti ini dan mungkin memantau trafik rangkaian"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> memiliki peranti ini dan mungkin memantau trafik rangkaian"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Peranti ini disediakan oleh <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Peranti ini milik organisasi anda dan dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan dihubungkan dengan <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Peranti ini milik organisasi anda dan disambungkan kepada Internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan disambungkan kepada Internet melalui <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Peranti ini milik organisasi anda"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Peranti ini milik organisasi anda dan dihubungkan dengan VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan dihubungkan dengan VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Peranti ini milik organisasi anda dan disambungkan ke Internet melalui VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Peranti ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan disambungkan kepada Internet melalui VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Organisasi anda mungkin memantau trafik rangkaian dalam profil kerja anda"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> mungkin memantau trafik rangkaian dalam profil kerja anda"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Aktiviti rangkaian profil kerja boleh dilihat oleh pentadbir IT anda"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Rangkaian mungkin dipantau"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Peranti ini dihubungkan dengan VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Profil kerja anda dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Profil peribadi anda dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Peranti ini dihubungkan dengan <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Peranti ini disambungkan kepada Internet melalui VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Apl kerja anda disambungkan kepada Internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Apl peribadi anda disambungkan kepada Internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Peranti ini disambungkan kepada Internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Peranti ini disediakan oleh <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Pengurusan peranti"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -405,10 +405,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Sijil kuasa dipasang pada peranti ini. Trafik rangkaian selamat anda mungkin dipantau atau diubah suai."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Pentadbir anda telah menghidupkan pengelogan rangkaian yang memantau trafik pada peranti anda."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Pentadbir anda telah menghidupkan pengelogan rangkaian yang memantau trafik dalam profil kerja anda tetapi bukan dalam profil peribadi anda."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Anda dihubungkan ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang boleh memantau aktiviti rangkaian anda, termasuk e-mel, apl dan laman web."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Anda dihubungkan ke <xliff:g id="VPN_APP_0">%1$s</xliff:g> dan <xliff:g id="VPN_APP_1">%2$s</xliff:g>, yang boleh memantau aktiviti rangkaian anda, termasuk e-mel, apl dan laman web."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Profil kerja anda dihubungkan ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktiviti rangkaian anda, termasuk e-mel, apl dan laman web."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Profil peribadi anda dihubungkan ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang boleh memantau aktiviti rangkaian anda, termasuk e-mel, apl dan laman web."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Peranti ini disambungkan kepada Internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviti rangkaian anda, termasuk e-mel dan data semakan imbas boleh dilihat oleh pentadbir IT anda."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Peranti ini disambungkan kepada Internet melalui <xliff:g id="VPN_APP_0">%1$s</xliff:g> dan <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Aktiviti rangkaian anda, termasuk e-mel dan data semakan imbas boleh dilihat oleh pentadbir IT anda."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Apl kerja anda disambungkan kepada Internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviti rangkaian anda dalam apl kerja, termasuk e-mel dan data semakan imbas boleh dilihat oleh pentadbir IT dan pembekal VPN anda."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Apl peribadi anda disambungkan kepada Internet melalui <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviti rangkaian anda, termasuk e-mel dan data semakan imbas boleh dilihat oleh pembekal VPN anda."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Buka tetapan VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Peranti ini diurus oleh ibu bapa anda. Ibu bapa anda dapat melihat dan mengurus maklumat seperti apl yang anda gunakan, lokasi dan masa skrin anda."</string>
@@ -729,6 +729,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Hidupkan apabila bateri berkemungkinan habis"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Tidak perlu"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"DumpSys"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikasi sedang menggunakan <xliff:g id="TYPES_LIST">%s</xliff:g> anda."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" dan "</string>
@@ -854,6 +856,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nama Siaran"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Kata Laluan"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Simpan"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Memulakan…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Tidak dapat disiarkan"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nombor binaan"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nombor binaan disalin ke papan keratan."</string>
     <string name="basic_status" msgid="2315371112182658176">"Buka perbualan"</string>
@@ -922,11 +926,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Tambahkan jubin"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Jangan tambah jubin"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Pilih pengguna"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apl aktif</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> apl aktif</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Maklumat baharu"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apl aktif"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Walaupun anda tidak menggunakan apl ini, apl masih lagi aktif dan mungkin menjejaskan hayat bateri"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Berhenti"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Dihentikan"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Selesai"</string>

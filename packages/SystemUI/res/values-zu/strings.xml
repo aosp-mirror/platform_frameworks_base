@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Zama ukuthatha isithombe-skrini futhi"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Ayikwazi ukulondoloza isithombe-skrini"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ukuthatha izithombe-skrini akuvunyelwe uhlelo lokusebenza noma inhlangano yakho"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Hlela"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Hlela isithombe-skrini"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Yabelana ngesithombe-skrini"</string>
@@ -346,8 +348,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Yebo, qhubeka"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Imodi yesivakashi"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Usemodini yesivakashi"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Engeza umsebenzisi omusha?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Uma ungeza umsebenzisi omusha, loyo muntu udinga ukusetha isikhala sakhe.\n\nNoma yimuphi umsebenzisi angabuyekeza izinhlelo zokusebenza kubo bonke abasebenzisi."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Ukwengeza umsebenzisi omusha kuzokhipha imodi yesivakashi futhi kusule wonke ama-app nedatha kusuka esikhathini sesihambeli samanje."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Kufinyelelwe kumkhawulo womsebenzisi"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -376,20 +376,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Inhlangano yakho ingumnikazi wale divayisi futhi ingaqapha ithrafikhi yenethiwekhi"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"I-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ingumnikazi wale divayisi futhi ingaqapha ithrafikhi yenethiwekhi"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Le divayisi ihlinzekwa yi-<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Le divayisi ngeyenhlangano yakho futhi ixhunywe ku-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Le divayisi ngeye-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> futhi ixhunywe ku-<xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Le divayisi ingeyenhlangano yakho futhi ixhunywe ku-inthanethi ngokusebenzisa i-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Le divayisi ingeye-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> futhi ixhunywe ku-inthanethi nge-<xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Le divayisi eyenhlangano yakho"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Le divayisi ngeye-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Le divayisi ngeyenhlangano yakho futhi ixhunywe kuma-VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Le divayisi ngeye-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> futhi ixhunywe kuma-VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Le divayisi ingeyenhlangano yakho futhi ixhunywe ku-inthanethi ngama-VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Le divayisi ingeye-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> futhi ixhunywe ku-inthanethi ngama-VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Inhlangano yakho ingaqapha ithrafikhi yenethiwekhi kuphrofayela yakho yomsebenzi"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"I-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ingaqaphela ithrafikhi yenethiwekhi kuphrofayela yakho yomsebenzi"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Umsebenzi wenethiwekhi yephrofayela yomsebenzi uyabonakala kumphathi wakho we-IT"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Inethiwekhi kungenzeka iqashiwe"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Le divayisi ixhunywe kuma-VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Iphrofayela yakho yomsebenzi ixhunywe ku-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Iphrofayela yakho yomuntu ixhunywe ku-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Le divayisi ixhunywe ku-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Le divayisi ixhunywe ku-inthanethi ngama-VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Ama-app akho omsebenzi axhunywe ku-inthanethi nge-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Ama-app akho womuntu siqu axhunywe ku-inthanethi nge-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Le divayisi ixhunywe ku-inthanethi nge-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Le divayisi ihlinzekwa yi-<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Ukuphathwa kwedivayisi"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"I-VPN"</string>
@@ -405,10 +405,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Ukugunyaza kwesitifiketi kufakwe kule divayisi. Ithrafikhi yenethiwekhi yakho evikelekile ingaqashelwa noma ilungiswe."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Umlawuli wakho uvule ukungena kwedivayisi yakho, okuqapha ithrafikhi kudivayisi yakho."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Umlawuli wakho uvule ukungena kwenethiwekhi, okuhlola ithrafikhi kudivayisi yakho yephrofayela yomsebenzi kodwa hhayi kuphrofayela yakho yomuntu siqu."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Uxhumeke ku-<xliff:g id="VPN_APP">%1$s</xliff:g>, engaqapha umsebenzi wenethiwekhi yakho, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Uxhumeke ku-<xliff:g id="VPN_APP_0">%1$s</xliff:g> naku-<xliff:g id="VPN_APP_1">%2$s</xliff:g>, okungaqaphela umsebenzi wakho wenethiwekhi, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Iphrofayela yakho yomsebenzi ixhumeke ku-<xliff:g id="VPN_APP">%1$s</xliff:g>, engaqapha umsebenzi wenethiwekhi yakho, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Iphrofayela yakho siqu ixhumeke ku-<xliff:g id="VPN_APP">%1$s</xliff:g>, engaqapha umsebenzi wakho wenethiwekhi, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Le divayisi ixhunywe ku-inthanethi nge-<xliff:g id="VPN_APP">%1$s</xliff:g>. Umsebenzi wakho wenethiwekhi, ohlanganisa ama-imeyili nedatha yokubhrawuza, ubonakala kumphathi wakho we-IT."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Le divayisi ixhunywe ku-inthanethi nge-<xliff:g id="VPN_APP_0">%1$s</xliff:g> nange-<xliff:g id="VPN_APP_1">%2$s</xliff:g>. Umsebenzi wakho wenethiwekhi, ohlanganisa ama-imeyili nedatha yokubhrawuza, ubonakala kumphathi wakho we-IT."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Ama-app akho okusebenza axhunywe ku-inthanethi nge-<xliff:g id="VPN_APP">%1$s</xliff:g>. Umsebenzi wakho wenethiwekhi kuma-app womsebenzi, okuhlanganisa ama-imeyili nedatha yokubhrawuza, ubonakala kumphathi wakho we-IT nomhlinzeki we-VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Ama-app akho womuntu siqu axhunywe ku-inthanethi nge-<xliff:g id="VPN_APP">%1$s</xliff:g>. Umsebenzi wakho wenethiwekhi, okuhlanganisa ama-imeyili nedatha yokubhrawuza, ubonakala kumhlinzeki wakho we-VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Vula izilungiselelo ze-VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Le divayisi iphethwe ngumzali wakho. Umzali wakho angabona futhi aphathe ulwazi olunjengezinhlelo zokusebenza ozisebenzisayo, indawo yakho, kanye nesikhathi sesikrini."</string>
@@ -729,6 +729,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Vula uma ibhethri sekungenzeka liphele"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Cha ngiyabonga"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"I-Dump SysUI Heap"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Izinhlelo zokusebenza zisebenzisa i-<xliff:g id="TYPES_LIST">%s</xliff:g> yakho."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" kanye "</string>
@@ -854,6 +856,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Londoloza Igama"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Iphasiwedi"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Londoloza"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Iyaqala…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Ayikwazi ukusakaza"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Yakha inombolo"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Yakha inombolo ekopishelwe kubhodi yokunamathisela."</string>
     <string name="basic_status" msgid="2315371112182658176">"Vula ingxoxo"</string>
@@ -922,11 +926,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Engeza ithayela"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ungafaki ithayela"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Khetha umsebenzisi"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one">Ama-app angu-<xliff:g id="COUNT_1">%s</xliff:g> ayasebenza</item>
+      <item quantity="other">Ama-app angu-<xliff:g id="COUNT_1">%s</xliff:g> ayasebenza</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Ulwazi olusha"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ama-app asebenzayo"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Ngisho noma ungawasebenzisi lama-app, asasebenza futhi angathinta impilo yebhethri"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Misa"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Imisiwe"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Kwenziwe"</string>

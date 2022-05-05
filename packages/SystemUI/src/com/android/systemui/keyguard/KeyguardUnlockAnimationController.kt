@@ -813,6 +813,11 @@ class KeyguardUnlockAnimationController @Inject constructor(
             return false
         }
 
+        // The smartspace is not visible if the bouncer is showing, so don't shared element it.
+        if (keyguardStateController.isBouncerShowing) {
+            return false
+        }
+
         // We started to swipe to dismiss, but now we're doing a fling animation to complete the
         // dismiss. In this case, the smartspace swiped away with the rest of the keyguard, so don't
         // do the shared element transition.
