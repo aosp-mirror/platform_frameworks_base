@@ -5513,6 +5513,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     public void setFractionToShade(float fraction) {
         mAmbientState.setFractionToShade(fraction);
+        updateContentHeight();  // Recompute stack height with different section gap.
         requestChildrenUpdate();
     }
 
